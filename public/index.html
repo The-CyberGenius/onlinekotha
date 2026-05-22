@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotha — Your WhatsApp memories, beautifully preserved</title>
+    <meta name="description" content="Turn your WhatsApp chat exports into a beautiful archive — searchable, shareable, and now you can even talk to it with AI.">
+    <meta property="og:title" content="Kotha — Your WhatsApp memories, beautifully preserved">
+    <meta property="og:description" content="Turn your WhatsApp chat exports into a beautiful archive — searchable, shareable, and now you can talk to it with AI.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+    <script src="/js/tailwind.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { background: #fafafa; animation: none; }
+        .hero-grad {
+            background: radial-gradient(1200px 600px at 50% -100px, rgba(99,102,241,0.18), transparent 50%),
+                        radial-gradient(800px 400px at 90% 200px, rgba(168,85,247,0.12), transparent 50%),
+                        #fafafa;
+        }
+        .feature-card {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.04);
+            border-radius: 24px;
+            padding: 32px;
+            transition: all 240ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px -20px rgba(0,0,0,0.18);
+            border-color: rgba(99,102,241,0.2);
+        }
+        .price-card {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 28px;
+            padding: 36px 28px;
+            transition: all 280ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .price-card.featured {
+            background: linear-gradient(180deg, #0f172a, #1e293b);
+            color: white;
+            transform: scale(1.04);
+            box-shadow: 0 24px 60px -20px rgba(15,23,42,0.4);
+        }
+        .price-card.featured .price-cta {
+            background: white;
+            color: #0f172a;
+        }
+        .btn-primary {
+            background: #0f172a;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            background: black;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -10px rgba(0,0,0,0.4);
+        }
+        .btn-ghost {
+            color: #0f172a;
+            padding: 14px 24px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 200ms;
+        }
+        .btn-ghost:hover {
+            background: rgba(0,0,0,0.04);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .float { animation: float 6s ease-in-out infinite; }
+        .bubble-preview {
+            background: white;
+            border-radius: 18px;
+            padding: 10px 14px;
+            font-size: 13px;
+            box-shadow: 0 4px 18px -6px rgba(0,0,0,0.1);
+            max-width: 260px;
+        }
+        .bubble-me {
+            background: linear-gradient(135deg, #2dd4bf, #059669);
+            color: white;
+        }
+    </style>
+</head>
+<body class="text-gray-900 antialiased">
+
+    <!-- Nav -->
+    <nav class="hero-grad sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-lg shadow-sm">💬</div>
+                <span class="font-extrabold text-lg tracking-tight">Kotha</span>
+            </a>
+            <div class="hidden md:flex items-center gap-6 text-sm font-semibold text-gray-600">
+                <a href="#features" class="hover:text-gray-900 transition">Features</a>
+                <a href="#how-it-works" class="hover:text-gray-900 transition">How it works</a>
+                <a href="#pricing" class="hover:text-gray-900 transition">Pricing</a>
+            </div>
+            <div class="flex items-center gap-2" id="nav-cta">
+                <a href="/login.html" id="nav-login" class="btn-ghost text-sm">Login</a>
+                <a href="/login.html#signup" id="nav-signup" class="btn-primary text-sm py-2.5 px-5">Get started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-grad pt-20 pb-24 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-1.5 text-xs font-bold text-gray-700 mb-6 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                Now with AI — talk to your chat history
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6">
+                Your memories,<br>
+                <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">beautifully preserved</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed mb-10">
+                Drop a WhatsApp chat export. See it in a stunning viewer — and now, talk to it. Ask "what did mom say about my wedding?" and your AI remembers, with sources.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                <a href="/login.html#signup" class="btn-primary">
+                    Start free — 1 day trial
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                </a>
+                <a href="#how-it-works" class="btn-ghost">See how it works</a>
+            </div>
+            <p class="text-xs text-gray-400 mt-6">No credit card. Your data stays on your machine.</p>
+        </div>
+
+        <!-- Hero preview mockup -->
+        <div class="max-w-3xl mx-auto mt-20 relative">
+            <div class="bg-white rounded-3xl border border-gray-200 shadow-2xl shadow-indigo-100/40 overflow-hidden">
+                <!-- Window chrome -->
+                <div class="bg-gray-50 border-b border-gray-100 px-4 py-3 flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                    <div class="flex-1 text-center text-xs font-semibold text-gray-500">Mom — Kotha</div>
+                </div>
+                <!-- Chat preview -->
+                <div class="p-8 bg-gradient-to-br from-indigo-50/30 to-purple-50/30 flex flex-col gap-3 min-h-[280px]">
+                    <div class="bubble-preview self-start">Beta, kab aa rahe ho?</div>
+                    <div class="bubble-preview self-start">Khaana banaya hai favourite</div>
+                    <div class="bubble-preview bubble-me self-end">Aa raha hu mummy, traffic mein hu</div>
+                    <div class="bubble-preview self-start">Drive safe ❤️</div>
+
+                    <!-- AI preview -->
+                    <div class="mt-4 self-end max-w-[80%] bg-gray-900 text-white text-xs rounded-2xl px-4 py-3 shadow-lg flex items-start gap-2">
+                        <span class="text-purple-300">✨</span>
+                        <div>
+                            <div class="font-semibold mb-1">Ask AI about this chat</div>
+                            <div class="text-gray-300 leading-relaxed">"Mummy ne pichli baar khaane mein kya banaya tha?"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Float decorations -->
+            <div class="absolute -top-6 -right-4 bg-white rounded-2xl shadow-xl border border-gray-100 px-4 py-2.5 text-xs font-bold text-indigo-600 float">
+                💬 12,847 messages
+            </div>
+            <div class="absolute -bottom-6 -left-4 bg-white rounded-2xl shadow-xl border border-gray-100 px-4 py-2.5 text-xs font-bold text-purple-600 float" style="animation-delay: -3s;">
+                ✨ Powered by Claude
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <p class="text-sm font-bold uppercase tracking-widest text-indigo-600 mb-3">Built for memory keepers</p>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Every feature, thoughtfully designed</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Not just a viewer. A way to relive, search, and rediscover the conversations that mattered.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="feature-card">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Beautiful viewer</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">WhatsApp-style interface with proper bubbles, dates, media inline. Photos, videos, voice notes — all play in place.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Talk to your history</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">"What did dad say about the trip?" Ask anything. AI reads thousands of messages instantly and answers with citations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Lightning search</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">Search by keyword, sender, date. Filter by media, links, stickers. Jump to any message in milliseconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Rich analytics</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">Who texts more. Word clouds. Activity by hour. First-message dates. Discover patterns you never noticed.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Photo gallery</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">Every photo, video, sticker — viewable in a clean grid. Click to jump back to the moment it was sent.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Private by design</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">Your chats live on your server. End-to-end encrypted API keys. We never read your conversations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how-it-works" class="py-24 px-6 bg-gray-50">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+                <p class="text-sm font-bold uppercase tracking-widest text-indigo-600 mb-3">3 steps</p>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">From export to AI in 30 seconds</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-5 text-2xl font-extrabold text-indigo-600 shadow-sm">1</div>
+                    <h3 class="font-bold text-xl mb-2">Export your chat</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">In WhatsApp, tap contact → Export Chat → Attach Media. You get a .zip file.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-5 text-2xl font-extrabold text-indigo-600 shadow-sm">2</div>
+                    <h3 class="font-bold text-xl mb-2">Drop it in</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">Drag-and-drop the zip or folder into Kotha. We parse iOS + Android exports automatically.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-5 text-2xl font-extrabold text-indigo-600 shadow-sm">3</div>
+                    <h3 class="font-bold text-xl mb-2">Browse. Ask. Relive.</h3>
+                    <p class="text-gray-600 text-[15px] leading-relaxed">Scroll the timeline, search any keyword, or just ask AI — like talking to a friend who remembers everything.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-24 px-6 bg-white">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+                <p class="text-sm font-bold uppercase tracking-widest text-indigo-600 mb-3">Simple pricing</p>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Free to view. Pay only for AI.</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Try everything for 24 hours. Then keep the viewer free forever, or upgrade for unlimited AI.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <!-- Free -->
+                <div class="price-card">
+                    <h3 class="font-bold text-xl mb-1">Free</h3>
+                    <p class="text-sm text-gray-500 mb-5">Viewer, forever</p>
+                    <div class="mb-6">
+                        <span class="text-5xl font-extrabold">$0</span>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-700 mb-7">
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Unlimited chat imports</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Beautiful WhatsApp-style viewer</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Full search, filters, analytics</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>24-hour AI trial</span></li>
+                    </ul>
+                    <a href="/login.html#signup" class="price-cta block text-center font-bold text-sm py-3 rounded-xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition">Start free</a>
+                </div>
+
+                <!-- Pro -->
+                <div class="price-card featured relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full">Most popular</div>
+                    <h3 class="font-bold text-xl mb-1">Pro</h3>
+                    <p class="text-sm text-gray-400 mb-5">Unlimited AI memory</p>
+                    <div class="mb-6">
+                        <span class="text-5xl font-extrabold">$5</span>
+                        <span class="text-gray-400 text-sm">/month</span>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-200 mb-7">
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Everything in Free</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Unlimited AI conversations</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>PDF "memory book" exports</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Cancel anytime</span></li>
+                    </ul>
+                    <a href="/login.html#signup" class="price-cta block text-center font-bold text-sm py-3 rounded-xl transition hover:opacity-90">Get Pro</a>
+                </div>
+
+                <!-- Lifetime -->
+                <div class="price-card">
+                    <h3 class="font-bold text-xl mb-1">Lifetime</h3>
+                    <p class="text-sm text-gray-500 mb-5">Pay once, forever</p>
+                    <div class="mb-6">
+                        <span class="text-5xl font-extrabold">$49</span>
+                        <span class="text-gray-400 text-sm"> one-time</span>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-700 mb-7">
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Everything in Pro</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Forever access</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>All future features included</span></li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Priority support</span></li>
+                    </ul>
+                    <a href="/login.html#signup" class="price-cta block text-center font-bold text-sm py-3 rounded-xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition">Buy lifetime</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-28 px-6 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight mb-6">
+                The chats you'll never want to lose.
+            </h2>
+            <p class="text-lg md:text-xl opacity-90 mb-10 max-w-xl mx-auto">
+                Start with a single export. Watch your memories come alive.
+            </p>
+            <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-white text-gray-900 font-bold text-base px-7 py-4 rounded-2xl shadow-2xl hover:scale-105 transition-transform">
+                Get started — free for 24 hours
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 bg-gray-900 text-gray-400">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm">💬</div>
+                <span class="font-bold text-white">Kotha</span>
+                <span class="text-sm">— Your memories, beautifully preserved.</span>
+            </div>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="#features" class="hover:text-white transition">Features</a>
+                <a href="#pricing" class="hover:text-white transition">Pricing</a>
+                <a href="/login.html" class="hover:text-white transition">Login</a>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto mt-8 pt-6 border-t border-gray-800 text-center text-xs">
+            © <span id="year"></span> Kotha. Made with care.
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // If already logged in, swap nav CTAs
+        (async () => {
+            try {
+                const r = await fetch('/api/auth/me');
+                const data = await r.json();
+                if (data.user) {
+                    // Replace nav: hide Login, single "Open app" primary
+                    const navLogin = document.getElementById('nav-login');
+                    const navSignup = document.getElementById('nav-signup');
+                    if (navLogin) navLogin.remove();
+                    if (navSignup) {
+                        navSignup.href = data.user.is_admin ? '/admin.html' : '/app';
+                        navSignup.textContent = data.user.is_admin ? 'Admin' : 'Open app';
+                    }
+                    // All other login.html links across page (hero, pricing, footer) → /app
+                    document.querySelectorAll('a[href="/login.html"], a[href="/login.html#signup"]').forEach(a => {
+                        const text = (a.textContent || '').trim();
+                        a.href = data.user.is_admin ? '/admin.html' : '/app';
+                        if (/get|start|buy|sign|trial/i.test(text)) a.textContent = data.user.is_admin ? 'Open Admin' : 'Open app';
+                    });
+                }
+            } catch {}
+        })();
+    </script>
+</body>
+</html>

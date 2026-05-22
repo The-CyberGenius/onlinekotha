@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotha — Admin</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script src="/js/tailwind.js"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .tab-active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div id="auth-gate" class="flex items-center justify-center h-screen text-gray-500">Checking access...</div>
+
+    <div id="app" class="hidden max-w-6xl mx-auto p-6">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-extrabold text-gray-900">Kotha Admin</h1>
+                <p class="text-xs text-gray-500" id="admin-email-info"></p>
+            </div>
+            <div class="flex gap-2">
+                <a href="/" class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 transition">← App</a>
+                <button id="logout-btn" class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 transition">Logout</button>
+            </div>
+        </header>
+
+        <!-- Stats strip -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Today's spend</p>
+                <p class="text-2xl font-extrabold text-indigo-700 mt-1">$<span id="stat-today-cost">0</span></p>
+                <p class="text-[10px] text-gray-400 mt-1">cap: $<span id="stat-cap">0</span></p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total spend</p>
+                <p class="text-2xl font-extrabold text-purple-700 mt-1">$<span id="stat-total-cost">0</span></p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total AI calls</p>
+                <p class="text-2xl font-extrabold text-teal-700 mt-1" id="stat-total-calls">0</p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Users</p>
+                <p class="text-2xl font-extrabold text-amber-700 mt-1" id="stat-users">0</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-1 bg-gray-200/60 p-1 rounded-2xl mb-6 overflow-x-auto no-scrollbar">
+            <button data-tab="providers" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition tab-active whitespace-nowrap">Providers</button>
+            <button data-tab="models" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Models</button>
+            <button data-tab="routes" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Routing</button>
+            <button data-tab="integrations" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Integrations</button>
+            <button data-tab="settings" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Limits</button>
+            <button data-tab="users" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Users</button>
+        </div>
+
+        <!-- Providers Tab -->
+        <section id="tab-providers" class="tab-content">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
+                <h2 class="font-extrabold text-gray-800 mb-3">Add provider</h2>
+                <form id="add-provider-form" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <select id="prov-name" required class="border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <option value="">Select provider...</option>
+                    </select>
+                    <input id="prov-key" type="password" placeholder="API key" required class="border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    <input id="prov-baseurl" type="text" placeholder="Base URL (optional)" class="border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl py-2 text-sm transition">+ Add</button>
+                </form>
+                <p id="prov-add-msg" class="text-xs text-red-600 font-semibold mt-2 hidden"></p>
+            </div>
+
+            <div id="provider-list" class="space-y-3"></div>
+        </section>
+
+        <!-- Models Tab -->
+        <section id="tab-models" class="tab-content hidden">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
+                <h2 class="font-extrabold text-gray-800 mb-1">Models</h2>
+                <p class="text-xs text-gray-500 mb-4">Models are auto-seeded when you add a provider. Add custom models below.</p>
+                <div id="model-list" class="space-y-2 text-sm"></div>
+            </div>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <h2 class="font-extrabold text-gray-800 mb-3">Add Custom Model</h2>
+                <form id="add-model-form" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Provider</label>
+                        <select id="model-provider-id" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400"></select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Model ID</label>
+                        <input id="model-id-input" type="text" placeholder="e.g. gpt-4-turbo" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">In $/M</label>
+                        <input id="model-in-price" type="number" step="0.01" placeholder="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Out $/M</label>
+                        <input id="model-out-price" type="number" step="0.01" placeholder="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    </div>
+                    <div class="md:col-span-6 flex items-center gap-3">
+                        <input id="model-display-name" type="text" placeholder="Display name (optional)" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl px-5 py-2 text-sm transition whitespace-nowrap">+ Add Model</button>
+                    </div>
+                </form>
+                <p id="model-add-msg" class="text-xs text-red-600 font-semibold mt-2 hidden"></p>
+            </div>
+        </section>
+
+        <!-- Routes Tab -->
+        <section id="tab-routes" class="tab-content hidden">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <h2 class="font-extrabold text-gray-800 mb-3">Feature → Model routing</h2>
+                <p class="text-xs text-gray-500 mb-4">Har feature ke liye primary aur fallback model choose karo. Primary fail = fallback try.</p>
+                <div id="routes-form" class="space-y-4"></div>
+            </div>
+        </section>
+
+        <!-- Integrations Tab -->
+        <section id="tab-integrations" class="tab-content hidden">
+            <div id="integrations-root" class="space-y-5"></div>
+        </section>
+
+        <!-- Settings Tab -->
+        <section id="tab-settings" class="tab-content hidden">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <h2 class="font-extrabold text-gray-800 mb-4">Global limits</h2>
+                <form id="settings-form" class="space-y-4 max-w-md">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Daily spend cap ($)</label>
+                        <input id="s-daily-cap" type="number" step="0.1" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <p class="text-[10px] text-gray-400 mt-1">When daily AI spend hits this, AI calls auto-pause</p>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial duration (hours)</label>
+                        <input id="s-trial-hours" type="number" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial daily AI messages</label>
+                        <input id="s-paid-msgs" type="number" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    </div>
+                    <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl px-5 py-2 text-sm transition">Save</button>
+                    <p id="settings-msg" class="text-xs text-green-600 font-semibold hidden">Saved</p>
+                </form>
+            </div>
+        </section>
+
+        <!-- Users Tab -->
+        <section id="tab-users" class="tab-content hidden">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <h2 class="font-extrabold text-gray-800 mb-3">Users</h2>
+                <div id="user-list" class="text-sm"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>
