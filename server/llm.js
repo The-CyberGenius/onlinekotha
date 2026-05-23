@@ -209,7 +209,8 @@ async function readSSE(stream, onEvent) {
     while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+        // Normalize CRLF → LF (Google Gemini uses \r\n)
+        buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
 
         let idx;
         while ((idx = buffer.indexOf('\n\n')) !== -1) {
