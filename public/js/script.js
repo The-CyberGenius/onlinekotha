@@ -361,20 +361,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-700">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
 
-                // Add Sender Filters to the Quick Actions UI automatically
-                senders.slice(0, 3).forEach(([sName, count]) => { // Show top 3 senders max as filters
+                // Add Sender Filters to the Quick Actions UI automatically (toggle on/off)
+                let activeSenderFilter = null;
+                const senderBtns = [];
+                senders.slice(0, 3).forEach(([sName, count]) => {
                     if (!sName) return;
                     const btn = document.createElement('button');
                     btn.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
                     btn.innerText = `👤 ${sName}`;
                     btn.onclick = () => {
-                        displayedMessages = allMessages.filter(msg => msg.sender === sName);
+                        if (activeSenderFilter === sName) {
+                            // Toggle OFF — show all messages
+                            activeSenderFilter = null;
+                            displayedMessages = [...allMessages];
+                            btn.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
+                            statsInfo.innerHTML = `Showing all <span class="font-bold text-blue-700">${allMessages.length.toLocaleString()}</span> messages.`;
+                        } else {
+                            // Toggle ON — filter by this sender
+                            activeSenderFilter = sName;
+                            displayedMessages = allMessages.filter(msg => msg.sender === sName);
+                            // Reset all buttons, highlight active
+                            senderBtns.forEach(b => {
+                                b.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
+                            });
+                            btn.className = 'text-xs bg-purple-600 border border-purple-600 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-white hover:bg-purple-700 hover:shadow transition whitespace-nowrap cursor-pointer';
+                            statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-700">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
+                        }
                         renderChats(-1, -1);
                         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length), 'reset');
-                        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-700">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
                         setTimeout(() => chatContainer.scrollTop = 0, 10);
                         toggleSidebar(false);
                     };
+                    senderBtns.push(btn);
                     filterContainer.appendChild(btn);
                 });
 
