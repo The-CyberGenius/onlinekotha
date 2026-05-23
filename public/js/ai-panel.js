@@ -5,9 +5,16 @@
 
     if (!bottomInput || !bottomSend || !chatContainer) return;
 
-    let currentConversationId = null;
+    // Per-chat conversation tracking
+    let conversationMap = {};   // { chatFolder: conversationId }
+    let contactNameMap = {};    // { chatFolder: contactName }
+    let activeChat = null;
     let streaming = false;
-    let contactName = '';
+
+    // Watch for chat switches — reset AI context per chat
+    function getActiveChat() { return window.currentChat || null; }
+    function getCurrentConvId() { return activeChat ? (conversationMap[activeChat] || null) : null; }
+    function getContactName() { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
 
     // ---------- Fix: multiple events for mobile compatibility ----------
     function updateSendBtn() {
@@ -50,6 +57,11 @@
         if (!text) return;
         if (!window.currentChat) { toast('Open a chat first'); return; }
 
+        // Track which chat this message belongs to
+        activeChat = getActiveChat();
+        const convId = getCurrentConvId();
+        const cName = getContactName();
+
         // Add user bubble to chat container
         appendUserBubble(text);
         bottomInput.value = '';
@@ -62,7 +74,7 @@
         typingEl.className = 'flex justify-start mb-3 animate-message';
         typingEl.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
-                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">✨ ${escapeHTML(contactName || 'AI')}</p>
+                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">✨ ${escapeHTML(cName || 'AI')}</p>
                 <div class="ai-typing"><span></span><span></span><span></span></div>
             </div>
         `;
@@ -77,9 +89,9 @@
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({
-                    chat: window.currentChat,
+                    chat: activeChat,
                     message: text,
-                    conversationId: currentConversationId,
+                    conversationId: convId,
                 }),
             });
 
@@ -117,12 +129,17 @@
                     try { data = JSON.parse(dataLines.join('\n')); } catch { continue; }
 
                     if (event === 'start') {
-                        currentConversationId = data.conversationId;
-                        if (data.contactName) contactName = data.contactName;
+                        // Save conversation per chat folder
+                        if (activeChat) {
+                            conversationMap[activeChat] = data.conversationId;
+                            if (data.contactName) contactNameMap[activeChat] = data.contactName;
+                        }
                     } else if (event === 'token') {
                         if (!responseBubble) {
                             typingEl.remove();
-                            responseBubble = appendContactBubble(contactName);
+                            responseBubble = appendContactBubble(
+                                (activeChat && contactNameMap[activeChat]) || data.contactName || 'AI'
+                            );
                         }
                         fullText += data.text;
                         responseBubble.querySelector('.ai-response-text').textContent = fullText;
