@@ -197,7 +197,15 @@ app.get('/api/messages', requireUser, async (req, res) => {
     }
 });
 
-app.post('/api/upload', requireUser, upload.array('files'), handleUpload);
+app.post('/api/upload', requireUser, (req, res, next) => {
+    upload.array('files')(req, res, err => {
+        if (err) {
+            if (err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: 'File too large — max 500 MB' });
+            return res.status(400).json({ error: err.message || 'Upload error' });
+        }
+        next();
+    });
+}, handleUpload);
 
 app.delete('/api/chats/:name', requireUser, (req, res) => {
     const myDir = userDir(req.user.id);

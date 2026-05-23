@@ -148,6 +148,10 @@
         });
 
         xhr.onload = () => {
+            if (xhr.status === 413) {
+                showError('File too large — max 500 MB');
+                return;
+            }
             try {
                 const resp = JSON.parse(xhr.responseText);
                 if (xhr.status >= 200 && xhr.status < 300 && resp.ok) {
@@ -161,7 +165,7 @@
                     showError(resp.error || 'Upload failed');
                 }
             } catch (err) {
-                showError('Server error');
+                showError('Server error (' + xhr.status + ')');
             }
         };
 
