@@ -11,12 +11,20 @@
 
     // ---------- Fix: multiple events for mobile compatibility ----------
     function updateSendBtn() {
-        bottomSend.disabled = !bottomInput.value.trim() || streaming;
+        const hasText = bottomInput.value.trim().length > 0;
+        bottomSend.disabled = !hasText || streaming;
+        bottomSend.style.opacity = (!hasText || streaming) ? '0.4' : '1';
     }
     bottomInput.addEventListener('input', updateSendBtn);
     bottomInput.addEventListener('keyup', updateSendBtn);
     bottomInput.addEventListener('change', updateSendBtn);
+    bottomInput.addEventListener('focus', updateSendBtn);
+    bottomInput.addEventListener('blur', updateSendBtn);
     bottomInput.addEventListener('paste', () => setTimeout(updateSendBtn, 10));
+    bottomInput.addEventListener('touchend', () => setTimeout(updateSendBtn, 50));
+
+    // Periodic check as fallback for mobile keyboards
+    setInterval(updateSendBtn, 500);
 
     bottomInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -25,7 +33,15 @@
         }
     });
 
-    bottomSend.addEventListener('click', handleSend);
+    // Send on click — bypass disabled check, verify text directly
+    bottomSend.addEventListener('click', () => {
+        if (bottomInput.value.trim()) handleSend();
+    });
+    // Also handle touch for mobile
+    bottomSend.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        if (bottomInput.value.trim()) handleSend();
+    });
 
     // ---------- Send ----------
     async function handleSend() {
