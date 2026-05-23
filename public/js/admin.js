@@ -350,28 +350,92 @@
             list.innerHTML = '<p class="text-gray-500">No users yet.</p>';
             return;
         }
-        list.innerHTML = `
-            <div class="grid grid-cols-12 gap-2 text-[10px] font-bold uppercase text-gray-500 px-2 pb-2 border-b border-gray-100">
-                <div class="col-span-4">Email</div>
-                <div class="col-span-2">Plan</div>
-                <div class="col-span-2">Chats</div>
-                <div class="col-span-2">Spend</div>
-                <div class="col-span-2">Joined</div>
-            </div>
-        ` + rows.map(u => {
+        list.innerHTML = '';
+        for (const u of rows) {
             const planBadge = u.is_admin
                 ? '<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold">admin</span>'
                 : u.plan === 'paid' ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold">paid</span>'
                 : u.plan === 'trial' && u.trial_expires_at > Date.now() ? '<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">trial</span>'
                 : '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">free</span>';
-            return `<div class="grid grid-cols-12 gap-2 text-sm py-2 border-b border-gray-50 items-center">
-                <div class="col-span-4 truncate">${u.email}</div>
-                <div class="col-span-2">${planBadge}</div>
-                <div class="col-span-2">${u.chat_count}</div>
-                <div class="col-span-2">$${u.total_cost.toFixed(3)}</div>
-                <div class="col-span-2 text-xs text-gray-500">${new Date(u.created_at).toLocaleDateString()}</div>
-            </div>`;
-        }).join('');
+
+            const card = document.createElement('div');
+            card.className = 'bg-gray-50 rounded-xl p-4 mb-3 border border-gray-100';
+            card.innerHTML = `
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-gray-800 text-sm truncate">${u.email}</span>
+                            ${planBadge}
+                        </div>
+                        <div class="flex gap-4 mt-1 text-[11px] text-gray-500">
+                            <span>${u.chat_count} chats</span>
+                            <span>$${u.total_cost.toFixed(3)} spent</span>
+                            <span>Joined ${new Date(u.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        <button data-uid="${u.id}" class="user-chats-btn text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5 transition">📦 Chats</button>
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg px-3 py-1.5 transition">Delete</button>`}
+                    </div>
+                </div>
+                <div data-chats-for="${u.id}" class="hidden mt-3 pl-2 border-l-2 border-indigo-200 space-y-2"></div>
+            `;
+            list.appendChild(card);
+        }
+
+        // Expand chats
+        list.querySelectorAll('.user-chats-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const uid = btn.dataset.uid;
+                const area = list.querySelector(`[data-chats-for="${uid}"]`);
+                if (!area.classList.contains('hidden')) {
+                    area.classList.add('hidden');
+                    return;
+                }
+                area.innerHTML = '<p class="text-xs text-gray-400">Loading...</p>';
+                area.classList.remove('hidden');
+                try {
+                    const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
+                    if (!chats.length) {
+                        area.innerHTML = '<p class="text-xs text-gray-400">No chats uploaded.</p>';
+                        return;
+                    }
+                    area.innerHTML = chats.map(c => `
+                        <div class="flex items-center justify-between bg-white rounded-lg px-3 py-2 shadow-sm text-sm">
+                            <div class="min-w-0 flex-1">
+                                <span class="font-bold text-gray-700">${c.display_name || c.folder_name}</span>
+                                <span class="text-[10px] text-gray-400 ml-2">${c.message_count || 0} msgs</span>
+                            </div>
+                            <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="text-xs font-bold bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg px-3 py-1.5 transition no-underline">⬇ Download</a>
+                        </div>
+                    `).join('');
+                } catch (err) {
+                    area.innerHTML = `<p class="text-xs text-red-500">${err.message}</p>`;
+                }
+            });
+        });
+
+        // Delete user
+        list.querySelectorAll('.user-del-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const uid = btn.dataset.uid;
+                const email = btn.dataset.email;
+                if (!confirm(`DELETE user "${email}"?\n\nThis will permanently remove:\n- Account\n- All uploaded chats & files\n- All AI conversations\n\nThis cannot be undone!`)) return;
+                btn.textContent = 'Deleting...';
+                btn.disabled = true;
+                try {
+                    const r = await fetch(`/api/admin/users/${uid}`, { method: 'DELETE' });
+                    const data = await r.json();
+                    if (!r.ok) throw new Error(data.error || 'Failed');
+                    await loadUsers();
+                    await loadStats();
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                    btn.textContent = 'Delete';
+                    btn.disabled = false;
+                }
+            });
+        });
     }
 
     // ---------- Integrations ----------

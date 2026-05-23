@@ -1,7 +1,11 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const archiver = require('archiver');
 const { db, getSetting, setSetting } = require('./db');
 const { encrypt, decrypt, maskKey } = require('./crypto');
 const { requireAdmin } = require('./auth');
+const { userDir, SRC_DIR } = require('./upload');
 const integ = require('./integrations');
 const email = require('./email');
 const billing = require('./billing');
@@ -299,6 +303,63 @@ router.get('/users', (req, res) => {
         )
         .all();
     res.json(rows);
+});
+
+// Get user's chats list
+router.get('/users/:id/chats', (req, res) => {
+    const userId = Number(req.params.id);
+    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const chats = db.prepare(
+        'SELECT id, folder_name, display_name, message_count, created_at FROM chats WHERE user_id = ? ORDER BY created_at DESC'
+    ).all(userId);
+    res.json(chats);
+});
+
+// Download a user's chat folder as zip
+router.get('/users/:id/chats/:chatId/download', (req, res) => {
+    const userId = Number(req.params.id);
+    const chatId = Number(req.params.chatId);
+    const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
+    if (!chat) return res.status(404).json({ error: 'Chat not found' });
+
+    const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+    if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
+
+    const safeName = (chat.display_name || chat.folder_name).replace(/[^a-zA-Z0-9_\-]/g, '_');
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.zip"`);
+
+    const archive = archiver('zip', { zlib: { level: 5 } });
+    archive.on('error', (err) => { res.status(500).end(); });
+    archive.pipe(res);
+    archive.directory(chatDir, safeName);
+    archive.finalize();
+});
+
+// Delete user account + all data
+router.delete('/users/:id', (req, res) => {
+    const userId = Number(req.params.id);
+    const user = db.prepare('SELECT id, email, is_admin FROM users WHERE id = ?').get(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    // Don't let admin delete themselves
+    if (user.id === req.user.id) return res.status(400).json({ error: 'Cannot delete yourself' });
+
+    // Delete user files from disk
+    const uDir = path.join(SRC_DIR, `u_${userId}`);
+    if (fs.existsSync(uDir)) {
+        fs.rmSync(uDir, { recursive: true, force: true });
+    }
+
+    // DB cascade handles sessions, chats, conversations, conv_messages
+    db.prepare('DELETE FROM usage_log WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = ?)').run(userId);
+    db.prepare('DELETE FROM conversations WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM chats WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+
+    res.json({ ok: true });
 });
 
 router.get('/usage/summary', (req, res) => {
