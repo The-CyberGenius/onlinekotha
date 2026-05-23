@@ -168,7 +168,7 @@ async function streamGoogle({ model, messages, systemPrompt, maxTokens, temperat
 
     const body = {
         contents,
-        generationConfig: { maxOutputTokens: maxTokens, temperature },
+        generationConfig: { maxOutputTokens: maxTokens, temperature, thinkingConfig: { thinkingBudget: 0 } },
     };
     if (systemPrompt) body.systemInstruction = { parts: [{ text: systemPrompt }] };
 
