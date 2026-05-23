@@ -109,6 +109,15 @@ router.post('/chat', aiGate, async (req, res) => {
         `SELECT role, content FROM conv_messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 12`
     ).all(convId).reverse();
 
+    // Detect sender names (most messages = user, second = contact)
+    const senderCounts = {};
+    for (const m of chatMessages) {
+        if (m.sender && m.type !== 'system') senderCounts[m.sender] = (senderCounts[m.sender] || 0) + 1;
+    }
+    const sortedSenders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
+    const userName = sortedSenders[0]?.[0] || 'User';
+    const contactName = sortedSenders[1]?.[0] || sortedSenders[0]?.[0] || 'Friend';
+
     // Build context from chat
     const { selected, stats } = selectContext(chatMessages, message);
     const contextBlock = formatContext(selected, chat);
@@ -125,10 +134,10 @@ router.post('/chat', aiGate, async (req, res) => {
         res.write(`data: ${JSON.stringify(data)}\n\n`);
     };
 
-    send('start', { conversationId: convId, stats });
+    send('start', { conversationId: convId, stats, contactName, userName });
 
-    // Build prompt
-    const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}\n\n--- Chat context ---\n${contextBlock}\n--- End context ---`;
+    // Build roleplay prompt
+    const systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock);
     const llmMessages = history.map(h => ({ role: h.role, content: h.content }));
 
     let fullText = '';
@@ -166,6 +175,25 @@ router.post('/chat', aiGate, async (req, res) => {
         res.end();
     }
 });
+
+function buildRoleplayPrompt(contactName, userName, contextBlock) {
+    return `You are "${contactName}" — the person ${userName} used to chat with on WhatsApp. You have access to their real chat history below.
+
+Your job:
+- You ARE ${contactName}. Stay in character at all times. Talk exactly like ${contactName} talks in the chat — same tone, slang, language, emoji style, everything.
+- Study how ${contactName} writes in the chat history: their word choices, message length, humor style, language mix (Hindi/English/Hinglish/etc). Mirror it perfectly.
+- Respond naturally as if the conversation is continuing right now.
+- You can reference shared memories, inside jokes, past conversations from the chat context.
+- If ${userName} asks something you'd know from the chat, answer using that info. If it's not in the context, respond naturally as ${contactName} would ("yaad nahi bhai", "pata nahi", etc).
+- Keep messages short and natural — like real WhatsApp messages (1-3 lines usually). No essays.
+- Use emojis only if ${contactName} uses them in the chat history.
+- NEVER break character. NEVER say you are an AI. You are ${contactName}.
+- NEVER use citation format like [#id]. Just talk naturally.
+
+--- Chat history for reference ---
+${contextBlock}
+--- End chat history ---`;
+}
 
 function extractCitations(text) {
     const ids = [];

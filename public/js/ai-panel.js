@@ -1,25 +1,22 @@
 (function () {
     const chatContainer = document.getElementById('chat-container');
-    const aiChatArea = document.getElementById('ai-chat-area');
-    const aiMessages = document.getElementById('ai-messages');
     const bottomInput = document.getElementById('bottom-ai-input');
     const bottomSend = document.getElementById('bottom-ai-send');
-    const sparkleBtn = document.getElementById('ask-ai-btn');
-    const backBtn = document.getElementById('ai-back-to-chat');
-    const newConvBtn = document.getElementById('ai-new-conv');
-    const aiSubtitle = document.getElementById('ai-chat-subtitle');
 
-    if (!aiChatArea || !bottomInput) return;
+    if (!bottomInput || !bottomSend || !chatContainer) return;
 
     let currentConversationId = null;
     let streaming = false;
-    let aiMode = false;
-    let lastLoadedChat = null;
+    let contactName = '';
 
-    // ---------- Bottom bar input ----------
-    bottomInput.addEventListener('input', () => {
+    // ---------- Fix: multiple events for mobile compatibility ----------
+    function updateSendBtn() {
         bottomSend.disabled = !bottomInput.value.trim() || streaming;
-    });
+    }
+    bottomInput.addEventListener('input', updateSendBtn);
+    bottomInput.addEventListener('keyup', updateSendBtn);
+    bottomInput.addEventListener('change', updateSendBtn);
+    bottomInput.addEventListener('paste', () => setTimeout(updateSendBtn, 10));
 
     bottomInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -30,102 +27,6 @@
 
     bottomSend.addEventListener('click', handleSend);
 
-    // ---------- Sparkle button toggles AI mode ----------
-    if (sparkleBtn) {
-        sparkleBtn.addEventListener('click', () => {
-            if (!window.currentChat) { toast('Open a chat first'); return; }
-            if (aiMode) {
-                hideAIMode();
-            } else {
-                showAIMode();
-            }
-        });
-    }
-
-    // ---------- Back to chat ----------
-    if (backBtn) backBtn.addEventListener('click', hideAIMode);
-
-    // ---------- New conversation ----------
-    if (newConvBtn) newConvBtn.addEventListener('click', () => {
-        currentConversationId = null;
-        lastLoadedChat = null;
-        aiMessages.innerHTML = '';
-        renderWelcome();
-    });
-
-    // ---------- Show / Hide AI mode ----------
-    function showAIMode() {
-        aiMode = true;
-        chatContainer.classList.add('hidden');
-        aiChatArea.classList.remove('hidden');
-        aiChatArea.classList.add('flex');
-        if (sparkleBtn) sparkleBtn.classList.add('ai-active');
-        aiSubtitle.textContent = prettyName(window.currentChat);
-
-        // Load existing conversation if switching to new chat
-        if (lastLoadedChat !== window.currentChat) {
-            currentConversationId = null;
-            loadExistingConversation(window.currentChat);
-            lastLoadedChat = window.currentChat;
-        }
-
-        bottomInput.focus();
-    }
-
-    function hideAIMode() {
-        aiMode = false;
-        chatContainer.classList.remove('hidden');
-        aiChatArea.classList.add('hidden');
-        aiChatArea.classList.remove('flex');
-        if (sparkleBtn) sparkleBtn.classList.remove('ai-active');
-    }
-
-    // ---------- Load existing conversation ----------
-    async function loadExistingConversation(chatFolder) {
-        aiMessages.innerHTML = '';
-        try {
-            const r = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
-            const convs = await r.json();
-            if (convs.length > 0) {
-                const latest = convs[0];
-                const r2 = await fetch(`/api/ai/conversations/${latest.id}`);
-                const conv = await r2.json();
-                currentConversationId = conv.id;
-                if (conv.messages && conv.messages.length) {
-                    for (const m of conv.messages) {
-                        const b = addBubble(m.role, '');
-                        if (m.role === 'assistant') {
-                            b.innerHTML = renderAssistantText(m.content);
-                            wireCitations(b);
-                        } else {
-                            b.textContent = m.content;
-                        }
-                    }
-                    scrollAI();
-                } else {
-                    renderWelcome();
-                }
-            } else {
-                renderWelcome();
-            }
-        } catch {
-            renderWelcome();
-        }
-    }
-
-    // ---------- Render welcome ----------
-    function renderWelcome() {
-        aiMessages.innerHTML = '';
-        const w = document.createElement('div');
-        w.className = 'ai-welcome text-center py-8 text-gray-500';
-        w.innerHTML = `
-            <div class="text-3xl mb-2">✨</div>
-            <p class="font-bold text-gray-700 text-sm">Ask anything about your chat</p>
-            <p class="text-xs mt-1">with <b>${escapeHTML(prettyName(window.currentChat))}</b></p>
-        `;
-        aiMessages.appendChild(w);
-    }
-
     // ---------- Send ----------
     async function handleSend() {
         if (streaming) return;
@@ -133,27 +34,27 @@
         if (!text) return;
         if (!window.currentChat) { toast('Open a chat first'); return; }
 
-        // Switch to AI mode if not already
-        if (!aiMode) showAIMode();
-
-        // Clear welcome
-        const w = aiMessages.querySelector('.ai-welcome');
-        if (w) w.remove();
-
-        addBubble('user', text);
+        // Add user bubble to chat container
+        appendUserBubble(text);
         bottomInput.value = '';
         bottomSend.disabled = true;
         streaming = true;
 
-        const typingWrap = document.createElement('div');
-        typingWrap.id = 'ai-typing-wrap';
-        typingWrap.className = 'flex flex-col';
-        typingWrap.innerHTML = '<div class="ai-bubble ai-bubble-assistant"><div class="ai-typing"><span></span><span></span><span></span></div></div>';
-        aiMessages.appendChild(typingWrap);
-        scrollAI();
+        // Add typing indicator
+        const typingEl = document.createElement('div');
+        typingEl.id = 'ai-typing-inline';
+        typingEl.className = 'flex justify-start mb-3 animate-message';
+        typingEl.innerHTML = `
+            <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
+                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">✨ ${escapeHTML(contactName || 'AI')}</p>
+                <div class="ai-typing"><span></span><span></span><span></span></div>
+            </div>
+        `;
+        chatContainer.appendChild(typingEl);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
 
-        let assistantBubble = null;
         let fullText = '';
+        let responseBubble = null;
 
         try {
             const resp = await fetch('/api/ai/chat', {
@@ -169,10 +70,10 @@
             if (!resp.ok) {
                 let errMsg = `Error ${resp.status}`;
                 try { errMsg = (await resp.json()).error || errMsg; } catch {}
-                typingWrap.remove();
-                addErrorBubble(errMsg);
+                typingEl.remove();
+                appendErrorBubble(errMsg);
                 streaming = false;
-                bottomSend.disabled = !bottomInput.value.trim();
+                updateSendBtn();
                 return;
             }
 
@@ -201,81 +102,72 @@
 
                     if (event === 'start') {
                         currentConversationId = data.conversationId;
+                        if (data.contactName) contactName = data.contactName;
                     } else if (event === 'token') {
-                        if (!assistantBubble) {
-                            typingWrap.remove();
-                            assistantBubble = addBubble('assistant', '');
+                        if (!responseBubble) {
+                            typingEl.remove();
+                            responseBubble = appendContactBubble(contactName);
                         }
                         fullText += data.text;
-                        assistantBubble.innerHTML = renderAssistantText(fullText);
-                        wireCitations(assistantBubble);
-                        scrollAI();
+                        responseBubble.querySelector('.ai-response-text').textContent = fullText;
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
                     } else if (event === 'done') {
-                        if (assistantBubble) {
-                            assistantBubble.innerHTML = renderAssistantText(fullText);
-                            wireCitations(assistantBubble);
-                        }
+                        // Final
                     } else if (event === 'error') {
-                        typingWrap.remove();
-                        addErrorBubble(data.message || 'Something went wrong');
+                        typingEl.remove();
+                        appendErrorBubble(data.message || 'Something went wrong');
                     }
                 }
             }
         } catch (err) {
-            typingWrap.remove();
-            addErrorBubble('Network error. Try again?');
+            typingEl.remove();
+            appendErrorBubble('Network error. Try again?');
         } finally {
             streaming = false;
-            bottomSend.disabled = !bottomInput.value.trim();
+            updateSendBtn();
             bottomInput.focus();
         }
     }
 
-    // ---------- Helpers ----------
-    function addBubble(role, text) {
+    // ---------- Bubble helpers ----------
+    function appendUserBubble(text) {
         const wrap = document.createElement('div');
-        wrap.className = 'flex flex-col';
-        const b = document.createElement('div');
-        b.className = `ai-bubble ${role === 'user' ? 'ai-bubble-user' : 'ai-bubble-assistant'}`;
-        if (text) b.textContent = text;
-        wrap.appendChild(b);
-        aiMessages.appendChild(wrap);
-        scrollAI();
-        return b;
+        wrap.className = 'flex justify-end mb-3 animate-message';
+        wrap.innerHTML = `
+            <div class="glass-chat-me rounded-2xl rounded-br-md px-4 py-3 max-w-[75%]">
+                <p class="text-sm leading-relaxed text-white">${escapeHTML(text)}</p>
+                <p class="text-[10px] text-white/60 text-right mt-1">just now</p>
+            </div>
+        `;
+        chatContainer.appendChild(wrap);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    function addErrorBubble(msg) {
-        const b = document.createElement('div');
-        b.className = 'ai-bubble ai-bubble-error';
-        b.textContent = msg;
-        aiMessages.appendChild(b);
-        scrollAI();
+    function appendContactBubble(name) {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex justify-start mb-3 animate-message';
+        wrap.innerHTML = `
+            <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
+                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">✨ ${escapeHTML(name || 'AI')}</p>
+                <p class="ai-response-text text-sm leading-relaxed text-gray-800"></p>
+                <p class="text-[10px] text-gray-400 text-right mt-1">just now</p>
+            </div>
+        `;
+        chatContainer.appendChild(wrap);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        return wrap;
     }
 
-    function scrollAI() {
-        requestAnimationFrame(() => {
-            aiMessages.scrollTop = aiMessages.scrollHeight;
-        });
-    }
-
-    function renderAssistantText(text) {
-        const escaped = escapeHTML(text);
-        return escaped.replace(/\[#(\d+)\]/g, (_, id) =>
-            `<span class="ai-cite" data-msg-id="${id}">#${id}</span>`
-        );
-    }
-
-    function wireCitations(container) {
-        container.querySelectorAll('.ai-cite').forEach(el => {
-            el.onclick = () => {
-                hideAIMode();
-                if (window.scrollToMessageId) window.scrollToMessageId(Number(el.dataset.msgId));
-            };
-        });
-    }
-
-    function prettyName(s) {
-        return (s || '').replace(/^WhatsApp Chat - /, '').replace(/_/g, ' ');
+    function appendErrorBubble(msg) {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex justify-center mb-3 animate-message';
+        wrap.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-sm text-red-600 font-medium max-w-[85%] text-center">
+                ${escapeHTML(msg)}
+            </div>
+        `;
+        chatContainer.appendChild(wrap);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     function escapeHTML(s) {
@@ -291,6 +183,15 @@
         document.body.appendChild(t);
         requestAnimationFrame(() => t.style.opacity = '1');
         setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 250); }, 2400);
+    }
+
+    // ---------- Sparkle button focuses AI input ----------
+    const sparkleBtn = document.getElementById('ask-ai-btn');
+    if (sparkleBtn) {
+        sparkleBtn.addEventListener('click', () => {
+            bottomInput.focus();
+            bottomInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        });
     }
 
     window.kothaToast = toast;

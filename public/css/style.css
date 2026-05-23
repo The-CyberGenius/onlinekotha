@@ -90,9 +90,7 @@ body {
     box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
 }
 
-#ai-chat-area {
-    min-height: 0;
-}
+/* AI inline — no separate area needed */
 
 .ai-bubble {
     max-width: 86%;
