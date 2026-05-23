@@ -11,18 +11,9 @@ body {
     animation: gradientBG 15s ease infinite;
 }
 
-/* Mobile: full-screen AI panel */
-@media (max-width: 640px) {
-    #ai-panel {
-        max-width: 100% !important;
-        border-left: none !important;
-        border-radius: 0 !important;
-    }
-}
-
-/* Safe area insets for notched phones */
+/* Safe area insets for bottom bar */
 @supports (padding: env(safe-area-inset-bottom)) {
-    #ai-panel .border-t {
+    #bottom-ai-bar {
         padding-bottom: calc(12px + env(safe-area-inset-bottom));
     }
 }
@@ -91,44 +82,16 @@ body {
     background: rgba(99, 102, 241, 0.8);
 }
 
-/* ============ AI Panel (Apple-style) ============ */
+/* ============ AI Inline Chat ============ */
 
-#ai-panel {
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    height: 100dvh;
-    width: 100%;
-    max-width: 420px;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border-left: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: -16px 0 48px -16px rgba(0, 0, 0, 0.12);
-    transform: translateX(100%);
-    transition: transform 360ms cubic-bezier(0.32, 0.72, 0, 1);
-    z-index: 80;
-    display: flex;
-    flex-direction: column;
+.ai-sparkle-btn.ai-active {
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    color: white;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
 }
 
-#ai-panel.open {
-    transform: translateX(0);
-}
-
-#ai-panel-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0);
-    transition: background 360ms cubic-bezier(0.32, 0.72, 0, 1);
-    z-index: 75;
-    pointer-events: none;
-}
-
-#ai-panel-backdrop.open {
-    background: rgba(0, 0, 0, 0.12);
-    pointer-events: auto;
+#ai-chat-area {
+    min-height: 0;
 }
 
 .ai-bubble {
