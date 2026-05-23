@@ -148,15 +148,16 @@ app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Media: serve only the requesting user's files
+// URL: /media/<chatFolder>/<filename>  → src/u_<userId>/<chatFolder>/<filename>
 app.get('/media/*rest', requireUser, (req, res, next) => {
     const rel = req.path.replace(/^\/media\//, '');
-    // Prevent path traversal
-    const fullPath = path.join(SRC_DIR, rel);
-    if (!path.normalize(fullPath).startsWith(SRC_DIR)) return res.status(403).end();
+    // Auto-prepend user directory
+    const userRel = `u_${req.user.id}/${rel}`;
+    const fullPath = path.join(SRC_DIR, userRel);
 
-    // Enforce ownership: path must start with u_<userId>/
-    const expectedPrefix = `u_${req.user.id}/`;
-    if (!rel.startsWith(expectedPrefix)) return res.status(403).end();
+    // Prevent path traversal
+    const userBase = path.join(SRC_DIR, `u_${req.user.id}`);
+    if (!path.normalize(fullPath).startsWith(userBase)) return res.status(403).end();
 
     if (!fs.existsSync(fullPath)) return res.status(404).end();
     res.sendFile(fullPath);
