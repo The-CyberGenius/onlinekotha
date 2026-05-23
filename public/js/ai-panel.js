@@ -9,7 +9,7 @@
     const sendBtn = document.getElementById('ai-send');
     const subtitle = document.getElementById('ai-subtitle');
 
-    if (!panel || !openBtn) return;
+    if (!panel) return;
 
     let currentConversationId = null;
     let streaming = false;
@@ -31,9 +31,41 @@
 
     sendBtn.addEventListener('click', handleSend);
 
-    openBtn.addEventListener('click', openPanel);
+    if (openBtn) openBtn.addEventListener('click', openPanel);
     closeBtn.addEventListener('click', closePanel);
     backdrop.addEventListener('click', closePanel);
+
+    // Bottom AI bar — opens panel with pre-filled text
+    const bottomInput = document.getElementById('bottom-ai-input');
+    const bottomSend = document.getElementById('bottom-ai-send');
+    if (bottomInput && bottomSend) {
+        bottomInput.addEventListener('input', () => {
+            bottomSend.disabled = !bottomInput.value.trim();
+        });
+        bottomInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendFromBottom();
+            }
+        });
+        bottomSend.addEventListener('click', sendFromBottom);
+        // Focus on bottom input opens panel with the text
+        function sendFromBottom() {
+            const text = bottomInput.value.trim();
+            if (!text) return;
+            if (!window.currentChat) { toast('Open a chat first'); return; }
+            // Open panel, fill input, send
+            panel.classList.add('open');
+            backdrop.classList.add('open');
+            subtitle.textContent = `About: ${window.currentChat}`;
+            if (!messagesEl.children.length) renderEmptyState();
+            input.value = text;
+            input.dispatchEvent(new Event('input'));
+            bottomInput.value = '';
+            bottomSend.disabled = true;
+            setTimeout(() => handleSend(), 100);
+        }
+    }
     newBtn.addEventListener('click', () => {
         currentConversationId = null;
         renderEmptyState();
