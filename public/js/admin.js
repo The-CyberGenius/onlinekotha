@@ -347,38 +347,52 @@
         const rows = await (await fetch('/api/admin/users')).json();
         const list = document.getElementById('user-list');
         if (!rows.length) {
-            list.innerHTML = '<p class="text-gray-500">No users yet.</p>';
+            list.innerHTML = '<div class="text-center py-8 text-gray-400"><p class="text-4xl mb-2">👥</p><p class="font-bold">No users yet</p></div>';
             return;
         }
-        list.innerHTML = '';
+        list.innerHTML = `<p class="text-xs text-gray-500 mb-3">${rows.length} total users</p>`;
         for (const u of rows) {
             const planBadge = u.is_admin
                 ? '<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold">admin</span>'
                 : u.plan === 'paid' ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold">paid</span>'
                 : u.plan === 'trial' && u.trial_expires_at > Date.now() ? '<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">trial</span>'
-                : '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">free</span>';
+                : '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">expired</span>';
+
+            const loginMethod = u.google_id
+                ? '<span class="text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Google</span>'
+                : '<span class="text-[9px] font-bold bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded">Email</span>';
+
+            const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
+            const avatarHtml = u.avatar_url
+                ? `<img src="${u.avatar_url}" class="w-10 h-10 rounded-xl object-cover shadow-sm" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm\\'>${initials}</div>'">`
+                : `<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">${initials}</div>`;
 
             const card = document.createElement('div');
-            card.className = 'bg-gray-50 rounded-xl p-4 mb-3 border border-gray-100';
+            card.className = 'bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm hover:shadow-md transition';
             card.innerHTML = `
-                <div class="flex items-center justify-between gap-2 flex-wrap">
+                <div class="flex items-center gap-3">
+                    <div class="shrink-0">${avatarHtml}</div>
                     <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-bold text-gray-800 text-sm truncate">${u.email}</span>
-                            ${planBadge}
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="font-bold text-gray-900 text-sm truncate">${u.display_name || u.email.split('@')[0]}</span>
+                            ${planBadge} ${loginMethod}
                         </div>
-                        <div class="flex gap-4 mt-1 text-[11px] text-gray-500">
-                            <span>${u.chat_count} chats</span>
-                            <span>$${u.total_cost.toFixed(3)} spent</span>
-                            <span>Joined ${new Date(u.created_at).toLocaleDateString()}</span>
+                        <p class="text-[11px] text-gray-500 truncate mt-0.5">${u.email}</p>
+                        <div class="flex gap-3 mt-1.5 text-[10px] text-gray-400 font-medium">
+                            <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${u.chat_count} chats</span>
+                            <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> $${u.total_cost.toFixed(3)}</span>
+                            <span>${new Date(u.created_at).toLocaleDateString()}</span>
                         </div>
                     </div>
-                    <div class="flex gap-2 shrink-0">
-                        <button data-uid="${u.id}" class="user-chats-btn text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5 transition">📦 Chats</button>
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg px-3 py-1.5 transition">Delete</button>`}
+                    <div class="flex flex-col gap-1.5 shrink-0">
+                        <button data-uid="${u.id}" class="user-chats-btn text-[11px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5 transition flex items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Chats
+                        </button>
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-[11px] font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg px-3 py-1.5 transition">Delete</button>`}
                     </div>
                 </div>
-                <div data-chats-for="${u.id}" class="hidden mt-3 pl-2 border-l-2 border-indigo-200 space-y-2"></div>
+                <div data-chats-for="${u.id}" class="hidden mt-3 space-y-1.5"></div>
             `;
             list.appendChild(card);
         }
@@ -390,27 +404,43 @@
                 const area = list.querySelector(`[data-chats-for="${uid}"]`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
+                    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Chats`;
                     return;
                 }
-                area.innerHTML = '<p class="text-xs text-gray-400">Loading...</p>';
+                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-indigo-300 border-t-transparent rounded-full animate-spin"></div> Loading...</div>';
                 area.classList.remove('hidden');
+                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg> Hide`;
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
                     if (!chats.length) {
-                        area.innerHTML = '<p class="text-xs text-gray-400">No chats uploaded.</p>';
+                        area.innerHTML = '<div class="bg-gray-50 rounded-xl p-3 text-center text-xs text-gray-400">No chats uploaded yet</div>';
                         return;
                     }
-                    area.innerHTML = chats.map(c => `
-                        <div class="flex items-center justify-between bg-white rounded-lg px-3 py-2 shadow-sm text-sm">
-                            <div class="min-w-0 flex-1">
-                                <span class="font-bold text-gray-700">${c.display_name || c.folder_name}</span>
-                                <span class="text-[10px] text-gray-400 ml-2">${c.message_count || 0} msgs</span>
+                    area.innerHTML = `
+                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                            <div class="grid grid-cols-12 gap-2 px-3 py-2 text-[9px] font-bold uppercase text-gray-400 tracking-wider border-b border-gray-100">
+                                <div class="col-span-5">Chat Name</div>
+                                <div class="col-span-2 text-center">Messages</div>
+                                <div class="col-span-3">Imported</div>
+                                <div class="col-span-2 text-right">Action</div>
                             </div>
-                            <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="text-xs font-bold bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-lg px-3 py-1.5 transition no-underline">⬇ Download</a>
+                            ${chats.map(c => `
+                                <div class="grid grid-cols-12 gap-2 px-3 py-2.5 items-center hover:bg-white transition text-sm border-b border-gray-50 last:border-0">
+                                    <div class="col-span-5 font-bold text-gray-800 truncate text-xs">${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</div>
+                                    <div class="col-span-2 text-center text-xs text-gray-500">${c.message_count || 0}</div>
+                                    <div class="col-span-3 text-[10px] text-gray-400">${new Date(c.created_at).toLocaleDateString()}</div>
+                                    <div class="col-span-2 text-right">
+                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="inline-flex items-center gap-1 text-[10px] font-bold bg-teal-500 text-white hover:bg-teal-600 rounded-lg px-2 py-1 transition no-underline shadow-sm">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            .zip
+                                        </a>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
-                    `).join('');
+                    `;
                 } catch (err) {
-                    area.innerHTML = `<p class="text-xs text-red-500">${err.message}</p>`;
+                    area.innerHTML = `<div class="bg-red-50 rounded-xl p-3 text-center text-xs text-red-500 font-bold">${err.message}</div>`;
                 }
             });
         });
