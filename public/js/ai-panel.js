@@ -8,14 +8,16 @@
     const input = document.getElementById('ai-input');
     const sendBtn = document.getElementById('ai-send');
     const subtitle = document.getElementById('ai-subtitle');
+    const bottomInput = document.getElementById('bottom-ai-input');
+    const bottomSend = document.getElementById('bottom-ai-send');
 
     if (!panel) return;
 
     let currentConversationId = null;
     let streaming = false;
-    let suggestions = [];
+    let lastLoadedChat = null;
 
-    // Auto-resize textarea
+    // ---------- Input wiring ----------
     input.addEventListener('input', () => {
         input.style.height = 'auto';
         input.style.height = Math.min(140, input.scrollHeight) + 'px';
@@ -31,13 +33,20 @@
 
     sendBtn.addEventListener('click', handleSend);
 
-    if (openBtn) openBtn.addEventListener('click', openPanel);
+    if (openBtn) openBtn.addEventListener('click', () => openPanel());
     closeBtn.addEventListener('click', closePanel);
     backdrop.addEventListener('click', closePanel);
+    newBtn.addEventListener('click', () => {
+        currentConversationId = null;
+        lastLoadedChat = null;
+        renderEmptyState();
+    });
 
-    // Bottom AI bar — opens panel with pre-filled text
-    const bottomInput = document.getElementById('bottom-ai-input');
-    const bottomSend = document.getElementById('bottom-ai-send');
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+    });
+
+    // ---------- Bottom AI bar ----------
     if (bottomInput && bottomSend) {
         bottomInput.addEventListener('input', () => {
             bottomSend.disabled = !bottomInput.value.trim();
@@ -49,44 +58,44 @@
             }
         });
         bottomSend.addEventListener('click', sendFromBottom);
-        // Focus on bottom input opens panel with the text
-        function sendFromBottom() {
-            const text = bottomInput.value.trim();
-            if (!text) return;
-            if (!window.currentChat) { toast('Open a chat first'); return; }
-            // Open panel, fill input, send
-            panel.classList.add('open');
-            backdrop.classList.add('open');
-            subtitle.textContent = `About: ${window.currentChat}`;
-            if (!messagesEl.children.length) renderEmptyState();
-            input.value = text;
-            input.dispatchEvent(new Event('input'));
-            bottomInput.value = '';
-            bottomSend.disabled = true;
-            setTimeout(() => handleSend(), 100);
-        }
     }
-    newBtn.addEventListener('click', () => {
-        currentConversationId = null;
-        renderEmptyState();
-    });
 
-    // Keyboard escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
-    });
+    function sendFromBottom() {
+        const text = (bottomInput.value || '').trim();
+        if (!text || !window.currentChat) {
+            if (!window.currentChat) toast('Open a chat first');
+            return;
+        }
+        bottomInput.value = '';
+        bottomSend.disabled = true;
+        openPanel(text);
+    }
 
-    async function openPanel() {
+    // ---------- Panel open/close ----------
+    async function openPanel(prefillText) {
         if (!window.currentChat) {
             toast('Open a chat first to ask questions');
             return;
         }
+
         panel.classList.add('open');
         backdrop.classList.add('open');
-        subtitle.textContent = `About: ${window.currentChat}`;
-        if (!suggestions.length) await loadSuggestions();
-        renderEmptyState();
-        setTimeout(() => input.focus(), 360);
+        subtitle.textContent = `About: ${prettyName(window.currentChat)}`;
+
+        // Load existing conversation for this chat (if not already loaded)
+        if (lastLoadedChat !== window.currentChat) {
+            currentConversationId = null;
+            await loadExistingConversation(window.currentChat);
+            lastLoadedChat = window.currentChat;
+        }
+
+        if (prefillText) {
+            input.value = prefillText;
+            input.dispatchEvent(new Event('input'));
+            setTimeout(() => handleSend(), 150);
+        } else {
+            setTimeout(() => input.focus(), 300);
+        }
     }
 
     function closePanel() {
@@ -94,47 +103,52 @@
         backdrop.classList.remove('open');
     }
 
-    async function loadSuggestions() {
+    // ---------- Load existing conversation ----------
+    async function loadExistingConversation(chatFolder) {
         try {
-            const r = await fetch('/api/ai/suggestions');
-            const data = await r.json();
-            suggestions = data.suggestions || [];
+            const r = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
+            const convs = await r.json();
+            if (convs.length > 0) {
+                // Load the most recent conversation
+                const latest = convs[0];
+                const r2 = await fetch(`/api/ai/conversations/${latest.id}`);
+                const conv = await r2.json();
+                currentConversationId = conv.id;
+                messagesEl.innerHTML = '';
+                if (conv.messages && conv.messages.length) {
+                    for (const m of conv.messages) {
+                        const b = addBubble(m.role, '');
+                        if (m.role === 'assistant') {
+                            b.innerHTML = renderAssistantText(m.content);
+                            wireCitations(b);
+                        } else {
+                            b.textContent = m.content;
+                        }
+                    }
+                    scrollToBottom();
+                } else {
+                    renderEmptyState();
+                }
+            } else {
+                renderEmptyState();
+            }
         } catch {
-            suggestions = [];
+            renderEmptyState();
         }
     }
 
+    // ---------- Render ----------
     function renderEmptyState() {
         messagesEl.innerHTML = '';
         const welcome = document.createElement('div');
-        welcome.className = 'ai-bubble ai-bubble-assistant';
-        welcome.style.maxWidth = '100%';
-        welcome.style.background = 'transparent';
-        welcome.style.padding = '8px 4px';
+        welcome.className = 'ai-welcome';
         welcome.innerHTML = `
-            <div class="text-gray-700 text-[15px] leading-relaxed">
-                Hi! I've read your conversation with <b>${escapeHTML(prettyName(window.currentChat))}</b>.
-                What would you like to know?
+            <div class="text-gray-600 text-[14px] leading-relaxed p-3">
+                <div class="text-2xl mb-2">✨</div>
+                <b>Ask anything</b> about your chat with <b>${escapeHTML(prettyName(window.currentChat))}</b>
             </div>
         `;
         messagesEl.appendChild(welcome);
-
-        if (suggestions.length) {
-            const wrap = document.createElement('div');
-            wrap.className = 'flex flex-col gap-2 mt-2';
-            for (const s of suggestions) {
-                const btn = document.createElement('button');
-                btn.className = 'ai-suggestion';
-                btn.textContent = s;
-                btn.addEventListener('click', () => {
-                    input.value = s;
-                    input.dispatchEvent(new Event('input'));
-                    handleSend();
-                });
-                wrap.appendChild(btn);
-            }
-            messagesEl.appendChild(wrap);
-        }
     }
 
     function prettyName(s) {
@@ -147,13 +161,13 @@
         }[c]));
     }
 
-    function addBubble(role, initialText = '') {
+    function addBubble(role, initialText) {
         const wrap = document.createElement('div');
         wrap.className = 'flex flex-col';
         const b = document.createElement('div');
         b.className = `ai-bubble ${role === 'user' ? 'ai-bubble-user' : 'ai-bubble-assistant'}`;
         b.dataset.role = role;
-        b.textContent = initialText;
+        if (initialText) b.textContent = initialText;
         wrap.appendChild(b);
         messagesEl.appendChild(wrap);
         scrollToBottom();
@@ -163,6 +177,7 @@
     function addTypingBubble() {
         const wrap = document.createElement('div');
         wrap.className = 'flex flex-col';
+        wrap.id = 'ai-typing-wrap';
         const b = document.createElement('div');
         b.className = 'ai-bubble ai-bubble-assistant';
         b.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
@@ -173,12 +188,10 @@
     }
 
     function addErrorBubble(msg) {
-        const wrap = document.createElement('div');
         const b = document.createElement('div');
         b.className = 'ai-bubble ai-bubble-error';
         b.textContent = msg;
-        wrap.appendChild(b);
-        messagesEl.appendChild(wrap);
+        messagesEl.appendChild(b);
         scrollToBottom();
     }
 
@@ -188,27 +201,19 @@
         });
     }
 
-    function clearSuggestionsIfPresent() {
-        // Remove the welcome+suggestions block once first message is sent
-        const containers = messagesEl.querySelectorAll('.flex.flex-col.gap-2');
-        containers.forEach(c => {
-            if (c.querySelector('.ai-suggestion')) c.remove();
-        });
-        // Remove welcome bubble
-        const welcomeBubble = messagesEl.querySelector('.ai-bubble.ai-bubble-assistant[style*="transparent"]');
-        if (welcomeBubble && welcomeBubble.parentElement) welcomeBubble.parentElement.remove();
+    function clearWelcome() {
+        const w = messagesEl.querySelector('.ai-welcome');
+        if (w) w.remove();
     }
 
+    // ---------- Send ----------
     async function handleSend() {
         if (streaming) return;
         const text = input.value.trim();
         if (!text) return;
-        if (!window.currentChat) {
-            toast('Open a chat first');
-            return;
-        }
+        if (!window.currentChat) { toast('Open a chat first'); return; }
 
-        clearSuggestionsIfPresent();
+        clearWelcome();
         addBubble('user', text);
         input.value = '';
         input.style.height = 'auto';
@@ -233,7 +238,8 @@
             if (!resp.ok) {
                 let errMsg = `Error ${resp.status}`;
                 try { errMsg = (await resp.json()).error || errMsg; } catch {}
-                typingBubble.parentElement.remove();
+                const tw = document.getElementById('ai-typing-wrap');
+                if (tw) tw.remove();
                 if (resp.status === 402) {
                     addUpgradeBubble(errMsg);
                 } else {
@@ -271,7 +277,8 @@
                         currentConversationId = data.conversationId;
                     } else if (event === 'token') {
                         if (!assistantBubble) {
-                            typingBubble.parentElement.remove();
+                            const tw = document.getElementById('ai-typing-wrap');
+                            if (tw) tw.remove();
                             assistantBubble = addBubble('assistant', '');
                         }
                         fullText += data.text;
@@ -279,19 +286,20 @@
                         wireCitations(assistantBubble);
                         scrollToBottom();
                     } else if (event === 'done') {
-                        // final pass — ensure citations rendered
                         if (assistantBubble) {
                             assistantBubble.innerHTML = renderAssistantText(fullText);
                             wireCitations(assistantBubble);
                         }
                     } else if (event === 'error') {
-                        if (typingBubble.parentElement) typingBubble.parentElement.remove();
+                        const tw = document.getElementById('ai-typing-wrap');
+                        if (tw) tw.remove();
                         addErrorBubble(data.message || 'Something went wrong');
                     }
                 }
             }
         } catch (err) {
-            if (typingBubble.parentElement) typingBubble.parentElement.remove();
+            const tw = document.getElementById('ai-typing-wrap');
+            if (tw) tw.remove();
             addErrorBubble('Network error. Try again?');
         } finally {
             streaming = false;
@@ -301,7 +309,6 @@
     }
 
     function renderAssistantText(text) {
-        // Convert [#123] to clickable spans
         const escaped = escapeHTML(text);
         return escaped.replace(/\[#(\d+)\]/g, (_, id) => {
             return `<span class="ai-cite" data-msg-id="${id}">#${id}</span>`;
@@ -310,15 +317,10 @@
 
     function wireCitations(container) {
         container.querySelectorAll('.ai-cite').forEach(el => {
-            el.onclick = () => jumpToMessage(Number(el.dataset.msgId));
+            el.onclick = () => {
+                if (window.scrollToMessageId) window.scrollToMessageId(Number(el.dataset.msgId));
+            };
         });
-    }
-
-    function jumpToMessage(id) {
-        // Hook called from script.js if available
-        if (window.scrollToMessageId) {
-            window.scrollToMessageId(id);
-        }
     }
 
     function addUpgradeBubble(msg) {
@@ -350,6 +352,5 @@
         }, 2400);
     }
 
-    // Expose toast for other modules
     window.kothaToast = toast;
 })();

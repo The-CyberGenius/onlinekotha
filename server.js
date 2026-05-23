@@ -150,14 +150,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Media: serve only the requesting user's files
 // URL: /media/<chatFolder>/<filename>  → src/u_<userId>/<chatFolder>/<filename>
 app.get('/media/*rest', requireUser, (req, res, next) => {
-    const rel = req.path.replace(/^\/media\//, '');
-    // Auto-prepend user directory
+    // Express 5: req.params.rest is an array of decoded path segments
+    const rel = Array.isArray(req.params.rest)
+        ? req.params.rest.join('/')
+        : req.params.rest;
     const userRel = `u_${req.user.id}/${rel}`;
-    const fullPath = path.join(SRC_DIR, userRel);
+    const fullPath = path.resolve(SRC_DIR, userRel);
 
     // Prevent path traversal
-    const userBase = path.join(SRC_DIR, `u_${req.user.id}`);
-    if (!path.normalize(fullPath).startsWith(userBase)) return res.status(403).end();
+    const userBase = path.resolve(SRC_DIR, `u_${req.user.id}`);
+    if (!fullPath.startsWith(userBase)) return res.status(403).end();
 
     if (!fs.existsSync(fullPath)) return res.status(404).end();
     res.sendFile(fullPath);
