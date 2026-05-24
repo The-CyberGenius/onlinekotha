@@ -113,7 +113,7 @@
         // Track which chat this message belongs to
         activeChat = getActiveChat();
         const convId = getCurrentConvId();
-        const cName = getContactName();
+        const cName = getContactName() || (document.getElementById('chat-header-name')?.innerText) || 'AI';
 
         // Add user bubble to chat container
         appendUserBubble(text);
@@ -121,13 +121,16 @@
         bottomSend.disabled = true;
         streaming = true;
 
-        // Add typing indicator
+        // Add typing indicator with contact name
         const typingEl = document.createElement('div');
         typingEl.id = 'ai-typing-inline';
         typingEl.className = 'flex justify-start mb-3 animate-message';
         typingEl.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
-                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(cName || 'AI')}</p>
+                <div class="flex items-center gap-2 mb-1">
+                    <p class="text-[11px] font-bold tracking-wide" style="color: #6366f1">${escapeHTML(cName)}</p>
+                    <span class="text-[10px] text-emerald-500 font-semibold">typing...</span>
+                </div>
                 <div class="ai-typing"><span></span><span></span><span></span></div>
             </div>
         `;

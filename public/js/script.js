@@ -135,11 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             } else {
                 mediaHtml = `
-                    <div class="flex items-center ${isMe ? 'bg-white/20' : 'bg-gray-100/80'} p-3 rounded-xl gap-3 cursor-pointer hover:opacity-80 transition mb-1 border ${isMe ? 'border-white/30' : 'border-gray-200'}">
-                        <div class="w-10 h-10 ${isMe ? 'bg-white/30' : 'bg-indigo-100'} text-${isMe ? 'white' : 'indigo-600'} rounded-lg flex items-center justify-center font-bold text-xs">DOC</div>
+                    <div class="flex items-center ${isMe ? 'doc-me' : 'doc-them'} p-3 rounded-xl gap-3 cursor-pointer hover:opacity-80 transition mb-1 border">
+                        <div class="w-10 h-10 ${isMe ? 'doc-icon-me' : 'doc-icon-them'} rounded-lg flex items-center justify-center font-bold text-xs">DOC</div>
                         <div class="overflow-hidden">
-                            <p class="text-sm font-semibold truncate ${isMe ? 'text-white' : 'text-gray-800'}">${msg.attachment}</p>
-                            <a href="${fileUrl}" target="_blank" download class="text-xs font-bold uppercase hover:underline ${isMe ? 'text-green-100' : 'text-indigo-500'}">Download</a>
+                            <p class="text-sm font-semibold truncate">${msg.attachment}</p>
+                            <a href="${fileUrl}" target="_blank" download class="text-xs font-bold uppercase hover:underline ${isMe ? 'opacity-70' : 'text-indigo-500'}">Download</a>
                         </div>
                     </div>
                 `;
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (msg.text) {
             const onlyEmojis = /^[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\s]+$/gu;
             const isBigEmoji = msg.text.trim().length > 0 && msg.text.trim().length <= 6 && onlyEmojis.test(msg.text);
-            contentHtml = `<p class="${isBigEmoji ? 'text-4xl' : 'text-[15px]'} leading-snug font-medium whitespace-pre-wrap break-words ${isMe ? 'text-white' : 'text-gray-800'}">${msg.text}</p>`;
+            contentHtml = `<p class="${isBigEmoji ? 'text-4xl' : 'text-[15px]'} leading-snug font-medium whitespace-pre-wrap break-words">${msg.text}</p>`;
         }
         if (msg.type === 'system') {
             return `
@@ -164,8 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
         }
 
-        const timeColor = isMe ? 'text-green-50/80' : 'text-gray-400';
-        const checkColor = isMe ? 'text-white' : 'text-blue-500';
+        const timeColor = isMe ? 'chat-time-me' : 'chat-time-them';
+        const checkColor = 'text-blue-500';
 
         return `
             <div class="flex flex-col mb-4 w-full" id="msg-${msg.id}">
@@ -977,6 +977,29 @@ document.addEventListener('DOMContentLoaded', () => {
             searchActionBtn.disabled = false;
         }, 15);
     });
+
+    // ── Dark Mode Toggle ──
+    const darkBtn = document.getElementById('dark-mode-btn');
+    const dmIcon = document.getElementById('dm-icon');
+    function updateDmIcon() {
+        if (!dmIcon) return;
+        const isDark = document.documentElement.classList.contains('dark');
+        dmIcon.innerHTML = isDark
+            ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+            : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+        // Update theme-color meta
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = isDark ? '#111b21' : '#6366f1';
+    }
+    if (darkBtn) {
+        updateDmIcon(); // Set initial icon
+        darkBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('kotha_dark', isDark ? '1' : '0');
+            updateDmIcon();
+        });
+    }
 
     window.jumpToMsg = (id) => {
         displayedMessages = allMessages; // Make sure we are in main view

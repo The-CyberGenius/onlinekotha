@@ -454,3 +454,284 @@ button, [role="button"] {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
 }
+
+/* ============ Chat Bubble Text Helpers ============ */
+.chat-time-me { color: rgba(17, 27, 33, 0.45); }
+.chat-time-them { color: #667781; }
+
+/* DOC attachment helpers */
+.doc-me { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.06); }
+.doc-them { background: #f3f4f6; border-color: #e5e7eb; }
+.doc-icon-me { background: rgba(0,0,0,0.08); }
+.doc-icon-them { background: #e0e7ff; color: #4f46e5; }
+
+/* ============ Dark Mode ============ */
+html.dark body { background: #0b141a; }
+
+html.dark #app {
+    background: #111b21 !important;
+    border-color: #2a3942 !important;
+    box-shadow: 0 20px 60px -15px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) !important;
+}
+
+/* ── Sidebar ── */
+html.dark #sidebar {
+    background: #111b21 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #sidebar-header {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #sidebar-header h2 { color: #e9edef; }
+html.dark #sidebar-header p { color: #8696a0; }
+html.dark #sidebar-header button { color: #aebac1; }
+html.dark #sidebar-header button:hover { background: #2a3942; color: #e9edef; }
+
+/* Search bar */
+html.dark #sidebar .border.shadow-sm {
+    background: #2a3942 !important;
+    border-color: #3b4a54 !important;
+}
+html.dark #search-box { color: #e9edef !important; }
+html.dark #search-box::placeholder { color: #667781 !important; }
+html.dark #search-action-btn { background: #00a884 !important; }
+html.dark #search-action-btn:disabled { background: #233138 !important; }
+
+/* Chat list */
+html.dark #chat-list-ui > div { border-color: transparent !important; }
+html.dark #chat-list-ui > div:hover { background: #2a3942 !important; }
+html.dark #chat-list-ui .text-\[13px\] { color: #e9edef !important; }
+html.dark #chat-list-ui .text-\[10px\] { color: #667781 !important; }
+html.dark #chat-list-ui .bg-indigo-50 { background: rgba(99,102,241,0.12) !important; border-color: rgba(99,102,241,0.25) !important; }
+
+/* Labels */
+html.dark #sidebar .uppercase.tracking-widest { color: #667781 !important; }
+html.dark #open-upload-btn { background: #00a884 !important; }
+
+/* Filter buttons */
+html.dark #filter-buttons-container { border-color: #2a3942 !important; }
+html.dark #filter-buttons-container > button { color: #8696a0 !important; }
+html.dark #filter-buttons-container > button:hover { color: #e9edef !important; background: #2a3942 !important; }
+html.dark #filter-buttons-container > .bg-purple-50 {
+    background: rgba(168,85,247,0.12) !important;
+    border-color: rgba(168,85,247,0.25) !important;
+    color: #c4b5fd !important;
+}
+html.dark #filter-buttons-container > .bg-purple-600 {
+    background: #7c3aed !important;
+    border-color: #7c3aed !important;
+}
+
+/* Smart filters */
+html.dark #smart-filters-container { border-color: #2a3942 !important; }
+html.dark #smart-filters-container h3 { color: #667781 !important; }
+html.dark #smart-filters-container select {
+    background: #2a3942 !important;
+    border-color: #3b4a54 !important;
+    color: #e9edef !important;
+}
+html.dark #smart-filters-container .bg-white {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #smart-filters-container label span { color: #d1d7db !important; }
+
+/* Stats / search results */
+html.dark #stats-info { color: #8696a0 !important; }
+html.dark #results-list > div {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #results-list > div:hover { background: #233138 !important; }
+html.dark #results-list .text-\[13px\] { color: #d1d7db !important; }
+
+/* Plan banner */
+html.dark #plan-badge { border-color: #2a3942 !important; }
+
+/* ── Chat Header ── */
+html.dark #chat-header-bar {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+    box-shadow: none !important;
+}
+html.dark #chat-header-name { color: #e9edef !important; }
+html.dark #chat-header-bar p { color: #8696a0 !important; }
+html.dark #chat-header-bar button:not(.ai-sparkle-btn) { color: #aebac1 !important; }
+html.dark #chat-header-bar button:not(.ai-sparkle-btn):hover { background: #2a3942 !important; }
+html.dark #dynamic-header-date { background: rgba(99,102,241,0.15) !important; color: #818cf8 !important; }
+
+/* Floating date */
+html.dark #floating-date {
+    background: #182229 !important;
+    color: #8696a0 !important;
+    border-color: #2a3942 !important;
+}
+
+/* ── Main Chat Area ── */
+html.dark #main-panel { background: #0b141a !important; }
+html.dark .main-chat-background {
+    background-color: #0b141a !important;
+    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.025'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E") !important;
+}
+
+/* Chat bubbles — dark */
+html.dark .glass-chat-me {
+    background: #005c4b;
+    color: #e9edef;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+html.dark .glass-chat-them {
+    background: #1f2c34;
+    color: #e9edef;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+/* Chat time — dark */
+html.dark .chat-time-me { color: rgba(233,237,239,0.5); }
+html.dark .chat-time-them { color: rgba(233,237,239,0.4); }
+
+/* DOC attachment — dark */
+html.dark .doc-me { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.05); }
+html.dark .doc-them { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.08); }
+html.dark .doc-icon-me { background: rgba(255,255,255,0.1); }
+html.dark .doc-icon-them { background: rgba(99,102,241,0.15); color: #818cf8; }
+
+/* Date separators */
+html.dark .date-separator span {
+    background: #182229 !important;
+    color: #8696a0 !important;
+    border-color: #2a3942 !important;
+}
+
+/* System messages */
+html.dark .glass-panel {
+    background: #182229 !important;
+    color: #8696a0 !important;
+}
+
+/* ── Bottom Input Bar ── */
+html.dark #bottom-ai-bar {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+    box-shadow: none !important;
+}
+html.dark #ai-input-wrap {
+    background: #2a3942 !important;
+}
+html.dark #bottom-ai-input { color: #e9edef !important; }
+html.dark #bottom-ai-input::placeholder { color: #667781 !important; }
+html.dark #bottom-ai-send { background: #00a884 !important; }
+html.dark #bottom-ai-send:disabled { background: #233138 !important; opacity: 0.5 !important; }
+
+/* ── AI Chat inline ── */
+html.dark #ai-chat-container { border-color: rgba(255,255,255,0.08) !important; }
+html.dark .ai-bubble-assistant {
+    background: #1f2c34 !important;
+    color: #e9edef !important;
+    border-color: #2a3942 !important;
+}
+html.dark .ai-bubble-error {
+    background: rgba(239,68,68,0.1) !important;
+    border-color: rgba(239,68,68,0.2) !important;
+    color: #fca5a5 !important;
+}
+html.dark .ai-suggestion {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+    color: #d1d7db !important;
+}
+html.dark .ai-suggestion:hover {
+    background: #233138 !important;
+    border-color: #3b4a54 !important;
+}
+html.dark .ai-typing span { background: #667781; }
+html.dark .ai-cursor-blink { color: #818cf8; }
+
+/* ── Modals ── */
+html.dark #upload-modal > div > div {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #upload-modal h3 { color: #e9edef !important; }
+html.dark #upload-modal p { color: #8696a0 !important; }
+html.dark #drop-zone {
+    border-color: #3b4a54 !important;
+    background: transparent !important;
+}
+html.dark #drop-zone:hover {
+    border-color: #667781 !important;
+    background: rgba(255,255,255,0.02) !important;
+}
+html.dark #drop-zone .bg-indigo-50 { background: rgba(99,102,241,0.15) !important; }
+html.dark #pick-folder-btn {
+    background: #2a3942 !important;
+    border-color: #3b4a54 !important;
+    color: #d1d7db !important;
+}
+html.dark #upload-modal details { color: #667781 !important; }
+html.dark #upload-modal summary { color: #8696a0 !important; }
+
+html.dark #analytics-content {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #analytics-content h3 { color: #e9edef !important; }
+html.dark #analytics-content .bg-gradient-to-br {
+    background: #233138 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #analytics-content .text-2xl { color: #e9edef !important; }
+html.dark #analytics-content .bg-gray-50 {
+    background: #233138 !important;
+    border-color: #2a3942 !important;
+}
+html.dark #analytics-content .bg-white {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+}
+
+html.dark #media-modal { background: rgba(0,0,0,0.95) !important; }
+
+/* ── Skeleton — dark ── */
+html.dark .skeleton {
+    background: linear-gradient(90deg, #1f2c34 25%, #2a3942 50%, #1f2c34 75%) !important;
+    background-size: 200% 100%;
+}
+
+/* ── Empty state — dark ── */
+html.dark #empty-state h2 { color: #e9edef !important; }
+html.dark #empty-state p { color: #8696a0 !important; }
+html.dark #empty-state span { color: #667781 !important; }
+
+/* ── Onboarding — dark ── */
+html.dark .onboarding-card { background: #1f2c34 !important; }
+html.dark .onboarding-card h3 { color: #e9edef !important; }
+html.dark .onboarding-card p { color: #8696a0 !important; }
+html.dark .onboarding-step-dot { background: #2a3942; }
+
+/* ── Scrollbar — dark ── */
+html.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
+html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Dark mode toggle ── */
+#dark-mode-btn {
+    transition: all 200ms ease;
+}
+html.dark #dark-mode-btn { color: #fbbf24; }
+html.dark #dark-mode-btn:hover { background: #2a3942; }
+
+/* ── Misc dark overrides ── */
+html.dark #sidebar-backdrop { background: rgba(0,0,0,0.7) !important; }
+html.dark button:focus-visible,
+html.dark input:focus-visible { outline-color: #818cf8; }
+html.dark .search-highlight { background: rgba(250,204,21,0.3); color: #fef08a; }
+
+/* Install PWA banner */
+html.dark .bg-gray-900 { background: #1f2c34 !important; }
+
+@media (max-width: 768px) {
+    html.dark #sidebar:not(.-translate-x-full) {
+        box-shadow: 8px 0 24px -8px rgba(0,0,0,0.5);
+    }
+}
