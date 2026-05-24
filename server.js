@@ -66,7 +66,8 @@ app.use(authMiddleware);
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // 100 requests per IP
-    message: { error: 'Too many requests, please try again after 15 minutes' }
+    message: { error: 'Too many requests, please try again after 15 minutes' },
+    validate: { trustProxy: false, xForwardedForHeader: false },
 });
 
 // ---------- Auth routes ----------
@@ -267,6 +268,7 @@ const demoLimiter = rateLimit({
     max: 12,
     keyGenerator: req => req.ip,
     message: { error: 'Too fast. Wait a moment.' },
+    validate: { trustProxy: false, xForwardedForHeader: false },
 });
 
 app.post('/api/demo-chat', demoLimiter, async (req, res) => {
