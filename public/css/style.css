@@ -441,3 +441,16 @@ button, [role="button"] {
     width: 24px;
     border-radius: 4px;
 }
+
+/* ============ AI Typewriter Cursor ============ */
+.ai-cursor-blink {
+    display: inline;
+    color: #6366f1;
+    font-weight: 300;
+    animation: cursorBlink 0.8s steps(2) infinite;
+    margin-left: 1px;
+}
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}

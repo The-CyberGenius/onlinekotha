@@ -12,6 +12,55 @@
     let activeChat = null;
     let streaming = false;
 
+    // ---------- Typewriter engine ----------
+    let typeQueue = '';
+    let typeTimer = null;
+    let typeTarget = null;
+    let typeCursor = null;
+    let typeScrollArea = null;
+
+    function startTypewriter(targetEl, scrollEl) {
+        typeQueue = '';
+        typeTarget = targetEl;
+        typeScrollArea = scrollEl;
+        // Add blinking cursor
+        typeCursor = document.createElement('span');
+        typeCursor.className = 'ai-cursor-blink';
+        typeCursor.textContent = '▎';
+        targetEl.after(typeCursor);
+    }
+
+    function feedTypewriter(text) {
+        typeQueue += text;
+        if (!typeTimer) drainQueue();
+    }
+
+    function drainQueue() {
+        if (!typeTarget || typeQueue.length === 0) {
+            typeTimer = null;
+            return;
+        }
+        // Type 1-2 characters per tick for natural feel
+        const chunk = typeQueue.slice(0, Math.random() > 0.7 ? 2 : 1);
+        typeQueue = typeQueue.slice(chunk.length);
+        typeTarget.textContent += chunk;
+        if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
+        typeTimer = setTimeout(drainQueue, 18 + Math.random() * 14);
+    }
+
+    function stopTypewriter() {
+        if (typeTimer) { clearTimeout(typeTimer); typeTimer = null; }
+        // Flush remaining queue instantly
+        if (typeTarget && typeQueue.length > 0) {
+            typeTarget.textContent += typeQueue;
+            typeQueue = '';
+        }
+        if (typeCursor) { typeCursor.remove(); typeCursor = null; }
+        if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
+        typeTarget = null;
+        typeScrollArea = null;
+    }
+
     // Watch for chat switches
     function getActiveChat() { return window.currentChat || null; }
     function getCurrentConvId() { return activeChat ? (conversationMap[activeChat] || null) : null; }
@@ -144,11 +193,15 @@
                             responseBubble = appendContactBubble(
                                 (activeChat && contactNameMap[activeChat]) || data.contactName || 'AI'
                             );
+                            startTypewriter(
+                                responseBubble.querySelector('.ai-response-text'),
+                                scrollArea
+                            );
                         }
                         fullText += data.text;
-                        responseBubble.querySelector('.ai-response-text').textContent = fullText;
-                        scrollArea.scrollTop = scrollArea.scrollHeight;
+                        feedTypewriter(data.text);
                     } else if (event === 'done') {
+                        stopTypewriter();
                         // Update time on response bubble to current time
                         if (responseBubble) {
                             const timeEl = responseBubble.querySelector('.ai-bubble-time');
@@ -161,9 +214,11 @@
                 }
             }
         } catch (err) {
+            stopTypewriter();
             typingEl.remove();
             appendErrorBubble('Network error. Try again?');
         } finally {
+            stopTypewriter();
             streaming = false;
             updateSendBtn();
             bottomInput.focus();
