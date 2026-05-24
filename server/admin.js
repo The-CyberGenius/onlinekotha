@@ -338,6 +338,43 @@ router.get('/users/:id/chats/:chatId/download', (req, res) => {
     archive.finalize();
 });
 
+// ---------- Manage user plan / trial ----------
+router.patch('/users/:id/plan', (req, res) => {
+    const userId = Number(req.params.id);
+    const user = db.prepare('SELECT id, plan, trial_expires_at FROM users WHERE id = ?').get(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const { plan, trial_extends_hours, trial_expires_at } = req.body || {};
+    const fields = [];
+    const values = [];
+
+    if (plan && ['free', 'trial', 'paid'].includes(plan)) {
+        fields.push('plan = ?');
+        values.push(plan);
+    }
+
+    if (trial_expires_at !== undefined) {
+        // Direct timestamp set
+        fields.push('trial_expires_at = ?');
+        values.push(trial_expires_at ? Number(trial_expires_at) : null);
+    } else if (trial_extends_hours) {
+        // Extend from now (or from current expiry if still active)
+        const base = (user.trial_expires_at && user.trial_expires_at > Date.now())
+            ? user.trial_expires_at
+            : Date.now();
+        fields.push('trial_expires_at = ?');
+        values.push(base + Number(trial_extends_hours) * 3600000);
+    }
+
+    if (!fields.length) return res.status(400).json({ error: 'Provide plan or trial_extends_hours' });
+
+    values.push(userId);
+    db.prepare(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+
+    const updated = db.prepare('SELECT id, email, plan, trial_expires_at FROM users WHERE id = ?').get(userId);
+    res.json({ ok: true, user: updated });
+});
+
 // Delete user account + all data
 router.delete('/users/:id', (req, res) => {
     const userId = Number(req.params.id);

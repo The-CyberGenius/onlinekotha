@@ -386,6 +386,10 @@
                         </div>
                     </div>
                     <div class="flex flex-col gap-1.5 shrink-0">
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn text-[11px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg px-3 py-1.5 transition flex items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                            Manage
+                        </button>`}
                         <button data-uid="${u.id}" class="user-chats-btn text-[11px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5 transition flex items-center gap-1">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             Chats
@@ -402,6 +406,113 @@
             `;
             list.appendChild(card);
         }
+
+        // Manage plan
+        list.querySelectorAll('.user-plan-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const uid = btn.dataset.uid;
+                const email = btn.dataset.email;
+                const currentPlan = btn.dataset.plan;
+                const trialExp = btn.dataset.trial ? Number(btn.dataset.trial) : null;
+
+                const trialInfo = trialExp
+                    ? (trialExp > Date.now()
+                        ? `Active — expires ${new Date(trialExp).toLocaleString()}`
+                        : `Expired on ${new Date(trialExp).toLocaleString()}`)
+                    : 'Not set';
+
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:20px;max-width:420px;width:100%;box-shadow:0 24px 48px rgba(0,0,0,0.2);overflow:hidden;">
+                        <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;">
+                            <h3 style="font-weight:800;font-size:16px;color:#1e293b;">Manage Plan</h3>
+                            <p style="font-size:12px;color:#64748b;margin-top:4px;">${email}</p>
+                        </div>
+                        <div style="padding:20px 24px;">
+                            <div style="margin-bottom:16px;">
+                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Plan</label>
+                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:14px;outline:none;">
+                                    <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free (3 msgs/day)</option>
+                                    <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial (unlimited)</option>
+                                    <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid (unlimited)</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom:16px;padding:12px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+                                <p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Current Trial Status</p>
+                                <p style="font-size:13px;color:#1e293b;margin-top:4px;font-weight:600;">${trialInfo}</p>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Extend Trial (hours from now)</label>
+                                <div style="display:flex;gap:8px;">
+                                    <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="flex:1;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:14px;outline:none;">
+                                    <button id="plan-modal-quick-24" style="background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 12px;cursor:pointer;">+24h</button>
+                                    <button id="plan-modal-quick-72" style="background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 12px;cursor:pointer;">+72h</button>
+                                    <button id="plan-modal-quick-168" style="background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 12px;cursor:pointer;">+7d</button>
+                                </div>
+                            </div>
+                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;margin-bottom:12px;"></div>
+                            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                                <button id="plan-modal-cancel" style="font-size:13px;font-weight:700;color:#64748b;padding:10px 18px;border-radius:12px;cursor:pointer;background:#f1f5f9;">Cancel</button>
+                                <button id="plan-modal-save" style="font-size:13px;font-weight:700;color:white;padding:10px 18px;border-radius:12px;cursor:pointer;background:#1e293b;">Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+                modal.querySelector('#plan-modal-cancel').addEventListener('click', () => modal.remove());
+
+                // Quick extend buttons
+                modal.querySelector('#plan-modal-quick-24').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '24'; });
+                modal.querySelector('#plan-modal-quick-72').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '72'; });
+                modal.querySelector('#plan-modal-quick-168').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '168'; });
+
+                // Save
+                modal.querySelector('#plan-modal-save').addEventListener('click', async () => {
+                    const newPlan = modal.querySelector('#plan-modal-plan').value;
+                    const hours = modal.querySelector('#plan-modal-hours').value;
+                    const msgEl = modal.querySelector('#plan-modal-msg');
+
+                    const body = {};
+                    if (newPlan !== currentPlan) body.plan = newPlan;
+                    if (hours && Number(hours) > 0) body.trial_extends_hours = Number(hours);
+
+                    // If switching to trial but no hours, give default 72h
+                    if (newPlan === 'trial' && !hours && currentPlan !== 'trial') {
+                        body.trial_extends_hours = 72;
+                    }
+
+                    if (Object.keys(body).length === 0) {
+                        msgEl.style.display = 'block';
+                        msgEl.style.background = '#fef2f2';
+                        msgEl.style.color = '#dc2626';
+                        msgEl.textContent = 'No changes to save';
+                        return;
+                    }
+
+                    try {
+                        const r = await fetch(`/api/admin/users/${uid}/plan`, {
+                            method: 'PATCH',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify(body),
+                        });
+                        const data = await r.json();
+                        if (!r.ok) throw new Error(data.error || 'Failed');
+                        msgEl.style.display = 'block';
+                        msgEl.style.background = '#f0fdf4';
+                        msgEl.style.color = '#16a34a';
+                        msgEl.textContent = `Updated! Plan: ${data.user.plan}${data.user.trial_expires_at ? ' · Trial until ' + new Date(data.user.trial_expires_at).toLocaleString() : ''}`;
+                        setTimeout(async () => { modal.remove(); await loadUsers(); }, 1500);
+                    } catch (err) {
+                        msgEl.style.display = 'block';
+                        msgEl.style.background = '#fef2f2';
+                        msgEl.style.color = '#dc2626';
+                        msgEl.textContent = err.message;
+                    }
+                });
+            });
+        });
 
         // Expand chats
         list.querySelectorAll('.user-chats-btn').forEach(btn => {
