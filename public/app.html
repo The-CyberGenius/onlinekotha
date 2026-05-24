@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=11">
+    <link rel="stylesheet" href="/css/style.css?v=13">
     <script src="/js/auth-init.js"></script>
     <script>if(localStorage.getItem('kotha_dark')==='1')document.documentElement.classList.add('dark')</script>
 </head>
@@ -44,6 +44,9 @@
                     <a id="admin-link" href="/admin.html" class="hidden w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition" title="Admin Panel">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>
+                    <button id="dark-mode-btn" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition" title="Toggle dark mode">
+                        <svg id="dm-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                    </button>
                     <button id="logout-btn" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition" title="Logout">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     </button>
@@ -181,9 +184,6 @@
                     </div>
                 </div>
                 <div class="flex gap-1.5 items-center shrink-0">
-                    <button id="dark-mode-btn" class="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500 transition" title="Toggle dark mode" aria-label="Toggle dark mode">
-                        <svg id="dm-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-                    </button>
                     <button id="ask-ai-btn" class="ai-sparkle-btn" title="Ask AI about this chat" aria-label="Ask AI">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
                     </button>
@@ -274,10 +274,10 @@
 
     <!-- AI Panel removed — AI chat is now inline -->
 
-    <script src="js/script.js?v=11"></script>
-    <script src="js/upload.js?v=11"></script>
-    <script src="js/ai-panel.js?v=12"></script>
-    <script src="js/features.js?v=11"></script>
+    <script src="js/script.js?v=13"></script>
+    <script src="js/upload.js?v=13"></script>
+    <script src="js/ai-panel.js?v=13"></script>
+    <script src="js/features.js?v=13"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => {});
