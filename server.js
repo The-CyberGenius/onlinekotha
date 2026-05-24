@@ -257,6 +257,115 @@ app.delete('/api/chats/:name', requireUser, (req, res) => {
 app.use('/api/ai', aiRouter);
 app.use('/api/billing', billingRouter);
 
+// ── Demo chat (landing page — no auth, IP-limited) ──
+const { callLLM } = require('./server/llm');
+const DEMO_LIMIT = 10;
+const demoUsage = new Map(); // IP → { count, history[] }
+
+const demoLimiter = rateLimit({
+    windowMs: 60_000,
+    max: 12,
+    keyGenerator: req => req.ip,
+    message: { error: 'Too fast. Wait a moment.' },
+});
+
+app.post('/api/demo-chat', demoLimiter, async (req, res) => {
+    const { message, sessionId } = req.body || {};
+    if (!message || typeof message !== 'string' || message.trim().length === 0)
+        return res.status(400).json({ error: 'message required' });
+    if (message.length > 300)
+        return res.status(400).json({ error: 'Message too long' });
+
+    const key = `${req.ip}_${sessionId || 'x'}`;
+    const usage = demoUsage.get(key) || { count: 0, history: [] };
+
+    if (usage.count >= DEMO_LIMIT) {
+        return res.status(429).json({
+            error: 'Demo limit reached! Sign up for free to keep chatting.',
+            remaining: 0,
+            limit: DEMO_LIMIT,
+        });
+    }
+
+    usage.count++;
+    usage.history.push({ role: 'user', content: message.trim() });
+    // Keep last 6 turns (12 messages)
+    if (usage.history.length > 12) usage.history = usage.history.slice(-12);
+    demoUsage.set(key, usage);
+
+    // Cleanup old sessions every 1000 requests
+    if (demoUsage.size > 5000) {
+        const entries = [...demoUsage.entries()];
+        entries.slice(0, 2000).forEach(([k]) => demoUsage.delete(k));
+    }
+
+    const remaining = DEMO_LIMIT - usage.count;
+
+    // SSE setup
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const send = (event, data) => {
+        res.write(`event: ${event}\n`);
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
+    send('start', { remaining });
+
+    const systemPrompt = `You are "Maa" — a loving Indian mother chatting with her child (Beta) on WhatsApp.
+
+PERSONALITY:
+- You are warm, caring, slightly dramatic, always worried about food and health
+- You text in Hinglish (mix of Hindi and English) — mostly Hindi
+- Short messages: 1-3 lines max, like real WhatsApp
+- You use emojis sparingly but lovingly: 🙏 😊 ❤️ 😘 🤗
+- You call them "beta", "babu", "baccha"
+- You always ask about food: "khana khaya?", "pani piyo", "dal chawal kha lo"
+- Typical mom behaviors: asking about health, sleep, weather, studies/job
+- Sometimes send blessings: "Bhagwan tumhe khush rakhe" 🙏
+- You get dramatic about small things: "tum toh mujhe bhool hi gaye" if they haven't texted
+- You type casually — no perfect grammar, sometimes skip words like real texting
+
+RULES:
+1. NEVER break character. You ARE Maa.
+2. NEVER say you are AI or a chatbot.
+3. Keep responses SHORT — 1-3 lines. Real WhatsApp style.
+4. Respond in Hinglish (primarily Hindi with some English words).
+5. Be natural, warm, and motherly.`;
+
+    const abortController = new AbortController();
+    req.on('close', () => abortController.abort());
+
+    let fullText = '';
+    try {
+        await callLLM({
+            feature: 'chat',
+            messages: usage.history,
+            systemPrompt,
+            userId: null,
+            signal: abortController.signal,
+            onToken: (token) => {
+                fullText += token;
+                send('token', { text: token });
+            },
+        });
+
+        usage.history.push({ role: 'assistant', content: fullText });
+        if (usage.history.length > 12) usage.history = usage.history.slice(-12);
+        demoUsage.set(key, usage);
+
+        send('done', { remaining });
+    } catch (err) {
+        console.error('Demo chat error:', err.message);
+        send('error', { message: 'AI is taking a break. Try again!' });
+    } finally {
+        res.end();
+    }
+});
+
 // 404 fallback (must be last)
 app.use((req, res) => {
     if (req.path.startsWith('/api/')) {

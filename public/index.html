@@ -399,9 +399,9 @@
         <!-- Trust line -->
         <p class="anim-fade-up d4 text-[12px] text-zinc-600 font-medium tracking-wide mb-16">Free forever · No credit card · Your data stays private</p>
 
-        <!-- ── Chat Mockup ── -->
+        <!-- ── Interactive Chat Demo ── -->
         <div class="anim-scale d5 max-w-[420px] mx-auto">
-            <div class="mockup-frame p-5 anim-float" style="animation-duration:6s;">
+            <div class="mockup-frame p-5" id="demo-chat-frame">
                 <!-- Chat header -->
                 <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]">
                     <div class="relative">
@@ -412,40 +412,44 @@
                         <p class="text-[13px] font-bold text-white">Maa</p>
                         <p class="text-[10px] text-emerald-400/80 font-medium">Online · AI</p>
                     </div>
-                    <div class="flex items-center gap-1.5 bg-emerald-400/10 px-2.5 py-1 rounded-full">
-                        <div class="relative w-1.5 h-1.5">
-                            <div class="absolute inset-0 bg-emerald-400 rounded-full"></div>
-                            <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-75"></div>
-                        </div>
-                        <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Live</span>
+                    <div class="flex items-center gap-1.5 bg-white/[0.05] px-2.5 py-1 rounded-full" id="demo-counter">
+                        <span class="text-[9px] font-bold text-zinc-400" id="demo-remaining">10 msgs left</span>
                     </div>
                 </div>
 
-                <!-- Messages -->
-                <div class="space-y-3" id="hero-chat">
-                    <!-- User message -->
+                <!-- Messages area -->
+                <div class="space-y-3 max-h-[280px] overflow-y-auto pr-1 scroll-smooth" id="hero-chat" style="scrollbar-width:thin;">
+                    <!-- Initial demo message (animated on load) -->
                     <div class="flex justify-end chat-msg" style="opacity:0;">
                         <div class="msg-user px-4 py-2.5 max-w-[85%]">
                             <p class="text-[13px] text-white leading-relaxed">Maa wo recipe batao na, aloo ke parathe wali</p>
-                            <p class="text-[9px] text-white/40 text-right mt-1.5">2:34 PM ✓✓</p>
+                            <p class="text-[9px] text-white/40 text-right mt-1.5">✓✓</p>
                         </div>
                     </div>
-                    <!-- AI response -->
                     <div class="flex items-end gap-2 chat-msg" style="opacity:0;">
                         <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold shrink-0">M</div>
                         <div class="msg-ai px-4 py-2.5 max-w-[85%]">
                             <p class="text-[13px] text-zinc-200 leading-relaxed" id="ai-typed-text"></p>
-                            <p class="text-[9px] text-zinc-500 text-right mt-1.5">2:34 PM · <span class="text-indigo-400">AI</span></p>
+                            <p class="text-[9px] text-zinc-500 text-right mt-1.5"><span class="text-indigo-400">AI</span></p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Input bar -->
-                <div class="mt-4 flex items-center gap-2 bg-white/[0.04] rounded-full px-4 py-2.5 border border-white/[0.04]">
-                    <span class="text-[13px] text-zinc-600 flex-1">Type a message...</span>
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <!-- Interactive input bar -->
+                <form id="demo-form" class="mt-4 flex items-center gap-2 bg-white/[0.04] rounded-full px-4 py-1.5 border border-white/[0.06] focus-within:border-indigo-500/30 transition-colors">
+                    <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Type a message to Maa..." class="bg-transparent text-[13px] text-white placeholder-zinc-600 flex-1 outline-none py-1.5">
+                    <button type="submit" id="demo-send" class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-shadow shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                    </div>
+                    </button>
+                </form>
+
+                <!-- Limit reached CTA (hidden initially) -->
+                <div id="demo-limit-cta" class="hidden mt-3 text-center">
+                    <p class="text-[11px] text-zinc-500 mb-2">Demo limit reached!</p>
+                    <a href="/login.html#signup" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-[11px] px-4 py-2 rounded-full shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition">
+                        Sign up free for unlimited
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </a>
                 </div>
             </div>
         </div>
@@ -917,42 +921,182 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
-// ── Hero chat typing animation ──
+// ── Hero Interactive Demo Chat ──
 (function heroChat() {
+    const chatArea = document.getElementById('hero-chat');
+    const form = document.getElementById('demo-form');
+    const input = document.getElementById('demo-input');
+    const sendBtn = document.getElementById('demo-send');
+    const remainingEl = document.getElementById('demo-remaining');
+    const limitCta = document.getElementById('demo-limit-cta');
+    const counterEl = document.getElementById('demo-counter');
+
+    // Session ID for tracking
+    let sessionId = localStorage.getItem('kotha_demo_sid');
+    if (!sessionId) {
+        sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('kotha_demo_sid', sessionId);
+    }
+
+    let remaining = parseInt(localStorage.getItem('kotha_demo_rem') ?? '10');
+    let isSending = false;
+
+    function updateCounter(r) {
+        remaining = r;
+        localStorage.setItem('kotha_demo_rem', r);
+        remainingEl.textContent = r + ' msgs left';
+        if (r <= 3) remainingEl.classList.add('text-amber-400');
+        if (r <= 0) {
+            form.classList.add('hidden');
+            limitCta.classList.remove('hidden');
+            counterEl.innerHTML = '<span class="text-[9px] font-bold text-red-400">0 left</span>';
+        }
+    }
+    updateCounter(remaining);
+
+    function timeNow() {
+        return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
+    function scrollChat() {
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function addUserMsg(text) {
+        const div = document.createElement('div');
+        div.className = 'flex justify-end';
+        div.innerHTML = `<div class="msg-user px-4 py-2.5 max-w-[85%]" style="animation:fade-up 0.3s ease forwards;">
+            <p class="text-[13px] text-white leading-relaxed">${escHtml(text)}</p>
+            <p class="text-[9px] text-white/40 text-right mt-1.5">${timeNow()} ✓✓</p>
+        </div>`;
+        chatArea.appendChild(div);
+        scrollChat();
+    }
+
+    function addAiBubble() {
+        const div = document.createElement('div');
+        div.className = 'flex items-end gap-2';
+        div.style.animation = 'fade-up 0.3s ease forwards';
+        div.innerHTML = `<div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold shrink-0">M</div>
+        <div class="msg-ai px-4 py-2.5 max-w-[85%]">
+            <p class="text-[13px] text-zinc-200 leading-relaxed ai-stream-text"><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.2s"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.4s"></span></p>
+            <p class="text-[9px] text-zinc-500 text-right mt-1.5"><span class="text-indigo-400">AI</span></p>
+        </div>`;
+        chatArea.appendChild(div);
+        scrollChat();
+        return div.querySelector('.ai-stream-text');
+    }
+
+    function escHtml(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Initial typing animation
     const msgs = document.querySelectorAll('.chat-msg');
     const aiText = document.getElementById('ai-typed-text');
     const fullResponse = 'Beta aloo ubal ke mash kar lo, phir hara dhaniya, mirchi, namak aur ajwain daal do. Atte me thoda namak oil daalke gundhna. Bas! 😊';
 
-    // Show user message after 1s
     setTimeout(() => {
         msgs[0].style.transition = 'opacity 0.5s, transform 0.5s';
         msgs[0].style.opacity = '1';
-        msgs[0].style.transform = 'translateX(0)';
-    }, 1000);
-
-    // Show AI bubble after 2s, type text
+    }, 800);
     setTimeout(() => {
         msgs[1].style.transition = 'opacity 0.5s, transform 0.5s';
         msgs[1].style.opacity = '1';
-        msgs[1].style.transform = 'translateX(0)';
-
-        // Type the response
         let i = 0;
-        const typeSpeed = 25;
         function typeChar() {
             if (i < fullResponse.length) {
                 aiText.textContent = fullResponse.slice(0, i + 1);
                 i++;
-                setTimeout(typeChar, typeSpeed + Math.random() * 15);
-            } else {
-                // Add blinking cursor at end
-                const cursor = document.createElement('span');
-                cursor.className = 'cursor-blink';
-                aiText.appendChild(cursor);
+                setTimeout(typeChar, 22 + Math.random() * 12);
             }
         }
-        setTimeout(typeChar, 400);
-    }, 2200);
+        setTimeout(typeChar, 300);
+    }, 1800);
+
+    // Send handler
+    async function sendDemo(text) {
+        if (isSending || remaining <= 0 || !text.trim()) return;
+        isSending = true;
+        sendBtn.disabled = true;
+        input.disabled = true;
+
+        addUserMsg(text.trim());
+        const streamEl = addAiBubble();
+
+        try {
+            const resp = await fetch('/api/demo-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text.trim(), sessionId }),
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                if (resp.status === 429 && err.remaining === 0) {
+                    updateCounter(0);
+                    streamEl.textContent = 'Beta sign up karo, phir aur baat karenge! 😊';
+                } else {
+                    streamEl.textContent = err.error || 'Something went wrong...';
+                }
+                return;
+            }
+
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let started = false;
+            let aiFullText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+
+                let idx;
+                while ((idx = buffer.indexOf('\n\n')) !== -1) {
+                    const block = buffer.slice(0, idx);
+                    buffer = buffer.slice(idx + 2);
+
+                    let eventType = '', dataStr = '';
+                    for (const line of block.split('\n')) {
+                        if (line.startsWith('event:')) eventType = line.slice(6).trim();
+                        else if (line.startsWith('data:')) dataStr = line.slice(5).trim();
+                    }
+                    if (!dataStr) continue;
+                    try {
+                        const data = JSON.parse(dataStr);
+                        if (eventType === 'start') {
+                            updateCounter(data.remaining);
+                        } else if (eventType === 'token') {
+                            if (!started) { streamEl.textContent = ''; started = true; }
+                            aiFullText += data.text;
+                            streamEl.textContent = aiFullText;
+                            scrollChat();
+                        } else if (eventType === 'done') {
+                            updateCounter(data.remaining);
+                        } else if (eventType === 'error') {
+                            if (!started) streamEl.textContent = data.message || 'Oops, try again!';
+                        }
+                    } catch {}
+                }
+            }
+        } catch (err) {
+            streamEl.textContent = 'Network error. Try again!';
+        } finally {
+            isSending = false;
+            sendBtn.disabled = false;
+            input.disabled = false;
+            input.focus();
+        }
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = input.value;
+        input.value = '';
+        sendDemo(text);
+    });
 })();
 
 // ── Auth check — update CTAs for logged-in users ──
