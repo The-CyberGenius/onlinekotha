@@ -113,7 +113,7 @@ function effectivePlan(user) {
     if (user.plan === 'trial' && user.trial_expires_at && user.trial_expires_at > Date.now()) {
         return 'trial';
     }
-    return 'free';
+    return 'free'; // Free tier: 3 AI msgs/day
 }
 
 function canUseAI(user) {

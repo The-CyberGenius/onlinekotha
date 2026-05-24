@@ -74,82 +74,14 @@
             const hours = Math.max(0, Math.floor(remainingMs / 3600000));
             const mins = Math.max(0, Math.floor((remainingMs % 3600000) / 60000));
             badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 border border-indigo-200';
-            text.innerHTML = `🎁 Trial: <b>${hours}h ${mins}m</b> remaining`;
+            text.innerHTML = `🎁 Trial: <b>${hours}h ${mins}m</b> · Unlimited AI`;
         } else if (plan === 'paid') {
             badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-green-100 text-green-800 border border-green-200';
-            text.innerHTML = `✓ Paid plan · AI unlocked`;
+            text.innerHTML = `✓ Pro plan · Unlimited AI`;
         } else {
-            badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-amber-50 text-amber-800 border border-amber-200';
-            text.innerHTML = `Trial ended · AI chat locked`;
-            if (upgrade) upgrade.classList.remove('hidden');
+            badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-gray-100 text-gray-700 border border-gray-200';
+            text.innerHTML = `Free tier · 3 AI chats/day`;
         }
 
-        if (upgrade) {
-            upgrade.addEventListener('click', () => openUpgradeModal());
-        }
-    }
-
-    function openUpgradeModal() {
-        if (document.getElementById('upgrade-modal-overlay')) return;
-        const overlay = document.createElement('div');
-        overlay.id = 'upgrade-modal-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;';
-        overlay.innerHTML = `
-            <div style="background:white;border-radius:24px;max-width:440px;width:100%;padding:32px;box-shadow:0 24px 60px -20px rgba(0,0,0,0.3);">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                    <h3 style="font-weight:800;font-size:20px;color:#0f172a;">Upgrade to Pro</h3>
-                    <button id="upg-close" style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;color:#64748b;font-weight:700;">✕</button>
-                </div>
-                <p style="color:#475569;font-size:14px;margin-bottom:20px;line-height:1.6;">Unlock unlimited AI conversations with your chat history.</p>
-
-                <div style="display:flex;flex-direction:column;gap:12px;">
-                    <button data-plan="pro" class="upg-btn" style="text-align:left;border:1px solid #e2e8f0;border-radius:16px;padding:16px;cursor:pointer;transition:all 200ms;background:white;">
-                        <div style="display:flex;justify-content:space-between;align-items:start;">
-                            <div>
-                                <div style="font-weight:700;color:#0f172a;font-size:15px;">Pro</div>
-                                <div style="font-size:12px;color:#64748b;margin-top:2px;">Monthly · cancel anytime</div>
-                            </div>
-                            <div style="font-weight:800;color:#0f172a;font-size:18px;">$5<span style="font-size:12px;color:#94a3b8;font-weight:600;">/mo</span></div>
-                        </div>
-                    </button>
-                    <button data-plan="lifetime" class="upg-btn" style="text-align:left;border:1px solid #e2e8f0;border-radius:16px;padding:16px;cursor:pointer;transition:all 200ms;background:linear-gradient(180deg,#0f172a,#1e293b);color:white;">
-                        <div style="display:flex;justify-content:space-between;align-items:start;">
-                            <div>
-                                <div style="font-weight:700;font-size:15px;">Lifetime</div>
-                                <div style="font-size:12px;opacity:0.7;margin-top:2px;">Pay once · forever yours</div>
-                            </div>
-                            <div style="font-weight:800;font-size:18px;">$49</div>
-                        </div>
-                    </button>
-                </div>
-                <p id="upg-err" style="color:#dc2626;font-size:12px;font-weight:600;margin-top:14px;text-align:center;display:none;"></p>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-        document.getElementById('upg-close').onclick = () => overlay.remove();
-        overlay.querySelectorAll('.upg-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const plan = btn.dataset.plan;
-                btn.disabled = true;
-                btn.style.opacity = '0.6';
-                try {
-                    const r = await fetch('/api/billing/checkout', {
-                        method: 'POST',
-                        headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify({ plan }),
-                    });
-                    const data = await r.json();
-                    if (!r.ok) throw new Error(data.error || 'Failed');
-                    window.location.href = data.url;
-                } catch (err) {
-                    const e = document.getElementById('upg-err');
-                    e.textContent = err.message;
-                    e.style.display = 'block';
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                }
-            });
-        });
     }
 })();

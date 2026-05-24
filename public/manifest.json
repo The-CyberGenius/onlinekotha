@@ -1,0 +1,20 @@
+{
+  "name": "Kotha — Chat Memories",
+  "short_name": "Kotha",
+  "description": "Relive your WhatsApp memories with AI-powered conversations",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#f8f9fb",
+  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "entertainment"],
+  "lang": "en"
+}
