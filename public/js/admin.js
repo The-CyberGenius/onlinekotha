@@ -611,6 +611,9 @@
                         <div class="bg-purple-50/50 rounded-xl overflow-hidden border border-purple-100">
                             <div class="px-3 py-2 border-b border-purple-100 flex items-center justify-between">
                                 <span class="text-[10px] font-bold uppercase text-purple-500 tracking-wider">AI Conversations (${convs.length})</span>
+                                <button class="ai-logs-close-btn w-5 h-5 rounded-md hover:bg-purple-200 flex items-center justify-center text-purple-400 hover:text-purple-700 transition" title="Close">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                </button>
                             </div>
                             ${convs.map(c => `
                                 <div class="px-3 py-2.5 hover:bg-white transition border-b border-purple-50 last:border-0">
@@ -631,6 +634,12 @@
                             `).join('')}
                         </div>
                     `;
+                    // Close logs card
+                    area.querySelector('.ai-logs-close-btn')?.addEventListener('click', () => {
+                        area.classList.add('hidden');
+                        area.innerHTML = '';
+                    });
+
                     // View button handlers
                     area.querySelectorAll('.ai-log-view-btn').forEach(vBtn => {
                         vBtn.addEventListener('click', async () => {
