@@ -115,7 +115,7 @@ app.post('/api/auth/login', (req, res) => {
 app.post('/api/auth/logout', (req, res) => {
     const token = req.cookies && req.cookies.session;
     logout(token);
-    res.clearCookie('session');
+    res.clearCookie('session', { httpOnly: true, sameSite: 'lax', path: '/' });
     res.json({ ok: true });
 });
 
