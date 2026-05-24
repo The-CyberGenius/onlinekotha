@@ -36,6 +36,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
+// Trust Nginx reverse proxy (for rate-limit, secure cookies, etc.)
+app.set('trust proxy', 1);
+
 // Shared cookie options — must be identical for set and clear
 const COOKIE_OPTS = {
     httpOnly: true,
