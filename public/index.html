@@ -312,7 +312,7 @@
         // Authentication State checking
         (async () => {
             try {
-                const r = await fetch('/api/auth/me');
+                const r = await fetch('/api/auth/me?_t=' + Date.now());
                 const data = await r.json();
                 if (data.user) {
                     document.querySelectorAll('a[href="/login.html"], a[href="/login.html#signup"]').forEach(a => {

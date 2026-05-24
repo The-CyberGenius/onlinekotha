@@ -104,7 +104,7 @@
                 });
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.error || 'Failed');
-                const me = await (await fetch('/api/auth/me')).json();
+                const me = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
                 window.location.href = me.user && me.user.is_admin ? '/admin.html' : getNext();
             } catch (err) {
                 errorMsg.textContent = err.message;
@@ -133,7 +133,7 @@
         // If already logged in, redirect straight to next
         (async () => {
             try {
-                const me = await (await fetch('/api/auth/me')).json();
+                const me = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
                 if (me.user) window.location.href = me.user.is_admin ? '/admin.html' : getNext();
             } catch {}
         })();

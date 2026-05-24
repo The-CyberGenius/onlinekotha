@@ -2,7 +2,7 @@
 (async function () {
     let me;
     try {
-        me = await (await fetch('/api/auth/me')).json();
+        me = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
     } catch {
         window.location.href = '/login.html?next=/app';
         return;
