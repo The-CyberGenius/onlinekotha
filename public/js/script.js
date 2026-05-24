@@ -56,13 +56,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if(e.target === mediaModal) closeMod();
     });
 
-    const getStringColor = (str) => {
+    const getStringColor = (str, forceDark) => {
+        const isDark = forceDark !== undefined ? forceDark : document.documentElement.classList.contains('dark');
         let hash = 0;
         for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
         let color = '#';
         for (let i = 0; i < 3; i++) {
             let value = (hash >> (i * 8)) & 0xFF;
-            color += ('00' + (value % 200 + 30).toString(16)).substr(-2);
+            value = isDark ? (value % 100) + 155 : (value % 200) + 30;
+            color += ('00' + value.toString(16)).substr(-2);
         }
         return color;
     };
@@ -153,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (msg.text) {
             const onlyEmojis = /^[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\s]+$/gu;
             const isBigEmoji = msg.text.trim().length > 0 && msg.text.trim().length <= 6 && onlyEmojis.test(msg.text);
-            contentHtml = `<p class="chat-msg-text ${isBigEmoji ? 'text-4xl' : 'text-[15px]'} leading-snug font-medium whitespace-pre-wrap break-words">${msg.text}</p>`;
+            contentHtml = `<p style="color:var(--msg-text)" class="${isBigEmoji ? 'text-4xl' : 'text-[15px]'} leading-snug font-medium whitespace-pre-wrap break-words">${msg.text}</p>`;
         }
         if (msg.type === 'system') {
             return `
@@ -164,8 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>`;
         }
 
-        const timeColor = isMe ? 'chat-time-me' : 'chat-time-them';
-        const checkColor = 'text-blue-500';
+        const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
 
         return `
             <div class="flex flex-col mb-4 w-full" id="msg-${msg.id}">
@@ -173,9 +174,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${nameHtml}
                     ${mediaHtml}
                     ${contentHtml}
-                    <div class="text-[10px] ${timeColor} flex items-center justify-end font-semibold mt-1 ml-auto select-none pt-0.5">
+                    <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto select-none pt-0.5">
                         ${msg.time}
-                        ${isMe ? `<svg class="w-3.5 h-3.5 ml-1 ${checkColor}" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>` : ''}
+                        ${isMe ? `<svg class="w-3.5 h-3.5 ml-1 text-blue-500" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>` : ''}
                     </div>
                 </div>
             </div>

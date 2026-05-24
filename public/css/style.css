@@ -455,9 +455,21 @@ button, [role="button"] {
     50% { opacity: 0; }
 }
 
+/* ============ Chat Color Variables ============ */
+:root {
+    --msg-text: #111b21;
+    --msg-time-me: rgba(17, 27, 33, 0.45);
+    --msg-time-them: #667781;
+}
+html.dark {
+    --msg-text: #e9edef;
+    --msg-time-me: rgba(233, 237, 239, 0.55);
+    --msg-time-them: rgba(233, 237, 239, 0.45);
+}
+
 /* ============ Chat Bubble Text Helpers ============ */
-.chat-time-me { color: rgba(17, 27, 33, 0.45); }
-.chat-time-them { color: #667781; }
+.chat-time-me { color: var(--msg-time-me); }
+.chat-time-them { color: var(--msg-time-them); }
 
 /* DOC attachment helpers */
 .doc-me { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.06); }
