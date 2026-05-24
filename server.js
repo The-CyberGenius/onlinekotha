@@ -49,7 +49,7 @@ const COOKIE_OPTS = {
 
 if (!fs.existsSync(SRC_DIR)) fs.mkdirSync(SRC_DIR, { recursive: true });
 
-app.use(helmet({ contentSecurityPolicy: false }));
+// app.use(helmet({ contentSecurityPolicy: false }));
 
 // Stripe webhook needs raw body — must come BEFORE express.json()
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
