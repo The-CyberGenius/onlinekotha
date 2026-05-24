@@ -149,7 +149,11 @@
                         responseBubble.querySelector('.ai-response-text').textContent = fullText;
                         scrollArea.scrollTop = scrollArea.scrollHeight;
                     } else if (event === 'done') {
-                        // Final
+                        // Update time on response bubble to current time
+                        if (responseBubble) {
+                            const timeEl = responseBubble.querySelector('.ai-bubble-time');
+                            if (timeEl) timeEl.textContent = formatNow();
+                        }
                     } else if (event === 'error') {
                         typingEl.remove();
                         appendErrorBubble(data.message || 'Something went wrong');
@@ -212,28 +216,41 @@
         if (existing) existing.remove();
     }
 
+    // ---------- Time helper ----------
+    function formatTime(ts) {
+        if (!ts) return formatNow();
+        const d = new Date(typeof ts === 'number' ? ts : parseInt(ts));
+        if (isNaN(d.getTime())) return formatNow();
+        return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+    function formatNow() {
+        return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
     // ---------- Bubble helpers ----------
-    function appendUserBubble(text) {
+    function appendUserBubble(text, timestamp) {
+        const time = formatTime(timestamp);
         const wrap = document.createElement('div');
         wrap.className = 'flex justify-end mb-3 animate-message';
         wrap.innerHTML = `
             <div class="glass-chat-me rounded-2xl rounded-br-md px-4 py-3 max-w-[75%]">
                 <p class="text-sm leading-relaxed">${escapeHTML(text)}</p>
-                <p class="text-[10px] text-gray-500/60 text-right mt-1">just now</p>
+                <p class="text-[10px] text-gray-500/60 text-right mt-1">${time}</p>
             </div>
         `;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
     }
 
-    function appendContactBubble(name) {
+    function appendContactBubble(name, timestamp) {
+        const time = formatTime(timestamp);
         const wrap = document.createElement('div');
         wrap.className = 'flex justify-start mb-3 animate-message';
         wrap.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
                 <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
                 <p class="ai-response-text text-sm leading-relaxed text-gray-800"></p>
-                <p class="text-[10px] text-gray-400 text-right mt-1">just now</p>
+                <p class="ai-bubble-time text-[10px] text-gray-400 text-right mt-1">${time}</p>
             </div>
         `;
         chatContainer.appendChild(wrap);
@@ -299,11 +316,11 @@
                 if (data.messages && data.messages.length > 0) {
                     data.messages.forEach(msg => {
                         if (msg.role === 'user') {
-                            appendUserBubble(msg.content);
+                            appendUserBubble(msg.content, msg.created_at);
                         } else if (msg.role === 'assistant') {
                             const headerEl = document.getElementById('chat-header-name');
                             const name = (contactNameMap[chatFolder]) || (headerEl ? headerEl.innerText : 'AI');
-                            const wrap = appendContactBubble(name);
+                            const wrap = appendContactBubble(name, msg.created_at);
                             wrap.querySelector('.ai-response-text').textContent = msg.content;
                         }
                     });
