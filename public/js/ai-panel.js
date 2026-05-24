@@ -292,8 +292,8 @@
         wrap.className = 'flex justify-end mb-3 animate-message';
         wrap.innerHTML = `
             <div class="glass-chat-me rounded-2xl rounded-br-md px-4 py-3 max-w-[75%]">
-                <p class="text-sm leading-relaxed">${escapeHTML(text)}</p>
-                <p class="text-[10px] text-gray-500/60 text-right mt-1">${time}</p>
+                <p style="color:var(--msg-text)" class="text-sm leading-relaxed">${escapeHTML(text)}</p>
+                <p style="color:var(--msg-time-me)" class="text-[10px] text-right mt-1">${time}</p>
             </div>
         `;
         chatContainer.appendChild(wrap);
@@ -307,8 +307,8 @@
         wrap.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
                 <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
-                <p class="ai-response-text text-sm leading-relaxed text-gray-800"></p>
-                <p class="ai-bubble-time text-[10px] text-gray-400 text-right mt-1">${time}</p>
+                <p style="color:var(--msg-text)" class="ai-response-text text-sm leading-relaxed"></p>
+                <p style="color:var(--msg-time-them)" class="ai-bubble-time text-[10px] text-right mt-1">${time}</p>
             </div>
         `;
         chatContainer.appendChild(wrap);
@@ -320,7 +320,7 @@
         const wrap = document.createElement('div');
         wrap.className = 'flex justify-center mb-3 animate-message';
         wrap.innerHTML = `
-            <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-sm text-red-600 font-medium max-w-[85%] text-center">
+            <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-sm font-medium max-w-[85%] text-center" style="color:var(--msg-text)">
                 ${escapeHTML(msg)}
             </div>
         `;
