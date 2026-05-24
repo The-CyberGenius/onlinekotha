@@ -312,9 +312,34 @@ router.get('/users/:id/chats', (req, res) => {
     const user = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
     const chats = db.prepare(
-        'SELECT id, folder_name, display_name, message_count, created_at FROM chats WHERE user_id = ? ORDER BY created_at DESC'
+        'SELECT id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE user_id = ? ORDER BY created_at DESC'
     ).all(userId);
     res.json(chats);
+});
+
+// Permanently delete a user's chat (files + DB)
+router.delete('/users/:id/chats/:chatId', (req, res) => {
+    const userId = Number(req.params.id);
+    const chatId = Number(req.params.chatId);
+    const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
+    if (!chat) return res.status(404).json({ error: 'Chat not found' });
+
+    // Remove files from disk
+    const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+    if (fs.existsSync(chatDir)) {
+        fs.rmSync(chatDir, { recursive: true, force: true });
+    }
+
+    // Remove AI conversations linked to this chat
+    const convs = db.prepare('SELECT id FROM conversations WHERE user_id = ? AND chat_folder = ?').all(userId, chat.folder_name);
+    for (const c of convs) {
+        db.prepare('DELETE FROM conv_messages WHERE conversation_id = ?').run(c.id);
+    }
+    db.prepare('DELETE FROM conversations WHERE user_id = ? AND chat_folder = ?').run(userId, chat.folder_name);
+
+    // Remove chat record
+    db.prepare('DELETE FROM chats WHERE id = ?').run(chatId);
+    res.json({ ok: true });
 });
 
 // Download a user's chat folder as zip

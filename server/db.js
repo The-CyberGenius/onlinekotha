@@ -145,6 +145,7 @@ safeAddColumn('users', 'stripe_customer_id', 'TEXT');
 safeAddColumn('users', 'stripe_subscription_id', 'TEXT');
 safeAddColumn('users', 'plan_renews_at', 'INTEGER');
 safeAddColumn('users', 'google_id', 'TEXT');
+safeAddColumn('chats', 'deleted_by_user', 'INTEGER NOT NULL DEFAULT 0');
 safeAddColumn('users', 'avatar_url', 'TEXT');
 safeAddColumn('users', 'display_name', 'TEXT');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}

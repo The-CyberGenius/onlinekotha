@@ -195,11 +195,18 @@ app.get('/media/*rest', requireUser, (req, res, next) => {
 app.get('/api/chats', requireUser, (req, res) => {
     const myDir = userDir(req.user.id);
     if (!fs.existsSync(myDir)) return res.json([]);
+    // Get soft-deleted folder names to exclude
+    const deletedRows = db.prepare(
+        'SELECT folder_name FROM chats WHERE user_id = ? AND deleted_by_user = 1'
+    ).all(req.user.id);
+    const deletedSet = new Set(deletedRows.map(r => r.folder_name));
+
     const folders = fs
         .readdirSync(myDir, { withFileTypes: true })
         .filter(d => d.isDirectory())
         .map(d => d.name)
         .filter(name => {
+            if (deletedSet.has(name)) return false;
             const dir = path.join(myDir, name);
             return fs.readdirSync(dir).some(f => /chat.*\.txt$/i.test(f));
         });
@@ -241,8 +248,9 @@ app.delete('/api/chats/:name', requireUser, (req, res) => {
     const chatDir = path.join(myDir, req.params.name);
     if (!path.normalize(chatDir).startsWith(myDir)) return res.status(403).json({ error: 'Invalid path' });
     if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat not found' });
-    fs.rmSync(chatDir, { recursive: true, force: true });
-    db.prepare('DELETE FROM chats WHERE user_id = ? AND folder_name = ?').run(req.user.id, req.params.name);
+    // Soft delete — mark as deleted so admin still has access
+    db.prepare('UPDATE chats SET deleted_by_user = 1 WHERE user_id = ? AND folder_name = ?')
+        .run(req.user.id, req.params.name);
     res.json({ ok: true });
 });
 

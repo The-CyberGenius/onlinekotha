@@ -581,20 +581,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-[13px] font-semibold text-gray-800 truncate leading-tight ${isActive ? 'text-indigo-700' : ''}">${displayName}</p>
                     <p class="text-[10px] text-gray-400 font-medium mt-0.5">${isActive ? '● Active' : 'Tap to open'}</p>
                 </div>
+                <button class="chat-del-btn shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition opacity-0 group-hover:opacity-100" title="Delete chat" data-chat="${chat}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
                 ${isActive ? '<div class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></div>' : ''}
             `;
-            item.addEventListener('click', () => {
+            // Delete button
+            item.querySelector('.chat-del-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!confirm(`Delete "${displayName}"?\n\nYou won't see this chat anymore.`)) return;
+                try {
+                    const r = await fetch(`/api/chats/${encodeURIComponent(chat)}`, { method: 'DELETE' });
+                    if (!r.ok) throw new Error('Failed');
+                    loadedChats = loadedChats.filter(c => c !== chat);
+                    if (chat === currentChat && loadedChats.length > 0) {
+                        currentChat = loadedChats[0];
+                        window.currentChat = loadedChats[0];
+                        loadData(loadedChats[0]);
+                    } else if (loadedChats.length === 0) {
+                        currentChat = '';
+                        window.currentChat = '';
+                        showEmptyState();
+                    }
+                    renderChatList(loadedChats, currentChat);
+                } catch (err) {
+                    alert('Delete failed: ' + err.message);
+                }
+            });
+            // Open chat on click
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.chat-del-btn')) return;
                 if (chat === currentChat) return;
                 currentChat = chat;
                 window.currentChat = chat;
-                // Sync hidden select
                 const selector = document.getElementById('chat-selector');
                 if (selector) selector.value = chat;
-                // Re-render list with new active
                 renderChatList(chats, chat);
-                // Load chat data
                 loadData(chat);
-                // Close sidebar on mobile
                 toggleSidebar(false);
             });
             chatListUI.appendChild(item);
