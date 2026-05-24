@@ -1,7 +1,6 @@
 // Service Worker for Kotha PWA
-const CACHE_NAME = 'kotha-v1';
+const CACHE_NAME = 'kotha-v2';
 const STATIC_ASSETS = [
-    '/app',
     '/css/style.css',
     '/js/tailwind.js',
     '/js/script.js',
@@ -30,11 +29,16 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-    // Network-first for API calls
-    if (e.request.url.includes('/api/')) {
-        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    const url = new URL(e.request.url);
+    
+    // Network-first for API, navigation, and auth routes
+    if (e.request.mode === 'navigate' || url.pathname.startsWith('/api/') || url.pathname === '/app' || url.pathname === '/login.html') {
+        e.respondWith(
+            fetch(e.request).catch(() => caches.match(e.request))
+        );
         return;
     }
+    
     // Cache-first for static assets
     e.respondWith(
         caches.match(e.request).then(cached => cached || fetch(e.request))
