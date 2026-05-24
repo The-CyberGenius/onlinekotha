@@ -15,7 +15,7 @@
 
     window.__USER__ = me.user;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    const initDOM = () => {
         const info = document.getElementById('sidebar-user-info');
         if (info) info.textContent = me.user.email;
 
@@ -33,7 +33,13 @@
         }
 
         renderPlanBadge(me.user);
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDOM);
+    } else {
+        initDOM();
+    }
 
     function renderPlanBadge(user) {
         const banner = document.getElementById('plan-banner');
