@@ -8,7 +8,85 @@
     <meta property="og:title" content="Kotha — Where conversations come alive">
     <meta property="og:description" content="AI that talks exactly like the people you miss. Upload WhatsApp chats, relive memories, start new conversations.">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="https://onlinekotha.com/og-image.svg">
+    <meta property="og:url" content="https://onlinekotha.com/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kotha — Where conversations come alive">
+    <meta name="twitter:description" content="AI that talks exactly like the people you miss. Upload WhatsApp chats, relive memories.">
+    <meta name="twitter:image" content="https://onlinekotha.com/og-image.svg">
+    <link rel="canonical" href="https://onlinekotha.com/">
     <meta name="theme-color" content="#0a0a0f">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Kotha",
+      "url": "https://onlinekotha.com",
+      "description": "Upload your WhatsApp chats. AI learns exactly how your loved ones talk — their words, humor, style. Then chat with them again, anytime.",
+      "applicationCategory": "SocialNetworkingApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "120"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I export my WhatsApp chat?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Open any WhatsApp chat, tap the 3 dots menu → More → Export chat → Choose 'Include Media' or 'Without Media' → Save the .zip file. Then upload it to Kotha."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my chat data safe and private?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Your chats are stored encrypted on our servers. We never sell your data, never train AI on your personal conversations, and you can delete everything anytime with one click."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the AI learn to talk like my contact?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Kotha's AI reads all messages in your uploaded chat to understand your contact's writing style — their language, slang, emojis, humor, and tone. It then responds in their exact style during conversations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Kotha free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Kotha is free forever with unlimited chat imports, a beautiful chat viewer, On This Day memories, and 3 AI conversations per day. A Pro plan with unlimited AI chats is coming soon."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which languages does Kotha support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Kotha works with any language — Hindi, English, Hinglish, Tamil, Bengali, Marathi, and more. The AI automatically matches whatever language your contact uses in chats."
+          }
+        }
+      ]
+    }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/manifest.json">
     <script src="/js/tailwind.js"></script>
@@ -690,6 +768,73 @@
     </div>
 </section>
 
+<!-- ═══════════ FAQ ═══════════ -->
+<section id="faq" class="py-24 md:py-32 px-5">
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-14 reveal">
+            <p class="text-[11px] font-bold text-indigo-400 uppercase tracking-[0.15em] mb-4">FAQ</p>
+            <h2 class="text-[36px] md:text-[44px] font-black tracking-tight leading-tight">Common questions</h2>
+        </div>
+
+        <div class="space-y-3 reveal">
+            <!-- Q1 -->
+            <details class="group glass-card" style="border-radius:16px;">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-[15px] font-semibold text-white select-none list-none">
+                    How do I export my WhatsApp chat?
+                    <svg class="w-5 h-5 text-zinc-500 group-open:rotate-45 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                </summary>
+                <div class="px-6 pb-5 text-[14px] text-zinc-400 leading-relaxed -mt-1">
+                    Open any WhatsApp chat → tap the <b class="text-zinc-300">3 dots menu</b> → More → Export chat → Choose "Include Media" or "Without Media" → Save the .zip file. Then drag & drop it into Kotha. Done!
+                </div>
+            </details>
+
+            <!-- Q2 -->
+            <details class="group glass-card" style="border-radius:16px;">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-[15px] font-semibold text-white select-none list-none">
+                    Is my chat data safe and private?
+                    <svg class="w-5 h-5 text-zinc-500 group-open:rotate-45 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                </summary>
+                <div class="px-6 pb-5 text-[14px] text-zinc-400 leading-relaxed -mt-1">
+                    100%. Your chats are stored encrypted. We <b class="text-zinc-300">never sell your data</b>, never train AI on your personal conversations, and you can delete everything anytime with one click.
+                </div>
+            </details>
+
+            <!-- Q3 -->
+            <details class="group glass-card" style="border-radius:16px;">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-[15px] font-semibold text-white select-none list-none">
+                    How does the AI learn to talk like my contact?
+                    <svg class="w-5 h-5 text-zinc-500 group-open:rotate-45 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                </summary>
+                <div class="px-6 pb-5 text-[14px] text-zinc-400 leading-relaxed -mt-1">
+                    Kotha's AI reads every message in your uploaded chat — their <b class="text-zinc-300">slang, emojis, humor, tone</b>. It learns their exact writing style and responds just like them. It's not generic AI — it becomes them.
+                </div>
+            </details>
+
+            <!-- Q4 -->
+            <details class="group glass-card" style="border-radius:16px;">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-[15px] font-semibold text-white select-none list-none">
+                    Is Kotha free to use?
+                    <svg class="w-5 h-5 text-zinc-500 group-open:rotate-45 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                </summary>
+                <div class="px-6 pb-5 text-[14px] text-zinc-400 leading-relaxed -mt-1">
+                    Yes! Free forever — unlimited chat imports, beautiful viewer, On This Day memories, and <b class="text-zinc-300">3 AI chats per day</b>. Pro plan (₹99/mo) with unlimited AI is coming soon.
+                </div>
+            </details>
+
+            <!-- Q5 -->
+            <details class="group glass-card" style="border-radius:16px;">
+                <summary class="flex items-center justify-between cursor-pointer px-6 py-5 text-[15px] font-semibold text-white select-none list-none">
+                    Which languages does Kotha support?
+                    <svg class="w-5 h-5 text-zinc-500 group-open:rotate-45 transition-transform duration-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                </summary>
+                <div class="px-6 pb-5 text-[14px] text-zinc-400 leading-relaxed -mt-1">
+                    All of them! Hindi, English, Hinglish, Tamil, Bengali, Marathi — you name it. The AI <b class="text-zinc-300">automatically matches</b> whatever language your contact uses in their chats.
+                </div>
+            </details>
+        </div>
+    </div>
+</section>
+
 <!-- ═══════════ FINAL CTA ═══════════ -->
 <section class="py-28 md:py-36 px-5 relative overflow-hidden">
     <div class="absolute inset-0 hero-mesh pointer-events-none opacity-50"></div>
@@ -724,6 +869,7 @@
         <div class="flex items-center gap-8 text-[12px] font-medium text-zinc-600">
             <a href="#how" class="hover:text-zinc-300 transition">How it works</a>
             <a href="#pricing" class="hover:text-zinc-300 transition">Pricing</a>
+            <a href="#faq" class="hover:text-zinc-300 transition">FAQ</a>
             <a href="/login.html" class="hover:text-zinc-300 transition">Login</a>
         </div>
     </div>

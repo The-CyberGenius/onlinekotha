@@ -1,0 +1,54 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#141420"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#f472b6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Ambient glow -->
+  <circle cx="200" cy="150" r="250" fill="#6366f1" opacity="0.08"/>
+  <circle cx="900" cy="500" r="200" fill="#f472b6" opacity="0.06"/>
+  <!-- Logo -->
+  <rect x="80" y="80" width="48" height="48" rx="12" fill="url(#accent)"/>
+  <text x="86" y="113" font-family="Arial,sans-serif" font-size="28" font-weight="bold" fill="white">K</text>
+  <text x="145" y="115" font-family="Arial,sans-serif" font-size="26" font-weight="800" fill="white" letter-spacing="-0.5">Kotha</text>
+  <!-- Headline -->
+  <text x="80" y="260" font-family="Arial,sans-serif" font-size="64" font-weight="900" fill="white" letter-spacing="-2">Their words,</text>
+  <text x="80" y="340" font-family="Arial,sans-serif" font-size="64" font-weight="900" fill="url(#pink)" letter-spacing="-2">alive again.</text>
+  <!-- Subtitle -->
+  <text x="80" y="410" font-family="Arial,sans-serif" font-size="24" fill="#a1a1aa">Upload WhatsApp chats. AI learns how they talk.</text>
+  <text x="80" y="445" font-family="Arial,sans-serif" font-size="24" fill="#a1a1aa">Chat with your loved ones, anytime.</text>
+  <!-- CTA pill -->
+  <rect x="80" y="490" width="220" height="50" rx="25" fill="url(#accent)"/>
+  <text x="130" y="522" font-family="Arial,sans-serif" font-size="18" font-weight="700" fill="white">Start talking →</text>
+  <!-- URL -->
+  <text x="80" y="590" font-family="Arial,sans-serif" font-size="16" fill="#71717a">onlinekotha.com</text>
+  <!-- Chat mockup hint -->
+  <rect x="750" y="160" width="370" height="380" rx="24" fill="#141420" stroke="#ffffff" stroke-opacity="0.08"/>
+  <!-- Mock chat header -->
+  <circle cx="790" cy="200" r="18" fill="#f472b6"/>
+  <text x="788" y="206" font-family="Arial,sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">M</text>
+  <text x="820" y="197" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="white">Maa</text>
+  <text x="820" y="214" font-family="Arial,sans-serif" font-size="10" fill="#34d399">Online · AI</text>
+  <line x1="770" y1="235" x2="1100" y2="235" stroke="#ffffff" stroke-opacity="0.04"/>
+  <!-- Mock user message -->
+  <rect x="850" y="260" width="250" height="40" rx="14" fill="url(#accent)"/>
+  <text x="870" y="285" font-family="Arial,sans-serif" font-size="12" fill="white">Maa recipe batao na 🙏</text>
+  <!-- Mock AI response -->
+  <rect x="770" y="320" width="300" height="60" rx="14" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.04"/>
+  <text x="790" y="345" font-family="Arial,sans-serif" font-size="12" fill="#e4e4e7">Beta aloo ubal ke mash kar lo,</text>
+  <text x="790" y="365" font-family="Arial,sans-serif" font-size="12" fill="#e4e4e7">phir dhaniya mirchi daal do 😊</text>
+  <!-- AI badge -->
+  <circle cx="780" cy="412" r="4" fill="#34d399"/>
+  <text x="790" y="416" font-family="Arial,sans-serif" font-size="10" fill="#71717a">AI responding as "Maa"</text>
+</svg>
