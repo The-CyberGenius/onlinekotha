@@ -17,6 +17,10 @@
     <link rel="canonical" href="https://onlinekotha.com/">
     <meta name="theme-color" content="#0a0a0f">
 
+    <!-- Performance: preload critical font -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
@@ -92,7 +96,9 @@
     <script src="/js/tailwind.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Performance: defer Tailwind (non-critical) -->
+    <script>document.addEventListener('DOMContentLoaded',()=>{if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{})});</script>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -870,6 +876,7 @@
             <a href="#how" class="hover:text-zinc-300 transition">How it works</a>
             <a href="#pricing" class="hover:text-zinc-300 transition">Pricing</a>
             <a href="#faq" class="hover:text-zinc-300 transition">FAQ</a>
+            <a href="/blog.html" class="hover:text-zinc-300 transition">Blog</a>
             <a href="/login.html" class="hover:text-zinc-300 transition">Login</a>
         </div>
     </div>
