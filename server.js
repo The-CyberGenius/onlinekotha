@@ -22,21 +22,43 @@ const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = emailModule;
 const { router: billingRouter, webhookHandler } = require('./server/billing');
 const { router: oauthRouter } = require('./server/oauth');
 const bcrypt = require('bcryptjs');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 if (!fs.existsSync(SRC_DIR)) fs.mkdirSync(SRC_DIR, { recursive: true });
 
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // Stripe webhook needs raw body — must come BEFORE express.json()
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
+
+app.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    next();
+});
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 app.use(authMiddleware);
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // 100 requests per IP
+    message: { error: 'Too many requests, please try again after 15 minutes' }
+});
+
 // ---------- Auth routes ----------
-app.post('/api/auth/signup', async (req, res) => {
+app.post('/api/auth/signup', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body || {};
         if (!email || !password) return res.status(400).json({ error: 'email + password required' });
@@ -96,7 +118,7 @@ app.post('/api/auth/resend-verify', (req, res) => {
     res.json({ ok: true });
 });
 
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', authLimiter, (req, res) => {
     try {
         const { email, password } = req.body || {};
         if (!email || !password) return res.status(400).json({ error: 'email + password required' });
