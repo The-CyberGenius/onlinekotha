@@ -325,9 +325,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadData = async (chatName) => {
         try {
+            showSkeleton();
+            statsInfo.innerText = 'Loading...';
             const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
             const data = await resp.json();
-            
+
             if (data.error) {
                 statsInfo.innerText = "Error: " + data.error;
                 return;
@@ -628,6 +630,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let loadedChats = [];
 
     const loadChatsList = async () => {
+        // Show skeleton in sidebar while loading
+        if (chatListUI) {
+            chatListUI.innerHTML = `
+                <div class="skeleton-chat-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line skeleton-line-long"></div><div class="skeleton skeleton-line skeleton-line-short"></div></div></div>
+                <div class="skeleton-chat-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line skeleton-line-long"></div><div class="skeleton skeleton-line skeleton-line-short"></div></div></div>
+                <div class="skeleton-chat-item"><div class="skeleton skeleton-avatar"></div><div class="skeleton-lines"><div class="skeleton skeleton-line skeleton-line-long"></div><div class="skeleton skeleton-line skeleton-line-short"></div></div></div>
+            `;
+        }
         try {
             const resp = await fetch('/api/chats');
             const chats = await resp.json();
@@ -659,18 +669,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // ── Skeleton Loading ──
+    function showSkeleton() {
+        chatContainer.innerHTML = `
+            <div id="chat-skeleton" class="py-4 px-2">
+                <div class="skeleton skeleton-date"></div>
+                <div class="skeleton skeleton-bubble-left" style="width:50%;animation-delay:0.1s"></div>
+                <div class="skeleton skeleton-bubble-right" style="animation-delay:0.2s"></div>
+                <div class="skeleton skeleton-bubble-left" style="width:60%;animation-delay:0.3s"></div>
+                <div class="skeleton skeleton-bubble-right-sm" style="animation-delay:0.4s"></div>
+                <div class="skeleton skeleton-date" style="animation-delay:0.5s"></div>
+                <div class="skeleton skeleton-bubble-right" style="width:55%;animation-delay:0.6s"></div>
+                <div class="skeleton skeleton-bubble-left" style="animation-delay:0.7s"></div>
+                <div class="skeleton skeleton-bubble-right-sm" style="width:35%;animation-delay:0.8s"></div>
+                <div class="skeleton skeleton-bubble-left" style="width:45%;animation-delay:0.9s"></div>
+            </div>`;
+    }
+
     function showEmptyState() {
         const container = document.getElementById('chat-container');
         if (!container) return;
         container.innerHTML = `
             <div class="h-full flex flex-col items-center justify-center px-8 text-center" id="empty-state">
-                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mb-5 shadow-inner">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div class="empty-state-float mb-6">
+                    <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center shadow-lg shadow-indigo-200/50 relative">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 flex items-center justify-center shadow-md empty-state-pulse">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+                        </div>
+                    </div>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Bring a chat to life</h2>
-                <p class="text-sm text-gray-500 max-w-sm leading-relaxed mb-6">Drop your WhatsApp export (.zip or folder) to see it beautifully — and talk to your memories with AI.</p>
-                <button id="empty-upload-btn" class="bg-gray-900 hover:bg-black text-white font-bold text-sm rounded-2xl px-6 py-3 transition shadow-lg">
-                    Import a chat
+                <p class="text-sm text-gray-500 max-w-sm leading-relaxed mb-2">Upload your WhatsApp export and see it beautifully — search through years of messages and talk to your memories with AI.</p>
+                <div class="flex items-center gap-4 text-[11px] text-gray-400 font-medium mb-6">
+                    <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
+                    <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
+                    <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Free</span>
+                </div>
+                <button id="empty-upload-btn" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-sm rounded-2xl px-7 py-3.5 transition shadow-lg shadow-indigo-300/30 hover:shadow-indigo-400/40 flex items-center gap-2 mx-auto">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    Import WhatsApp Chat
                 </button>
             </div>
         `;
@@ -730,8 +768,69 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // ── Onboarding Flow (first-time users) ──
+    function showOnboarding() {
+        if (localStorage.getItem('kotha_onboarded')) return;
+        const steps = [
+            {
+                icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>',
+                title: 'Upload your chat',
+                desc: 'Export your WhatsApp chat as a .zip file and drop it here. We support Android, iPhone, individual and group chats.',
+            },
+            {
+                icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+                title: 'See your chats beautifully',
+                desc: 'Messages appear in proper WhatsApp-style bubbles with photos, videos, and voice notes inline. Search through years instantly.',
+            },
+            {
+                icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
+                title: 'Talk with AI',
+                desc: 'AI learns how your contact texts — their slang, emojis, humor — and responds just like them. Click the sparkle button to start!',
+            },
+        ];
+        let step = 0;
+
+        function renderStep() {
+            const s = steps[step];
+            const dots = steps.map((_, i) => `<div class="onboarding-step-dot ${i === step ? 'active' : ''}"></div>`).join('');
+            const isLast = step === steps.length - 1;
+            document.getElementById('onboarding-overlay').innerHTML = `
+                <div class="onboarding-card">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-5">${s.icon}</div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">${s.title}</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed mb-6 max-w-xs mx-auto">${s.desc}</p>
+                    <div class="flex items-center justify-center gap-2 mb-5">${dots}</div>
+                    <div class="flex gap-3 justify-center">
+                        <button id="onboard-skip" class="text-sm text-gray-400 hover:text-gray-600 font-medium px-4 py-2 transition">${isLast ? '' : 'Skip'}</button>
+                        <button id="onboard-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl px-6 py-2.5 transition shadow-sm">${isLast ? 'Get Started!' : 'Next'}</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('onboard-next').addEventListener('click', () => {
+                if (isLast) { closeOnboarding(); return; }
+                step++;
+                renderStep();
+            });
+            const skipBtn = document.getElementById('onboard-skip');
+            if (skipBtn) skipBtn.addEventListener('click', closeOnboarding);
+        }
+
+        function closeOnboarding() {
+            localStorage.setItem('kotha_onboarded', '1');
+            const overlay = document.getElementById('onboarding-overlay');
+            if (overlay) { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 300); }
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'onboarding-overlay';
+        overlay.className = 'onboarding-overlay';
+        document.body.appendChild(overlay);
+        renderStep();
+    }
+
     // Initialize application by fetching the list of available chats
     loadChatsList();
+    setTimeout(showOnboarding, 800);
 
     // Quick Action Listeners
     btnTop.addEventListener('click', () => {
@@ -883,27 +982,44 @@ document.addEventListener('DOMContentLoaded', () => {
         displayedMessages = allMessages; // Make sure we are in main view
         const idx = displayedMessages.findIndex(m => m.id === id);
         if (idx !== -1) {
-            const start = Math.max(0, idx - 50); // Show 50 before
-            const end = Math.min(displayedMessages.length, idx + 100); // Show 100 after
+            const start = Math.max(0, idx - 50);
+            const end = Math.min(displayedMessages.length, idx + 100);
             renderChats(start, end);
-            
+
             toggleSidebar(false);
 
             setTimeout(() => {
                 const el = document.getElementById(`msg-${id}`);
                 if (el) {
-                    // Optimized direct scroll offset bypassing generic scrollIntoView for reliable center anchoring
                     scrollArea.scrollTop = el.offsetTop - (scrollArea.clientHeight / 2) + 50;
                     const bubble = el.firstElementChild;
-                    if(bubble) {
-                        const originalBorder = bubble.style.border;
-                        bubble.style.border = '2px solid #6366f1';
-                        bubble.classList.add('shadow-xl', 'scale-[1.02]');
-                        bubble.style.transition = 'all 0.5s ease';
-                        
+                    if (bubble) {
+                        bubble.style.transition = 'all 0.3s ease';
+                        bubble.style.boxShadow = '0 0 0 3px rgba(250,204,21,0.6), 0 8px 24px -4px rgba(0,0,0,0.15)';
+                        bubble.style.transform = 'scale(1.02)';
+                        bubble.classList.add('search-result-flash');
+
+                        // Highlight search query inside the message
+                        const query = searchBox.value.trim();
+                        if (query.length >= 3) {
+                            const textEl = bubble.querySelector('p');
+                            if (textEl && textEl.textContent.toLowerCase().includes(query.toLowerCase())) {
+                                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                                textEl.innerHTML = textEl.textContent.replace(regex, '<mark class="search-highlight">$1</mark>');
+                            }
+                        }
+
                         setTimeout(() => {
-                            bubble.style.border = originalBorder;
-                            bubble.classList.remove('shadow-xl', 'scale-[1.02]');
+                            bubble.style.boxShadow = '';
+                            bubble.style.transform = '';
+                            bubble.classList.remove('search-result-flash');
+                            // Remove highlight marks after a while
+                            setTimeout(() => {
+                                const marks = bubble.querySelectorAll('mark.search-highlight');
+                                marks.forEach(m => {
+                                    m.outerHTML = m.textContent;
+                                });
+                            }, 3000);
                         }, 2500);
                     }
                 }
