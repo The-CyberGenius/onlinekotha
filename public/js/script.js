@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const chatContainer = document.getElementById('chat-container');
+    const scrollArea = document.getElementById('chat-scroll-area');
     const headerName = document.getElementById('chat-header-name');
     const headerAvatar = document.getElementById('header-avatar');
     const sidebarAvatar = document.getElementById('sidebar-avatar');
@@ -221,9 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const previousFirst = displayedMessages[renderStart]?.date;
             lastRenderedDate = '';
             const html = generateChatsHtml(snippet);
-            const oldScroll = chatContainer.scrollHeight;
+            const oldScroll = scrollArea.scrollHeight;
             chatContainer.insertAdjacentHTML('afterbegin', html);
-            chatContainer.scrollTop += (chatContainer.scrollHeight - oldScroll);
+            scrollArea.scrollTop += (scrollArea.scrollHeight - oldScroll);
             renderStart = startIndex;
         } else if (mode === 'newer') {
             lastRenderedDate = displayedMessages[renderEnd - 1]?.date || '';
@@ -254,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.loadNewer = () => {
         if (renderEnd >= displayedMessages.length) return;
         const newEnd = Math.min(displayedMessages.length, renderEnd + CHUNK_SIZE);
-        const oldScroll = chatContainer.scrollTop;
+        const oldScroll = scrollArea.scrollTop;
         renderChats(renderEnd, newEnd, 'newer');
 
         // Prune from top
@@ -263,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             for(let i=0; i<CHUNK_SIZE && chatContainer.firstElementChild; i++) {
                 chatContainer.removeChild(chatContainer.firstElementChild);
             }
-            chatContainer.scrollTop = oldScroll; // Maintain visual position
+            scrollArea.scrollTop = oldScroll; // Maintain visual position
         }
     };
 
@@ -271,11 +272,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let scrollTimeout;
     const floatingDate = document.getElementById('floating-date');
 
-    chatContainer.addEventListener('scroll', () => {
+    scrollArea.addEventListener('scroll', () => {
         // Floating Date indicator logic
         if (floatingDate) {
             const topEl = Array.from(chatContainer.children).find(el => {
-                return el.id && el.id.startsWith('msg-') && (el.offsetTop - chatContainer.scrollTop + 20) > 0;
+                return el.id && el.id.startsWith('msg-') && (el.offsetTop - scrollArea.scrollTop + 20) > 0;
             });
 
             if (topEl) {
@@ -309,13 +310,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isScrolling) return;
         
-        if (chatContainer.scrollTop <= 400 && renderStart > 0) {
+        if (scrollArea.scrollTop <= 400 && renderStart > 0) {
             isScrolling = true;
             window.loadOlder();
             setTimeout(() => { isScrolling = false; }, 100);
         }
         
-        if (Math.abs((chatContainer.scrollHeight - chatContainer.scrollTop) - chatContainer.clientHeight) <= 400 && renderEnd < displayedMessages.length) {
+        if (Math.abs((scrollArea.scrollHeight - scrollArea.scrollTop) - scrollArea.clientHeight) <= 400 && renderEnd < displayedMessages.length) {
             isScrolling = true;
             window.loadNewer();
             setTimeout(() => { isScrolling = false; }, 100);
@@ -389,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         renderChats(-1, -1);
                         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length), 'reset');
-                        setTimeout(() => chatContainer.scrollTop = 0, 10);
+                        setTimeout(() => scrollArea.scrollTop = 0, 10);
                         toggleSidebar(false);
                     };
                     senderBtns.push(btn);
@@ -500,14 +501,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (el) {
                                     el.scrollIntoView({ block: 'start' });
                                     // small nudge up to account for absolute header
-                                    chatContainer.scrollTop -= 60; 
+                                    scrollArea.scrollTop -= 60; 
                                 }
                             }, 10);
                         } else {
                             // If anchor not found or filter completely altered view, default to newest chats
                             const end = displayedMessages.length;
                             renderChats(Math.max(0, end - CHUNK_SIZE), end, 'reset');
-                            setTimeout(() => chatContainer.scrollTop = chatContainer.scrollHeight, 10);
+                            setTimeout(() => scrollArea.scrollTop = scrollArea.scrollHeight, 10);
                         }
                     }
 
@@ -530,9 +531,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const start = Math.max(0, end - CHUNK_SIZE);
                 renderChats(start, end);
 
-                setTimeout(() => {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                                setTimeout(() => {
+                    scrollArea.scrollTop = scrollArea.scrollHeight;
                 }, 100);
+                
+                if (window.kothaLoadAiHistory) {
+                    window.kothaLoadAiHistory(chatName);
+                }
+
             } else {
                 chatContainer.innerHTML = '';
             }
@@ -645,7 +651,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnTop.addEventListener('click', () => {
         displayedMessages = allMessages; // Reset filter if active
         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
-        setTimeout(() => chatContainer.scrollTop = 0, 10);
+        setTimeout(() => scrollArea.scrollTop = 0, 10);
         toggleSidebar(false);
     });
 
@@ -653,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayedMessages = allMessages;
         const end = displayedMessages.length;
         renderChats(Math.max(0, end - CHUNK_SIZE), end);
-        setTimeout(() => chatContainer.scrollTop = chatContainer.scrollHeight, 10);
+        setTimeout(() => scrollArea.scrollTop = scrollArea.scrollHeight, 10);
         toggleSidebar(false);
     });
 
@@ -661,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
         displayedMessages = allMessages.filter(msg => msg.attachment && msg.type !== 'system');
         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
         statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-700">${displayedMessages.length}</span> media attachments.`;
-        setTimeout(() => chatContainer.scrollTop = 0, 10);
+        setTimeout(() => scrollArea.scrollTop = 0, 10);
         toggleSidebar(false);
     });
 
@@ -743,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayedMessages = allMessages;
             const end = displayedMessages.length;
             renderChats(Math.max(0, end - CHUNK_SIZE), end);
-            setTimeout(() => chatContainer.scrollTop = chatContainer.scrollHeight, 10);
+            setTimeout(() => scrollArea.scrollTop = scrollArea.scrollHeight, 10);
         }
     });
 
@@ -801,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById(`msg-${id}`);
                 if (el) {
                     // Optimized direct scroll offset bypassing generic scrollIntoView for reliable center anchoring
-                    chatContainer.scrollTop = el.offsetTop - (chatContainer.clientHeight / 2) + 50;
+                    scrollArea.scrollTop = el.offsetTop - (scrollArea.clientHeight / 2) + 50;
                     const bubble = el.firstElementChild;
                     if(bubble) {
                         const originalBorder = bubble.style.border;

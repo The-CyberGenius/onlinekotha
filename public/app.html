@@ -176,8 +176,11 @@
             </div>
 
             <!-- Chat Content -->
-            <div class="flex-1 overflow-y-auto px-3 sm:px-6 md:px-10 py-4 main-chat-background relative z-10" id="chat-container">
-                <!-- Messages injected here -->
+            <div class="flex-1 overflow-y-auto px-3 sm:px-6 md:px-10 py-4 main-chat-background relative z-10" id="chat-scroll-area">
+                <div id="chat-container">
+                    <!-- Messages injected here -->
+                </div>
+                <div id="ai-chat-container" class="mt-8 pt-6 border-t border-gray-400/20 empty:hidden"></div>
             </div>
 
             <!-- Bottom Input Bar -->

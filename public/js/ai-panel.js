@@ -1,9 +1,10 @@
 (function () {
-    const chatContainer = document.getElementById('chat-container');
+    const chatContainer = document.getElementById('ai-chat-container');
+    const scrollArea = document.getElementById('chat-scroll-area');
     const bottomInput = document.getElementById('bottom-ai-input');
     const bottomSend = document.getElementById('bottom-ai-send');
 
-    if (!bottomInput || !bottomSend || !chatContainer) return;
+    if (!bottomInput || !bottomSend || !chatContainer || !scrollArea) return;
 
     // Per-chat conversation tracking
     let conversationMap = {};   // { chatFolder: conversationId }
@@ -79,7 +80,7 @@
             </div>
         `;
         chatContainer.appendChild(typingEl);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollArea.scrollTop = scrollArea.scrollHeight;
 
         let fullText = '';
         let responseBubble = null;
@@ -143,7 +144,7 @@
                         }
                         fullText += data.text;
                         responseBubble.querySelector('.ai-response-text').textContent = fullText;
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                        scrollArea.scrollTop = scrollArea.scrollHeight;
                     } else if (event === 'done') {
                         // Final
                     } else if (event === 'error') {
@@ -173,7 +174,7 @@
             </div>
         `;
         chatContainer.appendChild(wrap);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollArea.scrollTop = scrollArea.scrollHeight;
     }
 
     function appendContactBubble(name) {
@@ -187,7 +188,7 @@
             </div>
         `;
         chatContainer.appendChild(wrap);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollArea.scrollTop = scrollArea.scrollHeight;
         return wrap;
     }
 
@@ -200,7 +201,7 @@
             </div>
         `;
         chatContainer.appendChild(wrap);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        scrollArea.scrollTop = scrollArea.scrollHeight;
     }
 
     function escapeHTML(s) {
@@ -226,6 +227,45 @@
             bottomInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
         });
     }
+
+    window.kothaLoadAiHistory = async (chatFolder) => {
+        if (!chatFolder) return;
+        chatContainer.innerHTML = '';
+        activeChat = chatFolder;
+        
+        try {
+            const resp = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
+            if (!resp.ok) return;
+            const convs = await resp.json();
+            
+            if (convs && convs.length > 0) {
+                const conv = convs[0];
+                conversationMap[chatFolder] = conv.id;
+                
+                const msgResp = await fetch(`/api/ai/conversations/${conv.id}`);
+                if (!msgResp.ok) return;
+                const data = await msgResp.json();
+                
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        if (msg.role === 'user') {
+                            appendUserBubble(msg.content);
+                        } else if (msg.role === 'assistant') {
+                            const headerEl = document.getElementById('chat-header-name');
+                            const name = (contactNameMap[chatFolder]) || (headerEl ? headerEl.innerText : 'AI');
+                            const wrap = appendContactBubble(name);
+                            wrap.querySelector('.ai-response-text').textContent = msg.content;
+                        }
+                    });
+                    setTimeout(() => {
+                        scrollArea.scrollTop = scrollArea.scrollHeight;
+                    }, 50);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to load AI history", e);
+        }
+    };
 
     window.kothaToast = toast;
 })();
