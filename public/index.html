@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="overflow-x-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,506 +15,361 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
-        body { background: #fafafa; -webkit-font-smoothing: antialiased; }
+        html, body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        body { background: #ffffff; }
+        html { scroll-behavior: smooth; }
 
-        /* Animated gradient mesh background */
-        .hero-mesh {
-            position: relative;
-            overflow: hidden;
-            background: #fafafa;
-        }
-        .hero-mesh::before {
-            content: '';
-            position: absolute;
-            inset: -50%;
-            background: conic-gradient(from 180deg at 50% 50%, #6366f1 0deg, #a855f7 72deg, #ec4899 144deg, #f59e0b 216deg, #10b981 288deg, #6366f1 360deg);
-            opacity: 0.06;
-            animation: meshSpin 30s linear infinite;
-            filter: blur(80px);
-        }
-        @keyframes meshSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        /* Hero gradient bg */
+        .hero-bg {
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 40%, #e0e7ff 70%, #f8fafc 100%);
         }
 
-        /* Floating orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.4;
-            animation: orbFloat 20s ease-in-out infinite;
+        /* Grid pattern overlay */
+        .grid-pattern {
+            background-image: linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
         }
-        .orb-1 { width: 400px; height: 400px; background: #6366f1; top: -100px; right: -100px; animation-delay: 0s; }
-        .orb-2 { width: 300px; height: 300px; background: #a855f7; bottom: -80px; left: -80px; animation-delay: -7s; }
-        .orb-3 { width: 250px; height: 250px; background: #ec4899; top: 40%; left: 60%; animation-delay: -14s; }
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -20px) scale(1.05); }
-            66% { transform: translate(-20px, 20px) scale(0.95); }
+
+        /* Glow behind hero text */
+        .hero-glow {
+            position: absolute;
+            width: 500px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -60%);
+            pointer-events: none;
         }
 
         /* Feature cards */
         .feat-card {
-            background: white;
+            background: #ffffff;
             border: 1px solid #f1f5f9;
-            border-radius: 20px;
-            padding: 28px;
-            transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        .feat-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent 40%, rgba(99,102,241,0.03));
-            opacity: 0;
-            transition: opacity 300ms;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
         }
         .feat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px -20px rgba(0,0,0,0.12);
-            border-color: rgba(99,102,241,0.15);
+            border-color: #e0e7ff;
+            box-shadow: 0 8px 30px -12px rgba(99,102,241,0.15);
+            transform: translateY(-2px);
         }
-        .feat-card:hover::before { opacity: 1; }
 
         /* Pricing */
         .price-card {
-            background: white;
+            background: #ffffff;
             border: 1px solid #f1f5f9;
-            border-radius: 24px;
-            padding: 32px 28px;
-            transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 20px;
+            padding: 32px 24px;
+            transition: all 250ms;
         }
-        .price-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -12px rgba(0,0,0,0.08); }
+        .price-card:hover { box-shadow: 0 8px 24px -8px rgba(0,0,0,0.06); }
         .price-card.featured {
-            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
-            color: white;
-            transform: scale(1.03);
-            box-shadow: 0 24px 60px -20px rgba(15,23,42,0.4);
-            border: none;
-        }
-        .price-card.featured:hover { transform: scale(1.03) translateY(-2px); }
-        .price-card.featured .price-cta { background: white; color: #0f172a; }
-
-        /* Buttons */
-        .btn-primary {
             background: #0f172a;
             color: white;
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 15px;
-            transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            border: none;
+            transform: scale(1.02);
+            box-shadow: 0 20px 50px -16px rgba(15,23,42,0.35);
         }
-        .btn-primary:hover {
-            background: #000;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px -8px rgba(0,0,0,0.3);
-        }
-        .btn-ghost {
-            color: #374151;
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 200ms;
-            border: 1px solid #e5e7eb;
-        }
-        .btn-ghost:hover {
-            background: white;
-            border-color: #d1d5db;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
+        .price-card.featured .price-cta { background: white; color: #0f172a; }
 
         /* Chat mockup */
-        .chat-mockup {
-            background: white;
-            border-radius: 24px;
-            border: 1px solid #e5e7eb;
-            box-shadow: 0 32px 64px -20px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.02);
-            overflow: hidden;
-            position: relative;
+        .mockup-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.03);
         }
         .msg-bubble {
             padding: 8px 12px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 13px;
-            line-height: 1.4;
-            max-width: 240px;
-            animation: msgIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+            line-height: 1.45;
+            max-width: 220px;
         }
-        .msg-them { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #f1f5f9; }
-        .msg-me { background: #d9fdd3; }
-        @keyframes msgIn {
-            from { opacity: 0; transform: translateY(8px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+        .msg-them { background: #fff; border: 1px solid #f1f5f9; }
+        .msg-me { background: #dcfce7; }
 
-        /* Floating badges */
-        .float-badge {
-            background: white;
-            border: 1px solid #f1f5f9;
-            border-radius: 14px;
-            padding: 10px 16px;
-            font-size: 12px;
-            font-weight: 700;
-            box-shadow: 0 8px 24px -8px rgba(0,0,0,0.08);
-            animation: floatBadge 5s ease-in-out infinite;
-        }
-        @keyframes floatBadge {
+        /* Floating label */
+        @keyframes gentleFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-5px); }
         }
+        .float-label { animation: gentleFloat 4s ease-in-out infinite; }
 
-        /* Steps line connector */
-        .step-connector {
-            position: absolute;
-            top: 32px;
-            left: calc(50% + 40px);
-            width: calc(100% - 80px);
-            height: 2px;
-            background: linear-gradient(90deg, #e5e7eb, #c7d2fe, #e5e7eb);
+        /* Step number */
+        .step-num {
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 18px;
+            background: #eef2ff;
+            color: #4f46e5;
         }
-
-        /* Smooth scroll */
-        html { scroll-behavior: smooth; }
-
-        /* Ticker animation */
-        @keyframes ticker {
-            from { transform: translateX(0); }
-            to { transform: translateX(-50%); }
-        }
-        .ticker-inner { animation: ticker 40s linear infinite; }
     </style>
 </head>
 <body class="text-gray-900 antialiased">
 
     <!-- Nav -->
-    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/80">
-        <div class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm shadow-indigo-200">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100">
+        <div class="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-sm">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
                 </div>
-                <span class="font-bold text-[17px] text-gray-900">Kotha</span>
+                <span class="font-bold text-[16px]">Kotha</span>
             </a>
-            <div class="hidden md:flex items-center gap-8 text-[13px] font-semibold text-gray-500">
+            <div class="hidden md:flex items-center gap-7 text-[13px] font-medium text-gray-500">
                 <a href="#features" class="hover:text-gray-900 transition">Features</a>
                 <a href="#how-it-works" class="hover:text-gray-900 transition">How it works</a>
                 <a href="#pricing" class="hover:text-gray-900 transition">Pricing</a>
             </div>
             <div class="flex items-center gap-2" id="nav-cta">
-                <a href="/login.html" id="nav-login" class="text-sm font-semibold text-gray-600 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-50 transition">Login</a>
-                <a href="/login.html#signup" id="nav-signup" class="text-sm font-semibold bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-black transition shadow-sm">Get started</a>
+                <a href="/login.html" id="nav-login" class="text-[13px] font-medium text-gray-600 hover:text-gray-900 px-3 py-2 transition hidden sm:block">Log in</a>
+                <a href="/login.html#signup" id="nav-signup" class="text-[13px] font-semibold bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">Get started</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero -->
-    <section class="hero-mesh pt-20 md:pt-28 pb-20 px-6 relative">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-
-        <div class="max-w-4xl mx-auto text-center relative z-10">
-            <!-- Pill badge -->
-            <div class="inline-flex items-center gap-2 bg-white border border-gray-200/80 rounded-full px-4 py-1.5 text-xs font-semibold text-gray-600 mb-8 shadow-sm backdrop-blur-sm">
-                <span class="flex items-center gap-1.5">
-                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span></span>
-                    New: AI-powered chat memory
-                </span>
+    <section class="hero-bg grid-pattern relative">
+        <div class="hero-glow"></div>
+        <div class="max-w-3xl mx-auto text-center px-5 pt-20 md:pt-28 pb-6 relative z-10">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 bg-white border border-indigo-100 rounded-full px-3.5 py-1.5 text-[11px] font-semibold text-indigo-700 mb-7 shadow-sm">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                New — AI-powered chat memory
             </div>
 
-            <h1 class="text-[40px] sm:text-5xl md:text-[64px] font-extrabold tracking-tight leading-[1.08] mb-6 text-gray-900">
-                Your conversations,<br class="hidden sm:block">
-                <span class="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 bg-clip-text text-transparent">preserved forever</span>
+            <h1 class="text-[36px] sm:text-[46px] md:text-[56px] font-extrabold tracking-tight leading-[1.1] mb-5">
+                Your conversations,<br>
+                <span class="text-indigo-600">preserved forever</span>
             </h1>
 
-            <p class="text-base md:text-lg text-gray-500 max-w-xl mx-auto leading-relaxed mb-10">
-                Drop a WhatsApp export. Relive it in a beautiful viewer. Ask AI anything — it remembers every message, with sources.
+            <p class="text-[15px] md:text-[17px] text-gray-500 max-w-md mx-auto leading-relaxed mb-8">
+                Drop a WhatsApp export. Relive it beautifully. Ask AI anything — it reads every message.
             </p>
 
             <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                <a href="/login.html#signup" class="btn-primary">
+                <a href="/login.html#signup" class="bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold text-[14px] hover:bg-indigo-700 transition shadow-sm shadow-indigo-200 inline-flex items-center gap-2">
                     Start free
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
                 </a>
-                <a href="#how-it-works" class="btn-ghost">How it works</a>
+                <a href="#how-it-works" class="text-gray-600 px-5 py-3 rounded-xl font-medium text-[14px] hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 transition">How it works</a>
             </div>
-            <p class="text-[11px] text-gray-400 mt-5">No credit card needed. Data stays private.</p>
+            <p class="text-[11px] text-gray-400 mt-4">No credit card. Your data stays private.</p>
         </div>
 
-        <!-- Hero chat mockup -->
-        <div class="max-w-2xl mx-auto mt-16 md:mt-20 relative z-10">
-            <div class="chat-mockup">
-                <!-- Window chrome -->
-                <div class="bg-[#075e54] px-4 py-3 flex items-center gap-3">
+        <!-- Chat Mockup -->
+        <div class="max-w-lg mx-auto px-5 pb-20 md:pb-28 relative z-10">
+            <div class="mt-10 rounded-2xl overflow-hidden mockup-shadow bg-white">
+                <!-- WhatsApp header -->
+                <div class="bg-[#075e54] px-4 py-2.5 flex items-center gap-3">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" class="opacity-60"><path d="M15 18l-6-6 6-6"/></svg>
                     <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-bold">M</div>
-                    <div>
-                        <p class="text-white text-sm font-semibold">Mom</p>
-                        <p class="text-white/60 text-[10px]">online</p>
+                    <div class="flex-1">
+                        <p class="text-white text-[13px] font-semibold">Mom</p>
+                        <p class="text-white/50 text-[10px]">online</p>
                     </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" class="opacity-40"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                 </div>
-                <!-- Chat messages -->
-                <div class="p-5 bg-[#efeae2] flex flex-col gap-2.5 min-h-[220px] sm:min-h-[260px]">
-                    <div class="msg-bubble msg-them self-start" style="animation-delay:0.1s">Beta, kab aa rahe ho? 🏠</div>
-                    <div class="msg-bubble msg-them self-start" style="animation-delay:0.3s">Favourite khaana banaya hai tere liye</div>
-                    <div class="msg-bubble msg-me self-end" style="animation-delay:0.5s">Aa raha hu mummy, 20 min! ❤️</div>
-                    <div class="msg-bubble msg-them self-start" style="animation-delay:0.7s">Drive safe beta</div>
-
-                    <!-- AI hint -->
-                    <div class="mt-3 self-center max-w-[85%] bg-white border border-indigo-100 rounded-xl px-4 py-3 flex items-start gap-2.5 shadow-sm" style="animation: msgIn 0.5s cubic-bezier(0.16,1,0.3,1) 1.2s both">
-                        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 mt-0.5">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+                <!-- Messages -->
+                <div class="p-4 bg-[#efeae2] flex flex-col gap-2 min-h-[200px]">
+                    <div class="msg-bubble msg-them self-start">Beta, kab aa rahe ho? 🏠</div>
+                    <div class="msg-bubble msg-them self-start">Favourite khaana banaya hai</div>
+                    <div class="msg-bubble msg-me self-end">Aa raha hu mummy, 20 min! ❤️</div>
+                    <div class="msg-bubble msg-them self-start">Drive safe beta</div>
+                    <!-- AI bar -->
+                    <div class="mt-2 bg-white border border-gray-200 rounded-lg px-3 py-2.5 flex items-center gap-2 self-stretch">
+                        <div class="w-6 h-6 rounded-md bg-indigo-100 flex items-center justify-center shrink-0">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
                         </div>
-                        <div>
-                            <p class="text-xs font-semibold text-gray-900 mb-0.5">Ask AI</p>
-                            <p class="text-[11px] text-gray-500 leading-relaxed">"Mummy ne pichli baar kya banaya tha?"</p>
-                        </div>
+                        <span class="text-[11px] text-gray-400 flex-1">Ask AI: "Mummy ne last time kya banaya?"</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
                     </div>
                 </div>
             </div>
-
-            <!-- Floating badges -->
-            <div class="absolute -top-4 -right-2 sm:-right-6 float-badge text-indigo-600" style="animation-delay: -1s;">
+            <!-- Floating labels -->
+            <div class="absolute -top-2 right-2 sm:right-0 bg-white border border-gray-100 rounded-xl px-3 py-2 text-[11px] font-bold text-indigo-600 shadow-md float-label">
                 12,847 messages
             </div>
-            <div class="absolute -bottom-4 -left-2 sm:-left-6 float-badge text-purple-600" style="animation-delay: -3s;">
-                AI powered
+            <div class="absolute -bottom-2 left-2 sm:left-0 bg-white border border-gray-100 rounded-xl px-3 py-2 text-[11px] font-bold text-purple-600 shadow-md float-label" style="animation-delay:-2s">
+                AI-powered
             </div>
-        </div>
-    </section>
-
-    <!-- Trust strip / social proof -->
-    <section class="py-6 border-y border-gray-100 bg-white overflow-hidden">
-        <div class="flex items-center gap-8 whitespace-nowrap ticker-inner">
-            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Trusted by 500+ users</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">Private & Secure</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">Works with iOS & Android exports</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">Powered by Claude AI</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">No data leaves your server</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Trusted by 500+ users</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">Private & Secure</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">Works with iOS & Android exports</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">Powered by Claude AI</span>
-            <span class="text-gray-300">|</span>
-            <span class="text-xs font-medium text-gray-400">No data leaves your server</span>
         </div>
     </section>
 
     <!-- Features -->
-    <section id="features" class="py-20 md:py-28 px-6 bg-white">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-14">
-                <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-3">Features</p>
-                <h2 class="text-3xl md:text-[42px] font-extrabold tracking-tight mb-4 leading-tight">Everything you need to<br class="hidden md:block"> relive your conversations</h2>
-                <p class="text-base text-gray-500 max-w-lg mx-auto">Not just a viewer. A way to search, rediscover, and talk to the messages that matter most.</p>
+    <section id="features" class="py-20 md:py-24 px-5 bg-white">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-indigo-600 mb-2">Features</p>
+                <h2 class="text-[28px] md:text-[36px] font-extrabold tracking-tight leading-tight">Everything to relive your chats</h2>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-5">
+            <div class="grid md:grid-cols-3 gap-4">
                 <div class="feat-card">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center mb-4">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <div class="w-9 h-9 rounded-lg bg-indigo-50 flex items-center justify-center mb-3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </div>
-                    <h3 class="font-bold text-base mb-2 text-gray-900">Beautiful viewer</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">WhatsApp-style bubbles with photos, videos, voice notes all playing inline. Feels like the real thing.</p>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Beautiful viewer</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">WhatsApp-style bubbles with photos, videos, voice notes — all inline.</p>
                 </div>
                 <div class="feat-card">
-                    <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-4">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+                    <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center mb-3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
                     </div>
-                    <h3 class="font-bold text-base mb-2 text-gray-900">Talk to your history</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Ask anything. AI reads thousands of messages and answers with citations. Like a friend who remembers everything.</p>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Talk to your history</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Ask AI anything. It reads thousands of messages and answers with citations.</p>
                 </div>
                 <div class="feat-card">
-                    <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center mb-4">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <div class="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center mb-3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </div>
-                    <h3 class="font-bold text-base mb-2 text-gray-900">Lightning search</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Search by keyword, sender, date. Filter by media, links, stickers. Jump to any message instantly.</p>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Lightning search</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Search by keyword, sender, date. Filter by media, links, stickers.</p>
                 </div>
                 <div class="feat-card">
-                    <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-4">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+                    <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center mb-3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
                     </div>
-                    <h3 class="font-bold text-base mb-2 text-gray-900">Rich analytics</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Who texts more. Activity patterns. First-message dates. Discover things you never noticed.</p>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Rich analytics</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Who texts more, activity patterns, first-message dates. Discover insights.</p>
                 </div>
                 <div class="feat-card">
-                    <div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center mb-4">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+                    <div class="w-9 h-9 rounded-lg bg-pink-50 flex items-center justify-center mb-3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
                     </div>
-                    <h3 class="font-bold text-base mb-2 text-gray-900">Media gallery</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Every photo, video, sticker in a clean grid. Click to jump back to the moment it was shared.</p>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Media gallery</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Every photo, video, sticker in a grid. Click to jump to the moment.</p>
                 </div>
                 <div class="feat-card">
-                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center mb-3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                     </div>
-                    <h3 class="font-bold text-base mb-2 text-gray-900">Private by design</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Your chats live on your own server. Encrypted API keys. We never read your conversations.</p>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Private by design</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Your chats stay on your server. Encrypted keys. We never read them.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- How it works -->
-    <section id="how-it-works" class="py-20 md:py-28 px-6 bg-[#fafafa]">
-        <div class="max-w-5xl mx-auto">
-            <div class="text-center mb-14">
-                <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-3">How it works</p>
-                <h2 class="text-3xl md:text-[42px] font-extrabold tracking-tight mb-4 leading-tight">From export to AI<br class="hidden md:block"> in 30 seconds</h2>
+    <section id="how-it-works" class="py-20 md:py-24 px-5 bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-indigo-600 mb-2">How it works</p>
+                <h2 class="text-[28px] md:text-[36px] font-extrabold tracking-tight leading-tight">Export to AI in 30 seconds</h2>
             </div>
-            <div class="grid md:grid-cols-3 gap-8 relative">
-                <!-- Connector line (desktop only) -->
-                <div class="hidden md:block step-connector"></div>
-
-                <div class="text-center relative">
-                    <div class="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-5 text-xl font-extrabold text-indigo-600 shadow-sm">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                    </div>
-                    <h3 class="font-bold text-lg mb-2">Export from WhatsApp</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Tap contact > Export Chat > Attach Media. You get a .zip file ready to upload.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="step-num mx-auto mb-4">1</div>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Export from WhatsApp</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Tap contact &gt; Export Chat &gt; Attach Media. You get a .zip file.</p>
                 </div>
-                <div class="text-center relative">
-                    <div class="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-5 text-xl font-extrabold text-indigo-600 shadow-sm">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    </div>
-                    <h3 class="font-bold text-lg mb-2">Drop it into Kotha</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Drag-and-drop the zip. We auto-detect iOS and Android formats in seconds.</p>
+                <div class="text-center">
+                    <div class="step-num mx-auto mb-4">2</div>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Drop it into Kotha</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Drag-and-drop the zip or folder. Auto-detects iOS &amp; Android formats.</p>
                 </div>
-                <div class="text-center relative">
-                    <div class="w-16 h-16 rounded-2xl bg-white border border-gray-200 flex items-center justify-center mx-auto mb-5 text-xl font-extrabold text-indigo-600 shadow-sm">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
-                    </div>
-                    <h3 class="font-bold text-lg mb-2">Browse. Ask. Relive.</h3>
-                    <p class="text-gray-500 text-sm leading-relaxed">Scroll the timeline, search any keyword, or ask AI — it remembers everything.</p>
+                <div class="text-center">
+                    <div class="step-num mx-auto mb-4">3</div>
+                    <h3 class="font-semibold text-[15px] mb-1.5">Browse. Ask. Relive.</h3>
+                    <p class="text-gray-500 text-[13px] leading-relaxed">Scroll the timeline, search keywords, or ask AI — it remembers everything.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Pricing -->
-    <section id="pricing" class="py-20 md:py-28 px-6 bg-white">
-        <div class="max-w-5xl mx-auto">
-            <div class="text-center mb-14">
-                <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-3">Pricing</p>
-                <h2 class="text-3xl md:text-[42px] font-extrabold tracking-tight mb-4 leading-tight">Free to view.<br class="md:hidden"> Pay only for AI.</h2>
-                <p class="text-base text-gray-500 max-w-md mx-auto">Try everything free. Keep the viewer forever, upgrade when you need unlimited AI.</p>
+    <section id="pricing" class="py-20 md:py-24 px-5 bg-white">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-indigo-600 mb-2">Pricing</p>
+                <h2 class="text-[28px] md:text-[36px] font-extrabold tracking-tight leading-tight">Free to view. Pay only for AI.</h2>
+                <p class="text-[14px] text-gray-500 mt-3 max-w-sm mx-auto">Try everything free. Keep the viewer forever, or upgrade for unlimited AI.</p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto items-start">
+            <div class="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto items-start">
                 <!-- Free -->
                 <div class="price-card">
-                    <h3 class="font-bold text-lg mb-1">Free</h3>
-                    <p class="text-xs text-gray-500 mb-5">Viewer forever</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-extrabold">$0</span>
-                    </div>
-                    <ul class="space-y-2.5 text-sm text-gray-600 mb-7">
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Unlimited chat imports</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Beautiful chat viewer</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Search, filters, analytics</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>24-hour AI trial</span></li>
+                    <h3 class="font-bold text-[16px] mb-0.5">Free</h3>
+                    <p class="text-[11px] text-gray-400 mb-4">Viewer forever</p>
+                    <div class="mb-5"><span class="text-3xl font-extrabold">$0</span></div>
+                    <ul class="space-y-2 text-[13px] text-gray-600 mb-6">
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited chat imports</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Beautiful chat viewer</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Search, filters, analytics</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>24-hour AI trial</li>
                     </ul>
-                    <a href="/login.html#signup" class="price-cta block text-center font-semibold text-sm py-3 rounded-xl bg-gray-100 text-gray-800 hover:bg-gray-200 transition">Start free</a>
+                    <a href="/login.html#signup" class="price-cta block text-center font-semibold text-[13px] py-2.5 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200 transition">Start free</a>
                 </div>
-
                 <!-- Pro -->
                 <div class="price-card featured relative">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm shadow-indigo-300">Popular</div>
-                    <h3 class="font-bold text-lg mb-1">Pro</h3>
-                    <p class="text-xs text-gray-400 mb-5">Unlimited AI memory</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-extrabold">$5</span>
-                        <span class="text-gray-400 text-sm">/mo</span>
-                    </div>
-                    <ul class="space-y-2.5 text-sm text-gray-300 mb-7">
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Everything in Free</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Unlimited AI conversations</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>PDF memory book exports</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Cancel anytime</span></li>
+                    <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full">Popular</div>
+                    <h3 class="font-bold text-[16px] mb-0.5">Pro</h3>
+                    <p class="text-[11px] text-gray-400 mb-4">Unlimited AI</p>
+                    <div class="mb-5"><span class="text-3xl font-extrabold">$5</span><span class="text-gray-400 text-[13px]">/mo</span></div>
+                    <ul class="space-y-2 text-[13px] text-gray-300 mb-6">
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Everything in Free</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Unlimited AI conversations</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>PDF memory book export</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-400 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Cancel anytime</li>
                     </ul>
-                    <a href="/login.html#signup" class="price-cta block text-center font-semibold text-sm py-3 rounded-xl transition hover:opacity-90">Get Pro</a>
+                    <a href="/login.html#signup" class="price-cta block text-center font-semibold text-[13px] py-2.5 rounded-lg transition hover:opacity-90">Get Pro</a>
                 </div>
-
                 <!-- Lifetime -->
                 <div class="price-card">
-                    <h3 class="font-bold text-lg mb-1">Lifetime</h3>
-                    <p class="text-xs text-gray-500 mb-5">Pay once, own forever</p>
-                    <div class="mb-6">
-                        <span class="text-4xl font-extrabold">$49</span>
-                        <span class="text-gray-400 text-sm"> once</span>
-                    </div>
-                    <ul class="space-y-2.5 text-sm text-gray-600 mb-7">
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Everything in Pro</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Forever access</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>All future features included</span></li>
-                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span>Priority support</span></li>
+                    <h3 class="font-bold text-[16px] mb-0.5">Lifetime</h3>
+                    <p class="text-[11px] text-gray-400 mb-4">Pay once, own forever</p>
+                    <div class="mb-5"><span class="text-3xl font-extrabold">$49</span><span class="text-gray-400 text-[13px]"> once</span></div>
+                    <ul class="space-y-2 text-[13px] text-gray-600 mb-6">
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Everything in Pro</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Forever access</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>All future features</li>
+                        <li class="flex items-start gap-2"><svg class="w-4 h-4 mt-0.5 text-green-500 shrink-0" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Priority support</li>
                     </ul>
-                    <a href="/login.html#signup" class="price-cta block text-center font-semibold text-sm py-3 rounded-xl bg-gray-100 text-gray-800 hover:bg-gray-200 transition">Buy lifetime</a>
+                    <a href="/login.html#signup" class="price-cta block text-center font-semibold text-[13px] py-2.5 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200 transition">Buy lifetime</a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Final CTA -->
-    <section class="py-24 md:py-32 px-6 bg-gray-900 text-white text-center relative overflow-hidden">
-        <!-- Background glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-indigo-500/10 blur-[100px]"></div>
-
-        <div class="max-w-2xl mx-auto relative z-10">
-            <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-5">
-                The chats you'll never<br>want to lose.
+    <!-- CTA -->
+    <section class="py-20 md:py-28 px-5 bg-gray-950 text-white text-center">
+        <div class="max-w-xl mx-auto">
+            <h2 class="text-[28px] md:text-[40px] font-extrabold tracking-tight leading-tight mb-4">
+                The chats you'll never want to lose.
             </h2>
-            <p class="text-base md:text-lg text-gray-400 mb-10 max-w-md mx-auto">
-                Start with a single export. Watch your memories come alive.
-            </p>
-            <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-white text-gray-900 font-bold text-sm px-6 py-3.5 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
+            <p class="text-[14px] text-gray-400 mb-8">Start with a single export. Watch your memories come alive.</p>
+            <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-white text-gray-900 font-semibold text-[14px] px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all">
                 Get started — it's free
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </a>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="py-10 px-6 bg-gray-950 text-gray-400">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5">
-            <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+    <footer class="py-8 px-5 bg-gray-950 border-t border-gray-800/50 text-gray-500">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded bg-indigo-600 flex items-center justify-center">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
                 </div>
-                <span class="font-bold text-white text-sm">Kotha</span>
-                <span class="text-xs text-gray-500 hidden sm:inline">— Your memories, preserved.</span>
+                <span class="font-semibold text-white text-[13px]">Kotha</span>
             </div>
-            <div class="flex items-center gap-6 text-xs font-medium">
+            <div class="flex items-center gap-5 text-[12px]">
                 <a href="#features" class="hover:text-white transition">Features</a>
                 <a href="#pricing" class="hover:text-white transition">Pricing</a>
                 <a href="/login.html" class="hover:text-white transition">Login</a>
             </div>
         </div>
-        <div class="max-w-6xl mx-auto mt-6 pt-5 border-t border-gray-800/50 text-center text-[11px] text-gray-600">
+        <div class="max-w-5xl mx-auto mt-5 pt-4 border-t border-gray-800/40 text-center text-[11px] text-gray-600">
             &copy; <span id="year"></span> Kotha. Made with care.
         </div>
     </footer>
 
     <script>
         document.getElementById('year').textContent = new Date().getFullYear();
-
-        // If already logged in, swap nav CTAs
         (async () => {
             try {
                 const r = await fetch('/api/auth/me');
