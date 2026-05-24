@@ -164,6 +164,7 @@ app.use('/api/admin', adminRouter);
 
 // /app → main viewer (app.html), redirect to login if not authed
 app.get('/app', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     if (!req.user) return res.redirect('/login.html');
     res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
