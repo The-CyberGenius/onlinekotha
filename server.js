@@ -266,7 +266,6 @@ const demoUsage = new Map(); // IP → { count, history[] }
 const demoLimiter = rateLimit({
     windowMs: 60_000,
     max: 12,
-    keyGenerator: req => req.ip,
     message: { error: 'Too fast. Wait a moment.' },
     validate: { trustProxy: false, xForwardedForHeader: false },
 });
