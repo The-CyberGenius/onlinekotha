@@ -357,7 +357,8 @@
             <span class="font-extrabold text-[17px] tracking-tight text-white">Kotha</span>
         </a>
         <div class="flex items-center gap-2">
-            <a href="/login.html" class="hidden sm:inline-flex text-[13px] font-semibold text-zinc-400 hover:text-white transition px-4 py-2">Log in</a>
+            <a href="/login.html" class="hidden sm:inline-flex text-[13px] font-semibold text-zinc-400 hover:text-white transition px-4 py-2" id="nav-login">Log in</a>
+            <button id="nav-logout-btn" class="hidden text-[13px] font-semibold text-zinc-400 hover:text-red-400 transition px-4 py-2">Logout</button>
             <a href="/login.html#signup" id="nav-cta" class="cta-primary text-white text-[13px] font-bold px-5 py-2.5 rounded-xl inline-flex items-center gap-2">
                 Get Started
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
@@ -1246,6 +1247,17 @@ window.addEventListener('scroll', () => {
                     a.href = dest;
                 }
             });
+            // Show logout button, hide login link
+            const navLogin = document.getElementById('nav-login');
+            const navLogout = document.getElementById('nav-logout-btn');
+            if (navLogin) navLogin.style.display = 'none';
+            if (navLogout) {
+                navLogout.classList.remove('hidden');
+                navLogout.addEventListener('click', async () => {
+                    try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch {}
+                    window.location.reload();
+                });
+            }
         }
     } catch {}
 })();
