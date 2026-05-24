@@ -3,606 +3,824 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kotha — Revive conversations with the people you love</title>
-    <meta name="description" content="Bring your WhatsApp memories back to life. Upload old chats, relive moments, and talk to AI that speaks exactly like your loved ones.">
-    <meta name="theme-color" content="#0a0a0a">
+    <title>Kotha — Where conversations come alive</title>
+    <meta name="description" content="Upload your WhatsApp chats. AI learns exactly how your loved ones talk — their words, humor, style. Then chat with them again, anytime.">
+    <meta property="og:title" content="Kotha — Where conversations come alive">
+    <meta property="og:description" content="AI that talks exactly like the people you miss. Upload WhatsApp chats, relive memories, start new conversations.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0a0a0f">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="manifest" href="/manifest.json">
     <script src="/js/tailwind.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', -apple-system, sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0a0a0a; color: #fafafa; overflow-x: hidden; }
-
-        /* === HERO GRADIENT === */
-        .hero-gradient {
-            background:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 119, 198, 0.3), transparent),
-                radial-gradient(ellipse 60% 40% at 70% 50%, rgba(255, 107, 107, 0.08), transparent),
-                radial-gradient(ellipse 50% 60% at 20% 60%, rgba(78, 205, 196, 0.06), transparent);
+        :root {
+            --bg: #0a0a0f;
+            --surface: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.06);
+            --accent: #818cf8;
+            --accent-deep: #6366f1;
+            --warm: #f59e0b;
+            --rose: #f472b6;
+            --emerald: #34d399;
         }
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: var(--bg); color: #f4f4f5; overflow-x: hidden; }
 
-        /* === FLOATING PARTICLES === */
-        .particles {
-            position: absolute;
+        /* ── Grain texture ── */
+        body::after {
+            content: '';
+            position: fixed;
             inset: 0;
-            overflow: hidden;
+            opacity: 0.015;
             pointer-events: none;
-        }
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            animation: drift linear infinite;
-            opacity: 0.4;
-        }
-        @keyframes drift {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.4; }
-            90% { opacity: 0.4; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
 
-        /* === GLOW ORB === */
+        /* ── Hero mesh gradient ── */
+        .hero-mesh {
+            background:
+                radial-gradient(ellipse 60% 50% at 50% 0%, rgba(99,102,241,0.15), transparent 70%),
+                radial-gradient(ellipse 40% 40% at 80% 20%, rgba(244,114,182,0.08), transparent 60%),
+                radial-gradient(ellipse 50% 50% at 20% 80%, rgba(52,211,153,0.04), transparent 60%);
+        }
+
+        /* ── Ambient orbs ── */
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.5;
-            animation: orb-float 12s ease-in-out infinite alternate;
+            filter: blur(100px);
+            pointer-events: none;
+            will-change: transform;
+            animation: orb-drift 20s ease-in-out infinite alternate;
         }
-        @keyframes orb-float {
+        @keyframes orb-drift {
             0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(20px, -30px) scale(1.1); }
-            100% { transform: translate(-10px, 20px) scale(0.95); }
+            33% { transform: translate(30px, -20px) scale(1.05); }
+            66% { transform: translate(-20px, 15px) scale(0.97); }
+            100% { transform: translate(10px, -10px) scale(1.02); }
         }
 
-        /* === ANIMATIONS === */
-        @keyframes fade-in-up {
-            from { opacity: 0; transform: translateY(40px); }
+        /* ── Animations ── */
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(32px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes scale-in {
-            from { opacity: 0; transform: scale(0.9); }
+        @keyframes scale-up {
+            from { opacity: 0; transform: scale(0.92); }
             to { opacity: 1; transform: scale(1); }
         }
-        @keyframes float-bubble {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        @keyframes slide-right {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(120, 119, 198, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(120, 119, 198, 0.6); }
+        @keyframes slide-left {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-        @keyframes typewriter {
-            from { width: 0; }
-            to { width: 100%; }
+        @keyframes gentle-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
-        @keyframes blink {
-            50% { border-color: transparent; }
+        @keyframes blink-caret {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        .animate-fade-up { animation: fade-in-up 0.8s ease-out forwards; }
-        .animate-scale { animation: scale-in 0.6s ease-out forwards; }
-        .animate-float { animation: float-bubble 4s ease-in-out infinite; }
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-        .delay-400 { animation-delay: 400ms; }
-        .delay-500 { animation-delay: 500ms; }
-        .delay-600 { animation-delay: 600ms; }
+        .anim-fade-up { animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .anim-scale { animation: scale-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .anim-float { animation: gentle-float 5s ease-in-out infinite; }
+        .d1 { animation-delay: 0.1s; }
+        .d2 { animation-delay: 0.2s; }
+        .d3 { animation-delay: 0.3s; }
+        .d4 { animation-delay: 0.4s; }
+        .d5 { animation-delay: 0.5s; }
+        .d6 { animation-delay: 0.6s; }
 
-        /* === REVEAL ON SCROLL === */
+        /* ── Scroll reveal ── */
         .reveal {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.7s ease, transform 0.7s ease;
+            transform: translateY(24px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .reveal.visible { opacity: 1; transform: none; }
+        .reveal-delay-1 { transition-delay: 80ms; }
+        .reveal-delay-2 { transition-delay: 160ms; }
+        .reveal-delay-3 { transition-delay: 240ms; }
 
-        /* === BUTTONS === */
-        .btn-glow {
-            background: linear-gradient(135deg, #7877c6 0%, #6c5ce7 50%, #a855f7 100%);
-            box-shadow: 0 0 20px rgba(120, 119, 198, 0.4), 0 4px 20px rgba(108, 92, 231, 0.3);
-            transition: all 0.3s ease;
+        /* ── Primary CTA ── */
+        .cta-primary {
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 4px 24px rgba(99,102,241,0.25);
             position: relative;
             overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .btn-glow::before {
+        .cta-primary::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
             transform: translateX(-100%);
-            transition: transform 0.5s;
+            transition: none;
         }
-        .btn-glow:hover::before { transform: translateX(100%); }
-        .btn-glow:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 0 40px rgba(120, 119, 198, 0.6), 0 8px 30px rgba(108, 92, 231, 0.4);
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 8px 40px rgba(99,102,241,0.35);
+        }
+        .cta-primary:hover::after {
+            animation: shimmer 0.6s ease forwards;
         }
 
-        /* === FEATURE CARD === */
-        .feature-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px;
-            padding: 2.5rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+        /* ── Glass card ── */
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(120,119,198,0.5), transparent);
-            opacity: 0;
-            transition: opacity 0.4s;
+        .glass-card:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: rgba(129,140,248,0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5);
         }
-        .feature-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(120, 119, 198, 0.3);
-            transform: translateY(-8px);
-            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5), 0 0 30px -10px rgba(120, 119, 198, 0.2);
-        }
-        .feature-card:hover::before { opacity: 1; }
 
-        /* === CHAT MOCKUP === */
-        .chat-mockup {
-            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+        /* ── Chat mockup ── */
+        .mockup-frame {
+            background: linear-gradient(160deg, #141420, #0f0f1a);
             border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 28px;
-            box-shadow: 0 50px 100px -30px rgba(0,0,0,0.8), 0 0 40px rgba(120,119,198,0.1);
+            border-radius: 24px;
+            box-shadow:
+                0 60px 120px -30px rgba(0,0,0,0.7),
+                0 0 80px -20px rgba(99,102,241,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.05);
         }
-        .chat-bubble-left {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 18px 18px 18px 4px;
+        .msg-user {
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            border-radius: 16px 16px 4px 16px;
         }
-        .chat-bubble-right {
-            background: linear-gradient(135deg, #6c5ce7, #7877c6);
-            border-radius: 18px 18px 4px 18px;
-        }
-        .chat-bubble-ai {
-            background: linear-gradient(135deg, rgba(78,205,196,0.15), rgba(120,119,198,0.15));
-            border: 1px solid rgba(78,205,196,0.2);
-            border-radius: 18px 18px 18px 4px;
+        .msg-ai {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 16px 16px 16px 4px;
         }
 
-        /* === TESTIMONIAL === */
-        .quote-mark {
-            font-size: 80px;
-            line-height: 1;
-            background: linear-gradient(135deg, #7877c6, #a855f7);
+        /* ── Typing cursor ── */
+        .cursor-blink {
+            display: inline-block;
+            width: 2px;
+            height: 14px;
+            background: var(--accent);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: blink-caret 0.8s step-end infinite;
+        }
+
+        /* ── Step number ── */
+        .step-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        /* ── Trust badge ── */
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        /* ── Gradient text utility ── */
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 900;
+            background-clip: text;
+        }
+        .gradient-text-warm {
+            background: linear-gradient(135deg, #f59e0b, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        /* === SMOOTH SCROLLBAR === */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        /* ── Pricing highlight ── */
+        .plan-highlight {
+            background: linear-gradient(160deg, rgba(99,102,241,0.08), rgba(129,140,248,0.03));
+            border: 1px solid rgba(99,102,241,0.2);
+        }
 
-        /* === RESPONSIVE === */
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+        /* ── Responsive ── */
         @media (max-width: 768px) {
-            .hero-title { font-size: 2.5rem !important; line-height: 1.1 !important; }
-            .feature-card { padding: 1.5rem; }
+            .hero-h1 { font-size: 2.5rem !important; letter-spacing: -0.02em; }
+            .hero-sub { font-size: 1rem !important; }
+            .mockup-frame { margin-inline: -8px; }
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- === PARTICLES BACKGROUND === -->
-    <div class="particles" id="particles"></div>
-
-    <!-- === NAV === -->
-    <nav class="fixed top-0 w-full z-50 transition-all duration-300" id="nav">
-        <div class="max-w-6xl mx-auto px-5 py-5 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7877c6] to-[#6c5ce7] flex items-center justify-center shadow-lg">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                </div>
-                <span class="font-extrabold text-lg tracking-tight">Kotha</span>
+<!-- ═══════════ NAV ═══════════ -->
+<nav class="fixed top-0 w-full z-50" id="nav">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5 group">
+            <div class="w-8 h-8 rounded-[10px] bg-gradient-to-br from-[#6366f1] to-[#818cf8] flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </div>
+            <span class="font-extrabold text-[17px] tracking-tight text-white">Kotha</span>
+        </a>
+        <div class="flex items-center gap-2">
+            <a href="/login.html" class="hidden sm:inline-flex text-[13px] font-semibold text-zinc-400 hover:text-white transition px-4 py-2">Log in</a>
+            <a href="/login.html#signup" id="nav-cta" class="cta-primary text-white text-[13px] font-bold px-5 py-2.5 rounded-xl inline-flex items-center gap-2">
+                Get Started
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </a>
-            <div class="flex items-center gap-3">
-                <a href="/login.html" class="text-sm font-medium text-gray-400 hover:text-white transition px-3 py-2 hidden sm:block">Log in</a>
-                <a href="/login.html#signup" class="btn-glow text-white text-sm font-bold px-5 py-2.5 rounded-xl">Get Started Free</a>
-            </div>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <!-- === HERO === -->
-    <section class="hero-gradient relative min-h-screen flex items-center justify-center px-5 pt-24 pb-16">
-        <!-- Orbs -->
-        <div class="orb w-[500px] h-[500px] bg-[#7877c6] top-[-10%] left-[10%] opacity-20"></div>
-        <div class="orb w-[400px] h-[400px] bg-[#ff6b6b] bottom-[10%] right-[5%] opacity-10" style="animation-delay: -4s;"></div>
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero-mesh relative min-h-screen flex items-center justify-center px-5 pt-28 pb-20 overflow-hidden">
+    <!-- Ambient orbs -->
+    <div class="orb w-[600px] h-[600px] bg-indigo-500/20 -top-[15%] left-[5%]"></div>
+    <div class="orb w-[400px] h-[400px] bg-pink-500/10 bottom-[5%] right-[0%]" style="animation-delay:-7s;animation-duration:25s;"></div>
+    <div class="orb w-[300px] h-[300px] bg-emerald-500/5 top-[60%] left-[50%]" style="animation-delay:-12s;animation-duration:18s;"></div>
 
-        <div class="max-w-5xl mx-auto text-center relative z-10">
-            <!-- Badge -->
-            <div class="animate-fade-up inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs font-semibold text-[#b8b5ff] mb-8 backdrop-blur-sm">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#7877c6] animate-pulse"></span>
-                AI that talks like the people you miss
-            </div>
+    <div class="max-w-5xl mx-auto text-center relative z-10">
+        <!-- Pill badge -->
+        <div class="anim-fade-up inline-flex items-center gap-2.5 bg-white/[0.04] border border-white/[0.08] rounded-full px-4 py-2 mb-8 backdrop-blur-sm">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+            </span>
+            <span class="text-[12px] font-semibold text-zinc-300 tracking-wide">AI-powered WhatsApp memories</span>
+        </div>
 
-            <!-- Title -->
-            <h1 class="hero-title animate-fade-up delay-100 text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-7" style="opacity:0">
-                Revive conversations<br>
-                <span class="bg-gradient-to-r from-[#7877c6] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">with the people you love</span>
-            </h1>
+        <!-- Headline -->
+        <h1 class="hero-h1 anim-fade-up d1 text-[3.2rem] sm:text-[3.8rem] md:text-[4.5rem] font-black tracking-[-0.03em] leading-[1.05] mb-6">
+            Their words,<br>
+            <span class="gradient-text">alive again.</span>
+        </h1>
 
-            <!-- Subtitle -->
-            <p class="animate-fade-up delay-200 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10" style="opacity:0">
-                Upload your old WhatsApp chats. Our AI learns how they talk — their words, their humor, their style.
-                Then chat with them again, <span class="text-white font-medium">anytime, anywhere.</span>
-            </p>
+        <!-- Sub-headline -->
+        <p class="hero-sub anim-fade-up d2 text-lg md:text-xl text-zinc-400 max-w-[560px] mx-auto leading-relaxed mb-10">
+            Upload your WhatsApp chats. AI learns exactly how they talk —
+            their humor, their slang, their love. Then <span class="text-white font-medium">chat with them, anytime.</span>
+        </p>
 
-            <!-- CTA -->
-            <div class="animate-fade-up delay-300 flex flex-col sm:flex-row gap-4 justify-center items-center mb-16" style="opacity:0">
-                <a href="/login.html#signup" class="btn-glow text-white px-8 py-4 rounded-2xl font-bold text-base inline-flex items-center gap-3 w-full sm:w-auto justify-center">
-                    Bring them back
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-                </a>
-                <span class="text-xs text-gray-500 font-medium">Free forever · No credit card</span>
-            </div>
+        <!-- CTA row -->
+        <div class="anim-fade-up d3 flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+            <a href="/login.html#signup" id="hero-cta" class="cta-primary text-white px-8 py-4 rounded-2xl font-bold text-[15px] inline-flex items-center gap-3 w-full sm:w-auto justify-center">
+                Start talking
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#how" class="text-[13px] font-semibold text-zinc-400 hover:text-white transition inline-flex items-center gap-2 px-4 py-3">
+                See how it works
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+            </a>
+        </div>
 
-            <!-- CHAT MOCKUP -->
-            <div class="animate-scale delay-400 max-w-lg mx-auto" style="opacity:0">
-                <div class="chat-mockup p-5 sm:p-6">
-                    <!-- Header -->
-                    <div class="flex items-center gap-3 mb-5 pb-4 border-b border-white/5">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white font-bold text-sm">M</div>
-                        <div>
-                            <p class="text-sm font-bold text-white">Maa</p>
-                            <p class="text-[10px] text-emerald-400 font-medium">Online · Powered by AI</p>
+        <!-- Trust line -->
+        <p class="anim-fade-up d4 text-[12px] text-zinc-600 font-medium tracking-wide mb-16">Free forever · No credit card · Your data stays private</p>
+
+        <!-- ── Chat Mockup ── -->
+        <div class="anim-scale d5 max-w-[420px] mx-auto">
+            <div class="mockup-frame p-5 anim-float" style="animation-duration:6s;">
+                <!-- Chat header -->
+                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]">
+                    <div class="relative">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-pink-500/20">M</div>
+                        <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#141420]"></div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-[13px] font-bold text-white">Maa</p>
+                        <p class="text-[10px] text-emerald-400/80 font-medium">Online · AI</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-emerald-400/10 px-2.5 py-1 rounded-full">
+                        <div class="relative w-1.5 h-1.5">
+                            <div class="absolute inset-0 bg-emerald-400 rounded-full"></div>
+                            <div class="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-75"></div>
                         </div>
-                        <div class="ml-auto flex items-center gap-1">
-                            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                            <span class="text-[10px] text-emerald-400 font-semibold">LIVE</span>
+                        <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Live</span>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                <div class="space-y-3" id="hero-chat">
+                    <!-- User message -->
+                    <div class="flex justify-end chat-msg" style="opacity:0;">
+                        <div class="msg-user px-4 py-2.5 max-w-[85%]">
+                            <p class="text-[13px] text-white leading-relaxed">Maa wo recipe batao na, aloo ke parathe wali</p>
+                            <p class="text-[9px] text-white/40 text-right mt-1.5">2:34 PM ✓✓</p>
                         </div>
                     </div>
+                    <!-- AI response -->
+                    <div class="flex items-end gap-2 chat-msg" style="opacity:0;">
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold shrink-0">M</div>
+                        <div class="msg-ai px-4 py-2.5 max-w-[85%]">
+                            <p class="text-[13px] text-zinc-200 leading-relaxed" id="ai-typed-text"></p>
+                            <p class="text-[9px] text-zinc-500 text-right mt-1.5">2:34 PM · <span class="text-indigo-400">AI</span></p>
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Messages -->
+                <!-- Input bar -->
+                <div class="mt-4 flex items-center gap-2 bg-white/[0.04] rounded-full px-4 py-2.5 border border-white/[0.04]">
+                    <span class="text-[13px] text-zinc-600 flex-1">Type a message...</span>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TRUST BAR ═══════════ -->
+<section class="border-y border-white/[0.04] bg-white/[0.01]">
+    <div class="max-w-5xl mx-auto px-5 py-10 flex flex-wrap items-center justify-center gap-10 md:gap-20">
+        <div class="text-center">
+            <p class="text-[28px] font-black text-white tracking-tight">10K<span class="text-indigo-400">+</span></p>
+            <p class="text-[11px] text-zinc-500 font-semibold tracking-wide mt-1">Messages Preserved</p>
+        </div>
+        <div class="hidden md:block w-px h-10 bg-white/[0.06]"></div>
+        <div class="text-center">
+            <p class="text-[28px] font-black text-white tracking-tight">500<span class="text-indigo-400">+</span></p>
+            <p class="text-[11px] text-zinc-500 font-semibold tracking-wide mt-1">Memories Relived</p>
+        </div>
+        <div class="hidden md:block w-px h-10 bg-white/[0.06]"></div>
+        <div class="text-center">
+            <p class="text-[28px] font-black text-white tracking-tight">100<span class="text-emerald-400">%</span></p>
+            <p class="text-[11px] text-zinc-500 font-semibold tracking-wide mt-1">Private & Encrypted</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ EMOTIONAL HOOK ═══════════ -->
+<section class="py-24 md:py-32 px-5">
+    <div class="max-w-3xl mx-auto text-center reveal">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500/10 to-pink-500/10 border border-amber-500/10 mb-8">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <p class="text-[26px] md:text-[34px] font-bold leading-[1.35] tracking-tight text-zinc-100 mb-5">
+            Some conversations are<br>too precious to lose.
+        </p>
+        <p class="text-[17px] text-zinc-500 leading-relaxed max-w-lg mx-auto">
+            Kotha brings them back — in their voice, their style, their warmth. For everyone who wants one more conversation.
+        </p>
+    </div>
+</section>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section id="how" class="py-24 md:py-32 px-5 relative">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-16 reveal">
+            <p class="text-[11px] font-bold text-indigo-400 uppercase tracking-[0.15em] mb-4">How it works</p>
+            <h2 class="text-[36px] md:text-[44px] font-black tracking-tight leading-tight">Three steps.<br>Under a minute.</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-5">
+            <!-- Step 1 -->
+            <div class="glass-card p-7 reveal">
+                <div class="step-number bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-5">1</div>
+                <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Upload your chat</h3>
+                <p class="text-[14px] text-zinc-400 leading-relaxed">Export any WhatsApp conversation as .zip. Drag and drop it. All messages, media, voice notes — everything preserved.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="glass-card p-7 reveal reveal-delay-1">
+                <div class="step-number bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-5">2</div>
+                <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">AI learns their voice</h3>
+                <p class="text-[14px] text-zinc-400 leading-relaxed">Our AI reads every message — their slang, emoji habits, humor, the way they text at 2 AM. It becomes them.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="glass-card p-7 reveal reveal-delay-2">
+                <div class="step-number bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">3</div>
+                <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Talk to them again</h3>
+                <p class="text-[14px] text-zinc-400 leading-relaxed">Start a conversation. They reply in their exact style — same tone, same energy, same love. Like they never left.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ FEATURE: PERSONALITY CLONE ═══════════ -->
+<section class="py-24 md:py-32 px-5 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/[0.02] to-transparent pointer-events-none"></div>
+    <div class="max-w-5xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <!-- Text -->
+            <div class="reveal">
+                <div class="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/15 rounded-full px-3.5 py-1.5 mb-5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+                    <span class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Personality Clone</span>
+                </div>
+                <h2 class="text-[32px] md:text-[38px] font-black tracking-tight leading-tight mb-5">Not generic AI.<br><span class="gradient-text">Exactly how they talk.</span></h2>
+                <p class="text-[15px] text-zinc-400 leading-relaxed mb-6">
+                    Kotha doesn't give robotic answers. It studies thousands of their real messages and responds in their exact way — their Hindi-English mix, their favorite emojis, their personality.
+                </p>
+                <div class="flex items-center gap-3 text-[13px] text-zinc-500">
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+                        <span>Same slang</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+                        <span>Same emojis</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>
+                        <span>Same vibe</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Visual -->
+            <div class="reveal reveal-delay-1">
+                <div class="glass-card p-5 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
                     <div class="space-y-3">
                         <div class="flex justify-end">
-                            <div class="chat-bubble-right px-4 py-2.5 max-w-[80%]">
-                                <p class="text-sm text-white">Maa wo recipe batao na, aloo ke parathe wali</p>
-                                <p class="text-[9px] text-white/50 text-right mt-1">2:34 PM</p>
+                            <div class="msg-user px-4 py-2.5 max-w-[80%]">
+                                <p class="text-[13px] text-white">Bhai trip plan karte hain next month</p>
                             </div>
                         </div>
                         <div class="flex items-end gap-2">
-                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">M</div>
-                            <div class="chat-bubble-ai px-4 py-2.5 max-w-[80%] animate-float" style="animation-duration: 5s;">
-                                <p class="text-sm text-gray-200">Beta aloo ubal ke mash kar lo, phir hara dhaniya, mirchi, namak aur ajwain daal do. Atte me thoda namak oil daalke gundhna. Bas! 😊</p>
-                                <p class="text-[9px] text-gray-500 text-right mt-1">2:34 PM · AI</p>
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-[8px] text-white font-bold shrink-0">R</div>
+                            <div class="msg-ai px-4 py-2.5 max-w-[80%]">
+                                <p class="text-[13px] text-zinc-200 leading-relaxed">Arre haan! Goa chalte hain bro, wahi plan karte hain jaise last time — sab 6 log 😂🔥</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <div class="msg-user px-4 py-2.5 max-w-[80%]">
+                                <p class="text-[13px] text-white">Buddi aa rha hai na? 😂</p>
+                            </div>
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-[8px] text-white font-bold shrink-0">R</div>
+                            <div class="msg-ai px-4 py-2.5 max-w-[80%]">
+                                <p class="text-[13px] text-zinc-200 leading-relaxed">Uska toh pata nahi bhai, uss din bola tha haan haan chalenge but tu jaanta hai uska 🤣</p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Input -->
-                    <div class="mt-5 flex items-center gap-2 bg-white/5 rounded-full px-4 py-2.5 border border-white/5">
-                        <input type="text" placeholder="Type a message..." class="bg-transparent text-sm text-gray-400 flex-1 outline-none" disabled>
-                        <div class="w-8 h-8 rounded-full bg-[#6c5ce7] flex items-center justify-center">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                        </div>
+                    <div class="mt-4 flex items-center justify-center gap-2 text-[10px] text-zinc-600">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+                        AI responding as "Rohit" · Learned from 4,230 messages
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- === SOCIAL PROOF BAR === -->
-    <section class="py-8 border-y border-white/5 bg-white/[0.01]">
-        <div class="max-w-4xl mx-auto px-5 flex flex-wrap items-center justify-center gap-8 md:gap-16 text-center">
-            <div>
-                <p class="text-2xl font-black text-white">10K+</p>
-                <p class="text-[11px] text-gray-500 font-medium">Messages Preserved</p>
-            </div>
-            <div class="w-px h-8 bg-white/10 hidden md:block"></div>
-            <div>
-                <p class="text-2xl font-black text-white">500+</p>
-                <p class="text-[11px] text-gray-500 font-medium">Memories Relived</p>
-            </div>
-            <div class="w-px h-8 bg-white/10 hidden md:block"></div>
-            <div>
-                <p class="text-2xl font-black text-white">100%</p>
-                <p class="text-[11px] text-gray-500 font-medium">Private & Secure</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- === EMOTIONAL HOOK === -->
-    <section class="py-24 px-5 relative">
-        <div class="max-w-4xl mx-auto text-center reveal">
-            <p class="quote-mark mb-4">"</p>
-            <p class="text-2xl md:text-3xl font-bold leading-relaxed text-gray-200 mb-6">
-                Some conversations are too precious to lose.<br>
-                <span class="text-gray-500">Kotha brings them back — in their voice, their style, their love.</span>
-            </p>
-            <p class="text-sm text-gray-500 font-medium">For everyone who misses someone's words</p>
-        </div>
-    </section>
-
-    <!-- === FEATURES === -->
-    <section id="features" class="py-24 px-5 relative">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16 reveal">
-                <p class="text-xs font-bold text-[#7877c6] uppercase tracking-widest mb-3">How it works</p>
-                <h2 class="text-4xl md:text-5xl font-black tracking-tight mb-5">Three steps to relive it all</h2>
-                <p class="text-gray-400 text-lg max-w-xl mx-auto">From forgotten zip file to living conversation in under a minute.</p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Step 1 -->
-                <div class="feature-card reveal">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#7877c6]/20 to-[#6c5ce7]/10 flex items-center justify-center mb-6 border border-[#7877c6]/20">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7877c6" stroke-width="1.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    </div>
-                    <div class="text-[#7877c6] text-xs font-bold mb-2">STEP 1</div>
-                    <h3 class="font-bold text-xl mb-3 text-white">Upload your chat</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Export any WhatsApp chat as .zip and drop it here. All media included — photos, voice notes, videos.</p>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="feature-card reveal" style="transition-delay: 100ms;">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#f472b6]/20 to-[#ec4899]/10 flex items-center justify-center mb-6 border border-[#f472b6]/20">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="1.5" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
-                    </div>
-                    <div class="text-[#f472b6] text-xs font-bold mb-2">STEP 2</div>
-                    <h3 class="font-bold text-xl mb-3 text-white">AI learns their voice</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Our AI reads every message — learning their slang, their humor, their way of saying things. Perfectly.</p>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="feature-card reveal" style="transition-delay: 200ms;">
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#4ecdc4]/20 to-[#26a69a]/10 flex items-center justify-center mb-6 border border-[#4ecdc4]/20">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4ecdc4" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    </div>
-                    <div class="text-[#4ecdc4] text-xs font-bold mb-2">STEP 3</div>
-                    <h3 class="font-bold text-xl mb-3 text-white">Talk to them again</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">Start chatting. They respond in their style — same emojis, same tone, same energy. Like they're right here.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- === USE CASES === -->
-    <section class="py-24 px-5 relative bg-gradient-to-b from-transparent via-[#7877c6]/[0.03] to-transparent">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-16 reveal">
-                <h2 class="text-4xl md:text-5xl font-black tracking-tight mb-5">Made for moments<br>that matter</h2>
-            </div>
-
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div class="feature-card text-center reveal">
-                    <div class="text-4xl mb-4">💕</div>
-                    <h4 class="font-bold text-white mb-2">Lost loved ones</h4>
-                    <p class="text-gray-500 text-xs leading-relaxed">Hear their words again. Feel their presence through the conversations you shared.</p>
-                </div>
-                <div class="feature-card text-center reveal" style="transition-delay:80ms;">
-                    <div class="text-4xl mb-4">🌍</div>
-                    <h4 class="font-bold text-white mb-2">Long-distance friends</h4>
-                    <p class="text-gray-500 text-xs leading-relaxed">Relive inside jokes and memories when they're far away.</p>
-                </div>
-                <div class="feature-card text-center reveal" style="transition-delay:160ms;">
-                    <div class="text-4xl mb-4">📖</div>
-                    <h4 class="font-bold text-white mb-2">Relationship diary</h4>
-                    <p class="text-gray-500 text-xs leading-relaxed">Search years of conversation. Find that recipe, that address, that sweet message.</p>
-                </div>
-                <div class="feature-card text-center reveal" style="transition-delay:240ms;">
-                    <div class="text-4xl mb-4">🧠</div>
-                    <h4 class="font-bold text-white mb-2">Memory assistant</h4>
-                    <p class="text-gray-500 text-xs leading-relaxed">"What did we plan for her birthday?" Ask AI — it remembers everything.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- === FEATURE SHOWCASE === -->
-    <section class="py-24 px-5">
-        <div class="max-w-5xl mx-auto">
-            <!-- Feature Row 1 -->
-            <div class="grid md:grid-cols-2 gap-12 items-center mb-24 reveal">
-                <div>
-                    <div class="inline-flex items-center gap-2 bg-[#7877c6]/10 border border-[#7877c6]/20 rounded-full px-3 py-1 text-[11px] font-bold text-[#b8b5ff] mb-4">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                        ON THIS DAY
-                    </div>
-                    <h3 class="text-3xl font-bold mb-4">Memories find you</h3>
-                    <p class="text-gray-400 leading-relaxed mb-4">Every day, Kotha surfaces messages from the same date in past years. Like a time machine for your conversations.</p>
-                    <p class="text-sm text-gray-500 italic">"2 years ago today, she said 'I'm so proud of you beta' "</p>
-                </div>
-                <div class="bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/5 rounded-3xl p-6 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl"></div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+<!-- ═══════════ FEATURE: ON THIS DAY ═══════════ -->
+<section class="py-24 md:py-32 px-5">
+    <div class="max-w-5xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <!-- Visual (left on desktop) -->
+            <div class="order-2 md:order-1 reveal">
+                <div class="glass-card p-5 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
+                    <div class="absolute top-4 right-4 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/15 flex items-center justify-center">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         </div>
-                        <span class="text-xs font-bold text-amber-400">On This Day · May 24</span>
-                    </div>
-                    <div class="space-y-2">
-                        <div class="bg-white/5 rounded-xl px-3 py-2 text-xs text-gray-300"><b class="text-amber-300">Papa:</b> Beta exam kaisa gaya? Tension mat le</div>
-                        <div class="bg-white/5 rounded-xl px-3 py-2 text-xs text-gray-300"><b class="text-amber-300">Didi:</b> Happy birthday chotu! Party kab de raha? 🎂</div>
-                        <div class="bg-white/5 rounded-xl px-3 py-2 text-xs text-gray-300"><b class="text-amber-300">Bhai:</b> Kal match dekhne chalein? IPL final hai</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature Row 2 -->
-            <div class="grid md:grid-cols-2 gap-12 items-center reveal">
-                <div class="order-2 md:order-1 bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/5 rounded-3xl p-6 relative overflow-hidden">
-                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl"></div>
-                    <div class="space-y-3">
-                        <div class="flex justify-end"><div class="bg-[#6c5ce7]/30 border border-[#6c5ce7]/20 rounded-2xl rounded-br-sm px-4 py-2 text-sm text-white max-w-[75%]">Bhai wo trip plan karte hain na next month</div></div>
-                        <div class="flex gap-2 items-end">
-                            <div class="w-6 h-6 rounded-full bg-emerald-500/30 flex items-center justify-center text-[8px] text-emerald-300 font-bold shrink-0">R</div>
-                            <div class="bg-white/5 border border-white/5 rounded-2xl rounded-bl-sm px-4 py-2 text-sm text-gray-300 max-w-[75%]">Arre haan! Goa chalte hain bro, wahi plan karte hain jaise last time — sab 6 log. Buddi toh confirm hai 😂</div>
+                        <div>
+                            <p class="text-[12px] font-bold text-amber-400">On This Day</p>
+                            <p class="text-[10px] text-zinc-600">May 24, 2023</p>
                         </div>
                     </div>
-                    <div class="mt-4 flex items-center gap-2 text-[10px] text-gray-500 justify-center">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
-                        AI responding as "Rohit" — learned from 4,230 messages
+                    <div class="space-y-2.5">
+                        <div class="bg-white/[0.04] border border-white/[0.03] rounded-2xl px-4 py-3">
+                            <p class="text-[10px] font-bold text-amber-400/70 mb-1">Papa</p>
+                            <p class="text-[13px] text-zinc-300 leading-relaxed">Beta exam kaisa gaya? Tension mat le, jo hoga acha hoga 🤞</p>
+                        </div>
+                        <div class="bg-white/[0.04] border border-white/[0.03] rounded-2xl px-4 py-3">
+                            <p class="text-[10px] font-bold text-pink-400/70 mb-1">Didi</p>
+                            <p class="text-[13px] text-zinc-300 leading-relaxed">Happy birthday chotu! Party kab de raha hai? 🎂🎉</p>
+                        </div>
+                        <div class="bg-white/[0.04] border border-white/[0.03] rounded-2xl px-4 py-3">
+                            <p class="text-[10px] font-bold text-emerald-400/70 mb-1">Bhai</p>
+                            <p class="text-[13px] text-zinc-300 leading-relaxed">Kal match dekhne chalein? IPL final hai bro 🏏</p>
+                        </div>
                     </div>
                 </div>
-                <div class="order-1 md:order-2">
-                    <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 text-[11px] font-bold text-emerald-300 mb-4">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
-                        PERSONALITY CLONE
-                    </div>
-                    <h3 class="text-3xl font-bold mb-4">Exactly how they talk</h3>
-                    <p class="text-gray-400 leading-relaxed mb-4">Not generic AI responses. Kotha studies thousands of their real messages and responds in their exact tone — their Hindi-English mix, their emojis, their vibe.</p>
-                    <p class="text-sm text-gray-500 italic">"It felt like actually texting him again"</p>
+            </div>
+            <!-- Text -->
+            <div class="order-1 md:order-2 reveal reveal-delay-1">
+                <div class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/15 rounded-full px-3.5 py-1.5 mb-5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    <span class="text-[11px] font-bold text-amber-300 uppercase tracking-wider">On This Day</span>
+                </div>
+                <h2 class="text-[32px] md:text-[38px] font-black tracking-tight leading-tight mb-5">Memories find you<br><span class="gradient-text-warm">every single day.</span></h2>
+                <p class="text-[15px] text-zinc-400 leading-relaxed mb-6">
+                    Every morning, Kotha surfaces messages from the same date in past years. A time machine for your conversations — the things they said, the moments you shared.
+                </p>
+                <p class="text-[14px] text-zinc-600 italic leading-relaxed border-l-2 border-amber-500/30 pl-4">
+                    "2 years ago today, she said — I'm so proud of you beta"
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ USE CASES ═══════════ -->
+<section class="py-24 md:py-32 px-5 relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-pink-500/[0.015] to-transparent pointer-events-none"></div>
+    <div class="max-w-5xl mx-auto relative">
+        <div class="text-center mb-14 reveal">
+            <h2 class="text-[36px] md:text-[44px] font-black tracking-tight leading-tight mb-4">Built for moments<br>that matter most</h2>
+            <p class="text-zinc-500 text-[15px] max-w-lg mx-auto">Whether it's love, friendship, or family — some conversations deserve to live forever.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-card p-6 text-center reveal">
+                <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/10 flex items-center justify-center mx-auto mb-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </div>
+                <h4 class="font-bold text-[15px] text-white mb-2">Lost loved ones</h4>
+                <p class="text-[12px] text-zinc-500 leading-relaxed">Hear their words again. Feel their presence through conversations you shared.</p>
+            </div>
+            <div class="glass-card p-6 text-center reveal reveal-delay-1">
+                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/10 flex items-center justify-center mx-auto mb-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <h4 class="font-bold text-[15px] text-white mb-2">Distant friends</h4>
+                <p class="text-[12px] text-zinc-500 leading-relaxed">Relive inside jokes and memories when they're oceans away.</p>
+            </div>
+            <div class="glass-card p-6 text-center reveal reveal-delay-2">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/10 flex items-center justify-center mx-auto mb-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                </div>
+                <h4 class="font-bold text-[15px] text-white mb-2">Digital diary</h4>
+                <p class="text-[12px] text-zinc-500 leading-relaxed">Search years of conversations. Find that recipe, that address, that sweet message.</p>
+            </div>
+            <div class="glass-card p-6 text-center reveal reveal-delay-3">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h4 class="font-bold text-[15px] text-white mb-2">Memory assistant</h4>
+                <p class="text-[12px] text-zinc-500 leading-relaxed">"What was her birthday plan?" Ask AI — it remembers everything they said.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ PRIVACY & TRUST ═══════════ -->
+<section class="py-24 md:py-32 px-5">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-14 reveal">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/10 mb-5">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h2 class="text-[36px] md:text-[44px] font-black tracking-tight mb-4">Your memories are sacred.</h2>
+            <p class="text-zinc-500 text-[15px] max-w-lg mx-auto">We treat your conversations with the respect they deserve. No selling data. No training on your chats. Ever.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-4 reveal">
+            <div class="trust-item">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                    <p class="text-[13px] font-bold text-white">Encrypted storage</p>
+                    <p class="text-[11px] text-zinc-500 mt-0.5">Your data, your control</p>
+                </div>
+            </div>
+            <div class="trust-item">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                <div>
+                    <p class="text-[13px] font-bold text-white">No data selling</p>
+                    <p class="text-[11px] text-zinc-500 mt-0.5">We never monetize you</p>
+                </div>
+            </div>
+            <div class="trust-item">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </div>
+                <div>
+                    <p class="text-[13px] font-bold text-white">Delete anytime</p>
+                    <p class="text-[11px] text-zinc-500 mt-0.5">Remove all data in one click</p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- === PRICING === -->
-    <section id="pricing" class="py-24 px-5 relative">
-        <div class="max-w-3xl mx-auto text-center">
-            <div class="reveal">
-                <h2 class="text-4xl md:text-5xl font-black tracking-tight mb-5">Free to start.<br>Free to remember.</h2>
-                <p class="text-gray-400 text-lg mb-12">No credit card needed. Upload your chats and start talking today.</p>
+<!-- ═══════════ PRICING ═══════════ -->
+<section id="pricing" class="py-24 md:py-32 px-5 relative">
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/[0.02] to-transparent pointer-events-none"></div>
+    <div class="max-w-3xl mx-auto relative">
+        <div class="text-center mb-14 reveal">
+            <p class="text-[11px] font-bold text-indigo-400 uppercase tracking-[0.15em] mb-4">Pricing</p>
+            <h2 class="text-[36px] md:text-[44px] font-black tracking-tight leading-tight mb-4">Free to start.<br>Free to remember.</h2>
+            <p class="text-zinc-500 text-[15px]">No credit card. No hidden fees. Just memories.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-5 max-w-xl mx-auto reveal">
+            <!-- Free Plan -->
+            <div class="glass-card p-6">
+                <h3 class="font-bold text-[17px] text-white mb-1">Free</h3>
+                <p class="text-[12px] text-zinc-500 mb-5">Perfect to start</p>
+                <div class="mb-6">
+                    <span class="text-[40px] font-black text-white tracking-tight">₹0</span>
+                    <span class="text-zinc-600 text-[13px] ml-1">forever</span>
+                </div>
+                <ul class="space-y-3 mb-7">
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Unlimited chat imports</li>
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Beautiful chat viewer</li>
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>3 AI chats per day</li>
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>On This Day memories</li>
+                </ul>
+                <a href="/login.html#signup" class="block w-full py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-center font-bold text-white hover:bg-white/[0.08] transition text-[13px]">Get Started Free</a>
             </div>
 
-            <div class="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto reveal">
-                <!-- Free -->
-                <div class="feature-card text-left">
-                    <h3 class="font-bold text-lg text-white mb-1">Free</h3>
-                    <p class="text-gray-500 text-xs mb-4">Forever</p>
-                    <div class="mb-6"><span class="text-4xl font-black text-white">$0</span></div>
-                    <ul class="space-y-3 text-sm text-gray-300 mb-6">
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#4ecdc4] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Unlimited chat imports</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#4ecdc4] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Beautiful chat viewer</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#4ecdc4] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>3 AI chats per day</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#4ecdc4] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>On This Day memories</li>
-                    </ul>
-                    <a href="/login.html#signup" class="block w-full py-3 rounded-xl bg-white/5 border border-white/10 text-center font-bold text-white hover:bg-white/10 transition text-sm">Start Free</a>
+            <!-- Pro Plan -->
+            <div class="plan-highlight rounded-[20px] p-6 relative">
+                <div class="absolute -top-3 left-5 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg shadow-indigo-500/30 uppercase tracking-wider">Coming Soon</div>
+                <h3 class="font-bold text-[17px] text-white mb-1">Pro</h3>
+                <p class="text-[12px] text-indigo-300/70 mb-5">Unlimited everything</p>
+                <div class="mb-6">
+                    <span class="text-[40px] font-black text-white tracking-tight">₹99</span>
+                    <span class="text-zinc-500 text-[13px] ml-1">/month</span>
                 </div>
-
-                <!-- Pro -->
-                <div class="feature-card text-left border-[#7877c6]/30 relative">
-                    <div class="absolute -top-3 left-6 bg-gradient-to-r from-[#7877c6] to-[#a855f7] text-white text-[10px] font-bold px-3 py-1 rounded-full">COMING SOON</div>
-                    <h3 class="font-bold text-lg text-white mb-1">Pro</h3>
-                    <p class="text-[#b8b5ff] text-xs mb-4">Unlimited everything</p>
-                    <div class="mb-6"><span class="text-4xl font-black text-white">&#8377;99</span><span class="text-gray-500 text-sm">/mo</span></div>
-                    <ul class="space-y-3 text-sm text-gray-300 mb-6">
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#7877c6] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Everything in Free</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#7877c6] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Unlimited AI chats</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#7877c6] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Share moments</li>
-                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-[#7877c6] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Priority AI models</li>
-                    </ul>
-                    <button disabled class="block w-full py-3 rounded-xl bg-[#7877c6]/20 border border-[#7877c6]/30 text-center font-bold text-[#b8b5ff] text-sm cursor-not-allowed opacity-70">Notify Me</button>
-                </div>
+                <ul class="space-y-3 mb-7">
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Everything in Free</li>
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Unlimited AI chats</li>
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Share moments as cards</li>
+                    <li class="flex items-center gap-2.5 text-[13px] text-zinc-300"><svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 13l4 4L19 7"/></svg>Priority AI models</li>
+                </ul>
+                <button disabled class="block w-full py-3 rounded-xl bg-indigo-500/20 border border-indigo-500/20 text-center font-bold text-indigo-300/60 text-[13px] cursor-not-allowed">Notify Me</button>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- === FINAL CTA === -->
-    <section class="py-24 px-5 relative">
-        <div class="max-w-3xl mx-auto text-center reveal">
-            <div class="relative inline-block mb-6">
-                <h2 class="text-4xl md:text-5xl font-black tracking-tight">
-                    Don't let memories<br>fade away
-                </h2>
+<!-- ═══════════ FINAL CTA ═══════════ -->
+<section class="py-28 md:py-36 px-5 relative overflow-hidden">
+    <div class="absolute inset-0 hero-mesh pointer-events-none opacity-50"></div>
+    <div class="orb w-[400px] h-[400px] bg-indigo-500/10 top-0 left-[20%]" style="animation-delay:-5s;"></div>
+    <div class="orb w-[300px] h-[300px] bg-pink-500/8 bottom-0 right-[10%]" style="animation-delay:-10s;"></div>
+
+    <div class="max-w-2xl mx-auto text-center relative z-10 reveal">
+        <h2 class="text-[36px] md:text-[48px] font-black tracking-tight leading-tight mb-5">
+            Don't let their words<br><span class="gradient-text">fade away.</span>
+        </h2>
+        <p class="text-zinc-400 text-[16px] leading-relaxed mb-10 max-w-md mx-auto">
+            Every conversation holds a piece of someone you love. Kotha makes sure you can return to it — beautifully, privately, forever.
+        </p>
+        <a href="/login.html#signup" id="final-cta" class="cta-primary text-white px-10 py-4 rounded-2xl font-bold text-[16px] inline-flex items-center gap-3">
+            Start preserving memories
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+        <p class="text-[11px] text-zinc-600 mt-5 font-medium">Free forever · No credit card required</p>
+    </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="border-t border-white/[0.04] bg-[#060608]">
+    <div class="max-w-5xl mx-auto px-5 sm:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-5">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 rounded-[8px] bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
             </div>
-            <p class="text-gray-400 text-lg mb-10 max-w-lg mx-auto">Every conversation tells a story. Kotha makes sure you can relive it — beautifully, privately, forever.</p>
-            <a href="/login.html#signup" class="btn-glow text-white px-10 py-4 rounded-2xl font-bold text-lg inline-flex items-center gap-3">
-                Start preserving now
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-            </a>
-            <p class="text-xs text-gray-600 mt-4">Free forever · Your data stays yours · End-to-end private</p>
+            <span class="font-bold text-[14px] text-white">Kotha</span>
+            <span class="text-[11px] text-zinc-700 ml-1">&copy; <span id="year"></span></span>
         </div>
-    </section>
-
-    <!-- === FOOTER === -->
-    <footer class="border-t border-white/5 py-10 bg-[#050505]">
-        <div class="max-w-6xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#7877c6] to-[#6c5ce7] flex items-center justify-center">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-                </div>
-                <span class="font-bold text-sm text-white">Kotha</span>
-                <span class="text-xs text-gray-600 ml-2">&copy; <span id="year"></span></span>
-            </div>
-            <div class="flex items-center gap-6 text-xs text-gray-500">
-                <a href="#features" class="hover:text-white transition">Features</a>
-                <a href="#pricing" class="hover:text-white transition">Pricing</a>
-                <a href="/login.html" class="hover:text-white transition">Login</a>
-            </div>
+        <div class="flex items-center gap-8 text-[12px] font-medium text-zinc-600">
+            <a href="#how" class="hover:text-zinc-300 transition">How it works</a>
+            <a href="#pricing" class="hover:text-zinc-300 transition">Pricing</a>
+            <a href="/login.html" class="hover:text-zinc-300 transition">Login</a>
         </div>
-    </footer>
+    </div>
+</footer>
 
-    <script>
-        // Year
-        document.getElementById('year').textContent = new Date().getFullYear();
+<script>
+// ── Year ──
+document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Scroll reveal
-        const revealObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    revealObserver.unobserve(entry.target);
+// ── Scroll reveal ──
+const ro = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            ro.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+// ── Nav glass on scroll ──
+const nav = document.getElementById('nav');
+let navScrolled = false;
+window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY > 40;
+    if (scrolled === navScrolled) return;
+    navScrolled = scrolled;
+    if (scrolled) {
+        nav.style.background = 'rgba(10,10,15,0.8)';
+        nav.style.backdropFilter = 'blur(20px)';
+        nav.style.webkitBackdropFilter = 'blur(20px)';
+        nav.style.borderBottom = '1px solid rgba(255,255,255,0.04)';
+    } else {
+        nav.style.background = 'transparent';
+        nav.style.backdropFilter = 'none';
+        nav.style.webkitBackdropFilter = 'none';
+        nav.style.borderBottom = 'none';
+    }
+}, { passive: true });
+
+// ── Hero chat typing animation ──
+(function heroChat() {
+    const msgs = document.querySelectorAll('.chat-msg');
+    const aiText = document.getElementById('ai-typed-text');
+    const fullResponse = 'Beta aloo ubal ke mash kar lo, phir hara dhaniya, mirchi, namak aur ajwain daal do. Atte me thoda namak oil daalke gundhna. Bas! 😊';
+
+    // Show user message after 1s
+    setTimeout(() => {
+        msgs[0].style.transition = 'opacity 0.5s, transform 0.5s';
+        msgs[0].style.opacity = '1';
+        msgs[0].style.transform = 'translateX(0)';
+    }, 1000);
+
+    // Show AI bubble after 2s, type text
+    setTimeout(() => {
+        msgs[1].style.transition = 'opacity 0.5s, transform 0.5s';
+        msgs[1].style.opacity = '1';
+        msgs[1].style.transform = 'translateX(0)';
+
+        // Type the response
+        let i = 0;
+        const typeSpeed = 25;
+        function typeChar() {
+            if (i < fullResponse.length) {
+                aiText.textContent = fullResponse.slice(0, i + 1);
+                i++;
+                setTimeout(typeChar, typeSpeed + Math.random() * 15);
+            } else {
+                // Add blinking cursor at end
+                const cursor = document.createElement('span');
+                cursor.className = 'cursor-blink';
+                aiText.appendChild(cursor);
+            }
+        }
+        setTimeout(typeChar, 400);
+    }, 2200);
+})();
+
+// ── Auth check — update CTAs for logged-in users ──
+(async () => {
+    try {
+        const r = await fetch('/api/auth/me?_t=' + Date.now());
+        const d = await r.json();
+        if (d.user) {
+            const dest = d.user.is_admin ? '/admin.html' : '/app';
+            const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
+            document.querySelectorAll('a[href="/login.html"], a[href="/login.html#signup"]').forEach(a => {
+                if (/get|start|bring|preserv|free|talking/i.test(a.textContent)) {
+                    a.href = dest;
+                    a.textContent = label;
+                } else {
+                    a.href = dest;
                 }
             });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-        // Nav blur on scroll
-        const nav = document.getElementById('nav');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                nav.style.background = 'rgba(10,10,10,0.85)';
-                nav.style.backdropFilter = 'blur(20px)';
-                nav.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-            } else {
-                nav.style.background = 'transparent';
-                nav.style.backdropFilter = 'none';
-                nav.style.borderBottom = 'none';
-            }
-        });
-
-        // Floating particles
-        const particleContainer = document.getElementById('particles');
-        const colors = ['#7877c6', '#f472b6', '#4ecdc4', '#f59e0b'];
-        for (let i = 0; i < 20; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            const size = Math.random() * 4 + 2;
-            p.style.width = size + 'px';
-            p.style.height = size + 'px';
-            p.style.left = Math.random() * 100 + '%';
-            p.style.background = colors[Math.floor(Math.random() * colors.length)];
-            p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            p.style.animationDelay = (Math.random() * 10) + 's';
-            particleContainer.appendChild(p);
         }
-
-        // Auth check — update CTA buttons for logged-in users
-        (async () => {
-            try {
-                const r = await fetch('/api/auth/me?_t=' + Date.now());
-                const data = await r.json();
-                if (data.user) {
-                    document.querySelectorAll('a[href="/login.html"], a[href="/login.html#signup"]').forEach(a => {
-                        a.href = data.user.is_admin ? '/admin.html' : '/app';
-                        if (/get|start|bring|preserv|free/i.test(a.textContent)) {
-                            a.textContent = data.user.is_admin ? 'Admin Panel' : 'Open App';
-                        }
-                    });
-                }
-            } catch {}
-        })();
-    </script>
+    } catch {}
+})();
+</script>
 </body>
 </html>
