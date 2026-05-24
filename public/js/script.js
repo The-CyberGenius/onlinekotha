@@ -547,10 +547,68 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // ---------- Chat List UI Rendering ----------
+    const chatListUI = document.getElementById('chat-list-ui');
+
+    const chatColors = [
+        'from-emerald-400 to-teal-500',
+        'from-violet-500 to-indigo-600',
+        'from-pink-500 to-rose-500',
+        'from-amber-400 to-orange-500',
+        'from-cyan-400 to-blue-500',
+        'from-fuchsia-500 to-purple-600',
+    ];
+
+    function renderChatList(chats, activeChat) {
+        if (!chatListUI) return;
+        chatListUI.innerHTML = '';
+        if (chats.length === 0) {
+            chatListUI.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No chats yet. Import one!</p>';
+            return;
+        }
+        chats.forEach((chat, idx) => {
+            const displayName = chat.replace('WhatsApp Chat - ', '');
+            const initial = displayName.charAt(0).toUpperCase();
+            const colorClass = chatColors[idx % chatColors.length];
+            const isActive = chat === activeChat;
+
+            const item = document.createElement('div');
+            item.className = `flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-indigo-50 border border-indigo-200 shadow-sm' : 'hover:bg-gray-100 border border-transparent'}`;
+            item.dataset.chat = chat;
+            item.innerHTML = `
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-[13px] font-semibold text-gray-800 truncate leading-tight ${isActive ? 'text-indigo-700' : ''}">${displayName}</p>
+                    <p class="text-[10px] text-gray-400 font-medium mt-0.5">${isActive ? '● Active' : 'Tap to open'}</p>
+                </div>
+                ${isActive ? '<div class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></div>' : ''}
+            `;
+            item.addEventListener('click', () => {
+                if (chat === currentChat) return;
+                currentChat = chat;
+                window.currentChat = chat;
+                // Sync hidden select
+                const selector = document.getElementById('chat-selector');
+                if (selector) selector.value = chat;
+                // Re-render list with new active
+                renderChatList(chats, chat);
+                // Load chat data
+                loadData(chat);
+                // Close sidebar on mobile
+                toggleSidebar(false);
+            });
+            chatListUI.appendChild(item);
+        });
+    }
+
+    // Keep reference to loaded chats for re-rendering
+    let loadedChats = [];
+
     const loadChatsList = async () => {
         try {
             const resp = await fetch('/api/chats');
             const chats = await resp.json();
+            loadedChats = chats;
             const selector = document.getElementById('chat-selector');
             if (!selector) return;
             selector.innerHTML = '<option value="">Select a chat...</option>';
@@ -566,8 +624,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.currentChat = chats[0];
                 loadData(chats[0]);
                 removeEmptyState();
+                // Render visual chat list
+                renderChatList(chats, chats[0]);
             } else {
                 showEmptyState();
+                renderChatList([], '');
             }
         } catch (e) {
             console.error("Failed to load chats:", e);
@@ -622,6 +683,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentChat = selectName;
                 window.currentChat = selectName;
                 loadData(selectName);
+                // Re-render chat list with new active
+                renderChatList(loadedChats, selectName);
             }
         }
     };
