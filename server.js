@@ -34,6 +34,15 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_PROD = process.env.NODE_ENV === 'production';
+
+// Shared cookie options — must be identical for set and clear
+const COOKIE_OPTS = {
+    httpOnly: true,
+    sameSite: 'lax',
+    path: '/',
+    ...(IS_PROD && { secure: true }),
+};
 
 if (!fs.existsSync(SRC_DIR)) fs.mkdirSync(SRC_DIR, { recursive: true });
 
@@ -65,11 +74,7 @@ app.post('/api/auth/signup', authLimiter, async (req, res) => {
         if (password.length < 6) return res.status(400).json({ error: 'password min 6 chars' });
         const user = createUser(email.trim(), password);
         const { token, expiresAt } = login(email.trim(), password);
-        res.cookie('session', token, {
-            httpOnly: true,
-            sameSite: 'lax',
-            expires: new Date(expiresAt),
-        });
+        res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
         sendVerifyEmail(user).catch(err => console.error('verify email failed:', err.message));
         res.json({ ok: true, user: { ...user, effective_plan: effectivePlan(user) } });
     } catch (err) {
@@ -123,11 +128,7 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
         const { email, password } = req.body || {};
         if (!email || !password) return res.status(400).json({ error: 'email + password required' });
         const { token, expiresAt } = login(email.trim(), password);
-        res.cookie('session', token, {
-            httpOnly: true,
-            sameSite: 'lax',
-            expires: new Date(expiresAt),
-        });
+        res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
         res.json({ ok: true });
     } catch (err) {
         res.status(401).json({ error: err.message });
@@ -137,7 +138,7 @@ app.post('/api/auth/login', authLimiter, (req, res) => {
 app.post('/api/auth/logout', (req, res) => {
     const token = req.cookies && req.cookies.session;
     logout(token);
-    res.clearCookie('session', { httpOnly: true, sameSite: 'lax', path: '/' });
+    res.clearCookie('session', COOKIE_OPTS);
     res.json({ ok: true });
 });
 

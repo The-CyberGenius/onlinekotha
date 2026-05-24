@@ -27,8 +27,12 @@
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', async () => {
-                await fetch('/api/auth/logout', { method: 'POST' });
-                window.location.href = '/login.html';
+                try {
+                    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+                } catch {}
+                // Force clear cookie client-side as backup
+                document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+                window.location.replace('/login.html');
             });
         }
 

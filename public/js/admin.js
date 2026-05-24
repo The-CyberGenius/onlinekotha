@@ -17,8 +17,9 @@
 
     // Logout
     document.getElementById('logout-btn').addEventListener('click', async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        window.location.href = '/login.html';
+        try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch {}
+        document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+        window.location.replace('/login.html');
     });
 
     // Tabs
@@ -389,10 +390,15 @@
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             Chats
                         </button>
+                        <button data-uid="${u.id}" class="user-ai-logs-btn text-[11px] font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg px-3 py-1.5 transition flex items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1"/></svg>
+                            AI Logs
+                        </button>
                         ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-[11px] font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg px-3 py-1.5 transition">Delete</button>`}
                     </div>
                 </div>
                 <div data-chats-for="${u.id}" class="hidden mt-3 space-y-1.5"></div>
+                <div data-ai-logs-for="${u.id}" class="hidden mt-3 space-y-1.5"></div>
             `;
             list.appendChild(card);
         }
@@ -439,6 +445,92 @@
                             `).join('')}
                         </div>
                     `;
+                } catch (err) {
+                    area.innerHTML = `<div class="bg-red-50 rounded-xl p-3 text-center text-xs text-red-500 font-bold">${err.message}</div>`;
+                }
+            });
+        });
+
+        // AI Logs expand
+        list.querySelectorAll('.user-ai-logs-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const uid = btn.dataset.uid;
+                const area = list.querySelector(`[data-ai-logs-for="${uid}"]`);
+                if (!area.classList.contains('hidden')) {
+                    area.classList.add('hidden');
+                    return;
+                }
+                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div> Loading AI logs...</div>';
+                area.classList.remove('hidden');
+                try {
+                    const convs = await (await fetch(`/api/admin/users/${uid}/conversations`)).json();
+                    if (!convs.length) {
+                        area.innerHTML = '<div class="bg-gray-50 rounded-xl p-3 text-center text-xs text-gray-400">No AI conversations yet</div>';
+                        return;
+                    }
+                    area.innerHTML = `
+                        <div class="bg-purple-50/50 rounded-xl overflow-hidden border border-purple-100">
+                            <div class="px-3 py-2 border-b border-purple-100 flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase text-purple-500 tracking-wider">AI Conversations (${convs.length})</span>
+                            </div>
+                            ${convs.map(c => `
+                                <div class="px-3 py-2.5 hover:bg-white transition border-b border-purple-50 last:border-0">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-xs font-bold text-gray-800 truncate">${c.title || 'Untitled'}</p>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${new Date(c.updated_at).toLocaleDateString()}</p>
+                                        </div>
+                                        <div class="flex gap-1 shrink-0">
+                                            <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg px-2 py-1 transition">View</button>
+                                            <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="text-[10px] font-bold bg-teal-100 text-teal-700 hover:bg-teal-200 rounded-lg px-2 py-1 transition no-underline inline-flex items-center gap-0.5">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                                .txt
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    // View button handlers
+                    area.querySelectorAll('.ai-log-view-btn').forEach(vBtn => {
+                        vBtn.addEventListener('click', async () => {
+                            const convId = vBtn.dataset.convid;
+                            const convUid = vBtn.dataset.uid;
+                            try {
+                                const data = await (await fetch(`/api/admin/users/${convUid}/conversations/${convId}`)).json();
+                                const modal = document.createElement('div');
+                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+                                modal.innerHTML = `
+                                    <div style="background:white;border-radius:20px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,0.2);">
+                                        <div style="padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+                                            <div>
+                                                <h4 style="font-weight:700;font-size:14px;color:#1e293b;">${data.title || 'AI Conversation'}</h4>
+                                                <p style="font-size:11px;color:#94a3b8;margin-top:2px;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
+                                            </div>
+                                            <button onclick="this.closest('[style]').remove()" style="width:28px;height:28px;border-radius:8px;background:#f1f5f9;color:#64748b;font-size:14px;cursor:pointer;">x</button>
+                                        </div>
+                                        <div style="padding:16px 20px;overflow-y:auto;flex:1;">
+                                            ${(data.messages || []).map(m => `
+                                                <div style="margin-bottom:12px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
+                                                    <div style="max-width:80%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;${m.role === 'user'
+                                                        ? 'background:#1e293b;color:white;border-bottom-right-radius:4px;'
+                                                        : 'background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;border-bottom-left-radius:4px;'}">
+                                                        ${m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}
+                                                        <div style="font-size:10px;color:${m.role === 'user' ? 'rgba(255,255,255,0.5)' : '#94a3b8'};margin-top:4px;text-align:right;">${new Date(m.created_at).toLocaleString()}</div>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                                modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+                                document.body.appendChild(modal);
+                            } catch (err) {
+                                alert('Error loading conversation: ' + err.message);
+                            }
+                        });
+                    });
                 } catch (err) {
                     area.innerHTML = `<div class="bg-red-50 rounded-xl p-3 text-center text-xs text-red-500 font-bold">${err.message}</div>`;
                 }

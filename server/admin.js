@@ -363,6 +363,58 @@ router.delete('/users/:id', (req, res) => {
     res.json({ ok: true });
 });
 
+// ---------- AI Conversation Logs (Admin) ----------
+router.get('/users/:id/conversations', (req, res) => {
+    const userId = Number(req.params.id);
+    const rows = db.prepare(
+        `SELECT c.id, c.chat_folder, c.title, c.created_at, c.updated_at,
+                (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
+         FROM conversations c WHERE c.user_id = ? ORDER BY c.updated_at DESC`
+    ).all(userId);
+    res.json(rows);
+});
+
+router.get('/users/:id/conversations/:convId', (req, res) => {
+    const userId = Number(req.params.id);
+    const convId = Number(req.params.convId);
+    const conv = db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, userId);
+    if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+    const msgs = db.prepare(
+        'SELECT id, role, content, citations, created_at FROM conv_messages WHERE conversation_id = ? ORDER BY id'
+    ).all(convId);
+    res.json({ ...conv, messages: msgs });
+});
+
+router.get('/users/:id/conversations/:convId/download', (req, res) => {
+    const userId = Number(req.params.id);
+    const convId = Number(req.params.convId);
+    const conv = db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, userId);
+    if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+
+    const msgs = db.prepare(
+        'SELECT role, content, created_at FROM conv_messages WHERE conversation_id = ? ORDER BY id'
+    ).all(convId);
+
+    // Build readable text log
+    let log = `AI Conversation Log\n`;
+    log += `User ID: ${userId}\n`;
+    log += `Chat: ${conv.chat_folder}\n`;
+    log += `Title: ${conv.title}\n`;
+    log += `Created: ${new Date(conv.created_at).toISOString()}\n`;
+    log += `${'='.repeat(50)}\n\n`;
+
+    for (const m of msgs) {
+        const time = new Date(m.created_at).toLocaleString();
+        const label = m.role === 'user' ? 'USER' : 'AI';
+        log += `[${time}] ${label}:\n${m.content}\n\n`;
+    }
+
+    const safeName = `ai_log_user${userId}_conv${convId}`;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.txt"`);
+    res.send(log);
+});
+
 router.get('/usage/summary', (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

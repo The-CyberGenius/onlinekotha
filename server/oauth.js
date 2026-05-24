@@ -104,9 +104,12 @@ router.get('/google/callback', (req, res, next) => {
                 return res.redirect('/login.html?error=oauth_failed');
             }
             const { token, expiresAt } = createSession(user.id);
+            const IS_PROD = process.env.NODE_ENV === 'production';
             res.cookie('session', token, {
                 httpOnly: true,
                 sameSite: 'lax',
+                path: '/',
+                ...(IS_PROD && { secure: true }),
                 expires: new Date(expiresAt),
             });
             let next_ = '/app';

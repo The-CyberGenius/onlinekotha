@@ -12,7 +12,7 @@
     let activeChat = null;
     let streaming = false;
 
-    // Watch for chat switches — reset AI context per chat
+    // Watch for chat switches
     function getActiveChat() { return window.currentChat || null; }
     function getCurrentConvId() { return activeChat ? (conversationMap[activeChat] || null) : null; }
     function getContactName() { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
@@ -58,6 +58,9 @@
         if (!text) return;
         if (!window.currentChat) { toast('Open a chat first'); return; }
 
+        // Remove any continue/reset bar
+        removeAiActionBar();
+
         // Track which chat this message belongs to
         activeChat = getActiveChat();
         const convId = getCurrentConvId();
@@ -75,7 +78,7 @@
         typingEl.className = 'flex justify-start mb-3 animate-message';
         typingEl.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
-                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">✨ ${escapeHTML(cName || 'AI')}</p>
+                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(cName || 'AI')}</p>
                 <div class="ai-typing"><span></span><span></span><span></span></div>
             </div>
         `;
@@ -163,14 +166,60 @@
         }
     }
 
+    // ---------- Continue / Reset Action Bar ----------
+    function showAiActionBar(convId, msgCount) {
+        removeAiActionBar();
+        const bar = document.createElement('div');
+        bar.id = 'ai-action-bar';
+        bar.className = 'flex items-center justify-center gap-3 py-3 animate-message';
+        bar.innerHTML = `
+            <div class="flex items-center gap-2 bg-white rounded-full px-2 py-1.5 shadow-sm border border-gray-200">
+                <button id="ai-continue-btn" class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-full transition">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    Continue (${msgCount} msgs)
+                </button>
+                <button id="ai-reset-btn" class="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/></svg>
+                    New chat
+                </button>
+            </div>
+        `;
+        chatContainer.appendChild(bar);
+
+        document.getElementById('ai-continue-btn').addEventListener('click', () => {
+            // Keep existing conversation — just scroll down ready to type
+            removeAiActionBar();
+            bottomInput.focus();
+            toast('Continuing previous conversation');
+        });
+
+        document.getElementById('ai-reset-btn').addEventListener('click', async () => {
+            // Delete the conversation and start fresh
+            try {
+                await fetch(`/api/ai/conversations/${convId}`, { method: 'DELETE' });
+            } catch {}
+            if (activeChat) delete conversationMap[activeChat];
+            chatContainer.innerHTML = '';
+            toast('AI chat reset — start fresh!');
+            bottomInput.focus();
+        });
+
+        scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+
+    function removeAiActionBar() {
+        const existing = document.getElementById('ai-action-bar');
+        if (existing) existing.remove();
+    }
+
     // ---------- Bubble helpers ----------
     function appendUserBubble(text) {
         const wrap = document.createElement('div');
         wrap.className = 'flex justify-end mb-3 animate-message';
         wrap.innerHTML = `
             <div class="glass-chat-me rounded-2xl rounded-br-md px-4 py-3 max-w-[75%]">
-                <p class="text-sm leading-relaxed text-white">${escapeHTML(text)}</p>
-                <p class="text-[10px] text-white/60 text-right mt-1">just now</p>
+                <p class="text-sm leading-relaxed">${escapeHTML(text)}</p>
+                <p class="text-[10px] text-gray-500/60 text-right mt-1">just now</p>
             </div>
         `;
         chatContainer.appendChild(wrap);
@@ -182,7 +231,7 @@
         wrap.className = 'flex justify-start mb-3 animate-message';
         wrap.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
-                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">✨ ${escapeHTML(name || 'AI')}</p>
+                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
                 <p class="ai-response-text text-sm leading-relaxed text-gray-800"></p>
                 <p class="text-[10px] text-gray-400 text-right mt-1">just now</p>
             </div>
@@ -228,24 +277,25 @@
         });
     }
 
+    // ---------- Load AI history when chat switches ----------
     window.kothaLoadAiHistory = async (chatFolder) => {
         if (!chatFolder) return;
         chatContainer.innerHTML = '';
         activeChat = chatFolder;
-        
+
         try {
             const resp = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
             if (!resp.ok) return;
             const convs = await resp.json();
-            
+
             if (convs && convs.length > 0) {
                 const conv = convs[0];
                 conversationMap[chatFolder] = conv.id;
-                
+
                 const msgResp = await fetch(`/api/ai/conversations/${conv.id}`);
                 if (!msgResp.ok) return;
                 const data = await msgResp.json();
-                
+
                 if (data.messages && data.messages.length > 0) {
                     data.messages.forEach(msg => {
                         if (msg.role === 'user') {
@@ -257,6 +307,10 @@
                             wrap.querySelector('.ai-response-text').textContent = msg.content;
                         }
                     });
+
+                    // Show continue/reset bar after loading history
+                    showAiActionBar(conv.id, data.messages.length);
+
                     setTimeout(() => {
                         scrollArea.scrollTop = scrollArea.scrollHeight;
                     }, 50);
