@@ -191,6 +191,20 @@ document.addEventListener('DOMContentLoaded', () => {
         modalContent.innerHTML = `<img src="${url}" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border-4 border-white/20">`;
     };
 
+    // ---------- Date formatting ----------
+    // Indian WhatsApp uses DD/MM/YY format
+    function formatChatDate(raw) {
+        if (!raw) return '';
+        const parts = raw.split('/');
+        if (parts.length !== 3) return raw;
+        const day   = parseInt(parts[0]);
+        const month = parseInt(parts[1]);
+        let year    = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+        const d = new Date(year, month - 1, day);
+        if (isNaN(d.getTime())) return raw;
+        return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
     let lastRenderedDate = '';
 
     const generateChatsHtml = (snippet) => {
@@ -199,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (msg.type !== 'system' && msg.date !== lastRenderedDate) {
                 html += `
                 <div class="flex justify-center mb-6 w-full date-separator">
-                    <span class="bg-gray-800/20 backdrop-blur-md text-gray-800 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 uppercase">${msg.date}</span>
+                    <span class="bg-gray-800/20 backdrop-blur-md text-gray-800 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 uppercase">${formatChatDate(msg.date)}</span>
                 </div>`;
                 lastRenderedDate = msg.date;
             }
@@ -286,17 +300,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (msg && msg.date) {
                     const parts = msg.date.split('/');
                     if (parts.length === 3) {
-                        const m = parseInt(parts[0]);
-                        const y = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
-                        const dateObj = new Date(y, m - 1);
-                        const formattedDate = `${dateObj.toLocaleString('en-US', { month: 'long' })} ${y}`;
-                        
+                        // Indian WhatsApp: DD/MM/YY
+                        const day = parseInt(parts[0]);
+                        const mon = parseInt(parts[1]);
+                        const y   = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+                        const dateObj = new Date(y, mon - 1, day);
+                        const monthName = dateObj.toLocaleString('en-IN', { month: 'long' });
+                        const formattedDate = `${monthName} ${y}`;
+
                         floatingDate.innerText = formattedDate;
                         floatingDate.classList.remove('opacity-0', 'translate-y-[-10px]');
                         floatingDate.classList.add('opacity-100', 'translate-y-0');
-                        
+
                         if (dynamicHeaderDate) {
-                            dynamicHeaderDate.innerText = parts[1] + ' ' + formattedDate; // e.g. "14 March 2024"
+                            dynamicHeaderDate.innerText = `${day} ${monthName} ${y}`;
                             dynamicHeaderDate.classList.remove('hidden');
                         }
                     }

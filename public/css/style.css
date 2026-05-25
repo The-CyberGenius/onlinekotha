@@ -15,11 +15,31 @@ body {
     }
 }
 
-/* Chat background — Premium Mesh / Pattern */
+/* Chat background — Animated premium mesh */
+@keyframes bgShift {
+    0%   { background-position: 0% 0%, 0 0; }
+    50%  { background-position: 100% 100%, 20px 20px; }
+    100% { background-position: 0% 0%, 0 0; }
+}
+
 .main-chat-background {
-    background-color: #f8fafc;
-    background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-color: #efeae2;
+    background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 55%),
+        radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 200% 200%, 200% 200%, 22px 22px;
+    animation: bgShift 14s ease-in-out infinite;
+}
+
+html.dark .main-chat-background {
+    background-color: #0b141a;
+    background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.07) 0%, transparent 55%),
+        radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 200% 200%, 200% 200%, 22px 22px;
+    animation: bgShift 14s ease-in-out infinite;
 }
 
 /* Chat bubbles */
