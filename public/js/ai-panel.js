@@ -12,17 +12,18 @@
     let activeChat = null;
     let streaming = false;
 
-    // ---------- Typewriter engine ----------
     let typeQueue = '';
     let typeTimer = null;
     let typeTarget = null;
     let typeCursor = null;
     let typeScrollArea = null;
+    let streamFinished = false;
 
     function startTypewriter(targetEl, scrollEl) {
         typeQueue = '';
         typeTarget = targetEl;
         typeScrollArea = scrollEl;
+        streamFinished = false;
         // Add blinking cursor
         typeCursor = document.createElement('span');
         typeCursor.className = 'ai-cursor-blink';
@@ -38,27 +39,40 @@
     function drainQueue() {
         if (!typeTarget || typeQueue.length === 0) {
             typeTimer = null;
+            if (streamFinished) cleanupTypewriter();
             return;
         }
-        // Type 1-2 characters per tick for natural feel
-        const chunk = typeQueue.slice(0, Math.random() > 0.7 ? 2 : 1);
+        // Type 1-3 characters per tick for natural feel
+        const chunk = typeQueue.slice(0, Math.random() > 0.7 ? 3 : 1);
         typeQueue = typeQueue.slice(chunk.length);
         typeTarget.textContent += chunk;
         if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
-        typeTimer = setTimeout(drainQueue, 18 + Math.random() * 14);
+        typeTimer = setTimeout(drainQueue, 15 + Math.random() * 15);
     }
 
-    function stopTypewriter() {
-        if (typeTimer) { clearTimeout(typeTimer); typeTimer = null; }
-        // Flush remaining queue instantly
-        if (typeTarget && typeQueue.length > 0) {
-            typeTarget.textContent += typeQueue;
-            typeQueue = '';
+    function finishStream() {
+        streamFinished = true;
+        if (!typeTimer && typeQueue.length === 0) {
+            cleanupTypewriter();
         }
+    }
+
+    function cleanupTypewriter() {
         if (typeCursor) { typeCursor.remove(); typeCursor = null; }
         if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
         typeTarget = null;
         typeScrollArea = null;
+        streaming = false;
+        updateSendBtn();
+    }
+
+    function stopTypewriterInstantly() {
+        if (typeTimer) { clearTimeout(typeTimer); typeTimer = null; }
+        if (typeTarget && typeQueue.length > 0) {
+            typeTarget.textContent += typeQueue;
+            typeQueue = '';
+        }
+        cleanupTypewriter();
     }
 
     // Watch for chat switches
@@ -204,7 +218,7 @@
                         fullText += data.text;
                         feedTypewriter(data.text);
                     } else if (event === 'done') {
-                        stopTypewriter();
+                        finishStream();
                         // Update time on response bubble to current time
                         if (responseBubble) {
                             const timeEl = responseBubble.querySelector('.ai-bubble-time');
@@ -213,17 +227,21 @@
                     } else if (event === 'error') {
                         typingEl.remove();
                         appendErrorBubble(data.message || 'Something went wrong');
+                        stopTypewriterInstantly();
                     }
                 }
             }
         } catch (err) {
-            stopTypewriter();
             typingEl.remove();
             appendErrorBubble('Network error. Try again?');
+            stopTypewriterInstantly();
         } finally {
-            stopTypewriter();
-            streaming = false;
-            updateSendBtn();
+            // streaming = false is now handled by cleanupTypewriter when queue drains
+            // but if we never started the typewriter (e.g. error before first token), we must reset:
+            if (!typeTarget && streaming) {
+                streaming = false;
+                updateSendBtn();
+            }
             bottomInput.focus();
         }
     }
