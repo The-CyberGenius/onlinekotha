@@ -136,6 +136,15 @@
         bottomInput.value = '';
         updateSendBtn();
 
+        // Brief color pulse on the chat background dots
+        const chatBg = document.querySelector('.main-chat-background');
+        if (chatBg) {
+            chatBg.classList.remove('chat-sending');          // reset if already active
+            void chatBg.offsetWidth;                          // force reflow so animation re-triggers
+            chatBg.classList.add('chat-sending');
+            setTimeout(() => chatBg.classList.remove('chat-sending'), 750);
+        }
+
         // Queue the request
         msgQueue.push({ text, chat: activeChat });
 
@@ -256,9 +265,23 @@
                                 const timeEl = responseBubble.querySelector('.ai-bubble-time');
                                 if (timeEl) timeEl.textContent = formatNow();
                             }
-                            // After typewriter drains: split multi-paragraph into separate bubbles
+                            // After typewriter drains: clean up any leaked context headers,
+                            // then split multi-paragraph into separate bubbles
                             onTypewriterComplete = () => {
-                                splitIntoBubbles(fullText, responseBubble,
+                                // Strip [#id date time sender] context metadata that AI should never output
+                                const cleanedText = fullText
+                                    .replace(/\[#\d+[^\]\n]*\]/g, '')
+                                    .replace(/[ \t]{2,}/g, ' ')
+                                    .replace(/\n{3,}/g, '\n\n')
+                                    .trim();
+
+                                // If text was dirty, update the already-rendered bubble
+                                if (cleanedText !== fullText && responseBubble) {
+                                    const textEl = responseBubble.querySelector('.ai-response-text');
+                                    if (textEl) textEl.textContent = cleanedText;
+                                }
+
+                                splitIntoBubbles(cleanedText, responseBubble,
                                     (chatFolder && contactNameMap[chatFolder]) || cName);
                                 resolve();
                             };
@@ -403,7 +426,7 @@
     function appendContactBubble(name, timestamp) {
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-start mb-3 animate-message';
+        wrap.className = 'flex justify-start mb-3 animate-message-ai';
         wrap.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
                 <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>

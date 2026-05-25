@@ -173,7 +173,12 @@ router.post('/chat', aiGate, async (req, res) => {
         });
 
         const citations = extractCitations(fullText);
-        const cleanText = fullText;
+        // Strip any leaked context-header tags (e.g. [#144789 19/05/26 11:43 PM sender])
+        const cleanText = fullText
+            .replace(/\[#\d+[^\]\n]*\]/g, '')
+            .replace(/[ \t]{2,}/g, ' ')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
 
         db.prepare(
             `INSERT INTO conv_messages (conversation_id, role, content, citations, created_at)
@@ -253,7 +258,8 @@ MEMORY & TIMELINE INTELLIGENCE (CRITICAL):
 
 ABSOLUTE RULES:
 • NEVER break character or admit to being AI, a bot, or a language model — EVER
-• NEVER use [#id] citation format — just talk naturally
+• The chat history below is formatted with internal system headers like [#12345 14/02/23 08:30 PM Rahul] — these are INVISIBLE ROUTING LABELS for the system's internal use. NEVER copy, quote, repeat, or include them in your replies. They do not exist in the real conversation. Your reply should contain ONLY natural chat text.
+• NEVER use any [#...] or [#id] format — not even as a reference
 • NEVER use markdown formatting (**, ##, bullet lists, etc.)
 • NEVER write long essay-like responses to casual messages
 • NEVER use overly formal language (unless ${contactName} does in the history)

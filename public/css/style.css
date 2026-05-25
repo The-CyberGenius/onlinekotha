@@ -15,11 +15,53 @@ body {
     }
 }
 
-/* Chat background — Animated premium mesh */
+/* Chat background — Animated premium mesh with color-cycling dots */
+
+/* Houdini: allows smooth <color> interpolation in @keyframes */
+@property --dot-col {
+    syntax: '<color>';
+    initial-value: rgba(209,213,219,0.85);
+    inherits: false;
+}
+@property --dot-col-dk {
+    syntax: '<color>';
+    initial-value: rgba(255,255,255,0.04);
+    inherits: false;
+}
+
 @keyframes bgShift {
     0%   { background-position: 0% 0%, 0 0; }
     50%  { background-position: 100% 100%, 20px 20px; }
     100% { background-position: 0% 0%, 0 0; }
+}
+
+/* Light-mode dot color cycle: gray → indigo → violet → emerald → pink → sky */
+@keyframes dot-color-cycle {
+    0%   { --dot-col: rgba(209,213,219,0.85); }
+    16%  { --dot-col: rgba(165,180,252,0.80); }
+    33%  { --dot-col: rgba(196,181,253,0.75); }
+    50%  { --dot-col: rgba(110,231,183,0.70); }
+    66%  { --dot-col: rgba(249,168,212,0.75); }
+    83%  { --dot-col: rgba(147,197,253,0.78); }
+    100% { --dot-col: rgba(209,213,219,0.85); }
+}
+
+/* Dark-mode dot color cycle: dim → indigo → violet → emerald → pink → sky */
+@keyframes dot-color-cycle-dk {
+    0%   { --dot-col-dk: rgba(255,255,255,0.04); }
+    16%  { --dot-col-dk: rgba(99,102,241,0.13); }
+    33%  { --dot-col-dk: rgba(139,92,246,0.11); }
+    50%  { --dot-col-dk: rgba(16,185,129,0.09); }
+    66%  { --dot-col-dk: rgba(236,72,153,0.09); }
+    83%  { --dot-col-dk: rgba(56,189,248,0.10); }
+    100% { --dot-col-dk: rgba(255,255,255,0.04); }
+}
+
+/* Brief glow pulse when user sends a message */
+@keyframes sendPulse {
+    0%   { filter: brightness(1) saturate(1); }
+    35%  { filter: brightness(1.09) saturate(1.25); }
+    100% { filter: brightness(1) saturate(1); }
 }
 
 .main-chat-background {
@@ -27,9 +69,9 @@ body {
     background-image:
         radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.07) 0%, transparent 55%),
         radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 55%),
-        radial-gradient(#d1d5db 1px, transparent 1px);
+        radial-gradient(var(--dot-col) 1px, transparent 1px);
     background-size: 200% 200%, 200% 200%, 22px 22px;
-    animation: bgShift 14s ease-in-out infinite;
+    animation: bgShift 14s ease-in-out infinite, dot-color-cycle 20s ease-in-out infinite;
 }
 
 html.dark .main-chat-background {
@@ -37,9 +79,17 @@ html.dark .main-chat-background {
     background-image:
         radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 55%),
         radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.07) 0%, transparent 55%),
-        radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+        radial-gradient(var(--dot-col-dk) 1px, transparent 1px);
     background-size: 200% 200%, 200% 200%, 22px 22px;
-    animation: bgShift 14s ease-in-out infinite;
+    animation: bgShift 14s ease-in-out infinite, dot-color-cycle-dk 20s ease-in-out infinite;
+}
+
+/* On message send: dots cycle faster + brightness pulse */
+.main-chat-background.chat-sending {
+    animation: bgShift 14s ease-in-out infinite, dot-color-cycle 7s ease-in-out infinite, sendPulse 0.65s ease-out !important;
+}
+html.dark .main-chat-background.chat-sending {
+    animation: bgShift 14s ease-in-out infinite, dot-color-cycle-dk 7s ease-in-out infinite, sendPulse 0.65s ease-out !important;
 }
 
 /* Chat bubbles */
@@ -71,8 +121,21 @@ html.dark .main-chat-background {
     100% { opacity: 1; transform: translateY(0); }
 }
 
+/* AI bubble: bouncy WhatsApp-like pop-in */
+@keyframes bubblePop {
+    0%   { opacity: 0; transform: translateY(10px) scale(0.93); }
+    55%  { transform: translateY(-3px) scale(1.015); }
+    75%  { transform: translateY(2px) scale(0.997); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .animate-message {
     animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Used for AI/contact message bubbles — more expressive pop */
+.animate-message-ai {
+    animation: bubblePop 0.42s cubic-bezier(0.34, 1.5, 0.64, 1) forwards;
 }
 
 /* Custom Scrollbar */
@@ -609,11 +672,7 @@ html.dark #floating-date {
 
 /* ── Main Chat Area ── */
 html.dark #main-panel { background: #0f172a !important; }
-html.dark .main-chat-background {
-    background-color: #0f172a !important;
-    background-image: radial-gradient(#1e293b 1px, transparent 1px) !important;
-    background-size: 20px 20px !important;
-}
+/* (dark .main-chat-background is defined near the top with animated dot-color-cycle-dk) */
 
 /* Chat bubbles — dark */
 html.dark .glass-chat-me {
