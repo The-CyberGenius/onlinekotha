@@ -343,9 +343,248 @@
             .hero-sub { font-size: 1rem !important; }
             .mockup-frame { margin-inline: -8px; }
         }
+
+        /* ═══════════════════════════════════════════
+           ADVANCED VISUAL EFFECTS
+        ═══════════════════════════════════════════ */
+
+        /* ── Scroll progress bar ── */
+        #scroll-progress {
+            position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #f472b6, #34d399);
+            background-size: 200% 100%;
+            animation: gradient-shift 3s ease infinite;
+            z-index: 10000;
+            box-shadow: 0 0 10px rgba(168,85,247,0.6);
+            transition: width 0.08s linear;
+        }
+
+        /* ── Cursor spotlight ── */
+        .cursor-spot {
+            position: fixed; width: 500px; height: 500px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(99,102,241,0.055) 0%, transparent 70%);
+            pointer-events: none; z-index: 1;
+            transform: translate(-50%, -50%);
+            left: -999px; top: -999px;
+            will-change: left, top;
+            transition: left 0.12s ease, top 0.12s ease;
+        }
+
+        /* ── Floating memory bubbles (hero bg) ── */
+        #floating-bubbles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+        .float-bubble {
+            position: absolute; bottom: -80px;
+            display: flex; flex-direction: column;
+            background: rgba(255,255,255,0.028);
+            border: 1px solid rgba(255,255,255,0.055);
+            border-radius: 14px 14px 14px 4px;
+            padding: 7px 13px 8px;
+            backdrop-filter: blur(6px);
+            animation: bubble-rise linear infinite;
+            white-space: nowrap;
+        }
+        .float-bubble .bub-name { font-size: 9px; font-weight: 700; color: rgba(129,140,248,0.55); margin-bottom: 2px; letter-spacing: 0.04em; }
+        .float-bubble .bub-msg  { font-size: 11.5px; color: rgba(255,255,255,0.18); }
+        @keyframes bubble-rise {
+            0%   { transform: translateY(0)     translateX(0)                    rotate(var(--r0,-2deg)); opacity: 0; }
+            6%   { opacity: 1; }
+            88%  { opacity: 0.35; }
+            100% { transform: translateY(-115vh) translateX(var(--dx,25px)) rotate(var(--r1,2deg));  opacity: 0; }
+        }
+
+        /* ── Aurora hero gradient (mouse-responsive) ── */
+        .hero-aurora {
+            position: absolute; inset: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 70% 60% at var(--ax,50%) var(--ay,20%), rgba(99,102,241,0.18), transparent 65%),
+                radial-gradient(ellipse 55% 50% at 82% 78%, rgba(244,114,182,0.09), transparent 55%),
+                radial-gradient(ellipse 45% 40% at 12% 72%, rgba(52,211,153,0.055), transparent 55%),
+                radial-gradient(ellipse 35% 35% at 65% 88%, rgba(168,85,247,0.07), transparent 50%);
+            animation: aurora-breathe 12s ease-in-out infinite;
+        }
+        @keyframes aurora-breathe {
+            0%,100% { opacity: 1; filter: blur(0px); }
+            50%      { opacity: 0.85; filter: blur(1px); }
+        }
+
+        /* ── @property for conic border animation ── */
+        @property --ba { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        @keyframes conic-spin { to { --ba: 360deg; } }
+
+        /* ── CTA aurora border ── */
+        .cta-primary {
+            background: linear-gradient(135deg, #5a5cf4, #818cf8);
+            position: relative; overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.35), 0 4px 28px rgba(99,102,241,0.28);
+        }
+        .cta-primary::before {
+            content: ''; position: absolute; inset: -1px; border-radius: inherit;
+            background: conic-gradient(from var(--ba,0deg), transparent 0deg, rgba(255,255,255,0.18) 60deg, transparent 120deg);
+            animation: conic-spin 2.5s linear infinite; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .cta-primary:hover::before { opacity: 1; }
+        .cta-primary::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.13), transparent);
+            transform: translateX(-100%);
+        }
+        .cta-primary:hover::after { animation: shimmer 0.55s ease forwards; }
+        .cta-primary:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 14px 48px rgba(99,102,241,0.42), 0 0 90px -20px rgba(168,85,247,0.3);
+        }
+
+        /* ── 3D tilt + holographic glow on cards ── */
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s, border-color 0.4s;
+            transform-style: preserve-3d;
+            perspective: 900px;
+            position: relative; overflow: hidden;
+        }
+        .glass-card .holo {
+            position: absolute; inset: 0; border-radius: inherit;
+            background: radial-gradient(circle at var(--hx,50%) var(--hy,50%), rgba(255,255,255,0.07) 0%, transparent 60%);
+            opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 2;
+        }
+        .glass-card:hover .holo { opacity: 1; }
+        .glass-card:hover {
+            border-color: rgba(129,140,248,0.25);
+            box-shadow: 0 24px 70px -15px rgba(0,0,0,0.55), 0 0 0 1px rgba(129,140,248,0.1);
+        }
+
+        /* ── Aurora rotating border on highlight cards ── */
+        .aurora-card {
+            position: relative; border-radius: 20px;
+        }
+        .aurora-card::before {
+            content: ''; position: absolute; inset: -1.5px; border-radius: 22px;
+            background: conic-gradient(from var(--ba,0deg),
+                transparent 0deg, rgba(99,102,241,0.6) 60deg,
+                rgba(192,132,252,0.5) 120deg, rgba(244,114,182,0.5) 180deg,
+                rgba(52,211,153,0.4) 250deg, transparent 300deg);
+            animation: conic-spin 5s linear infinite; z-index: 0; opacity: 0; transition: opacity 0.4s;
+        }
+        .aurora-card:hover::before { opacity: 1; }
+        .aurora-card > * { position: relative; z-index: 1; }
+
+        /* ── Animated gradient text ── */
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6, #818cf8);
+            background-size: 250% 250%; background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: gradient-shift 5s ease infinite;
+        }
+        .gradient-text-warm {
+            background: linear-gradient(135deg, #f59e0b, #f472b6, #f59e0b);
+            background-size: 250% 250%; background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: gradient-shift 6s ease infinite;
+        }
+
+        /* ── Word stagger reveal (headline) ── */
+        .word-reveal .word {
+            display: inline-block; opacity: 0;
+            transform: translateY(28px);
+            animation: word-up 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+        @keyframes word-up { to { opacity: 1; transform: translateY(0); } }
+
+        /* ── Badge glow pulse ── */
+        .badge-glow {
+            box-shadow: 0 0 0 1px rgba(52,211,153,0.2), 0 0 20px -5px rgba(52,211,153,0.25);
+            animation: badge-pulse 3s ease-in-out infinite;
+        }
+        @keyframes badge-pulse {
+            0%,100% { box-shadow: 0 0 0 1px rgba(52,211,153,0.2), 0 0 20px -5px rgba(52,211,153,0.25); }
+            50%      { box-shadow: 0 0 0 1px rgba(52,211,153,0.4), 0 0 35px -5px rgba(52,211,153,0.45); }
+        }
+
+        /* ── Online indicator ring ── */
+        .online-ring {
+            position: absolute; inset: -3px; border-radius: 50%;
+            border: 2px solid rgba(52,211,153,0.5);
+            animation: ring-pulse 2.5s ease-out infinite;
+        }
+        @keyframes ring-pulse {
+            0%   { transform: scale(1); opacity: 0.7; }
+            70%  { transform: scale(1.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        /* ── Count-up stats ── */
+        .stat-value { font-variant-numeric: tabular-nums; }
+
+        /* ── Heart particles ── */
+        .heart-p {
+            position: absolute; font-size: 13px; pointer-events: none; z-index: 20;
+            animation: heart-up 1.8s ease-out forwards;
+        }
+        @keyframes heart-up {
+            0%   { transform: translateY(0) scale(0) rotate(-10deg); opacity: 0; }
+            15%  { transform: translateY(-8px) scale(1.1) rotate(5deg); opacity: 1; }
+            100% { transform: translateY(-55px) scale(0.4) rotate(-5deg); opacity: 0; }
+        }
+
+        /* ── Testimonial quote glyph ── */
+        .testimonial-card { position: relative; overflow: hidden; }
+        .testimonial-card::before {
+            content: '\201C'; position: absolute; top: -16px; right: 16px;
+            font-size: 110px; font-weight: 900; font-family: Georgia, serif;
+            color: rgba(99,102,241,0.06); line-height: 1; pointer-events: none;
+        }
+
+        /* ── Glow dot for steps ── */
+        .step-glow { box-shadow: 0 0 20px -4px currentColor; }
+
+        /* ── Subtle section shimmer line ── */
+        .shimmer-line {
+            height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+            margin: 0 auto; max-width: 500px;
+        }
+
+        /* ── Enhanced trust items ── */
+        .trust-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px 20px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .trust-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(52,211,153,0.2); }
+
+        /* ── FAQ open state highlight ── */
+        details[open] > summary { color: #a5b4fc; }
+        details[open] { background: rgba(99,102,241,0.04) !important; border-color: rgba(99,102,241,0.18) !important; }
+
+        /* ── Final CTA ambient glow ── */
+        .final-glow {
+            position: absolute; width: 600px; height: 300px; border-radius: 50%;
+            background: rgba(99,102,241,0.08); filter: blur(80px);
+            left: 50%; top: 50%; transform: translate(-50%,-50%);
+            animation: orb-drift 15s ease-in-out infinite alternate;
+        }
+
+        @media (max-width: 768px) {
+            .cursor-spot { display: none; }
+            .float-bubble { display: none; }
+        }
     </style>
 </head>
 <body class="antialiased">
+
+<!-- Scroll progress bar -->
+<div id="scroll-progress"></div>
+<!-- Cursor spotlight -->
+<div class="cursor-spot" id="cursor-spot"></div>
+<!-- SVG blob goo filter (hidden) -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;">
+    <defs>
+        <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="12" result="b"/><feColorMatrix in="b" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="g"/><feComposite in="SourceGraphic" in2="g" operator="atop"/></filter>
+    </defs>
+</svg>
 
 <!-- ═══════════ NAV ═══════════ -->
 <nav class="fixed top-0 w-full z-50" id="nav">
@@ -367,6 +606,10 @@
 
 <!-- ═══════════ HERO ═══════════ -->
 <section class="hero-mesh relative min-h-screen flex items-center justify-center px-5 pt-28 pb-20 overflow-hidden">
+    <!-- Aurora responsive background -->
+    <div class="hero-aurora" id="hero-aurora"></div>
+    <!-- Floating memory bubbles -->
+    <div id="floating-bubbles"></div>
     <!-- Ambient orbs -->
     <div class="orb w-[600px] h-[600px] bg-indigo-500/20 -top-[15%] left-[5%]"></div>
     <div class="orb w-[400px] h-[400px] bg-pink-500/10 bottom-[5%] right-[0%]" style="animation-delay:-7s;animation-duration:25s;"></div>
@@ -374,7 +617,7 @@
 
     <div class="max-w-5xl mx-auto text-center relative z-10">
         <!-- Pill badge -->
-        <div class="anim-fade-up inline-flex items-center gap-2.5 bg-white/[0.04] border border-white/[0.08] rounded-full px-4 py-2 mb-8 backdrop-blur-sm">
+        <div class="anim-fade-up badge-glow inline-flex items-center gap-2.5 bg-white/[0.04] border border-white/[0.08] rounded-full px-4 py-2 mb-8 backdrop-blur-sm">
             <span class="relative flex h-2 w-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
@@ -382,10 +625,13 @@
             <span class="text-[12px] font-semibold text-zinc-300 tracking-wide">AI-powered WhatsApp memories</span>
         </div>
 
-        <!-- Headline -->
-        <h1 class="hero-h1 anim-fade-up d1 text-[3.2rem] sm:text-[3.8rem] md:text-[4.5rem] font-black tracking-[-0.03em] leading-[1.05] mb-6">
-            Keep your loved ones<br>
-            <span class="gradient-text">always online.</span>
+        <!-- Headline — word-reveal stagger -->
+        <h1 class="hero-h1 word-reveal text-[3.2rem] sm:text-[3.8rem] md:text-[4.5rem] font-black tracking-[-0.03em] leading-[1.05] mb-6">
+            <span class="word" style="animation-delay:0.05s">Keep</span>
+            <span class="word" style="animation-delay:0.15s"> your</span>
+            <span class="word" style="animation-delay:0.25s"> loved</span>
+            <span class="word" style="animation-delay:0.35s"> ones</span><br>
+            <span class="gradient-text word" style="animation-delay:0.45s">always online.</span>
         </h1>
 
         <!-- Sub-headline -->
@@ -415,6 +661,7 @@
                 <!-- Chat header -->
                 <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]">
                     <div class="relative">
+                        <div class="online-ring"></div>
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-pink-500/20">M</div>
                         <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-[#141420]"></div>
                     </div>
@@ -470,17 +717,17 @@
 <section class="border-y border-white/[0.04] bg-white/[0.01]">
     <div class="max-w-5xl mx-auto px-5 py-10 flex flex-wrap items-center justify-center gap-10 md:gap-20">
         <div class="text-center">
-            <p class="text-[28px] font-black text-white tracking-tight">10K<span class="text-indigo-400">+</span></p>
+            <span class="stat-value text-[28px] font-black text-white tracking-tight" data-target="10000" data-suffix="K+">10K+</span>
             <p class="text-[11px] text-zinc-500 font-semibold tracking-wide mt-1">Messages Preserved</p>
         </div>
         <div class="hidden md:block w-px h-10 bg-white/[0.06]"></div>
         <div class="text-center">
-            <p class="text-[28px] font-black text-white tracking-tight">500<span class="text-indigo-400">+</span></p>
+            <span class="stat-value text-[28px] font-black text-white tracking-tight" data-target="500" data-suffix="+">500+</span>
             <p class="text-[11px] text-zinc-500 font-semibold tracking-wide mt-1">Memories Relived</p>
         </div>
         <div class="hidden md:block w-px h-10 bg-white/[0.06]"></div>
         <div class="text-center">
-            <p class="text-[28px] font-black text-white tracking-tight">100<span class="text-emerald-400">%</span></p>
+            <span class="stat-value text-[28px] font-black text-white tracking-tight" data-target="100" data-suffix="%" data-color="emerald">100%</span>
             <p class="text-[11px] text-zinc-500 font-semibold tracking-wide mt-1">Private & Encrypted</p>
         </div>
     </div>
@@ -511,22 +758,25 @@
 
         <div class="grid md:grid-cols-3 gap-5">
             <!-- Step 1 -->
-            <div class="glass-card p-7 reveal">
-                <div class="step-number bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-5">1</div>
+            <div class="glass-card aurora-card tilt-card p-7 reveal">
+                <div class="holo"></div>
+                <div class="step-number step-glow bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-5">1</div>
                 <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Upload your chat</h3>
                 <p class="text-[14px] text-zinc-400 leading-relaxed">Export any WhatsApp conversation as .zip. Drag and drop it. All messages, media, voice notes — everything preserved.</p>
             </div>
 
             <!-- Step 2 -->
-            <div class="glass-card p-7 reveal reveal-delay-1">
-                <div class="step-number bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-5">2</div>
+            <div class="glass-card aurora-card tilt-card p-7 reveal reveal-delay-1">
+                <div class="holo"></div>
+                <div class="step-number step-glow bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-5">2</div>
                 <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">AI learns their voice</h3>
                 <p class="text-[14px] text-zinc-400 leading-relaxed">Our AI reads every message — their slang, emoji habits, humor, the way they text at 2 AM. It becomes them.</p>
             </div>
 
             <!-- Step 3 -->
-            <div class="glass-card p-7 reveal reveal-delay-2">
-                <div class="step-number bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">3</div>
+            <div class="glass-card aurora-card tilt-card p-7 reveal reveal-delay-2">
+                <div class="holo"></div>
+                <div class="step-number step-glow bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">3</div>
                 <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Talk to them again</h3>
                 <p class="text-[14px] text-zinc-400 leading-relaxed">Start a conversation. They reply in their exact style — same tone, same energy, same love. Like they never left.</p>
             </div>
@@ -664,28 +914,32 @@
         </div>
 
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="glass-card p-6 text-center reveal">
+            <div class="glass-card tilt-card p-6 text-center reveal">
+                <div class="holo"></div>
                 <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/10 flex items-center justify-center mx-auto mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fb7185" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </div>
                 <h4 class="font-bold text-[15px] text-white mb-2">Lost loved ones</h4>
                 <p class="text-[12px] text-zinc-500 leading-relaxed">Hear their words again. Feel their presence through conversations you shared.</p>
             </div>
-            <div class="glass-card p-6 text-center reveal reveal-delay-1">
+            <div class="glass-card tilt-card p-6 text-center reveal reveal-delay-1">
+                <div class="holo"></div>
                 <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/10 flex items-center justify-center mx-auto mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </div>
                 <h4 class="font-bold text-[15px] text-white mb-2">Distant friends</h4>
                 <p class="text-[12px] text-zinc-500 leading-relaxed">Relive inside jokes and memories when they're oceans away.</p>
             </div>
-            <div class="glass-card p-6 text-center reveal reveal-delay-2">
+            <div class="glass-card tilt-card p-6 text-center reveal reveal-delay-2">
+                <div class="holo"></div>
                 <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/10 flex items-center justify-center mx-auto mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
                 </div>
                 <h4 class="font-bold text-[15px] text-white mb-2">Digital diary</h4>
                 <p class="text-[12px] text-zinc-500 leading-relaxed">Search years of conversations. Find that recipe, that address, that sweet message.</p>
             </div>
-            <div class="glass-card p-6 text-center reveal reveal-delay-3">
+            <div class="glass-card tilt-card p-6 text-center reveal reveal-delay-3">
+                <div class="holo"></div>
                 <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/10 flex items-center justify-center mx-auto mb-4">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
@@ -759,7 +1013,8 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-5">
-            <div class="glass-card p-6 reveal">
+            <div class="glass-card tilt-card testimonial-card p-6 reveal">
+                <div class="holo"></div>
                 <div class="flex gap-0.5 mb-4">
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
@@ -777,7 +1032,8 @@
                 </div>
             </div>
 
-            <div class="glass-card p-6 reveal reveal-delay-1">
+            <div class="glass-card tilt-card testimonial-card p-6 reveal reveal-delay-1">
+                <div class="holo"></div>
                 <div class="flex gap-0.5 mb-4">
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
@@ -795,7 +1051,8 @@
                 </div>
             </div>
 
-            <div class="glass-card p-6 reveal reveal-delay-2">
+            <div class="glass-card tilt-card testimonial-card p-6 reveal reveal-delay-2">
+                <div class="holo"></div>
                 <div class="flex gap-0.5 mb-4">
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
@@ -978,6 +1235,7 @@
 <!-- ═══════════ FINAL CTA ═══════════ -->
 <section class="py-28 md:py-36 px-5 relative overflow-hidden">
     <div class="absolute inset-0 hero-mesh pointer-events-none opacity-50"></div>
+    <div class="final-glow"></div>
     <div class="orb w-[400px] h-[400px] bg-indigo-500/10 top-0 left-[20%]" style="animation-delay:-5s;"></div>
     <div class="orb w-[300px] h-[300px] bg-pink-500/8 bottom-0 right-[10%]" style="animation-delay:-10s;"></div>
 
@@ -1227,6 +1485,189 @@ window.addEventListener('scroll', () => {
         input.value = '';
         sendDemo(text);
     });
+})();
+
+// ═══════════════════════════════════════════════
+// ADVANCED VISUAL EFFECTS
+// ═══════════════════════════════════════════════
+
+// ── 1. Scroll progress bar ──
+(function() {
+    const bar = document.getElementById('scroll-progress');
+    if (!bar) return;
+    window.addEventListener('scroll', () => {
+        const h = document.documentElement;
+        const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+        bar.style.width = Math.min(pct, 100) + '%';
+    }, { passive: true });
+})();
+
+// ── 2. Cursor spotlight ──
+(function() {
+    const spot = document.getElementById('cursor-spot');
+    if (!spot) return;
+    let raf;
+    document.addEventListener('mousemove', (e) => {
+        if (raf) cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+            spot.style.left = e.clientX + 'px';
+            spot.style.top  = e.clientY + 'px';
+        });
+    });
+})();
+
+// ── 3. Aurora hero — follows mouse ──
+(function() {
+    const aurora = document.getElementById('hero-aurora');
+    if (!aurora) return;
+    const hero = aurora.closest('section');
+    if (!hero) return;
+    let raf;
+    hero.addEventListener('mousemove', (e) => {
+        if (raf) cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+            const r = hero.getBoundingClientRect();
+            const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1);
+            const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+            aurora.style.setProperty('--ax', x + '%');
+            aurora.style.setProperty('--ay', y + '%');
+        });
+    });
+})();
+
+// ── 4. Floating memory bubbles ──
+(function() {
+    const container = document.getElementById('floating-bubbles');
+    if (!container) return;
+    const msgs = [
+        { name: 'Maa',        text: 'Khana kha liya beta? 🍽️' },
+        { name: 'Papa',       text: 'Take care okay ❤️' },
+        { name: 'Rohan',      text: 'Miss you yaar 💙' },
+        { name: 'Didi',       text: 'Hamesha sath hoon 💛' },
+        { name: 'Maa',        text: 'Ghar kab aa raha hai?' },
+        { name: 'Nani',       text: 'Apna khayal rakhna 🙏' },
+        { name: 'Papa',       text: "I'm so proud of you ✨" },
+        { name: 'Best Friend',text: 'Kal milte hain pakka?' },
+        { name: 'Bhai',       text: 'Good morning! Uthh ja 😂' },
+        { name: 'Dost',       text: 'Bahut yaad aa raha hai' },
+        { name: 'Nana',       text: 'Bhagwan khush rakhe 🙏' },
+        { name: 'Sis',        text: 'Love you always 😘' },
+    ];
+    function spawnBubble() {
+        const m    = msgs[Math.floor(Math.random() * msgs.length)];
+        const el   = document.createElement('div');
+        el.className = 'float-bubble';
+        const dur  = 18 + Math.random() * 16;
+        const left = 5  + Math.random() * 85;
+        const dx   = (Math.random() - 0.5) * 60;
+        const r0   = (Math.random() - 0.5) * 4;
+        const r1   = (Math.random() - 0.5) * 4;
+        el.style.cssText = `left:${left}%;--dx:${dx}px;--r0:${r0}deg;--r1:${r1}deg;animation-duration:${dur}s;animation-delay:${Math.random()*10}s`;
+        el.innerHTML = `<span class="bub-name">${m.name}</span><span class="bub-msg">${m.text}</span>`;
+        container.appendChild(el);
+        setTimeout(() => el.remove(), (dur + 12) * 1000);
+    }
+    // Spawn initial set + continuous stream
+    for (let i = 0; i < 8; i++) setTimeout(spawnBubble, i * 1400);
+    setInterval(spawnBubble, 3200);
+})();
+
+// ── 5. 3D tilt + holographic light on cards ──
+(function() {
+    document.querySelectorAll('.tilt-card').forEach(card => {
+        const holo = card.querySelector('.holo');
+        card.addEventListener('mouseenter', () => {
+            card.style.transition = 'transform 0.08s ease, box-shadow 0.08s ease';
+        });
+        card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width  - 0.5;
+            const y = (e.clientY - r.top)  / r.height - 0.5;
+            card.style.transform = `perspective(700px) rotateX(${(-y * 12).toFixed(2)}deg) rotateY(${(x * 12).toFixed(2)}deg) translateZ(6px)`;
+            card.style.boxShadow = `${(-x * 18).toFixed(0)}px ${(y * 18).toFixed(0)}px 40px -12px rgba(0,0,0,0.5), 0 0 30px -10px rgba(99,102,241,${(0.06 + Math.abs(x) * 0.18).toFixed(2)})`;
+            if (holo) {
+                holo.style.setProperty('--hx', ((x + 0.5) * 100).toFixed(1) + '%');
+                holo.style.setProperty('--hy', ((y + 0.5) * 100).toFixed(1) + '%');
+            }
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s';
+            card.style.transform  = '';
+            card.style.boxShadow  = '';
+        });
+    });
+})();
+
+// ── 6. Magnetic CTA buttons ──
+(function() {
+    document.querySelectorAll('.cta-primary').forEach(btn => {
+        btn.addEventListener('mouseenter', () => { btn.style.transition = 'transform 0.1s'; });
+        btn.addEventListener('mousemove', (e) => {
+            const r = btn.getBoundingClientRect();
+            const x = (e.clientX - r.left - r.width  / 2) * 0.28;
+            const y = (e.clientY - r.top  - r.height / 2) * 0.28;
+            btn.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) scale(1.03)`;
+        });
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s';
+            btn.style.transform  = '';
+        });
+    });
+})();
+
+// ── 7. Count-up stats on scroll ─���
+(function() {
+    const stats = document.querySelectorAll('.stat-value[data-target]');
+    if (!stats.length) return;
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const el     = entry.target;
+            const target = parseInt(el.dataset.target);
+            const suffix = el.dataset.suffix || '';
+            const color  = el.dataset.color;
+            obs.unobserve(el);
+            const start = performance.now();
+            const dur   = 1800;
+            function tick(now) {
+                const p = Math.min((now - start) / dur, 1);
+                const e = 1 - Math.pow(1 - p, 3); // ease-out cubic
+                let val = Math.round(e * target);
+                if (target >= 1000) {
+                    // show as K
+                    el.innerHTML = (val >= 1000 ? Math.floor(val/1000) + 'K' : val) + `<span style="color:${color === 'emerald' ? '#34d399' : '#818cf8'}">${suffix.replace(/\d+K?/,'')}</span>`;
+                } else {
+                    el.innerHTML = val + `<span style="color:${color === 'emerald' ? '#34d399' : '#818cf8'}">${suffix.replace(/\d+/,'')}</span>`;
+                }
+                if (p < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        });
+    }, { threshold: 0.6 });
+    stats.forEach(s => obs.observe(s));
+})();
+
+// ── 8. Heart particles from demo chat ──
+(function() {
+    const frame = document.getElementById('demo-chat-frame');
+    if (!frame) return;
+    const HEARTS = ['❤️','💙','💛','💜','🩷','✨','🌸'];
+    function spawnHeart(container) {
+        const h = document.createElement('span');
+        h.className = 'heart-p';
+        h.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
+        h.style.cssText = `bottom:50px;left:${20 + Math.random()*60}%`;
+        container.appendChild(h);
+        setTimeout(() => h.remove(), 1900);
+    }
+    // Spawn hearts when AI responds — observe DOM changes in chat area
+    const chatArea = document.getElementById('hero-chat');
+    if (chatArea) {
+        const mo = new MutationObserver(() => {
+            for (let i = 0; i < 3; i++) setTimeout(() => spawnHeart(frame), i * 220);
+        });
+        mo.observe(chatArea, { childList: true });
+    }
 })();
 
 // ── Auth check — update CTAs for logged-in users ──
