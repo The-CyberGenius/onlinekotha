@@ -733,18 +733,16 @@
             extraButtons: `<button data-action="test-email" class="text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5">Send test email</button>`,
         }));
 
-        // Stripe card
+        // Razorpay card
         root.appendChild(integCard({
-            title: 'Stripe (billing)',
-            subtitle: 'For Pro + Lifetime upgrades',
-            section: 'stripe',
-            status: data.status.stripe,
-            data: data.stripe,
+            title: 'Razorpay (billing)',
+            subtitle: 'Indian payment gateway — Standard Checkout',
+            section: 'razorpay',
+            status: data.status.razorpay,
+            data: data.razorpay || {},
             fields: [
-                { k: 'secret_key', label: 'Secret key', placeholder: 'sk_live_xxx', type: 'password', secret: true },
-                { k: 'webhook_secret', label: 'Webhook secret', placeholder: 'whsec_xxx', type: 'password', secret: true },
-                { k: 'pro_price_id', label: 'Pro price ID ($5/mo)', placeholder: 'price_xxx', type: 'text' },
-                { k: 'lifetime_price_id', label: 'Lifetime price ID ($49)', placeholder: 'price_xxx', type: 'text' },
+                { k: 'key_id',     label: 'Key ID (public)',   placeholder: 'rzp_live_xxx',  type: 'text' },
+                { k: 'key_secret', label: 'Key Secret',        placeholder: 'xxxxxxxx',      type: 'password', secret: true },
             ],
         }));
 

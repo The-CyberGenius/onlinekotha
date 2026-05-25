@@ -134,6 +134,21 @@ CREATE TABLE IF NOT EXISTS conv_messages (
   FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_convmsg_conv ON conv_messages(conversation_id);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  provider TEXT NOT NULL DEFAULT 'razorpay',
+  order_id TEXT UNIQUE NOT NULL,
+  payment_id TEXT,
+  amount INTEGER NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'INR',
+  plan TEXT,
+  status TEXT NOT NULL DEFAULT 'captured',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
 `);
 
 // Migrations: ALTER existing users table for new columns

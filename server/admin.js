@@ -496,9 +496,9 @@ router.get('/integrations', (req, res) => {
     res.json({
         ...snap,
         status: {
-            email: email.configured(),
-            stripe: billing.configured(),
-            google: oauth.configured(),
+            email:    email.configured(),
+            razorpay: billing.configured(),
+            google:   oauth.configured(),
         },
     });
 });
@@ -508,26 +508,10 @@ router.put('/integrations', (req, res) => {
     const updates = {};
     const nulls = [];
 
-    // Email section
-    if (body.email) {
-        for (const [field, val] of Object.entries(body.email)) {
-            const key = `integ.email.${field}`;
-            if (val === null || val === '') nulls.push(key);
-            else updates[key] = val;
-        }
-    }
-    // Stripe section
-    if (body.stripe) {
-        for (const [field, val] of Object.entries(body.stripe)) {
-            const key = `integ.stripe.${field}`;
-            if (val === null || val === '') nulls.push(key);
-            else updates[key] = val;
-        }
-    }
-    // OAuth section
-    if (body.oauth) {
-        for (const [field, val] of Object.entries(body.oauth)) {
-            const key = `integ.oauth.${field}`;
+    for (const section of ['email', 'stripe', 'oauth', 'razorpay']) {
+        if (!body[section]) continue;
+        for (const [field, val] of Object.entries(body[section])) {
+            const key = `integ.${section}.${field}`;
             if (val === null || val === '') nulls.push(key);
             else updates[key] = val;
         }
@@ -536,7 +520,7 @@ router.put('/integrations', (req, res) => {
     integ.bulkUpdate(updates, nulls);
     // Invalidate caches so next request picks up new config
     email.resetTransporter();
-    billing.resetStripe();
+    billing.reset();
     oauth.resetStrategy();
 
     res.json({ ok: true });
