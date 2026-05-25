@@ -1,62 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GKQ286KWDG');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set new password — Kotha</title>
+    <title>Set New Password — Kotha</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { animation: { 'fade-in-up': 'fadeInUp 0.6s ease-out forwards', }, keyframes: { fadeInUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } } } }
+        }
+    </script>
+    <style>
+        .auth-bg-mesh {
+            background-color: #0b0f19;
+            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.25) 0px, transparent 50%);
+        }
+    </style>
 </head>
-<body class="flex items-center justify-center h-screen w-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
-    <div class="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl shadow-2xl p-8 w-full max-w-md">
-        <div class="text-center mb-6">
-            <img src="/logo.svg" alt="Kotha Logo" class="inline-flex w-16 h-16 rounded-2xl shadow-lg mb-3" />
-            <h1 class="text-2xl font-extrabold text-gray-800">Set a new password</h1>
+<body class="flex min-h-[100dvh] w-screen overflow-hidden bg-gray-50 text-gray-800 font-sans">
+    
+    <div class="hidden lg:flex w-1/2 auth-bg-mesh relative items-center justify-center overflow-hidden">
+        <div class="relative z-10 flex flex-col items-center text-center p-12 max-w-lg">
+            <img src="/logo.svg" alt="Kotha Logo" class="w-32 h-32 mb-8 drop-shadow-2xl" />
+            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-4">Set New Password</h1>
+            <p class="text-lg text-indigo-200 font-medium">Create a strong new password to protect your beautifully preserved memories.</p>
         </div>
+    </div>
 
-        <form id="reset-form" class="space-y-3">
-            <input type="password" id="password" required minlength="6" placeholder="New password (min 6 chars)" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
-            <button type="submit" id="submit-btn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 rounded-xl transition shadow">Set new password</button>
-            <p id="error-msg" class="hidden text-xs text-red-600 font-semibold text-center"></p>
-        </form>
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative">
+        <div class="w-full max-w-md animate-fade-in-up">
+            <div class="lg:hidden text-center mb-10">
+                <img src="/logo.svg" alt="Kotha Logo" class="w-16 h-16 mx-auto mb-4 drop-shadow-xl" />
+                <h2 class="text-2xl font-extrabold text-gray-900">Kotha</h2>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Create New Password</h2>
+                <p class="text-gray-500">Your new password must be at least 6 characters long.</p>
+            </div>
 
-        <div id="success-msg" class="hidden text-center">
-            <div class="text-5xl mb-3">✓</div>
-            <p class="font-bold text-gray-800 mb-2">Password updated</p>
-            <a href="/login.html" class="text-indigo-600 font-bold text-sm hover:underline">Back to login</a>
+            <form id="reset-form" class="space-y-6">
+                <!-- Floating Label Input: Password -->
+                <div class="relative">
+                    <input type="password" id="password" minlength="6" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
+                    <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">New Password</label>
+                </div>
+                
+                <button type="submit" id="submit-btn" class="relative overflow-hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/50 mt-4">
+                    Reset password
+                </button>
+                <p id="msg" class="text-sm font-semibold text-center hidden mt-4"></p>
+                
+                <div class="text-center mt-6">
+                    <a href="/login.html" class="text-sm font-bold text-indigo-600 hover:text-indigo-500 transition-colors">&larr; Back to login</a>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
-        const token = new URLSearchParams(window.location.search).get('token');
-        if (!token) window.location.href = '/forgot.html';
-
         document.getElementById('reset-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const password = document.getElementById('password').value;
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const newPassword = document.getElementById('password').value;
             const btn = document.getElementById('submit-btn');
-            const errorMsg = document.getElementById('error-msg');
-            errorMsg.classList.add('hidden');
+            const msgEl = document.getElementById('msg');
+            
+            if (!token) {
+                msgEl.textContent = 'Invalid or missing token';
+                msgEl.className = 'text-sm font-semibold text-center text-red-600 mt-4';
+                return;
+            }
+
             btn.disabled = true;
-            btn.textContent = 'Updating...';
+            btn.textContent = 'Resetting...';
+            msgEl.classList.add('hidden');
+
             try {
-                const resp = await fetch('/api/auth/reset', {
+                const resp = await fetch('/api/auth/reset-password', {
                     method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ token, password }),
+                    headers: {'content-type':'application/json'},
+                    body: JSON.stringify({token, newPassword})
                 });
-                const data = await resp.json();
-                if (!resp.ok) throw new Error(data.error || 'Failed');
-                document.getElementById('reset-form').classList.add('hidden');
-                document.getElementById('success-msg').classList.remove('hidden');
-            } catch (err) {
-                errorMsg.textContent = err.message;
-                errorMsg.classList.remove('hidden');
+                
+                if (resp.ok) {
+                    msgEl.textContent = 'Password reset successfully!';
+                    msgEl.className = 'text-sm font-semibold text-center text-emerald-600 mt-4';
+                    btn.textContent = 'Done';
+                    setTimeout(() => window.location.href = '/login.html', 1500);
+                } else {
+                    const err = await resp.json();
+                    msgEl.textContent = err.error || 'Failed to reset';
+                    msgEl.className = 'text-sm font-semibold text-center text-red-600 mt-4';
+                    btn.disabled = false;
+                    btn.textContent = 'Reset password';
+                }
+            } catch (e) {
+                msgEl.textContent = 'Network error';
+                msgEl.className = 'text-sm font-semibold text-center text-red-600 mt-4';
                 btn.disabled = false;
-                btn.textContent = 'Set new password';
+                btn.textContent = 'Reset password';
             }
         });
     </script>

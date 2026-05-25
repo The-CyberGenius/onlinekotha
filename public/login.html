@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GKQ286KWDG');</script>
     <meta charset="UTF-8">
@@ -10,59 +9,131 @@
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        .auth-bg-mesh {
+            background-color: #0b0f19;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.25) 0px, transparent 50%);
+        }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-[100dvh] w-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 p-4">
-    <div class="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl shadow-2xl p-8 w-full max-w-md">
-        <div class="text-center mb-6">
-            <img src="/logo.svg" alt="Kotha Logo" class="inline-flex w-16 h-16 rounded-2xl shadow-lg mb-3" />
-            <h1 class="text-2xl font-extrabold text-gray-800">Kotha</h1>
-            <p class="text-sm text-gray-500 mt-1">Your chats, beautifully preserved</p>
+<body class="flex min-h-[100dvh] w-screen overflow-hidden bg-gray-50 text-gray-800 font-sans">
+    
+    <!-- LEFT SIDE: Dynamic Brand Visual (Hidden on mobile) -->
+    <div class="hidden lg:flex w-1/2 auth-bg-mesh relative items-center justify-center overflow-hidden">
+        <!-- Floating animated blobs -->
+        <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-blob"></div>
+        <div class="absolute top-1/3 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+        
+        <div class="relative z-10 flex flex-col items-center text-center p-12 max-w-lg">
+            <img src="/logo.svg" alt="Kotha Logo" class="w-32 h-32 mb-8 drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
+            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-4">Your chats, beautifully preserved.</h1>
+            <p class="text-lg text-indigo-200 font-medium">Experience the next generation of memory preservation. Analyze, search, and relive your WhatsApp conversations with AI.</p>
         </div>
+    </div>
 
-        <div class="flex gap-2 bg-gray-100 rounded-xl p-1 mb-5">
-            <button id="tab-login" class="flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow text-indigo-600">Login</button>
-            <button id="tab-signup" class="flex-1 py-2 rounded-lg font-bold text-sm text-gray-500">Sign up</button>
-        </div>
-
-        <!-- Google OAuth button — only shown if configured -->
-        <a id="google-btn" href="#" class="hidden w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-sm transition rounded-xl py-2.5 mb-3 font-bold text-sm text-gray-700">
-            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
-            Continue with Google
-        </a>
-
-        <!-- Divider (shown only with Google) -->
-        <div id="auth-divider" class="hidden items-center gap-3 mb-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-            <div class="flex-1 h-px bg-gray-200"></div>
-            <span>or with email</span>
-            <div class="flex-1 h-px bg-gray-200"></div>
-        </div>
-
-        <form id="auth-form" class="space-y-3">
-            <div>
-                <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Email</label>
-                <input type="email" id="email" required class="w-full mt-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+    <!-- RIGHT SIDE: Auth Form -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative">
+        <div class="w-full max-w-md animate-fade-in-up">
+            <!-- Mobile Logo -->
+            <div class="lg:hidden text-center mb-10">
+                <img src="/logo.svg" alt="Kotha Logo" class="w-16 h-16 mx-auto mb-4 drop-shadow-xl" />
+                <h2 class="text-2xl font-extrabold text-gray-900">Kotha</h2>
             </div>
-            <div>
-                <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Password</label>
-                <input type="password" id="password" required minlength="6" class="w-full mt-1 bg-white border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
+            
+            <div class="mb-8">
+                <h2 id="form-title" class="text-3xl font-extrabold text-gray-900 mb-2">Welcome back</h2>
+                <p id="form-subtitle" class="text-gray-500">Please enter your details to sign in.</p>
             </div>
-            <button type="submit" id="submit-btn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 rounded-xl transition shadow">Login</button>
-            <p id="error-msg" class="text-xs text-red-600 font-semibold text-center hidden"></p>
-            <p class="text-center text-xs text-gray-500 mt-2"><a href="/forgot.html" class="font-bold text-indigo-600 hover:underline">Forgot password?</a></p>
-            <p id="trial-info" class="text-xs text-indigo-700 font-semibold text-center bg-indigo-50 rounded-lg py-2 hidden">
-                🎁 New users get <b>1 day free trial</b> of AI chat features
-            </p>
-        </form>
+
+            <!-- Sliding Tabs -->
+            <div class="relative flex p-1 bg-gray-100 rounded-xl mb-8 shadow-inner">
+                <div id="tab-slider" class="absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white rounded-lg shadow-sm transition-transform duration-300 ease-out z-0"></div>
+                <button id="tab-login" class="flex-1 relative z-10 py-2.5 font-bold text-sm text-indigo-600 transition-colors duration-300">Log In</button>
+                <button id="tab-signup" class="flex-1 relative z-10 py-2.5 font-bold text-sm text-gray-500 transition-colors duration-300">Sign Up</button>
+            </div>
+
+            <!-- Google OAuth -->
+            <a id="google-btn" href="#" class="hidden group relative flex items-center justify-center gap-3 w-full bg-white border-2 border-gray-200 hover:border-indigo-100 hover:bg-indigo-50 rounded-xl py-3 mb-6 font-bold text-sm text-gray-700 transition-all shadow-sm">
+                <svg width="20" height="20" viewBox="0 0 48 48" class="group-hover:scale-110 transition-transform"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+                Continue with Google
+            </a>
+
+            <div id="auth-divider" class="hidden items-center gap-4 mb-6">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">or with email</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <form id="auth-form" class="space-y-5">
+                <!-- Floating Label Input: Email -->
+                <div class="relative">
+                    <input type="email" id="email" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
+                    <label for="email" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">Email address</label>
+                </div>
+                
+                <!-- Floating Label Input: Password -->
+                <div class="relative">
+                    <input type="password" id="password" minlength="6" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
+                    <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">Password</label>
+                </div>
+
+                <div class="flex items-center justify-between mt-2">
+                    <p id="error-msg" class="text-xs text-red-600 font-bold hidden"></p>
+                    <a href="/forgot.html" id="forgot-link" class="text-sm font-bold text-indigo-600 hover:text-indigo-500 ml-auto transition-colors">Forgot password?</a>
+                </div>
+
+                <button type="submit" id="submit-btn" class="relative overflow-hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/50 mt-4">
+                    <span class="relative z-10" id="btn-text">Sign In</span>
+                </button>
+                
+                <p id="trial-info" class="text-xs text-indigo-700 font-semibold text-center bg-indigo-50 border border-indigo-100 rounded-xl py-3 px-4 hidden mt-6 shadow-sm">
+                    ✨ New users get a <b>1 day free trial</b> of AI features!
+                </p>
+            </form>
+        </div>
     </div>
 
     <script>
         let mode = 'login';
         const tabLogin = document.getElementById('tab-login');
         const tabSignup = document.getElementById('tab-signup');
+        const tabSlider = document.getElementById('tab-slider');
         const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
         const trialInfo = document.getElementById('trial-info');
         const errorMsg = document.getElementById('error-msg');
+        const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
+        const forgotLink = document.getElementById('forgot-link');
 
         function getNext() {
             const params = new URLSearchParams(window.location.search);
@@ -74,13 +145,21 @@
         function switchMode(newMode) {
             mode = newMode;
             const isLogin = mode === 'login';
-            tabLogin.className = isLogin
-                ? 'flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow text-indigo-600'
-                : 'flex-1 py-2 rounded-lg font-bold text-sm text-gray-500';
-            tabSignup.className = !isLogin
-                ? 'flex-1 py-2 rounded-lg font-bold text-sm bg-white shadow text-indigo-600'
-                : 'flex-1 py-2 rounded-lg font-bold text-sm text-gray-500';
-            submitBtn.textContent = isLogin ? 'Login' : 'Create account';
+            
+            // Animate slider
+            tabSlider.style.transform = isLogin ? 'translateX(0)' : 'translateX(100%)';
+            
+            // Text colors
+            tabLogin.className = `flex-1 relative z-10 py-2.5 font-bold text-sm transition-colors duration-300 ${isLogin ? 'text-indigo-600' : 'text-gray-500'}`;
+            tabSignup.className = `flex-1 relative z-10 py-2.5 font-bold text-sm transition-colors duration-300 ${!isLogin ? 'text-indigo-600' : 'text-gray-500'}`;
+            
+            // Update copy
+            btnText.textContent = isLogin ? 'Sign In' : 'Create Account';
+            formTitle.textContent = isLogin ? 'Welcome back' : 'Create an account';
+            formSubtitle.textContent = isLogin ? 'Please enter your details to sign in.' : 'Start preserving your chats today.';
+            
+            // Visibility toggles
+            forgotLink.style.display = isLogin ? 'block' : 'none';
             trialInfo.classList.toggle('hidden', isLogin);
             errorMsg.classList.add('hidden');
         }
@@ -88,7 +167,6 @@
         tabLogin.addEventListener('click', () => switchMode('login'));
         tabSignup.addEventListener('click', () => switchMode('signup'));
 
-        // Respect #signup hash from landing page CTAs
         if (window.location.hash === '#signup') switchMode('signup');
 
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
@@ -97,60 +175,52 @@
             const password = document.getElementById('password').value;
             errorMsg.classList.add('hidden');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Please wait...';
+            btnText.textContent = 'Please wait...';
 
             try {
-                const resp = await fetch(`/api/auth/${mode}`, {
+                const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+                const resp = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
+                    headers: {'content-type':'application/json'},
+                    body: JSON.stringify({ email, password })
                 });
-                const data = await resp.json();
-                if (!resp.ok) throw new Error(data.error || 'Failed');
-                const me = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
-                window.location.href = me.user && me.user.is_admin ? '/admin.html' : getNext();
+
+                if (resp.ok) {
+                    window.location.href = mode === 'signup' ? '/login.html?msg=verify' : getNext();
+                } else {
+                    const err = await resp.json();
+                    errorMsg.textContent = err.error || 'Authentication failed';
+                    errorMsg.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    btnText.textContent = mode === 'login' ? 'Sign In' : 'Create Account';
+                }
             } catch (err) {
-                errorMsg.textContent = err.message;
+                errorMsg.textContent = 'Network error. Try again.';
                 errorMsg.classList.remove('hidden');
                 submitBtn.disabled = false;
-                submitBtn.textContent = mode === 'login' ? 'Login' : 'Create account';
+                btnText.textContent = mode === 'login' ? 'Sign In' : 'Create Account';
             }
         });
 
-        // Show Google button if backend is configured
-        (async () => {
-            try {
-                const r = await (await fetch('/api/auth/status')).json();
-                if (r.google) {
-                    const next = encodeURIComponent(getNext());
-                    const googleBtn = document.getElementById('google-btn');
-                    googleBtn.href = `/api/auth/google?next=${next}`;
-                    googleBtn.classList.remove('hidden');
-                    const divider = document.getElementById('auth-divider');
-                    divider.classList.remove('hidden');
-                    divider.classList.add('flex');
+        // Config check for Google OAuth
+        fetch('/api/auth/config')
+            .then(res => res.json())
+            .then(data => {
+                if (data.googleOAuthEnabled) {
+                    const btn = document.getElementById('google-btn');
+                    btn.classList.remove('hidden');
+                    btn.href = `/api/auth/google?next=${encodeURIComponent(getNext())}`;
+                    document.getElementById('auth-divider').classList.remove('hidden');
+                    document.getElementById('auth-divider').classList.add('flex');
                 }
-            } catch {}
-        })();
+            }).catch(()=>{});
 
-        // If already logged in, redirect straight to next
-        (async () => {
-            try {
-                const me = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
-                if (me.user) window.location.href = me.user.is_admin ? '/admin.html' : getNext();
-            } catch {}
-        })();
-
-        // Show OAuth error from query (?error=oauth_failed)
-        const urlErr = new URLSearchParams(window.location.search).get('error');
-        if (urlErr) {
-            const e = document.getElementById('error-msg');
-            e.textContent = urlErr === 'oauth_failed'
-                ? "Couldn't sign in with Google. Try again?"
-                : urlErr === 'oauth_disabled'
-                ? 'Google sign-in is not configured.'
-                : 'Sign-in failed';
-            e.classList.remove('hidden');
+        // Optional verify message
+        if (new URLSearchParams(window.location.search).get('msg') === 'verify') {
+            errorMsg.textContent = 'Verification email sent! Check your inbox.';
+            errorMsg.classList.remove('text-red-600');
+            errorMsg.classList.add('text-emerald-600');
+            errorMsg.classList.remove('hidden');
         }
     </script>
 </body>

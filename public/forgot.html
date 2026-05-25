@@ -1,35 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GKQ286KWDG');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot password — Kotha</title>
+    <title>Forgot Password — Kotha</title>
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { animation: { 'fade-in-up': 'fadeInUp 0.6s ease-out forwards', }, keyframes: { fadeInUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } } } }
+        }
+    </script>
+    <style>
+        .auth-bg-mesh {
+            background-color: #0b0f19;
+            background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.25) 0px, transparent 50%);
+        }
+    </style>
 </head>
-<body class="flex items-center justify-center h-screen w-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100">
-    <div class="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl shadow-2xl p-8 w-full max-w-md">
-        <div class="text-center mb-6">
-            <img src="/logo.svg" alt="Kotha Logo" class="inline-flex w-16 h-16 rounded-2xl shadow-lg mb-3" />
-            <h1 class="text-2xl font-extrabold text-gray-800">Reset your password</h1>
-            <p class="text-sm text-gray-500 mt-1">We'll email you a link to set a new one</p>
+<body class="flex min-h-[100dvh] w-screen overflow-hidden bg-gray-50 text-gray-800 font-sans">
+    
+    <div class="hidden lg:flex w-1/2 auth-bg-mesh relative items-center justify-center overflow-hidden">
+        <div class="relative z-10 flex flex-col items-center text-center p-12 max-w-lg">
+            <img src="/logo.svg" alt="Kotha Logo" class="w-32 h-32 mb-8 drop-shadow-2xl" />
+            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-4">Secure Account Recovery</h1>
+            <p class="text-lg text-indigo-200 font-medium">We'll help you get back to your beautifully preserved chats.</p>
         </div>
+    </div>
 
-        <form id="forgot-form" class="space-y-3">
-            <input type="email" id="email" required placeholder="Email" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-400 text-sm">
-            <button type="submit" id="submit-btn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 rounded-xl transition shadow">Send reset link</button>
-        </form>
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative">
+        <div class="w-full max-w-md animate-fade-in-up">
+            <div class="lg:hidden text-center mb-10">
+                <img src="/logo.svg" alt="Kotha Logo" class="w-16 h-16 mx-auto mb-4 drop-shadow-xl" />
+                <h2 class="text-2xl font-extrabold text-gray-900">Kotha</h2>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Reset Password</h2>
+                <p class="text-gray-500">Enter your email and we'll send a link to reset your password.</p>
+            </div>
 
-        <div id="success-msg" class="hidden mt-4 bg-green-50 text-green-800 rounded-xl p-3 text-sm font-semibold text-center">
-            ✓ If that email is registered, a reset link is on its way. Check your inbox.
+            <form id="forgot-form" class="space-y-6">
+                <!-- Floating Label Input: Email -->
+                <div class="relative">
+                    <input type="email" id="email" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
+                    <label for="email" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">Email address</label>
+                </div>
+                
+                <button type="submit" id="submit-btn" class="relative overflow-hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/50 mt-4">
+                    Send reset link
+                </button>
+                <p id="msg" class="text-sm font-semibold text-center hidden mt-4"></p>
+                
+                <div class="text-center mt-6">
+                    <a href="/login.html" class="text-sm font-bold text-indigo-600 hover:text-indigo-500 transition-colors">&larr; Back to login</a>
+                </div>
+            </form>
         </div>
-
-        <p class="text-center text-xs text-gray-500 mt-6">
-            <a href="/login.html" class="font-bold text-indigo-600 hover:underline">← Back to login</a>
-        </p>
     </div>
 
     <script>
@@ -37,17 +65,33 @@
             e.preventDefault();
             const email = document.getElementById('email').value;
             const btn = document.getElementById('submit-btn');
+            const msgEl = document.getElementById('msg');
+            
             btn.disabled = true;
             btn.textContent = 'Sending...';
+            msgEl.classList.add('hidden');
+
             try {
-                await fetch('/api/auth/forgot', {
+                const resp = await fetch('/api/auth/forgot-password', {
                     method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ email }),
+                    headers: {'content-type':'application/json'},
+                    body: JSON.stringify({email})
                 });
-                document.getElementById('forgot-form').classList.add('hidden');
-                document.getElementById('success-msg').classList.remove('hidden');
-            } catch {
+                
+                if (resp.ok) {
+                    msgEl.textContent = 'Check your email for a reset link.';
+                    msgEl.className = 'text-sm font-semibold text-center text-emerald-600 mt-4';
+                    btn.textContent = 'Sent!';
+                } else {
+                    const err = await resp.json();
+                    msgEl.textContent = err.error || 'Failed to send';
+                    msgEl.className = 'text-sm font-semibold text-center text-red-600 mt-4';
+                    btn.disabled = false;
+                    btn.textContent = 'Send reset link';
+                }
+            } catch (e) {
+                msgEl.textContent = 'Network error';
+                msgEl.className = 'text-sm font-semibold text-center text-red-600 mt-4';
                 btn.disabled = false;
                 btn.textContent = 'Send reset link';
             }
