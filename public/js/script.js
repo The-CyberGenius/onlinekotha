@@ -408,11 +408,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(parts.length === 3) years.add(parts[2]);
                 });
                 const yearSelect = document.getElementById('filter-year');
+                yearSelect.innerHTML = '<option value="">Year</option>';
                 [...years].sort().forEach(y => {
                     const fullYear = y.length === 2 ? `20${y}` : y;
                     yearSelect.innerHTML += `<option value="${y}">${fullYear}</option>`;
                 });
                 const daySelect = document.getElementById('filter-day');
+                daySelect.innerHTML = '<option value="">Day</option>';
                 for(let i=1; i<=31; i++) {
                     daySelect.innerHTML += `<option value="${i}">${i}</option>`;
                 }
@@ -441,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayedMessages = allMessages.filter(msg => {
                         // Date check
                         if(d || m || y) {
-                            const parts = msg.date.split('/'); // Assuming MM/DD/YY
+                            const parts = msg.date.split('/'); // Assuming MM/DD/YY or DD/MM/YY
                             if (parts.length === 3) {
                                 const msgM = parseInt(parts[0]);
                                 const msgD = parseInt(parts[1]);
@@ -454,6 +456,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         // Content check
+                        if (!showMedia && msg.attachment) return false;
+
                         if (msg.text) {
                             const text = msg.text.toLowerCase();
                             
@@ -470,8 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const stickerExts = ['.webp', 'sticker omitted'];
                                 if(stickerExts.some(ext => text.includes(ext))) return false;
                             }
-                        } else if (showLinks) {
-                            return false; // exclude messages without text if strictly looking for links
+                        } else {
+                            if (showLinks) return false; // exclude messages without text if strictly looking for links
                         }
 
                         return true;

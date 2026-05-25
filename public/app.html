@@ -29,9 +29,7 @@
             <!-- Sidebar Header -->
             <div id="sidebar-header" class="bg-white flex justify-between items-center px-5 py-4 z-20 shrink-0 border-b border-gray-100">
                 <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-extrabold text-white text-base shadow-lg bg-gradient-to-br from-violet-500 to-indigo-600" id="sidebar-avatar">
-                        K
-                    </div>
+                    <img src="/logo.svg" alt="Kotha Logo" class="w-10 h-10 shadow-lg rounded-xl transition hover:scale-105" id="sidebar-avatar" />
                     <div class="ml-3">
                         <h2 class="text-[15px] font-bold text-gray-900 tracking-tight" id="sidebar-title">Kotha</h2>
                         <p class="text-[11px] text-gray-500 font-medium" id="sidebar-user-info"></p>
@@ -114,42 +112,60 @@
             </div>
 
             <!-- Smart Filters Section (collapsed by default) -->
-            <div class="px-4 pb-3 pt-2 border-b border-gray-200/60 shrink-0 hidden" id="smart-filters-container">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Smart Filters</h3>
-                    <button id="reset-filters" class="text-[10px] text-indigo-500 font-bold hover:underline hidden">Reset</button>
+            <div class="px-5 pb-4 pt-4 border-b border-gray-200/60 shrink-0 hidden bg-gray-50/50" id="smart-filters-container">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg> Filters</h3>
+                    <button id="reset-filters" class="text-[11px] text-indigo-600 font-bold bg-indigo-50 px-2.5 py-1 rounded-md hover:bg-indigo-100 transition hidden shadow-sm">Reset All</button>
                 </div>
 
                 <!-- Date Filters -->
-                <div class="grid grid-cols-3 gap-2 mb-3">
-                    <select id="filter-day" class="text-xs bg-white border border-gray-200 shadow-sm rounded-lg px-2 py-1.5 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none text-center">
-                        <option value="">Day</option>
-                    </select>
-                    <select id="filter-month" class="text-xs bg-white border border-gray-200 shadow-sm rounded-lg px-2 py-1.5 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none text-center">
-                        <option value="">Month</option>
-                        <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
-                        <option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option>
-                        <option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option>
-                        <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
-                    </select>
-                    <select id="filter-year" class="text-xs bg-white border border-gray-200 shadow-sm rounded-lg px-2 py-1.5 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none text-center">
-                        <option value="">Year</option>
-                    </select>
+                <div class="grid grid-cols-3 gap-2.5 mb-4">
+                    <div class="relative">
+                        <select id="filter-day" class="w-full text-[13px] bg-white border border-gray-200 shadow-sm rounded-xl pl-3 pr-6 py-2 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-indigo-400/40 focus:border-indigo-400 transition cursor-pointer appearance-none">
+                            <option value="">Day</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+                    </div>
+                    <div class="relative">
+                        <select id="filter-month" class="w-full text-[13px] bg-white border border-gray-200 shadow-sm rounded-xl pl-3 pr-6 py-2 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-indigo-400/40 focus:border-indigo-400 transition cursor-pointer appearance-none">
+                            <option value="">Month</option>
+                            <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
+                            <option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option>
+                            <option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option>
+                            <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+                    </div>
+                    <div class="relative">
+                        <select id="filter-year" class="w-full text-[13px] bg-white border border-gray-200 shadow-sm rounded-xl pl-3 pr-6 py-2 font-medium text-gray-700 outline-none focus:ring-2 focus:ring-indigo-400/40 focus:border-indigo-400 transition cursor-pointer appearance-none">
+                            <option value="">Year</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+                    </div>
                 </div>
 
                 <!-- Toggles -->
-                <div class="flex flex-col gap-2 bg-white rounded-xl p-3 border border-gray-100 shadow-sm">
+                <div class="flex flex-col gap-3 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                     <label class="flex items-center justify-between cursor-pointer group">
-                        <span class="text-xs font-medium text-gray-700 group-hover:text-indigo-600 transition">Show Media</span>
-                        <input type="checkbox" id="toggle-media" checked class="form-checkbox h-4 w-4 text-indigo-500 rounded border-gray-300 shadow-sm">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-6 h-6 rounded-md bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
+                            <span class="text-[13px] font-semibold text-gray-700 group-hover:text-indigo-700 transition">Show Media</span>
+                        </div>
+                        <input type="checkbox" id="toggle-media" checked class="form-checkbox h-4 w-4 text-indigo-500 rounded border-gray-300 shadow-sm transition focus:ring-indigo-400">
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group">
-                        <span class="text-xs font-medium text-gray-700 group-hover:text-purple-600 transition">Show Stickers</span>
-                        <input type="checkbox" id="toggle-stickers" checked class="form-checkbox h-4 w-4 text-purple-500 rounded border-gray-300 shadow-sm">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-6 h-6 rounded-md bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+                            <span class="text-[13px] font-semibold text-gray-700 group-hover:text-purple-700 transition">Show Stickers</span>
+                        </div>
+                        <input type="checkbox" id="toggle-stickers" checked class="form-checkbox h-4 w-4 text-purple-500 rounded border-gray-300 shadow-sm transition focus:ring-purple-400">
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group">
-                        <span class="text-xs font-medium text-gray-700 group-hover:text-teal-600 transition">Links Only</span>
-                        <input type="checkbox" id="toggle-links" class="form-checkbox h-4 w-4 text-teal-500 rounded border-gray-300 shadow-sm">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-6 h-6 rounded-md bg-teal-50 flex items-center justify-center group-hover:bg-teal-100 transition"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+                            <span class="text-[13px] font-semibold text-gray-700 group-hover:text-teal-700 transition">Links Only</span>
+                        </div>
+                        <input type="checkbox" id="toggle-links" class="form-checkbox h-4 w-4 text-teal-500 rounded border-gray-300 shadow-sm transition focus:ring-teal-400">
                     </label>
                 </div>
             </div>
