@@ -203,15 +203,17 @@
         });
 
         // Config check for Google OAuth
-        fetch('/api/auth/config')
+        fetch('/api/auth/status')
             .then(res => res.json())
             .then(data => {
-                if (data.googleOAuthEnabled) {
+                if (data.google) {
                     const btn = document.getElementById('google-btn');
                     btn.classList.remove('hidden');
+                    btn.classList.add('flex'); // explicitly add flex
                     btn.href = `/api/auth/google?next=${encodeURIComponent(getNext())}`;
-                    document.getElementById('auth-divider').classList.remove('hidden');
-                    document.getElementById('auth-divider').classList.add('flex');
+                    const divider = document.getElementById('auth-divider');
+                    divider.classList.remove('hidden');
+                    divider.classList.add('flex');
                 }
             }).catch(()=>{});
 
