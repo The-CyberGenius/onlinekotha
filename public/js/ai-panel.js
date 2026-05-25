@@ -1,32 +1,39 @@
 (function () {
     const chatContainer = document.getElementById('ai-chat-container');
-    const scrollArea = document.getElementById('chat-scroll-area');
-    const bottomInput = document.getElementById('bottom-ai-input');
-    const bottomSend = document.getElementById('bottom-ai-send');
+    const scrollArea    = document.getElementById('chat-scroll-area');
+    const bottomInput   = document.getElementById('bottom-ai-input');
+    const bottomSend    = document.getElementById('bottom-ai-send');
 
     if (!bottomInput || !bottomSend || !chatContainer || !scrollArea) return;
 
     // Per-chat conversation tracking
-    let conversationMap = {};   // { chatFolder: conversationId }
-    let contactNameMap = {};    // { chatFolder: contactName }
-    let activeChat = null;
-    let streaming = false;
+    let conversationMap  = {};   // { chatFolder: conversationId }
+    let contactNameMap   = {};   // { chatFolder: contactName }
+    let activeChat       = null;
 
-    let typeQueue = '';
-    let typeTimer = null;
-    let typeTarget = null;
-    let typeCursor = null;
-    let typeScrollArea = null;
-    let streamFinished = false;
+    // Message queue — lets user send multiple messages while AI is still responding
+    let msgQueue   = [];     // { text, chat }[]
+    let processing = false;  // true while one AI request is in-flight
 
+    // Typewriter state
+    let typeQueue           = '';
+    let typeTimer           = null;
+    let typeTarget          = null;
+    let typeCursor          = null;
+    let typeScrollArea      = null;
+    let streamFinished      = false;
+    let onTypewriterComplete = null;  // fired once typewriter drains after stream ends
+
+    // ─────────────────────────────────────────────
+    //  Typewriter engine
+    // ─────────────────────────────────────────────
     function startTypewriter(targetEl, scrollEl) {
-        typeQueue = '';
-        typeTarget = targetEl;
+        typeQueue      = '';
+        typeTarget     = targetEl;
         typeScrollArea = scrollEl;
         streamFinished = false;
-        // Add blinking cursor
-        typeCursor = document.createElement('span');
-        typeCursor.className = 'ai-cursor-blink';
+        typeCursor     = document.createElement('span');
+        typeCursor.className   = 'ai-cursor-blink';
         typeCursor.textContent = '▎';
         targetEl.after(typeCursor);
     }
@@ -42,7 +49,7 @@
             if (streamFinished) cleanupTypewriter();
             return;
         }
-        // Type 1-3 characters per tick for natural feel
+        // 1-3 chars per tick for natural feel
         const chunk = typeQueue.slice(0, Math.random() > 0.7 ? 3 : 1);
         typeQueue = typeQueue.slice(chunk.length);
         typeTarget.textContent += chunk;
@@ -52,18 +59,22 @@
 
     function finishStream() {
         streamFinished = true;
-        if (!typeTimer && typeQueue.length === 0) {
-            cleanupTypewriter();
-        }
+        if (!typeTimer && typeQueue.length === 0) cleanupTypewriter();
     }
 
     function cleanupTypewriter() {
-        if (typeCursor) { typeCursor.remove(); typeCursor = null; }
+        if (typeCursor)     { typeCursor.remove(); typeCursor = null; }
         if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
-        typeTarget = null;
+        typeTarget     = null;
         typeScrollArea = null;
-        streaming = false;
         updateSendBtn();
+
+        // Fire completion callback (used for multi-bubble split)
+        if (onTypewriterComplete) {
+            const cb = onTypewriterComplete;
+            onTypewriterComplete = null;
+            cb();
+        }
     }
 
     function stopTypewriterInstantly() {
@@ -75,69 +86,96 @@
         cleanupTypewriter();
     }
 
-    // Watch for chat switches
-    function getActiveChat() { return window.currentChat || null; }
-    function getCurrentConvId() { return activeChat ? (conversationMap[activeChat] || null) : null; }
-    function getContactName() { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
+    // ─────────────────────────────────────────────
+    //  Helpers
+    // ─────────────────────────────────────────────
+    function getActiveChat()   { return window.currentChat || null; }
+    function getCurrentConvId(){ return activeChat ? (conversationMap[activeChat] || null) : null; }
+    function getContactName()  { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
 
-    // ---------- Fix: multiple events for mobile compatibility ----------
+    // Send button: only disabled when input is empty
+    // (user can send while AI is responding — queue handles ordering)
     function updateSendBtn() {
         const hasText = bottomInput.value.trim().length > 0;
-        bottomSend.disabled = !hasText || streaming;
-        bottomSend.style.opacity = (!hasText || streaming) ? '0.4' : '1';
+        bottomSend.disabled    = !hasText;
+        bottomSend.style.opacity = !hasText ? '0.4' : '1';
     }
-    bottomInput.addEventListener('input', updateSendBtn);
-    bottomInput.addEventListener('keyup', updateSendBtn);
-    bottomInput.addEventListener('change', updateSendBtn);
-    bottomInput.addEventListener('focus', updateSendBtn);
-    bottomInput.addEventListener('blur', updateSendBtn);
-    bottomInput.addEventListener('paste', () => setTimeout(updateSendBtn, 10));
-    bottomInput.addEventListener('touchend', () => setTimeout(updateSendBtn, 50));
-
-    // Periodic check as fallback for mobile keyboards
+    bottomInput.addEventListener('input',   updateSendBtn);
+    bottomInput.addEventListener('keyup',   updateSendBtn);
+    bottomInput.addEventListener('change',  updateSendBtn);
+    bottomInput.addEventListener('focus',   updateSendBtn);
+    bottomInput.addEventListener('blur',    updateSendBtn);
+    bottomInput.addEventListener('paste',   () => setTimeout(updateSendBtn, 10));
+    bottomInput.addEventListener('touchend',() => setTimeout(updateSendBtn, 50));
     setInterval(updateSendBtn, 500);
 
     bottomInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleSend();
-        }
+        if (e.key === 'Enter') { e.preventDefault(); handleSend(); }
     });
-
-    // Send on click — bypass disabled check, verify text directly
     bottomSend.addEventListener('click', () => {
         if (bottomInput.value.trim()) handleSend();
     });
-    // Also handle touch for mobile
     bottomSend.addEventListener('touchend', (e) => {
         e.preventDefault();
         if (bottomInput.value.trim()) handleSend();
     });
 
-    // ---------- Send ----------
-    async function handleSend() {
-        if (streaming) return;
+    // ─────────────────────────────────────────────
+    //  Send handler — adds to queue, never blocks
+    // ─────────────────────────────────────────────
+    function handleSend() {
         const text = bottomInput.value.trim();
         if (!text) return;
         if (!window.currentChat) { toast('Open a chat first'); return; }
 
-        // Remove any continue/reset bar
         removeAiActionBar();
-
-        // Track which chat this message belongs to
         activeChat = getActiveChat();
-        const convId = getCurrentConvId();
-        const cName = getContactName() || (document.getElementById('chat-header-name')?.innerText) || 'AI';
 
-        // Add user bubble to chat container
+        // Show user's bubble immediately — no waiting for AI
         appendUserBubble(text);
         bottomInput.value = '';
-        bottomSend.disabled = true;
-        streaming = true;
+        updateSendBtn();
 
-        // Add typing indicator with contact name
+        // Queue the request
+        msgQueue.push({ text, chat: activeChat });
+
+        // Kick off queue processor if idle
+        if (!processing) processQueue();
+    }
+
+    // ─────────────────────────────────────────────
+    //  Queue processor — one AI request at a time
+    // ─────────────────────────────────────────────
+    async function processQueue() {
+        if (processing || msgQueue.length === 0) return;
+        processing = true;
+
+        const item = msgQueue.shift();
+        activeChat = item.chat;
+
+        try {
+            await sendToAI(item.text, item.chat);
+        } catch (e) {
+            console.error('processQueue error:', e);
+        }
+
+        processing = false;
+
+        // Small gap before next message, feels more natural
+        if (msgQueue.length > 0) setTimeout(processQueue, 250);
+    }
+
+    // ─────────────────────────────────────────────
+    //  Core AI request (streaming SSE)
+    // ─────────────────────────────────────────────
+    async function sendToAI(text, chatFolder) {
+        const convId = conversationMap[chatFolder] || null;
+        const cName  = contactNameMap[chatFolder]  ||
+            (document.getElementById('chat-header-name')?.innerText) || 'AI';
+
+        // Typing indicator
         const typingEl = document.createElement('div');
-        typingEl.id = 'ai-typing-inline';
+        typingEl.id        = 'ai-typing-inline';
         typingEl.className = 'flex justify-start mb-3 animate-message';
         typingEl.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
@@ -146,111 +184,158 @@
                     <span class="text-[10px] text-emerald-500 font-semibold">typing...</span>
                 </div>
                 <div class="ai-typing"><span></span><span></span><span></span></div>
-            </div>
-        `;
+            </div>`;
         chatContainer.appendChild(typingEl);
         scrollArea.scrollTop = scrollArea.scrollHeight;
 
-        let fullText = '';
+        let fullText      = '';
         let responseBubble = null;
 
-        try {
-            const resp = await fetch('/api/ai/chat', {
-                method: 'POST',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({
-                    chat: activeChat,
-                    message: text,
-                    conversationId: convId,
-                }),
-            });
+        return new Promise(async (resolve) => {
+            try {
+                const resp = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ chat: chatFolder, message: text, conversationId: convId }),
+                });
 
-            if (!resp.ok) {
-                let errMsg = `Error ${resp.status}`;
-                try { errMsg = (await resp.json()).error || errMsg; } catch {}
-                typingEl.remove();
-                appendErrorBubble(errMsg);
-                streaming = false;
-                updateSendBtn();
-                return;
-            }
+                if (!resp.ok) {
+                    let errMsg = `Error ${resp.status}`;
+                    try { errMsg = (await resp.json()).error || errMsg; } catch {}
+                    typingEl.remove();
+                    appendErrorBubble(errMsg);
+                    return resolve();
+                }
 
-            const reader = resp.body.getReader();
-            const decoder = new TextDecoder();
-            let buf = '';
+                const reader  = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let buf = '';
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                buf += decoder.decode(value, { stream: true });
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buf += decoder.decode(value, { stream: true });
 
-                let idx;
-                while ((idx = buf.indexOf('\n\n')) !== -1) {
-                    const block = buf.slice(0, idx);
-                    buf = buf.slice(idx + 2);
-                    let event = 'message';
-                    let dataLines = [];
-                    for (const line of block.split('\n')) {
-                        if (line.startsWith('event:')) event = line.slice(6).trim();
-                        else if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
-                    }
-                    if (!dataLines.length) continue;
-                    let data;
-                    try { data = JSON.parse(dataLines.join('\n')); } catch { continue; }
+                    let idx;
+                    while ((idx = buf.indexOf('\n\n')) !== -1) {
+                        const block = buf.slice(0, idx);
+                        buf = buf.slice(idx + 2);
 
-                    if (event === 'start') {
-                        // Save conversation per chat folder
-                        if (activeChat) {
-                            conversationMap[activeChat] = data.conversationId;
-                            if (data.contactName) contactNameMap[activeChat] = data.contactName;
+                        let event = 'message';
+                        let dataLines = [];
+                        for (const line of block.split('\n')) {
+                            if (line.startsWith('event:'))      event = line.slice(6).trim();
+                            else if (line.startsWith('data:'))  dataLines.push(line.slice(5).trim());
                         }
-                    } else if (event === 'token') {
-                        if (!responseBubble) {
+                        if (!dataLines.length) continue;
+                        let data;
+                        try { data = JSON.parse(dataLines.join('\n')); } catch { continue; }
+
+                        if (event === 'start') {
+                            if (chatFolder) {
+                                conversationMap[chatFolder] = data.conversationId;
+                                if (data.contactName) contactNameMap[chatFolder] = data.contactName;
+                            }
+                        } else if (event === 'token') {
+                            if (!responseBubble) {
+                                typingEl.remove();
+                                responseBubble = appendContactBubble(
+                                    (chatFolder && contactNameMap[chatFolder]) || data.contactName || 'AI'
+                                );
+                                startTypewriter(
+                                    responseBubble.querySelector('.ai-response-text'),
+                                    scrollArea
+                                );
+                            }
+                            fullText += data.text;
+                            feedTypewriter(data.text);
+
+                        } else if (event === 'done') {
+                            // Update timestamp on first bubble
+                            if (responseBubble) {
+                                const timeEl = responseBubble.querySelector('.ai-bubble-time');
+                                if (timeEl) timeEl.textContent = formatNow();
+                            }
+                            // After typewriter drains: split multi-paragraph into separate bubbles
+                            onTypewriterComplete = () => {
+                                splitIntoBubbles(fullText, responseBubble,
+                                    (chatFolder && contactNameMap[chatFolder]) || cName);
+                                resolve();
+                            };
+                            finishStream();
+
+                        } else if (event === 'error') {
                             typingEl.remove();
-                            responseBubble = appendContactBubble(
-                                (activeChat && contactNameMap[activeChat]) || data.contactName || 'AI'
-                            );
-                            startTypewriter(
-                                responseBubble.querySelector('.ai-response-text'),
-                                scrollArea
-                            );
+                            appendErrorBubble(data.message || 'Something went wrong');
+                            onTypewriterComplete = null;
+                            stopTypewriterInstantly();
+                            resolve();
                         }
-                        fullText += data.text;
-                        feedTypewriter(data.text);
-                    } else if (event === 'done') {
-                        finishStream();
-                        // Update time on response bubble to current time
-                        if (responseBubble) {
-                            const timeEl = responseBubble.querySelector('.ai-bubble-time');
-                            if (timeEl) timeEl.textContent = formatNow();
-                        }
-                    } else if (event === 'error') {
-                        typingEl.remove();
-                        appendErrorBubble(data.message || 'Something went wrong');
-                        stopTypewriterInstantly();
                     }
                 }
+            } catch (err) {
+                typingEl.remove();
+                appendErrorBubble('Network error. Try again?');
+                onTypewriterComplete = null;
+                stopTypewriterInstantly();
+                resolve();
+            } finally {
+                bottomInput.focus();
             }
-        } catch (err) {
-            typingEl.remove();
-            appendErrorBubble('Network error. Try again?');
-            stopTypewriterInstantly();
-        } finally {
-            // streaming = false is now handled by cleanupTypewriter when queue drains
-            // but if we never started the typewriter (e.g. error before first token), we must reset:
-            if (!typeTarget && streaming) {
-                streaming = false;
-                updateSendBtn();
-            }
-            bottomInput.focus();
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    //  Multi-bubble split
+    //  When AI sends paragraphs separated by \n\n,
+    //  display each as a separate WhatsApp message bubble
+    // ─────────────────────────────────────────────
+    function splitIntoBubbles(fullText, firstBubble, contactName) {
+        const paragraphs = fullText
+            .split(/\n\n+/)
+            .map(p => p.trim())
+            .filter(p => p.length > 0);
+
+        if (paragraphs.length <= 1 || !firstBubble) return;
+
+        // Update first bubble to show only the first paragraph
+        const textEl = firstBubble.querySelector('.ai-response-text');
+        if (textEl) textEl.textContent = paragraphs[0];
+
+        // Show subsequent paragraphs as separate bubbles with natural delays
+        const maxBubbles = Math.min(paragraphs.length, 5);
+        for (let i = 1; i < maxBubbles; i++) {
+            const delay = i * 520;
+            const para  = paragraphs[i];
+            setTimeout(() => {
+                // Brief "typing..." before each extra bubble
+                const miniTyping = document.createElement('div');
+                miniTyping.className = 'flex justify-start mb-1 animate-message';
+                miniTyping.innerHTML = `
+                    <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-2 max-w-[75%]">
+                        <div class="ai-typing"><span></span><span></span><span></span></div>
+                    </div>`;
+                chatContainer.appendChild(miniTyping);
+                scrollArea.scrollTop = scrollArea.scrollHeight;
+
+                setTimeout(() => {
+                    miniTyping.remove();
+                    const extra = appendContactBubble(contactName);
+                    extra.querySelector('.ai-response-text').textContent = para;
+                    const timeEl = extra.querySelector('.ai-bubble-time');
+                    if (timeEl) timeEl.textContent = formatNow();
+                }, 380);
+            }, delay);
         }
     }
 
-    // ---------- Continue / Reset Action Bar ----------
+    // ─────────────────────────────────────────────
+    //  Continue / Reset bar
+    // ─────────────────────────────────────────────
     function showAiActionBar(convId, msgCount) {
         removeAiActionBar();
         const bar = document.createElement('div');
-        bar.id = 'ai-action-bar';
+        bar.id        = 'ai-action-bar';
         bar.className = 'flex items-center justify-center gap-3 py-3 animate-message';
         bar.innerHTML = `
             <div class="flex items-center gap-2 bg-white rounded-full px-2 py-1.5 shadow-sm border border-gray-200">
@@ -262,22 +347,16 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5"/></svg>
                     New chat
                 </button>
-            </div>
-        `;
+            </div>`;
         chatContainer.appendChild(bar);
 
         document.getElementById('ai-continue-btn').addEventListener('click', () => {
-            // Keep existing conversation — just scroll down ready to type
             removeAiActionBar();
             bottomInput.focus();
             toast('Continuing previous conversation');
         });
-
         document.getElementById('ai-reset-btn').addEventListener('click', async () => {
-            // Delete the conversation and start fresh
-            try {
-                await fetch(`/api/ai/conversations/${convId}`, { method: 'DELETE' });
-            } catch {}
+            try { await fetch(`/api/ai/conversations/${convId}`, { method: 'DELETE' }); } catch {}
             if (activeChat) delete conversationMap[activeChat];
             chatContainer.innerHTML = '';
             toast('AI chat reset — start fresh!');
@@ -288,11 +367,13 @@
     }
 
     function removeAiActionBar() {
-        const existing = document.getElementById('ai-action-bar');
-        if (existing) existing.remove();
+        const el = document.getElementById('ai-action-bar');
+        if (el) el.remove();
     }
 
-    // ---------- Time helper ----------
+    // ─────────────────────────────────────────────
+    //  Time helpers
+    // ─────────────────────────────────────────────
     function formatTime(ts) {
         if (!ts) return formatNow();
         const d = new Date(typeof ts === 'number' ? ts : parseInt(ts));
@@ -303,7 +384,9 @@
         return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
     }
 
-    // ---------- Bubble helpers ----------
+    // ─────────────────────────────────────────────
+    //  Bubble helpers
+    // ─────────────────────────────────────────────
     function appendUserBubble(text, timestamp) {
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
@@ -312,8 +395,7 @@
             <div class="glass-chat-me rounded-2xl rounded-br-md px-4 py-3 max-w-[75%]">
                 <p style="color:var(--msg-text)" class="text-sm leading-relaxed">${escapeHTML(text)}</p>
                 <p style="color:var(--msg-time-me)" class="text-[10px] text-right mt-1">${time}</p>
-            </div>
-        `;
+            </div>`;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
     }
@@ -327,8 +409,7 @@
                 <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
                 <p style="color:var(--msg-text)" class="ai-response-text text-sm leading-relaxed"></p>
                 <p style="color:var(--msg-time-them)" class="ai-bubble-time text-[10px] text-right mt-1">${time}</p>
-            </div>
-        `;
+            </div>`;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
         return wrap;
@@ -340,8 +421,7 @@
         wrap.innerHTML = `
             <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-sm font-medium max-w-[85%] text-center" style="color:var(--msg-text)">
                 ${escapeHTML(msg)}
-            </div>
-        `;
+            </div>`;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
     }
@@ -361,7 +441,9 @@
         setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 250); }, 2400);
     }
 
-    // ---------- Sparkle button focuses AI input ----------
+    // ─────────────────────────────────────────────
+    //  Sparkle button — focus AI input
+    // ─────────────────────────────────────────────
     const sparkleBtn = document.getElementById('ask-ai-btn');
     if (sparkleBtn) {
         sparkleBtn.addEventListener('click', () => {
@@ -370,7 +452,9 @@
         });
     }
 
-    // ---------- Load AI history when chat switches ----------
+    // ─────────────────────────────────────────────
+    //  Load AI history when chat switches
+    // ─────────────────────────────────────────────
     window.kothaLoadAiHistory = async (chatFolder) => {
         if (!chatFolder) return;
         chatContainer.innerHTML = '';
@@ -395,22 +479,18 @@
                             appendUserBubble(msg.content, msg.created_at);
                         } else if (msg.role === 'assistant') {
                             const headerEl = document.getElementById('chat-header-name');
-                            const name = (contactNameMap[chatFolder]) || (headerEl ? headerEl.innerText : 'AI');
+                            const name = contactNameMap[chatFolder] || (headerEl ? headerEl.innerText : 'AI');
                             const wrap = appendContactBubble(name, msg.created_at);
                             wrap.querySelector('.ai-response-text').textContent = msg.content;
                         }
                     });
 
-                    // Show continue/reset bar after loading history
                     showAiActionBar(conv.id, data.messages.length);
-
-                    setTimeout(() => {
-                        scrollArea.scrollTop = scrollArea.scrollHeight;
-                    }, 50);
+                    setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 50);
                 }
             }
         } catch (e) {
-            console.error("Failed to load AI history", e);
+            console.error('Failed to load AI history', e);
         }
     };
 
