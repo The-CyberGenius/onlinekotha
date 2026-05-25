@@ -161,6 +161,78 @@ router.post('/verify-payment', requireUser, async (req, res) => {
     }
 });
 
+// ─── POST /api/billing/webhook ───────────────────────────────────────────────
+// Called directly by Razorpay — raw body required (mounted in server.js)
+// Handles: payment.captured → idempotent upgrade even if frontend closed
+function webhookHandler(req, res) {
+    const webhookSecret = integ.get('integ.razorpay.webhook_secret');
+
+    // ── 1. Signature verification (skip only if no secret configured yet) ───
+    if (webhookSecret) {
+        const receivedSig = req.headers['x-razorpay-signature'];
+        if (!receivedSig) {
+            console.warn('Razorpay webhook: missing signature header');
+            return res.status(400).json({ error: 'Missing signature' });
+        }
+        const expectedSig = crypto
+            .createHmac('sha256', webhookSecret)
+            .update(req.body)           // req.body is raw Buffer here
+            .digest('hex');
+        if (!crypto.timingSafeEqual(Buffer.from(receivedSig), Buffer.from(expectedSig))) {
+            console.warn('Razorpay webhook: signature mismatch');
+            return res.status(400).json({ error: 'Invalid signature' });
+        }
+    }
+
+    // ── 2. Parse event ───────────────────────────────────────────────────────
+    let event;
+    try {
+        event = JSON.parse(req.body.toString());
+    } catch {
+        return res.status(400).json({ error: 'Invalid JSON' });
+    }
+
+    // ── 3. Handle payment.captured ───────────────────────────────────────────
+    if (event.event === 'payment.captured') {
+        const payment = event.payload?.payment?.entity;
+        if (!payment) return res.status(200).json({ ok: true });
+
+        const orderId   = payment.order_id;
+        const paymentId = payment.id;
+        const amount    = payment.amount;
+        const currency  = payment.currency || 'INR';
+        const notes     = payment.notes || {};
+        const userId    = notes.user_id ? parseInt(notes.user_id) : null;
+        const plan      = notes.plan || 'pro_monthly';
+
+        if (!userId || !orderId) {
+            console.warn('Razorpay webhook: missing user_id or order_id in notes', notes);
+            return res.status(200).json({ ok: true }); // 200 so Razorpay doesn't retry
+        }
+
+        try {
+            db.transaction(() => {
+                // INSERT OR IGNORE = idempotent, safe against duplicate webhooks
+                db.prepare(`
+                    INSERT OR IGNORE INTO payments
+                      (user_id, provider, order_id, payment_id, amount, currency, plan, status, created_at)
+                    VALUES (?, 'razorpay', ?, ?, ?, ?, ?, 'captured', ?)
+                `).run(userId, orderId, paymentId, amount, currency, plan, Date.now());
+
+                db.prepare(`UPDATE users SET plan = 'paid' WHERE id = ?`).run(userId);
+            })();
+
+            console.log(`✓ Webhook: payment captured user=${userId} order=${orderId} payment=${paymentId}`);
+        } catch (err) {
+            console.error('Webhook DB error:', err);
+            // Return 500 so Razorpay retries the webhook
+            return res.status(500).json({ error: 'DB error' });
+        }
+    }
+
+    res.status(200).json({ ok: true });
+}
+
 // ─── Legacy stubs (kept for backward compatibility) ─────────────────────────
 router.post('/checkout', requireUser, (req, res) => {
     res.status(410).json({ error: 'Use POST /api/billing/create-order instead' });
@@ -168,10 +240,5 @@ router.post('/checkout', requireUser, (req, res) => {
 router.post('/portal', requireUser, (req, res) => {
     res.status(410).json({ error: 'Manage payments at razorpay.com dashboard' });
 });
-
-// Webhook stub (Razorpay webhooks can be added here later)
-function webhookHandler(req, res) {
-    res.status(200).json({ received: true });
-}
 
 module.exports = { router, webhookHandler, configured, reset };

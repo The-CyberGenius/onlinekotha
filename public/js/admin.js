@@ -741,8 +741,9 @@
             status: data.status.razorpay,
             data: data.razorpay || {},
             fields: [
-                { k: 'key_id',     label: 'Key ID (public)',   placeholder: 'rzp_live_xxx',  type: 'text' },
-                { k: 'key_secret', label: 'Key Secret',        placeholder: 'xxxxxxxx',      type: 'password', secret: true },
+                { k: 'key_id',        label: 'Key ID (public)',    placeholder: 'rzp_live_xxx',  type: 'text' },
+                { k: 'key_secret',    label: 'Key Secret',         placeholder: 'xxxxxxxx',      type: 'password', secret: true },
+                { k: 'webhook_secret',label: 'Webhook Secret',     placeholder: 'Set in Razorpay Dashboard → Webhooks', type: 'password', secret: true },
             ],
         }));
 

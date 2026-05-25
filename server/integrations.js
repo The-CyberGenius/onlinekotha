@@ -12,6 +12,7 @@ const SECRET_KEYS = new Set([
     'integ.stripe.webhook_secret',
     'integ.oauth.google_client_secret',
     'integ.razorpay.key_secret',
+    'integ.razorpay.webhook_secret',
 ]);
 
 // Map of integration field → env var fallback
@@ -28,8 +29,9 @@ const ENV_FALLBACK = {
     'integ.stripe.lifetime_price_id': 'STRIPE_LIFETIME_PRICE_ID',
     'integ.oauth.google_client_id': 'GOOGLE_CLIENT_ID',
     'integ.oauth.google_client_secret': 'GOOGLE_CLIENT_SECRET',
-    'integ.razorpay.key_id': 'RAZORPAY_KEY_ID',
-    'integ.razorpay.key_secret': 'RAZORPAY_KEY_SECRET',
+    'integ.razorpay.key_id':        'RAZORPAY_KEY_ID',
+    'integ.razorpay.key_secret':    'RAZORPAY_KEY_SECRET',
+    'integ.razorpay.webhook_secret':'RAZORPAY_WEBHOOK_SECRET',
 };
 
 // In-memory cache invalidated on write
