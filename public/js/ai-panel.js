@@ -31,8 +31,6 @@
     let _dA = 0, _dOn = false;
     let _dcW = 0, _dcH = 0;
     let _dDPR = 1;
-    let _dDotSp = 22;          // dot spacing (px)
-    let _blastLock = false;
 
     function _dotInit() {
         if (_dc) return;
@@ -54,7 +52,6 @@
         if (!_dc) return;
         const isMobile = window.innerWidth < 768;
         _dDPR   = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
-        _dDotSp = isMobile ? 28 : 22;
 
         _dcW = scrollArea.clientWidth  || window.innerWidth;
         _dcH = scrollArea.clientHeight || window.innerHeight;
@@ -66,29 +63,26 @@
         _dc.style.marginBottom = '-' + _dcH + 'px';
         _dx.setTransform(_dDPR, 0, 0, _dDPR, 0, 0);
 
+        const numParticles = isMobile ? 50 : 90;
         _dd = [];
-        for (let x = _dDotSp / 2; x < _dcW; x += _dDotSp) {
-            for (let y = _dDotSp / 2; y < _dcH; y += _dDotSp) {
-                _dd.push({
-                    x, y,
-                    bX: x, bY: y,
-                    phase:      (x + y) * 0.013 + Math.random() * 1.4,
-                    speed:      0.45 + Math.random() * 0.85,
-                    hueBase:    Math.random() * 360,
-                    pulseSpeed: 0.7 + Math.random() * 1.5,
-                    sparkle:    0,
-                    bs: 0,   // 0=normal 1=glow 2=blasting 3=returning
-                    bT: 0,
-                    bVx: 0, bVy: 0,
-                    glowHue: 240,
-                });
-            }
+        for (let i = 0; i < numParticles; i++) {
+            _dd.push({
+                x: Math.random() * _dcW,
+                y: Math.random() * _dcH,
+                vx: (Math.random() - 0.5) * 0.45,
+                vy: (Math.random() - 0.5) * 0.45,
+                radius: 1.1 + Math.random() * 1.5,
+                phase: Math.random() * Math.PI * 2,
+                pulseSpeed: 1.2 + Math.random() * 1.8,
+                hue: Math.random() * 360,
+                bx: 0,
+                by: 0
+            });
         }
         _dotDrawOnce();
         if (!_dId && (_dOn || _dA > 0.01)) _dId = requestAnimationFrame(_dotLoop);
     }
 
-    // Draw exactly one frame — used to paint idle dots without keeping loop alive
     function _dotDrawOnce() {
         _dotDraw(_dA, performance.now() / 1000);
     }
@@ -105,199 +99,131 @@
         if (!_dx) return;
 
         const t = ts / 1000;
-        const hasBlast = _dd.some(d => d.bs > 0);
+        const hasBlast = _dd.some(d => (d.bx && Math.abs(d.bx) > 0.05) || (d.by && Math.abs(d.by) > 0.05));
 
         _dA += ((_dOn ? 1 : 0) - _dA) * 0.045;
         _dotDraw(_dA, t);
 
-        // Only keep running while there is something to animate
         if (_dOn || _dA > 0.01 || hasBlast) {
             _dId = requestAnimationFrame(_dotLoop);
         }
-        // Loop stops naturally when idle — restarted by _dotStart() or _triggerTextBlast()
     }
 
     function _dotDraw(alpha, t) {
         if (!_dx || !_dc || _dd.length === 0) return;
         const dk = document.documentElement.classList.contains('dark');
+        const isMobile = window.innerWidth < 768;
         _dx.clearRect(0, 0, _dcW, _dcH);
 
+        const speedMult = _dOn ? 2.6 : 1.0;
+
+        // 1. Update positions & Wrap bounds
         for (const d of _dd) {
-            // ── GLOW (bright, no gradient — much cheaper) ────────────
-            if (d.bs === 1) {
-                const gp = 0.5 + 0.5 * Math.sin(t * 9 + d.phase * 1.7);
-                const r  = 2.5 + gp * 1.5;
-                // Outer soft halo (cheap: one big transparent circle)
-                _dx.beginPath();
-                _dx.arc(d.x, d.y, r * 3, 0, Math.PI * 2);
-                _dx.fillStyle = `hsla(${d.glowHue},88%,68%,${0.10 * gp})`;
-                _dx.fill();
-                // Core bright dot
-                _dx.beginPath();
-                _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
-                _dx.fillStyle = `hsla(${d.glowHue},92%,72%,${0.7 + gp * 0.3})`;
-                _dx.fill();
-                continue;
+            if (d.bx) {
+                d.bx *= 0.92;
+                if (Math.abs(d.bx) < 0.05) d.bx = 0;
+            }
+            if (d.by) {
+                d.by *= 0.92;
+                if (Math.abs(d.by) < 0.05) d.by = 0;
             }
 
-            // ── BLASTING ──────────────────────────────────────────────
-            if (d.bs === 2) {
-                const dt   = t - d.bT;
-                const fric = Math.exp(-dt * 2.8);
-                const rx   = d.x + d.bVx * dt * fric;
-                const ry   = d.y + d.bVy * dt * fric;
-                const fade = Math.max(0, 1 - dt * 2.4);
-                if (dt > 0.42) { d.bs = 3; d.bT = t; d.bX = rx; d.bY = ry; }
-                if (fade > 0.015) {
-                    _dx.beginPath();
-                    _dx.arc(rx, ry, 1.8, 0, Math.PI * 2);
-                    _dx.fillStyle = `hsla(${d.glowHue},85%,65%,${fade})`;
-                    _dx.fill();
+            d.x += d.vx * speedMult + (d.bx || 0);
+            d.y += d.vy * speedMult + (d.by || 0);
+
+            if (d.x < -15) d.x = _dcW + 15;
+            if (d.x > _dcW + 15) d.x = -15;
+            if (d.y < -15) d.y = _dcH + 15;
+            if (d.y > _dcH + 15) d.y = -15;
+        }
+
+        // 2. Draw Constellation Connecting Lines
+        const maxDist = isMobile ? 75 : 95;
+        _dx.lineWidth = 0.55;
+        for (let i = 0; i < _dd.length; i++) {
+            const p1 = _dd[i];
+            for (let j = i + 1; j < _dd.length; j++) {
+                const p2 = _dd[j];
+                const dx = p1.x - p2.x;
+                const dy = p1.y - p2.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < maxDist) {
+                    const lineAlpha = (1 - dist / maxDist) * (dk ? 0.09 : 0.16);
+                    if (lineAlpha > 0.01) {
+                        _dx.beginPath();
+                        _dx.moveTo(p1.x, p1.y);
+                        _dx.lineTo(p2.x, p2.y);
+                        if (dk) {
+                            _dx.strokeStyle = `rgba(129, 140, 248, ${lineAlpha})`;
+                        } else {
+                            _dx.strokeStyle = `rgba(99, 102, 241, ${lineAlpha})`;
+                        }
+                        _dx.stroke();
+                    }
                 }
-                continue;
             }
+        }
 
-            // ── RETURNING ─────────────────────────────────────────────
-            if (d.bs === 3) {
-                const dt = t - d.bT;
-                const p  = Math.min(1, dt / 0.55);
-                const e  = 1 - Math.pow(1 - p, 2.5);
-                const rx = d.bX + (d.x - d.bX) * e;
-                const ry = d.bY + (d.y - d.bY) * e;
-                if (p >= 1) d.bs = 0;
-                _dx.beginPath();
-                _dx.arc(rx, ry, 1.5, 0, Math.PI * 2);
-                _dx.fillStyle = dk
-                    ? `rgba(255,255,255,${0.07 * Math.min(1, dt * 3)})`
-                    : `rgba(209,213,219,${0.75 * Math.min(1, dt * 3)})`;
-                _dx.fill();
-                continue;
-            }
-
-            // ── NORMAL (idle pulse / AI color wave) ───────────────────
-            const pulse = 0.5 + 0.5 * Math.sin(t * d.pulseSpeed + d.phase * 2.1);
-            if (Math.random() < 0.00008) d.sparkle = 1;
-            d.sparkle *= 0.80;
-            const sp = d.sparkle;
-            const r  = 1.5 + alpha * 0.6 + sp * 0.9;
+        // 3. Draw Particles with pulse & glow
+        for (const d of _dd) {
+            const pulse = 0.5 + 0.5 * Math.sin(t * d.pulseSpeed + d.phase);
+            const r = d.radius + pulse * 0.5 + (_dOn ? 0.35 : 0);
 
             _dx.beginPath();
             _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
 
-            if (alpha < 0.025) {
-                const iHue = (d.hueBase + t * 5) % 360;
-                const iSat = dk ? 14 : 20;
-                const iLit = dk ? 74 : 64;
-                const a    = Math.min(1, (dk ? 0.06 + 0.07 * pulse : 0.60 + 0.32 * pulse) + sp * 0.5);
-                _dx.fillStyle = `hsla(${iHue},${iSat}%,${iLit}%,${a})`;
-            } else {
-                const wave = d.phase + t * d.speed;
-                const hue  = (d.hueBase + wave * 52) % 360;
-                const sat  = 74 + 14 * pulse;
-                const lit  = dk ? 54 + 18 * pulse : 54 + 22 * pulse;
-                const nA   = dk ? 0.04 * (1 - alpha) : 0.88 * (1 - alpha * 0.88);
-                if (nA > 0.01) {
-                    _dx.fillStyle = dk ? `rgba(255,255,255,${nA})` : `rgba(209,213,219,${nA})`;
-                    _dx.fill();
+            let colorStr;
+            if (dk) {
+                const hue = (d.hue + t * 12) % 360;
+                colorStr = `hsla(${hue}, 85%, 78%, ${0.28 + 0.22 * pulse})`;
+                _dx.fillStyle = colorStr;
+                _dx.fill();
+
+                if (_dOn) {
                     _dx.beginPath();
-                    _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
+                    _dx.arc(d.x, d.y, r * 2.5, 0, Math.PI * 2);
+                    _dx.fillStyle = `hsla(${hue}, 85%, 78%, ${(0.07 + 0.04 * pulse)})`;
+                    _dx.fill();
                 }
-                const cA = (dk ? 0.30 : 0.84) * alpha * (0.55 + 0.45 * pulse) + sp * 0.4;
-                _dx.fillStyle = `hsla(${hue},${sat}%,${lit}%,${Math.min(1, cA)})`;
+            } else {
+                const hue = (d.hue + t * 8) % 360;
+                colorStr = `hsla(${hue}, 75%, 52%, ${0.52 + 0.22 * pulse})`;
+                _dx.fillStyle = colorStr;
+                _dx.fill();
+
+                if (_dOn) {
+                    _dx.beginPath();
+                    _dx.arc(d.x, d.y, r * 2.5, 0, Math.PI * 2);
+                    _dx.fillStyle = `hsla(${hue}, 75%, 52%, ${(0.10 + 0.04 * pulse)})`;
+                    _dx.fill();
+                }
             }
-            _dx.fill();
         }
     }
 
-    // ─────────────────────────────────────────────
-    //  Dynamic Blast — 5 lightweight geometric patterns,
-    //  random colors every time, zero image processing
-    // ─────────────────────────────────────────────
-    const _BLAST_PATTERNS = ['ring', 'wave', 'burst', 'diagonal', 'spiral'];
-    let   _blastPatternIdx = 0; // cycles so you never see same twice in a row
-
     function _triggerTextBlast() {
-        if (!_dc || !_dx || _dd.length === 0 || _blastLock) return;
-        _blastLock = true;
-        for (const d of _dd) d.bs = 0;
+        if (!_dc || !_dx || _dd.length === 0) return;
 
-        // Fresh random hue palette each blast
-        const baseHue = Math.random() * 360;
-        const hues = [0,45,90,135,180].map(o => (baseHue + o) % 360);
+        // Blast origins from bottom center (where input area is)
+        const blastX = _dcW / 2;
+        const blastY = _dcH;
 
-        // Cycle through patterns (ring → wave → burst → diagonal → spiral → ring…)
-        const pattern = _BLAST_PATTERNS[_blastPatternIdx % _BLAST_PATTERNS.length];
-        _blastPatternIdx++;
+        for (const d of _dd) {
+            const dx = d.x - blastX;
+            const dy = d.y - blastY;
+            const dist = Math.hypot(dx, dy);
 
-        let glowDots = [];
-        let cX = _dcW / 2, cY = _dcH / 2;
+            // Stronger push close to source, fading over distance
+            const force = Math.max(1, 450 / (dist + 80));
+            const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.25;
 
-        if (pattern === 'ring') {
-            // Glowing ring of dots at a random radius
-            cX = _dcW * (0.3 + Math.random() * 0.4);
-            cY = _dcH * (0.3 + Math.random() * 0.4);
-            const r = Math.min(_dcW, _dcH) * (0.18 + Math.random() * 0.18);
-            glowDots = _dd.filter(d => {
-                const dist = Math.hypot(d.x - cX, d.y - cY);
-                return dist >= r - _dDotSp * 1.6 && dist <= r + _dDotSp * 1.6;
-            });
-
-        } else if (pattern === 'wave') {
-            // Horizontal band across the screen
-            const bandY = _dcH * (0.25 + Math.random() * 0.5);
-            glowDots = _dd.filter(d => Math.abs(d.y - bandY) <= _dDotSp * 2);
-            cY = bandY;
-
-        } else if (pattern === 'burst') {
-            // Radial burst from a random off-center point
-            cX = _dcW * (0.2 + Math.random() * 0.6);
-            cY = _dcH * (0.2 + Math.random() * 0.6);
-            const r = Math.min(_dcW, _dcH) * (0.20 + Math.random() * 0.15);
-            glowDots = _dd.filter(d => Math.hypot(d.x - cX, d.y - cY) <= r);
-
-        } else if (pattern === 'diagonal') {
-            // Diagonal strip — slash or backslash randomly
-            const dir = Math.random() > 0.5 ? 1 : -1;
-            const sc  = _dcH / Math.max(1, _dcW);
-            glowDots = _dd.filter(d => {
-                const proj = Math.abs((d.y - cY) - dir * (d.x - cX) * sc) / Math.sqrt(1 + sc * sc);
-                return proj < _dDotSp * 2.2;
-            });
-
-        } else { // spiral — select dots whose angle from center matches a spiral curve
-            const turns = 1.4 + Math.random() * 0.8;
-            glowDots = _dd.filter(d => {
-                const ang  = Math.atan2(d.y - cY, d.x - cX);
-                const dist = Math.hypot(d.x - cX, d.y - cY);
-                const maxR = Math.min(_dcW, _dcH) * 0.45;
-                const expected = (((ang + Math.PI * 2) % (Math.PI * 2)) / (Math.PI * 2)) * maxR / turns;
-                return Math.abs(dist - expected) < _dDotSp * 1.4;
-            });
+            d.bx = Math.cos(angle) * force * 18;
+            d.by = Math.sin(angle) * force * 18;
         }
 
-        if (glowDots.length < 3) { _blastLock = false; return; }
-
-        // Assign hues along the dot set for a gradient effect
-        glowDots.forEach((d, i) => {
-            d.glowHue = hues[Math.floor((i / glowDots.length) * hues.length)];
-        });
-
-        if (!_dId) _dId = requestAnimationFrame(_dotLoop);
-        for (const d of glowDots) d.bs = 1;
-
-        setTimeout(() => {
-            for (const d of glowDots) {
-                if (d.bs !== 1) continue;
-                d.bs  = 2;
-                d.bT  = performance.now() / 1000;
-                // Blast away from pattern center + scatter
-                const ang = Math.atan2(d.y - cY, d.x - cX) + (Math.random() - 0.5) * 1.2;
-                const spd = 100 + Math.random() * 170;
-                d.bVx = Math.cos(ang) * spd;
-                d.bVy = Math.sin(ang) * spd;
-            }
-            setTimeout(() => { _blastLock = false; }, 900);
-        }, 480);
+        if (!_dId) {
+            _dId = requestAnimationFrame(_dotLoop);
+        }
     }
 
     // ─────────────────────────────────────────────

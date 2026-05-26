@@ -5,7 +5,7 @@ body {
     touch-action: manipulation;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: #f0f2f5;
+    background: radial-gradient(circle at top left, #f5f3ff, #f3f4f6 70%);
 }
 
 /* Safe area insets for bottom bar */
@@ -70,11 +70,15 @@ html.dark .main-chat-background.chat-sending {
 
 /* Chat bubbles */
 .glass-chat-me {
-    background: linear-gradient(135deg, #6366f1, #818cf8);
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
     color: #ffffff;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px 16px 4px 16px;
+    box-shadow: 0 8px 24px -6px rgba(99, 102, 241, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px 18px 4px 18px;
+    transition: transform 150ms ease;
+}
+.glass-chat-me:hover {
+    transform: translateY(-1px);
 }
 
 .glass-chat-me a {
@@ -83,12 +87,17 @@ html.dark .main-chat-background.chat-sending {
 }
 
 .glass-chat-them {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.88);
     color: #1e293b;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 16px 16px 16px 4px;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 18px 18px 18px 4px;
+    backdrop-filter: blur(12px);
+    transition: transform 150ms ease, background-color 150ms ease;
+}
+.glass-chat-them:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.96);
 }
 
 /* Animations */
@@ -116,18 +125,18 @@ html.dark .main-chat-background.chat-sending {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
 }
 ::-webkit-scrollbar-track {
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
+    background: rgba(99, 102, 241, 0.2);
     border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(99, 102, 241, 0.4);
 }
 
 /* ============ AI Inline Chat ============ */
@@ -652,16 +661,21 @@ html.dark #main-panel { background: #0f172a !important; }
 
 /* Chat bubbles — dark */
 html.dark .glass-chat-me {
-    background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+    background: linear-gradient(135deg, #3730a3, #4f46e5) !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 24px -6px rgba(79, 70, 229, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 html.dark .glass-chat-them {
-    background: #1e293b !important;
+    background: rgba(30, 41, 59, 0.8) !important;
     color: #f8fafc !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
-    border: 1px solid rgba(255,255,255,0.05) !important;
+    box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(12px);
+    transition: transform 150ms ease, background-color 150ms ease;
+}
+html.dark .glass-chat-them:hover {
+    background: rgba(30, 41, 59, 0.9) !important;
 }
 
 /* Force ALL text inside bubbles to be light in dark mode */
@@ -702,9 +716,17 @@ html.dark .glass-panel {
     background: linear-gradient(to top, white 55%, rgba(255,255,255,0.85) 85%, transparent);
 }
 #ai-input-wrap {
-    border: 1.5px solid rgba(99,102,241,0.18);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05);
-    transition: border-color 200ms, box-shadow 200ms;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
+    border: 1.2px solid rgba(99, 102, 241, 0.15);
+    box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.12), 0 1px 3px rgba(0, 0, 0, 0.02);
+    border-radius: 20px;
+    transition: border-color 250ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1), transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+#ai-input-wrap:focus-within {
+    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow: 0 12px 35px -8px rgba(99, 102, 241, 0.22), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transform: translateY(-1px);
 }
 #ai-input-wrap:focus-within {
     border-color: rgba(99,102,241,0.55);
@@ -718,13 +740,13 @@ html.dark #bottom-ai-bar {
     background: linear-gradient(to top, #0b141a 55%, rgba(11,20,26,0.85) 85%, transparent) !important;
 }
 html.dark #ai-input-wrap {
-    background: #1f2c34 !important;
-    border-color: rgba(99,102,241,0.22) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    background: rgba(31, 44, 52, 0.8) !important;
+    border-color: rgba(99, 102, 241, 0.25) !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4) !important;
 }
 html.dark #ai-input-wrap:focus-within {
-    border-color: rgba(99,102,241,0.50) !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.12), 0 4px 20px rgba(0,0,0,0.3) !important;
+    border-color: rgba(99, 102, 241, 0.5) !important;
+    box-shadow: 0 12px 35px -8px rgba(99, 102, 241, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.4) !important;
 }
 html.dark #bottom-ai-input { color: #e9edef !important; }
 html.dark #bottom-ai-input::placeholder { color: #667781 !important; }
@@ -818,8 +840,23 @@ html.dark .onboarding-card p { color: #8696a0 !important; }
 html.dark .onboarding-step-dot { background: #2a3942; }
 
 /* ── Scrollbar — dark ── */
-html.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
-html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+html.dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 10px; }
+html.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* ── Interactive list hover effects ── */
+#chat-list-ui > div {
+    transition: background-color 200ms ease, transform 200ms ease;
+}
+#chat-list-ui > div:hover {
+    transform: translateX(2px);
+}
+.action-pill {
+    border-radius: 12px;
+    transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.action-pill:active {
+    transform: scale(0.95);
+}
 
 /* ── Dark mode toggle ── */
 #dark-mode-btn {
