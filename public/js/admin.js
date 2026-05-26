@@ -322,26 +322,37 @@
 
     async function loadSettings() {
         const s = await (await fetch('/api/admin/settings')).json();
-        document.getElementById('s-daily-cap').value = s.daily_spend_cap_usd || '5';
-        document.getElementById('s-trial-hours').value = s.trial_duration_hours || '24';
-        document.getElementById('s-paid-msgs').value = s.paid_user_daily_messages || '500';
+        document.getElementById('s-daily-cap').value  = s.daily_spend_cap_usd         || '5';
+        document.getElementById('s-free-msgs').value  = s.free_user_daily_messages    || '3';
+        document.getElementById('s-paid-msgs').value  = s.paid_user_daily_messages    || '500';
+        document.getElementById('s-trial-hours').value = s.trial_duration_hours       || '24';
     }
 
     document.getElementById('settings-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await fetch('/api/admin/settings', {
-            method: 'PUT',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-                daily_spend_cap_usd: document.getElementById('s-daily-cap').value,
-                trial_duration_hours: document.getElementById('s-trial-hours').value,
-                paid_user_daily_messages: document.getElementById('s-paid-msgs').value,
-            }),
-        });
-        const m = document.getElementById('settings-msg');
-        m.classList.remove('hidden');
-        setTimeout(() => m.classList.add('hidden'), 2000);
-        await loadStats();
+        const btn = e.target.querySelector('button[type=submit]');
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    daily_spend_cap_usd:      document.getElementById('s-daily-cap').value,
+                    free_user_daily_messages: document.getElementById('s-free-msgs').value,
+                    paid_user_daily_messages: document.getElementById('s-paid-msgs').value,
+                    trial_duration_hours:     document.getElementById('s-trial-hours').value,
+                }),
+            });
+            if (!res.ok) throw new Error('Save failed');
+            const m = document.getElementById('settings-msg');
+            m.classList.remove('hidden');
+            setTimeout(() => m.classList.add('hidden'), 2500);
+            await loadStats();
+        } catch (err) {
+            alert('Error saving settings: ' + err.message);
+        } finally {
+            btn.disabled = false;
+        }
     });
 
     async function loadUsers() {
@@ -355,9 +366,11 @@
         for (const u of rows) {
             const planBadge = u.is_admin
                 ? '<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold">admin</span>'
-                : u.plan === 'paid' ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold">paid</span>'
-                : u.plan === 'trial' && u.trial_expires_at > Date.now() ? '<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">trial</span>'
-                : '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">expired</span>';
+                : u.plan === 'paid'  ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold">✓ paid</span>'
+                : u.plan === 'trial' && u.trial_expires_at > Date.now()
+                    ? `<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">trial</span>`
+                : u.plan === 'trial' ? '<span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-[10px] font-bold">trial expired</span>'
+                : '<span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[10px] font-bold">free</span>';
 
             const loginMethod = u.google_id
                 ? '<span class="text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Google</span>'
@@ -433,9 +446,9 @@
                             <div style="margin-bottom:16px;">
                                 <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Plan</label>
                                 <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:14px;outline:none;">
-                                    <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free (3 msgs/day)</option>
-                                    <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial (unlimited)</option>
-                                    <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid (unlimited)</option>
+                                    <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free (limited msgs/day)</option>
+                                    <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial (higher daily cap, time-limited)</option>
+                                    <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid ✓ (truly unlimited)</option>
                                 </select>
                             </div>
                             <div style="margin-bottom:16px;padding:12px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">

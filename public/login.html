@@ -61,8 +61,12 @@
     </div>
 
     <!-- RIGHT SIDE: Auth Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative">
-        <div class="w-full max-w-md animate-fade-in-up">
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white relative overflow-hidden">
+        <!-- Subtle background shapes -->
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full blur-3xl opacity-70 z-0"></div>
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-gradient-to-tr from-pink-50 to-indigo-50 rounded-full blur-3xl opacity-70 z-0"></div>
+
+        <div class="w-full max-w-md animate-fade-in-up relative z-10">
             <!-- Mobile Logo -->
             <div class="lg:hidden text-center mb-10">
                 <img src="/logo.svg" alt="Kotha Logo" class="w-16 h-16 mx-auto mb-4 drop-shadow-xl" />
@@ -75,15 +79,16 @@
             </div>
 
             <!-- Sliding Tabs -->
-            <div class="relative flex p-1 bg-gray-100 rounded-xl mb-8 shadow-inner">
-                <div id="tab-slider" class="absolute top-1 left-1 w-[calc(50%-4px)] h-[calc(100%-8px)] bg-white rounded-lg shadow-sm transition-transform duration-300 ease-out z-0"></div>
-                <button id="tab-login" class="flex-1 relative z-10 py-2.5 font-bold text-sm text-indigo-600 transition-colors duration-300">Log In</button>
-                <button id="tab-signup" class="flex-1 relative z-10 py-2.5 font-bold text-sm text-gray-500 transition-colors duration-300">Sign Up</button>
+            <div class="relative flex p-1.5 bg-gray-50/80 backdrop-blur-sm rounded-2xl mb-8 shadow-inner border border-gray-100">
+                <div id="tab-slider" class="absolute top-1.5 left-1.5 w-[calc(50%-6px)] h-[calc(100%-12px)] bg-white rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.05)] border border-gray-100 transition-transform duration-300 ease-out z-0"></div>
+                <button id="tab-login" class="flex-1 relative z-10 py-3 font-bold text-sm text-indigo-600 transition-colors duration-300">Log In</button>
+                <button id="tab-signup" class="flex-1 relative z-10 py-3 font-bold text-sm text-gray-400 hover:text-gray-600 transition-colors duration-300">Sign Up</button>
             </div>
 
             <!-- Google OAuth -->
-            <a id="google-btn" href="#" class="hidden group relative flex items-center justify-center gap-3 w-full bg-white border-2 border-gray-200 hover:border-indigo-100 hover:bg-indigo-50 rounded-xl py-3 mb-6 font-bold text-sm text-gray-700 transition-all shadow-sm">
-                <svg width="20" height="20" viewBox="0 0 48 48" class="group-hover:scale-110 transition-transform"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+            <a id="google-btn" href="#" class="hidden group relative flex items-center justify-center gap-3 w-full bg-white border-2 border-gray-100 hover:border-transparent hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] rounded-2xl py-3.5 mb-6 font-bold text-sm text-gray-700 transition-all duration-300">
+                <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                <svg width="22" height="22" viewBox="0 0 48 48" class="group-hover:scale-110 transition-transform"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
                 Continue with Google
             </a>
 
@@ -95,14 +100,14 @@
 
             <form id="auth-form" class="space-y-5">
                 <!-- Floating Label Input: Email -->
-                <div class="relative">
-                    <input type="email" id="email" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
+                <div class="relative group">
+                    <input type="email" id="email" class="block rounded-2xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50/50 border-2 border-gray-100 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 peer shadow-sm" placeholder=" " required />
                     <label for="email" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">Email address</label>
                 </div>
                 
                 <!-- Floating Label Input: Password -->
-                <div class="relative">
-                    <input type="password" id="password" minlength="6" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
+                <div class="relative group">
+                    <input type="password" id="password" minlength="6" class="block rounded-2xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50/50 border-2 border-gray-100 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 peer shadow-sm" placeholder=" " required />
                     <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">Password</label>
                 </div>
 
@@ -111,8 +116,11 @@
                     <a href="/forgot.html" id="forgot-link" class="text-sm font-bold text-indigo-600 hover:text-indigo-500 ml-auto transition-colors">Forgot password?</a>
                 </div>
 
-                <button type="submit" id="submit-btn" class="relative overflow-hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/50 mt-4">
-                    <span class="relative z-10" id="btn-text">Sign In</span>
+                <button type="submit" id="submit-btn" class="relative overflow-hidden w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(99,102,241,0.3)] focus:outline-none focus:ring-4 focus:ring-indigo-500/50 mt-6 group">
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        <span id="btn-text">Sign In</span>
+                        <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </span>
                 </button>
                 
                 <p id="trial-info" class="text-xs text-indigo-700 font-semibold text-center bg-indigo-50 border border-indigo-100 rounded-xl py-3 px-4 hidden mt-6 shadow-sm">
@@ -150,8 +158,8 @@
             tabSlider.style.transform = isLogin ? 'translateX(0)' : 'translateX(100%)';
             
             // Text colors
-            tabLogin.className = `flex-1 relative z-10 py-2.5 font-bold text-sm transition-colors duration-300 ${isLogin ? 'text-indigo-600' : 'text-gray-500'}`;
-            tabSignup.className = `flex-1 relative z-10 py-2.5 font-bold text-sm transition-colors duration-300 ${!isLogin ? 'text-indigo-600' : 'text-gray-500'}`;
+            tabLogin.className = `flex-1 relative z-10 py-3 font-bold text-sm transition-colors duration-300 ${isLogin ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`;
+            tabSignup.className = `flex-1 relative z-10 py-3 font-bold text-sm transition-colors duration-300 ${!isLogin ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'}`;
             
             // Update copy
             btnText.textContent = isLogin ? 'Sign In' : 'Create Account';

@@ -134,20 +134,30 @@
                 <h2 class="font-extrabold text-gray-800 mb-4">Global limits</h2>
                 <form id="settings-form" class="space-y-4 max-w-md">
                     <div>
-                        <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Daily spend cap ($)</label>
+                        <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Daily AI spend cap ($)</label>
                         <input id="s-daily-cap" type="number" step="0.1" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
-                        <p class="text-[10px] text-gray-400 mt-1">When daily AI spend hits this, AI calls auto-pause</p>
+                        <p class="text-[10px] text-gray-400 mt-1">Pauses AI calls when daily spend hits this amount</p>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial duration (hours)</label>
-                        <input id="s-trial-hours" type="number" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                    <div class="border border-dashed border-gray-200 rounded-xl p-4 space-y-4">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Plan limits</p>
+                        <div>
+                            <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Free plan — daily AI messages</label>
+                            <input id="s-free-msgs" type="number" min="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                            <p class="text-[10px] text-gray-400 mt-1">Free users get this many AI messages per day (0 = disabled)</p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial plan — daily AI messages <span class="text-gray-400 font-normal normal-case">(Paid = unlimited)</span></label>
+                            <input id="s-paid-msgs" type="number" min="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                            <p class="text-[10px] text-gray-400 mt-1">Trial users daily cap — does NOT apply to Paid plan</p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial duration (hours)</label>
+                            <input id="s-trial-hours" type="number" min="1" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                            <p class="text-[10px] text-gray-400 mt-1">Default trial length for new sign-ups</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial daily AI messages <span class="text-gray-400 font-normal normal-case">(Paid = unlimited)</span></label>
-                        <input id="s-paid-msgs" type="number" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
-                    </div>
-                    <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl px-5 py-2 text-sm transition">Save</button>
-                    <p id="settings-msg" class="text-xs text-green-600 font-semibold hidden">Saved</p>
+                    <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl px-5 py-2 text-sm transition">Save Settings</button>
+                    <p id="settings-msg" class="text-xs text-green-600 font-semibold hidden">✓ Saved successfully</p>
                 </form>
             </div>
         </section>
@@ -161,6 +171,6 @@
         </section>
     </div>
 
-    <script src="/js/admin.js?v=3"></script>
+    <script src="/js/admin.js?v=4"></script>
 </body>
 </html>

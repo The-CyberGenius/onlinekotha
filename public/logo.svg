@@ -19,6 +19,8 @@
   <!-- Overlay to create 3D ribbon intersection effect -->
   <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="url(#g2)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
   
-  <!-- Geometric dot to represent AI/user -->
-  <circle cx="65" cy="30" r="7" fill="#fff" filter="url(#glow)"/>
+  <!-- Geometric dot to represent AI/user with animation along the infinity path -->
+  <circle r="7" fill="#fff" filter="url(#glow)">
+    <animateMotion dur="4s" repeatCount="indefinite" path="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z"/>
+  </circle>
 </svg>

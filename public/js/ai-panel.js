@@ -25,24 +25,21 @@
     let onTypewriterComplete = null;  // fired once typewriter drains after stream ends
 
     // ─────────────────────────────────────────────
-    //  Dot FX Canvas — individual per-dot color wave
-    //  Activates only while AI is replying, then fades back to neutral
+    //  Dot FX Canvas — always-on per-dot pulse + color wave on AI reply
     // ─────────────────────────────────────────────
-    let _dc = null, _dx = null, _dd = [], _dId = null, _dA = 0, _dOn = false;
-    const _DSP = 22; // dot spacing px
+    let _dc = null, _dx = null, _dd = [], _dId = null, _dA = 0, _dOn = false, _dLastT = 0;
+    const _DSP = 22;
 
     function _dotInit() {
         if (_dc) return;
         _dc = document.createElement('canvas');
         _dc.id = 'dot-fx-canvas';
-        // sticky+z-index:-1 keeps canvas fixed at top of viewport, below all chat content
         _dc.style.cssText = 'position:sticky;top:0;left:0;width:100%;pointer-events:none;z-index:-1;display:block;';
         _dx = _dc.getContext('2d');
         scrollArea.insertBefore(_dc, scrollArea.firstChild);
         _dotResize();
         new ResizeObserver(_dotResize).observe(scrollArea);
-        // Redraw when dark/light mode toggles
-        new MutationObserver(() => { if (_dc) _dotDraw(_dA); })
+        new MutationObserver(() => { if (_dc) _dotDraw(_dA, performance.now() / 1000); })
             .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
     }
 
@@ -51,73 +48,97 @@
         const w = scrollArea.clientWidth, h = scrollArea.clientHeight;
         _dc.width  = Math.ceil(w);
         _dc.height = Math.ceil(h);
-        // Negative margin so canvas doesn't push chat content down
         _dc.style.marginBottom = `-${Math.ceil(h)}px`;
-        // Rebuild dot grid — diagonal phase offset creates a wave effect
         _dd = [];
         for (let x = _DSP / 2; x < w; x += _DSP) {
             for (let y = _DSP / 2; y < h; y += _DSP) {
                 _dd.push({
                     x, y,
-                    phase:   (x + y) * 0.013 + Math.random() * 1.4,
-                    speed:   0.45 + Math.random() * 0.85,
-                    hueBase: Math.random() * 360,   // each dot gets a unique hue
+                    phase:      (x + y) * 0.013 + Math.random() * 1.4,
+                    speed:      0.45 + Math.random() * 0.85,
+                    hueBase:    Math.random() * 360,
+                    pulseSpeed: 0.7 + Math.random() * 1.5,  // individual pulse rhythm
+                    sparkle:    0,                            // sparkle decay value
                 });
             }
         }
-        _dotDraw(_dA);
+        _dotDraw(_dA, performance.now() / 1000);
+        if (!_dId) _dId = requestAnimationFrame(_dotLoop);
     }
 
     function _dotStart() {
         if (!_dc) _dotInit();
         _dOn = true;
-        if (!_dId) _dotLoop();
+        if (!_dId) _dId = requestAnimationFrame(_dotLoop);
     }
 
-    function _dotStop() {
-        _dOn = false; // loop fades out naturally
-    }
+    function _dotStop() { _dOn = false; }
 
-    function _dotLoop() {
+    function _dotLoop(ts) {
         if (!_dx) { _dId = null; return; }
-        _dA += ((_dOn ? 1 : 0) - _dA) * 0.042;    // smooth alpha lerp
-        if (_dA < 0.004 && !_dOn) {
-            _dotDraw(0);
-            _dId = null;
+        const t = ts / 1000;
+
+        // Throttle idle to ~25fps to save CPU; full 60fps during AI reply
+        const IDLE_MS = 40;
+        if (!_dOn && _dA < 0.02 && (ts - _dLastT) < IDLE_MS) {
+            _dId = requestAnimationFrame(_dotLoop);
             return;
         }
-        _dotDraw(_dA);
+        _dLastT = ts;
+
+        _dA += ((_dOn ? 1 : 0) - _dA) * 0.045;
+        _dotDraw(_dA, t);
         _dId = requestAnimationFrame(_dotLoop);
     }
 
-    function _dotDraw(alpha) {
+    function _dotDraw(alpha, t) {
         if (!_dx || !_dc || _dd.length === 0) return;
         const dk = document.documentElement.classList.contains('dark');
         const w  = _dc.width, h = _dc.height;
-        const t  = performance.now() / 1000;
         _dx.clearRect(0, 0, w, h);
 
         for (const d of _dd) {
-            const wave = d.phase + t * d.speed;
-            const hue  = (d.hueBase + wave * 48) % 360; // hue drifts continuously
+            // Individual pulse: each dot breathes at its own rhythm (always active)
+            const pulse = 0.5 + 0.5 * Math.sin(t * d.pulseSpeed + d.phase * 2.1);
+
+            // Random sparkle flash
+            if (Math.random() < 0.00025) d.sparkle = 1;
+            d.sparkle *= 0.82;
+            const sp = d.sparkle;
+
+            // Dot radius grows slightly on AI reply and sparkle
+            const r = 0.9 + alpha * 0.5 + sp * 0.7;
 
             _dx.beginPath();
-            _dx.arc(d.x, d.y, 1, 0, Math.PI * 2);
+            _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
 
-            if (alpha < 0.02) {
-                // Pure neutral (idle state)
-                _dx.fillStyle = dk ? 'rgba(255,255,255,0.04)' : 'rgba(209,213,219,0.88)';
+            if (alpha < 0.025) {
+                // ── IDLE: neutral dots with individual pulse + faint hue drift
+                const idleHue = (d.hueBase + t * 5) % 360;   // very slow color drift
+                const idleSat = dk ? 12 : 18;                  // nearly desaturated
+                const idleLit = dk ? 72 : 62;
+                const base    = dk ? 0.03 + 0.035 * pulse : 0.50 + 0.38 * pulse;
+                const a       = Math.min(1, base + sp * 0.45);
+                _dx.fillStyle = `hsla(${idleHue},${idleSat}%,${idleLit}%,${a})`;
             } else {
-                // Cross-fade neutral → colored per dot
-                const nA = dk ? 0.04 * (1 - alpha) : 0.88 * (1 - alpha * 0.8);
-                const cA = dk ? 0.22 * alpha        : 0.76 * alpha;
-                // Draw neutral layer
-                _dx.fillStyle = dk ? `rgba(255,255,255,${nA})` : `rgba(209,213,219,${nA})`;
-                _dx.fill();
-                // Draw colored layer on top
-                _dx.beginPath();
-                _dx.arc(d.x, d.y, 1, 0, Math.PI * 2);
-                _dx.fillStyle = `hsla(${hue},72%,${dk ? 64 : 62}%,${cA})`;
+                // ── AI ACTIVE: vivid per-dot color wave
+                const wave = d.phase + t * d.speed;
+                const hue  = (d.hueBase + wave * 52) % 360;
+                const sat  = 72 + 12 * pulse;
+                const lit  = dk ? 52 + 16 * pulse : 52 + 20 * pulse;
+
+                // Neutral layer fading out
+                const nA = dk ? 0.04 * (1 - alpha) : 0.88 * (1 - alpha * 0.88);
+                if (nA > 0.008) {
+                    _dx.fillStyle = dk ? `rgba(255,255,255,${nA})` : `rgba(209,213,219,${nA})`;
+                    _dx.fill();
+                    _dx.beginPath();
+                    _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
+                }
+
+                // Colored layer
+                const cA = (dk ? 0.28 : 0.80) * alpha * (0.55 + 0.45 * pulse) + sp * 0.35;
+                _dx.fillStyle = `hsla(${hue},${sat}%,${lit}%,${Math.min(1, cA)})`;
             }
             _dx.fill();
         }
@@ -503,11 +524,12 @@
             bottomInput.focus();
             toast('Continuing previous conversation');
         });
-        document.getElementById('ai-reset-btn').addEventListener('click', async () => {
-            try { await fetch(`/api/ai/conversations/${convId}`, { method: 'DELETE' }); } catch {}
+        document.getElementById('ai-reset-btn').addEventListener('click', () => {
+            // Start fresh without deleting — old conversation stays accessible in history
             if (activeChat) delete conversationMap[activeChat];
-            chatContainer.innerHTML = '';
-            toast('AI chat reset — start fresh!');
+            const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
+            msgs.forEach(m => m.remove());
+            toast('New conversation — previous saved in history');
             bottomInput.focus();
         });
 
@@ -601,41 +623,155 @@
     }
 
     // ─────────────────────────────────────────────
-    //  Load AI history when chat switches
+    //  Conversation Picker + History Loader
+    //  Shows last 3 conversations per chat with
+    //  Continue / Delete / New options
     // ─────────────────────────────────────────────
+
+    function _fmtConvDate(ts) {
+        if (!ts) return '';
+        const d = new Date(ts);
+        const now = new Date();
+        const diff = now - d;
+        if (diff < 86400000) return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+        if (diff < 7 * 86400000) return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+        return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
+    }
+
+    async function _renderConvPicker(convs, chatFolder) {
+        const existing = document.getElementById('ai-conv-picker');
+        if (existing) existing.remove();
+
+        if (!convs || convs.length === 0) return;
+
+        const top3 = convs.slice(0, 3);
+        const picker = document.createElement('div');
+        picker.id = 'ai-conv-picker';
+        picker.className = 'mb-4';
+
+        const isDark = document.documentElement.classList.contains('dark');
+
+        picker.innerHTML = `
+            <div class="flex items-center justify-between mb-2 px-1">
+                <span class="text-[10px] font-bold uppercase tracking-widest opacity-40">Saved conversations</span>
+                <button id="ai-new-conv-btn" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1 transition">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                    New chat
+                </button>
+            </div>
+            <div id="ai-conv-list" class="flex flex-col gap-1.5"></div>`;
+
+        chatContainer.insertBefore(picker, chatContainer.firstChild);
+
+        const list = picker.querySelector('#ai-conv-list');
+
+        top3.forEach((conv, idx) => {
+            const isActive = conversationMap[chatFolder] === conv.id;
+            const item = document.createElement('div');
+            item.className = `ai-conv-item flex items-center gap-2 rounded-xl px-3 py-2 cursor-pointer transition ${isActive ? 'bg-indigo-50 border border-indigo-200' : 'bg-white/60 border border-gray-100 hover:bg-gray-50'}`;
+            item.dataset.convId = conv.id;
+            item.innerHTML = `
+                <div class="flex-1 min-w-0">
+                    <p class="text-[11px] font-bold truncate ${isActive ? 'text-indigo-700' : 'text-gray-700'}">${escapeHTML(conv.title || 'Conversation ' + (idx + 1))}</p>
+                    <p class="text-[10px] opacity-50">${_fmtConvDate(conv.updated_at)} · ${conv.msg_count} msgs</p>
+                </div>
+                ${isActive ? '<span class="text-[9px] font-bold text-indigo-500 bg-indigo-100 px-1.5 py-0.5 rounded-full shrink-0">active</span>' : `<button class="conv-load-btn text-[11px] font-bold text-indigo-600 hover:text-indigo-800 shrink-0 px-2 py-1 rounded-lg hover:bg-indigo-50 transition" data-cid="${conv.id}">Load</button>`}
+                <button class="conv-del-btn text-[11px] text-gray-400 hover:text-red-500 shrink-0 px-1 transition" data-cid="${conv.id}" title="Delete">✕</button>`;
+            list.appendChild(item);
+        });
+
+        // "Load" button — switch to that conversation
+        list.querySelectorAll('.conv-load-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const cid = Number(btn.dataset.cid);
+                conversationMap[chatFolder] = cid;
+                // Clear messages and reload
+                const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
+                msgs.forEach(m => m.remove());
+                await _loadConvMessages(cid, chatFolder);
+                await window.kothaLoadAiHistory(chatFolder); // re-render picker with new active
+            });
+        });
+
+        // "Delete" button
+        list.querySelectorAll('.conv-del-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const cid = Number(btn.dataset.cid);
+                try {
+                    await fetch(`/api/ai/conversations/${cid}`, { method: 'DELETE' });
+                    if (conversationMap[chatFolder] === cid) {
+                        delete conversationMap[chatFolder];
+                        const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
+                        msgs.forEach(m => m.remove());
+                    }
+                    await window.kothaLoadAiHistory(chatFolder); // refresh
+                    toast('Conversation deleted');
+                } catch {}
+            });
+        });
+
+        // "New chat" button — start fresh without deleting anything
+        picker.querySelector('#ai-new-conv-btn').addEventListener('click', () => {
+            delete conversationMap[chatFolder];
+            const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
+            msgs.forEach(m => m.remove());
+            // Re-render picker without an active conversation
+            window.kothaLoadAiHistory(chatFolder);
+            bottomInput.focus();
+            toast('New conversation started');
+        });
+    }
+
+    async function _loadConvMessages(convId, chatFolder) {
+        try {
+            const resp = await fetch(`/api/ai/conversations/${convId}`);
+            if (!resp.ok) return;
+            const data = await resp.json();
+            if (!data.messages || data.messages.length === 0) return;
+
+            const headerEl = document.getElementById('chat-header-name');
+            const name = contactNameMap[chatFolder] || (headerEl ? headerEl.innerText : 'AI');
+
+            data.messages.forEach(msg => {
+                if (msg.role === 'user') {
+                    appendUserBubble(msg.content, msg.created_at);
+                } else if (msg.role === 'assistant') {
+                    const wrap = appendContactBubble(name, msg.created_at);
+                    wrap.querySelector('.ai-response-text').textContent = msg.content;
+                }
+            });
+            setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 50);
+        } catch (e) {
+            console.error('Load conv messages failed', e);
+        }
+    }
+
     window.kothaLoadAiHistory = async (chatFolder) => {
         if (!chatFolder) return;
-        chatContainer.innerHTML = '';
         activeChat = chatFolder;
+
+        // Full clear: picker + message bubbles
+        chatContainer.innerHTML = '';
 
         try {
             const resp = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
             if (!resp.ok) return;
             const convs = await resp.json();
 
+            // Render the picker (last 3 conversations)
+            await _renderConvPicker(convs, chatFolder);
+
             if (convs && convs.length > 0) {
-                const conv = convs[0];
-                conversationMap[chatFolder] = conv.id;
-
-                const msgResp = await fetch(`/api/ai/conversations/${conv.id}`);
-                if (!msgResp.ok) return;
-                const data = await msgResp.json();
-
-                if (data.messages && data.messages.length > 0) {
-                    data.messages.forEach(msg => {
-                        if (msg.role === 'user') {
-                            appendUserBubble(msg.content, msg.created_at);
-                        } else if (msg.role === 'assistant') {
-                            const headerEl = document.getElementById('chat-header-name');
-                            const name = contactNameMap[chatFolder] || (headerEl ? headerEl.innerText : 'AI');
-                            const wrap = appendContactBubble(name, msg.created_at);
-                            wrap.querySelector('.ai-response-text').textContent = msg.content;
-                        }
-                    });
-
-                    showAiActionBar(conv.id, data.messages.length);
-                    setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 50);
+                // Auto-load most recent conversation if none active
+                if (!conversationMap[chatFolder]) {
+                    conversationMap[chatFolder] = convs[0].id;
+                    if (convs[0].title) {
+                        // Extract contact name from first assistant message if not yet known
+                    }
                 }
+                await _loadConvMessages(conversationMap[chatFolder], chatFolder);
             }
         } catch (e) {
             console.error('Failed to load AI history', e);
