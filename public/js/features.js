@@ -866,6 +866,450 @@
         showToast('Wrapped card saved!');
     }
 
+    // ═══════════════════════════════════════════════════════════════
+    //  ANIMATED VIDEO EXPORT — Canvas + MediaRecorder
+    //  Creates a ~18s animated video (1080×1920) with 5 scenes
+    // ═══════════════════════════════════════════════════════════════
+    function exportWrappedVideo(stats) {
+        return new Promise((resolveVideo) => {
+        showToast('🎬 Recording video... please wait');
+
+        const W = 1080, H = 1920;
+        const C = document.createElement('canvas');
+        C.width = W; C.height = H;
+        const ctx = C.getContext('2d');
+        if (!ctx) { showToast('Canvas not supported'); resolveVideo(); return; }
+
+        const stream = C.captureStream(30); // 30 FPS
+        let recorder;
+        try {
+            recorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm;codecs=vp9',
+                videoBitsPerSecond: 4000000
+            });
+        } catch {
+            try {
+                recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+            } catch {
+                showToast('Video recording not supported in this browser');
+                resolveVideo(); return;
+            }
+        }
+
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.webm`;
+            const file = new File([blob], fname, { type: 'video/webm' });
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: 'My Kotha Wrapped' })
+                    .catch(() => directDownload(blob, fname));
+            } else {
+                directDownload(blob, fname);
+            }
+            showToast('🎬 Video saved!');
+            resolveVideo();
+        };
+
+        // ── Drawing helpers ──
+        function drawBg() {
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, '#0f0720');
+            bg.addColorStop(0.35, '#1a0d3a');
+            bg.addColorStop(0.65, '#120a2e');
+            bg.addColorStop(1, '#080510');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
+
+            // Glow orbs
+            const orbs = [[180,300,'#6366f1',400,0.2],[900,500,'#a855f7',350,0.15],[540,1000,'#ec4899',450,0.1],[200,1500,'#f59e0b',350,0.12],[850,1700,'#6366f1',280,0.18]];
+            orbs.forEach(([x,y,hex,r,a]) => {
+                const hr=parseInt(hex.slice(1,3),16),hg=parseInt(hex.slice(3,5),16),hb=parseInt(hex.slice(5,7),16);
+                const g=ctx.createRadialGradient(x,y,0,x,y,r);
+                g.addColorStop(0,`rgba(${hr},${hg},${hb},${a})`);
+                g.addColorStop(1,'rgba(0,0,0,0)');
+                ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+            });
+        }
+
+        function drawBranding(t) {
+            const alpha = Math.min(1, t * 3);
+            ctx.save(); ctx.globalAlpha = alpha;
+            ctx.textBaseline = 'top'; ctx.textAlign = 'left';
+            ctx.font = '800 28px -apple-system, sans-serif';
+            ctx.fillStyle = '#818cf8';
+            ctx.fillText('✦ KOTHA WRAPPED', 80, 100);
+            ctx.textAlign = 'right';
+            ctx.font = '600 24px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.fillText('onlinekotha.com', W - 80, 104);
+            // Accent line
+            const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
+            lineGrad.addColorStop(0, '#6366f1');
+            lineGrad.addColorStop(0.5, '#ec4899');
+            lineGrad.addColorStop(1, '#f59e0b');
+            ctx.fillStyle = lineGrad;
+            ctx.fillRect(80, 148, W - 160, 3);
+            ctx.restore();
+        }
+
+        function drawFooter(t) {
+            const alpha = Math.min(1, t * 2);
+            ctx.save(); ctx.globalAlpha = alpha; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+            const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
+            lineGrad.addColorStop(0, '#6366f1'); lineGrad.addColorStop(0.5, '#ec4899'); lineGrad.addColorStop(1, '#f59e0b');
+            ctx.fillStyle = lineGrad;
+            ctx.fillRect(80, H - 200, W - 160, 2);
+            ctx.font = '800 32px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText('Made with Kotha', W/2, H - 170);
+            ctx.font = '700 28px -apple-system, sans-serif';
+            const ctaG = ctx.createLinearGradient(W/2-200,0,W/2+200,0);
+            ctaG.addColorStop(0,'#818cf8'); ctaG.addColorStop(1,'#c084fc');
+            ctx.fillStyle = ctaG;
+            ctx.fillText('✦  onlinekotha.com  ✦', W/2, H - 125);
+            ctx.font = '500 22px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillText('Upload your WhatsApp chat · Get your Wrapped', W/2, H - 80);
+            ctx.restore();
+        }
+
+        function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+        function easeInOut(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+        // ── 5 Scenes (3.5s each = ~17.5s total) ──
+        const SCENE_DUR = 3.5;
+        const TOTAL_DUR = SCENE_DUR * 5;
+        const startTime = performance.now();
+
+        function drawFrame() {
+            const elapsed = (performance.now() - startTime) / 1000;
+            if (elapsed >= TOTAL_DUR) {
+                recorder.stop();
+                return;
+            }
+
+            const sceneIdx = Math.min(4, Math.floor(elapsed / SCENE_DUR));
+            const sceneT = (elapsed - sceneIdx * SCENE_DUR) / SCENE_DUR; // 0→1
+
+            drawBg();
+            drawBranding(sceneT);
+
+            ctx.textBaseline = 'top'; ctx.textAlign = 'left';
+
+            if (sceneIdx === 0) drawScene1(sceneT);
+            else if (sceneIdx === 1) drawScene2(sceneT);
+            else if (sceneIdx === 2) drawScene3(sceneT);
+            else if (sceneIdx === 3) drawScene4(sceneT);
+            else drawScene5(sceneT);
+
+            drawFooter(sceneT);
+            requestAnimationFrame(drawFrame);
+        }
+
+        // Scene 1: Welcome + Name
+        function drawScene1(t) {
+            const cy = 400;
+            // Big sparkle emoji
+            const emojiAlpha = easeOut(Math.min(1, t * 4));
+            const emojiScale = 0.5 + easeOut(Math.min(1, t * 3)) * 0.5;
+            ctx.save(); ctx.globalAlpha = emojiAlpha;
+            ctx.font = `${Math.round(120 * emojiScale)}px -apple-system, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText('✨', W/2, cy - 80);
+            ctx.restore();
+
+            // "Your Chat Story"
+            const titleAlpha = easeOut(Math.max(0, Math.min(1, (t - 0.15) * 3)));
+            const titleY = cy + 80 + (1 - titleAlpha) * 30;
+            ctx.save(); ctx.globalAlpha = titleAlpha;
+            ctx.font = '900 72px -apple-system, sans-serif';
+            ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+            ctx.fillText('Your Chat Story', W/2, titleY);
+            ctx.restore();
+
+            // "with Name"
+            const nameAlpha = easeOut(Math.max(0, Math.min(1, (t - 0.3) * 3)));
+            const nameY = titleY + 90 + (1 - nameAlpha) * 20;
+            ctx.save(); ctx.globalAlpha = nameAlpha;
+            let nf = 80;
+            ctx.font = `900 ${nf}px -apple-system, sans-serif`;
+            while (ctx.measureText('with ' + stats.otherName).width > W - 160 && nf > 40) {
+                nf -= 2; ctx.font = `900 ${nf}px -apple-system, sans-serif`;
+            }
+            const ng = ctx.createLinearGradient(W/2-300, 0, W/2+300, 0);
+            ng.addColorStop(0,'#a5b4fc'); ng.addColorStop(0.5,'#c084fc'); ng.addColorStop(1,'#f472b6');
+            ctx.fillStyle = ng;
+            ctx.fillText('with ' + stats.otherName, W/2, nameY);
+            ctx.restore();
+
+            // Date range
+            const dateAlpha = easeOut(Math.max(0, Math.min(1, (t - 0.5) * 3)));
+            ctx.save(); ctx.globalAlpha = dateAlpha * 0.5;
+            ctx.font = '600 30px -apple-system, sans-serif';
+            ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+            ctx.fillText(`${stats.firstDate || '—'}  →  ${stats.lastDate || '—'}`, W/2, nameY + nf + 30);
+            ctx.restore();
+
+            // Message count badge
+            const badgeAlpha = easeOut(Math.max(0, Math.min(1, (t - 0.65) * 3)));
+            ctx.save(); ctx.globalAlpha = badgeAlpha;
+            ctx.font = '700 36px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.textAlign = 'center';
+            ctx.fillText(`${stats.totalMessages.toLocaleString()} messages analyzed`, W/2, nameY + nf + 90);
+            ctx.restore();
+        }
+
+        // Scene 2: Total Messages + Talk Ratio
+        function drawScene2(t) {
+            const cy = 300;
+            // Label
+            const labelA = easeOut(Math.min(1, t * 5));
+            ctx.save(); ctx.globalAlpha = labelA;
+            ctx.font = '800 26px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillText('TOTAL MESSAGES', 80, cy);
+            ctx.restore();
+
+            // Animated counter
+            const counterT = easeOut(Math.max(0, Math.min(1, (t - 0.1) * 2)));
+            const displayNum = Math.round(stats.totalMessages * counterT);
+            ctx.font = '900 140px -apple-system, sans-serif';
+            const numG = ctx.createLinearGradient(80, cy+50, 80, cy+200);
+            numG.addColorStop(0,'#ffffff'); numG.addColorStop(1,'#a5b4fc');
+            ctx.fillStyle = numG;
+            ctx.fillText(displayNum.toLocaleString(), 80, cy + 50);
+
+            // Talk ratio
+            const ratioA = easeOut(Math.max(0, Math.min(1, (t - 0.4) * 3)));
+            ctx.save(); ctx.globalAlpha = ratioA;
+            const ratY = cy + 280;
+            ctx.font = '800 26px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillText('WHO TALKED MORE', 80, ratY);
+
+            // Bars animate
+            const barT = easeOut(Math.max(0, Math.min(1, (t - 0.55) * 3)));
+            const barW = W - 160;
+
+            // Sender 1
+            ctx.font = 'bold 30px -apple-system, sans-serif';
+            ctx.fillStyle = '#a5b4fc';
+            ctx.fillText(stats.sender1Name, 80, ratY + 55);
+            ctx.textAlign = 'right'; ctx.fillText(stats.sender1Percent + '%', W-80, ratY + 55); ctx.textAlign = 'left';
+            ctx.beginPath(); roundedRect(ctx, 80, ratY+100, barW, 20, 10);
+            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+            const s1w = Math.max(4, barW * stats.sender1Percent/100 * barT);
+            ctx.beginPath(); roundedRect(ctx, 80, ratY+100, s1w, 20, 10);
+            const sg1 = ctx.createLinearGradient(80,0,80+s1w,0);
+            sg1.addColorStop(0,'#6366f1'); sg1.addColorStop(1,'#818cf8');
+            ctx.fillStyle = sg1; ctx.fill();
+
+            // Sender 2
+            ctx.fillStyle = '#f472b6';
+            ctx.fillText(stats.sender2Name, 80, ratY + 145);
+            ctx.textAlign = 'right'; ctx.fillText(stats.sender2Percent + '%', W-80, ratY + 145); ctx.textAlign = 'left';
+            ctx.beginPath(); roundedRect(ctx, 80, ratY+190, barW, 20, 10);
+            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+            const s2w = Math.max(4, barW * stats.sender2Percent/100 * barT);
+            ctx.beginPath(); roundedRect(ctx, 80, ratY+190, s2w, 20, 10);
+            const sg2 = ctx.createLinearGradient(80,0,80+s2w,0);
+            sg2.addColorStop(0,'#ec4899'); sg2.addColorStop(1,'#a855f7');
+            ctx.fillStyle = sg2; ctx.fill();
+            ctx.restore();
+        }
+
+        // Scene 3: Peak Time + Time Distribution
+        function drawScene3(t) {
+            const cy = 300;
+            const labelA = easeOut(Math.min(1, t * 5));
+            ctx.save(); ctx.globalAlpha = labelA;
+            ctx.font = '800 26px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillText('PEAK CHAT TIME', 80, cy);
+            ctx.restore();
+
+            // Peak label
+            const peakA = easeOut(Math.max(0, Math.min(1, (t-0.1)*3)));
+            ctx.save(); ctx.globalAlpha = peakA;
+            ctx.font = '900 64px -apple-system, sans-serif';
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText(stats.peakLabel, 80, cy + 55);
+            ctx.restore();
+
+            // Time bars
+            const periods = ['morning','afternoon','evening','night'];
+            const icons = { morning:'🌅', afternoon:'☀️', evening:'🌆', night:'🦉' };
+            const labels = { morning:'Morning', afternoon:'Afternoon', evening:'Evening', night:'Late Night' };
+
+            periods.forEach((p, i) => {
+                const delay = 0.3 + i * 0.1;
+                const barA = easeOut(Math.max(0, Math.min(1, (t - delay) * 3)));
+                const count = stats.timeCounts[p];
+                const pct = stats.totalMessages > 0 ? Math.round((count/stats.totalMessages)*100) : 0;
+                const isP = p === stats.peakPeriod;
+                const by = cy + 180 + i * 90;
+
+                ctx.save(); ctx.globalAlpha = barA;
+                ctx.font = `${isP ? 'bold' : '600'} 28px -apple-system, sans-serif`;
+                ctx.fillStyle = isP ? '#fbbf24' : 'rgba(255,255,255,0.4)';
+                ctx.fillText(`${icons[p]} ${labels[p]}`, 80, by);
+                ctx.textAlign = 'right';
+                ctx.fillText(`${count.toLocaleString()} (${pct}%)`, W-80, by);
+                ctx.textAlign = 'left';
+
+                // Bar
+                const barW = W - 160;
+                ctx.beginPath(); roundedRect(ctx, 80, by+40, barW, 14, 7);
+                ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+                const bw = Math.max(2, barW * pct/100 * barA);
+                ctx.beginPath(); roundedRect(ctx, 80, by+40, bw, 14, 7);
+                ctx.fillStyle = isP ? '#fbbf24' : 'rgba(255,255,255,0.15)'; ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // Scene 4: Vibe + Emojis
+        function drawScene4(t) {
+            const cy = 350;
+            // Vibe
+            const vibeA = easeOut(Math.min(1, t * 4));
+            ctx.save(); ctx.globalAlpha = vibeA;
+            ctx.font = '800 26px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'center';
+            ctx.fillText('YOUR CHAT VIBE', W/2, cy);
+
+            ctx.font = '900 56px -apple-system, sans-serif';
+            const vg = ctx.createLinearGradient(W/2-300,0,W/2+300,0);
+            vg.addColorStop(0,'#f472b6'); vg.addColorStop(1,'#c084fc');
+            ctx.fillStyle = vg;
+            ctx.fillText(stats.vibe, W/2, cy + 55);
+            ctx.restore();
+
+            // Vibe description
+            const descA = easeOut(Math.max(0, Math.min(1, (t-0.2)*3)));
+            ctx.save(); ctx.globalAlpha = descA * 0.6;
+            ctx.font = '600 28px -apple-system, sans-serif';
+            ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+            ctx.fillText(stats.vibeDesc.length > 60 ? stats.vibeDesc.slice(0,57)+'...' : stats.vibeDesc, W/2, cy + 140);
+            ctx.restore();
+
+            // Emojis with bounce
+            ctx.font = '800 26px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'center';
+            const emojiLabelA = easeOut(Math.max(0, Math.min(1, (t-0.35)*3)));
+            ctx.save(); ctx.globalAlpha = emojiLabelA;
+            ctx.fillText('TOP EMOJIS', W/2, cy + 240);
+            ctx.restore();
+
+            const emojis = stats.topEmojis.slice(0, 5);
+            const emojiSpacing = 160;
+            const startX = W/2 - ((emojis.length - 1) * emojiSpacing) / 2;
+
+            emojis.forEach((emoji, i) => {
+                const delay = 0.45 + i * 0.08;
+                const eT = Math.max(0, Math.min(1, (t - delay) * 4));
+                // Bounce curve
+                let scale, yOff;
+                if (eT < 0.5) {
+                    scale = eT * 2 * 1.2;
+                    yOff = (1 - eT * 2) * 50;
+                } else if (eT < 0.7) {
+                    scale = 1.2 - (eT - 0.5) * 1.0;
+                    yOff = -(eT - 0.5) * 20;
+                } else {
+                    scale = 1.0 + (eT - 0.7) * 0.05 * Math.sin((eT - 0.7) * 20);
+                    yOff = 0;
+                }
+                const alpha = Math.min(1, eT * 3);
+
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.font = `${Math.round(80 * Math.max(0.1, scale))}px -apple-system, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(emoji, startX + i * emojiSpacing, cy + 300 + yOff);
+                ctx.font = 'bold 22px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.fillText(`#${i+1}`, startX + i * emojiSpacing, cy + 400);
+                ctx.restore();
+            });
+        }
+
+        // Scene 5: Summary card + CTA
+        function drawScene5(t) {
+            const cardA = easeOut(Math.min(1, t * 3));
+            const cardScale = 0.9 + cardA * 0.1;
+            const cardY = 280;
+            const cardH = 900;
+
+            ctx.save();
+            ctx.globalAlpha = cardA;
+            ctx.translate(W/2, cardY + cardH/2);
+            ctx.scale(cardScale, cardScale);
+            ctx.translate(-W/2, -(cardY + cardH/2));
+
+            // Glass card
+            ctx.beginPath(); roundedRect(ctx, 80, cardY, W-160, cardH, 40);
+            ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 2; ctx.stroke();
+
+            ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+            let y = cardY + 50;
+
+            // Name
+            ctx.font = '900 52px -apple-system, sans-serif';
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Chat with ' + stats.otherName, 140, y);
+            y += 80;
+
+            // Stats grid
+            const items = [
+                ['TOTAL MESSAGES', stats.totalMessages.toLocaleString(), '#a5b4fc'],
+                ['PEAK TIME', stats.peakLabel, '#fbbf24'],
+                ['CHAT VIBE', stats.vibe, '#f472b6'],
+                ['AVG WORDS/MSG', String(stats.avgWords), '#34d399'],
+            ];
+            items.forEach(([label, value, color], i) => {
+                const delay = 0.2 + i * 0.1;
+                const itemA = easeOut(Math.max(0, Math.min(1, (t - delay) * 4)));
+                ctx.save(); ctx.globalAlpha = itemA * cardA;
+
+                ctx.font = '800 20px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.fillText(label, 140, y);
+
+                ctx.font = '900 48px -apple-system, sans-serif';
+                ctx.fillStyle = color;
+                let valFont = 48;
+                ctx.font = `900 ${valFont}px -apple-system, sans-serif`;
+                while (ctx.measureText(value).width > W - 340 && valFont > 28) {
+                    valFont -= 2; ctx.font = `900 ${valFont}px -apple-system, sans-serif`;
+                }
+                ctx.fillText(value, 140, y + 30);
+                ctx.restore();
+                y += 140;
+            });
+
+            // Emojis row
+            const emojiRowA = easeOut(Math.max(0, Math.min(1, (t - 0.6) * 3)));
+            ctx.save(); ctx.globalAlpha = emojiRowA * cardA;
+            ctx.font = '800 20px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('TOP EMOJIS', 140, y);
+            ctx.font = '56px -apple-system, sans-serif';
+            ctx.fillText(stats.topEmojis.slice(0,5).join('  ') || '💬', 140, y + 35);
+            ctx.restore();
+
+            ctx.restore(); // card transform
+        }
+
+        // Start recording
+        recorder.start();
+        requestAnimationFrame(drawFrame);
+        }); // end Promise
+    }
+
     // ── Launch Wrapped ──
     function launchWrapped() {
         const raw = window.kothaGetAllMessages ? window.kothaGetAllMessages() : [];
@@ -1071,6 +1515,10 @@
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                                         Copy Image to Clipboard
                                     </button>
+                                    <button class="wrapped-video-btn flex items-center gap-2 w-full justify-center" id="wrapped-video-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                        Share as Animated Video
+                                    </button>
                                 </div>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center uppercase tracking-widest">← TAP LEFT TO REWATCH</div>
@@ -1185,6 +1633,26 @@
             e.stopPropagation();
             e.preventDefault();
             handleCopy(e);
+        }, { passive: false });
+
+        // Video export button
+        const vidBtn = overlay.querySelector('#wrapped-video-btn');
+        function handleVideo(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            vidBtn.style.opacity = '0.6';
+            vidBtn.textContent = '⏳ Creating video...';
+            showToast('Generating animated video...');
+            setTimeout(() => exportWrappedVideo(stats).finally(() => {
+                vidBtn.style.opacity = '1';
+                vidBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Share as Animated Video';
+            }), 100);
+        }
+        vidBtn.addEventListener('click', handleVideo);
+        vidBtn.addEventListener('touchend', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleVideo(e);
         }, { passive: false });
     }
 
