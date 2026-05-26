@@ -351,6 +351,25 @@
         if (!text) return;
         if (!window.currentChat) { toast('Open a chat first'); return; }
 
+        if (window.currentChat === '__global__') {
+            bottomInput.value = '';
+            updateSendBtn();
+            _triggerTextBlast(text);
+
+            fetch('/api/global-chat/send', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ text }),
+            }).then(resp => {
+                if (!resp.ok) {
+                    toast('Failed to send global message');
+                }
+            }).catch(() => {
+                toast('Network error sending message');
+            });
+            return;
+        }
+
         removeAiActionBar();
         activeChat = getActiveChat();
 

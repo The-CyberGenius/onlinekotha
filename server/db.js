@@ -149,6 +149,16 @@ CREATE TABLE IF NOT EXISTS payments (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
+ 
+CREATE TABLE IF NOT EXISTS global_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  sender TEXT NOT NULL,
+  text TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_global_messages_user ON global_messages(user_id);
 `);
 
 // Migrations: ALTER existing users table for new columns

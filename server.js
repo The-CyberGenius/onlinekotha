@@ -17,6 +17,7 @@ const { getMessages } = require('./server/cache');
 const { upload, handleUpload, SRC_DIR, userDir } = require('./server/upload');
 const adminRouter = require('./server/admin');
 const aiRouter = require('./server/ai');
+const globalChatRouter = require('./server/globalChat');
 const emailModule = require('./server/email');
 const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = emailModule;
 const { router: billingRouter, webhookHandler } = require('./server/billing');
@@ -258,6 +259,7 @@ app.delete('/api/chats/:name', requireUser, (req, res) => {
 
 app.use('/api/ai', aiRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api/global-chat', globalChatRouter);
 
 // ── Demo chat (landing page — no auth, IP-limited) ──
 const { callLLM } = require('./server/llm');

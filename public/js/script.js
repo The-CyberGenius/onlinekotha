@@ -636,6 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.chat-del-btn')) return;
                 if (chat === currentChat) return;
+                if (currentChat === '__global__') {
+                    deactivateGlobalUI();
+                }
                 currentChat = chat;
                 window.currentChat = chat;
                 const selector = document.getElementById('chat-selector');
@@ -674,15 +677,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 selector.appendChild(opt);
             });
             if (chats.length > 0) {
-                selector.value = chats[0];
-                currentChat = chats[0];
-                window.currentChat = chats[0];
-                loadData(chats[0]);
-                removeEmptyState();
-                // Render visual chat list
-                renderChatList(chats, chats[0]);
+                if (currentChat === '__global__') {
+                    removeEmptyState();
+                    renderChatList(chats, '');
+                } else {
+                    selector.value = chats[0];
+                    currentChat = chats[0];
+                    window.currentChat = chats[0];
+                    loadData(chats[0]);
+                    removeEmptyState();
+                    // Render visual chat list
+                    renderChatList(chats, chats[0]);
+                }
             } else {
-                showEmptyState();
+                if (currentChat !== '__global__') {
+                    showEmptyState();
+                }
                 renderChatList([], '');
             }
         } catch (e) {
@@ -749,6 +759,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (chatSelector) {
         chatSelector.addEventListener('change', (e) => {
             if (e.target.value) {
+                if (currentChat === '__global__') {
+                    deactivateGlobalUI();
+                }
                 currentChat = e.target.value;
                 window.currentChat = currentChat;
                 loadData(currentChat);
@@ -760,6 +773,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.refreshChats = async (selectName) => {
         await loadChatsList();
         if (selectName) {
+            if (currentChat === '__global__') {
+                deactivateGlobalUI();
+            }
             const selector = document.getElementById('chat-selector');
             if (selector) {
                 selector.value = selectName;
@@ -848,6 +864,186 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.className = 'onboarding-overlay';
         document.body.appendChild(overlay);
         renderStep();
+    }
+
+    // ── Global Chat Room Logic ──
+    let globalEventSource = null;
+    const globalChatItem = document.getElementById('global-chat-item');
+    const globalOnlineUsersList = document.getElementById('global-online-users-list');
+    const globalActiveIndicator = document.getElementById('global-active-indicator');
+    const globalOnlineCount = document.getElementById('global-online-count');
+    const askAiBtn = document.getElementById('ask-ai-btn');
+    const bottomAiInput = document.getElementById('bottom-ai-input');
+
+    function connectGlobalChat() {
+        if (globalEventSource) return;
+
+        chatContainer.innerHTML = `
+            <div class="flex justify-center my-6 animate-pulse">
+                <span class="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs px-4 py-2 font-bold rounded-full shadow-sm border border-indigo-100 dark:border-indigo-900/40">Connecting to Global Chat...</span>
+            </div>
+        `;
+
+        globalEventSource = new EventSource('/api/global-chat/stream');
+
+        globalEventSource.addEventListener('history', (e) => {
+            try {
+                const msgs = JSON.parse(e.data);
+                chatContainer.innerHTML = '';
+                let lastDate = '';
+                msgs.forEach(msg => {
+                    if (msg.date !== lastDate) {
+                        chatContainer.insertAdjacentHTML('beforeend', `
+                            <div class="flex justify-center mb-6 w-full date-separator">
+                                <span class="bg-gray-800/20 backdrop-blur-md text-gray-800 dark:text-gray-200 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 dark:border-white/10 uppercase">${formatChatDate(msg.date)}</span>
+                            </div>
+                        `);
+                        lastDate = msg.date;
+                    }
+                    const bubble = renderGlobalMessage(msg);
+                    chatContainer.insertAdjacentHTML('beforeend', bubble);
+                });
+                scrollArea.scrollTop = scrollArea.scrollHeight;
+            } catch (err) {
+                console.error('Failed to parse global chat history:', err);
+            }
+        });
+
+        globalEventSource.addEventListener('message', (e) => {
+            try {
+                const msg = JSON.parse(e.data);
+                const bubble = renderGlobalMessage(msg);
+                chatContainer.insertAdjacentHTML('beforeend', bubble);
+                scrollArea.scrollTop = scrollArea.scrollHeight;
+            } catch (err) {
+                console.error('Failed to parse incoming global message:', err);
+            }
+        });
+
+        globalEventSource.addEventListener('online-list', (e) => {
+            try {
+                const users = JSON.parse(e.data);
+                updateOnlineUsersList(users);
+            } catch (err) {
+                console.error('Failed to parse online users list:', err);
+            }
+        });
+
+        globalEventSource.onerror = (err) => {
+            console.error('Global EventSource error:', err);
+        };
+
+        if (globalActiveIndicator) globalActiveIndicator.classList.remove('hidden');
+    }
+
+    function disconnectGlobalChat() {
+        if (globalEventSource) {
+            globalEventSource.close();
+            globalEventSource = null;
+        }
+        if (globalActiveIndicator) globalActiveIndicator.classList.add('hidden');
+    }
+
+    function updateOnlineUsersList(users) {
+        if (globalOnlineCount) {
+            globalOnlineCount.textContent = `${users.length} user${users.length === 1 ? '' : 's'} online`;
+        }
+        if (!globalOnlineUsersList) return;
+        globalOnlineUsersList.innerHTML = '';
+        users.forEach(u => {
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-2 py-0.5';
+            const displayName = u.name || 'Anonymous User';
+            
+            let avatarHtml = '';
+            if (u.avatar_url) {
+                avatarHtml = `<img src="${u.avatar_url}" class="w-4 h-4 rounded-full object-cover shrink-0">`;
+            } else {
+                avatarHtml = `<div class="w-4 h-4 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center text-[8px] shrink-0">${displayName.charAt(0).toUpperCase()}</div>`;
+            }
+
+            item.innerHTML = `
+                ${avatarHtml}
+                <span class="truncate font-semibold text-gray-700 dark:text-gray-300 flex-1">${displayName}</span>
+                <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+            `;
+            globalOnlineUsersList.appendChild(item);
+        });
+    }
+
+    function renderGlobalMessage(msg) {
+        const isMe = window.__USER__ && msg.userId === window.__USER__.id;
+        const msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
+        const nameHtml = !isMe ? `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>` : '';
+        const contentHtml = `<p style="color:var(--msg-text)" class="text-[14px] leading-normal font-medium whitespace-pre-wrap break-words">${escapeHTML(msg.text)}</p>`;
+        const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
+
+        return `
+            <div class="flex flex-col mb-1.5 w-full animate-message" id="global-msg-${msg.id}">
+                <div class="max-w-[85%] md:max-w-md lg:max-w-lg relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
+                    ${nameHtml}
+                    ${contentHtml}
+                    <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto select-none pt-0.5">
+                        ${msg.time}
+                        ${isMe ? `<svg class="w-3.5 h-3.5 ml-1 text-blue-500" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function escapeHTML(s) {
+        return String(s || '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+    }
+
+    function deactivateGlobalUI() {
+        disconnectGlobalChat();
+        if (globalChatItem) {
+            globalChatItem.classList.remove('bg-indigo-50', 'border-indigo-200', 'shadow-sm');
+            globalChatItem.classList.add('hover:bg-gray-100', 'border-transparent');
+        }
+        if (globalOnlineUsersList) globalOnlineUsersList.classList.add('hidden');
+        if (askAiBtn) askAiBtn.classList.remove('hidden');
+        if (bottomAiInput) {
+            bottomAiInput.placeholder = 'Ask AI about this chat…';
+        }
+        const statusEl = document.querySelector('#chat-header-name + div p');
+        if (statusEl) statusEl.innerText = 'online';
+    }
+
+    if (globalChatItem) {
+        globalChatItem.addEventListener('click', () => {
+            if (currentChat === '__global__') return;
+            
+            disconnectGlobalChat();
+
+            currentChat = '__global__';
+            window.currentChat = '__global__';
+
+            globalChatItem.classList.add('bg-indigo-50', 'border-indigo-200', 'shadow-sm');
+            globalChatItem.classList.remove('hover:bg-gray-100', 'border-transparent');
+            if (globalOnlineUsersList) globalOnlineUsersList.classList.remove('hidden');
+
+            renderChatList(loadedChats, '');
+
+            if (askAiBtn) askAiBtn.classList.add('hidden');
+            if (headerName) headerName.innerText = 'Global Chat Room';
+            if (sidebarTitle) sidebarTitle.innerText = 'Global Chat';
+            const statusEl = document.querySelector('#chat-header-name + div p');
+            if (statusEl) statusEl.innerText = 'Anonymous community chat';
+
+            if (bottomAiInput) {
+                bottomAiInput.placeholder = 'Send a message to everyone...';
+            }
+
+            const aiChatContainer = document.getElementById('ai-chat-container');
+            if (aiChatContainer) aiChatContainer.innerHTML = '';
+
+            connectGlobalChat();
+            toggleSidebar(false);
+        });
     }
 
     // Initialize application by fetching the list of available chats

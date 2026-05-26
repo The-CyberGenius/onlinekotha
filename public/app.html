@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=22">
+    <link rel="stylesheet" href="/css/style.css?v=23">
     <!-- Razorpay Standard Checkout — must load before auth-init.js opens the modal -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="/js/auth-init.js"></script>
@@ -79,6 +79,23 @@
                 <button id="search-action-btn" disabled class="bg-gray-900 text-white rounded-xl px-3 outline-none py-2 shadow-sm hover:bg-black transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center font-bold text-sm shrink-0">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
                 </button>
+            </div>
+
+            <!-- Global Chat (Anonymous Community) -->
+            <div class="px-3 pt-1 pb-2 shrink-0">
+                <div id="global-chat-item" class="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group border border-transparent hover:bg-gray-100 dark:hover:bg-white/5">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[13px] font-bold text-gray-800 dark:text-gray-200 truncate leading-tight">Global Chat Room</p>
+                        <p class="text-[10px] text-gray-400 font-medium mt-0.5" id="global-online-count">0 users online</p>
+                    </div>
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0 hidden" id="global-active-indicator"></div>
+                </div>
+                <div id="global-online-users-list" class="hidden px-5 pt-1.5 pb-2 text-[11px] text-gray-500 dark:text-gray-400 flex flex-col gap-1.5 max-h-[110px] overflow-y-auto no-scrollbar border-l-2 border-indigo-100 dark:border-indigo-900/40 ml-4.5">
+                    <!-- Dynamic online users list will populate here -->
+                </div>
             </div>
 
             <!-- Chat List (WhatsApp-style) -->
@@ -299,9 +316,9 @@
 
     <!-- AI Panel removed — AI chat is now inline -->
 
-    <script src="js/script.js?v=15"></script>
+    <script src="js/script.js?v=16"></script>
     <script src="js/upload.js?v=14"></script>
-    <script src="js/ai-panel.js?v=25"></script>
+    <script src="js/ai-panel.js?v=26"></script>
     <script src="js/features.js?v=14"></script>
     <script>
         if ('serviceWorker' in navigator) {
