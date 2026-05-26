@@ -63,6 +63,83 @@ document.addEventListener('DOMContentLoaded', () => {
         return n;
     }
 
+    function isGarbageName(s) {
+        if (!s) return true;
+        const cleaned = s.replace(/[\s\-_+().]/g, '').toLowerCase();
+        if (/^(user|contact|unknown|friend|you|me|myself|chat|group|whatsapp|whatsappchat)$/i.test(cleaned)) return true;
+        // Mostly digits (phone numbers)
+        const digitRatio = (cleaned.replace(/\D/g, '').length) / cleaned.length;
+        if (digitRatio > 0.5) return true;
+        if (cleaned.length < 2) return true;
+        return false;
+    }
+
+    function resolveChatNames(folderName, senders) {
+        const senderNames = senders.map(s => s[0]);
+        const cleanedFolder = cleanDisplayName(folderName);
+        
+        let detectedMyName = "";
+        let detectedOtherName = "";
+        
+        // 1. Try to find "me" based on logged-in user email or name if available
+        if (window.__USER__ && window.__USER__.email) {
+            const emailPrefix = window.__USER__.email.split('@')[0].toLowerCase();
+            // Look for a sender name that matches email prefix
+            const matchedMe = senderNames.find(name => {
+                const n = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                return n.includes(emailPrefix) || emailPrefix.includes(n);
+            });
+            if (matchedMe) {
+                detectedMyName = matchedMe;
+            }
+        }
+        
+        // 2. Try to find "me" based on common self-names
+        if (!detectedMyName) {
+            const selfName = senderNames.find(name => /^(you|me|myself)$/i.test(name));
+            if (selfName) detectedMyName = selfName;
+        }
+        
+        // 3. Match folder name to senders to find the other person
+        if (cleanedFolder && !isGarbageName(cleanedFolder)) {
+            const matchedOther = senderNames.find(name => {
+                const n = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const f = cleanedFolder.toLowerCase().replace(/[^a-z0-9]/g, '');
+                return n.includes(f) || f.includes(n);
+            });
+            if (matchedOther) {
+                detectedOtherName = matchedOther;
+            } else {
+                detectedOtherName = cleanedFolder;
+            }
+        }
+        
+        // If we found "me", then the other person is the sender who is not "me"
+        if (detectedMyName && !detectedOtherName) {
+            detectedOtherName = senderNames.find(name => name !== detectedMyName) || "";
+        }
+        
+        // If we found "other", then "me" is the sender who is not "other"
+        if (detectedOtherName && !detectedMyName) {
+            detectedMyName = senderNames.find(name => name !== detectedOtherName) || "";
+        }
+        
+        // Fallbacks if still unresolved
+        if (!detectedOtherName) {
+            if (cleanedFolder && !isGarbageName(cleanedFolder)) {
+                detectedOtherName = cleanedFolder;
+            } else {
+                detectedOtherName = senderNames[1] || senderNames[0] || "User";
+            }
+        }
+        if (!detectedMyName) {
+            detectedMyName = senderNames.find(name => name !== detectedOtherName) || senderNames[0] || "User";
+        }
+        
+        return { myName: detectedMyName, otherName: detectedOtherName };
+    }
+
+
     const closeMod = () => {
         mediaModal.classList.remove('opacity-100');
         mediaModal.classList.add('opacity-0');
@@ -514,8 +591,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const senders = Object.entries(senderCounts).sort((a,b) => b[1] - a[1]);
                 const chatContactName = chatName.replace('WhatsApp Chat - ', '');
                 // Smart name cleaning — strip WhatsApp junk, underscores, dates
-                otherPersonName = cleanDisplayName(chatContactName) || senders[1]?.[0] || "User";
-                myName = senders.find(s => s[0] !== otherPersonName)?.[0] || senders[0]?.[0] || "User";
+                const resolved = resolveChatNames(chatContactName, senders);
+                otherPersonName = resolved.otherName;
+                myName = resolved.myName;
 
                 headerName.innerText = otherPersonName;
                 sidebarTitle.innerText = "All Chats";
