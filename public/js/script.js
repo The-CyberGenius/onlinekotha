@@ -288,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const floatingDate = document.getElementById('floating-date');
 
     scrollArea.addEventListener('scroll', () => {
+        if (currentChat === '__global__') return;
         // Floating Date indicator logic
         if (floatingDate) {
             const topEl = Array.from(chatContainer.children).find(el => {
@@ -1258,6 +1259,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const statusEl = document.querySelector('#chat-header-name + div p');
         if (statusEl) statusEl.innerText = 'online';
+
+        // Show filters and search since they apply to private chats
+        const filterBar = document.getElementById('filter-buttons-container');
+        if (filterBar) filterBar.classList.remove('hidden');
+        const searchBar = document.querySelector('.px-4.pt-3.pb-2.shrink-0.flex.gap-2.relative');
+        if (searchBar) searchBar.classList.remove('hidden');
+        const searchResults = document.getElementById('search-results');
+        if (searchResults) searchResults.classList.remove('hidden');
+        const smartFilters = document.getElementById('smart-filters-container');
+        if (smartFilters) smartFilters.classList.add('hidden'); // remains hidden unless toggled
     }
 
     if (globalChatItem) {
@@ -1290,6 +1301,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const aiChatContainer = document.getElementById('ai-chat-container');
             if (aiChatContainer) aiChatContainer.innerHTML = '';
+
+            // Hide filters and search since they don't apply to global chat
+            const filterBar = document.getElementById('filter-buttons-container');
+            if (filterBar) filterBar.classList.add('hidden');
+            const searchBar = document.querySelector('.px-4.pt-3.pb-2.shrink-0.flex.gap-2.relative');
+            if (searchBar) searchBar.classList.add('hidden');
+            const searchResults = document.getElementById('search-results');
+            if (searchResults) searchResults.classList.add('hidden');
+            const smartFilters = document.getElementById('smart-filters-container');
+            if (smartFilters) smartFilters.classList.add('hidden');
+
+            // Reset displayed messages so scroll/other filters don't operate on old data
+            displayedMessages = [];
+            allMessages = [];
+            renderStart = 0;
+            renderEnd = 0;
 
             connectGlobalChat();
             toggleSidebar(false);
