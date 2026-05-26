@@ -210,74 +210,94 @@
     }
 
     // ─────────────────────────────────────────────
-    //  Text-Blast — dots form user's text, then explode
+    //  Dynamic Blast — 5 lightweight geometric patterns,
+    //  random colors every time, zero image processing
     // ─────────────────────────────────────────────
-    function _triggerTextBlast(text) {
+    const _BLAST_PATTERNS = ['ring', 'wave', 'burst', 'diagonal', 'spiral'];
+    let   _blastPatternIdx = 0; // cycles so you never see same twice in a row
+
+    function _triggerTextBlast() {
         if (!_dc || !_dx || _dd.length === 0 || _blastLock) return;
         _blastLock = true;
-
         for (const d of _dd) d.bs = 0;
 
-        const display = text.length > 18 ? text.slice(0, 18) + '…' : text;
-        const fSz  = Math.max(28, Math.min(48, _dcH / 7));
-        const ofc  = document.createElement('canvas');
-        ofc.width  = _dcW;
-        ofc.height = Math.ceil(fSz * 2.2);
-        const oct  = ofc.getContext('2d');
-        oct.font   = `800 ${fSz}px Inter,-apple-system,system-ui,sans-serif`;
-        oct.textBaseline = 'alphabetic';
-        const tw   = oct.measureText(display).width;
-        const tx0  = Math.max(6, (_dcW - tw) / 2);
-        const ty0  = Math.ceil(fSz * 1.55);
-        oct.fillStyle = '#fff';
-        oct.fillText(display, tx0, ty0);
+        // Fresh random hue palette each blast
+        const baseHue = Math.random() * 360;
+        const hues = [0,45,90,135,180].map(o => (baseHue + o) % 360);
 
-        const px   = oct.getImageData(0, 0, ofc.width, ofc.height).data;
-        const yOff = (_dcH - ofc.height) / 2;
+        // Cycle through patterns (ring → wave → burst → diagonal → spiral → ring…)
+        const pattern = _BLAST_PATTERNS[_blastPatternIdx % _BLAST_PATTERNS.length];
+        _blastPatternIdx++;
 
-        const glowDots = [];
-        const sr   = Math.ceil(_dDotSp * 0.55);
-        const hues = [245, 280, 320, 200, 160];
+        let glowDots = [];
+        let cX = _dcW / 2, cY = _dcH / 2;
 
-        for (const d of _dd) {
-            const px_ = Math.round(d.x);
-            const py_ = Math.round(d.y - yOff);
-            if (py_ < 0 || py_ >= ofc.height) continue;
-            let lit = false;
-            outer: for (let dy = -sr; dy <= sr; dy++) {
-                for (let dx = -sr; dx <= sr; dx++) {
-                    const nx = Math.max(0, Math.min(ofc.width - 1, px_ + dx));
-                    const ny = Math.max(0, Math.min(ofc.height - 1, py_ + dy));
-                    if (px[(ny * ofc.width + nx) * 4 + 3] > 55) { lit = true; break outer; }
-                }
-            }
-            if (lit) {
-                const hIdx = Math.floor((d.x / _dcW) * hues.length);
-                d.glowHue  = hues[Math.min(hIdx, hues.length - 1)] + Math.random() * 25 - 12;
-                glowDots.push(d);
-            }
+        if (pattern === 'ring') {
+            // Glowing ring of dots at a random radius
+            cX = _dcW * (0.3 + Math.random() * 0.4);
+            cY = _dcH * (0.3 + Math.random() * 0.4);
+            const r = Math.min(_dcW, _dcH) * (0.18 + Math.random() * 0.18);
+            glowDots = _dd.filter(d => {
+                const dist = Math.hypot(d.x - cX, d.y - cY);
+                return dist >= r - _dDotSp * 1.6 && dist <= r + _dDotSp * 1.6;
+            });
+
+        } else if (pattern === 'wave') {
+            // Horizontal band across the screen
+            const bandY = _dcH * (0.25 + Math.random() * 0.5);
+            glowDots = _dd.filter(d => Math.abs(d.y - bandY) <= _dDotSp * 2);
+            cY = bandY;
+
+        } else if (pattern === 'burst') {
+            // Radial burst from a random off-center point
+            cX = _dcW * (0.2 + Math.random() * 0.6);
+            cY = _dcH * (0.2 + Math.random() * 0.6);
+            const r = Math.min(_dcW, _dcH) * (0.20 + Math.random() * 0.15);
+            glowDots = _dd.filter(d => Math.hypot(d.x - cX, d.y - cY) <= r);
+
+        } else if (pattern === 'diagonal') {
+            // Diagonal strip — slash or backslash randomly
+            const dir = Math.random() > 0.5 ? 1 : -1;
+            const sc  = _dcH / Math.max(1, _dcW);
+            glowDots = _dd.filter(d => {
+                const proj = Math.abs((d.y - cY) - dir * (d.x - cX) * sc) / Math.sqrt(1 + sc * sc);
+                return proj < _dDotSp * 2.2;
+            });
+
+        } else { // spiral — select dots whose angle from center matches a spiral curve
+            const turns = 1.4 + Math.random() * 0.8;
+            glowDots = _dd.filter(d => {
+                const ang  = Math.atan2(d.y - cY, d.x - cX);
+                const dist = Math.hypot(d.x - cX, d.y - cY);
+                const maxR = Math.min(_dcW, _dcH) * 0.45;
+                const expected = (((ang + Math.PI * 2) % (Math.PI * 2)) / (Math.PI * 2)) * maxR / turns;
+                return Math.abs(dist - expected) < _dDotSp * 1.4;
+            });
         }
 
-        if (glowDots.length < 4) { _blastLock = false; return; }
+        if (glowDots.length < 3) { _blastLock = false; return; }
 
-        // Restart loop for blast animation
+        // Assign hues along the dot set for a gradient effect
+        glowDots.forEach((d, i) => {
+            d.glowHue = hues[Math.floor((i / glowDots.length) * hues.length)];
+        });
+
         if (!_dId) _dId = requestAnimationFrame(_dotLoop);
-
         for (const d of glowDots) d.bs = 1;
 
         setTimeout(() => {
-            const cX = _dcW / 2, cY = _dcH / 2;
             for (const d of glowDots) {
                 if (d.bs !== 1) continue;
                 d.bs  = 2;
                 d.bT  = performance.now() / 1000;
-                const ang = Math.atan2(d.y - cY, d.x - cX) + (Math.random() - 0.5) * 1.8;
-                const spd = 120 + Math.random() * 200;
+                // Blast away from pattern center + scatter
+                const ang = Math.atan2(d.y - cY, d.x - cX) + (Math.random() - 0.5) * 1.2;
+                const spd = 100 + Math.random() * 170;
                 d.bVx = Math.cos(ang) * spd;
                 d.bVy = Math.sin(ang) * spd;
             }
-            setTimeout(() => { _blastLock = false; }, 1000);
-        }, 550);
+            setTimeout(() => { _blastLock = false; }, 900);
+        }, 480);
     }
 
     // ─────────────────────────────────────────────
