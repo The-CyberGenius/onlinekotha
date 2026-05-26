@@ -572,154 +572,277 @@
         };
     }
 
-    // ── Canvas export card ──
+    // ── Canvas export card — Instagram/Facebook story optimized (1080×1920) ──
     function exportWrappedCanvas(stats, action) {
-        const C = document.createElement('canvas');
-        C.width = 1080; C.height = 1920;
-        const ctx = C.getContext('2d');
-        if (!ctx) return;
+        try {
+            const C = document.createElement('canvas');
+            const W = 1080, H = 1920;
+            C.width = W; C.height = H;
+            const ctx = C.getContext('2d');
+            if (!ctx) { showToast('Canvas not supported'); return; }
 
-        // Background
-        const bg = ctx.createLinearGradient(0, 0, 540, 1920);
-        bg.addColorStop(0, '#0c0a1a');
-        bg.addColorStop(0.4, '#1a1040');
-        bg.addColorStop(1, '#0a0812');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, 1080, 1920);
+            // ── Rich gradient background ──
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, '#0f0720');
+            bg.addColorStop(0.3, '#1a0d3a');
+            bg.addColorStop(0.6, '#120a2e');
+            bg.addColorStop(1, '#080510');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
 
-        // Glow orbs
-        [[240, 300, '#6366f1', 500], [850, 1600, '#d946ef', 450], [540, 960, '#f59e0b', 300]].forEach(([x, y, color, r]) => {
-            const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-            g.addColorStop(0, color.replace(')', ',0.18)').replace('rgb', 'rgba').replace('#', ''));
-            // Simple hex→rgba
-            const hr = parseInt(color.slice(1, 3), 16), hg = parseInt(color.slice(3, 5), 16), hb = parseInt(color.slice(5, 7), 16);
-            const g2 = ctx.createRadialGradient(x, y, 0, x, y, r);
-            g2.addColorStop(0, `rgba(${hr},${hg},${hb},0.2)`);
-            g2.addColorStop(1, 'rgba(0,0,0,0)');
-            ctx.fillStyle = g2;
-            ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-        });
+            // ── Multiple glow orbs for depth ──
+            const orbs = [
+                [180, 240, '#6366f1', 420, 0.25],
+                [900, 400, '#a855f7', 350, 0.18],
+                [540, 960, '#ec4899', 500, 0.12],
+                [200, 1500, '#f59e0b', 380, 0.15],
+                [850, 1650, '#6366f1', 300, 0.2],
+            ];
+            orbs.forEach(([x, y, hex, r, alpha]) => {
+                const hr = parseInt(hex.slice(1, 3), 16), hg = parseInt(hex.slice(3, 5), 16), hb = parseInt(hex.slice(5, 7), 16);
+                const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+                g.addColorStop(0, `rgba(${hr},${hg},${hb},${alpha})`);
+                g.addColorStop(0.6, `rgba(${hr},${hg},${hb},${alpha * 0.3})`);
+                g.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, W, H);
+            });
 
-        // Card
-        const cx = 80, cy = 260, cw = 920, ch = 1340, cr = 50;
-        ctx.beginPath(); roundedRect(ctx, cx, cy, cw, ch, cr);
-        ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 3; ctx.stroke();
+            // ── Noise/grain texture overlay ──
+            for (let i = 0; i < 3000; i++) {
+                const nx = Math.random() * W, ny = Math.random() * H;
+                ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.015})`;
+                ctx.fillRect(nx, ny, 1, 1);
+            }
 
-        ctx.textBaseline = 'top';
+            ctx.textBaseline = 'top';
 
-        // Header
-        ctx.font = 'bold 32px -apple-system, sans-serif';
-        ctx.fillStyle = '#818cf8'; ctx.textAlign = 'left';
-        ctx.fillText('KOTHA WRAPPED', cx + 60, cy + 60);
-        ctx.textAlign = 'right';
-        ctx.font = '600 26px -apple-system, sans-serif';
-        ctx.fillStyle = '#4b5563';
-        ctx.fillText('onlinekotha.com', cx + cw - 60, cy + 66);
-        ctx.textAlign = 'left';
+            // ── Top branding bar ──
+            ctx.textAlign = 'left';
+            ctx.font = '800 28px -apple-system, "Segoe UI", sans-serif';
+            ctx.fillStyle = '#818cf8';
+            ctx.fillText('✦ KOTHA WRAPPED', 80, 100);
+            ctx.textAlign = 'right';
+            ctx.font = '600 24px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.fillText('onlinekotha.com', W - 80, 104);
 
-        // Name
-        ctx.font = '900 64px -apple-system, sans-serif';
-        ctx.fillStyle = '#fff';
-        const nameText = `Chat with ${stats.otherName}`;
-        // Auto-shrink if too wide
-        let nameFont = 64;
-        while (ctx.measureText(nameText).width > cw - 140 && nameFont > 36) {
-            nameFont -= 2;
-            ctx.font = `900 ${nameFont}px -apple-system, sans-serif`;
-        }
-        ctx.fillText(nameText, cx + 60, cy + 140);
+            // Thin accent line
+            const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
+            lineGrad.addColorStop(0, '#6366f1');
+            lineGrad.addColorStop(0.5, '#ec4899');
+            lineGrad.addColorStop(1, '#f59e0b');
+            ctx.fillStyle = lineGrad;
+            ctx.fillRect(80, 148, W - 160, 3);
 
-        // Date range
-        ctx.font = '600 26px -apple-system, sans-serif';
-        ctx.fillStyle = '#6b7280';
-        ctx.fillText(`${stats.firstDate || '—'} → ${stats.lastDate || '—'}`, cx + 60, cy + 140 + nameFont + 16);
+            // ── Name section ──
+            ctx.textAlign = 'left';
+            ctx.font = '900 72px -apple-system, "Segoe UI", sans-serif';
+            ctx.fillStyle = '#fff';
+            const nameText = `Chat with`;
+            ctx.fillText(nameText, 80, 200);
 
-        // Total messages
-        const secY = cy + 320;
-        ctx.font = '800 28px -apple-system, sans-serif';
-        ctx.fillStyle = '#9ca3af';
-        ctx.fillText('TOTAL MESSAGES', cx + 60, secY);
-        ctx.font = '900 110px -apple-system, sans-serif';
-        const tg = ctx.createLinearGradient(cx, secY + 50, cx, secY + 160);
-        tg.addColorStop(0, '#ffffff'); tg.addColorStop(1, '#a5b4fc');
-        ctx.fillStyle = tg;
-        ctx.fillText(stats.totalMessages.toLocaleString(), cx + 60, secY + 50);
+            // Name with gradient
+            let nameFont = 80;
+            ctx.font = `900 ${nameFont}px -apple-system, "Segoe UI", sans-serif`;
+            const nameVal = stats.otherName;
+            while (ctx.measureText(nameVal).width > W - 180 && nameFont > 40) {
+                nameFont -= 2;
+                ctx.font = `900 ${nameFont}px -apple-system, "Segoe UI", sans-serif`;
+            }
+            const nameGrad = ctx.createLinearGradient(80, 290, 600, 290);
+            nameGrad.addColorStop(0, '#a5b4fc');
+            nameGrad.addColorStop(0.5, '#c084fc');
+            nameGrad.addColorStop(1, '#f472b6');
+            ctx.fillStyle = nameGrad;
+            ctx.fillText(nameVal, 80, 290);
 
-        // Talk ratio
-        const ratY = secY + 210;
-        ctx.font = '800 28px -apple-system, sans-serif';
-        ctx.fillStyle = '#9ca3af';
-        ctx.fillText('TALK RATIO', cx + 60, ratY);
+            // Nickname subtitle
+            let subtitleY = 290 + nameFont + 10;
+            if (stats.detectedNickname && stats.detectedNickname.toLowerCase() !== stats.otherName.toLowerCase()) {
+                ctx.font = '700 30px -apple-system, sans-serif';
+                ctx.fillStyle = '#c084fc';
+                ctx.fillText(`aka "${stats.detectedNickname}"`, 80, subtitleY);
+                subtitleY += 45;
+            }
 
-        const barW = 380, barH = 18, barY = ratY + 90;
-        // Sender 1
-        ctx.font = 'bold 28px -apple-system, sans-serif';
-        ctx.fillStyle = '#a5b4fc';
-        ctx.fillText(`${stats.sender1Name} · ${stats.sender1Percent}%`, cx + 60, ratY + 45);
-        ctx.beginPath(); roundedRect(ctx, cx + 60, barY, barW, barH, 9);
-        ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fill();
-        ctx.beginPath(); roundedRect(ctx, cx + 60, barY, Math.max(2, barW * stats.sender1Percent / 100), barH, 9);
-        ctx.fillStyle = '#6366f1'; ctx.fill();
+            // Date range
+            ctx.font = '600 26px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText(`${stats.firstDate || '—'}  →  ${stats.lastDate || '—'}`, 80, subtitleY);
 
-        // Sender 2
-        ctx.fillStyle = '#f472b6';
-        ctx.fillText(`${stats.sender2Name} · ${stats.sender2Percent}%`, cx + 500, ratY + 45);
-        ctx.beginPath(); roundedRect(ctx, cx + 500, barY, barW, barH, 9);
-        ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fill();
-        ctx.beginPath(); roundedRect(ctx, cx + 500, barY, Math.max(2, barW * stats.sender2Percent / 100), barH, 9);
-        const pg = ctx.createLinearGradient(cx + 500, 0, cx + 880, 0);
-        pg.addColorStop(0, '#ec4899'); pg.addColorStop(1, '#a855f7');
-        ctx.fillStyle = pg; ctx.fill();
+            // ── Glass card: Total Messages ──
+            const cardY = subtitleY + 80;
+            ctx.beginPath();
+            roundedRect(ctx, 60, cardY, W - 120, 260, 32);
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-        // Bottom row: Peak + Vibe + Emojis
-        const bY = barY + 80;
-        ctx.font = '800 28px -apple-system, sans-serif';
-        ctx.fillStyle = '#9ca3af';
-        ctx.fillText('PEAK TIME', cx + 60, bY);
-        ctx.font = '900 42px -apple-system, sans-serif';
-        ctx.fillStyle = '#fbbf24';
-        ctx.fillText(stats.peakLabel, cx + 60, bY + 45);
+            ctx.font = '800 22px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.letterSpacing = '3px';
+            ctx.fillText('TOTAL MESSAGES', 110, cardY + 35);
 
-        ctx.font = '800 28px -apple-system, sans-serif';
-        ctx.fillStyle = '#9ca3af';
-        ctx.fillText('CHAT VIBE', cx + 60, bY + 140);
-        ctx.font = '900 42px -apple-system, sans-serif';
-        ctx.fillStyle = '#f472b6';
-        ctx.fillText(stats.vibe, cx + 60, bY + 185);
+            ctx.font = '900 120px -apple-system, sans-serif';
+            const numGrad = ctx.createLinearGradient(110, cardY + 70, 110, cardY + 200);
+            numGrad.addColorStop(0, '#ffffff');
+            numGrad.addColorStop(1, '#a5b4fc');
+            ctx.fillStyle = numGrad;
+            ctx.fillText(stats.totalMessages.toLocaleString(), 110, cardY + 75);
 
-        ctx.font = '800 28px -apple-system, sans-serif';
-        ctx.fillStyle = '#9ca3af';
-        ctx.fillText('TOP EMOJIS', cx + 60, bY + 290);
-        ctx.font = '56px -apple-system, sans-serif';
-        ctx.fillText(stats.topEmojis.slice(0, 5).join('  ') || '💬', cx + 60, bY + 335);
+            ctx.font = '600 24px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.fillText(`${stats.avgWords} avg words per message`, 110, cardY + 210);
 
-        // Footer
-        ctx.textAlign = 'center';
-        ctx.font = 'bold 30px -apple-system, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        ctx.fillText('Made with Kotha · onlinekotha.com', 540, 1740);
-        ctx.font = '500 22px -apple-system, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.fillText('Your WhatsApp conversations, beautifully analyzed', 540, 1785);
+            // ── Talk Ratio section ──
+            const ratY = cardY + 300;
+            ctx.font = '800 22px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillText('WHO TALKED MORE', 80, ratY);
 
-        // Export
-        C.toBlob((blob) => {
-            if (!blob) { showToast('Export failed — try again'); return; }
-            const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
+            // Sender 1
+            const s1Y = ratY + 50;
+            ctx.font = 'bold 30px -apple-system, sans-serif';
+            ctx.fillStyle = '#a5b4fc';
+            ctx.fillText(`${stats.sender1Name}`, 80, s1Y);
+            ctx.textAlign = 'right';
+            ctx.fillText(`${stats.sender1Percent}%`, W - 80, s1Y);
+            ctx.textAlign = 'left';
 
-            if (action === 'copy') {
-                if (navigator.clipboard && window.ClipboardItem) {
-                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                        .then(() => showToast('Copied to clipboard!'))
-                        .catch(() => fallbackDownload(blob, fname));
+            const barFullW = W - 160;
+            // Bar track
+            ctx.beginPath(); roundedRect(ctx, 80, s1Y + 48, barFullW, 16, 8);
+            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+            // Bar fill
+            const s1W = Math.max(4, barFullW * stats.sender1Percent / 100);
+            ctx.beginPath(); roundedRect(ctx, 80, s1Y + 48, s1W, 16, 8);
+            const s1Grad = ctx.createLinearGradient(80, 0, 80 + s1W, 0);
+            s1Grad.addColorStop(0, '#6366f1');
+            s1Grad.addColorStop(1, '#818cf8');
+            ctx.fillStyle = s1Grad; ctx.fill();
+
+            // Sender 2
+            const s2Y = s1Y + 85;
+            ctx.font = 'bold 30px -apple-system, sans-serif';
+            ctx.fillStyle = '#f472b6';
+            ctx.fillText(`${stats.sender2Name}`, 80, s2Y);
+            ctx.textAlign = 'right';
+            ctx.fillText(`${stats.sender2Percent}%`, W - 80, s2Y);
+            ctx.textAlign = 'left';
+
+            ctx.beginPath(); roundedRect(ctx, 80, s2Y + 48, barFullW, 16, 8);
+            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
+            const s2W = Math.max(4, barFullW * stats.sender2Percent / 100);
+            ctx.beginPath(); roundedRect(ctx, 80, s2Y + 48, s2W, 16, 8);
+            const s2Grad = ctx.createLinearGradient(80, 0, 80 + s2W, 0);
+            s2Grad.addColorStop(0, '#ec4899');
+            s2Grad.addColorStop(1, '#a855f7');
+            ctx.fillStyle = s2Grad; ctx.fill();
+
+            // ── Two glass cards side by side: Peak Time + Vibe ──
+            const pairY = s2Y + 110;
+            const cardW = (W - 180) / 2;
+
+            // Peak time card
+            ctx.beginPath(); roundedRect(ctx, 60, pairY, cardW, 180, 24);
+            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+            ctx.font = '800 18px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('PEAK TIME', 100, pairY + 30);
+            ctx.font = '900 36px -apple-system, sans-serif';
+            ctx.fillStyle = '#fbbf24';
+            // Split peak label if needed
+            const peakWords = stats.peakLabel.split(' ');
+            if (peakWords.length > 2) {
+                ctx.font = '900 32px -apple-system, sans-serif';
+                ctx.fillText(peakWords.slice(0, -1).join(' '), 100, pairY + 75);
+                ctx.fillText(peakWords.slice(-1).join(' '), 100, pairY + 115);
+            } else {
+                ctx.fillText(stats.peakLabel, 100, pairY + 85);
+            }
+
+            // Vibe card
+            const vibeX = 60 + cardW + 60;
+            ctx.beginPath(); roundedRect(ctx, vibeX, pairY, cardW, 180, 24);
+            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+            ctx.font = '800 18px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('CHAT VIBE', vibeX + 40, pairY + 30);
+            ctx.font = '900 32px -apple-system, sans-serif';
+            const vibeGrad = ctx.createLinearGradient(vibeX, pairY + 75, vibeX + cardW, pairY + 75);
+            vibeGrad.addColorStop(0, '#f472b6');
+            vibeGrad.addColorStop(1, '#c084fc');
+            ctx.fillStyle = vibeGrad;
+            const vibeWords = stats.vibe.split(' ');
+            if (vibeWords.length > 2) {
+                ctx.font = '900 28px -apple-system, sans-serif';
+                ctx.fillText(vibeWords.slice(0, -1).join(' '), vibeX + 40, pairY + 75);
+                ctx.fillText(vibeWords.slice(-1).join(' '), vibeX + 40, pairY + 115);
+            } else {
+                ctx.fillText(stats.vibe, vibeX + 40, pairY + 85);
+            }
+
+            // ── Emoji row ──
+            const emojiY = pairY + 220;
+            ctx.beginPath(); roundedRect(ctx, 60, emojiY, W - 120, 120, 24);
+            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+            ctx.font = '800 18px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('TOP EMOJIS', 100, emojiY + 20);
+            ctx.font = '56px -apple-system, sans-serif';
+            ctx.fillText(stats.topEmojis.slice(0, 5).join('   ') || '💬', 100, emojiY + 50);
+
+            // ── Footer with CTA ──
+            // Gradient accent line
+            ctx.fillStyle = lineGrad;
+            ctx.fillRect(80, H - 200, W - 160, 2);
+
+            ctx.textAlign = 'center';
+            ctx.font = '800 32px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText('Made with Kotha', W / 2, H - 170);
+
+            ctx.font = '700 28px -apple-system, sans-serif';
+            const ctaGrad = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
+            ctaGrad.addColorStop(0, '#818cf8');
+            ctaGrad.addColorStop(1, '#c084fc');
+            ctx.fillStyle = ctaGrad;
+            ctx.fillText('✦  onlinekotha.com  ✦', W / 2, H - 125);
+
+            ctx.font = '500 22px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillText('Upload your WhatsApp chat · Get your Wrapped', W / 2, H - 80);
+
+            // ── Export ──
+            C.toBlob((blob) => {
+                if (!blob) { showToast('Export failed — try again'); return; }
+                const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
+
+                if (action === 'copy') {
+                    if (navigator.clipboard && window.ClipboardItem) {
+                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                            .then(() => showToast('✅ Copied to clipboard!'))
+                            .catch(() => fallbackDownload(blob, fname));
+                    } else {
+                        fallbackDownload(blob, fname);
+                    }
                 } else {
                     fallbackDownload(blob, fname);
                 }
-            } else {
-                fallbackDownload(blob, fname);
-            }
-        }, 'image/png');
+            }, 'image/png', 1.0);
+        } catch (err) {
+            console.error('Wrapped export error:', err);
+            showToast('Export failed — ' + (err.message || 'unknown error'));
+        }
     }
 
     function fallbackDownload(blob, fname) {
@@ -974,34 +1097,53 @@
         });
 
         // Start story
-        activeStory = new WrappedStory(slideEls, () => {});
-        activeStory.start();
+        const navLeft = overlay.querySelector('#wrapped-nav-left');
+        const navRight = overlay.querySelector('#wrapped-nav-right');
 
-        // Pause / resume on hold (but not on buttons)
+        // Helper: toggle nav tap pointer-events based on current slide
+        function updateNavTapsForSlide(index) {
+            const isLastSlide = index === slideEls.length - 1;
+            // On last slide, completely disable nav taps so buttons underneath get clicks
+            navRight.style.pointerEvents = isLastSlide ? 'none' : 'auto';
+            // Keep left nav active so user can go back
+            navLeft.style.pointerEvents = 'auto';
+        }
+
+        // Patch showSlide to also update nav taps
+        const origShowSlide = WrappedStory.prototype.showSlide;
+        activeStory = new WrappedStory(slideEls, () => {});
+        const storyRef = activeStory;
+        const origShow = storyRef.showSlide.bind(storyRef);
+        storyRef.showSlide = function(index) {
+            origShow(index);
+            updateNavTapsForSlide(index);
+        };
+        storyRef.start();
+
+        // Pause / resume on hold (but not on buttons or close)
         const cont = overlay.querySelector('.wrapped-container');
         cont.addEventListener('pointerdown', (e) => {
             if (e.target.closest('.wrapped-action-btns') || e.target.closest('#wrapped-close-btn')) return;
-            activeStory.pause();
+            if (storyRef) storyRef.pause();
         });
-        const doResume = () => { if (activeStory) activeStory.resume(); };
+        const doResume = () => { if (storyRef) storyRef.resume(); };
         cont.addEventListener('pointerup', doResume);
         cont.addEventListener('pointerleave', doResume);
 
-        // Nav taps — but NOT when on last slide action buttons
-        overlay.querySelector('#wrapped-nav-left').addEventListener('click', (e) => {
+        // Nav taps
+        navLeft.addEventListener('click', (e) => {
             e.stopPropagation();
-            activeStory.prev();
+            storyRef.prev();
         });
-        overlay.querySelector('#wrapped-nav-right').addEventListener('click', (e) => {
-            // If on last slide, don't hijack — let the button work
-            if (activeStory && activeStory.currentIndex === slideEls.length - 1) return;
+        navRight.addEventListener('click', (e) => {
             e.stopPropagation();
-            activeStory.next();
+            storyRef.next();
         });
 
         // Close
         const close = () => {
-            if (activeStory) { activeStory.destroy(); activeStory = null; }
+            if (storyRef) { storyRef.destroy(); }
+            activeStory = null;
             overlay.remove();
             document.removeEventListener('keydown', escH2);
         };
@@ -1009,17 +1151,41 @@
         const escH2 = (e) => { if (e.key === 'Escape') close(); };
         document.addEventListener('keydown', escH2);
 
-        // Download & Copy — direct listeners, high z-index, no interference
-        overlay.querySelector('#wrapped-download-btn').addEventListener('click', (e) => {
+        // Download & Copy — direct listeners with mobile touch support
+        const dlBtn = overlay.querySelector('#wrapped-download-btn');
+        const cpBtn = overlay.querySelector('#wrapped-copy-btn');
+
+        function handleDownload(e) {
             e.stopPropagation();
             e.preventDefault();
-            exportWrappedCanvas(stats, 'download');
-        });
-        overlay.querySelector('#wrapped-copy-btn').addEventListener('click', (e) => {
+            dlBtn.style.opacity = '0.6';
+            setTimeout(() => { dlBtn.style.opacity = '1'; }, 300);
+            showToast('Generating card...');
+            setTimeout(() => exportWrappedCanvas(stats, 'download'), 100);
+        }
+        function handleCopy(e) {
             e.stopPropagation();
             e.preventDefault();
-            exportWrappedCanvas(stats, 'copy');
-        });
+            cpBtn.style.opacity = '0.6';
+            setTimeout(() => { cpBtn.style.opacity = '1'; }, 300);
+            showToast('Copying...');
+            setTimeout(() => exportWrappedCanvas(stats, 'copy'), 100);
+        }
+
+        // Both click and touchend for maximum mobile compatibility
+        dlBtn.addEventListener('click', handleDownload);
+        dlBtn.addEventListener('touchend', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleDownload(e);
+        }, { passive: false });
+
+        cpBtn.addEventListener('click', handleCopy);
+        cpBtn.addEventListener('touchend', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            handleCopy(e);
+        }, { passive: false });
     }
 
     // ── Init ──
