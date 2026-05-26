@@ -3,4 +3,4 @@ Allow: /
 Disallow: /api/
 Disallow: /admin.html
 
-Sitemap: https://onlinekotha.com/sitemap.xml
+Sitemap: https://www.onlinekotha.com/sitemap.xml
