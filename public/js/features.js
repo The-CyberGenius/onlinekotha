@@ -867,17 +867,15 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    //  STORY CARDS EXPORT — 5 individual Instagram/WhatsApp story PNGs
-    //  Each card: 1080×1920 with unique data visualization
+    //  SINGLE STORY CARD EXPORT — 1080×1920 Instagram/WhatsApp story PNG
     // ═══════════════════════════════════════════════════════════════
-    function exportWrappedStoryCards(stats) {
-        return new Promise((resolveCards) => {
-            showToast('📸 Creating 5 high-res story cards... please wait');
+    function exportSingleStoryCard(stats, idx) {
+        return new Promise((resolveCard) => {
             const W = 1080, H = 1920;
             const C = document.createElement('canvas');
             C.width = W; C.height = H;
             const ctx = C.getContext('2d');
-            if (!ctx) { showToast('Canvas not supported'); resolveCards(); return; }
+            if (!ctx) { showToast('Canvas not supported'); resolveCard(); return; }
 
             // ── Drawing helpers ──
             function drawBg() {
@@ -890,7 +888,13 @@
                 ctx.fillRect(0, 0, W, H);
 
                 // Glow orbs
-                const orbs = [[180,300,'#6366f1',400,0.2],[900,500,'#a855f7',350,0.15],[540,1000,'#ec4899',450,0.1],[200,1500,'#f59e0b',350,0.12],[850,1700,'#6366f1',280,0.18]];
+                const orbs = [
+                    [180,300,'#6366f1',400,0.2],
+                    [900,500,'#a855f7',350,0.15],
+                    [540,1000,'#ec4899',450,0.1],
+                    [200,1500,'#f59e0b',350,0.12],
+                    [850,1700,'#6366f1',280,0.18]
+                ];
                 orbs.forEach(([x,y,hex,r,a]) => {
                     const hr=parseInt(hex.slice(1,3),16),hg=parseInt(hex.slice(3,5),16),hb=parseInt(hex.slice(5,7),16);
                     const g=ctx.createRadialGradient(x,y,0,x,y,r);
@@ -941,8 +945,6 @@
                 ctx.fillText('Upload your WhatsApp chat · Get your Wrapped', W/2, H - 80);
                 ctx.restore();
             }
-
-            function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
             // Scene 1: Welcome + Name
             function drawScene1(t) {
@@ -1171,104 +1173,23 @@
             }
 
             const scenes = [drawScene1, drawScene2, drawScene3, drawScene4, drawScene5];
-            const blobs = [];
-
-            // Process each scene sequentially
-            function exportScene(idx) {
-                if (idx >= scenes.length) {
-                    createZip(blobs, stats).then(() => {
-                        resolveCards();
-                    });
-                    return;
-                }
-
-                ctx.clearRect(0, 0, W, H);
-                drawBg();
-                drawBranding(1.0);
-                scenes[idx](1.0);
-                drawFooter(1.0);
-
-                C.toBlob((blob) => {
-                    if (blob) {
-                        blobs.push({ blob, index: idx + 1 });
-                    }
-                    exportScene(idx + 1);
-                }, 'image/png', 1.0);
-            }
-
-            exportScene(0);
-        });
-    }
-
-    function createZip(blobs, stats) {
-        return new Promise((resolve) => {
-            const hasZip = typeof JSZip !== 'undefined';
-            const safeName = stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_');
             
-            if (hasZip) {
-                const zip = new JSZip();
-                blobs.forEach((item) => {
-                    zip.file(`story_card_${item.index}_${safeName}.png`, item.blob);
-                });
-                
-                zip.generateAsync({ type: 'blob' }).then((zipBlob) => {
-                    const zipName = `${safeName}_kotha_wrapped_stories.zip`;
-                    const file = new File([zipBlob], zipName, { type: 'application/zip' });
-                    
-                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                        navigator.share({ files: [file], title: 'My Kotha Wrapped Story Cards' })
-                            .catch(() => {
-                                const a = document.createElement('a');
-                                a.href = URL.createObjectURL(zipBlob);
-                                a.download = zipName;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(a.href);
-                            });
-                    } else {
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(zipBlob);
-                        a.download = zipName;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(a.href);
-                    }
-                    showToast('🎁 Wrapped Story Cards Zip saved!');
-                    resolve();
-                }).catch((err) => {
-                    console.error('Zip generation failed, falling back to individual downloads', err);
-                    downloadFallback(blobs, safeName).then(resolve);
-                });
-            } else {
-                downloadFallback(blobs, safeName).then(resolve);
-            }
-        });
-    }
+            ctx.clearRect(0, 0, W, H);
+            drawBg();
+            drawBranding(1.0);
+            scenes[idx](1.0);
+            drawFooter(1.0);
 
-    function downloadFallback(blobs, safeName) {
-        return new Promise((resolve) => {
-            showToast('Starting individual downloads...');
-            let i = 0;
-            function dlNext() {
-                if (i >= blobs.length) {
-                    showToast('📸 All 5 story cards downloaded!');
-                    resolve();
+            C.toBlob((blob) => {
+                if (!blob) {
+                    showToast('Export failed — try again');
+                    resolveCard();
                     return;
                 }
-                const item = blobs[i];
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(item.blob);
-                a.download = `story_card_${item.index}_${safeName}.png`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(a.href);
-                i++;
-                setTimeout(dlNext, 300);
-            }
-            dlNext();
+                const fname = `wrapped_story_${idx + 1}_${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png`;
+                fallbackDownload(blob, fname);
+                resolveCard();
+            }, 'image/png', 1.0);
         });
     }
 
@@ -1311,6 +1232,12 @@
                                 <p class="text-sm text-gray-400 mt-4 leading-relaxed max-w-[280px]">${stats.totalMessages.toLocaleString()} messages analyzed across ${stats.firstDate || '?'} to ${stats.lastDate || '?'}</p>
                                 <p class="text-xs text-gray-600 mt-3 font-medium">${stats.avgWords} avg words per message</p>
                             </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="0">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT TO BEGIN →</div>
                         </div>
                     </div>
@@ -1344,6 +1271,12 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="1">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
                         </div>
                     </div>
@@ -1375,6 +1308,12 @@
                                         `;
                                     }).join('')}
                                 </div>
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="2">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
                         </div>
@@ -1412,6 +1351,12 @@
                                     ` : ''}
                                 ` : `<div class="text-gray-500 text-sm">No emojis found in this chat!</div>`}
                             </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="3">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
                         </div>
                     </div>
@@ -1427,6 +1372,12 @@
                                     <p class="text-xs text-gray-300 leading-relaxed font-medium">${stats.vibeDesc}</p>
                                 </div>
                                 <div class="text-6xl mt-8" style="animation:pulse 2s infinite">${stats.topEmojis[0] || '💬'}</div>
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="4">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT FOR SHARE CARD →</div>
                         </div>
@@ -1476,10 +1427,6 @@
                                     <button class="bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12.5px] rounded-xl py-2.5 px-4 flex items-center gap-2 w-full justify-center transition active:scale-95 cursor-pointer" id="wrapped-copy-btn">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                                         Copy Image to Clipboard
-                                    </button>
-                                    <button class="wrapped-stories-btn flex items-center gap-2 w-full justify-center" id="wrapped-stories-btn">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/></svg>
-                                        📸 Download Story Cards (5)
                                     </button>
                                 </div>
                             </div>
@@ -1597,25 +1544,35 @@
             handleCopy(e);
         }, { passive: false });
 
-        // Story cards export button
-        const storyBtn = overlay.querySelector('#wrapped-stories-btn');
-        function handleStories(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            storyBtn.style.opacity = '0.6';
-            storyBtn.textContent = '⏳ Generating cards...';
-            showToast('Creating 5 story cards...');
-            setTimeout(() => exportWrappedStoryCards(stats).finally(() => {
-                storyBtn.style.opacity = '1';
-                storyBtn.innerHTML = '📸 Download Story Cards (5)';
-            }), 100);
-        }
-        storyBtn.addEventListener('click', handleStories);
-        storyBtn.addEventListener('touchend', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            handleStories(e);
-        }, { passive: false });
+        // Individual story cards save buttons
+        const saveBtns = overlay.querySelectorAll('.wrapped-slide-save-btn');
+        saveBtns.forEach(btn => {
+            const idx = parseInt(btn.getAttribute('data-scene'), 10);
+            function handleSave(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                storyRef.pause(); // Pause slideshow while downloading
+                
+                const originalText = btn.innerHTML;
+                btn.style.opacity = '0.6';
+                btn.textContent = '⏳ Saving...';
+                
+                showToast(`Saving story card ${idx + 1}...`);
+                setTimeout(() => {
+                    exportSingleStoryCard(stats, idx).finally(() => {
+                        btn.style.opacity = '1';
+                        btn.innerHTML = originalText;
+                        storyRef.resume(); // Resume slideshow
+                    });
+                }, 100);
+            }
+            btn.addEventListener('click', handleSave);
+            btn.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleSave(e);
+            }, { passive: false });
+        });
     }
 
     function exportStatsCanvas(stats, action) {
