@@ -449,8 +449,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 
                 const senders = Object.entries(senderCounts).sort((a,b) => b[1] - a[1]);
-                myName = senders[0]?.[0]; 
-                otherPersonName = senders[1]?.[0] || myName || "User";
+                const chatContactName = chatName.replace('WhatsApp Chat - ', '');
+                otherPersonName = chatContactName || senders[1]?.[0] || "User";
+                myName = senders.find(s => s[0] !== otherPersonName)?.[0] || senders[0]?.[0] || "User";
 
                 headerName.innerText = otherPersonName;
                 sidebarTitle.innerText = "All Chats";
