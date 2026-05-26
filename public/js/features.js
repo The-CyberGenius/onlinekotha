@@ -1271,7 +1271,6 @@
             dlNext();
         });
     }
-    }
 
     // ── Launch Wrapped ──
     function launchWrapped() {
@@ -1618,6 +1617,221 @@
             handleStories(e);
         }, { passive: false });
     }
+
+    function exportStatsCanvas(stats, action) {
+        try {
+            const C = document.createElement('canvas');
+            const W = 1080, H = 1920;
+            C.width = W; C.height = H;
+            const ctx = C.getContext('2d');
+            if (!ctx) { showToast('Canvas not supported'); return; }
+
+            // ── Background ──
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, '#0f0720');
+            bg.addColorStop(0.35, '#1a0d3a');
+            bg.addColorStop(0.65, '#120a2e');
+            bg.addColorStop(1, '#080510');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, W, H);
+
+            // Glow orbs
+            const orbs = [
+                [180, 240, '#6366f1', 420, 0.25],
+                [900, 400, '#a855f7', 350, 0.18],
+                [540, 960, '#ec4899', 500, 0.12],
+                [200, 1500, '#f59e0b', 380, 0.15],
+                [850, 1650, '#6366f1', 300, 0.2],
+            ];
+            orbs.forEach(([x, y, hex, r, alpha]) => {
+                const hr = parseInt(hex.slice(1, 3), 16), hg = parseInt(hex.slice(3, 5), 16), hb = parseInt(hex.slice(5, 7), 16);
+                const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+                g.addColorStop(0, `rgba(${hr},${hg},${hb},${alpha})`);
+                g.addColorStop(0.6, `rgba(${hr},${hg},${hb},${alpha * 0.3})`);
+                g.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, W, H);
+            });
+
+            // Noise texture
+            for (let i = 0; i < 3000; i++) {
+                const nx = Math.random() * W, ny = Math.random() * H;
+                ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.015})`;
+                ctx.fillRect(nx, ny, 1, 1);
+            }
+
+            ctx.textBaseline = 'top';
+
+            // ── Top branding bar ──
+            ctx.textAlign = 'left';
+            ctx.font = '800 28px -apple-system, "Segoe UI", sans-serif';
+            ctx.fillStyle = '#818cf8';
+            ctx.fillText('✦ KOTHA STATS', 80, 100);
+            ctx.textAlign = 'right';
+            ctx.font = '600 24px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.fillText('onlinekotha.com', W - 80, 104);
+
+            // Thin accent line
+            const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
+            lineGrad.addColorStop(0, '#6366f1');
+            lineGrad.addColorStop(0.5, '#ec4899');
+            lineGrad.addColorStop(1, '#f59e0b');
+            ctx.fillStyle = lineGrad;
+            ctx.fillRect(80, 148, W - 160, 3);
+
+            // ── Title section ──
+            ctx.textAlign = 'left';
+            ctx.font = '900 72px -apple-system, "Segoe UI", sans-serif';
+            ctx.fillStyle = '#fff';
+            ctx.fillText('Chat Analytics', 80, 200);
+
+            let nameFont = 80;
+            ctx.font = `900 ${nameFont}px -apple-system, "Segoe UI", sans-serif`;
+            const nameVal = `with ${stats.contactName}`;
+            while (ctx.measureText(nameVal).width > W - 180 && nameFont > 40) {
+                nameFont -= 2;
+                ctx.font = `900 ${nameFont}px -apple-system, sans-serif`;
+            }
+            const nameGrad = ctx.createLinearGradient(80, 290, 600, 290);
+            nameGrad.addColorStop(0, '#a5b4fc');
+            nameGrad.addColorStop(0.5, '#c084fc');
+            nameGrad.addColorStop(1, '#f472b6');
+            ctx.fillStyle = nameGrad;
+            ctx.fillText(nameVal, 80, 290);
+
+            // ── Big Total Messages Box ──
+            const cardY = 410;
+            ctx.beginPath();
+            roundedRect(ctx, 80, cardY, W - 160, 240, 32);
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.font = '800 22px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.letterSpacing = '3px';
+            ctx.fillText('TOTAL MESSAGES EXCHANGED', 120, cardY + 40);
+
+            ctx.font = '900 110px -apple-system, sans-serif';
+            const numGrad = ctx.createLinearGradient(120, cardY + 70, 120, cardY + 200);
+            numGrad.addColorStop(0, '#ffffff');
+            numGrad.addColorStop(1, '#a5b4fc');
+            ctx.fillStyle = numGrad;
+            ctx.fillText(stats.totalMsgs.toLocaleString(), 120, cardY + 80);
+
+            // ── Grid row: Media & Links ──
+            const gridY = cardY + 280;
+            const gridItemW = (W - 200) / 2;
+
+            // Media
+            ctx.beginPath(); roundedRect(ctx, 80, gridY, gridItemW, 180, 24);
+            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.stroke();
+            ctx.font = '800 18px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('MEDIA SHARED', 110, gridY + 30);
+            ctx.font = '900 48px -apple-system, sans-serif';
+            ctx.fillStyle = '#c084fc';
+            ctx.fillText(stats.totalMedia.toLocaleString(), 110, gridY + 75);
+
+            // Links
+            ctx.beginPath(); roundedRect(ctx, 80 + gridItemW + 40, gridY, gridItemW, 180, 24);
+            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.stroke();
+            ctx.font = '800 18px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('LINKS SHARED', 80 + gridItemW + 70, gridY + 30);
+            ctx.font = '900 48px -apple-system, sans-serif';
+            ctx.fillStyle = '#34d399';
+            ctx.fillText(stats.totalLinks.toLocaleString(), 80 + gridItemW + 70, gridY + 75);
+
+            // ── First Message row ──
+            const fRowY = gridY + 220;
+            ctx.beginPath(); roundedRect(ctx, 80, fRowY, W - 160, 110, 20);
+            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.stroke();
+            ctx.font = '800 18px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('FIRST MESSAGE SENT', 110, fRowY + 25);
+            ctx.font = 'bold 32px -apple-system, sans-serif';
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText(stats.firstDate, 110, fRowY + 55);
+
+            // ── Contributors section ──
+            const contY = fRowY + 160;
+            ctx.font = '800 22px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.fillText('TOP CONTRIBUTORS', 80, contY);
+
+            let currentItemY = contY + 45;
+            stats.contributors.forEach((c, idx) => {
+                const [sName, count, pct] = c;
+                ctx.font = 'bold 28px -apple-system, sans-serif';
+                const color = idx === 0 ? '#818cf8' : idx === 1 ? '#f472b6' : '#34d399';
+                ctx.fillStyle = color;
+                ctx.fillText(sName, 80, currentItemY);
+                ctx.textAlign = 'right';
+                ctx.fillText(`${count.toLocaleString()} (${pct}%)`, W - 80, currentItemY);
+                ctx.textAlign = 'left';
+
+                // Bar
+                ctx.beginPath(); roundedRect(ctx, 80, currentItemY + 42, W - 160, 14, 7);
+                ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fill();
+                const fillW = Math.max(4, (W - 160) * pct / 100);
+                ctx.beginPath(); roundedRect(ctx, 80, currentItemY + 42, fillW, 14, 7);
+                ctx.fillStyle = color; ctx.fill();
+
+                currentItemY += 85;
+            });
+
+            // ── Footer ──
+            ctx.fillStyle = lineGrad;
+            ctx.fillRect(80, H - 200, W - 160, 2);
+
+            ctx.textAlign = 'center';
+            ctx.font = '800 32px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            ctx.fillText('Made with Kotha', W / 2, H - 170);
+
+            ctx.font = '700 28px -apple-system, sans-serif';
+            const ctaGrad = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
+            ctaGrad.addColorStop(0, '#818cf8');
+            ctaGrad.addColorStop(1, '#c084fc');
+            ctx.fillStyle = ctaGrad;
+            ctx.fillText('✦  onlinekotha.com  ✦', W / 2, H - 125);
+
+            ctx.font = '500 22px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillText('Upload your WhatsApp chat · Get your Stats', W / 2, H - 80);
+
+            // ── Export ──
+            C.toBlob((blob) => {
+                if (!blob) { showToast('Export failed — try again'); return; }
+                const fname = `${stats.contactName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_stats.png`;
+
+                if (action === 'copy') {
+                    if (navigator.clipboard && window.ClipboardItem) {
+                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+                            .then(() => showToast('✅ Copied to clipboard!'))
+                            .catch(() => fallbackDownload(blob, fname));
+                    } else {
+                        fallbackDownload(blob, fname);
+                    }
+                } else {
+                    fallbackDownload(blob, fname);
+                }
+            }, 'image/png', 1.0);
+
+        } catch (err) {
+            console.error('Stats export error:', err);
+            showToast('Export failed — ' + (err.message || 'unknown error'));
+        }
+    }
+
+    window.kothaExportStatsCard = exportStatsCanvas;
 
     // ── Init ──
     function initWrapped() {

@@ -351,37 +351,65 @@
     </script>
 
     <!-- Analytics Modal -->
-    <div id="analytics-modal" class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity duration-300 px-4">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 border border-gray-100 transform scale-95 transition-transform duration-300" id="analytics-content">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-gray-900">Chat Analytics</h3>
-                <button id="close-analytics" class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    <div id="analytics-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center hidden opacity-0 transition-opacity duration-300 px-4">
+        <div class="bg-[#0f0826] border border-white/10 w-full max-w-sm rounded-3xl shadow-2xl p-5 transform scale-95 transition-transform duration-300 text-white relative overflow-hidden" id="analytics-content">
+            <!-- Glow background shapes -->
+            <div class="absolute -top-16 -right-16 w-32 h-32 bg-indigo-500/20 rounded-full filter blur-2xl"></div>
+            <div class="absolute -bottom-16 -left-16 w-32 h-32 bg-pink-500/20 rounded-full filter blur-2xl"></div>
+            
+            <div class="flex justify-between items-center mb-4 relative z-10">
+                <h3 class="text-sm font-black text-indigo-300 tracking-widest uppercase">✦ Chat Stats</h3>
+                <button id="close-analytics" class="w-8 h-8 rounded-xl hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 mb-5">
-                <div class="bg-gradient-to-br from-indigo-50 to-indigo-100/50 p-4 rounded-xl border border-indigo-100">
-                    <p class="text-[10px] font-bold text-indigo-500 uppercase mb-1 tracking-wider">Total Msgs</p>
-                    <p class="text-2xl font-bold text-indigo-900" id="stat-total-msgs">0</p>
+            <!-- The Visual Stats Card (Shareable Style) -->
+            <div id="stat-share-card" class="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 relative overflow-hidden shadow-xl mb-4 text-left z-10">
+                <div class="absolute top-0 right-0 p-3 text-[9px] text-white/20 font-bold uppercase tracking-widest">onlinekotha.com</div>
+                
+                <h4 class="text-lg font-black text-white leading-tight mb-4 animate-pulse" id="stat-chat-title">Chat stats</h4>
+                
+                <div class="space-y-4 mb-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[9px] text-white/40 uppercase font-black tracking-wider">Total Messages</p>
+                            <p class="text-xl font-black text-white" id="stat-total-msgs">0</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-white/40 uppercase font-black tracking-wider">Media Shared</p>
+                            <p class="text-xl font-black text-white" id="stat-total-media">0</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[9px] text-white/40 uppercase font-black tracking-wider">Links Shared</p>
+                            <p class="text-xl font-black text-white" id="stat-total-links">0</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-white/40 uppercase font-black tracking-wider">First Message</p>
+                            <p class="text-xs font-bold text-amber-300 mt-1" id="stat-first-date">-</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-gradient-to-br from-purple-50 to-purple-100/50 p-4 rounded-xl border border-purple-100">
-                    <p class="text-[10px] font-bold text-purple-500 uppercase mb-1 tracking-wider">Total Media</p>
-                    <p class="text-2xl font-bold text-purple-900" id="stat-total-media">0</p>
-                </div>
-                <div class="bg-gradient-to-br from-teal-50 to-teal-100/50 p-4 rounded-xl border border-teal-100">
-                    <p class="text-[10px] font-bold text-teal-500 uppercase mb-1 tracking-wider">Links Shared</p>
-                    <p class="text-2xl font-bold text-teal-900" id="stat-total-links">0</p>
-                </div>
-                <div class="bg-gradient-to-br from-amber-50 to-amber-100/50 p-4 rounded-xl border border-amber-100">
-                    <p class="text-[10px] font-bold text-amber-500 uppercase mb-1 tracking-wider">First Message</p>
-                    <p class="text-sm font-bold text-amber-900 mt-1" id="stat-first-date">-</p>
+
+                <!-- Top Contributors inside the card -->
+                <div class="border-t border-white/5 pt-3">
+                    <p class="text-[9px] text-white/40 uppercase font-black tracking-wider mb-2">Contributors</p>
+                    <div id="stat-contributors" class="space-y-2.5"></div>
                 </div>
             </div>
 
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <p class="text-[10px] font-bold text-gray-500 uppercase mb-3 tracking-widest text-center">Top Contributors</p>
-                <div id="stat-contributors" class="flex flex-col gap-2"></div>
+            <!-- Action buttons for downloading/sharing the stats card -->
+            <div class="flex flex-col gap-2 relative z-10">
+                <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl py-2.5 px-4 flex items-center gap-2 w-full justify-center transition active:scale-95 cursor-pointer shadow-md shadow-indigo-600/10" id="stat-download-btn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Share / Download Stats Card
+                </button>
+                <button class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs rounded-xl py-2.5 px-4 flex items-center gap-2 w-full justify-center transition active:scale-95 cursor-pointer" id="stat-copy-btn">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy Card to Clipboard
+                </button>
             </div>
         </div>
     </div>

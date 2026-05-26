@@ -1624,6 +1624,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalLinks = allMessages.filter(m => m.text && m.text.includes('http')).length;
         const firstDate = allMessages.find(m => m.date)?.date || '-';
 
+        document.getElementById('stat-chat-title').innerText = `Chat with ${otherPersonName}`;
         document.getElementById('stat-total-msgs').innerText = totalMsgs.toLocaleString();
         document.getElementById('stat-total-media').innerText = totalMedia.toLocaleString();
         document.getElementById('stat-total-links').innerText = totalLinks.toLocaleString();
@@ -1635,16 +1636,83 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         let contributorsHtml = '';
-        Object.entries(senderCounts).sort((a,b) => b[1] - a[1]).slice(0, 4).forEach(([sName, count]) => {
+        const sortedContributors = Object.entries(senderCounts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+        sortedContributors.forEach(([sName, count], idx) => {
             const pct = Math.round((count / totalMsgs) * 100);
+            const colors = ['text-indigo-400 bg-indigo-500/10', 'text-pink-400 bg-pink-500/10', 'text-emerald-400 bg-emerald-500/10'];
+            const barColors = ['bg-indigo-500', 'bg-pink-500', 'bg-emerald-500'];
+            const cClass = colors[idx] || 'text-teal-400 bg-teal-500/10';
+            const bColor = barColors[idx] || 'bg-teal-500';
+            
             contributorsHtml += `
-                <div class="flex items-center justify-between text-sm mb-1.5 p-2 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-indigo-100 hover:shadow transition">
-                    <span class="font-bold flex items-center gap-2 text-gray-700" style="color: ${getStringColor(sName)}"><span class="w-2.5 h-2.5 rounded-full" style="background: ${getStringColor(sName)}"></span>${sName}</span>
-                    <span class="font-extrabold text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-md text-[11px]">${count.toLocaleString()} <span class="font-semibold opacity-60">(${pct}%)</span></span>
+                <div>
+                    <div class="flex justify-between items-center text-xs mb-1">
+                        <span class="font-bold text-white/90 truncate max-w-[180px]">${sName}</span>
+                        <span class="font-extrabold ${cClass} px-2 py-0.5 rounded text-[10px]">${count.toLocaleString()} (${pct}%)</span>
+                    </div>
+                    <div class="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+                        <div class="h-full ${bColor} rounded-full" style="width: ${pct}%"></div>
+                    </div>
                 </div>
             `;
         });
         document.getElementById('stat-contributors').innerHTML = contributorsHtml;
+
+        // Hook up download/copy handlers
+        const dlBtn = document.getElementById('stat-download-btn');
+        const cpBtn = document.getElementById('stat-copy-btn');
+        
+        const statsPayload = {
+            contactName: otherPersonName,
+            totalMsgs,
+            totalMedia,
+            totalLinks,
+            firstDate,
+            contributors: sortedContributors.map(([sName, count]) => {
+                const pct = Math.round((count / totalMsgs) * 100);
+                return [sName, count, pct];
+            })
+        };
+
+        if (dlBtn && !dlBtn.hasListener) {
+            dlBtn.hasListener = true;
+            const handleDl = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                showToast('Generating stats card...');
+                if (window.kothaExportStatsCard) {
+                    window.kothaExportStatsCard(statsPayload, 'download');
+                } else {
+                    showToast('Export module not loaded yet');
+                }
+            };
+            dlBtn.addEventListener('click', handleDl);
+            dlBtn.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleDl(e);
+            }, { passive: false });
+        }
+
+        if (cpBtn && !cpBtn.hasListener) {
+            cpBtn.hasListener = true;
+            const handleCp = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                showToast('Copying stats card...');
+                if (window.kothaExportStatsCard) {
+                    window.kothaExportStatsCard(statsPayload, 'copy');
+                } else {
+                    showToast('Export module not loaded yet');
+                }
+            };
+            cpBtn.addEventListener('click', handleCp);
+            cpBtn.addEventListener('touchend', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                handleCp(e);
+            }, { passive: false });
+        }
 
         toggleSidebar(false);
         analyticsModal.classList.remove('hidden');
