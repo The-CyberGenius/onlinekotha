@@ -154,8 +154,32 @@ router.post('/chat', aiGate, async (req, res) => {
 
     send('start', { conversationId: convId, stats, contactName, userName, time: timeStr, date: dateStr });
 
-    // Build roleplay prompt (pass stats so AI knows how much history exists)
-    const systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats);
+    // Load custom system prompt if configured in DB, else fallback to default template
+    const route = db.prepare('SELECT system_prompt FROM routes WHERE feature = ?').get('chat');
+    let systemPrompt;
+    if (route && route.system_prompt) {
+        const totalMsgs = stats && stats.totalMessages ? stats.totalMessages : 0;
+        const historyNote = totalMsgs ? ` (${totalMsgs} messages in full history)` : '';
+        
+        systemPrompt = route.system_prompt
+            .replace(/\{\{contactName\}\}/g, contactName)
+            .replace(/\{\{userName\}\}/g, userName)
+            .replace(/\{\{contextBlock\}\}/g, contextBlock)
+            .replace(/\{\{currentDate\}\}/g, dateStr)
+            .replace(/\{\{currentTime\}\}/g, timeStr)
+            .replace(/\{\{totalMessages\}\}/g, String(totalMsgs))
+            .replace(/\{\{historyNote\}\}/g, historyNote)
+            .replace(/\$\{contactName\}/g, contactName)
+            .replace(/\$\{userName\}/g, userName)
+            .replace(/\$\{contextBlock\}/g, contextBlock)
+            .replace(/\$\{currentDate\}/g, dateStr)
+            .replace(/\$\{currentTime\}/g, timeStr)
+            .replace(/\$\{totalMessages\}/g, String(totalMsgs))
+            .replace(/\$\{historyNote\}/g, historyNote);
+    } else {
+        // Build default roleplay prompt (pass stats so AI knows how much history exists)
+        systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats);
+    }
     const llmMessages = history.map(h => ({ role: h.role, content: h.content }));
 
     let fullText = '';

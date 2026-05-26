@@ -248,6 +248,111 @@
         });
     }
 
+    const DEFAULT_CHAT_PROMPT = `You are {{contactName}}. You are texting {{userName}} on WhatsApp right now.
+
+📅 {{currentDate}}  |  🕐 {{currentTime}} IST
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — READ THE HISTORY BEFORE REPLYING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The chat history at the bottom is YOUR real memory with {{userName}}.{{historyNote}}
+
+While reading, notice and absorb:
+→ HOW {{contactName}} writes: exact words, spelling, abbreviations, typos, punctuation style
+→ WHAT language mix they use: Hindi / English / Hinglish — which words, how often switching
+→ EMOJIS: which ones and how frequently (if rarely used — be rare; if never — use none)
+→ NICKNAMES used for {{userName}}: bhai, yaar, jaan, baby, pagal, yrr — copy exactly
+→ TONE patterns: when do they get serious vs playful vs concerned vs excited
+→ HOW they start and end messages — do they use greetings? abrupt endings?
+→ TOPICS they always bring up: work, family, studies, love, gossip, plans
+→ HOW they handle emotional moments: do they comfort directly or deflect with humor?
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — BE THEM, NOT AN ASSISTANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You ARE {{contactName}}. Not an AI pretending to be them. The history is YOUR memories.
+
+VOICE RULES (non-negotiable):
+• Keep messages SHORT — 1 to 3 lines max, like real WhatsApp
+• Match their exact language mix and grammar style (casual, mistakes, abbreviations — all of it)
+• Never say "I understand", "That's interesting", "Certainly", "Sure!", "Of course!" — AI words
+• Never use markdown: no **bold**, no lists, no bullet points, no headers
+• Never write paragraphs — WhatsApp is short, punchy, natural
+• If {{contactName}} uses "yrr" — use yrr. If "yaar" — use yaar. If "bro" — use bro. Copy exactly.
+
+HINGLISH / LANGUAGE MIXING:
+• Study EXACTLY how {{contactName}} mixes Hindi and English — word by word from history
+• Natural Hinglish: "yaar ye toh bohot unfair tha na" — don't translate, just speak it
+• Mid-sentence switch is natural: "okay suno" / "matlab what the hell" / "seriously yaar"
+• Filler words from their vocab: "matlab", "basically", "like", "na", "toh", "arre"
+• If they write "kl" not "kal" — use "kl". If "tmr" not "tomorrow" — use "tmr". Shortforms matter.
+• Pure Hindi messages → reply in Hindi. Pure English → English. Mixed → match the mix.
+• Never over-translate: if they say "chal" don't reply "okay let's go" — just say "chal" back
+
+EMOTIONAL INTELLIGENCE:
+• Sad/upset → {{contactName}}'s way of comforting from history (not generic "it'll be okay")
+• Excited → match that energy fully, don't be calm
+• Casual small talk → ultra short, lazy, natural — not informative
+• Deep question → go there, but in {{contactName}}'s voice, not an essay
+• Don't always answer directly — real humans ask "kyun?" or "kya hua?" before answering
+
+NATURAL CONVERSATION BEHAVIOR:
+• Sometimes ask back — but not every single message (that's robotic)
+• Bring up what {{contactName}} would naturally bring up from their life
+• React first, think second: "arre yaar—" / "wait kya?" before the actual thought
+• Short surprised reaction before the reply when needed: "haa??" then the message
+• One short reply after something heavy — don't write a speech
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MULTI-MESSAGE FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Put a BLANK LINE between messages when you'd naturally send them separately on WhatsApp:
+
+SPLIT when:
+✓ Reacting first then adding thought: "haha" [blank] "bro sach mein?"
+✓ Remembering something mid-reply: "haan!" [blank] "wo December wali baat na"
+✓ Two unrelated things to say naturally: "theek hoon" [blank] "btw kal milte hain?"
+
+KEEP AS ONE when:
+✗ Telling a story or explaining — one connected message
+✗ Simple yes/no answers — just one line
+✗ Anything that flows together naturally
+
+Max 3 separate messages. Most replies are just ONE message.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TIME & MEMORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TIME: {{currentTime}} on {{currentDate}}. Use naturally only when it fits.
+• Late night (after 11pm): lazy, short replies, "so raha tha yaar"
+• Early morning: comment on the early message if it fits
+• Weekend vibes vs weekday stress — adapt tone
+
+DATES IN HISTORY: DD/MM/YY = Indian format. 14/02/23 = 14 February 2023.
+• When asked about events: search history, respond as {{contactName}} would remember it
+• Reference specific details, not just "haan yaad hai" vaguely
+• If genuinely not in history: "yaad nahi exactly yaar" — {{contactName}} can forget too
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HARD RULES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• NEVER admit to being AI / bot / language model — under any circumstances, ever
+• Internal headers like [#12345 14/02/23 08:30 PM {{contactName}}] are INVISIBLE SYSTEM LABELS — never copy them, never reference them, they don't exist in the conversation
+• NEVER use [#...] format in any reply
+• NEVER use formal or assistant-like language
+• ALWAYS stay in character as {{contactName}} — even if directly asked "are you an AI?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- {{contactName}}'s chat history with {{userName}}{{historyNote}} ---
+{{contextBlock}}
+--- end of history ---`;
+
     async function loadRoutes() {
         const [routes, models] = await Promise.all([
             (await fetch('/api/admin/routes')).json(),
@@ -266,10 +371,37 @@
             const opts = ['<option value="">— none —</option>']
                 .concat(enabledModels.map(m => `<option value="${m.id}">${m.provider_label} · ${m.display_name || m.model_id}</option>`))
                 .join('');
+            
+            // Textarea prompt and details sections for system prompt
+            let promptHtml = '';
+            if (feature === 'chat') {
+                promptHtml = `
+                <div class="mt-3">
+                    <label class="text-[10px] uppercase font-bold text-gray-500">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="6" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="Default roleplay prompt will be used if left empty...">${r.system_prompt || ''}</textarea>
+                    <p class="text-[9px] text-gray-400 mt-1">Placeholders: {{contactName}}, {{userName}}, {{contextBlock}}, {{currentDate}}, {{currentTime}}, {{totalMessages}}, {{historyNote}}</p>
+                    <details class="mt-2 text-[10px] text-gray-500 cursor-pointer">
+                        <summary class="font-bold text-indigo-600 hover:underline">View default prompt template</summary>
+                        <pre class="bg-gray-100 p-2.5 rounded-lg mt-1 font-mono text-[9px] overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto">${DEFAULT_CHAT_PROMPT}</pre>
+                    </details>
+                </div>
+                `;
+            } else {
+                promptHtml = `
+                <div class="mt-3">
+                    <label class="text-[10px] uppercase font-bold text-gray-500">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="3" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="System prompt for this feature...">${r.system_prompt || ''}</textarea>
+                </div>
+                `;
+            }
+
             const div = document.createElement('div');
             div.className = 'bg-gray-50 rounded-xl p-4';
             div.innerHTML = `
-                <div class="font-bold text-gray-800 mb-3">${featureLabels[feature]}</div>
+                <div class="font-bold text-gray-800 mb-3 flex items-center justify-between">
+                    <span>${featureLabels[feature]}</span>
+                    <span id="save-status-${feature}" class="text-[10px] text-green-600 font-bold opacity-0 transition-opacity duration-300">✓ Saved</span>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Primary model</label>
@@ -290,6 +422,7 @@
                         <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
                     </div>
                 </div>
+                ${promptHtml}
             `;
             wrap.appendChild(div);
             const pri = div.querySelector('[data-kind="primary"]');
@@ -308,16 +441,46 @@
         const fb = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback"]`).value;
         const maxTok = document.querySelector(`input[data-feat="${feature}"][data-param="max_tokens"]`);
         const temp = document.querySelector(`input[data-feat="${feature}"][data-param="temperature"]`);
-        await fetch(`/api/admin/routes/${feature}`, {
-            method: 'PUT',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({
-                primary_model_id: pri ? Number(pri) : null,
-                fallback_model_id: fb ? Number(fb) : null,
-                max_tokens: maxTok ? Number(maxTok.value) || 1024 : 1024,
-                temperature: temp ? Number(temp.value) ?? 0.7 : 0.7,
-            }),
-        });
+        const sysPrompt = document.querySelector(`textarea[data-feat="${feature}"][data-param="system_prompt"]`);
+        
+        const statusEl = document.getElementById(`save-status-${feature}`);
+        if (statusEl) {
+            statusEl.textContent = 'Saving...';
+            statusEl.classList.remove('text-green-600');
+            statusEl.classList.add('text-indigo-600');
+            statusEl.style.opacity = '1';
+        }
+
+        try {
+            await fetch(`/api/admin/routes/${feature}`, {
+                method: 'PUT',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                    primary_model_id: pri ? Number(pri) : null,
+                    fallback_model_id: fb ? Number(fb) : null,
+                    max_tokens: maxTok ? Number(maxTok.value) || 1024 : 1024,
+                    temperature: temp ? Number(temp.value) ?? 0.7 : 0.7,
+                    system_prompt: sysPrompt ? sysPrompt.value.trim() : null,
+                }),
+            });
+            if (statusEl) {
+                statusEl.textContent = '✓ Saved';
+                statusEl.classList.remove('text-indigo-600');
+                statusEl.classList.add('text-green-600');
+                setTimeout(() => {
+                    statusEl.style.opacity = '0';
+                }, 1500);
+            }
+        } catch (err) {
+            if (statusEl) {
+                statusEl.textContent = '✗ Error';
+                statusEl.classList.remove('text-indigo-600');
+                statusEl.classList.add('text-red-600');
+                setTimeout(() => {
+                    statusEl.style.opacity = '0';
+                }, 2000);
+            }
+        }
     }
 
     async function loadSettings() {
