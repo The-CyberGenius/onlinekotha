@@ -23,8 +23,11 @@ function aiGate(req, res, next) {
          WHERE c.user_id = ? AND cm.role = 'user' AND cm.created_at >= ?`
     ).get(req.user.id, startOfDay.getTime()).n;
 
+    // Paid plan = truly unlimited, no cap check at all
+    if (plan === 'paid') return next();
+
     if (plan === 'free') {
-        // Free tier: limited daily messages
+        // Free tier: small daily cap
         const freeMax = Number(getSetting('free_user_daily_messages', '3'));
         if (freeMax > 0 && usedToday >= freeMax) {
             return res.status(429).json({
@@ -34,10 +37,10 @@ function aiGate(req, res, next) {
             });
         }
     } else {
-        // Trial / Paid users get higher daily cap
-        const dailyMax = Number(getSetting('paid_user_daily_messages', '500'));
-        if (dailyMax > 0 && usedToday >= dailyMax) {
-            return res.status(429).json({ error: `Daily limit (${dailyMax}) reached. Resets at midnight.` });
+        // Trial users: higher cap but still limited
+        const trialMax = Number(getSetting('paid_user_daily_messages', '500'));
+        if (trialMax > 0 && usedToday >= trialMax) {
+            return res.status(429).json({ error: `Daily limit (${trialMax}) reached. Resets at midnight.` });
         }
     }
     next();
