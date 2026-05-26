@@ -133,52 +133,226 @@
     //  CHAT WRAPPED — Spotify-style story with smart name extraction
     // ═══════════════════════════════════════════════════════════════════
 
-    // ── Smart contact name extraction ──
-    // Handles: "WhatsApp Chat - Sunil Mamu", "WhatsApp_Chat_with_Sunil_Mamu_2024",
-    //          folder names with underscores, trailing dates, numbers, junk
-    function cleanContactName(rawFolderName, senderNames) {
-        if (!rawFolderName) return senderNames?.[0] || 'Friend';
+    // ═══════════════════════════════════════════════════════════════
+    //  SMART NAME DETECTION — multi-layer intelligence
+    // ═══════════════════════════════════════════════════════════════
+    //
+    // Priority:
+    //   1. Clean folder name (if it's a real name, not phone/junk)
+    //   2. Other person's WhatsApp sender name (from messages)
+    //   3. Nickname detection — scan USER's messages for what they
+    //      call the other person most ("Mamu", "Bhai", "Baby" etc.)
+    //   4. Fallback: "Friend"
 
-        let name = rawFolderName;
+    // Check if a string looks like a phone number or gibberish, not a real name
+    function isGarbageName(s) {
+        if (!s || s.length < 2) return true;
+        const cleaned = s.replace(/[\s\-_+().]/g, '');
+        // Mostly digits → phone number
+        const digitRatio = (cleaned.replace(/\D/g, '').length) / cleaned.length;
+        if (digitRatio > 0.5) return true;
+        // Too short after cleaning
+        if (cleaned.length < 2) return true;
+        // Just "User", "Contact", "Unknown" etc.
+        if (/^(user|contact|unknown|friend|you|me|myself)$/i.test(cleaned)) return true;
+        return false;
+    }
 
-        // Strip common WhatsApp export prefixes (case-insensitive)
+    // Clean a raw folder/chat name into something presentable
+    function cleanRawName(raw) {
+        if (!raw) return '';
+        let name = raw;
+        // Strip WhatsApp export prefixes
         name = name.replace(/^whatsapp[\s_-]*chat[\s_-]*(with[\s_-]*)?[-–—]?\s*/i, '');
-
-        // Replace underscores with spaces
+        // Replace underscores
         name = name.replace(/_/g, ' ');
-
-        // Remove trailing timestamps/dates: (2024), _2024, -20240115, etc.
+        // Remove trailing dates/timestamps/numbers
         name = name.replace(/[\s_-]*\(?\d{4,}\)?[\s_-]*$/g, '');
         name = name.replace(/[\s_-]*\d{1,2}[\s_/-]\d{1,2}[\s_/-]\d{2,4}\s*$/g, '');
-
-        // Remove trailing junk: random numbers, hashes, file extensions
         name = name.replace(/[\s_-]+\d+\s*$/g, '');
+        // Remove file extensions
         name = name.replace(/\.(txt|zip|csv|json)\s*$/i, '');
-
-        // Remove ".txt" that sometimes remains
-        name = name.replace(/\.txt$/i, '');
-
-        // Collapse multiple spaces
+        // Collapse spaces
         name = name.replace(/\s{2,}/g, ' ').trim();
+        return name;
+    }
 
-        // If after cleaning we got nothing or too short, try sender names
-        if (name.length < 2 && senderNames && senderNames.length > 0) {
-            // Pick the non-"You" sender
-            name = senderNames.find(n => n && n.toLowerCase() !== 'you') || senderNames[0] || 'Friend';
-        }
-
-        // Title case each word (but keep ALL CAPS words if they're short like "DJ")
-        name = name.replace(/\b\w+/g, w => {
-            if (w.length <= 3 && w === w.toUpperCase()) return w; // keep "DJ", "AB"
-            return w.charAt(0).toUpperCase() + w.slice(1);
+    // Title-case a name nicely
+    function titleCase(s) {
+        if (!s) return '';
+        return s.replace(/\b\w+/g, w => {
+            if (w.length <= 3 && w === w.toUpperCase()) return w; // keep "DJ","AB"
+            return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
         });
+    }
 
-        // Truncate if still too long (e.g. group chat names)
-        if (name.length > 24) {
-            name = name.slice(0, 22).trim() + '…';
+    // ── Nickname detection from actual message content ──
+    // Scans the user's own messages for how they address the other person.
+    // Returns the most used nickname/address term, or null if nothing found.
+    function detectNicknameFromMessages(messages, myName) {
+        if (!messages || !myName) return null;
+
+        // Only scan user's own messages (what THEY write TO the other person)
+        const myMsgs = messages.filter(m => m.sender === myName && m.text && m.text.length > 1);
+        if (myMsgs.length < 5) return null; // Need enough data
+
+        // Common addressing words that could be nicknames (Hindi + English)
+        // These are words people use to CALL someone — not just random words
+        const addressPatterns = new Set([
+            // Hindi family/relationship
+            'mamu', 'mama', 'maamu', 'chachu', 'chacha', 'tau', 'tauji',
+            'papa', 'mumma', 'mummy', 'mom', 'dad', 'daddy', 'maa',
+            'didi', 'di', 'bhaiya', 'bhabhi', 'nanu', 'nani', 'dada', 'dadi',
+            'anna', 'akka', 'amma',
+            // Hindi casual
+            'bhai', 'bro', 'yaar', 'yar', 'yrr', 'dude', 'bhai',
+            'pagal', 'pagle', 'pagali', 'buddhu', 'chutki',
+            // Romantic / close
+            'baby', 'babe', 'babu', 'jaanu', 'jaan', 'jannu', 'janu',
+            'shona', 'sonu', 'meri', 'mera', 'love', 'darling', 'dear',
+            'sweetheart', 'honey', 'hubby', 'wifey', 'cutie', 'cutey',
+            'gudiya', 'golu', 'chintu', 'pintu', 'chiku', 'chhotu',
+            'raju', 'munna', 'munni', 'ladoo', 'laddu',
+            // Respectful
+            'sir', 'maam', 'madam', 'boss', 'bro', 'bruh',
+        ]);
+
+        // Words to IGNORE — too common, not names
+        const stopWords = new Set([
+            'hi', 'hello', 'hey', 'hii', 'hiii', 'yo', 'oi',
+            'ok', 'okay', 'okk', 'okkk', 'hmm', 'hmmm', 'hmmmm',
+            'ha', 'haa', 'haan', 'nhi', 'nahi', 'na', 'ni',
+            'kya', 'kyu', 'kyun', 'kab', 'kaha', 'kaise', 'kaisa',
+            'ye', 'yeh', 'wo', 'woh', 'tu', 'tum', 'aap', 'me', 'mai', 'mein',
+            'acha', 'accha', 'achha', 'theek', 'thik', 'sahi',
+            'are', 'arre', 'arey', 'arre',
+            'chal', 'chalo', 'chlo', 'sun', 'suno', 'sunno', 'sunn',
+            'ab', 'abhi', 'aaj', 'kal', 'kl',
+            'the', 'a', 'an', 'is', 'was', 'i', 'my', 'your', 'we',
+            'what', 'why', 'how', 'when', 'where', 'who',
+            'lol', 'lmao', 'haha', 'hehe', 'omg', 'wtf', 'bruh',
+            'good', 'morning', 'night', 'gm', 'gn',
+            'yes', 'no', 'ya', 'yeah', 'nope',
+            'so', 'but', 'and', 'or', 'if', 'then', 'to', 'se', 'ka', 'ki', 'ke',
+            'bht', 'bohot', 'bahut', 'bhot',
+            'image', 'omitted', 'video', 'audio', 'sticker', 'gif', 'document',
+            'deleted', 'message', 'this',
+        ]);
+
+        // Count how often each word appears as the FIRST word of a message
+        // (that's where people usually address someone: "Mamu sun", "Baby good morning")
+        const firstWordCounts = {};
+        // Also count words that appear RIGHT AT the start, followed by common separators
+        const addressCounts = {};
+
+        for (const msg of myMsgs) {
+            const text = msg.text.trim();
+            if (text.length < 2) continue;
+
+            // Get first word (or first 2 words for compound names like "Sunil Mamu")
+            const words = text.split(/[\s,!?.]+/).filter(w => w.length > 0);
+            if (words.length === 0) continue;
+
+            const w1 = words[0].toLowerCase().replace(/[^a-zऀ-ॿ]/gi, '');
+            if (!w1 || w1.length < 2 || stopWords.has(w1)) continue;
+
+            // Skip if first word is a number
+            if (/^\d+$/.test(w1)) continue;
+
+            // Count first-word occurrences
+            firstWordCounts[w1] = (firstWordCounts[w1] || 0) + 1;
+
+            // If first word is a known address pattern, boost it
+            if (addressPatterns.has(w1)) {
+                addressCounts[w1] = (addressCounts[w1] || 0) + 2; // double weight
+            }
+
+            // Check 2-word combo: "Sunil Mamu", "Baby girl" etc.
+            if (words.length >= 2) {
+                const w2 = words[1].toLowerCase().replace(/[^a-zऀ-ॿ]/gi, '');
+                if (w2 && w2.length >= 2 && !stopWords.has(w2)) {
+                    const combo = `${w1} ${w2}`;
+                    firstWordCounts[combo] = (firstWordCounts[combo] || 0) + 1;
+                    if (addressPatterns.has(w1) || addressPatterns.has(w2)) {
+                        addressCounts[combo] = (addressCounts[combo] || 0) + 2;
+                    }
+                }
+            }
         }
 
-        return name || 'Friend';
+        // Merge scores: address patterns get boosted
+        const scores = {};
+        for (const [word, count] of Object.entries(firstWordCounts)) {
+            // Need at least 3 occurrences to be a real pattern
+            if (count < 3) continue;
+            scores[word] = count + (addressCounts[word] || 0);
+        }
+
+        // Find the word with highest score
+        const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+        if (sorted.length === 0) return null;
+
+        const [bestWord, bestScore] = sorted[0];
+
+        // Must appear in at least 2% of user's messages to be meaningful
+        const minThreshold = Math.max(3, myMsgs.length * 0.02);
+        if (bestScore < minThreshold) return null;
+
+        // Title-case the detected nickname
+        return titleCase(bestWord);
+    }
+
+    // ── Master name resolver ──
+    // Combines all strategies to find the best display name
+    function resolveBestName(rawFolder, rawOtherName, senderNames, messages, myName) {
+        // Strategy 1: Clean folder name
+        const cleanedFolder = cleanRawName(rawFolder);
+
+        // Strategy 2: Other person's sender name from messages
+        const otherSender = senderNames?.find(n => n !== myName) || '';
+
+        // Strategy 3: Detect nickname from message content
+        const nickname = detectNicknameFromMessages(messages, myName);
+
+        // Decision logic:
+        let finalName = '';
+
+        // If folder name is a real name (not phone/junk) → use it
+        if (cleanedFolder && !isGarbageName(cleanedFolder)) {
+            finalName = cleanedFolder;
+        }
+        // Else if sender name is real → use it
+        else if (otherSender && !isGarbageName(otherSender)) {
+            finalName = otherSender;
+        }
+        // Else if we detected a nickname → use it (this is the magic)
+        else if (nickname) {
+            finalName = nickname;
+        }
+        // Else use whatever sender name we have
+        else if (otherSender) {
+            finalName = otherSender;
+        }
+        // Last resort
+        else {
+            finalName = senderNames?.[0] || 'Friend';
+        }
+
+        // BUT — if nickname was detected AND folder/sender name exists,
+        // check if nickname is MORE personal (people prefer nicknames on Wrapped)
+        // If nickname frequency is high enough, prefer it over formal name
+        if (nickname && finalName !== nickname) {
+            // If nickname is a known relationship term, prefer it as subtitle
+            // We'll return both: name + nickname
+        }
+
+        // Title case + truncate
+        finalName = titleCase(finalName);
+        if (finalName.length > 24) {
+            finalName = finalName.slice(0, 22).trim() + '…';
+        }
+
+        return { name: finalName || 'Friend', nickname: nickname || null };
     }
 
     // ── Story controller ──
@@ -315,11 +489,14 @@
 
         // All sender names for name fallback
         const allSenderNames = sorted.map(s => s[0]);
+        const myName = window.kothaGetMyName ? window.kothaGetMyName() : s1[0];
 
-        // Clean name from folder + senders
+        // Smart name resolution: folder → sender → nickname from messages
         const rawFolder = window.kothaGetCurrentChat ? window.kothaGetCurrentChat() : '';
         const rawOther = window.kothaGetOtherPersonName ? window.kothaGetOtherPersonName() : '';
-        const otherName = cleanContactName(rawOther || rawFolder, allSenderNames);
+        const { name: otherName, nickname: detectedNickname } = resolveBestName(
+            rawOther || rawFolder, rawOther, allSenderNames, messages, myName
+        );
 
         // Peak time
         const tc = { morning: 0, afternoon: 0, evening: 0, night: 0 };
@@ -391,7 +568,7 @@
             peakLabel: peakLabels[peak], peakPeriod: peak,
             timeCounts: tc,
             topEmojis, vibe, vibeDesc,
-            avgWords, firstDate, lastDate,
+            avgWords, firstDate, lastDate, detectedNickname,
         };
     }
 
@@ -601,6 +778,7 @@
                             <div class="wrapped-main-body">
                                 <div class="text-5xl mb-5" style="animation:pulse 2s infinite">✨</div>
                                 <h2 class="wrapped-title" style="overflow-wrap:break-word;word-break:break-word;">Your Chat Story<br>with <span class="text-indigo-400 font-black">${escH(stats.otherName)}</span></h2>
+                                ${stats.detectedNickname && stats.detectedNickname.toLowerCase() !== stats.otherName.toLowerCase() ? `<p class="text-xs text-purple-400/80 mt-1 font-bold tracking-wide">aka "${escH(stats.detectedNickname)}"</p>` : ''}
                                 <p class="text-sm text-gray-400 mt-4 leading-relaxed max-w-[280px]">${stats.totalMessages.toLocaleString()} messages analyzed across ${stats.firstDate || '?'} to ${stats.lastDate || '?'}</p>
                                 <p class="text-xs text-gray-600 mt-3 font-medium">${stats.avgWords} avg words per message</p>
                             </div>
