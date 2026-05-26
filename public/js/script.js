@@ -1579,4 +1579,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 100);
         }
     };
+
+    // Expose chat data getters globally for features (like Chat Wrapped)
+    window.kothaGetAllMessages = () => allMessages;
+    window.kothaGetMyName = () => myName;
+    window.kothaGetOtherPersonName = () => otherPersonName;
+    window.kothaGetCurrentChat = () => currentChat;
 });
