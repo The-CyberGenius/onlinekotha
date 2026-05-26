@@ -1083,8 +1083,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         globalEventSource.addEventListener('history', (e) => {
-            chatContainer.innerHTML = '';
-            scrollArea.scrollTop = scrollArea.scrollHeight;
+            try {
+                const msgs = JSON.parse(e.data);
+                chatContainer.innerHTML = '';
+                let lastDate = '';
+                msgs.forEach(msg => {
+                    if (msg.date !== lastDate) {
+                        chatContainer.insertAdjacentHTML('beforeend', `
+                            <div class="flex justify-center mb-6 w-full date-separator">
+                                <span class="bg-gray-200/50 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 dark:border-white/10 uppercase">${formatChatDate(msg.date)}</span>
+                            </div>
+                        `);
+                        lastDate = msg.date;
+                    }
+                    const bubble = renderGlobalMessage(msg);
+                    chatContainer.insertAdjacentHTML('beforeend', bubble);
+                });
+                scrollArea.scrollTop = scrollArea.scrollHeight;
+            } catch (err) {
+                console.error('Failed to parse global chat history:', err);
+            }
         });
 
         globalEventSource.addEventListener('message', (e) => {

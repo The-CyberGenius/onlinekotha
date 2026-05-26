@@ -38,6 +38,30 @@ const activeMessages = [];
 const userReactions = new Map(); // messageId -> Map of userId -> emoji
 const typingUsers = new Map(); // userId -> { name, timeout }
 
+// Populate activeMessages cache from the database on startup
+try {
+    const recent = db.prepare(`
+        SELECT m.id, m.user_id, m.sender, m.text, m.created_at
+        FROM global_messages m
+        ORDER BY m.id DESC LIMIT 50
+    `).all();
+    recent.reverse();
+    recent.forEach(m => {
+        const d = new Date(m.created_at);
+        activeMessages.push({
+            id: m.id,
+            userId: m.user_id,
+            sender: m.sender,
+            text: m.text,
+            time: d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
+            date: d.toLocaleDateString('en-IN'),
+            reactions: {}
+        });
+    });
+} catch (err) {
+    console.error('Error seeding activeMessages from database:', err.message);
+}
+
 function broadcast(event, data) {
     const raw = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
     for (const [key, client] of clients.entries()) {
@@ -80,9 +104,8 @@ router.get('/stream', requireUser, (req, res) => {
     // Send connection initialization event with their anonymous name
     res.write(`event: init\ndata: ${JSON.stringify({ name: myAnonName })}\n\n`);
 
-    // We do NOT send DB message history to keep the room completely session-isolated.
-    // However, we send an empty history event so the client knows history loading is complete.
-    res.write(`event: history\ndata: ${JSON.stringify([])}\n\n`);
+    // Send message history from activeMessages cache
+    res.write(`event: history\ndata: ${JSON.stringify(activeMessages)}\n\n`);
 
     // Broadcast system join notification
     broadcast('system', { text: `${myAnonName} joined the room` });
