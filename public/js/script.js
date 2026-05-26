@@ -155,11 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (msg.text) {
             const onlyEmojis = /^[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\s]+$/gu;
             const isBigEmoji = msg.text.trim().length > 0 && msg.text.trim().length <= 6 && onlyEmojis.test(msg.text);
-            contentHtml = `<p style="color:var(--msg-text)" class="${isBigEmoji ? 'text-4xl' : 'text-[15px]'} leading-snug font-medium whitespace-pre-wrap break-words">${msg.text}</p>`;
+            contentHtml = `<p style="color:var(--msg-text)" class="${isBigEmoji ? 'text-4xl' : 'text-[14px]'} leading-normal font-medium whitespace-pre-wrap break-words">${msg.text}</p>`;
         }
         if (msg.type === 'system') {
             return `
-            <div class="flex justify-center mb-6" id="msg-${msg.id}">
+            <div class="flex justify-center mb-4" id="msg-${msg.id}">
                 <div class="glass-panel text-gray-600 text-[11px] px-4 py-2 font-medium rounded-full shadow-sm truncate max-w-xs md:max-w-md">
                     ${msg.text || msg.attachment}
                 </div>
@@ -169,8 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
 
         return `
-            <div class="flex flex-col mb-4 w-full" id="msg-${msg.id}">
-                <div class="max-w-[85%] md:max-w-md lg:max-w-lg relative p-3 md:p-3.5 ${msgClass} flex flex-col gap-0.5">
+            <div class="flex flex-col mb-1.5 w-full" id="msg-${msg.id}">
+                <div class="max-w-[85%] md:max-w-md lg:max-w-lg relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
                     ${nameHtml}
                     ${mediaHtml}
                     ${contentHtml}

@@ -31,6 +31,7 @@
     let _dA = 0, _dOn = false;
     let _dcW = 0, _dcH = 0;
     let _dDPR = 1;
+    let _focused = true;
 
     function _dotInit() {
         if (_dc) return;
@@ -45,6 +46,29 @@
         const dmBtn = document.getElementById('dark-mode-btn');
         if (dmBtn) dmBtn.addEventListener('click', () => {
             requestAnimationFrame(() => { if (!_dId) _dotDrawOnce(); });
+        });
+
+        // Smart visibility change and blur/focus management (Zero idle CPU)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                if (_dId) { cancelAnimationFrame(_dId); _dId = null; }
+            } else {
+                if (_focused && (_dOn || _dA > 0.01)) {
+                    if (!_dId) _dId = requestAnimationFrame(_dotLoop);
+                }
+            }
+        });
+
+        window.addEventListener('blur', () => {
+            _focused = false;
+            if (_dId) { cancelAnimationFrame(_dId); _dId = null; }
+        });
+
+        window.addEventListener('focus', () => {
+            _focused = true;
+            if (document.visibilityState !== 'hidden' && (_dOn || _dA > 0.01)) {
+                if (!_dId) _dId = requestAnimationFrame(_dotLoop);
+            }
         });
     }
 
@@ -63,7 +87,7 @@
         _dc.style.marginBottom = '-' + _dcH + 'px';
         _dx.setTransform(_dDPR, 0, 0, _dDPR, 0, 0);
 
-        const numParticles = isMobile ? 50 : 90;
+        const numParticles = isMobile ? 35 : 65;
         _dd = [];
         for (let i = 0; i < numParticles; i++) {
             _dd.push({
@@ -80,7 +104,7 @@
             });
         }
         _dotDrawOnce();
-        if (!_dId && (_dOn || _dA > 0.01)) _dId = requestAnimationFrame(_dotLoop);
+        if (!_dId && _focused && (_dOn || _dA > 0.01)) _dId = requestAnimationFrame(_dotLoop);
     }
 
     function _dotDrawOnce() {
@@ -90,7 +114,9 @@
     function _dotStart() {
         if (!_dc) _dotInit();
         _dOn = true;
-        if (!_dId) _dId = requestAnimationFrame(_dotLoop);
+        if (!_dId && _focused && document.visibilityState !== 'hidden') {
+            _dId = requestAnimationFrame(_dotLoop);
+        }
     }
     function _dotStop() { _dOn = false; }
 
@@ -104,7 +130,7 @@
         _dA += ((_dOn ? 1 : 0) - _dA) * 0.045;
         _dotDraw(_dA, t);
 
-        if (_dOn || _dA > 0.01 || hasBlast) {
+        if (_focused && document.visibilityState !== 'hidden' && (_dOn || _dA > 0.01 || hasBlast)) {
             _dId = requestAnimationFrame(_dotLoop);
         }
     }
@@ -126,6 +152,18 @@
             if (d.by) {
                 d.by *= 0.92;
                 if (Math.abs(d.by) < 0.05) d.by = 0;
+            }
+
+            // Apply minor organic Brownian drift to velocities
+            d.vx += (Math.random() - 0.5) * 0.018;
+            d.vy += (Math.random() - 0.5) * 0.018;
+
+            // Clamp velocity to keep drift smooth and readable
+            const maxDrift = 0.55;
+            const speed = Math.hypot(d.vx, d.vy);
+            if (speed > maxDrift) {
+                d.vx = (d.vx / speed) * maxDrift;
+                d.vy = (d.vy / speed) * maxDrift;
             }
 
             d.x += d.vx * speedMult + (d.bx || 0);
@@ -373,9 +411,9 @@
 
         const typingEl = document.createElement('div');
         typingEl.id        = 'ai-typing-inline';
-        typingEl.className = 'flex justify-start mb-3 animate-message';
+        typingEl.className = 'flex justify-start mb-1.5 animate-message';
         typingEl.innerHTML = `
-            <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
+            <div class="glass-chat-them rounded-2xl rounded-bl-md px-3.5 py-2 max-w-[75%]">
                 <div class="flex items-center gap-2 mb-1">
                     <p class="text-[11px] font-bold tracking-wide" style="color: #6366f1">${escapeHTML(cName)}</p>
                     <span class="text-[10px] text-emerald-500 font-semibold">typing...</span>
@@ -526,9 +564,9 @@
 
             setTimeout(() => {
                 const miniTyping = document.createElement('div');
-                miniTyping.className = 'flex justify-start mb-1 animate-message';
+                miniTyping.className = 'flex justify-start mb-1.5 animate-message';
                 miniTyping.innerHTML = `
-                    <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-2 max-w-[75%]">
+                    <div class="glass-chat-them rounded-2xl rounded-bl-md px-3.5 py-1.5 max-w-[75%]">
                         <div class="ai-typing"><span></span><span></span><span></span></div>
                     </div>`;
                 chatContainer.appendChild(miniTyping);
@@ -610,11 +648,11 @@
     function appendUserBubble(text, timestamp) {
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-end mb-3 animate-message';
+        wrap.className = 'flex justify-end mb-1.5 animate-message';
         wrap.innerHTML = `
-            <div class="glass-chat-me rounded-2xl rounded-br-md px-4 py-3 max-w-[75%]">
-                <p style="color:var(--msg-text)" class="text-sm leading-relaxed">${escapeHTML(text)}</p>
-                <p style="color:var(--msg-time-me)" class="text-[10px] text-right mt-1">${time}</p>
+            <div class="glass-chat-me rounded-2xl rounded-br-md px-3.5 py-2 max-w-[75%]">
+                <p style="color:var(--msg-text)" class="text-[14px] leading-normal">${escapeHTML(text)}</p>
+                <p style="color:var(--msg-time-me)" class="text-[9px] text-right mt-0.5">${time}</p>
             </div>`;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
@@ -623,12 +661,12 @@
     function appendContactBubble(name, timestamp) {
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-start mb-3 animate-message-ai';
+        wrap.className = 'flex justify-start mb-1.5 animate-message-ai';
         wrap.innerHTML = `
-            <div class="glass-chat-them rounded-2xl rounded-bl-md px-4 py-3 max-w-[75%]">
-                <p class="text-[11px] font-bold mb-1 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
-                <p style="color:var(--msg-text)" class="ai-response-text text-sm leading-relaxed"></p>
-                <p style="color:var(--msg-time-them)" class="ai-bubble-time text-[10px] text-right mt-1">${time}</p>
+            <div class="glass-chat-them rounded-2xl rounded-bl-md px-3.5 py-2 max-w-[75%]">
+                <p class="text-[10px] font-bold mb-0.5 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
+                <p style="color:var(--msg-text)" class="ai-response-text text-[14px] leading-normal"></p>
+                <p style="color:var(--msg-time-them)" class="ai-bubble-time text-[9px] text-right mt-0.5">${time}</p>
             </div>`;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
@@ -637,9 +675,9 @@
 
     function appendErrorBubble(msg) {
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-center mb-3 animate-message';
+        wrap.className = 'flex justify-center mb-1.5 animate-message';
         wrap.innerHTML = `
-            <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-2 text-sm font-medium max-w-[85%] text-center" style="color:var(--msg-text)">
+            <div class="bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 rounded-xl px-4 py-2 text-sm font-semibold text-red-800 dark:text-red-300 max-w-[85%] text-center">
                 ${escapeHTML(msg)}
             </div>`;
         chatContainer.appendChild(wrap);

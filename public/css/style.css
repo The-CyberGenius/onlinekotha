@@ -600,6 +600,11 @@ html.dark #open-upload-btn { background: #00a884 !important; }
 html.dark #filter-buttons-container { border-color: #2a3942 !important; }
 html.dark #filter-buttons-container .action-pill { color: #8696a0 !important; }
 html.dark #filter-buttons-container .action-pill:hover { color: #e9edef !important; background: #2a3942 !important; }
+html.dark #filter-buttons-container .bg-indigo-50 {
+    background: rgba(99, 102, 241, 0.22) !important;
+    color: #818cf8 !important;
+    border-color: rgba(99, 102, 241, 0.35) !important;
+}
 html.dark #filter-buttons-container > .bg-purple-50 {
     background: rgba(168,85,247,0.12) !important;
     border-color: rgba(168,85,247,0.25) !important;
