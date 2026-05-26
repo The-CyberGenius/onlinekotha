@@ -109,6 +109,7 @@ function logout(token) {
 
 function effectivePlan(user) {
     if (!user) return 'anonymous';
+    if (user.is_admin) return 'paid';
     if (user.plan === 'paid') return 'paid';
     if (user.plan === 'trial' && user.trial_expires_at && user.trial_expires_at > Date.now()) {
         return 'trial';

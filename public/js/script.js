@@ -876,6 +876,193 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomAiInput = document.getElementById('bottom-ai-input');
     const clearGlobalChatBtn = document.getElementById('clear-global-chat-btn');
 
+    // Reply and Reaction State variables
+    window.replyingTo = null;
+    let activePicker = null;
+
+    const replyPreview = document.getElementById('reply-preview-container');
+    const replySender = document.getElementById('reply-preview-sender');
+    const replyText = document.getElementById('reply-preview-text');
+    const replyClose = document.getElementById('reply-preview-close');
+    const inputWrap = document.getElementById('ai-input-wrap');
+
+    function setupReply(msgId, sender, text) {
+        window.replyingTo = { msgId, sender, text };
+        if (replySender) replySender.textContent = sender;
+        if (replyText) replyText.textContent = text;
+        if (replyPreview) replyPreview.classList.remove('hidden');
+        if (inputWrap) {
+            inputWrap.classList.remove('rounded-2xl');
+            inputWrap.classList.add('rounded-b-2xl', 'rounded-t-none', 'border-t', 'border-gray-100', 'dark:border-gray-800');
+        }
+        if (bottomAiInput) bottomAiInput.focus();
+    }
+
+    window.clearReplyPreview = function() {
+        window.replyingTo = null;
+        if (replyPreview) replyPreview.classList.add('hidden');
+        if (inputWrap) {
+            inputWrap.classList.add('rounded-2xl');
+            inputWrap.classList.remove('rounded-b-2xl', 'rounded-t-none', 'border-t', 'border-gray-100', 'dark:border-gray-800');
+        }
+    };
+
+    if (replyClose) {
+        replyClose.addEventListener('click', window.clearReplyPreview);
+    }
+
+    function showReactionPicker(btn, msgId) {
+        if (activePicker) activePicker.remove();
+
+        const picker = document.createElement('div');
+        picker.className = 'reaction-picker absolute bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-2.5 py-1.5 flex items-center gap-1 z-50 shadow-lg';
+        
+        const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+        emojis.forEach(emoji => {
+            const emojiBtn = document.createElement('button');
+            emojiBtn.className = 'reaction-emoji-btn text-[17px] hover:scale-125 transition duration-150 p-1 cursor-pointer';
+            emojiBtn.textContent = emoji;
+            emojiBtn.addEventListener('click', () => {
+                sendReaction(msgId, emoji);
+                picker.remove();
+            });
+            picker.appendChild(emojiBtn);
+        });
+
+        document.body.appendChild(picker);
+        const rect = btn.getBoundingClientRect();
+        picker.style.position = 'fixed';
+        picker.style.left = `${rect.left + window.scrollX - 70}px`;
+        picker.style.top = `${rect.top + window.scrollY - 46}px`;
+
+        activePicker = picker;
+
+        setTimeout(() => {
+            document.addEventListener('click', (e) => {
+                if (picker.parentNode && !picker.contains(e.target) && e.target !== btn) {
+                    picker.remove();
+                }
+            }, { once: true });
+        }, 10);
+    }
+
+    async function sendReaction(messageId, emoji) {
+        try {
+            await fetch('/api/global-chat/react', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ messageId, emoji })
+            });
+        } catch (err) {
+            console.error('Failed to send reaction:', err);
+        }
+    }
+
+    function updateMessageReactionsInDOM(messageId, reactions) {
+        const msgEl = document.getElementById(`global-msg-${messageId}`);
+        if (!msgEl) return;
+
+        const bubbleEl = msgEl.querySelector('.glass-chat-me, .glass-chat-them');
+        if (!bubbleEl) return;
+
+        let badge = bubbleEl.querySelector('.msg-reactions-badge');
+        if (!reactions || Object.keys(reactions).length === 0) {
+            if (badge) badge.remove();
+            return;
+        }
+
+        if (!badge) {
+            badge = document.createElement('div');
+            const isMe = bubbleEl.classList.contains('glass-chat-me');
+            badge.className = `msg-reactions-badge absolute -bottom-2.5 ${isMe ? 'right-2' : 'left-2'} bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-1.5 py-0.5 shadow-sm text-[10px] flex items-center gap-1 select-none z-10`;
+            bubbleEl.appendChild(badge);
+        }
+
+        let inner = '';
+        for (const [emoji, count] of Object.entries(reactions)) {
+            inner += `<span>${emoji}<span class="text-[8px] font-bold text-gray-400 ml-0.5">${count}</span></span>`;
+        }
+        badge.innerHTML = inner;
+    }
+
+    function renderSystemMessage(text) {
+        chatContainer.insertAdjacentHTML('beforeend', `
+            <div class="flex justify-center my-3 w-full animate-message">
+                <span class="bg-gray-200/50 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[11px] px-3.5 py-1 font-semibold rounded-full border border-gray-300/30 dark:border-white/5 shadow-sm">${escapeHTML(text)}</span>
+            </div>
+        `);
+        scrollArea.scrollTop = scrollArea.scrollHeight;
+    }
+
+    function updateTypingStatus(typers) {
+        const otherTypers = typers.filter(name => name !== window.myGlobalAnonName);
+        const statusEl = document.querySelector('#chat-header-name + div p');
+        if (!statusEl) return;
+
+        if (otherTypers.length === 0) {
+            const countText = globalOnlineCount ? globalOnlineCount.textContent : '0 users online';
+            statusEl.innerHTML = `<span class="flex items-center gap-1.5"><span class="online-pulse"></span> ${countText}</span>`;
+        } else {
+            let text = '';
+            if (otherTypers.length === 1) {
+                text = `${otherTypers[0]} is typing...`;
+            } else if (otherTypers.length === 2) {
+                text = `${otherTypers[0]} and ${otherTypers[1]} are typing...`;
+            } else {
+                text = 'Several people are typing...';
+            }
+            statusEl.innerHTML = `<span class="text-emerald-500 font-semibold italic animate-pulse">${escapeHTML(text)}</span>`;
+        }
+    }
+
+    let typingTimeout = null;
+    let isCurrentlyTyping = false;
+
+    if (bottomAiInput) {
+        bottomAiInput.addEventListener('input', () => {
+            if (currentChat === '__global__') {
+                if (!isCurrentlyTyping) {
+                    isCurrentlyTyping = true;
+                    sendGlobalTypingState(true);
+                }
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    isCurrentlyTyping = false;
+                    sendGlobalTypingState(false);
+                }, 2000);
+            }
+        });
+    }
+
+    async function sendGlobalTypingState(isTyping) {
+        try {
+            await fetch('/api/global-chat/typing', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ isTyping })
+            });
+        } catch {}
+    }
+
+    // Event delegation for message actions (Reply and React)
+    chatContainer.addEventListener('click', (e) => {
+        const replyBtn = e.target.closest('.reply-btn');
+        if (replyBtn) {
+            const msgId = replyBtn.dataset.msgId;
+            const sender = replyBtn.dataset.sender;
+            const text = replyBtn.dataset.text;
+            setupReply(msgId, sender, text);
+            return;
+        }
+
+        const reactTrigger = e.target.closest('.react-trigger-btn');
+        if (reactTrigger) {
+            const msgId = reactTrigger.dataset.msgId;
+            showReactionPicker(reactTrigger, msgId);
+            return;
+        }
+    });
+
     function connectGlobalChat() {
         if (globalEventSource) return;
 
@@ -887,27 +1074,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         globalEventSource = new EventSource('/api/global-chat/stream');
 
-        globalEventSource.addEventListener('history', (e) => {
+        globalEventSource.addEventListener('init', (e) => {
             try {
-                const msgs = JSON.parse(e.data);
-                chatContainer.innerHTML = '';
-                let lastDate = '';
-                msgs.forEach(msg => {
-                    if (msg.date !== lastDate) {
-                        chatContainer.insertAdjacentHTML('beforeend', `
-                            <div class="flex justify-center mb-6 w-full date-separator">
-                                <span class="bg-gray-800/20 backdrop-blur-md text-gray-800 dark:text-gray-200 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 dark:border-white/10 uppercase">${formatChatDate(msg.date)}</span>
-                            </div>
-                        `);
-                        lastDate = msg.date;
-                    }
-                    const bubble = renderGlobalMessage(msg);
-                    chatContainer.insertAdjacentHTML('beforeend', bubble);
-                });
-                scrollArea.scrollTop = scrollArea.scrollHeight;
-            } catch (err) {
-                console.error('Failed to parse global chat history:', err);
-            }
+                const data = JSON.parse(e.data);
+                window.myGlobalAnonName = data.name;
+            } catch (err) {}
+        });
+
+        globalEventSource.addEventListener('history', (e) => {
+            chatContainer.innerHTML = '';
+            scrollArea.scrollTop = scrollArea.scrollHeight;
         });
 
         globalEventSource.addEventListener('message', (e) => {
@@ -929,9 +1105,36 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const users = JSON.parse(e.data);
                 updateOnlineUsersList(users);
+                if (currentChat === '__global__') {
+                    const statusEl = document.querySelector('#chat-header-name + div p');
+                    if (statusEl) {
+                        statusEl.innerHTML = `<span class="flex items-center gap-1.5"><span class="online-pulse"></span> ${users.length} user${users.length === 1 ? '' : 's'} online</span>`;
+                    }
+                }
             } catch (err) {
                 console.error('Failed to parse online users list:', err);
             }
+        });
+
+        globalEventSource.addEventListener('typing-list', (e) => {
+            try {
+                const typers = JSON.parse(e.data);
+                updateTypingStatus(typers);
+            } catch (err) {}
+        });
+
+        globalEventSource.addEventListener('system', (e) => {
+            try {
+                const sys = JSON.parse(e.data);
+                renderSystemMessage(sys.text);
+            } catch (err) {}
+        });
+
+        globalEventSource.addEventListener('reaction', (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                updateMessageReactionsInDOM(data.messageId, data.reactions);
+            } catch (err) {}
         });
 
         globalEventSource.onerror = (err) => {
@@ -947,6 +1150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             globalEventSource = null;
         }
         if (globalActiveIndicator) globalActiveIndicator.classList.add('hidden');
+        window.clearReplyPreview();
     }
 
     function updateOnlineUsersList(users) {
@@ -960,12 +1164,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.className = 'flex items-center gap-2 py-0.5';
             const displayName = u.name || 'Anonymous User';
             
-            let avatarHtml = '';
-            if (u.avatar_url) {
-                avatarHtml = `<img src="${u.avatar_url}" class="w-4 h-4 rounded-full object-cover shrink-0">`;
-            } else {
-                avatarHtml = `<div class="w-4 h-4 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center text-[8px] shrink-0">${displayName.charAt(0).toUpperCase()}</div>`;
-            }
+            let avatarHtml = `<div class="w-4 h-4 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center text-[8px] shrink-0">${displayName.charAt(0).toUpperCase()}</div>`;
 
             item.innerHTML = `
                 ${avatarHtml}
@@ -980,19 +1179,61 @@ document.addEventListener('DOMContentLoaded', () => {
         const isMe = window.__USER__ && msg.userId === window.__USER__.id;
         const msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
         const nameHtml = !isMe ? `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>` : '';
+        
+        let replyBlockHtml = '';
+        if (msg.replyTo) {
+            replyBlockHtml = `
+                <div class="reply-block border-l-4 border-indigo-500 bg-black/5 dark:bg-white/5 px-2 py-1 rounded-md mb-1.5 text-xs select-none">
+                    <p class="font-bold text-indigo-600 dark:text-indigo-400">${escapeHTML(msg.replyTo.sender)}</p>
+                    <p class="text-gray-500 dark:text-gray-300 truncate">${escapeHTML(msg.replyTo.text)}</p>
+                </div>
+            `;
+        }
+
         const contentHtml = `<p style="color:var(--msg-text)" class="text-[14px] leading-normal font-medium whitespace-pre-wrap break-words">${escapeHTML(msg.text)}</p>`;
         const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
 
+        // Actions: reply & react
+        const actionsHtml = `
+            <div class="msg-actions absolute top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 flex items-center gap-1 z-30 ${isMe ? 'right-full mr-2 flex-row-reverse' : 'left-full ml-2'}">
+                <button class="msg-action-btn reply-btn w-6 h-6 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-indigo-600 transition" title="Reply" data-msg-id="${msg.id}" data-sender="${escapeHTML(msg.sender)}" data-text="${escapeHTML(msg.text)}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 14L4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+                </button>
+                <button class="msg-action-btn react-trigger-btn w-6 h-6 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-amber-500 transition" title="React" data-msg-id="${msg.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                </button>
+            </div>
+        `;
+
+        let reactionsHtml = '';
+        if (msg.reactions && Object.keys(msg.reactions).length > 0) {
+            reactionsHtml = `<div class="msg-reactions-badge absolute -bottom-2.5 ${isMe ? 'right-2' : 'left-2'} bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-1.5 py-0.5 shadow-sm text-[10px] flex items-center gap-1 select-none z-10">`;
+            for (const [emoji, count] of Object.entries(msg.reactions)) {
+                reactionsHtml += `<span>${emoji}<span class="text-[8px] font-bold text-gray-400 ml-0.5">${count}</span></span>`;
+            }
+            reactionsHtml += `</div>`;
+        }
+
+        const ticksHtml = isMe ? `
+            <svg class="w-3.5 h-3.5 ml-1 text-blue-500 inline-block align-middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12l5.25 5 10.75-11" />
+                <path d="M8 12l5.25 5 6.75-7" stroke-width="2.5" />
+            </svg>
+        ` : '';
+
         return `
-            <div class="flex flex-col mb-1.5 w-full animate-message" id="global-msg-${msg.id}">
+            <div class="flex flex-col mb-3.5 w-full animate-message relative group" id="global-msg-${msg.id}">
                 <div class="max-w-[85%] md:max-w-md lg:max-w-lg relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
+                    ${replyBlockHtml}
                     ${nameHtml}
                     ${contentHtml}
-                    <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto select-none pt-0.5">
+                    <div style="color:var(${timeVar})" class="text-[9px] flex items-center justify-end font-semibold mt-1 ml-auto select-none pt-0.5">
                         ${msg.time}
-                        ${isMe ? `<svg class="w-3.5 h-3.5 ml-1 text-blue-500" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>` : ''}
+                        ${ticksHtml}
                     </div>
+                    ${reactionsHtml}
                 </div>
+                ${actionsHtml}
             </div>
         `;
     }
@@ -1041,7 +1282,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headerName) headerName.innerText = 'Global Chat Room';
             if (sidebarTitle) sidebarTitle.innerText = 'Global Chat';
             const statusEl = document.querySelector('#chat-header-name + div p');
-            if (statusEl) statusEl.innerText = 'Anonymous community chat';
+            if (statusEl) statusEl.innerText = 'Connecting...';
 
             if (bottomAiInput) {
                 bottomAiInput.placeholder = 'Send a message to everyone...';

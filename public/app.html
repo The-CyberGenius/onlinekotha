@@ -249,6 +249,16 @@
             <!-- Bottom Input Bar -->
             <div id="bottom-ai-bar" class="w-full px-3 md:px-5 pb-3 pt-2 z-20 shrink-0">
                 <div class="max-w-3xl mx-auto">
+                    <!-- Reply Preview Box -->
+                    <div id="reply-preview-container" class="hidden bg-gray-50 dark:bg-[#1f2c34] border-t border-x border-gray-200 dark:border-gray-700/80 rounded-t-2xl px-4 py-2.5 flex items-center justify-between gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+                        <div class="border-l-4 border-indigo-500 pl-3 min-w-0 flex-1">
+                            <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400" id="reply-preview-sender">Sender</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5" id="reply-preview-text">Message</p>
+                        </div>
+                        <button id="reply-preview-close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition shrink-0 p-1 cursor-pointer" title="Cancel Reply">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                     <div id="ai-input-wrap" class="flex items-center gap-2.5 bg-white rounded-2xl px-3 py-2 min-h-[52px]">
                         <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-sm">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
