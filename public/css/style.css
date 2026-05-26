@@ -1254,6 +1254,26 @@ input, button, select {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+/* Wrapped action buttons — MUST sit above nav tap zones */
+.wrapped-action-btns {
+    position: relative;
+    z-index: 200 !important;
+    pointer-events: auto !important;
+}
+.wrapped-action-btns button {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 201;
+}
 
 /* ============ Enhanced Smart Filters & Wrapped Highlighter ============ */
 
