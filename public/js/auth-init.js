@@ -171,6 +171,7 @@
                         },
                     };
 
+                    if (window._loadRazorpay) await window._loadRazorpay();
                     const rzp = new window.Razorpay(options);
                     rzp.on('payment.failed', (response) => {
                         console.error('Payment failed:', response.error);

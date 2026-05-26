@@ -319,18 +319,30 @@
     function getCurrentConvId(){ return activeChat ? (conversationMap[activeChat] || null) : null; }
     function getContactName()  { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
 
+    let _sendBtnRaf = null;
     function updateSendBtn() {
-        const hasText = bottomInput.value.trim().length > 0;
-        bottomSend.disabled      = !hasText;
-        bottomSend.style.opacity = !hasText ? '0.4' : '1';
+        if (_sendBtnRaf) return; // debounce via rAF — max once per frame
+        _sendBtnRaf = requestAnimationFrame(() => {
+            _sendBtnRaf = null;
+            const hasText = bottomInput.value.trim().length > 0;
+            bottomSend.disabled      = !hasText;
+            bottomSend.style.opacity = !hasText ? '0.4' : '1';
+        });
     }
-    bottomInput.addEventListener('input',    updateSendBtn);
-    bottomInput.addEventListener('keyup',    updateSendBtn);
-    bottomInput.addEventListener('change',   updateSendBtn);
-    bottomInput.addEventListener('focus',    updateSendBtn);
-    bottomInput.addEventListener('blur',     updateSendBtn);
-    bottomInput.addEventListener('paste',    () => setTimeout(updateSendBtn, 10));
-    bottomInput.addEventListener('touchend', () => setTimeout(updateSendBtn, 50));
+    // Single 'input' event covers typing, paste, autocomplete — no need for keyup/change/etc.
+    bottomInput.addEventListener('input', updateSendBtn);
+    bottomInput.addEventListener('focus', updateSendBtn);
+
+    // Pause dot canvas during active typing to eliminate lag
+    let _typingPauseTimer = null;
+    bottomInput.addEventListener('input', () => {
+        if (_dId && !_dOn) { cancelAnimationFrame(_dId); _dId = null; } // pause idle animation while typing
+        clearTimeout(_typingPauseTimer);
+        _typingPauseTimer = setTimeout(() => {
+            // Resume idle dots after user stops typing for 500ms
+            if (!_dId && _focused && _dA > 0.01) _dId = requestAnimationFrame(_dotLoop);
+        }, 500);
+    });
 
     bottomInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); handleSend(); }
@@ -511,11 +523,8 @@
                                     const textEl = responseBubble.querySelector('.ai-response-text');
                                     if (textEl) textEl.textContent = cleanedText;
                                 }
-                                splitIntoBubbles(
-                                    cleanedText, responseBubble,
-                                    (chatFolder && contactNameMap[chatFolder]) || cName,
-                                    () => { _dotStop(); resolve(); }
-                                );
+                                _dotStop();
+                                resolve();
                             };
                             finishStream();
 
@@ -542,61 +551,7 @@
         });
     }
 
-    // ─────────────────────────────────────────────
-    //  Multi-bubble split
-    // ─────────────────────────────────────────────
-    function splitIntoBubbles(fullText, firstBubble, contactName, onAllDone) {
-        const paragraphs = fullText
-            .split(/\n\n+/)
-            .map(p => p.trim())
-            .filter(p => p.length > 0);
-
-        if (paragraphs.length <= 1 || !firstBubble) {
-            onAllDone?.();
-            return;
-        }
-
-        const textEl = firstBubble.querySelector('.ai-response-text');
-        if (textEl) textEl.textContent = paragraphs[0];
-
-        const maxBubbles = Math.min(paragraphs.length, 4);
-        let cumDelay = 180;
-
-        for (let i = 1; i < maxBubbles; i++) {
-            const prevLen  = paragraphs[i - 1].length;
-            const nextLen  = paragraphs[i].length;
-            const readPrev = Math.min(900,  Math.max(250, prevLen * 17));
-            const typingMs = Math.min(2400, Math.max(500, nextLen * 33));
-            cumDelay += readPrev;
-
-            const para    = paragraphs[i];
-            const startAt = cumDelay;
-            const isLast  = (i === maxBubbles - 1);
-
-            setTimeout(() => {
-                const miniTyping = document.createElement('div');
-                miniTyping.className = 'flex justify-start mb-1.5 animate-message';
-                miniTyping.innerHTML = `
-                    <div class="glass-chat-them rounded-2xl rounded-bl-md px-3.5 py-1.5 max-w-[75%]">
-                        <div class="ai-typing"><span></span><span></span><span></span></div>
-                    </div>`;
-                chatContainer.appendChild(miniTyping);
-                scrollArea.scrollTop = scrollArea.scrollHeight;
-
-                setTimeout(() => {
-                    miniTyping.remove();
-                    const extra = appendContactBubble(contactName);
-                    extra.querySelector('.ai-response-text').textContent = para;
-                    const tEl = extra.querySelector('.ai-bubble-time');
-                    if (tEl) tEl.textContent = formatNow();
-                    scrollArea.scrollTop = scrollArea.scrollHeight;
-                    if (isLast) onAllDone?.();
-                }, typingMs);
-            }, startAt);
-
-            cumDelay += typingMs;
-        }
-    }
+    // (splitIntoBubbles removed — single clean response bubble is better UX)
 
     // ─────────────────────────────────────────────
     //  Continue / Reset bar
