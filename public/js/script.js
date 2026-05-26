@@ -1526,7 +1526,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderChatList(loadedChats, '');
 
             if (askAiBtn) askAiBtn.classList.add('hidden');
-            if (window.__USER__ && window.__USER__.is_admin === 1) {
+            if (window.__USER__ && (window.__USER__.is_admin === 1 || window.__USER__.is_admin === true)) {
                 if (clearGlobalChatBtn) clearGlobalChatBtn.classList.remove('hidden');
             }
             if (headerName) headerName.innerText = 'Global Chat Room';
