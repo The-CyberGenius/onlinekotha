@@ -35,13 +35,6 @@ body {
     100% { background-position: 0% 0%; }
 }
 
-/* Brief glow pulse when user sends a message */
-@keyframes sendPulse {
-    0%   { filter: brightness(1) saturate(1); }
-    35%  { filter: brightness(1.09) saturate(1.25); }
-    100% { filter: brightness(1) saturate(1); }
-}
-
 .main-chat-background {
     background-color: #efeae2;
     background-image:
@@ -58,14 +51,6 @@ html.dark .main-chat-background {
         radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.07) 0%, transparent 55%);
     background-size: 200% 200%, 200% 200%;
     animation: bgShift 14s ease-in-out infinite;
-}
-
-/* On message send: brightness pulse */
-.main-chat-background.chat-sending {
-    animation: bgShift 14s ease-in-out infinite, sendPulse 0.65s ease-out !important;
-}
-html.dark .main-chat-background.chat-sending {
-    animation: bgShift 14s ease-in-out infinite, sendPulse 0.65s ease-out !important;
 }
 
 /* Chat bubbles */

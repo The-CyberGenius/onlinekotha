@@ -32,6 +32,7 @@
     let _dcW = 0, _dcH = 0;
     let _dDPR = 1;
     let _focused = true;
+    let _dSpeed = 1.0;
 
     function _dotInit() {
         if (_dc) return;
@@ -125,12 +126,16 @@
         if (!_dx) return;
 
         const t = ts / 1000;
+        
+        // Smoothly interpolate speed multiplier
+        _dSpeed += ((_dOn ? 2.0 : 1.0) - _dSpeed) * 0.065;
+
         const hasBlast = _dd.some(d => (d.bx && Math.abs(d.bx) > 0.05) || (d.by && Math.abs(d.by) > 0.05));
 
         _dA += ((_dOn ? 1 : 0) - _dA) * 0.045;
         _dotDraw(_dA, t);
 
-        if (_focused && document.visibilityState !== 'hidden' && (_dOn || _dA > 0.01 || hasBlast)) {
+        if (_focused && document.visibilityState !== 'hidden' && (_dOn || _dA > 0.01 || hasBlast || Math.abs(_dSpeed - 1.0) > 0.02)) {
             _dId = requestAnimationFrame(_dotLoop);
         }
     }
@@ -140,8 +145,6 @@
         const dk = document.documentElement.classList.contains('dark');
         const isMobile = window.innerWidth < 768;
         _dx.clearRect(0, 0, _dcW, _dcH);
-
-        const speedMult = _dOn ? 2.6 : 1.0;
 
         // 1. Update positions & Wrap bounds
         for (const d of _dd) {
@@ -166,8 +169,8 @@
                 d.vy = (d.vy / speed) * maxDrift;
             }
 
-            d.x += d.vx * speedMult + (d.bx || 0);
-            d.y += d.vy * speedMult + (d.by || 0);
+            d.x += d.vx * _dSpeed + (d.bx || 0);
+            d.y += d.vy * _dSpeed + (d.by || 0);
 
             if (d.x < -15) d.x = _dcW + 15;
             if (d.x > _dcW + 15) d.x = -15;
@@ -242,22 +245,8 @@
     function _triggerTextBlast() {
         if (!_dc || !_dx || _dd.length === 0) return;
 
-        // Blast origins from bottom center (where input area is)
-        const blastX = _dcW / 2;
-        const blastY = _dcH;
-
-        for (const d of _dd) {
-            const dx = d.x - blastX;
-            const dy = d.y - blastY;
-            const dist = Math.hypot(dx, dy);
-
-            // Stronger push close to source, fading over distance
-            const force = Math.max(1, 450 / (dist + 80));
-            const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.25;
-
-            d.bx = Math.cos(angle) * force * 18;
-            d.by = Math.sin(angle) * force * 18;
-        }
+        // Gentle, smooth speed wave on message send instead of physical push
+        _dSpeed = 3.6;
 
         if (!_dId) {
             _dId = requestAnimationFrame(_dotLoop);
@@ -370,13 +359,6 @@
         updateSendBtn();
 
         _triggerTextBlast(text);
-        const chatBg = document.querySelector('.main-chat-background');
-        if (chatBg) {
-            chatBg.classList.remove('chat-sending');
-            void chatBg.offsetWidth;
-            chatBg.classList.add('chat-sending');
-            setTimeout(() => chatBg.classList.remove('chat-sending'), 750);
-        }
 
         msgQueue.push({ text, chat: activeChat });
         if (!processing) processQueue();
