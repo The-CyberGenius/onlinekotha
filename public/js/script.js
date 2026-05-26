@@ -314,60 +314,103 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isScrolling = false;
     let scrollTimeout;
+    let _scrollRaf = null;
     const floatingDate = document.getElementById('floating-date');
+
+    // Cached date string for header — avoid repeated DOM updates
+    let _lastHeaderDateStr = '';
+
+    function parseMsgDate(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('/');
+        if (parts.length !== 3) return null;
+        const day = parseInt(parts[0]);
+        const mon = parseInt(parts[1]);
+        const y = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+        return { day, mon, y };
+    }
 
     scrollArea.addEventListener('scroll', () => {
         if (currentChat === '__global__') return;
-        // Floating Date indicator logic
-        if (floatingDate) {
-            const topEl = Array.from(chatContainer.children).find(el => {
-                return el.id && el.id.startsWith('msg-') && (el.offsetTop - scrollArea.scrollTop + 20) > 0;
-            });
 
-            if (topEl) {
-                const msgId = parseInt(topEl.id.replace('msg-', ''));
-                const msg = displayedMessages.find(m => m.id === msgId);
-                if (msg && msg.date) {
-                    const parts = msg.date.split('/');
-                    if (parts.length === 3) {
-                        // Indian WhatsApp: DD/MM/YY
-                        const day = parseInt(parts[0]);
-                        const mon = parseInt(parts[1]);
-                        const y   = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
-                        const dateObj = new Date(y, mon - 1, day);
-                        const monthName = dateObj.toLocaleString('en-IN', { month: 'long' });
-                        const formattedDate = `${monthName} ${y}`;
+        // Use rAF to batch scroll work — prevents layout thrashing
+        if (!_scrollRaf) {
+            _scrollRaf = requestAnimationFrame(() => {
+                _scrollRaf = null;
 
-                        floatingDate.innerText = formattedDate;
+                // ── Floating date + header date ──
+                if (floatingDate) {
+                    // Find the topmost visible date separator first (cheaper than scanning all msg elements)
+                    const separators = chatContainer.querySelectorAll('.date-separator');
+                    let closestDate = null;
+                    const scrollTop = scrollArea.scrollTop;
+                    const threshold = scrollArea.getBoundingClientRect().top + 80;
+
+                    // Walk separators to find the one closest to viewport top
+                    for (let i = separators.length - 1; i >= 0; i--) {
+                        const rect = separators[i].getBoundingClientRect();
+                        if (rect.top <= threshold) {
+                            closestDate = separators[i].textContent.trim();
+                            break;
+                        }
+                    }
+
+                    // Fallback: find topmost visible message's date
+                    if (!closestDate) {
+                        const children = chatContainer.children;
+                        for (let i = 0; i < children.length; i++) {
+                            const el = children[i];
+                            if (!el.id || !el.id.startsWith('msg-')) continue;
+                            if (el.getBoundingClientRect().top + el.offsetHeight > threshold) {
+                                const msgId = parseInt(el.id.replace('msg-', ''));
+                                const msg = displayedMessages.find(m => m.id === msgId);
+                                if (msg && msg.date) {
+                                    const pd = parseMsgDate(msg.date);
+                                    if (pd) {
+                                        const dateObj = new Date(pd.y, pd.mon - 1, pd.day);
+                                        const monthName = dateObj.toLocaleString('en-IN', { month: 'long' });
+                                        closestDate = `${pd.day} ${monthName} ${pd.y}`;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+
+                    if (closestDate) {
+                        floatingDate.innerText = closestDate;
                         floatingDate.classList.remove('opacity-0', 'translate-y-[-10px]');
                         floatingDate.classList.add('opacity-100', 'translate-y-0');
 
-                        if (dynamicHeaderDate) {
-                            dynamicHeaderDate.innerText = `${day} ${monthName} ${y}`;
+                        if (dynamicHeaderDate && closestDate !== _lastHeaderDateStr) {
+                            _lastHeaderDateStr = closestDate;
+                            dynamicHeaderDate.innerText = closestDate;
                             dynamicHeaderDate.classList.remove('hidden');
                         }
                     }
-                }
-            }
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                floatingDate.classList.add('opacity-0', 'translate-y-[-10px]');
-                floatingDate.classList.remove('opacity-100', 'translate-y-0');
-            }, 800);
-        }
 
-        if (isScrolling) return;
-        
-        if (scrollArea.scrollTop <= 400 && renderStart > 0) {
-            isScrolling = true;
-            window.loadOlder();
-            setTimeout(() => { isScrolling = false; }, 100);
-        }
-        
-        if (Math.abs((scrollArea.scrollHeight - scrollArea.scrollTop) - scrollArea.clientHeight) <= 400 && renderEnd < displayedMessages.length) {
-            isScrolling = true;
-            window.loadNewer();
-            setTimeout(() => { isScrolling = false; }, 100);
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        floatingDate.classList.add('opacity-0', 'translate-y-[-10px]');
+                        floatingDate.classList.remove('opacity-100', 'translate-y-0');
+                    }, 1200);
+                }
+
+                // ── Infinite scroll: load older/newer chunks ──
+                if (!isScrolling) {
+                    if (scrollArea.scrollTop <= 400 && renderStart > 0) {
+                        isScrolling = true;
+                        window.loadOlder();
+                        setTimeout(() => { isScrolling = false; }, 80);
+                    }
+
+                    if (Math.abs((scrollArea.scrollHeight - scrollArea.scrollTop) - scrollArea.clientHeight) <= 400 && renderEnd < displayedMessages.length) {
+                        isScrolling = true;
+                        window.loadNewer();
+                        setTimeout(() => { isScrolling = false; }, 80);
+                    }
+                }
+            });
         }
     });
 
@@ -544,12 +587,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     daySelect.innerHTML += `<option value="${i}">${i}</option>`;
                 }
                 
-                // Smart Filters Logic
+                // Smart Filters Logic — Apply button driven (no auto-change listeners)
                 const filterMonth = document.getElementById('filter-month');
                 const toggleMedia = document.getElementById('toggle-media');
                 const toggleStickers = document.getElementById('toggle-stickers');
                 const toggleLinks = document.getElementById('toggle-links');
                 const resetFiltersBtn = document.getElementById('reset-filters');
+                const applyFiltersBtn = document.getElementById('apply-filters-btn');
 
                 const applyFilters = () => {
                     const d = daySelect.value;
@@ -558,8 +602,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const showMedia = toggleMedia.checked;
                     const showStickers = toggleStickers.checked;
                     const showLinks = toggleLinks ? toggleLinks.checked : false;
+                    const hasDateFilter = !!(d || m || y);
 
-                    if(d || m || y || !showMedia || !showStickers || showLinks) {
+                    if(hasDateFilter || !showMedia || !showStickers || showLinks) {
                         resetFiltersBtn.classList.remove('hidden');
                     } else {
                         resetFiltersBtn.classList.add('hidden');
@@ -567,9 +612,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     displayedMessages = allMessages.filter(msg => {
                         // Date check
-                        if(d || m || y) {
+                        if(hasDateFilter) {
                             if (!msg.date) return false;
-                            const parts = msg.date.split('/'); // Assuming MM/DD/YY or DD/MM/YY
+                            const parts = msg.date.split('/');
                             if (parts.length === 3) {
                                 const msgM = parseInt(parts[datePartsOrder.monthIdx]);
                                 const msgD = parseInt(parts[datePartsOrder.dayIdx]);
@@ -588,7 +633,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         if (msg.text) {
                             const text = msg.text.toLowerCase();
-                            
+
                             if (showLinks) {
                                 if (!text.includes('http') && !text.includes('www.')) return false;
                             }
@@ -597,60 +642,48 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const mediaExts = ['.jpg', '.jpeg', '.png', '.mp4', '.mov', 'image omitted', 'video omitted', 'audio omitted', 'document omitted'];
                                 if(mediaExts.some(ext => text.includes(ext))) return false;
                             }
-                            
+
                             if(!showStickers) {
                                 const stickerExts = ['.webp', 'sticker omitted'];
                                 if(stickerExts.some(ext => text.includes(ext))) return false;
                             }
                         } else {
-                            if (showLinks) return false; // exclude messages without text if strictly looking for links
+                            if (showLinks) return false;
                         }
 
                         return true;
                     });
 
-                    // Maintain visual anchor position when filtering toggles back and forth
-                    const visibleBubble = Array.from(chatContainer.children).find(el => {
-                        return el.id && el.id.startsWith('msg-') && el.getBoundingClientRect().top >= 0;
-                    });
-                    const anchorId = visibleBubble ? parseInt(visibleBubble.id.replace('msg-', '')) : null;
-
                     renderChats(-1, -1); // Clear UI
 
                     if (displayedMessages.length > 0) {
-                        let anchorIdx = -1;
-                        if (anchorId !== null) {
-                            anchorIdx = displayedMessages.findIndex(m => m.id === anchorId);
-                            if (anchorIdx === -1) anchorIdx = displayedMessages.findIndex(m => m.id > anchorId);
-                        }
-                        
-                        // If we found the message we were previously looking at after filtering, render around it!
-                        if (anchorIdx !== -1) {
-                            const start = Math.max(0, anchorIdx - 20);
-                            const end = Math.min(displayedMessages.length, start + CHUNK_SIZE);
-                            renderChats(start, end, 'reset');
-                            
-                            setTimeout(() => {
-                                const targetId = displayedMessages[anchorIdx]?.id;
-                                const el = document.getElementById(`msg-${targetId}`);
-                                if (el) {
-                                    el.scrollIntoView({ block: 'start' });
-                                    // small nudge up to account for absolute header
-                                    scrollArea.scrollTop -= 60; 
-                                }
-                            }, 10);
+                        // When date filter is active → jump to FIRST matching message (top of filtered results)
+                        if (hasDateFilter) {
+                            const end = Math.min(CHUNK_SIZE, displayedMessages.length);
+                            renderChats(0, end, 'reset');
+                            setTimeout(() => { scrollArea.scrollTop = 0; }, 10);
                         } else {
-                            // If anchor not found or filter completely altered view, default to newest chats
+                            // No date filter → show newest messages at bottom
                             const end = displayedMessages.length;
                             renderChats(Math.max(0, end - CHUNK_SIZE), end, 'reset');
-                            setTimeout(() => scrollArea.scrollTop = scrollArea.scrollHeight, 10);
+                            setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 10);
                         }
                     }
 
                     statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> filtered msgs.`;
+
+                    // Close sidebar on mobile after applying
+                    toggleSidebar(false);
                 };
 
-                [daySelect, filterMonth, yearSelect, toggleMedia, toggleStickers, toggleLinks].forEach(el => {
+                // Apply button — single click to filter
+                if (applyFiltersBtn) {
+                    applyFiltersBtn.addEventListener('click', applyFilters);
+                }
+
+                // NO auto-change listeners on dropdowns — only the Apply button triggers filtering
+                // Checkboxes still auto-apply since they're simple toggles
+                [toggleMedia, toggleStickers, toggleLinks].forEach(el => {
                     if(el) el.addEventListener('change', applyFilters);
                 });
 

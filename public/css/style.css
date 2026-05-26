@@ -18,6 +18,14 @@ body {
 /* Prevent canvas from causing horizontal scroll on mobile */
 #chat-scroll-area {
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: auto; /* JS handles smooth jump — CSS smooth breaks infinite scroll */
+}
+
+/* GPU-accelerate chat bubbles for smooth scrolling */
+#chat-container > div {
+    will-change: auto;
+    contain: layout style;
 }
 
 /* Fix iOS Safari input auto-zoom — inputs must be >= 16px */

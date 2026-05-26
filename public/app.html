@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=25">
+    <link rel="stylesheet" href="/css/style.css?v=26">
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay=function(){return new Promise(function(r){if(window.Razorpay)return r();var s=document.createElement('script');s.src='https://checkout.razorpay.com/v1/checkout.js';s.onload=r;document.head.appendChild(s)})}</script>
     <script src="/js/auth-init.js"></script>
@@ -171,6 +171,12 @@
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
                     </div>
                 </div>
+
+                <!-- Apply button -->
+                <button id="apply-filters-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[13px] rounded-xl py-2.5 mb-4 transition shadow-sm active:scale-[0.98] flex items-center justify-center gap-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                    Apply Filters
+                </button>
 
                 <!-- Toggles -->
                 <div class="flex flex-col gap-3 bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
@@ -333,7 +339,7 @@
 
     <!-- AI Panel removed — AI chat is now inline -->
 
-    <script src="js/script.js?v=20"></script>
+    <script src="js/script.js?v=21"></script>
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=16"></script>
