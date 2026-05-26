@@ -14,7 +14,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=18">
+    <link rel="stylesheet" href="/css/style.css?v=19">
     <!-- Razorpay Standard Checkout — must load before auth-init.js opens the modal -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="/js/auth-init.js"></script>
@@ -227,15 +227,17 @@
             </div>
 
             <!-- Bottom Input Bar -->
-            <div id="bottom-ai-bar" class="w-full p-2.5 md:p-3 bg-white border-t border-gray-100 z-20 shrink-0 shadow-[0_-1px_3px_rgba(0,0,0,0.03)]">
-                <div class="max-w-3xl mx-auto flex items-center gap-2">
-                    <div id="ai-input-wrap" class="flex-1 flex items-center gap-2 bg-[#f0f2f5] rounded-full px-4 py-2 min-h-[44px]">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" class="shrink-0 opacity-60"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
-                        <input type="text" id="bottom-ai-input" placeholder="Ask AI about this chat..." class="flex-1 bg-transparent border-none outline-none text-sm font-medium text-gray-700 placeholder-gray-400 min-w-0">
+            <div id="bottom-ai-bar" class="w-full px-3 md:px-5 pb-3 pt-2 z-20 shrink-0">
+                <div class="max-w-3xl mx-auto">
+                    <div id="ai-input-wrap" class="flex items-center gap-2.5 bg-white rounded-2xl px-3 py-2 min-h-[52px]">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+                        </div>
+                        <input type="text" id="bottom-ai-input" placeholder="Ask AI about this chat…" class="flex-1 bg-transparent border-none text-[15px] font-medium text-gray-800 placeholder-gray-400 min-w-0">
+                        <button id="bottom-ai-send" class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white hover:bg-indigo-700 active:scale-95 transition shrink-0 disabled:opacity-25 disabled:cursor-not-allowed" disabled>
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        </button>
                     </div>
-                    <button id="bottom-ai-send" class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-sm hover:bg-indigo-700 hover:shadow-md transition shrink-0 disabled:opacity-30 disabled:shadow-none" disabled>
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                    </button>
                 </div>
             </div>
         </div>
@@ -299,7 +301,7 @@
 
     <script src="js/script.js?v=14"></script>
     <script src="js/upload.js?v=14"></script>
-    <script src="js/ai-panel.js?v=21"></script>
+    <script src="js/ai-panel.js?v=22"></script>
     <script src="js/features.js?v=14"></script>
     <script>
         if ('serviceWorker' in navigator) {

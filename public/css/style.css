@@ -698,18 +698,38 @@ html.dark .glass-panel {
 }
 
 /* ── Bottom Input Bar ── */
+#bottom-ai-bar {
+    background: linear-gradient(to top, white 55%, rgba(255,255,255,0.85) 85%, transparent);
+}
+#ai-input-wrap {
+    border: 1.5px solid rgba(99,102,241,0.18);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05);
+    transition: border-color 200ms, box-shadow 200ms;
+}
+#ai-input-wrap:focus-within {
+    border-color: rgba(99,102,241,0.55);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.10), 0 4px 20px rgba(0,0,0,0.07);
+}
+/* Kill the ugly blue outline on the raw input — focus style is on wrapper */
+#bottom-ai-input { outline: none !important; box-shadow: none !important; }
+#bottom-ai-input:focus, #bottom-ai-input:focus-visible { outline: none !important; box-shadow: none !important; }
+
 html.dark #bottom-ai-bar {
-    background: #1f2c34 !important;
-    border-color: #2a3942 !important;
-    box-shadow: none !important;
+    background: linear-gradient(to top, #0b141a 55%, rgba(11,20,26,0.85) 85%, transparent) !important;
 }
 html.dark #ai-input-wrap {
-    background: #2a3942 !important;
+    background: #1f2c34 !important;
+    border-color: rgba(99,102,241,0.22) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+}
+html.dark #ai-input-wrap:focus-within {
+    border-color: rgba(99,102,241,0.50) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12), 0 4px 20px rgba(0,0,0,0.3) !important;
 }
 html.dark #bottom-ai-input { color: #e9edef !important; }
 html.dark #bottom-ai-input::placeholder { color: #667781 !important; }
-html.dark #bottom-ai-send { background: #00a884 !important; }
-html.dark #bottom-ai-send:disabled { background: #233138 !important; opacity: 0.5 !important; }
+html.dark #bottom-ai-send { background: #4f46e5 !important; }
+html.dark #bottom-ai-send:disabled { background: #233138 !important; opacity: 0.4 !important; }
 
 /* ── AI Chat inline ── */
 html.dark #ai-chat-container { border-color: rgba(255,255,255,0.08) !important; }

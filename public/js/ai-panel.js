@@ -882,6 +882,16 @@
 
     window.kothaToast = toast;
 
+    // Disable browser context menu on chat messages — prevents "Share as image" etc.
+    const _noCtx = e => e.preventDefault();
+    chatContainer.addEventListener('contextmenu', _noCtx);
+    document.getElementById('chat-container')?.addEventListener('contextmenu', _noCtx);
+    scrollArea.addEventListener('contextmenu', e => {
+        // Allow context menu on inputs/textareas only
+        if (e.target.matches('input,textarea,select')) return;
+        e.preventDefault();
+    });
+
     // Init dot canvas on load (draws once, then loop stops — zero idle CPU)
     _dotInit();
 })();
