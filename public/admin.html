@@ -119,7 +119,13 @@
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                 <h2 class="font-extrabold text-gray-800 mb-3">Feature → Model routing</h2>
                 <p class="text-xs text-gray-500 mb-4">Har feature ke liye primary aur fallback model choose karo. Primary fail = fallback try.</p>
-                <div id="routes-form" class="space-y-4"></div>
+                <form id="routes-form-wrapper" class="space-y-4">
+                    <div id="routes-form" class="space-y-4"></div>
+                    <div class="flex items-center gap-3 pt-2">
+                        <button type="submit" id="routes-save-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl px-5 py-2 text-sm transition">Save Routing</button>
+                        <p id="routes-global-msg" class="text-xs text-green-600 font-semibold hidden">✓ Saved successfully</p>
+                    </div>
+                </form>
             </div>
         </section>
 

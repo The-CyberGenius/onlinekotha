@@ -398,10 +398,7 @@ HARD RULES
             const div = document.createElement('div');
             div.className = 'bg-gray-50 rounded-xl p-4';
             div.innerHTML = `
-                <div class="font-bold text-gray-800 mb-3 flex items-center justify-between">
-                    <span>${featureLabels[feature]}</span>
-                    <span id="save-status-${feature}" class="text-[10px] text-green-600 font-bold opacity-0 transition-opacity duration-300">✓ Saved</span>
-                </div>
+                <div class="font-bold text-gray-800 mb-3">${featureLabels[feature]}</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Primary model</label>
@@ -429,59 +426,52 @@ HARD RULES
             const fb = div.querySelector('[data-kind="fallback"]');
             if (r.primary_model_id) pri.value = String(r.primary_model_id);
             if (r.fallback_model_id) fb.value = String(r.fallback_model_id);
-            [pri, fb].forEach(sel => sel.addEventListener('change', () => saveRoute(feature)));
-            div.querySelectorAll('.route-param').forEach(inp => {
-                inp.addEventListener('change', () => saveRoute(feature));
-            });
         }
     }
 
-    async function saveRoute(feature) {
-        const pri = document.querySelector(`select[data-feat="${feature}"][data-kind="primary"]`).value;
-        const fb = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback"]`).value;
-        const maxTok = document.querySelector(`input[data-feat="${feature}"][data-param="max_tokens"]`);
-        const temp = document.querySelector(`input[data-feat="${feature}"][data-param="temperature"]`);
-        const sysPrompt = document.querySelector(`textarea[data-feat="${feature}"][data-param="system_prompt"]`);
+    document.getElementById('routes-form-wrapper').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('routes-save-btn');
+        const msg = document.getElementById('routes-global-msg');
+        btn.disabled = true;
+        msg.classList.add('hidden');
         
-        const statusEl = document.getElementById(`save-status-${feature}`);
-        if (statusEl) {
-            statusEl.textContent = 'Saving...';
-            statusEl.classList.remove('text-green-600');
-            statusEl.classList.add('text-indigo-600');
-            statusEl.style.opacity = '1';
-        }
-
         try {
-            await fetch(`/api/admin/routes/${feature}`, {
-                method: 'PUT',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({
-                    primary_model_id: pri ? Number(pri) : null,
-                    fallback_model_id: fb ? Number(fb) : null,
-                    max_tokens: maxTok ? Number(maxTok.value) || 1024 : 1024,
-                    temperature: temp ? Number(temp.value) ?? 0.7 : 0.7,
-                    system_prompt: sysPrompt ? sysPrompt.value.trim() : null,
-                }),
+            const featureLabels = {
+                chat: 'chat',
+                embedding: 'embedding',
+                wrapped: 'wrapped',
+            };
+            
+            const promises = Object.keys(featureLabels).map(async (feature) => {
+                const pri = document.querySelector(`select[data-feat="${feature}"][data-kind="primary"]`).value;
+                const fb = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback"]`).value;
+                const maxTok = document.querySelector(`input[data-feat="${feature}"][data-param="max_tokens"]`);
+                const temp = document.querySelector(`input[data-feat="${feature}"][data-param="temperature"]`);
+                const sysPrompt = document.querySelector(`textarea[data-feat="${feature}"][data-param="system_prompt"]`);
+                
+                await fetch(`/api/admin/routes/${feature}`, {
+                    method: 'PUT',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({
+                        primary_model_id: pri ? Number(pri) : null,
+                        fallback_model_id: fb ? Number(fb) : null,
+                        max_tokens: maxTok ? Number(maxTok.value) || 1024 : 1024,
+                        temperature: temp ? Number(temp.value) ?? 0.7 : 0.7,
+                        system_prompt: sysPrompt ? sysPrompt.value.trim() : null,
+                    }),
+                });
             });
-            if (statusEl) {
-                statusEl.textContent = '✓ Saved';
-                statusEl.classList.remove('text-indigo-600');
-                statusEl.classList.add('text-green-600');
-                setTimeout(() => {
-                    statusEl.style.opacity = '0';
-                }, 1500);
-            }
+            
+            await Promise.all(promises);
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 2500);
         } catch (err) {
-            if (statusEl) {
-                statusEl.textContent = '✗ Error';
-                statusEl.classList.remove('text-indigo-600');
-                statusEl.classList.add('text-red-600');
-                setTimeout(() => {
-                    statusEl.style.opacity = '0';
-                }, 2000);
-            }
+            alert('Error saving routing: ' + err.message);
+        } finally {
+            btn.disabled = false;
         }
-    }
+    });
 
     async function loadSettings() {
         const s = await (await fetch('/api/admin/settings')).json();
