@@ -43,6 +43,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let renderEnd = 0;
     const CHUNK_SIZE = 100;
 
+    // Smart name cleaning — used everywhere names are displayed
+    function cleanDisplayName(raw) {
+        if (!raw) return '';
+        let n = raw;
+        // Strip WhatsApp prefixes
+        n = n.replace(/^whatsapp[\s_-]*chat[\s_-]*(with[\s_-]*)?[-–—]?\s*/i, '');
+        // Underscores → spaces
+        n = n.replace(/_/g, ' ');
+        // Trailing dates/numbers/junk
+        n = n.replace(/[\s-]*\(?\d{4,}\)?[\s-]*$/g, '');
+        n = n.replace(/[\s-]*\d{1,2}[\s/-]\d{1,2}[\s/-]\d{2,4}\s*$/g, '');
+        n = n.replace(/[\s-]+\d+\s*$/g, '');
+        n = n.replace(/\.(txt|zip|csv|json)\s*$/i, '');
+        // Collapse spaces + trim
+        n = n.replace(/\s{2,}/g, ' ').trim();
+        // Title case
+        if (n) n = n.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1));
+        return n;
+    }
+
     const closeMod = () => {
         mediaModal.classList.remove('opacity-100');
         mediaModal.classList.add('opacity-0');
@@ -450,7 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const senders = Object.entries(senderCounts).sort((a,b) => b[1] - a[1]);
                 const chatContactName = chatName.replace('WhatsApp Chat - ', '');
-                otherPersonName = chatContactName || senders[1]?.[0] || "User";
+                // Smart name cleaning — strip WhatsApp junk, underscores, dates
+                otherPersonName = cleanDisplayName(chatContactName) || senders[1]?.[0] || "User";
                 myName = senders.find(s => s[0] !== otherPersonName)?.[0] || senders[0]?.[0] || "User";
 
                 headerName.innerText = otherPersonName;
