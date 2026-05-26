@@ -111,4 +111,14 @@ router.post('/send', requireUser, (req, res) => {
     res.json({ ok: true });
 });
 
+// Clear endpoint (Admin only)
+router.delete('/clear', requireUser, (req, res) => {
+    if (!req.user.is_admin) {
+        return res.status(403).json({ error: 'Admin only feature' });
+    }
+    db.prepare('DELETE FROM global_messages').run();
+    broadcast('clear', {});
+    res.json({ ok: true });
+});
+
 module.exports = router;

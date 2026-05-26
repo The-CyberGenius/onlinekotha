@@ -874,6 +874,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const globalOnlineCount = document.getElementById('global-online-count');
     const askAiBtn = document.getElementById('ask-ai-btn');
     const bottomAiInput = document.getElementById('bottom-ai-input');
+    const clearGlobalChatBtn = document.getElementById('clear-global-chat-btn');
 
     function connectGlobalChat() {
         if (globalEventSource) return;
@@ -918,6 +919,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 console.error('Failed to parse incoming global message:', err);
             }
+        });
+
+        globalEventSource.addEventListener('clear', (e) => {
+            chatContainer.innerHTML = '';
         });
 
         globalEventSource.addEventListener('online-list', (e) => {
@@ -1006,6 +1011,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (globalOnlineUsersList) globalOnlineUsersList.classList.add('hidden');
         if (askAiBtn) askAiBtn.classList.remove('hidden');
+        if (clearGlobalChatBtn) clearGlobalChatBtn.classList.add('hidden');
         if (bottomAiInput) {
             bottomAiInput.placeholder = 'Ask AI about this chat…';
         }
@@ -1029,6 +1035,9 @@ document.addEventListener('DOMContentLoaded', () => {
             renderChatList(loadedChats, '');
 
             if (askAiBtn) askAiBtn.classList.add('hidden');
+            if (window.__USER__ && window.__USER__.is_admin === 1) {
+                if (clearGlobalChatBtn) clearGlobalChatBtn.classList.remove('hidden');
+            }
             if (headerName) headerName.innerText = 'Global Chat Room';
             if (sidebarTitle) sidebarTitle.innerText = 'Global Chat';
             const statusEl = document.querySelector('#chat-header-name + div p');
@@ -1043,6 +1052,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
             connectGlobalChat();
             toggleSidebar(false);
+        });
+    }
+
+    if (clearGlobalChatBtn) {
+        clearGlobalChatBtn.addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to clear the entire global chat history? This cannot be undone.')) return;
+            try {
+                const resp = await fetch('/api/global-chat/clear', { method: 'DELETE' });
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    alert('Failed to clear global chat: ' + (err.error || resp.statusText));
+                } else {
+                    window.kothaToast('Global chat cleared');
+                }
+            } catch (err) {
+                alert('Network error: ' + err.message);
+            }
         });
     }
 
