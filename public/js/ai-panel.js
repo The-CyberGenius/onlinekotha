@@ -25,6 +25,105 @@
     let onTypewriterComplete = null;  // fired once typewriter drains after stream ends
 
     // ─────────────────────────────────────────────
+    //  Dot FX Canvas — individual per-dot color wave
+    //  Activates only while AI is replying, then fades back to neutral
+    // ─────────────────────────────────────────────
+    let _dc = null, _dx = null, _dd = [], _dId = null, _dA = 0, _dOn = false;
+    const _DSP = 22; // dot spacing px
+
+    function _dotInit() {
+        if (_dc) return;
+        _dc = document.createElement('canvas');
+        _dc.id = 'dot-fx-canvas';
+        // sticky+z-index:-1 keeps canvas fixed at top of viewport, below all chat content
+        _dc.style.cssText = 'position:sticky;top:0;left:0;width:100%;pointer-events:none;z-index:-1;display:block;';
+        _dx = _dc.getContext('2d');
+        scrollArea.insertBefore(_dc, scrollArea.firstChild);
+        _dotResize();
+        new ResizeObserver(_dotResize).observe(scrollArea);
+        // Redraw when dark/light mode toggles
+        new MutationObserver(() => { if (_dc) _dotDraw(_dA); })
+            .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    function _dotResize() {
+        if (!_dc) return;
+        const w = scrollArea.clientWidth, h = scrollArea.clientHeight;
+        _dc.width  = Math.ceil(w);
+        _dc.height = Math.ceil(h);
+        // Negative margin so canvas doesn't push chat content down
+        _dc.style.marginBottom = `-${Math.ceil(h)}px`;
+        // Rebuild dot grid — diagonal phase offset creates a wave effect
+        _dd = [];
+        for (let x = _DSP / 2; x < w; x += _DSP) {
+            for (let y = _DSP / 2; y < h; y += _DSP) {
+                _dd.push({
+                    x, y,
+                    phase:   (x + y) * 0.013 + Math.random() * 1.4,
+                    speed:   0.45 + Math.random() * 0.85,
+                    hueBase: Math.random() * 360,   // each dot gets a unique hue
+                });
+            }
+        }
+        _dotDraw(_dA);
+    }
+
+    function _dotStart() {
+        if (!_dc) _dotInit();
+        _dOn = true;
+        if (!_dId) _dotLoop();
+    }
+
+    function _dotStop() {
+        _dOn = false; // loop fades out naturally
+    }
+
+    function _dotLoop() {
+        if (!_dx) { _dId = null; return; }
+        _dA += ((_dOn ? 1 : 0) - _dA) * 0.042;    // smooth alpha lerp
+        if (_dA < 0.004 && !_dOn) {
+            _dotDraw(0);
+            _dId = null;
+            return;
+        }
+        _dotDraw(_dA);
+        _dId = requestAnimationFrame(_dotLoop);
+    }
+
+    function _dotDraw(alpha) {
+        if (!_dx || !_dc || _dd.length === 0) return;
+        const dk = document.documentElement.classList.contains('dark');
+        const w  = _dc.width, h = _dc.height;
+        const t  = performance.now() / 1000;
+        _dx.clearRect(0, 0, w, h);
+
+        for (const d of _dd) {
+            const wave = d.phase + t * d.speed;
+            const hue  = (d.hueBase + wave * 48) % 360; // hue drifts continuously
+
+            _dx.beginPath();
+            _dx.arc(d.x, d.y, 1, 0, Math.PI * 2);
+
+            if (alpha < 0.02) {
+                // Pure neutral (idle state)
+                _dx.fillStyle = dk ? 'rgba(255,255,255,0.04)' : 'rgba(209,213,219,0.88)';
+            } else {
+                // Cross-fade neutral → colored per dot
+                const nA = dk ? 0.04 * (1 - alpha) : 0.88 * (1 - alpha * 0.8);
+                const cA = dk ? 0.22 * alpha        : 0.76 * alpha;
+                // Draw neutral layer
+                _dx.fillStyle = dk ? `rgba(255,255,255,${nA})` : `rgba(209,213,219,${nA})`;
+                _dx.fill();
+                // Draw colored layer on top
+                _dx.beginPath();
+                _dx.arc(d.x, d.y, 1, 0, Math.PI * 2);
+                _dx.fillStyle = `hsla(${hue},72%,${dk ? 64 : 62}%,${cA})`;
+            }
+            _dx.fill();
+        }
+    }
+
+    // ─────────────────────────────────────────────
     //  Typewriter engine
     // ─────────────────────────────────────────────
     function startTypewriter(targetEl, scrollEl) {
@@ -182,6 +281,9 @@
         const cName  = contactNameMap[chatFolder]  ||
             (document.getElementById('chat-header-name')?.innerText) || 'AI';
 
+        // Activate dot color wave — lights up individual dots while AI thinks
+        _dotStart();
+
         // Typing indicator
         const typingEl = document.createElement('div');
         typingEl.id        = 'ai-typing-inline';
@@ -281,9 +383,11 @@
                                     if (textEl) textEl.textContent = cleanedText;
                                 }
 
-                                splitIntoBubbles(cleanedText, responseBubble,
-                                    (chatFolder && contactNameMap[chatFolder]) || cName);
-                                resolve();
+                                splitIntoBubbles(
+                                    cleanedText, responseBubble,
+                                    (chatFolder && contactNameMap[chatFolder]) || cName,
+                                    () => { _dotStop(); resolve(); }
+                                );
                             };
                             finishStream();
 
@@ -292,6 +396,7 @@
                             appendErrorBubble(data.message || 'Something went wrong');
                             onTypewriterComplete = null;
                             stopTypewriterInstantly();
+                            _dotStop();
                             resolve();
                         }
                     }
@@ -301,6 +406,7 @@
                 appendErrorBubble('Network error. Try again?');
                 onTypewriterComplete = null;
                 stopTypewriterInstantly();
+                _dotStop();
                 resolve();
             } finally {
                 bottomInput.focus();
@@ -310,28 +416,43 @@
 
     // ─────────────────────────────────────────────
     //  Multi-bubble split
-    //  When AI sends paragraphs separated by \n\n,
-    //  display each as a separate WhatsApp message bubble
+    //  AI sends separate "messages" separated by \n\n.
+    //  Each one gets its own bubble with realistic typing delay.
     // ─────────────────────────────────────────────
-    function splitIntoBubbles(fullText, firstBubble, contactName) {
+    function splitIntoBubbles(fullText, firstBubble, contactName, onAllDone) {
         const paragraphs = fullText
             .split(/\n\n+/)
             .map(p => p.trim())
             .filter(p => p.length > 0);
 
-        if (paragraphs.length <= 1 || !firstBubble) return;
+        if (paragraphs.length <= 1 || !firstBubble) {
+            onAllDone?.();
+            return;
+        }
 
-        // Update first bubble to show only the first paragraph
+        // Update first bubble to only the first paragraph
         const textEl = firstBubble.querySelector('.ai-response-text');
         if (textEl) textEl.textContent = paragraphs[0];
 
-        // Show subsequent paragraphs as separate bubbles with natural delays
-        const maxBubbles = Math.min(paragraphs.length, 5);
+        const maxBubbles = Math.min(paragraphs.length, 4); // max 4 messages at once
+
+        // Schedule each extra bubble with realistic cumulative delay.
+        // Delay = reading the previous message (~18ms/char) + typing next message (~32ms/char)
+        let cumDelay = 180; // small pause after first bubble finishes
         for (let i = 1; i < maxBubbles; i++) {
-            const delay = i * 520;
-            const para  = paragraphs[i];
+            const prevLen = paragraphs[i - 1].length;
+            const nextLen = paragraphs[i].length;
+            // How long user "reads" previous bubble, then how long to "type" next
+            const readPrev  = Math.min(900,  Math.max(250, prevLen * 17));
+            const typingMs  = Math.min(2400, Math.max(500, nextLen * 33));
+            cumDelay += readPrev;
+
+            const para      = paragraphs[i];
+            const startAt   = cumDelay;
+            const isLast    = (i === maxBubbles - 1);
+
             setTimeout(() => {
-                // Brief "typing..." before each extra bubble
+                // Show mini typing indicator sized to the message length
                 const miniTyping = document.createElement('div');
                 miniTyping.className = 'flex justify-start mb-1 animate-message';
                 miniTyping.innerHTML = `
@@ -345,10 +466,14 @@
                     miniTyping.remove();
                     const extra = appendContactBubble(contactName);
                     extra.querySelector('.ai-response-text').textContent = para;
-                    const timeEl = extra.querySelector('.ai-bubble-time');
-                    if (timeEl) timeEl.textContent = formatNow();
-                }, 380);
-            }, delay);
+                    const tEl = extra.querySelector('.ai-bubble-time');
+                    if (tEl) tEl.textContent = formatNow();
+                    scrollArea.scrollTop = scrollArea.scrollHeight;
+                    if (isLast) onAllDone?.();
+                }, typingMs);
+            }, startAt);
+
+            cumDelay += typingMs;
         }
     }
 
@@ -518,4 +643,7 @@
     };
 
     window.kothaToast = toast;
+
+    // Eagerly init dot canvas so neutral dots show from the start
+    _dotInit();
 })();

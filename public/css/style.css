@@ -15,46 +15,13 @@ body {
     }
 }
 
-/* Chat background — Animated premium mesh with color-cycling dots */
-
-/* Houdini: allows smooth <color> interpolation in @keyframes */
-@property --dot-col {
-    syntax: '<color>';
-    initial-value: rgba(209,213,219,0.85);
-    inherits: false;
-}
-@property --dot-col-dk {
-    syntax: '<color>';
-    initial-value: rgba(255,255,255,0.04);
-    inherits: false;
-}
+/* Chat background — Animated premium mesh. Dots are drawn via canvas (dot-fx-canvas)
+   so each dot can be individually colored when AI is replying. */
 
 @keyframes bgShift {
-    0%   { background-position: 0% 0%, 0 0; }
-    50%  { background-position: 100% 100%, 20px 20px; }
-    100% { background-position: 0% 0%, 0 0; }
-}
-
-/* Light-mode dot color cycle: gray → indigo → violet → emerald → pink → sky */
-@keyframes dot-color-cycle {
-    0%   { --dot-col: rgba(209,213,219,0.85); }
-    16%  { --dot-col: rgba(165,180,252,0.80); }
-    33%  { --dot-col: rgba(196,181,253,0.75); }
-    50%  { --dot-col: rgba(110,231,183,0.70); }
-    66%  { --dot-col: rgba(249,168,212,0.75); }
-    83%  { --dot-col: rgba(147,197,253,0.78); }
-    100% { --dot-col: rgba(209,213,219,0.85); }
-}
-
-/* Dark-mode dot color cycle: dim → indigo → violet → emerald → pink → sky */
-@keyframes dot-color-cycle-dk {
-    0%   { --dot-col-dk: rgba(255,255,255,0.04); }
-    16%  { --dot-col-dk: rgba(99,102,241,0.13); }
-    33%  { --dot-col-dk: rgba(139,92,246,0.11); }
-    50%  { --dot-col-dk: rgba(16,185,129,0.09); }
-    66%  { --dot-col-dk: rgba(236,72,153,0.09); }
-    83%  { --dot-col-dk: rgba(56,189,248,0.10); }
-    100% { --dot-col-dk: rgba(255,255,255,0.04); }
+    0%   { background-position: 0% 0%; }
+    50%  { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
 }
 
 /* Brief glow pulse when user sends a message */
@@ -68,28 +35,26 @@ body {
     background-color: #efeae2;
     background-image:
         radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.07) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 55%),
-        radial-gradient(var(--dot-col) 1px, transparent 1px);
-    background-size: 200% 200%, 200% 200%, 22px 22px;
-    animation: bgShift 14s ease-in-out infinite, dot-color-cycle 20s ease-in-out infinite;
+        radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.06) 0%, transparent 55%);
+    background-size: 200% 200%, 200% 200%;
+    animation: bgShift 14s ease-in-out infinite;
 }
 
 html.dark .main-chat-background {
     background-color: #0b141a;
     background-image:
         radial-gradient(ellipse at 20% 20%, rgba(99,102,241,0.08) 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.07) 0%, transparent 55%),
-        radial-gradient(var(--dot-col-dk) 1px, transparent 1px);
-    background-size: 200% 200%, 200% 200%, 22px 22px;
-    animation: bgShift 14s ease-in-out infinite, dot-color-cycle-dk 20s ease-in-out infinite;
+        radial-gradient(ellipse at 80% 80%, rgba(139,92,246,0.07) 0%, transparent 55%);
+    background-size: 200% 200%, 200% 200%;
+    animation: bgShift 14s ease-in-out infinite;
 }
 
-/* On message send: dots cycle faster + brightness pulse */
+/* On message send: brightness pulse */
 .main-chat-background.chat-sending {
-    animation: bgShift 14s ease-in-out infinite, dot-color-cycle 7s ease-in-out infinite, sendPulse 0.65s ease-out !important;
+    animation: bgShift 14s ease-in-out infinite, sendPulse 0.65s ease-out !important;
 }
 html.dark .main-chat-background.chat-sending {
-    animation: bgShift 14s ease-in-out infinite, dot-color-cycle-dk 7s ease-in-out infinite, sendPulse 0.65s ease-out !important;
+    animation: bgShift 14s ease-in-out infinite, sendPulse 0.65s ease-out !important;
 }
 
 /* Chat bubbles */
