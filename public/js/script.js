@@ -365,6 +365,61 @@ document.addEventListener('DOMContentLoaded', () => {
         return { monthIdx: 0, dayIdx: 1 }; // default MM/DD/YY
     };
 
+    const animatePlaceholder = (inputEl, text) => {
+        if (!inputEl) return;
+        inputEl.targetPlaceholderText = text;
+        
+        if (inputEl.placeholderTimer) clearTimeout(inputEl.placeholderTimer);
+        if (inputEl.cursorTimer) clearInterval(inputEl.cursorTimer);
+        
+        let index = 0;
+        let currentText = '';
+        const cursorChar = ' |';
+        
+        const type = () => {
+            const currentTarget = inputEl.targetPlaceholderText || text;
+            if (document.activeElement === inputEl) {
+                inputEl.placeholder = currentTarget;
+                return;
+            }
+            if (index < currentTarget.length) {
+                currentText += currentTarget[index];
+                inputEl.placeholder = currentText + cursorChar;
+                index++;
+                const delay = currentTarget[index - 1] === ' ' ? 80 : (35 + Math.random() * 40);
+                inputEl.placeholderTimer = setTimeout(type, delay);
+            } else {
+                let showCursor = true;
+                inputEl.placeholder = currentTarget + cursorChar;
+                inputEl.cursorTimer = setInterval(() => {
+                    if (document.activeElement === inputEl) {
+                        inputEl.placeholder = currentTarget;
+                        clearInterval(inputEl.cursorTimer);
+                        return;
+                    }
+                    showCursor = !showCursor;
+                    inputEl.placeholder = currentTarget + (showCursor ? cursorChar : '  ');
+                }, 500);
+            }
+        };
+        
+        if (!inputEl.placeholderListenersAdded) {
+            inputEl.placeholderListenersAdded = true;
+            inputEl.addEventListener('focus', () => {
+                if (inputEl.placeholderTimer) clearTimeout(inputEl.placeholderTimer);
+                if (inputEl.cursorTimer) clearInterval(inputEl.cursorTimer);
+                inputEl.placeholder = inputEl.targetPlaceholderText || text;
+            });
+            inputEl.addEventListener('blur', () => {
+                if (!inputEl.value) {
+                    animatePlaceholder(inputEl, inputEl.targetPlaceholderText || text);
+                }
+            });
+        }
+        
+        type();
+    };
+
     const loadData = async (chatName) => {
         try {
             showSkeleton();
@@ -403,6 +458,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (otherPersonName) {
                     headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
                     sidebarAvatar.innerText = 'C';
+                }
+
+                // Animate bottom input placeholder typewriter effect
+                const bottomAiInput = document.getElementById('bottom-ai-input');
+                if (bottomAiInput) {
+                    animatePlaceholder(bottomAiInput, `Continue With virtual ${otherPersonName}…`);
                 }
 
                 statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
@@ -1300,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (askAiBtn) askAiBtn.classList.remove('hidden');
         if (clearGlobalChatBtn) clearGlobalChatBtn.classList.add('hidden');
         if (bottomAiInput) {
-            bottomAiInput.placeholder = 'Ask AI about this chat…';
+            animatePlaceholder(bottomAiInput, `Continue With virtual ${otherPersonName}…`);
         }
         const statusEl = document.querySelector('#chat-header-name + div p');
         if (statusEl) statusEl.innerText = 'online';
@@ -1341,7 +1402,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (statusEl) statusEl.innerText = 'Connecting...';
 
             if (bottomAiInput) {
-                bottomAiInput.placeholder = 'Send a message to everyone...';
+                animatePlaceholder(bottomAiInput, 'Send a message to everyone…');
             }
 
             const aiChatContainer = document.getElementById('ai-chat-container');
@@ -1606,6 +1667,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 100);
         }
     };
+
+    // Hotkey: Press '/' to focus `#bottom-ai-input` on PC/desktop
+    document.addEventListener('keydown', (e) => {
+        if (e.key === '/') {
+            const activeEl = document.activeElement;
+            if (activeEl && (
+                activeEl.tagName === 'INPUT' || 
+                activeEl.tagName === 'TEXTAREA' || 
+                activeEl.isContentEditable
+            )) {
+                return;
+            }
+            if (bottomAiInput) {
+                e.preventDefault();
+                bottomAiInput.focus();
+            }
+        }
+    });
 
     // Expose chat data getters globally for features (like Chat Wrapped)
     window.kothaGetAllMessages = () => allMessages;
