@@ -848,8 +848,16 @@
     function fallbackDownload(blob, fname) {
         const file = new File([blob], fname, { type: 'image/png' });
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({ files: [file], title: 'My Kotha Wrapped' })
-                .catch(() => directDownload(blob, fname));
+            try {
+                navigator.share({ files: [file], title: 'My Kotha' })
+                    .catch((err) => {
+                        console.warn('Share rejected, downloading directly:', err);
+                        directDownload(blob, fname);
+                    });
+            } catch (shareErr) {
+                console.warn('Share error (e.g. no gesture), downloading directly:', shareErr);
+                directDownload(blob, fname);
+            }
         } else {
             directDownload(blob, fname);
         }
