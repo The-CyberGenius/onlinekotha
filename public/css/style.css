@@ -1255,4 +1255,92 @@ input, button, select {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* ============ Enhanced Smart Filters & Wrapped Highlighter ============ */
+
+/* Dark mode background for filters container */
+html.dark #smart-filters-container {
+    background: #111b21 !important;
+}
+html.dark #smart-filters-container select option {
+    background: #2a3942 !important;
+    color: #e9edef !important;
+}
+
+/* Dark mode checkmark boxes and label states */
+html.dark #smart-filters-container .bg-indigo-50 {
+    background: rgba(99, 102, 241, 0.15) !important;
+}
+html.dark #smart-filters-container .bg-purple-50 {
+    background: rgba(168, 85, 247, 0.15) !important;
+}
+html.dark #smart-filters-container .bg-teal-50 {
+    background: rgba(20, 184, 166, 0.15) !important;
+}
+
+html.dark #smart-filters-container input[type="checkbox"] {
+    background-color: #2a3942 !important;
+    border-color: #3b4a54 !important;
+}
+
+/* Shimmering and pulsing Wrapped Button in sidebar */
+#btn-wrapped {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(236, 72, 153, 0.12) 100%) !important;
+    border: 1.5px solid rgba(245, 158, 11, 0.4) !important;
+    color: #b45309 !important;
+    animation: pulseWrapped 2.5s infinite ease-in-out;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#btn-wrapped:hover {
+    transform: scale(1.04) translateY(-1px);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(236, 72, 153, 0.22) 100%) !important;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+    border-color: rgba(245, 158, 11, 0.6) !important;
+    color: #92400e !important;
+}
+
+#btn-wrapped::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transform: skewX(-20deg);
+    animation: shimmerWrapped 4s infinite linear;
+}
+
+/* Dark mode Wrapped button overrides */
+html.dark #btn-wrapped {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 70, 239, 0.2) 100%) !important;
+    border-color: rgba(245, 158, 11, 0.45) !important;
+    color: #fbbf24 !important;
+}
+
+html.dark #btn-wrapped:hover {
+    color: #ffffff !important;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), 0 0 30px rgba(217, 70, 239, 0.25);
+    border-color: rgba(251, 191, 36, 0.85) !important;
+}
+
+@keyframes pulseWrapped {
+    0%, 100% {
+        box-shadow: 0 0 4px rgba(245, 158, 11, 0.15);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 14px rgba(245, 158, 11, 0.4), 0 0 22px rgba(236, 72, 153, 0.2);
+        transform: scale(1.03);
+    }
+}
+
+@keyframes shimmerWrapped {
+    0% { left: -150%; }
+    30% { left: 150%; }
+    100% { left: 150%; }
+}
+
 

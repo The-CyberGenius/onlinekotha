@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let otherPersonName = "Contact";
     let myName = null;
     let currentChat = '';
+    let datePartsOrder = { monthIdx: 0, dayIdx: 1 }; // default MM/DD/YY
 
     // View state
     let renderStart = 0;
@@ -223,6 +224,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderChats = (startIndex, endIndex, mode = 'reset') => {
+        if (mode === 'reset' && (startIndex === -1 || endIndex === -1 || startIndex >= endIndex || displayedMessages.length === 0)) {
+            lastRenderedDate = '';
+            chatContainer.innerHTML = '<div class="text-center py-12 text-sm text-gray-400 dark:text-gray-500 italic">No messages found matching current filters.</div>';
+            renderStart = 0;
+            renderEnd = 0;
+            return;
+        }
+
         const snippet = displayedMessages.slice(startIndex, endIndex);
         
         if (snippet.length === 0) return;
@@ -342,6 +351,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const detectDateFormat = (messages) => {
+        for (const msg of messages) {
+            if (!msg.date) continue;
+            const parts = msg.date.split('/');
+            if (parts.length === 3) {
+                const val0 = parseInt(parts[0], 10);
+                const val1 = parseInt(parts[1], 10);
+                if (val0 > 12) return { monthIdx: 1, dayIdx: 0 }; // DD/MM/YY
+                if (val1 > 12) return { monthIdx: 0, dayIdx: 1 }; // MM/DD/YY
+            }
+        }
+        return { monthIdx: 0, dayIdx: 1 }; // default MM/DD/YY
+    };
+
     const loadData = async (chatName) => {
         try {
             showSkeleton();
@@ -356,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             allMessages = data;
             displayedMessages = allMessages; // Default view is everything
+            datePartsOrder = detectDateFormat(allMessages);
             
             // Clear previous dynamically added filters if changing chats
             const filterContainer = document.getElementById('filter-buttons-container');
@@ -381,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     sidebarAvatar.innerText = 'C';
                 }
 
-                statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-700">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
+                statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
 
                 // Add Sender Filters to the Quick Actions UI automatically (toggle on/off)
                 let activeSenderFilter = null;
@@ -397,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             activeSenderFilter = null;
                             displayedMessages = [...allMessages];
                             btn.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
-                            statsInfo.innerHTML = `Showing all <span class="font-bold text-blue-700">${allMessages.length.toLocaleString()}</span> messages.`;
+                            statsInfo.innerHTML = `Showing all <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages.`;
                         } else {
                             // Toggle ON — filter by this sender
                             activeSenderFilter = sName;
@@ -407,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 b.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
                             });
                             btn.className = 'text-xs bg-purple-600 border border-purple-600 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-white hover:bg-purple-700 hover:shadow transition whitespace-nowrap cursor-pointer';
-                            statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-700">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
+                            statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
                         }
                         renderChats(-1, -1);
                         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length), 'reset');
@@ -461,15 +485,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayedMessages = allMessages.filter(msg => {
                         // Date check
                         if(d || m || y) {
+                            if (!msg.date) return false;
                             const parts = msg.date.split('/'); // Assuming MM/DD/YY or DD/MM/YY
                             if (parts.length === 3) {
-                                const msgM = parseInt(parts[0]);
-                                const msgD = parseInt(parts[1]);
+                                const msgM = parseInt(parts[datePartsOrder.monthIdx]);
+                                const msgD = parseInt(parts[datePartsOrder.dayIdx]);
                                 const msgY = parts[2];
 
                                 if (m && msgM !== parseInt(m)) return false;
                                 if (d && msgD !== parseInt(d)) return false;
                                 if (y && msgY !== y) return false;
+                            } else {
+                                return false;
                             }
                         }
 
@@ -537,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
 
-                    statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-700">${displayedMessages.length.toLocaleString()}</span> filtered msgs.`;
+                    statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> filtered msgs.`;
                 };
 
                 [daySelect, filterMonth, yearSelect, toggleMedia, toggleStickers, toggleLinks].forEach(el => {
@@ -1381,7 +1408,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnMedia.addEventListener('click', () => {
         displayedMessages = allMessages.filter(msg => msg.attachment && msg.type !== 'system');
         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
-        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-700">${displayedMessages.length}</span> media attachments.`;
+        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length}</span> media attachments.`;
         setTimeout(() => scrollArea.scrollTop = 0, 10);
         toggleSidebar(false);
     });
@@ -1459,7 +1486,7 @@ document.addEventListener('DOMContentLoaded', () => {
         searchClearBtn.classList.add('hidden');
         searchActionBtn.disabled = true;
         resultsList.innerHTML = '';
-        statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-700">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
+        statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
         if (displayedMessages.length !== allMessages.length) {
             displayedMessages = allMessages;
             const end = displayedMessages.length;
@@ -1483,7 +1510,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     filtered.push(allMessages[i]);
                 }
             }
-            statsInfo.innerHTML = `Found <span class="font-bold text-indigo-700">${filtered.length.toLocaleString()}</span> matches for "${query}".`;
+            statsInfo.innerHTML = `Found <span class="font-bold text-indigo-600 dark:text-indigo-400">${filtered.length.toLocaleString()}</span> matches for "${query}".`;
 
             let resultsHtml = '';
             const limitRes = filtered.slice(-100);

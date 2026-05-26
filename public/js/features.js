@@ -434,7 +434,7 @@
         return matches;
     }
 
-    function exportWrappedCanvas(stats) {
+    function exportWrappedCanvas(stats, action = 'download') {
         const canvas = document.createElement('canvas');
         canvas.width = 1080;
         canvas.height = 1920;
@@ -600,26 +600,50 @@
         canvas.toBlob((blob) => {
             if (!blob) return;
             const filename = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
-            if (navigator.share && navigator.canShare) {
-                const file = new File([blob], filename, { type: 'image/png' });
-                navigator.share({ files: [file], title: 'My Kotha Chat Wrapped' }).catch(() => {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                });
+
+            if (action === 'copy') {
+                if (navigator.clipboard && window.ClipboardItem) {
+                    navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]).then(() => {
+                        showToast('Image copied to clipboard! Paste it directly into your chat.');
+                    }).catch((err) => {
+                        console.error('Clipboard copy failed, downloading instead:', err);
+                        downloadBlobFallback(blob, filename);
+                    });
+                } else {
+                    showToast('Direct copying not supported. Downloading instead...');
+                    downloadBlobFallback(blob, filename);
+                }
             } else {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.click();
-                URL.revokeObjectURL(url);
+                downloadBlobFallback(blob, filename);
             }
-            showToast('Wrapped card downloaded!');
         }, 'image/png');
+    }
+
+    function downloadBlobFallback(blob, filename) {
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({
+                files: [file],
+                title: 'My Kotha Chat Wrapped',
+                text: 'Check out our chat statistics on onlinekotha.com!'
+            }).catch(() => {
+                triggerDownload(blob, filename);
+            });
+        } else {
+            triggerDownload(blob, filename);
+        }
+    }
+
+    function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Wrapped card saved!');
     }
 
     function launchWrapped() {
@@ -940,10 +964,16 @@
                                     </div>
                                 </div>
                                 
-                                <button class="wrapped-download-btn mt-6 flex items-center gap-2 w-full justify-center" id="wrapped-download-btn">
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                    Download Share Card
-                                </button>
+                                <div class="flex flex-col gap-2 mt-5 w-full">
+                                    <button class="wrapped-download-btn mt-0 flex items-center gap-2 w-full justify-center" id="wrapped-download-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                        Share / Download Card
+                                    </button>
+                                    <button class="bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12.5px] rounded-xl py-2.5 px-4 flex items-center gap-2 w-full justify-center transition active:scale-95 cursor-pointer" id="wrapped-copy-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                        Copy Card to Clipboard
+                                    </button>
+                                </div>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center uppercase tracking-widest">TAP LEFT TO REWATCH</div>
                         </div>
@@ -972,7 +1002,7 @@
 
         const container = overlay.querySelector('.wrapped-container');
         container.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('#wrapped-close-btn') || e.target.closest('.wrapped-download-btn')) return;
+            if (e.target.closest('#wrapped-close-btn') || e.target.closest('.wrapped-download-btn') || e.target.closest('#wrapped-copy-btn')) return;
             activeStory.pause();
         });
         const resumeAction = () => {
@@ -1007,7 +1037,12 @@
 
         overlay.querySelector('#wrapped-download-btn').addEventListener('click', (e) => {
             e.stopPropagation();
-            exportWrappedCanvas(stats);
+            exportWrappedCanvas(stats, 'download');
+        });
+
+        overlay.querySelector('#wrapped-copy-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            exportWrappedCanvas(stats, 'copy');
         });
     }
 
