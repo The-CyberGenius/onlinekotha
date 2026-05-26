@@ -25,9 +25,14 @@
     let onTypewriterComplete = null;  // fired once typewriter drains after stream ends
 
     // ─────────────────────────────────────────────
-    //  Dot FX Canvas — always-on per-dot pulse + color wave on AI reply
+    //  Dot FX Canvas — HiDPI sharp dots, per-dot pulse,
+    //  color wave on AI reply, + text-blast on send
     // ─────────────────────────────────────────────
-    let _dc = null, _dx = null, _dd = [], _dId = null, _dA = 0, _dOn = false, _dLastT = 0;
+    let _dc = null, _dx = null, _dd = [], _dId = null;
+    let _dA = 0, _dOn = false, _dLastT = 0;
+    let _dcW = 0, _dcH = 0;   // logical dimensions (pre-DPR)
+    let _dDPR = 1;
+    let _blastLock = false;   // prevent overlapping text blasts
     const _DSP = 22;
 
     function _dotInit() {
@@ -45,20 +50,33 @@
 
     function _dotResize() {
         if (!_dc) return;
-        const w = scrollArea.clientWidth, h = scrollArea.clientHeight;
-        _dc.width  = Math.ceil(w);
-        _dc.height = Math.ceil(h);
-        _dc.style.marginBottom = `-${Math.ceil(h)}px`;
+        _dDPR = Math.min(window.devicePixelRatio || 1, 3);
+        _dcW = scrollArea.clientWidth;
+        _dcH = scrollArea.clientHeight;
+        // Physical resolution = logical × DPR for crisp Retina rendering
+        _dc.width  = Math.ceil(_dcW * _dDPR);
+        _dc.height = Math.ceil(_dcH * _dDPR);
+        _dc.style.width  = _dcW + 'px';
+        _dc.style.height = _dcH + 'px';
+        _dc.style.marginBottom = `-${Math.ceil(_dcH)}px`;
+        // Reset transform so logical coords always used in draw calls
+        _dx.setTransform(_dDPR, 0, 0, _dDPR, 0, 0);
+
         _dd = [];
-        for (let x = _DSP / 2; x < w; x += _DSP) {
-            for (let y = _DSP / 2; y < h; y += _DSP) {
+        for (let x = _DSP / 2; x < _dcW; x += _DSP) {
+            for (let y = _DSP / 2; y < _dcH; y += _DSP) {
                 _dd.push({
-                    x, y,
+                    x, y,                           // grid (logical px)
+                    bX: x, bY: y,                   // blast exit position
                     phase:      (x + y) * 0.013 + Math.random() * 1.4,
                     speed:      0.45 + Math.random() * 0.85,
                     hueBase:    Math.random() * 360,
-                    pulseSpeed: 0.7 + Math.random() * 1.5,  // individual pulse rhythm
-                    sparkle:    0,                            // sparkle decay value
+                    pulseSpeed: 0.7 + Math.random() * 1.5,
+                    sparkle:    0,
+                    bs: 0,   // blast state: 0=normal 1=glow 2=blasting 3=returning
+                    bT: 0,   // blast start time
+                    bVx: 0, bVy: 0,  // blast velocity
+                    glowHue: 240,    // hue for glow/blast phase
                 });
             }
         }
@@ -71,21 +89,18 @@
         _dOn = true;
         if (!_dId) _dId = requestAnimationFrame(_dotLoop);
     }
-
     function _dotStop() { _dOn = false; }
 
     function _dotLoop(ts) {
         if (!_dx) { _dId = null; return; }
         const t = ts / 1000;
-
-        // Throttle idle to ~25fps to save CPU; full 60fps during AI reply
-        const IDLE_MS = 40;
-        if (!_dOn && _dA < 0.02 && (ts - _dLastT) < IDLE_MS) {
+        // Any blast dots = always 60fps; otherwise throttle idle to 25fps
+        const hasBlast = _dd.some(d => d.bs > 0);
+        if (!_dOn && _dA < 0.02 && !hasBlast && (ts - _dLastT) < 40) {
             _dId = requestAnimationFrame(_dotLoop);
             return;
         }
         _dLastT = ts;
-
         _dA += ((_dOn ? 1 : 0) - _dA) * 0.045;
         _dotDraw(_dA, t);
         _dId = requestAnimationFrame(_dotLoop);
@@ -94,54 +109,181 @@
     function _dotDraw(alpha, t) {
         if (!_dx || !_dc || _dd.length === 0) return;
         const dk = document.documentElement.classList.contains('dark');
-        const w  = _dc.width, h = _dc.height;
-        _dx.clearRect(0, 0, w, h);
+        _dx.clearRect(0, 0, _dcW, _dcH);  // logical dimensions
 
         for (const d of _dd) {
-            // Individual pulse: each dot breathes at its own rhythm (always active)
-            const pulse = 0.5 + 0.5 * Math.sin(t * d.pulseSpeed + d.phase * 2.1);
+            // ── GLOW state (forming text shape) ──────────────────────
+            if (d.bs === 1) {
+                const gp   = 0.5 + 0.5 * Math.sin(t * 9 + d.phase * 1.7);
+                const gr   = 2.0 + gp * 0.8;
+                // Soft halo
+                const grd  = _dx.createRadialGradient(d.x, d.y, 0, d.x, d.y, gr * 3.5);
+                grd.addColorStop(0, `hsla(${d.glowHue},88%,68%,${0.55 * gp})`);
+                grd.addColorStop(1, `hsla(${d.glowHue},88%,68%,0)`);
+                _dx.beginPath();
+                _dx.arc(d.x, d.y, gr * 3.5, 0, Math.PI * 2);
+                _dx.fillStyle = grd;
+                _dx.fill();
+                // Core bright dot
+                _dx.beginPath();
+                _dx.arc(d.x, d.y, gr, 0, Math.PI * 2);
+                _dx.fillStyle = `hsla(${d.glowHue},92%,72%,${0.85 + gp * 0.15})`;
+                _dx.fill();
+                continue;
+            }
 
-            // Random sparkle flash
-            if (Math.random() < 0.00025) d.sparkle = 1;
-            d.sparkle *= 0.82;
+            // ── BLASTING state (flying outward) ──────────────────────
+            if (d.bs === 2) {
+                const dt      = t - d.bT;
+                const fric    = Math.exp(-dt * 2.8);
+                const rx      = d.x  + d.bVx * dt * fric;
+                const ry      = d.y  + d.bVy * dt * fric;
+                const fade    = Math.max(0, 1 - dt * 2.4);
+                if (dt > 0.42) { d.bs = 3; d.bT = t; d.bX = rx; d.bY = ry; }
+                if (fade > 0.015) {
+                    _dx.beginPath();
+                    _dx.arc(rx, ry, 1.8, 0, Math.PI * 2);
+                    _dx.fillStyle = `hsla(${d.glowHue},85%,65%,${fade})`;
+                    _dx.fill();
+                }
+                continue;
+            }
+
+            // ── RETURNING state (flying back to grid) ─────────────────
+            if (d.bs === 3) {
+                const dt  = t - d.bT;
+                const p   = Math.min(1, dt / 0.55);
+                const e   = 1 - Math.pow(1 - p, 2.5);
+                const rx  = d.bX + (d.x - d.bX) * e;
+                const ry  = d.bY + (d.y - d.bY) * e;
+                if (p >= 1) { d.bs = 0; }
+                _dx.beginPath();
+                _dx.arc(rx, ry, 1.5, 0, Math.PI * 2);
+                _dx.fillStyle = dk
+                    ? `rgba(255,255,255,${0.07 * Math.min(1, dt * 3)})`
+                    : `rgba(209,213,219,${0.75 * Math.min(1, dt * 3)})`;
+                _dx.fill();
+                continue;
+            }
+
+            // ── NORMAL state (idle pulse / AI color wave) ─────────────
+            const pulse = 0.5 + 0.5 * Math.sin(t * d.pulseSpeed + d.phase * 2.1);
+            if (Math.random() < 0.00022) d.sparkle = 1;
+            d.sparkle *= 0.80;
             const sp = d.sparkle;
 
-            // Dot radius grows slightly on AI reply and sparkle
-            const r = 0.9 + alpha * 0.5 + sp * 0.7;
+            const r = 1.5 + alpha * 0.6 + sp * 0.9;   // larger, crisper radius
 
             _dx.beginPath();
             _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
 
             if (alpha < 0.025) {
-                // ── IDLE: neutral dots with individual pulse + faint hue drift
-                const idleHue = (d.hueBase + t * 5) % 360;   // very slow color drift
-                const idleSat = dk ? 12 : 18;                  // nearly desaturated
-                const idleLit = dk ? 72 : 62;
-                const base    = dk ? 0.03 + 0.035 * pulse : 0.50 + 0.38 * pulse;
-                const a       = Math.min(1, base + sp * 0.45);
-                _dx.fillStyle = `hsla(${idleHue},${idleSat}%,${idleLit}%,${a})`;
+                // IDLE: neutral with slight individual hue drift + pulse
+                const iHue = (d.hueBase + t * 5) % 360;
+                const iSat = dk ? 14 : 20;
+                const iLit = dk ? 74 : 64;
+                const a    = Math.min(1, (dk ? 0.06 + 0.07 * pulse : 0.60 + 0.32 * pulse) + sp * 0.5);
+                _dx.fillStyle = `hsla(${iHue},${iSat}%,${iLit}%,${a})`;
             } else {
-                // ── AI ACTIVE: vivid per-dot color wave
+                // AI ACTIVE: vivid wave
                 const wave = d.phase + t * d.speed;
                 const hue  = (d.hueBase + wave * 52) % 360;
-                const sat  = 72 + 12 * pulse;
-                const lit  = dk ? 52 + 16 * pulse : 52 + 20 * pulse;
-
-                // Neutral layer fading out
-                const nA = dk ? 0.04 * (1 - alpha) : 0.88 * (1 - alpha * 0.88);
-                if (nA > 0.008) {
+                const sat  = 74 + 14 * pulse;
+                const lit  = dk ? 54 + 18 * pulse : 54 + 22 * pulse;
+                const nA   = dk ? 0.04 * (1 - alpha) : 0.88 * (1 - alpha * 0.88);
+                if (nA > 0.01) {
                     _dx.fillStyle = dk ? `rgba(255,255,255,${nA})` : `rgba(209,213,219,${nA})`;
                     _dx.fill();
                     _dx.beginPath();
                     _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
                 }
-
-                // Colored layer
-                const cA = (dk ? 0.28 : 0.80) * alpha * (0.55 + 0.45 * pulse) + sp * 0.35;
+                const cA = (dk ? 0.30 : 0.84) * alpha * (0.55 + 0.45 * pulse) + sp * 0.4;
                 _dx.fillStyle = `hsla(${hue},${sat}%,${lit}%,${Math.min(1, cA)})`;
             }
             _dx.fill();
         }
+    }
+
+    // ─────────────────────────────────────────────
+    //  Text-Blast: when user sends a message, dots form
+    //  the text shape, glow, then explode outward
+    // ─────────────────────────────────────────────
+    function _triggerTextBlast(text) {
+        if (!_dc || !_dx || _dd.length === 0 || _blastLock) return;
+        _blastLock = true;
+
+        // Reset any previous blast
+        for (const d of _dd) { d.bs = 0; }
+
+        // ── Rasterise text on an off-screen canvas (logical px) ──
+        const display = text.length > 18 ? text.slice(0, 18) + '…' : text;
+        const fSz  = Math.max(32, Math.min(52, _dcH / 7));
+        const ofc  = document.createElement('canvas');
+        ofc.width  = _dcW;
+        ofc.height = Math.ceil(fSz * 2.2);
+        const oct  = ofc.getContext('2d');
+        oct.font   = `800 ${fSz}px Inter,-apple-system,system-ui,sans-serif`;
+        oct.textBaseline = 'alphabetic';
+        const tw   = oct.measureText(display).width;
+        const tx0  = Math.max(6, (_dcW - tw) / 2);
+        const ty0  = Math.ceil(fSz * 1.55);
+        oct.fillStyle = '#fff';
+        oct.fillText(display, tx0, ty0);
+
+        const px   = oct.getImageData(0, 0, ofc.width, ofc.height).data;
+        const yOff = (_dcH - ofc.height) / 2;   // vertical center in chat area
+
+        // ── Find which grid dots overlap the text pixels ──
+        const glowDots  = [];
+        const sr        = Math.ceil(_DSP * 0.55);  // sample radius
+        // Pre-build a color gradient across the text for variety
+        const hues      = [245, 280, 320, 200, 160]; // indigo→violet→pink→sky→emerald
+
+        for (const d of _dd) {
+            const px_ = Math.round(d.x);
+            const py_ = Math.round(d.y - yOff);
+            if (py_ < 0 || py_ >= ofc.height) continue;
+            let lit = false;
+            outer: for (let dy = -sr; dy <= sr; dy++) {
+                for (let dx = -sr; dx <= sr; dx++) {
+                    const nx = Math.max(0, Math.min(ofc.width - 1, px_ + dx));
+                    const ny = Math.max(0, Math.min(ofc.height - 1, py_ + dy));
+                    if (px[(ny * ofc.width + nx) * 4 + 3] > 55) { lit = true; break outer; }
+                }
+            }
+            if (lit) {
+                // Assign hue based on horizontal position (rainbow left→right)
+                const hIdx = Math.floor((d.x / _dcW) * hues.length);
+                d.glowHue  = hues[Math.min(hIdx, hues.length - 1)] + Math.random() * 25 - 12;
+                glowDots.push(d);
+            }
+        }
+
+        if (glowDots.length < 4) { _blastLock = false; return; }
+
+        // ── Phase 1: GLOW (dots light up at grid positions) ──
+        for (const d of glowDots) d.bs = 1;
+
+        // ── Phase 2: BLAST after 580ms ──
+        setTimeout(() => {
+            const cX = _dcW / 2, cY = _dcH / 2;
+            for (const d of glowDots) {
+                if (d.bs !== 1) continue;
+                d.bs  = 2;
+                d.bT  = performance.now() / 1000;
+                // Velocity = away from center + random scatter
+                const ang   = Math.atan2(d.y - cY, d.x - cX) + (Math.random() - 0.5) * 1.8;
+                const spd   = 130 + Math.random() * 240;
+                d.bVx = Math.cos(ang) * spd;
+                d.bVy = Math.sin(ang) * spd;
+            }
+
+            // ── Phase 3: RETURN after blast (400ms + 420ms = 1000ms) ──
+            // Dots return themselves in the drawing loop via bs=3
+
+            // Unlock after full cycle (~1.6s total)
+            setTimeout(() => { _blastLock = false; }, 1100);
+        }, 580);
     }
 
     // ─────────────────────────────────────────────
@@ -256,11 +398,12 @@
         bottomInput.value = '';
         updateSendBtn();
 
-        // Brief color pulse on the chat background dots
+        // Text-to-dots blast animation + CSS pulse
+        _triggerTextBlast(text);
         const chatBg = document.querySelector('.main-chat-background');
         if (chatBg) {
-            chatBg.classList.remove('chat-sending');          // reset if already active
-            void chatBg.offsetWidth;                          // force reflow so animation re-triggers
+            chatBg.classList.remove('chat-sending');
+            void chatBg.offsetWidth;
             chatBg.classList.add('chat-sending');
             setTimeout(() => chatBg.classList.remove('chat-sending'), 750);
         }
