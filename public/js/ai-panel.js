@@ -22,66 +22,75 @@
     let typeCursor          = null;
     let typeScrollArea      = null;
     let streamFinished      = false;
-    let onTypewriterComplete = null;  // fired once typewriter drains after stream ends
+    let onTypewriterComplete = null;
 
     // ─────────────────────────────────────────────
-    //  Dot FX Canvas — HiDPI sharp dots, per-dot pulse,
-    //  color wave on AI reply, + text-blast on send
+    //  Dot FX Canvas — lightweight, stops when idle
     // ─────────────────────────────────────────────
     let _dc = null, _dx = null, _dd = [], _dId = null;
-    let _dA = 0, _dOn = false, _dLastT = 0;
-    let _dcW = 0, _dcH = 0;   // logical dimensions (pre-DPR)
+    let _dA = 0, _dOn = false;
+    let _dcW = 0, _dcH = 0;
     let _dDPR = 1;
-    let _blastLock = false;   // prevent overlapping text blasts
-    const _DSP = 22;
+    let _dDotSp = 22;          // dot spacing (px)
+    let _blastLock = false;
 
     function _dotInit() {
         if (_dc) return;
         _dc = document.createElement('canvas');
         _dc.id = 'dot-fx-canvas';
-        _dc.style.cssText = 'position:sticky;top:0;left:0;width:100%;pointer-events:none;z-index:-1;display:block;';
+        _dc.style.cssText = 'position:sticky;top:0;left:0;width:100%;max-width:100%;pointer-events:none;z-index:-1;display:block;overflow:hidden;';
         _dx = _dc.getContext('2d');
         scrollArea.insertBefore(_dc, scrollArea.firstChild);
         _dotResize();
         new ResizeObserver(_dotResize).observe(scrollArea);
-        new MutationObserver(() => { if (_dc) _dotDraw(_dA, performance.now() / 1000); })
-            .observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        // Redraw idle dots after dark mode toggle
+        const dmBtn = document.getElementById('dark-mode-btn');
+        if (dmBtn) dmBtn.addEventListener('click', () => {
+            requestAnimationFrame(() => { if (!_dId) _dotDrawOnce(); });
+        });
     }
 
     function _dotResize() {
         if (!_dc) return;
-        _dDPR = Math.min(window.devicePixelRatio || 1, 3);
-        _dcW = scrollArea.clientWidth;
-        _dcH = scrollArea.clientHeight;
-        // Physical resolution = logical × DPR for crisp Retina rendering
+        const isMobile = window.innerWidth < 768;
+        _dDPR   = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+        _dDotSp = isMobile ? 28 : 22;
+
+        _dcW = scrollArea.clientWidth  || window.innerWidth;
+        _dcH = scrollArea.clientHeight || window.innerHeight;
+
         _dc.width  = Math.ceil(_dcW * _dDPR);
         _dc.height = Math.ceil(_dcH * _dDPR);
         _dc.style.width  = _dcW + 'px';
         _dc.style.height = _dcH + 'px';
-        _dc.style.marginBottom = `-${Math.ceil(_dcH)}px`;
-        // Reset transform so logical coords always used in draw calls
+        _dc.style.marginBottom = '-' + _dcH + 'px';
         _dx.setTransform(_dDPR, 0, 0, _dDPR, 0, 0);
 
         _dd = [];
-        for (let x = _DSP / 2; x < _dcW; x += _DSP) {
-            for (let y = _DSP / 2; y < _dcH; y += _DSP) {
+        for (let x = _dDotSp / 2; x < _dcW; x += _dDotSp) {
+            for (let y = _dDotSp / 2; y < _dcH; y += _dDotSp) {
                 _dd.push({
-                    x, y,                           // grid (logical px)
-                    bX: x, bY: y,                   // blast exit position
+                    x, y,
+                    bX: x, bY: y,
                     phase:      (x + y) * 0.013 + Math.random() * 1.4,
                     speed:      0.45 + Math.random() * 0.85,
                     hueBase:    Math.random() * 360,
                     pulseSpeed: 0.7 + Math.random() * 1.5,
                     sparkle:    0,
-                    bs: 0,   // blast state: 0=normal 1=glow 2=blasting 3=returning
-                    bT: 0,   // blast start time
-                    bVx: 0, bVy: 0,  // blast velocity
-                    glowHue: 240,    // hue for glow/blast phase
+                    bs: 0,   // 0=normal 1=glow 2=blasting 3=returning
+                    bT: 0,
+                    bVx: 0, bVy: 0,
+                    glowHue: 240,
                 });
             }
         }
+        _dotDrawOnce();
+        if (!_dId && (_dOn || _dA > 0.01)) _dId = requestAnimationFrame(_dotLoop);
+    }
+
+    // Draw exactly one frame — used to paint idle dots without keeping loop alive
+    function _dotDrawOnce() {
         _dotDraw(_dA, performance.now() / 1000);
-        if (!_dId) _dId = requestAnimationFrame(_dotLoop);
     }
 
     function _dotStart() {
@@ -92,53 +101,52 @@
     function _dotStop() { _dOn = false; }
 
     function _dotLoop(ts) {
-        if (!_dx) { _dId = null; return; }
+        _dId = null;
+        if (!_dx) return;
+
         const t = ts / 1000;
-        // Any blast dots = always 60fps; otherwise throttle idle to 25fps
         const hasBlast = _dd.some(d => d.bs > 0);
-        if (!_dOn && _dA < 0.02 && !hasBlast && (ts - _dLastT) < 40) {
-            _dId = requestAnimationFrame(_dotLoop);
-            return;
-        }
-        _dLastT = ts;
+
         _dA += ((_dOn ? 1 : 0) - _dA) * 0.045;
         _dotDraw(_dA, t);
-        _dId = requestAnimationFrame(_dotLoop);
+
+        // Only keep running while there is something to animate
+        if (_dOn || _dA > 0.01 || hasBlast) {
+            _dId = requestAnimationFrame(_dotLoop);
+        }
+        // Loop stops naturally when idle — restarted by _dotStart() or _triggerTextBlast()
     }
 
     function _dotDraw(alpha, t) {
         if (!_dx || !_dc || _dd.length === 0) return;
         const dk = document.documentElement.classList.contains('dark');
-        _dx.clearRect(0, 0, _dcW, _dcH);  // logical dimensions
+        _dx.clearRect(0, 0, _dcW, _dcH);
 
         for (const d of _dd) {
-            // ── GLOW state (forming text shape) ──────────────────────
+            // ── GLOW (bright, no gradient — much cheaper) ────────────
             if (d.bs === 1) {
-                const gp   = 0.5 + 0.5 * Math.sin(t * 9 + d.phase * 1.7);
-                const gr   = 2.0 + gp * 0.8;
-                // Soft halo
-                const grd  = _dx.createRadialGradient(d.x, d.y, 0, d.x, d.y, gr * 3.5);
-                grd.addColorStop(0, `hsla(${d.glowHue},88%,68%,${0.55 * gp})`);
-                grd.addColorStop(1, `hsla(${d.glowHue},88%,68%,0)`);
+                const gp = 0.5 + 0.5 * Math.sin(t * 9 + d.phase * 1.7);
+                const r  = 2.5 + gp * 1.5;
+                // Outer soft halo (cheap: one big transparent circle)
                 _dx.beginPath();
-                _dx.arc(d.x, d.y, gr * 3.5, 0, Math.PI * 2);
-                _dx.fillStyle = grd;
+                _dx.arc(d.x, d.y, r * 3, 0, Math.PI * 2);
+                _dx.fillStyle = `hsla(${d.glowHue},88%,68%,${0.10 * gp})`;
                 _dx.fill();
                 // Core bright dot
                 _dx.beginPath();
-                _dx.arc(d.x, d.y, gr, 0, Math.PI * 2);
-                _dx.fillStyle = `hsla(${d.glowHue},92%,72%,${0.85 + gp * 0.15})`;
+                _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
+                _dx.fillStyle = `hsla(${d.glowHue},92%,72%,${0.7 + gp * 0.3})`;
                 _dx.fill();
                 continue;
             }
 
-            // ── BLASTING state (flying outward) ──────────────────────
+            // ── BLASTING ──────────────────────────────────────────────
             if (d.bs === 2) {
-                const dt      = t - d.bT;
-                const fric    = Math.exp(-dt * 2.8);
-                const rx      = d.x  + d.bVx * dt * fric;
-                const ry      = d.y  + d.bVy * dt * fric;
-                const fade    = Math.max(0, 1 - dt * 2.4);
+                const dt   = t - d.bT;
+                const fric = Math.exp(-dt * 2.8);
+                const rx   = d.x + d.bVx * dt * fric;
+                const ry   = d.y + d.bVy * dt * fric;
+                const fade = Math.max(0, 1 - dt * 2.4);
                 if (dt > 0.42) { d.bs = 3; d.bT = t; d.bX = rx; d.bY = ry; }
                 if (fade > 0.015) {
                     _dx.beginPath();
@@ -149,14 +157,14 @@
                 continue;
             }
 
-            // ── RETURNING state (flying back to grid) ─────────────────
+            // ── RETURNING ─────────────────────────────────────────────
             if (d.bs === 3) {
-                const dt  = t - d.bT;
-                const p   = Math.min(1, dt / 0.55);
-                const e   = 1 - Math.pow(1 - p, 2.5);
-                const rx  = d.bX + (d.x - d.bX) * e;
-                const ry  = d.bY + (d.y - d.bY) * e;
-                if (p >= 1) { d.bs = 0; }
+                const dt = t - d.bT;
+                const p  = Math.min(1, dt / 0.55);
+                const e  = 1 - Math.pow(1 - p, 2.5);
+                const rx = d.bX + (d.x - d.bX) * e;
+                const ry = d.bY + (d.y - d.bY) * e;
+                if (p >= 1) d.bs = 0;
                 _dx.beginPath();
                 _dx.arc(rx, ry, 1.5, 0, Math.PI * 2);
                 _dx.fillStyle = dk
@@ -166,26 +174,23 @@
                 continue;
             }
 
-            // ── NORMAL state (idle pulse / AI color wave) ─────────────
+            // ── NORMAL (idle pulse / AI color wave) ───────────────────
             const pulse = 0.5 + 0.5 * Math.sin(t * d.pulseSpeed + d.phase * 2.1);
-            if (Math.random() < 0.00022) d.sparkle = 1;
+            if (Math.random() < 0.00008) d.sparkle = 1;
             d.sparkle *= 0.80;
             const sp = d.sparkle;
-
-            const r = 1.5 + alpha * 0.6 + sp * 0.9;   // larger, crisper radius
+            const r  = 1.5 + alpha * 0.6 + sp * 0.9;
 
             _dx.beginPath();
             _dx.arc(d.x, d.y, r, 0, Math.PI * 2);
 
             if (alpha < 0.025) {
-                // IDLE: neutral with slight individual hue drift + pulse
                 const iHue = (d.hueBase + t * 5) % 360;
                 const iSat = dk ? 14 : 20;
                 const iLit = dk ? 74 : 64;
                 const a    = Math.min(1, (dk ? 0.06 + 0.07 * pulse : 0.60 + 0.32 * pulse) + sp * 0.5);
                 _dx.fillStyle = `hsla(${iHue},${iSat}%,${iLit}%,${a})`;
             } else {
-                // AI ACTIVE: vivid wave
                 const wave = d.phase + t * d.speed;
                 const hue  = (d.hueBase + wave * 52) % 360;
                 const sat  = 74 + 14 * pulse;
@@ -205,19 +210,16 @@
     }
 
     // ─────────────────────────────────────────────
-    //  Text-Blast: when user sends a message, dots form
-    //  the text shape, glow, then explode outward
+    //  Text-Blast — dots form user's text, then explode
     // ─────────────────────────────────────────────
     function _triggerTextBlast(text) {
         if (!_dc || !_dx || _dd.length === 0 || _blastLock) return;
         _blastLock = true;
 
-        // Reset any previous blast
-        for (const d of _dd) { d.bs = 0; }
+        for (const d of _dd) d.bs = 0;
 
-        // ── Rasterise text on an off-screen canvas (logical px) ──
         const display = text.length > 18 ? text.slice(0, 18) + '…' : text;
-        const fSz  = Math.max(32, Math.min(52, _dcH / 7));
+        const fSz  = Math.max(28, Math.min(48, _dcH / 7));
         const ofc  = document.createElement('canvas');
         ofc.width  = _dcW;
         ofc.height = Math.ceil(fSz * 2.2);
@@ -231,13 +233,11 @@
         oct.fillText(display, tx0, ty0);
 
         const px   = oct.getImageData(0, 0, ofc.width, ofc.height).data;
-        const yOff = (_dcH - ofc.height) / 2;   // vertical center in chat area
+        const yOff = (_dcH - ofc.height) / 2;
 
-        // ── Find which grid dots overlap the text pixels ──
-        const glowDots  = [];
-        const sr        = Math.ceil(_DSP * 0.55);  // sample radius
-        // Pre-build a color gradient across the text for variety
-        const hues      = [245, 280, 320, 200, 160]; // indigo→violet→pink→sky→emerald
+        const glowDots = [];
+        const sr   = Math.ceil(_dDotSp * 0.55);
+        const hues = [245, 280, 320, 200, 160];
 
         for (const d of _dd) {
             const px_ = Math.round(d.x);
@@ -252,7 +252,6 @@
                 }
             }
             if (lit) {
-                // Assign hue based on horizontal position (rainbow left→right)
                 const hIdx = Math.floor((d.x / _dcW) * hues.length);
                 d.glowHue  = hues[Math.min(hIdx, hues.length - 1)] + Math.random() * 25 - 12;
                 glowDots.push(d);
@@ -261,29 +260,24 @@
 
         if (glowDots.length < 4) { _blastLock = false; return; }
 
-        // ── Phase 1: GLOW (dots light up at grid positions) ──
+        // Restart loop for blast animation
+        if (!_dId) _dId = requestAnimationFrame(_dotLoop);
+
         for (const d of glowDots) d.bs = 1;
 
-        // ── Phase 2: BLAST after 580ms ──
         setTimeout(() => {
             const cX = _dcW / 2, cY = _dcH / 2;
             for (const d of glowDots) {
                 if (d.bs !== 1) continue;
                 d.bs  = 2;
                 d.bT  = performance.now() / 1000;
-                // Velocity = away from center + random scatter
-                const ang   = Math.atan2(d.y - cY, d.x - cX) + (Math.random() - 0.5) * 1.8;
-                const spd   = 130 + Math.random() * 240;
+                const ang = Math.atan2(d.y - cY, d.x - cX) + (Math.random() - 0.5) * 1.8;
+                const spd = 120 + Math.random() * 200;
                 d.bVx = Math.cos(ang) * spd;
                 d.bVy = Math.sin(ang) * spd;
             }
-
-            // ── Phase 3: RETURN after blast (400ms + 420ms = 1000ms) ──
-            // Dots return themselves in the drawing loop via bs=3
-
-            // Unlock after full cycle (~1.6s total)
-            setTimeout(() => { _blastLock = false; }, 1100);
-        }, 580);
+            setTimeout(() => { _blastLock = false; }, 1000);
+        }, 550);
     }
 
     // ─────────────────────────────────────────────
@@ -311,7 +305,6 @@
             if (streamFinished) cleanupTypewriter();
             return;
         }
-        // 1-3 chars per tick for natural feel
         const chunk = typeQueue.slice(0, Math.random() > 0.7 ? 3 : 1);
         typeQueue = typeQueue.slice(chunk.length);
         typeTarget.textContent += chunk;
@@ -330,8 +323,6 @@
         typeTarget     = null;
         typeScrollArea = null;
         updateSendBtn();
-
-        // Fire completion callback (used for multi-bubble split)
         if (onTypewriterComplete) {
             const cb = onTypewriterComplete;
             onTypewriterComplete = null;
@@ -355,21 +346,18 @@
     function getCurrentConvId(){ return activeChat ? (conversationMap[activeChat] || null) : null; }
     function getContactName()  { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
 
-    // Send button: only disabled when input is empty
-    // (user can send while AI is responding — queue handles ordering)
     function updateSendBtn() {
         const hasText = bottomInput.value.trim().length > 0;
-        bottomSend.disabled    = !hasText;
+        bottomSend.disabled      = !hasText;
         bottomSend.style.opacity = !hasText ? '0.4' : '1';
     }
-    bottomInput.addEventListener('input',   updateSendBtn);
-    bottomInput.addEventListener('keyup',   updateSendBtn);
-    bottomInput.addEventListener('change',  updateSendBtn);
-    bottomInput.addEventListener('focus',   updateSendBtn);
-    bottomInput.addEventListener('blur',    updateSendBtn);
-    bottomInput.addEventListener('paste',   () => setTimeout(updateSendBtn, 10));
-    bottomInput.addEventListener('touchend',() => setTimeout(updateSendBtn, 50));
-    setInterval(updateSendBtn, 500);
+    bottomInput.addEventListener('input',    updateSendBtn);
+    bottomInput.addEventListener('keyup',    updateSendBtn);
+    bottomInput.addEventListener('change',   updateSendBtn);
+    bottomInput.addEventListener('focus',    updateSendBtn);
+    bottomInput.addEventListener('blur',     updateSendBtn);
+    bottomInput.addEventListener('paste',    () => setTimeout(updateSendBtn, 10));
+    bottomInput.addEventListener('touchend', () => setTimeout(updateSendBtn, 50));
 
     bottomInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); handleSend(); }
@@ -383,7 +371,7 @@
     });
 
     // ─────────────────────────────────────────────
-    //  Send handler — adds to queue, never blocks
+    //  Send handler
     // ─────────────────────────────────────────────
     function handleSend() {
         const text = bottomInput.value.trim();
@@ -393,12 +381,10 @@
         removeAiActionBar();
         activeChat = getActiveChat();
 
-        // Show user's bubble immediately — no waiting for AI
         appendUserBubble(text);
         bottomInput.value = '';
         updateSendBtn();
 
-        // Text-to-dots blast animation + CSS pulse
         _triggerTextBlast(text);
         const chatBg = document.querySelector('.main-chat-background');
         if (chatBg) {
@@ -408,32 +394,24 @@
             setTimeout(() => chatBg.classList.remove('chat-sending'), 750);
         }
 
-        // Queue the request
         msgQueue.push({ text, chat: activeChat });
-
-        // Kick off queue processor if idle
         if (!processing) processQueue();
     }
 
     // ─────────────────────────────────────────────
-    //  Queue processor — one AI request at a time
+    //  Queue processor
     // ─────────────────────────────────────────────
     async function processQueue() {
         if (processing || msgQueue.length === 0) return;
         processing = true;
-
         const item = msgQueue.shift();
         activeChat = item.chat;
-
         try {
             await sendToAI(item.text, item.chat);
         } catch (e) {
             console.error('processQueue error:', e);
         }
-
         processing = false;
-
-        // Small gap before next message, feels more natural
         if (msgQueue.length > 0) setTimeout(processQueue, 250);
     }
 
@@ -445,10 +423,8 @@
         const cName  = contactNameMap[chatFolder]  ||
             (document.getElementById('chat-header-name')?.innerText) || 'AI';
 
-        // Activate dot color wave — lights up individual dots while AI thinks
         _dotStart();
 
-        // Typing indicator
         const typingEl = document.createElement('div');
         typingEl.id        = 'ai-typing-inline';
         typingEl.className = 'flex justify-start mb-3 animate-message';
@@ -499,8 +475,8 @@
                         let event = 'message';
                         let dataLines = [];
                         for (const line of block.split('\n')) {
-                            if (line.startsWith('event:'))      event = line.slice(6).trim();
-                            else if (line.startsWith('data:'))  dataLines.push(line.slice(5).trim());
+                            if (line.startsWith('event:'))     event = line.slice(6).trim();
+                            else if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
                         }
                         if (!dataLines.length) continue;
                         let data;
@@ -526,27 +502,20 @@
                             feedTypewriter(data.text);
 
                         } else if (event === 'done') {
-                            // Update timestamp on first bubble
                             if (responseBubble) {
                                 const timeEl = responseBubble.querySelector('.ai-bubble-time');
                                 if (timeEl) timeEl.textContent = formatNow();
                             }
-                            // After typewriter drains: clean up any leaked context headers,
-                            // then split multi-paragraph into separate bubbles
                             onTypewriterComplete = () => {
-                                // Strip [#id date time sender] context metadata that AI should never output
                                 const cleanedText = fullText
                                     .replace(/\[#\d+[^\]\n]*\]/g, '')
                                     .replace(/[ \t]{2,}/g, ' ')
                                     .replace(/\n{3,}/g, '\n\n')
                                     .trim();
-
-                                // If text was dirty, update the already-rendered bubble
                                 if (cleanedText !== fullText && responseBubble) {
                                     const textEl = responseBubble.querySelector('.ai-response-text');
                                     if (textEl) textEl.textContent = cleanedText;
                                 }
-
                                 splitIntoBubbles(
                                     cleanedText, responseBubble,
                                     (chatFolder && contactNameMap[chatFolder]) || cName,
@@ -580,8 +549,6 @@
 
     // ─────────────────────────────────────────────
     //  Multi-bubble split
-    //  AI sends separate "messages" separated by \n\n.
-    //  Each one gets its own bubble with realistic typing delay.
     // ─────────────────────────────────────────────
     function splitIntoBubbles(fullText, firstBubble, contactName, onAllDone) {
         const paragraphs = fullText
@@ -594,29 +561,24 @@
             return;
         }
 
-        // Update first bubble to only the first paragraph
         const textEl = firstBubble.querySelector('.ai-response-text');
         if (textEl) textEl.textContent = paragraphs[0];
 
-        const maxBubbles = Math.min(paragraphs.length, 4); // max 4 messages at once
+        const maxBubbles = Math.min(paragraphs.length, 4);
+        let cumDelay = 180;
 
-        // Schedule each extra bubble with realistic cumulative delay.
-        // Delay = reading the previous message (~18ms/char) + typing next message (~32ms/char)
-        let cumDelay = 180; // small pause after first bubble finishes
         for (let i = 1; i < maxBubbles; i++) {
-            const prevLen = paragraphs[i - 1].length;
-            const nextLen = paragraphs[i].length;
-            // How long user "reads" previous bubble, then how long to "type" next
-            const readPrev  = Math.min(900,  Math.max(250, prevLen * 17));
-            const typingMs  = Math.min(2400, Math.max(500, nextLen * 33));
+            const prevLen  = paragraphs[i - 1].length;
+            const nextLen  = paragraphs[i].length;
+            const readPrev = Math.min(900,  Math.max(250, prevLen * 17));
+            const typingMs = Math.min(2400, Math.max(500, nextLen * 33));
             cumDelay += readPrev;
 
-            const para      = paragraphs[i];
-            const startAt   = cumDelay;
-            const isLast    = (i === maxBubbles - 1);
+            const para    = paragraphs[i];
+            const startAt = cumDelay;
+            const isLast  = (i === maxBubbles - 1);
 
             setTimeout(() => {
-                // Show mini typing indicator sized to the message length
                 const miniTyping = document.createElement('div');
                 miniTyping.className = 'flex justify-start mb-1 animate-message';
                 miniTyping.innerHTML = `
@@ -668,7 +630,6 @@
             toast('Continuing previous conversation');
         });
         document.getElementById('ai-reset-btn').addEventListener('click', () => {
-            // Start fresh without deleting — old conversation stays accessible in history
             if (activeChat) delete conversationMap[activeChat];
             const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
             msgs.forEach(m => m.remove());
@@ -755,7 +716,7 @@
     }
 
     // ─────────────────────────────────────────────
-    //  Sparkle button — focus AI input
+    //  Sparkle button
     // ─────────────────────────────────────────────
     const sparkleBtn = document.getElementById('ask-ai-btn');
     if (sparkleBtn) {
@@ -767,10 +728,7 @@
 
     // ─────────────────────────────────────────────
     //  Conversation Picker + History Loader
-    //  Shows last 3 conversations per chat with
-    //  Continue / Delete / New options
     // ─────────────────────────────────────────────
-
     function _fmtConvDate(ts) {
         if (!ts) return '';
         const d = new Date(ts);
@@ -784,7 +742,6 @@
     async function _renderConvPicker(convs, chatFolder) {
         const existing = document.getElementById('ai-conv-picker');
         if (existing) existing.remove();
-
         if (!convs || convs.length === 0) return;
 
         const top3 = convs.slice(0, 3);
@@ -792,12 +749,10 @@
         picker.id = 'ai-conv-picker';
         picker.className = 'mb-4';
 
-        const isDark = document.documentElement.classList.contains('dark');
-
         picker.innerHTML = `
             <div class="flex items-center justify-between mb-2 px-1">
-                <span class="text-[10px] font-bold uppercase tracking-widest opacity-40">Saved conversations</span>
-                <button id="ai-new-conv-btn" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-700 flex items-center gap-1 transition">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Saved conversations</span>
+                <button id="ai-new-conv-btn" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1 transition">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                     New chat
                 </button>
@@ -805,39 +760,35 @@
             <div id="ai-conv-list" class="flex flex-col gap-1.5"></div>`;
 
         chatContainer.insertBefore(picker, chatContainer.firstChild);
-
         const list = picker.querySelector('#ai-conv-list');
 
         top3.forEach((conv, idx) => {
             const isActive = conversationMap[chatFolder] === conv.id;
             const item = document.createElement('div');
-            item.className = `ai-conv-item flex items-center gap-2 rounded-xl px-3 py-2 cursor-pointer transition ${isActive ? 'bg-indigo-50 border border-indigo-200' : 'bg-white/60 border border-gray-100 hover:bg-gray-50'}`;
+            item.className = `ai-conv-item flex items-center gap-2 rounded-xl px-3 py-2 cursor-pointer transition ${isActive ? 'bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-500/40' : 'bg-white/60 dark:bg-white/5 border border-gray-100 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10'}`;
             item.dataset.convId = conv.id;
             item.innerHTML = `
                 <div class="flex-1 min-w-0">
-                    <p class="text-[11px] font-bold truncate ${isActive ? 'text-indigo-700' : 'text-gray-700'}">${escapeHTML(conv.title || 'Conversation ' + (idx + 1))}</p>
-                    <p class="text-[10px] opacity-50">${_fmtConvDate(conv.updated_at)} · ${conv.msg_count} msgs</p>
+                    <p class="text-[11px] font-bold truncate ${isActive ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'}">${escapeHTML(conv.title || 'Conversation ' + (idx + 1))}</p>
+                    <p class="text-[10px] opacity-40">${_fmtConvDate(conv.updated_at)} · ${conv.msg_count} msgs</p>
                 </div>
                 ${isActive ? '<span class="text-[9px] font-bold text-indigo-500 bg-indigo-100 px-1.5 py-0.5 rounded-full shrink-0">active</span>' : `<button class="conv-load-btn text-[11px] font-bold text-indigo-600 hover:text-indigo-800 shrink-0 px-2 py-1 rounded-lg hover:bg-indigo-50 transition" data-cid="${conv.id}">Load</button>`}
                 <button class="conv-del-btn text-[11px] text-gray-400 hover:text-red-500 shrink-0 px-1 transition" data-cid="${conv.id}" title="Delete">✕</button>`;
             list.appendChild(item);
         });
 
-        // "Load" button — switch to that conversation
         list.querySelectorAll('.conv-load-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const cid = Number(btn.dataset.cid);
                 conversationMap[chatFolder] = cid;
-                // Clear messages and reload
                 const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
                 msgs.forEach(m => m.remove());
                 await _loadConvMessages(cid, chatFolder);
-                await window.kothaLoadAiHistory(chatFolder); // re-render picker with new active
+                await window.kothaLoadAiHistory(chatFolder);
             });
         });
 
-        // "Delete" button
         list.querySelectorAll('.conv-del-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -849,18 +800,16 @@
                         const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
                         msgs.forEach(m => m.remove());
                     }
-                    await window.kothaLoadAiHistory(chatFolder); // refresh
+                    await window.kothaLoadAiHistory(chatFolder);
                     toast('Conversation deleted');
                 } catch {}
             });
         });
 
-        // "New chat" button — start fresh without deleting anything
         picker.querySelector('#ai-new-conv-btn').addEventListener('click', () => {
             delete conversationMap[chatFolder];
             const msgs = chatContainer.querySelectorAll('.flex.justify-start,.flex.justify-end,.flex.justify-center');
             msgs.forEach(m => m.remove());
-            // Re-render picker without an active conversation
             window.kothaLoadAiHistory(chatFolder);
             bottomInput.focus();
             toast('New conversation started');
@@ -894,25 +843,15 @@
     window.kothaLoadAiHistory = async (chatFolder) => {
         if (!chatFolder) return;
         activeChat = chatFolder;
-
-        // Full clear: picker + message bubbles
         chatContainer.innerHTML = '';
-
         try {
             const resp = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
             if (!resp.ok) return;
             const convs = await resp.json();
-
-            // Render the picker (last 3 conversations)
             await _renderConvPicker(convs, chatFolder);
-
             if (convs && convs.length > 0) {
-                // Auto-load most recent conversation if none active
                 if (!conversationMap[chatFolder]) {
                     conversationMap[chatFolder] = convs[0].id;
-                    if (convs[0].title) {
-                        // Extract contact name from first assistant message if not yet known
-                    }
                 }
                 await _loadConvMessages(conversationMap[chatFolder], chatFolder);
             }
@@ -923,6 +862,6 @@
 
     window.kothaToast = toast;
 
-    // Eagerly init dot canvas so neutral dots show from the start
+    // Init dot canvas on load (draws once, then loop stops — zero idle CPU)
     _dotInit();
 })();

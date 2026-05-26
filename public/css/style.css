@@ -15,6 +15,17 @@ body {
     }
 }
 
+/* Prevent canvas from causing horizontal scroll on mobile */
+#chat-scroll-area {
+    overflow-x: hidden;
+}
+
+/* Fix iOS Safari input auto-zoom — inputs must be >= 16px */
+#bottom-ai-input,
+#search-box {
+    font-size: 16px;
+}
+
 /* Chat background — Animated premium mesh. Dots are drawn via canvas (dot-fx-canvas)
    so each dot can be individually colored when AI is replying. */
 
