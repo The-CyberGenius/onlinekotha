@@ -607,13 +607,113 @@
 
         // Average words per message
         let totalWords = 0;
-        messages.forEach(m => { if (m.text) totalWords += m.text.split(/\s+/).length; });
+        let longestMsg = '', longestMsgLen = 0;
+        messages.forEach(m => {
+            if (m.text) {
+                const wc = m.text.split(/\s+/).length;
+                totalWords += wc;
+                if (wc > longestMsgLen) { longestMsgLen = wc; longestMsg = m.text; }
+            }
+        });
         const avgWords = totalMessages > 0 ? Math.round(totalWords / totalMessages) : 0;
 
         // Date range
         let firstDate = '', lastDate = '';
         for (const m of messages) { if (m.date) { firstDate = m.date; break; } }
         for (let i = messages.length - 1; i >= 0; i--) { if (messages[i].date) { lastDate = messages[i].date; break; } }
+
+        // ── Advanced analytics ──
+
+        // Messages per day of week
+        const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        const dayFullNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const dayCounts = [0,0,0,0,0,0,0];
+        const dateSet = new Set();
+        const dateMsgCounts = {};
+
+        messages.forEach(m => {
+            if (!m.date) return;
+            dateSet.add(m.date);
+            dateMsgCounts[m.date] = (dateMsgCounts[m.date] || 0) + 1;
+            // Parse date for day-of-week (handles DD/MM/YYYY, MM/DD/YYYY, etc.)
+            const parts = m.date.split(/[\/\-\.]/);
+            if (parts.length >= 3) {
+                // Try DD/MM/YYYY first (WhatsApp default)
+                let d = new Date(parseInt(parts[2] < 100 ? '20'+parts[2] : parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+                if (isNaN(d.getTime())) d = new Date(m.date);
+                if (!isNaN(d.getTime())) dayCounts[d.getDay()]++;
+            }
+        });
+
+        const totalDays = dateSet.size || 1;
+        const msgsPerDay = Math.round(totalMessages / totalDays);
+
+        // Busiest day of week
+        let busiestDayIdx = 0;
+        dayCounts.forEach((c, i) => { if (c > dayCounts[busiestDayIdx]) busiestDayIdx = i; });
+        const busiestDay = dayFullNames[busiestDayIdx];
+
+        // Busiest single date
+        let busiestDate = '', busiestDateCount = 0;
+        Object.entries(dateMsgCounts).forEach(([dt, c]) => {
+            if (c > busiestDateCount) { busiestDateCount = c; busiestDate = dt; }
+        });
+
+        // Chat streak (consecutive days)
+        const sortedDates = [...dateSet].sort((a, b) => {
+            const pa = a.split(/[\/\-\.]/), pb = b.split(/[\/\-\.]/);
+            const da = new Date(parseInt(pa[2]<100?'20'+pa[2]:pa[2]), parseInt(pa[1])-1, parseInt(pa[0]));
+            const db = new Date(parseInt(pb[2]<100?'20'+pb[2]:pb[2]), parseInt(pb[1])-1, parseInt(pb[0]));
+            return da - db;
+        });
+        let maxStreak = 1, curStreak = 1;
+        for (let i = 1; i < sortedDates.length; i++) {
+            const pa = sortedDates[i-1].split(/[\/\-\.]/), pb = sortedDates[i].split(/[\/\-\.]/);
+            const da = new Date(parseInt(pa[2]<100?'20'+pa[2]:pa[2]), parseInt(pa[1])-1, parseInt(pa[0]));
+            const db = new Date(parseInt(pb[2]<100?'20'+pb[2]:pb[2]), parseInt(pb[1])-1, parseInt(pb[0]));
+            const diff = Math.round((db - da) / 86400000);
+            if (diff === 1) { curStreak++; if (curStreak > maxStreak) maxStreak = curStreak; }
+            else curStreak = 1;
+        }
+
+        // Question marks count (who asks more)
+        let s1Questions = 0, s2Questions = 0;
+        messages.forEach(m => {
+            if (m.text && m.text.includes('?')) {
+                if (m.sender === s1[0]) s1Questions++;
+                else s2Questions++;
+            }
+        });
+        const totalQuestions = s1Questions + s2Questions;
+
+        // Media count (messages with <Media omitted> or attachment)
+        let mediaCount = 0;
+        messages.forEach(m => {
+            if (m.text && (/media omitted|image omitted|video omitted|audio omitted|sticker omitted|gif omitted|document omitted/i.test(m.text) || /\.(jpg|png|mp4|opus|webp)/i.test(m.text))) mediaCount++;
+        });
+
+        // Laughter count
+        let laughCount = 0;
+        messages.forEach(m => {
+            if (m.text && (/ha{2,}|lol|lmao|rofl|😂|🤣|😭/i.test(m.text))) laughCount++;
+        });
+
+        // Late night ratio
+        const lateNightPct = totalMessages > 0 ? Math.round((tc.night / totalMessages) * 100) : 0;
+
+        // Who texts first (by date — first message of each day)
+        let s1First = 0, s2First = 0;
+        const seenDates = new Set();
+        messages.forEach(m => {
+            if (m.date && !seenDates.has(m.date)) {
+                seenDates.add(m.date);
+                if (m.sender === s1[0]) s1First++;
+                else s2First++;
+            }
+        });
+
+        // Longest message preview (truncated)
+        const longestMsgPreview = longestMsg.length > 80 ? longestMsg.slice(0, 77) + '...' : longestMsg;
 
         return {
             totalMessages, otherName,
@@ -623,6 +723,14 @@
             timeCounts: tc,
             topEmojis, vibe, vibeDesc,
             avgWords, firstDate, lastDate, detectedNickname,
+            // Advanced
+            totalDays, msgsPerDay, totalWords,
+            busiestDay, busiestDayIdx, dayCounts, dayNames,
+            busiestDate, busiestDateCount,
+            maxStreak, longestMsgLen, longestMsgPreview,
+            totalQuestions, s1Questions, s2Questions,
+            mediaCount, laughCount, lateNightPct,
+            s1First, s2First,
         };
     }
 
@@ -1283,12 +1391,171 @@
                 });
             }
 
-            // Scene 4: Vibe + Emojis
+            // Scene 4: Fun Facts & Records
             function drawScene4(t) {
-                const cy = 350;
-                ctx.save();
+                ctx.textBaseline = 'top'; ctx.textAlign = 'left';
+                const cy = 220;
+                ctx.font = '800 24px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fillText('FUN FACTS', 80, cy);
+
+                const facts = [
+                    ['🔥', 'LONGEST STREAK', stats.maxStreak + ' days straight', '#fb923c'],
+                    ['📅', 'DAYS CHATTING', stats.totalDays + ' days · ' + stats.msgsPerDay + ' msgs/day', '#a5b4fc'],
+                    ['💬', 'TOTAL WORDS', stats.totalWords.toLocaleString() + ' words', '#c084fc'],
+                    ['😂', 'LOL MOMENTS', stats.laughCount.toLocaleString() + ' msgs with laughter', '#fbbf24'],
+                ];
+                if (stats.mediaCount > 0) facts.push(['📸', 'MEDIA SHARED', stats.mediaCount.toLocaleString() + ' photos/videos', '#22d3ee']);
+
+                facts.forEach(([icon, label, value, color], i) => {
+                    const fy = cy + 65 + i * 145;
+                    // Card
+                    ctx.beginPath(); roundedRect(ctx, 60, fy, W-120, 120, 24);
+                    ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
+                    // Icon
+                    ctx.font = '48px -apple-system, sans-serif';
+                    ctx.fillText(icon, 90, fy + 15);
+                    // Label
+                    ctx.font = '700 18px -apple-system, sans-serif';
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                    ctx.fillText(label, 165, fy + 20);
+                    // Value
+                    let vf = 38;
+                    ctx.font = `900 ${vf}px -apple-system, sans-serif`;
+                    while (ctx.measureText(value).width > W - 280 && vf > 22) { vf -= 2; ctx.font = `900 ${vf}px -apple-system, sans-serif`; }
+                    ctx.fillStyle = color;
+                    ctx.fillText(value, 165, fy + 55);
+                });
+            }
+
+            // Scene 5: Who's Eager + Day Activity
+            function drawScene5(t) {
+                ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+                const cy = 220;
+                ctx.font = '800 24px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fillText("WHO'S MORE EAGER?", W/2, cy);
+
+                ctx.font = '600 28px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.fillText('Who texts first each day?', W/2, cy + 50);
+
+                // VS layout
+                const vsY = cy + 120;
+                // Sender 1
+                ctx.font = '900 72px -apple-system, sans-serif';
+                ctx.fillStyle = stats.s1First >= stats.s2First ? '#a5b4fc' : 'rgba(255,255,255,0.3)';
+                ctx.fillText(String(stats.s1First), W/2 - 200, vsY);
+                ctx.font = '700 26px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.fillText(stats.sender1Name, W/2 - 200, vsY + 80);
+                if (stats.s1First >= stats.s2First) {
+                    ctx.font = '700 22px -apple-system, sans-serif';
+                    ctx.fillStyle = '#a5b4fc';
+                    ctx.fillText('👑 STARTER', W/2 - 200, vsY + 115);
+                }
+                // VS
+                ctx.font = '800 40px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillText('vs', W/2, vsY + 30);
+                // Sender 2
+                ctx.font = '900 72px -apple-system, sans-serif';
+                ctx.fillStyle = stats.s2First > stats.s1First ? '#f472b6' : 'rgba(255,255,255,0.3)';
+                ctx.fillText(String(stats.s2First), W/2 + 200, vsY);
+                ctx.font = '700 26px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.fillText(stats.sender2Name, W/2 + 200, vsY + 80);
+                if (stats.s2First > stats.s1First) {
+                    ctx.font = '700 22px -apple-system, sans-serif';
+                    ctx.fillStyle = '#f472b6';
+                    ctx.fillText('👑 STARTER', W/2 + 200, vsY + 115);
+                }
+
+                // Busiest day card
+                const bdY = vsY + 190;
+                ctx.textAlign = 'left';
+                ctx.beginPath(); roundedRect(ctx, 60, bdY, W-120, 130, 28);
+                ctx.fillStyle = 'rgba(251,191,36,0.06)'; ctx.fill();
+                ctx.strokeStyle = 'rgba(251,191,36,0.2)'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.font = '700 20px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fillText('BUSIEST DAY OF WEEK', 110, bdY + 25);
+                ctx.font = '900 42px -apple-system, sans-serif';
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText(stats.busiestDay + 's are your day! 📆', 110, bdY + 60);
+
+                // Most active date
+                if (stats.busiestDateCount > 0) {
+                    const mdY = bdY + 165;
+                    ctx.beginPath(); roundedRect(ctx, 60, mdY, W-120, 120, 28);
+                    ctx.fillStyle = 'rgba(52,211,153,0.06)'; ctx.fill();
+                    ctx.strokeStyle = 'rgba(52,211,153,0.2)'; ctx.lineWidth = 2; ctx.stroke();
+                    ctx.font = '700 20px -apple-system, sans-serif';
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                    ctx.fillText('MOST ACTIVE DAY EVER', 110, mdY + 22);
+                    ctx.font = '900 36px -apple-system, sans-serif';
+                    ctx.fillStyle = '#34d399';
+                    ctx.fillText(stats.busiestDate + ' — ' + stats.busiestDateCount + ' msgs! 🎉', 110, mdY + 60);
+                }
+
+                // Questions
+                if (stats.totalQuestions > 0) {
+                    const qY = bdY + (stats.busiestDateCount > 0 ? 320 : 165);
+                    ctx.beginPath(); roundedRect(ctx, 60, qY, W-120, 110, 28);
+                    ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
+                    ctx.font = '700 20px -apple-system, sans-serif';
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                    ctx.fillText('QUESTIONS ASKED ❓', 110, qY + 20);
+                    ctx.font = '800 30px -apple-system, sans-serif';
+                    ctx.fillStyle = '#c084fc';
+                    ctx.fillText(stats.sender1Name + ': ' + stats.s1Questions + '  ·  ' + stats.sender2Name + ': ' + stats.s2Questions, 110, qY + 55);
+                }
+            }
+
+            // Scene 6: Emojis
+            function drawScene6(t) {
+                ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+                const cy = 300;
                 ctx.font = '800 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fillText('EMOJI CHAMPIONS', W/2, cy);
+
+                const emojis = stats.topEmojis.slice(0, 5);
+                const spacing = 170;
+                const startX = W/2 - ((emojis.length - 1) * spacing) / 2;
+
+                // Podium style
+                emojis.forEach((emoji, i) => {
+                    const ex = startX + i * spacing;
+                    const heights = [260, 200, 160, 120, 100];
+                    const barH = heights[i] || 100;
+                    const barY = 720 - barH;
+                    const colors = ['#6366f1','#a855f7','#ec4899','#f472b6','#818cf8'];
+                    // Bar
+                    ctx.beginPath(); roundedRect(ctx, ex - 55, barY, 110, barH, 20);
+                    const bg = ctx.createLinearGradient(0, barY, 0, barY + barH);
+                    bg.addColorStop(0, colors[i]); bg.addColorStop(1, 'rgba(0,0,0,0.1)');
+                    ctx.fillStyle = bg; ctx.fill();
+                    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1.5; ctx.stroke();
+                    // Emoji on top
+                    ctx.font = `${i === 0 ? 72 : i < 3 ? 56 : 44}px -apple-system, sans-serif`;
+                    ctx.fillText(emoji, ex, barY - (i === 0 ? 85 : i < 3 ? 70 : 55));
+                    // Rank
+                    ctx.font = '800 28px -apple-system, sans-serif';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText('#' + (i + 1), ex, barY + 20);
+                });
+                ctx.textAlign = 'left';
+            }
+
+            // Scene 7: Vibe
+            function drawScene7(t) {
+                ctx.textBaseline = 'top'; ctx.textAlign = 'center';
+                const cy = 350;
+                ctx.font = '800 26px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
                 ctx.fillText('YOUR CHAT VIBE', W/2, cy);
 
                 ctx.font = '900 56px -apple-system, sans-serif';
@@ -1296,90 +1563,93 @@
                 vg.addColorStop(0,'#f472b6'); vg.addColorStop(1,'#c084fc');
                 ctx.fillStyle = vg;
                 ctx.fillText(stats.vibe, W/2, cy + 55);
-                ctx.restore();
 
                 ctx.save(); ctx.globalAlpha = 0.6;
                 ctx.font = '600 28px -apple-system, sans-serif';
-                ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-                ctx.fillText(stats.vibeDesc.length > 60 ? stats.vibeDesc.slice(0,57)+'...' : stats.vibeDesc, W/2, cy + 140);
+                ctx.fillStyle = '#fff';
+                const desc = stats.vibeDesc || '';
+                if (desc.length > 55) {
+                    const mid = desc.lastIndexOf(' ', 55);
+                    ctx.fillText(desc.slice(0, mid > 0 ? mid : 55), W/2, cy + 145);
+                    ctx.fillText(desc.slice(mid > 0 ? mid+1 : 55), W/2, cy + 183);
+                } else {
+                    ctx.fillText(desc, W/2, cy + 145);
+                }
                 ctx.restore();
 
-                ctx.save();
-                ctx.font = '800 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'center';
-                ctx.fillText('TOP EMOJIS', W/2, cy + 240);
-                ctx.restore();
+                // Big emoji
+                ctx.font = '120px -apple-system, sans-serif';
+                ctx.fillText(stats.topEmojis[0] || '💬', W/2, cy + 250);
 
-                const emojis = stats.topEmojis.slice(0, 5);
-                const emojiSpacing = 160;
-                const startX = W/2 - ((emojis.length - 1) * emojiSpacing) / 2;
-
-                emojis.forEach((emoji, i) => {
-                    ctx.save();
-                    ctx.font = `800 80px -apple-system, sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.fillText(emoji, startX + i * emojiSpacing, cy + 300);
-                    ctx.font = 'bold 22px -apple-system, sans-serif';
-                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                    ctx.fillText(`#${i+1}`, startX + i * emojiSpacing, cy + 400);
-                    ctx.restore();
-                });
+                // Late night stat
+                ctx.font = '700 26px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                ctx.fillText(stats.lateNightPct + '% of chats happen after midnight 🌙', W/2, cy + 420);
+                ctx.textAlign = 'left';
             }
 
-            // Scene 5: Summary card + CTA
-            function drawScene5(t) {
-                const cardY = 280;
-                const cardH = 900;
+            // Scene 8: Summary card + CTA (for share image)
+            function drawScene8(t) {
+                const cardY = 220;
+                const cardH = 1000;
+                ctx.textBaseline = 'top';
 
                 ctx.save();
                 ctx.beginPath(); roundedRect(ctx, 80, cardY, W-160, cardH, 40);
                 ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
                 ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 2; ctx.stroke();
 
-                ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-                let y = cardY + 50;
+                ctx.textAlign = 'left';
+                let y = cardY + 40;
 
-                ctx.font = '900 52px -apple-system, sans-serif';
+                ctx.font = '900 48px -apple-system, sans-serif';
                 ctx.fillStyle = '#fff';
+                let nf2 = 48;
+                ctx.font = `900 ${nf2}px -apple-system, sans-serif`;
+                while (ctx.measureText('Chat with ' + stats.otherName).width > W - 280 && nf2 > 28) { nf2 -= 2; ctx.font = `900 ${nf2}px -apple-system, sans-serif`; }
                 ctx.fillText('Chat with ' + stats.otherName, 140, y);
-                y += 80;
+                y += nf2 + 25;
 
                 const items = [
-                    ['TOTAL MESSAGES', stats.totalMessages.toLocaleString(), '#a5b4fc'],
-                    ['PEAK TIME', stats.peakLabel, '#fbbf24'],
-                    ['CHAT VIBE', stats.vibe, '#f472b6'],
-                    ['AVG WORDS/MSG', String(stats.avgWords), '#34d399'],
+                    ['💬', 'MESSAGES', stats.totalMessages.toLocaleString(), '#a5b4fc'],
+                    ['📅', 'DAYS ACTIVE', String(stats.totalDays), '#818cf8'],
+                    ['🔥', 'STREAK', stats.maxStreak + ' days', '#fb923c'],
+                    ['⏰', 'PEAK TIME', stats.peakLabel, '#fbbf24'],
+                    ['✨', 'VIBE', stats.vibe, '#f472b6'],
+                    ['😂', 'LOL MOMENTS', stats.laughCount.toLocaleString(), '#fbbf24'],
                 ];
-                items.forEach(([label, value, color]) => {
-                    ctx.save();
-                    ctx.font = '800 20px -apple-system, sans-serif';
+                // 2-col grid
+                const colW = (W - 320) / 2;
+                items.forEach(([icon, label, value, color], i) => {
+                    const col = i % 2;
+                    const row = Math.floor(i / 2);
+                    const cx = 140 + col * (colW + 40);
+                    const ry = y + row * 120;
+
+                    ctx.font = '36px -apple-system, sans-serif';
+                    ctx.fillText(icon, cx, ry);
+                    ctx.font = '700 16px -apple-system, sans-serif';
                     ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                    ctx.fillText(label, 140, y);
-
-                    ctx.font = '900 48px -apple-system, sans-serif';
+                    ctx.fillText(label, cx + 50, ry + 5);
+                    let vf2 = 36;
+                    ctx.font = `900 ${vf2}px -apple-system, sans-serif`;
+                    while (ctx.measureText(value).width > colW - 60 && vf2 > 20) { vf2 -= 2; ctx.font = `900 ${vf2}px -apple-system, sans-serif`; }
                     ctx.fillStyle = color;
-                    let valFont = 48;
-                    ctx.font = `900 ${valFont}px -apple-system, sans-serif`;
-                    while (ctx.measureText(value).width > W - 340 && valFont > 28) {
-                        valFont -= 2; ctx.font = `900 ${valFont}px -apple-system, sans-serif`;
-                    }
-                    ctx.fillText(value, 140, y + 30);
-                    ctx.restore();
-                    y += 140;
+                    ctx.fillText(value, cx + 50, ry + 30);
                 });
+                y += Math.ceil(items.length / 2) * 120 + 15;
 
-                ctx.save();
-                ctx.font = '800 20px -apple-system, sans-serif';
+                // Emojis
+                ctx.font = '700 16px -apple-system, sans-serif';
                 ctx.fillStyle = 'rgba(255,255,255,0.35)';
                 ctx.fillText('TOP EMOJIS', 140, y);
-                ctx.font = '56px -apple-system, sans-serif';
-                ctx.fillText(stats.topEmojis.slice(0,5).join('  ') || '💬', 140, y + 35);
-                ctx.restore();
+                ctx.font = '52px -apple-system, sans-serif';
+                ctx.fillText(stats.topEmojis.slice(0,5).join('  ') || '💬', 140, y + 28);
 
                 ctx.restore();
             }
 
-            const scenes = [drawScene1, drawScene2, drawScene3, drawScene4, drawScene5];
+            const scenes = [drawScene1, drawScene2, drawScene3, drawScene4, drawScene5, drawScene6, drawScene7, drawScene8];
             
             ctx.clearRect(0, 0, W, H);
             drawBg();
@@ -1519,7 +1789,113 @@
                         </div>
                     </div>
 
-                    <!-- 4: Emojis -->
+                    <!-- 4: Fun Facts & Records -->
+                    <div class="wrapped-slide">
+                        <div class="wrapped-slide-content">
+                            <div class="wrapped-header-tag">FUN FACTS</div>
+                            <div class="wrapped-main-body w-full">
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-4">Mind-blowing chat stats</p>
+                                <div class="space-y-3 w-full">
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">🔥</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Longest Streak</p>
+                                            <p class="text-lg font-black text-orange-400">${stats.maxStreak} days straight</p>
+                                        </div>
+                                    </div>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">📅</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Days Chatting</p>
+                                            <p class="text-lg font-black text-indigo-300">${stats.totalDays} days · ${stats.msgsPerDay} msgs/day</p>
+                                        </div>
+                                    </div>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">💬</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Words Written</p>
+                                            <p class="text-lg font-black text-purple-300">${stats.totalWords.toLocaleString()} words</p>
+                                        </div>
+                                    </div>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">😂</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">LOL Moments</p>
+                                            <p class="text-lg font-black text-yellow-300">${stats.laughCount.toLocaleString()} msgs with laughter</p>
+                                        </div>
+                                    </div>
+                                    ${stats.mediaCount > 0 ? `
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">📸</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Media Shared</p>
+                                            <p class="text-lg font-black text-cyan-300">${stats.mediaCount.toLocaleString()} photos/videos/audio</p>
+                                        </div>
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="3">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
+                        </div>
+                    </div>
+
+                    <!-- 5: Who Starts + Day Activity -->
+                    <div class="wrapped-slide">
+                        <div class="wrapped-slide-content">
+                            <div class="wrapped-header-tag">WHO'S MORE EAGER?</div>
+                            <div class="wrapped-main-body w-full">
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Who texts first each day?</p>
+                                <div class="flex justify-center gap-6 mb-6">
+                                    <div class="text-center">
+                                        <div class="text-3xl font-black ${stats.s1First >= stats.s2First ? 'text-indigo-400' : 'text-gray-400'}">${stats.s1First}</div>
+                                        <p class="text-[10px] text-gray-400 mt-1 font-bold">${escH(stats.sender1Name)}</p>
+                                        ${stats.s1First >= stats.s2First ? '<p class="text-[9px] text-indigo-400 font-bold mt-0.5">👑 STARTER</p>' : ''}
+                                    </div>
+                                    <div class="text-gray-600 text-2xl font-bold self-center">vs</div>
+                                    <div class="text-center">
+                                        <div class="text-3xl font-black ${stats.s2First > stats.s1First ? 'text-pink-400' : 'text-gray-400'}">${stats.s2First}</div>
+                                        <p class="text-[10px] text-gray-400 mt-1 font-bold">${escH(stats.sender2Name)}</p>
+                                        ${stats.s2First > stats.s1First ? '<p class="text-[9px] text-pink-400 font-bold mt-0.5">👑 STARTER</p>' : ''}
+                                    </div>
+                                </div>
+
+                                <div class="wrapped-badge-box text-left w-full mb-3">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2">Busiest Day of Week</p>
+                                    <p class="text-lg font-black text-amber-400">${stats.busiestDay}s are your day! 📆</p>
+                                </div>
+
+                                ${stats.totalQuestions > 0 ? `
+                                <div class="wrapped-badge-box text-left w-full mb-3">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2">Questions Asked</p>
+                                    <p class="text-sm font-bold text-gray-300">${stats.totalQuestions.toLocaleString()} total questions</p>
+                                    <div class="flex gap-3 mt-2">
+                                        <span class="text-xs text-indigo-300 font-bold">${escH(stats.sender1Name)}: ${stats.s1Questions}</span>
+                                        <span class="text-xs text-pink-300 font-bold">${escH(stats.sender2Name)}: ${stats.s2Questions}</span>
+                                    </div>
+                                </div>` : ''}
+
+                                ${stats.busiestDateCount > 0 ? `
+                                <div class="wrapped-badge-box text-left w-full">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Most Active Day Ever</p>
+                                    <p class="text-sm font-black text-green-400">${stats.busiestDate} — ${stats.busiestDateCount} messages! 🎉</p>
+                                </div>` : ''}
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="4">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
+                        </div>
+                    </div>
+
+                    <!-- 6: Emojis -->
                     <div class="wrapped-slide">
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">EMOJI CHAMPIONS</div>
@@ -1552,16 +1928,16 @@
                                 ` : `<div class="text-gray-500 text-sm">No emojis found in this chat!</div>`}
                             </div>
                             <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="3">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="5">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                    Share / Save
+                                    Save Card
                                 </button>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
                         </div>
                     </div>
 
-                    <!-- 5: Vibe -->
+                    <!-- 7: Vibe -->
                     <div class="wrapped-slide">
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">THE VIBE CHECK</div>
@@ -1571,19 +1947,20 @@
                                 <div class="wrapped-badge-box mt-4">
                                     <p class="text-xs text-gray-300 leading-relaxed font-medium">${stats.vibeDesc}</p>
                                 </div>
-                                <div class="text-6xl mt-8" style="animation:pulse 2s infinite">${stats.topEmojis[0] || '💬'}</div>
+                                <div class="text-6xl mt-6" style="animation:pulse 2s infinite">${stats.topEmojis[0] || '💬'}</div>
+                                <div class="mt-4 text-xs text-gray-500 font-bold">${stats.lateNightPct}% of chats happen after midnight 🌙</div>
                             </div>
                             <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="4">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                    Share / Save
+                                    Save Card
                                 </button>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT FOR SHARE CARD →</div>
                         </div>
                     </div>
 
-                    <!-- 6: Share / Export -->
+                    <!-- 8: Share / Export -->
                     <div class="wrapped-slide">
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">SHARE YOUR STORY</div>
@@ -1591,29 +1968,49 @@
                                 <div class="bg-gradient-to-br from-indigo-950/40 to-purple-950/40 border border-indigo-500/20 backdrop-blur-md rounded-3xl p-5 w-full text-left shadow-2xl relative overflow-hidden">
                                     <div class="absolute -top-10 -right-10 w-24 h-24 bg-pink-500/10 rounded-full filter blur-xl"></div>
                                     <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-500/10 rounded-full filter blur-xl"></div>
-                                    <div class="flex justify-between items-center mb-4">
+                                    <div class="flex justify-between items-center mb-3">
                                         <span class="text-[9px] font-black text-indigo-400 tracking-wider uppercase">Kotha Wrapped</span>
                                         <span class="text-[9px] text-gray-500 font-bold">onlinekotha.com</span>
                                     </div>
-                                    <h3 class="text-lg font-black text-white leading-tight mb-4">Chat with ${escH(stats.otherName)}</h3>
-                                    <div class="space-y-3.5">
-                                        <div>
-                                            <p class="text-[9px] text-gray-400 uppercase font-extrabold tracking-wider">Total Messages</p>
-                                            <p class="text-xl font-black text-white">${stats.totalMessages.toLocaleString()}</p>
+                                    <h3 class="text-base font-black text-white leading-tight mb-3">Chat with ${escH(stats.otherName)}</h3>
+                                    <div class="space-y-2.5">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Messages</p>
+                                                <p class="text-lg font-black text-white">${stats.totalMessages.toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Days Active</p>
+                                                <p class="text-lg font-black text-indigo-300">${stats.totalDays}</p>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Streak</p>
+                                                <p class="text-xs font-black text-orange-400">🔥 ${stats.maxStreak}d</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Peak</p>
+                                                <p class="text-xs font-extrabold text-amber-300">${stats.peakLabel}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Vibe</p>
+                                                <p class="text-xs font-extrabold text-purple-300">${stats.vibe}</p>
+                                            </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-2">
                                             <div>
-                                                <p class="text-[9px] text-gray-400 uppercase font-extrabold tracking-wider">Peak Time</p>
-                                                <p class="text-xs font-extrabold text-indigo-200">${stats.peakLabel}</p>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">LOL Moments</p>
+                                                <p class="text-xs font-black text-yellow-300">😂 ${stats.laughCount.toLocaleString()}</p>
                                             </div>
                                             <div>
-                                                <p class="text-[9px] text-gray-400 uppercase font-extrabold tracking-wider">Chat Vibe</p>
-                                                <p class="text-xs font-extrabold text-purple-200">${stats.vibe}</p>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Words Written</p>
+                                                <p class="text-xs font-black text-green-300">${stats.totalWords.toLocaleString()}</p>
                                             </div>
                                         </div>
                                         <div>
-                                            <p class="text-[9px] text-gray-400 uppercase font-extrabold tracking-wider mb-1">Top Emojis</p>
-                                            <p class="text-xl font-bold flex gap-1.5">${stats.topEmojis.slice(0, 5).join(' ') || '💬'}</p>
+                                            <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider mb-1">Top Emojis</p>
+                                            <p class="text-lg font-bold flex gap-1.5">${stats.topEmojis.slice(0, 5).join(' ') || '💬'}</p>
                                         </div>
                                     </div>
                                 </div>
