@@ -676,9 +676,10 @@
             ctx.font = '800 28px -apple-system, "Segoe UI", sans-serif';
             ctx.fillStyle = '#818cf8';
             ctx.fillText('✦ KOTHA WRAPPED', 80, 100);
+            // Professional watermark top right
             ctx.textAlign = 'right';
-            ctx.font = '600 24px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.font = '800 24px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.fillText('onlinekotha.com', W - 80, 104);
 
             // Thin accent line
@@ -858,23 +859,32 @@
             // ── Footer with CTA ──
             // Gradient accent line
             ctx.fillStyle = lineGrad;
-            ctx.fillRect(80, H - 200, W - 160, 2);
+            ctx.fillRect(80, H - 220, W - 160, 2);
 
             ctx.textAlign = 'center';
-            ctx.font = '800 32px -apple-system, sans-serif';
+            ctx.font = '800 28px -apple-system, sans-serif';
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.fillText('Made with Kotha', W / 2, H - 170);
+            ctx.fillText('Generate your own stats at', W / 2, H - 180);
 
-            ctx.font = '700 28px -apple-system, sans-serif';
-            const ctaGrad = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
-            ctaGrad.addColorStop(0, '#818cf8');
-            ctaGrad.addColorStop(1, '#c084fc');
-            ctx.fillStyle = ctaGrad;
-            ctx.fillText('✦  onlinekotha.com  ✦', W / 2, H - 125);
-
-            ctx.font = '500 22px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.2)';
-            ctx.fillText('Upload your WhatsApp chat · Get your Wrapped', W / 2, H - 80);
+            // Beautiful Pill Badge for onlinekotha.com
+            ctx.beginPath();
+            roundedRect(ctx, W/2 - 220, H - 135, 440, 70, 35);
+            const badgeGrad = ctx.createLinearGradient(W/2 - 220, 0, W/2 + 220, 0);
+            badgeGrad.addColorStop(0, '#6366f1');
+            badgeGrad.addColorStop(0.5, '#c084fc');
+            badgeGrad.addColorStop(1, '#f472b6');
+            ctx.fillStyle = badgeGrad;
+            ctx.fill();
+            
+            // Shadow / glow for badge
+            ctx.shadowColor = 'rgba(192, 132, 252, 0.4)';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.shadowBlur = 0; // reset
+            
+            ctx.font = '900 32px -apple-system, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('onlinekotha.com', W/2, H - 117);
 
             // ── Export ──
             const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
@@ -917,80 +927,131 @@
         }
     }
 
-    function dataURLtoFile(dataurl, filename) {
-        const arr = dataurl.split(',');
-        const mime = arr[0].match(/:(.*?);/)[1];
-        const bstr = atob(arr[1]);
-        let n = bstr.length;
-        const u8arr = new Uint8Array(n);
-        while (n--) {
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, { type: mime });
-    }
+    // Helper used previously to convert dataUrl to file (removed since we use canvas.toBlob directly now)
+
 
     function syncDownload(canvas, fname) {
         try {
-            const dataUrl = canvas.toDataURL('image/png', 1.0);
-            const file = dataURLtoFile(dataUrl, fname);
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                navigator.share({ files: [file], title: 'Kotha' })
-                    .catch((err) => {
-                        console.warn('Share rejected/failed:', err);
-                        if (err.name !== 'AbortError') {
-                            triggerDirectDownload(dataUrl, fname);
-                        }
-                    });
-            } else {
-                triggerDirectDownload(dataUrl, fname);
-            }
-        } catch (err) {
-            console.error('Sync download error, falling back:', err);
             canvas.toBlob((blob) => {
-                if (blob) fallbackDownload(blob, fname);
+                if (!blob) { showToast('Canvas generation failed'); return; }
+                const dataUrl = URL.createObjectURL(blob);
+                showShareModal(dataUrl, blob, fname);
             }, 'image/png', 1.0);
+        } catch (err) {
+            console.error('Download error:', err);
+            showToast('Error preparing image');
         }
     }
 
-    function triggerDirectDownload(dataUrl, fname) {
+    function showShareModal(dataUrl, blob, fname) {
+        // Remove existing modal if any
+        const existing = document.getElementById('kotha-share-modal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'kotha-share-modal';
+        modal.className = 'fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-4 transition-all duration-300 animate-in fade-in';
+        
+        // WhatsApp SVG
+        const waIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12.031 21.082c-1.637 0-3.21-.424-4.63-1.229l-5.182 1.36 1.385-5.051a9.982 9.982 0 0 1-1.34-4.992c0-5.512 4.49-10 10.016-10 5.51 0 9.998 4.488 9.998 10s-4.488 10-9.998 10l-.249-.088zm-4.485-3.08l.31.184c1.28.762 2.768 1.164 4.296 1.164 4.595 0 8.337-3.74 8.337-8.335s-3.742-8.336-8.337-8.336-8.338 3.741-8.338 8.336c0 1.577.42 3.1 1.223 4.42l.202.333-1.1 4 4.107-1.077zm4.61-9.967c-.201-.448-.415-.456-.6-.464-.154-.008-.33-.008-.507-.008a.965.965 0 0 0-.693.32c-.24.256-.91.888-.91 2.16 0 1.272.932 2.504 1.063 2.68.13.176 1.828 2.792 4.43 3.856 2.6 1.064 2.6.704 3.064.64.464-.064 1.498-.608 1.708-1.2.21-.592.21-1.104.148-1.2-.063-.104-.24-.168-.508-.304-.268-.136-1.583-.784-1.83-8.872-.246-.088-.426-.088-.61-.312L15 15.655c-.177.216-.364.24-.62.104-.256-.128-1.132-.416-2.158-1.328-.797-.712-1.336-1.592-1.494-1.85-.157-.256-.017-.392.112-.52.115-.112.268-.304.4-.464.131-.152.176-.256.264-.424.088-.168.044-.32-.02-.456-.064-.136-.61-1.472-.835-2.016z"/></svg>`;
+        
+        // Insta SVG
+        const igIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`;
+        
+        // Download SVG
+        const dlIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>`;
+
+        modal.innerHTML = `
+            <div class="bg-[#12141c] border border-gray-700/50 shadow-2xl rounded-[32px] p-6 w-full max-w-sm flex flex-col items-center relative" style="box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.25);">
+                <button class="absolute -top-4 -right-4 w-10 h-10 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-full flex items-center justify-center text-white transition-transform active:scale-95" id="close-img-modal">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+                
+                <h3 class="text-white font-black text-xl mb-1 mt-2 tracking-tight">Share Your Stats</h3>
+                <p class="text-gray-400 text-xs font-medium mb-5 text-center">Exported in high quality</p>
+                
+                <div class="relative w-full aspect-[9/16] max-h-[50vh] bg-gray-900 rounded-2xl overflow-hidden shadow-inner mb-6 border border-gray-800 flex items-center justify-center group">
+                    <img src="${dataUrl}" class="w-full h-full object-contain pointer-events-none" />
+                </div>
+                
+                <div class="flex flex-col gap-3 w-full">
+                    <!-- WhatsApp Share -->
+                    <button id="share-wa" class="w-full bg-[#25D366] hover:bg-[#20b858] text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95">
+                        ${waIcon} Share to WhatsApp
+                    </button>
+                    
+                    <!-- Instagram Share -->
+                    <button id="share-ig" class="w-full bg-gradient-to-r from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888] text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95">
+                        ${igIcon} Share to Instagram
+                    </button>
+                    
+                    <!-- Download -->
+                    <button id="share-dl" class="w-full bg-gray-800 hover:bg-gray-700 text-white font-extrabold py-3.5 px-4 rounded-xl flex items-center justify-center gap-3 transition-transform active:scale-95 border border-gray-700">
+                        ${dlIcon} Download Image
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Close handling
+        const closeMod = () => {
+            modal.style.opacity = '0';
+            setTimeout(() => { modal.remove(); URL.revokeObjectURL(dataUrl); }, 300);
+        };
+        modal.querySelector('#close-img-modal').addEventListener('click', closeMod);
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeMod(); });
+
+        const isMobile = /iPad|iPhone|iPod|Android/i.test(navigator.userAgent);
+
+        // Perform share if supported natively, otherwise fallback to download
+        const executeShare = async (platform) => {
+            const file = new File([blob], fname, { type: 'image/png' });
+            
+            // Native share is supported (Mobile Safari/Chrome)
+            if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({ 
+                        title: 'My Kotha Stats',
+                        text: 'Check out my WhatsApp wrapped from onlinekotha.com! ✨',
+                        files: [file] 
+                    });
+                    showToast(`Shared to ${platform}!`);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.warn('Share failed, downloading instead:', err);
+                        performDirectDownload(dataUrl, fname);
+                    }
+                }
+            } else {
+                // Desktop fallback - web share API for files on desktop is buggy (creates local tmp paths)
+                // Better to just download and tell them to share it
+                performDirectDownload(dataUrl, fname);
+                showToast(`Image downloaded! Open ${platform} to share it.`);
+            }
+        };
+
+        modal.querySelector('#share-wa').addEventListener('click', () => {
+            executeShare('WhatsApp');
+        });
+        
+        modal.querySelector('#share-ig').addEventListener('click', () => {
+            executeShare('Instagram');
+        });
+        
+        modal.querySelector('#share-dl').addEventListener('click', () => {
+            performDirectDownload(dataUrl, fname);
+        });
+    }
+
+    function performDirectDownload(dataUrl, fname) {
         const a = document.createElement('a');
         a.href = dataUrl;
         a.download = fname;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        showToast('Card saved!');
-    }
-
-    function fallbackDownload(blob, fname) {
-        const file = new File([blob], fname, { type: 'image/png' });
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-            try {
-                navigator.share({ files: [file], title: 'My Kotha' })
-                    .catch((err) => {
-                        console.warn('Share rejected/failed:', err);
-                        if (err.name !== 'AbortError') {
-                            directDownload(blob, fname);
-                        }
-                    });
-            } catch (shareErr) {
-                console.warn('Share error (e.g. no gesture), downloading directly:', shareErr);
-                directDownload(blob, fname);
-            }
-        } else {
-            directDownload(blob, fname);
-        }
-    }
-
-    function directDownload(blob, fname) {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = fname;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-        showToast('Wrapped card saved!');
+        showToast('Image downloaded!');
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1038,10 +1099,13 @@
                 ctx.font = '800 28px -apple-system, sans-serif';
                 ctx.fillStyle = '#818cf8';
                 ctx.fillText('✦ KOTHA WRAPPED', 80, 100);
+                
+                // Professional watermark top right
                 ctx.textAlign = 'right';
-                ctx.font = '600 24px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.25)';
+                ctx.font = '800 24px -apple-system, sans-serif';
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
                 ctx.fillText('onlinekotha.com', W - 80, 104);
+                
                 // Accent line
                 const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
                 lineGrad.addColorStop(0, '#6366f1');
@@ -1055,21 +1119,37 @@
             function drawFooter(t) {
                 const alpha = Math.min(1, t * 2);
                 ctx.save(); ctx.globalAlpha = alpha; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                
+                // Top border line for footer
                 const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
                 lineGrad.addColorStop(0, '#6366f1'); lineGrad.addColorStop(0.5, '#ec4899'); lineGrad.addColorStop(1, '#f59e0b');
                 ctx.fillStyle = lineGrad;
-                ctx.fillRect(80, H - 200, W - 160, 2);
-                ctx.font = '800 32px -apple-system, sans-serif';
+                ctx.fillRect(80, H - 220, W - 160, 2);
+                
+                ctx.font = '800 28px -apple-system, sans-serif';
                 ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.fillText('Made with Kotha', W/2, H - 170);
-                ctx.font = '700 28px -apple-system, sans-serif';
-                const ctaG = ctx.createLinearGradient(W/2-200,0,W/2+200,0);
-                ctaG.addColorStop(0,'#818cf8'); ctaG.addColorStop(1,'#c084fc');
-                ctx.fillStyle = ctaG;
-                ctx.fillText('✦  onlinekotha.com  ✦', W/2, H - 125);
-                ctx.font = '500 22px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.2)';
-                ctx.fillText('Upload your WhatsApp chat · Get your Wrapped', W/2, H - 80);
+                ctx.fillText('Generate your own stats at', W/2, H - 180);
+                
+                // Beautiful Pill Badge for onlinekotha.com
+                ctx.beginPath();
+                roundedRect(ctx, W/2 - 220, H - 135, 440, 70, 35);
+                const badgeGrad = ctx.createLinearGradient(W/2 - 220, 0, W/2 + 220, 0);
+                badgeGrad.addColorStop(0, '#6366f1');
+                badgeGrad.addColorStop(0.5, '#c084fc');
+                badgeGrad.addColorStop(1, '#f472b6');
+                ctx.fillStyle = badgeGrad;
+                ctx.fill();
+                
+                // Shadow / glow for badge
+                ctx.shadowColor = 'rgba(192, 132, 252, 0.4)';
+                ctx.shadowBlur = 20;
+                ctx.fill();
+                ctx.shadowBlur = 0; // reset
+                
+                ctx.font = '900 32px -apple-system, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText('onlinekotha.com', W/2, H - 117);
+                
                 ctx.restore();
             }
 
@@ -1432,7 +1512,7 @@
                             <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
                                 <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="2">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                    Save Card
+                                    Share / Save
                                 </button>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
@@ -1474,7 +1554,7 @@
                             <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
                                 <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="3">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                    Save Card
+                                    Share / Save
                                 </button>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
@@ -1496,7 +1576,7 @@
                             <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
                                 <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="4">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                    Save Card
+                                    Share / Save
                                 </button>
                             </div>
                             <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT FOR SHARE CARD →</div>
@@ -1747,8 +1827,8 @@
             ctx.fillStyle = '#818cf8';
             ctx.fillText('✦ KOTHA STATS', 80, 100);
             ctx.textAlign = 'right';
-            ctx.font = '600 24px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.25)';
+            ctx.font = '800 24px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.fillText('onlinekotha.com', W - 80, 104);
 
             // Thin accent line
@@ -1868,23 +1948,32 @@
 
             // ── Footer ──
             ctx.fillStyle = lineGrad;
-            ctx.fillRect(80, H - 200, W - 160, 2);
+            ctx.fillRect(80, H - 220, W - 160, 2);
 
             ctx.textAlign = 'center';
-            ctx.font = '800 32px -apple-system, sans-serif';
+            ctx.font = '800 28px -apple-system, sans-serif';
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.fillText('Made with Kotha', W / 2, H - 170);
+            ctx.fillText('Generate your own stats at', W / 2, H - 180);
 
-            ctx.font = '700 28px -apple-system, sans-serif';
-            const ctaGrad = ctx.createLinearGradient(W / 2 - 200, 0, W / 2 + 200, 0);
-            ctaGrad.addColorStop(0, '#818cf8');
-            ctaGrad.addColorStop(1, '#c084fc');
-            ctx.fillStyle = ctaGrad;
-            ctx.fillText('✦  onlinekotha.com  ✦', W / 2, H - 125);
-
-            ctx.font = '500 22px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.2)';
-            ctx.fillText('Upload your WhatsApp chat · Get your Stats', W / 2, H - 80);
+            // Beautiful Pill Badge for onlinekotha.com
+            ctx.beginPath();
+            roundedRect(ctx, W/2 - 220, H - 135, 440, 70, 35);
+            const badgeGrad = ctx.createLinearGradient(W/2 - 220, 0, W/2 + 220, 0);
+            badgeGrad.addColorStop(0, '#6366f1');
+            badgeGrad.addColorStop(0.5, '#c084fc');
+            badgeGrad.addColorStop(1, '#f472b6');
+            ctx.fillStyle = badgeGrad;
+            ctx.fill();
+            
+            // Shadow / glow for badge
+            ctx.shadowColor = 'rgba(192, 132, 252, 0.4)';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.shadowBlur = 0; // reset
+            
+            ctx.font = '900 32px -apple-system, sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('onlinekotha.com', W/2, H - 117);
 
             // ── Export ──
             const fname = `${stats.contactName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_stats.png`;

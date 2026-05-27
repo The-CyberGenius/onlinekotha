@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
 
         return `
-            <div class="flex flex-col mb-1.5 w-full" id="msg-${msg.id}">
+            <div class="flex flex-col mb-1 w-full" id="msg-${msg.id}">
                 <div class="max-w-[85%] md:max-w-md lg:max-w-lg relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
                     ${nameHtml}
                     ${mediaHtml}
@@ -306,18 +306,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastRenderedDate = '';
 
     const generateChatsHtml = (snippet) => {
-        let html = '';
+        const frag = document.createDocumentFragment();
         snippet.forEach((msg, idx) => {
             if (msg.type !== 'system' && msg.date !== lastRenderedDate) {
-                html += `
-                <div class="flex justify-center mb-6 w-full date-separator">
-                    <span class="bg-gray-800/20 backdrop-blur-md text-gray-800 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 uppercase">${formatChatDate(msg.date)}</span>
-                </div>`;
+                const dateSep = document.createElement('div');
+                dateSep.className = 'flex justify-center mb-6 w-full date-separator';
+                dateSep.setAttribute('data-date', msg.date);
+                dateSep.innerHTML = `<span class="bg-gray-800/20 backdrop-blur-md text-gray-800 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 uppercase">${formatChatDate(msg.date)}</span>`;
+                frag.appendChild(dateSep);
                 lastRenderedDate = msg.date;
             }
-            html += renderMessage(msg, idx);
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = renderMessage(msg, idx);
+            while (wrapper.firstChild) frag.appendChild(wrapper.firstChild);
         });
-        return html;
+        return frag;
     };
 
     const renderChats = (startIndex, endIndex, mode = 'reset') => {
@@ -335,22 +338,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (mode === 'reset') {
             lastRenderedDate = '';
-            chatContainer.innerHTML = generateChatsHtml(snippet);
+            chatContainer.innerHTML = '';
+            chatContainer.appendChild(generateChatsHtml(snippet));
             renderStart = startIndex;
             renderEnd = endIndex;
         } else if (mode === 'older') {
-            // Need to calculate date separately for prepends since they are inserted backwards relative to existing DOM
-            const previousFirst = displayedMessages[renderStart]?.date;
             lastRenderedDate = '';
-            const html = generateChatsHtml(snippet);
+            const frag = generateChatsHtml(snippet);
             const oldScroll = scrollArea.scrollHeight;
-            chatContainer.insertAdjacentHTML('afterbegin', html);
+            chatContainer.insertBefore(frag, chatContainer.firstChild);
             scrollArea.scrollTop += (scrollArea.scrollHeight - oldScroll);
             renderStart = startIndex;
         } else if (mode === 'newer') {
             lastRenderedDate = displayedMessages[renderEnd - 1]?.date || '';
-            const html = generateChatsHtml(snippet);
-            chatContainer.insertAdjacentHTML('beforeend', html);
+            const frag = generateChatsHtml(snippet);
+            chatContainer.appendChild(frag);
             renderEnd = endIndex;
         }
         
@@ -415,42 +417,23 @@ document.addEventListener('DOMContentLoaded', () => {
             _scrollRaf = requestAnimationFrame(() => {
                 _scrollRaf = null;
 
-                // ── Floating date + header date ──
-                if (floatingDate) {
-                    // Find the topmost visible date separator first (cheaper than scanning all msg elements)
-                    const separators = chatContainer.querySelectorAll('.date-separator');
+                // ── Floating date + header date ── 
+                // OPTIMIZED: Use array index instead of DOM querySelectorAll scan
+                if (floatingDate && displayedMessages.length > 0) {
+                    // Estimate visible message index from scroll position ratio
+                    const scrollRatio = scrollArea.scrollTop / Math.max(1, scrollArea.scrollHeight - scrollArea.clientHeight);
+                    const estimatedIdx = renderStart + Math.floor((renderEnd - renderStart) * scrollRatio);
+                    const clampedIdx = Math.max(renderStart, Math.min(estimatedIdx, renderEnd - 1));
+                    
+                    // Find date from displayedMessages array — O(1) vs O(n) DOM scan
+                    const visibleMsg = displayedMessages[clampedIdx];
                     let closestDate = null;
-                    const scrollTop = scrollArea.scrollTop;
-                    const threshold = scrollArea.getBoundingClientRect().top + 80;
-
-                    // Walk separators to find the one closest to viewport top
-                    for (let i = separators.length - 1; i >= 0; i--) {
-                        const rect = separators[i].getBoundingClientRect();
-                        if (rect.top <= threshold) {
-                            closestDate = separators[i].textContent.trim();
-                            break;
-                        }
-                    }
-
-                    // Fallback: find topmost visible message's date
-                    if (!closestDate) {
-                        const children = chatContainer.children;
-                        for (let i = 0; i < children.length; i++) {
-                            const el = children[i];
-                            if (!el.id || !el.id.startsWith('msg-')) continue;
-                            if (el.getBoundingClientRect().top + el.offsetHeight > threshold) {
-                                const msgId = parseInt(el.id.replace('msg-', ''));
-                                const msg = displayedMessages.find(m => m.id === msgId);
-                                if (msg && msg.date) {
-                                    const pd = parseMsgDate(msg.date);
-                                    if (pd) {
-                                        const dateObj = new Date(pd.y, pd.mon - 1, pd.day);
-                                        const monthName = dateObj.toLocaleString('en-IN', { month: 'long' });
-                                        closestDate = `${pd.day} ${monthName} ${pd.y}`;
-                                    }
-                                }
-                                break;
-                            }
+                    if (visibleMsg && visibleMsg.date) {
+                        const pd = parseMsgDate(visibleMsg.date);
+                        if (pd) {
+                            const dateObj = new Date(pd.y, pd.mon - 1, pd.day);
+                            const monthName = dateObj.toLocaleString('en-IN', { month: 'long' });
+                            closestDate = `${pd.day} ${monthName} ${pd.y}`;
                         }
                     }
 
@@ -470,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     scrollTimeout = setTimeout(() => {
                         floatingDate.classList.add('opacity-0', 'translate-y-[-10px]');
                         floatingDate.classList.remove('opacity-100', 'translate-y-0');
-                    }, 1200);
+                    }, 1500);
                 }
 
                 // ── Infinite scroll: load older/newer chunks ──
@@ -489,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-    });
+    }, { passive: true });
 
     const detectDateFormat = (messages) => {
         for (const msg of messages) {
@@ -575,6 +558,17 @@ document.addEventListener('DOMContentLoaded', () => {
             allMessages = data;
             displayedMessages = allMessages; // Default view is everything
             datePartsOrder = detectDateFormat(allMessages);
+
+            // Cache last message preview for sidebar display
+            if (!window._chatMetaCache) window._chatMetaCache = {};
+            if (allMessages.length > 0) {
+                const lastTextMsg = [...allMessages].reverse().find(m => m.text && m.type !== 'system');
+                window._chatMetaCache[chatName] = {
+                    lastMessage: lastTextMsg ? (lastTextMsg.text.length > 40 ? lastTextMsg.text.slice(0, 40) + '…' : lastTextMsg.text) : '',
+                    lastTime: lastTextMsg?.time || '',
+                    count: allMessages.filter(m => m.type !== 'system').length,
+                };
+            }
             
             // Clear previous dynamically added filters if changing chats
             const filterContainer = document.getElementById('filter-buttons-container');
@@ -837,24 +831,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         chats.forEach((chat, idx) => {
-            const displayName = chat.replace('WhatsApp Chat - ', '');
+            const displayName = cleanDisplayName(chat.replace('WhatsApp Chat - ', ''));
             const initial = displayName.charAt(0).toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
             const isActive = chat === activeChat;
 
+            // Get last message preview from cache if available
+            const chatMeta = window._chatMetaCache?.[chat];
+            const lastMsg = chatMeta?.lastMessage || '';
+            const lastTime = chatMeta?.lastTime || '';
+            const msgCount = chatMeta?.count || '';
+
             const item = document.createElement('div');
-            item.className = `flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-indigo-50 border border-indigo-200 shadow-sm' : 'hover:bg-gray-100 border border-transparent'}`;
+            item.className = `flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-[13px] font-semibold text-gray-800 truncate leading-tight ${isActive ? 'text-indigo-700' : ''}">${displayName}</p>
-                    <p class="text-[10px] text-gray-400 font-medium mt-0.5">${isActive ? '● Active' : 'Tap to open'}</p>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
+                <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-2">
+                    <div class="flex items-center justify-between gap-2 mt-1">
+                        <p class="text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${displayName}</p>
+                        <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 mt-0.5">
+                        <p class="text-[11px] text-gray-400 font-medium truncate leading-tight">${lastMsg || (isActive ? '● Active' : 'Tap to open')}</p>
+                        ${msgCount ? `<span class="text-[9px] text-gray-400 font-medium shrink-0">${msgCount} msgs</span>` : ''}
+                    </div>
                 </div>
                 <button class="chat-del-btn shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition opacity-0 group-hover:opacity-100" title="Delete chat" data-chat="${chat}">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 </button>
-                ${isActive ? '<div class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></div>' : ''}
             `;
             // Delete button
             item.querySelector('.chat-del-btn').addEventListener('click', async (e) => {

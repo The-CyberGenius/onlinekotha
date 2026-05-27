@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GKQ286KWDG');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kotha — App</title>
@@ -13,28 +10,36 @@
     <meta name="theme-color" content="#6366f1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <script src="/js/tailwind.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=27">
+    <!-- Preconnect to CDN origins for faster loads -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <!-- CSS first — critical render path -->
+    <link rel="stylesheet" href="/css/style.css?v=28">
+    <!-- Tailwind CDN — defer to unblock first paint (407KB) -->
+    <script defer src="/js/tailwind.js"></script>
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay=function(){return new Promise(function(r){if(window.Razorpay)return r();var s=document.createElement('script');s.src='https://checkout.razorpay.com/v1/checkout.js';s.onload=r;document.head.appendChild(s)})}</script>
     <script src="/js/auth-init.js"></script>
     <script>if(localStorage.getItem('kotha_dark')==='1')document.documentElement.classList.add('dark')</script>
+    <!-- Google Analytics — async, non-blocking -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GKQ286KWDG');</script>
 </head>
 <body class="flex items-center justify-center h-[100dvh] w-screen overflow-hidden p-0 md:p-4 lg:p-6">
 
     <div id="app" class="flex w-full h-full max-w-7xl mx-auto rounded-none md:rounded-[28px] shadow-2xl overflow-hidden relative bg-white/95 backdrop-blur-2xl border-0 md:border border-gray-200/50">
         <!-- Mobile sidebar backdrop -->
-        <div id="sidebar-backdrop" class="hidden md:hidden absolute inset-0 bg-black/40 backdrop-blur-sm z-[55]"></div>
+        <div id="sidebar-backdrop" class="hidden md:hidden absolute inset-0 bg-black/40 z-[55]"></div>
 
         <!-- Sidebar -->
-        <div id="sidebar" class="w-full md:w-[340px] lg:w-[360px] flex flex-col absolute md:relative h-full transition-transform duration-300 left-0 bg-[#f8f9fb] md:bg-[#f8f9fb] z-[60] transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none border-r border-gray-200/60">
+        <div id="sidebar" class="w-full md:w-[340px] lg:w-[360px] flex flex-col absolute md:relative h-full transition-transform duration-200 left-0 bg-white dark:bg-[#111b21] z-[60] transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none border-r border-gray-200/60 dark:border-gray-800">
             <!-- Sidebar Header -->
-            <div id="sidebar-header" class="bg-white flex justify-between items-center px-5 py-4 z-20 shrink-0 border-b border-gray-100">
+            <div id="sidebar-header" class="bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-4 py-3 z-20 shrink-0 border-b border-gray-200 dark:border-gray-800 transition-colors">
                 <div class="flex items-center">
-                    <img src="/logo.svg" alt="Kotha Logo" class="w-10 h-10 shadow-lg rounded-xl transition hover:scale-105" id="sidebar-avatar" />
+                    <img src="/logo.svg" alt="Kotha Logo" class="w-10 h-10 rounded-full cursor-pointer hover:opacity-80 transition" id="sidebar-avatar" />
                     <div class="ml-3">
-                        <h2 class="text-[15px] font-bold text-gray-900 tracking-tight" id="sidebar-title">Kotha</h2>
-                        <p class="text-[11px] text-gray-500 font-medium" id="sidebar-user-info"></p>
+                        <h2 class="text-[15px] font-semibold text-gray-900 dark:text-gray-100 tracking-tight" id="sidebar-title">Chats</h2>
                     </div>
                 </div>
                 <div class="flex items-center gap-1">
@@ -68,16 +73,15 @@
             <select id="chat-selector" class="hidden"><option value="">Select a chat...</option></select>
 
             <!-- Search Bar -->
-            <div class="px-4 pt-3 pb-2 shrink-0 flex gap-2 relative">
-                <div class="bg-white rounded-xl flex items-center px-3 py-2 border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-400/40 focus-within:border-indigo-300 transition-all w-full shadow-sm">
-                    <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    <input type="text" id="search-box" placeholder="Search messages..." class="bg-transparent border-none outline-none ml-2 w-full text-sm font-medium text-gray-700 placeholder-gray-400">
-                    <button class="text-gray-400 hover:text-red-500 transition hidden p-1 cursor-pointer shrink-0" id="search-clear-btn" title="Clear Search">
+            <div class="px-3 pt-2 pb-2 shrink-0 flex gap-2 relative border-b border-gray-200 dark:border-gray-800">
+                <div class="bg-[#f0f2f5] dark:bg-[#202c33] rounded-lg flex items-center px-3 py-1.5 transition-all w-full h-9">
+                    <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="search-box" placeholder="Search or start new chat" class="bg-transparent border-none outline-none ml-3 w-full text-[14.5px] font-normal text-gray-700 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400">
+                    <button class="text-gray-400 hover:text-gray-600 transition hidden p-1 cursor-pointer shrink-0" id="search-clear-btn" title="Clear Search">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                <button id="search-action-btn" disabled class="bg-gray-900 text-white rounded-xl px-3 outline-none py-2 shadow-sm hover:bg-black transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center font-bold text-sm shrink-0">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                <button id="search-action-btn" disabled class="hidden">
                 </button>
             </div>
 
@@ -212,13 +216,13 @@
         </div>
 
         <!-- Main Chat Area -->
-        <div id="main-panel" class="flex-1 flex flex-col relative w-full md:w-auto h-full bg-[#efeae2]">
+        <div id="main-panel" class="flex-1 flex flex-col relative w-full md:w-auto h-full bg-[#efeae2] dark:bg-[#0b141a]">
             <!-- Chat Header -->
-            <div id="chat-header-bar" class="h-[60px] md:h-16 bg-white flex justify-between items-center px-3 md:px-5 border-b border-gray-100 z-20 w-full shrink-0 gap-2 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <div id="chat-header-bar" class="h-[60px] md:h-16 bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-3 md:px-5 z-20 w-full shrink-0 gap-2 shadow-sm transition-colors">
                 <div class="flex items-center min-w-0 flex-1">
                     <!-- Mobile sidebar toggle -->
-                    <button class="md:hidden mr-2.5 w-9 h-9 rounded-lg hover:bg-gray-100 flex items-center justify-center transition shrink-0" id="open-sidebar-btn" title="Menu & Chats" aria-label="Open menu">
-                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                    <button class="md:hidden mr-2.5 w-9 h-9 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition shrink-0" id="open-sidebar-btn" title="Menu & Chats" aria-label="Open menu">
+                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                     </button>
                     <!-- Avatar -->
                     <div class="relative shrink-0">
@@ -257,25 +261,25 @@
             </div>
 
             <!-- Bottom Input Bar -->
-            <div id="bottom-ai-bar" class="w-full px-3 md:px-5 pb-3 pt-2 z-20 shrink-0">
+            <div id="bottom-ai-bar" class="w-full px-3 md:px-5 pb-3 pt-2 z-20 shrink-0 bg-[#f0f2f5] dark:bg-[#202c33] transition-colors">
                 <div class="max-w-3xl mx-auto">
                     <!-- Reply Preview Box -->
-                    <div id="reply-preview-container" class="hidden bg-gray-50 dark:bg-[#1f2c34] border-t border-x border-gray-200 dark:border-gray-700/80 rounded-t-2xl px-4 py-2.5 flex items-center justify-between gap-3 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
-                        <div class="border-l-4 border-indigo-500 pl-3 min-w-0 flex-1">
-                            <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400" id="reply-preview-sender">Sender</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5" id="reply-preview-text">Message</p>
+                    <div id="reply-preview-container" class="hidden bg-[#f0f2f5] dark:bg-[#202c33] border-t border-gray-300 dark:border-gray-700 rounded-t-lg px-4 py-2.5 flex items-center justify-between gap-3">
+                        <div class="border-l-4 border-[#25D366] pl-3 min-w-0 flex-1">
+                            <p class="text-xs font-bold text-[#128C7E] dark:text-[#25D366]" id="reply-preview-sender">Sender</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-300 truncate mt-0.5" id="reply-preview-text">Message</p>
                         </div>
                         <button id="reply-preview-close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition shrink-0 p-1 cursor-pointer" title="Cancel Reply">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                         </button>
                     </div>
-                    <div id="ai-input-wrap" class="flex items-center gap-2.5 bg-white rounded-2xl px-3 py-2 min-h-[52px]">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shrink-0 shadow-sm">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
-                        </div>
-                        <input type="text" id="bottom-ai-input" placeholder="Continue With virtual Chat…" class="flex-1 bg-transparent border-none text-[15px] font-medium text-gray-800 placeholder-gray-400 min-w-0">
-                        <button id="bottom-ai-send" class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white hover:bg-indigo-700 active:scale-95 transition shrink-0 disabled:opacity-25 disabled:cursor-not-allowed" disabled>
-                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    <div id="ai-input-wrap" class="flex items-center gap-2.5 bg-white dark:bg-[#2a3942] rounded-xl px-3 py-2 min-h-[52px] shadow-sm">
+                        <button class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition" title="Attach file (Disabled)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        </button>
+                        <input type="text" id="bottom-ai-input" placeholder="Type a message..." class="flex-1 bg-transparent border-none text-[15px] font-medium text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 min-w-0 outline-none">
+                        <button id="bottom-ai-send" class="w-9 h-9 rounded-full bg-[#00a884] flex items-center justify-center text-white hover:bg-[#008f6f] active:scale-95 transition shrink-0 disabled:opacity-25 disabled:cursor-not-allowed shadow-md" disabled>
+                            <svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                         </button>
                     </div>
                 </div>
