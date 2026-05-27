@@ -1685,7 +1685,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hook up download/copy handlers
         const dlBtn = document.getElementById('stat-download-btn');
         const cpBtn = document.getElementById('stat-copy-btn');
-        
+
+        const showToast = (msg) => {
+            if (window.kothaToast) window.kothaToast(msg);
+            else console.log(msg);
+        };
+
         const statsPayload = {
             contactName: otherPersonName,
             totalMsgs,
@@ -1698,6 +1703,9 @@ document.addEventListener('DOMContentLoaded', () => {
             })
         };
 
+        if (dlBtn) dlBtn.statsPayload = statsPayload;
+        if (cpBtn) cpBtn.statsPayload = statsPayload;
+
         if (dlBtn && !dlBtn.hasListener) {
             dlBtn.hasListener = true;
             const handleDl = (e) => {
@@ -1705,7 +1713,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 showToast('Generating stats card...');
                 if (window.kothaExportStatsCard) {
-                    window.kothaExportStatsCard(statsPayload, 'download');
+                    window.kothaExportStatsCard(dlBtn.statsPayload, 'download');
                 } else {
                     showToast('Export module not loaded yet');
                 }
@@ -1725,7 +1733,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 showToast('Copying stats card...');
                 if (window.kothaExportStatsCard) {
-                    window.kothaExportStatsCard(statsPayload, 'copy');
+                    window.kothaExportStatsCard(cpBtn.statsPayload, 'copy');
                 } else {
                     showToast('Export module not loaded yet');
                 }

@@ -129,6 +129,60 @@
         setTimeout(() => { if (banner.parentNode) banner.remove(); }, 15000);
     }
 
+    // ===== iOS Install Prompt =====
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isIOS && !isStandalone) {
+        setTimeout(showIOSInstallBanner, 4000);
+    }
+
+    function showIOSInstallBanner() {
+        if (document.getElementById('ios-install-banner') || localStorage.getItem('kotha_ios_install_dismissed')) return;
+        const banner = document.createElement('div');
+        banner.id = 'ios-install-banner';
+        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-zinc-950 text-white rounded-2xl p-4 shadow-2xl z-[90] flex flex-col gap-3 animate-message border border-white/10';
+        banner.innerHTML = `
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
+                    <img src="/logo.svg" alt="Logo" class="w-6 h-6">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold">Install Kotha App</p>
+                    <p class="text-[11px] text-zinc-400">Save memories and view chats faster on your iPhone.</p>
+                </div>
+                <button id="ios-dismiss-btn" class="text-zinc-500 hover:text-white transition p-1 shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="bg-white/5 rounded-xl p-3 text-[11px] text-zinc-300 flex flex-col gap-2 border border-white/5">
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
+                    <span>Tap Safari's **Share** button below:</span>
+                    <svg class="w-4 h-4 text-blue-400 inline shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
+                    <span>Scroll down and select **Add to Home Screen**.</span>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(banner);
+
+        document.getElementById('ios-dismiss-btn').addEventListener('click', () => {
+            banner.remove();
+            localStorage.setItem('kotha_ios_install_dismissed', '1');
+        });
+    }
+
+    // ===== Tactical Haptic Feedback =====
+    document.addEventListener('click', (e) => {
+        const target = e.target.closest('.cta-primary, button, a.nav-cta, .reaction-emoji-btn');
+        if (target && navigator.vibrate) {
+            try { navigator.vibrate(12); } catch {}
+        }
+    });
+
     // ═══════════════════════════════════════════════════════════════════
     //  CHAT WRAPPED — Spotify-style story with smart name extraction
     // ═══════════════════════════════════════════════════════════════════
