@@ -535,40 +535,31 @@ HARD RULES
                 : `<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">${initials}</div>`;
 
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm hover:shadow-md transition';
+            card.className = 'bg-white rounded-lg p-2 mb-1.5 border border-gray-100 shadow-sm hover:shadow-md transition';
             card.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <div class="shrink-0">${avatarHtml}</div>
-                    <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                    <div class="shrink-0 w-6 h-6">${avatarHtml.replace('w-10 h-10', 'w-6 h-6 text-[10px] rounded-md').replace('rounded-xl', 'rounded-md')}</div>
+                    <div class="min-w-0 flex-1 flex flex-col md:flex-row md:items-center justify-between gap-1">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="font-bold text-gray-900 text-sm truncate">${u.display_name || u.email.split('@')[0]}</span>
+                            <span class="font-bold text-gray-900 text-[11px] truncate">${u.display_name || u.email.split('@')[0]}</span>
+                            <span class="text-[9px] text-gray-500 truncate">${u.email}</span>
                             ${planBadge} ${loginMethod}
                         </div>
-                        <p class="text-[11px] text-gray-500 truncate mt-0.5">${u.email}</p>
-                        <div class="flex gap-3 mt-1.5 text-[10px] text-gray-400 font-medium">
-                            <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> ${u.chat_count} chats</span>
-                            <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> $${u.total_cost.toFixed(3)}</span>
-                            <span>${new Date(u.created_at).toLocaleDateString()}</span>
+                        <div class="flex gap-2 text-[9px] text-gray-400 font-medium">
+                            <span>💬 ${u.chat_count}</span>
+                            <span>💰 $${u.total_cost.toFixed(3)}</span>
+                            <span>📅 ${new Date(u.created_at).toLocaleDateString()}</span>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-1.5 shrink-0">
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn text-[11px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg px-3 py-1.5 transition flex items-center gap-1">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
-                            Manage
-                        </button>`}
-                        <button data-uid="${u.id}" class="user-chats-btn text-[11px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5 transition flex items-center gap-1">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            Chats
-                        </button>
-                        <button data-uid="${u.id}" class="user-ai-logs-btn text-[11px] font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg px-3 py-1.5 transition flex items-center gap-1">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1"/></svg>
-                            AI Logs
-                        </button>
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-[11px] font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg px-3 py-1.5 transition">Delete</button>`}
+                    <div class="flex items-center gap-1 shrink-0 ml-2">
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn text-[9px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 rounded px-1.5 py-0.5 transition">Manage</button>`}
+                        <button data-uid="${u.id}" class="user-chats-btn text-[9px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded px-1.5 py-0.5 transition">Chats</button>
+                        <button data-uid="${u.id}" class="user-ai-logs-btn text-[9px] font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 rounded px-1.5 py-0.5 transition">AI Logs</button>
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-[9px] font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded px-1.5 py-0.5 transition">Del</button>`}
                     </div>
                 </div>
-                <div data-chats-for="${u.id}" class="hidden mt-3 space-y-1.5"></div>
-                <div data-ai-logs-for="${u.id}" class="hidden mt-3 space-y-1.5"></div>
+                <div data-chats-for="${u.id}" class="hidden mt-1.5 pt-1.5 border-t border-gray-50 space-y-1"></div>
+                <div data-ai-logs-for="${u.id}" class="hidden mt-1.5 pt-1.5 border-t border-gray-50 space-y-1"></div>
             `;
             list.appendChild(card);
         }

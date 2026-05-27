@@ -19,46 +19,45 @@
 
     <div id="app" class="hidden max-w-6xl mx-auto p-6">
         <!-- Header -->
-        <header class="flex items-center justify-between mb-6">
+        <header class="flex items-center justify-between mb-3">
             <div>
-                <h1 class="text-2xl font-extrabold text-gray-900">Kotha Admin</h1>
-                <p class="text-xs text-gray-500" id="admin-email-info"></p>
+                <h1 class="text-xl font-extrabold text-gray-900">Kotha Admin</h1>
+                <p class="text-[10px] text-gray-500" id="admin-email-info"></p>
             </div>
-            <div class="flex gap-2">
-                <a href="/app.html" class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 transition">← Open App</a>
-                <button id="logout-btn" class="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 transition">Logout</button>
+            <div class="flex gap-1.5">
+                <a href="/app.html" class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">← Open App</a>
+                <button id="logout-btn" class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">Logout</button>
             </div>
         </header>
 
         <!-- Stats strip -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Today's spend</p>
-                <p class="text-2xl font-extrabold text-indigo-700 mt-1">$<span id="stat-today-cost">0</span></p>
-                <p class="text-[10px] text-gray-400 mt-1">cap: $<span id="stat-cap">0</span></p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider flex justify-between">Today's spend <span class="normal-case text-gray-400 font-medium">cap: $<span id="stat-cap">0</span></span></p>
+                <p class="text-lg font-extrabold text-indigo-700 leading-tight mt-0.5">$<span id="stat-today-cost">0</span></p>
             </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total spend</p>
-                <p class="text-2xl font-extrabold text-purple-700 mt-1">$<span id="stat-total-cost">0</span></p>
+            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Total spend</p>
+                <p class="text-lg font-extrabold text-purple-700 leading-tight mt-0.5">$<span id="stat-total-cost">0</span></p>
             </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total AI calls</p>
-                <p class="text-2xl font-extrabold text-teal-700 mt-1" id="stat-total-calls">0</p>
+            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Total AI calls</p>
+                <p class="text-lg font-extrabold text-teal-700 leading-tight mt-0.5" id="stat-total-calls">0</p>
             </div>
-            <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Users</p>
-                <p class="text-2xl font-extrabold text-amber-700 mt-1" id="stat-users">0</p>
+            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Users</p>
+                <p class="text-lg font-extrabold text-amber-700 leading-tight mt-0.5" id="stat-users">0</p>
             </div>
         </div>
 
         <!-- Tabs -->
-        <div class="flex gap-1 bg-gray-200/60 p-1 rounded-2xl mb-6 overflow-x-auto no-scrollbar">
-            <button data-tab="providers" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition tab-active whitespace-nowrap">Providers</button>
-            <button data-tab="models" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Models</button>
-            <button data-tab="routes" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Routing</button>
-            <button data-tab="integrations" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Integrations</button>
-            <button data-tab="settings" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Limits</button>
-            <button data-tab="users" class="tab-btn flex-none md:flex-1 py-2 px-4 md:px-2 rounded-xl font-bold text-sm transition text-gray-600 whitespace-nowrap">Users</button>
+        <div class="flex gap-1 bg-gray-200/60 p-1 rounded-lg mb-4 overflow-x-auto no-scrollbar">
+            <button data-tab="providers" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition tab-active whitespace-nowrap">Providers</button>
+            <button data-tab="models" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Models</button>
+            <button data-tab="routes" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Routing</button>
+            <button data-tab="integrations" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Integrations</button>
+            <button data-tab="settings" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Limits</button>
+            <button data-tab="users" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Users</button>
         </div>
 
         <!-- Providers Tab -->
@@ -170,13 +169,15 @@
 
         <!-- Users Tab -->
         <section id="tab-users" class="tab-content hidden">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h2 class="font-extrabold text-gray-800 mb-3">Users</h2>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-3">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="font-extrabold text-gray-800 text-sm">Users</h2>
+                </div>
                 <div id="user-list" class="text-sm"></div>
             </div>
         </section>
     </div>
 
-    <script src="/js/admin.js?v=5"></script>
+    <script src="/js/admin.js?v=6"></script>
 </body>
 </html>
