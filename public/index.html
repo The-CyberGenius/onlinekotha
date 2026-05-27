@@ -307,6 +307,86 @@
             box-shadow: 0 20px 40px -10px var(--shadow);
         }
 
+        /* ── Border Beam Effect ── */
+        .glass-card.border-beam {
+            position: relative;
+            overflow: hidden;
+            border-color: transparent !important;
+        }
+        .border-beam-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .border-beam-glow::before {
+            content: '';
+            position: absolute;
+            left: -50%;
+            top: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                transparent, 
+                var(--accent) 15%, 
+                transparent 30%, 
+                transparent 65%, 
+                var(--accent) 80%, 
+                transparent 100%
+            );
+            animation: border-beam-spin 8s linear infinite;
+            opacity: 0.18;
+            transition: opacity 0.3s;
+        }
+        .glass-card.border-beam:hover .border-beam-glow::before {
+            opacity: 0.55;
+        }
+        .border-beam-glow::after {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            background: var(--card-bg);
+            border-radius: inherit;
+            z-index: 1;
+        }
+        html.light .border-beam-glow::after {
+            background: #ffffff;
+        }
+        .border-beam-content {
+            position: relative;
+            z-index: 2;
+        }
+        @keyframes border-beam-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ── Vibe Pill Dock ── */
+        .vibe-dock {
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        html.light .vibe-dock {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        .vibe-pill {
+            cursor: pointer;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+        }
+        .vibe-pill.active {
+            background: var(--accent);
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        html.light .vibe-pill.active {
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.15);
+        }
+
+
         /* ── Chat mockup ── */
         .mockup-frame {
             background: var(--card-bg);
@@ -646,6 +726,16 @@
             <span class="font-extrabold text-[17px] tracking-tight text-white">Kotha</span>
         </a>
         <div class="flex items-center gap-2">
+            <button id="sound-toggle" class="p-2 rounded-xl border border-white/10 text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-center mr-1" aria-label="Toggle sound effects">
+                <!-- Speaker muted icon (default) -->
+                <svg id="sound-toggle-mute" class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"></path>
+                </svg>
+                <!-- Speaker active icon -->
+                <svg id="sound-toggle-active" class="hidden w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+            </button>
             <button id="theme-toggle" class="p-2 rounded-xl border border-white/10 text-zinc-400 hover:text-white hover:bg-white/5 transition flex items-center justify-center mr-1" aria-label="Toggle dark/light mode">
                 <!-- Sun icon -->
                 <svg id="theme-toggle-sun" class="hidden w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
@@ -669,6 +759,8 @@
 
 <!-- ═══════════ HERO ═══════════ -->
 <section class="hero-mesh relative min-h-screen flex items-center justify-center px-5 pt-28 pb-20 overflow-hidden">
+    <!-- Interactive Canvas Particle Net -->
+    <canvas id="vibe-canvas" class="absolute inset-0 z-0 pointer-events-none opacity-45"></canvas>
     <!-- Grid pattern background overlay -->
     <div class="bg-grid-pattern absolute inset-0 z-0"></div>
     <!-- Aurora responsive background -->
@@ -700,10 +792,26 @@
         </h1>
 
         <!-- Sub-headline -->
-        <p class="hero-sub anim-fade-up d2 text-lg md:text-xl text-zinc-400 max-w-[560px] mx-auto leading-relaxed mb-10">
+        <p class="hero-sub anim-fade-up d2 text-lg md:text-xl text-zinc-400 max-w-[560px] mx-auto leading-relaxed mb-8">
             Upload your WhatsApp chats. AI learns exactly how they talk —
             their humor, their slang, their love. Then <span class="text-white font-medium">chat with them, anytime.</span>
         </p>
+
+        <!-- Vibe Pill Dock -->
+        <div class="anim-fade-up d2 flex flex-wrap justify-center gap-2 mb-10 max-w-lg mx-auto bg-white/[0.03] border border-white/[0.08] p-1.5 rounded-2xl backdrop-blur-md relative z-20 vibe-dock">
+            <button data-vibe="nostalgic" class="vibe-pill active flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all duration-300">
+                <span>🍲</span> Nostalgic (Maa)
+            </button>
+            <button data-vibe="funny" class="vibe-pill flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all duration-300">
+                <span>😂</span> Funny (Bestie)
+            </button>
+            <button data-vibe="romantic" class="vibe-pill flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all duration-300">
+                <span>💖</span> Romantic (Partner)
+            </button>
+            <button data-vibe="professional" class="vibe-pill flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold transition-all duration-300">
+                <span>💼</span> Professional (Boss)
+            </button>
+        </div>
 
         <!-- CTA row -->
         <div class="anim-fade-up d3 flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
@@ -825,27 +933,36 @@
 
         <div class="grid md:grid-cols-3 gap-5">
             <!-- Step 1 -->
-            <div class="glass-card aurora-card tilt-card p-7 reveal">
-                <div class="holo"></div>
-                <div class="step-number step-glow bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-5">1</div>
-                <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Upload your chat</h3>
-                <p class="text-[14px] text-zinc-400 leading-relaxed">Export any WhatsApp conversation as .zip. Drag and drop it. All messages, media, voice notes — everything preserved.</p>
+            <div class="glass-card border-beam aurora-card tilt-card p-7 reveal">
+                <div class="border-beam-glow"></div>
+                <div class="border-beam-content relative z-10">
+                    <div class="holo"></div>
+                    <div class="step-number step-glow bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-5">1</div>
+                    <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Upload your chat</h3>
+                    <p class="text-[14px] text-zinc-400 leading-relaxed">Export any WhatsApp conversation as .zip. Drag and drop it. All messages, media, voice notes — everything preserved.</p>
+                </div>
             </div>
 
             <!-- Step 2 -->
-            <div class="glass-card aurora-card tilt-card p-7 reveal reveal-delay-1">
-                <div class="holo"></div>
-                <div class="step-number step-glow bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-5">2</div>
-                <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">AI learns their voice</h3>
-                <p class="text-[14px] text-zinc-400 leading-relaxed">Our AI reads every message — their slang, emoji habits, humor, the way they text at 2 AM. It becomes them.</p>
+            <div class="glass-card border-beam aurora-card tilt-card p-7 reveal reveal-delay-1">
+                <div class="border-beam-glow"></div>
+                <div class="border-beam-content relative z-10">
+                    <div class="holo"></div>
+                    <div class="step-number step-glow bg-pink-500/10 text-pink-400 border border-pink-500/20 mb-5">2</div>
+                    <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">AI learns their voice</h3>
+                    <p class="text-[14px] text-zinc-400 leading-relaxed">Our AI reads every message — their slang, emoji habits, humor, the way they text at 2 AM. It becomes them.</p>
+                </div>
             </div>
 
             <!-- Step 3 -->
-            <div class="glass-card aurora-card tilt-card p-7 reveal reveal-delay-2">
-                <div class="holo"></div>
-                <div class="step-number step-glow bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">3</div>
-                <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Talk to them again</h3>
-                <p class="text-[14px] text-zinc-400 leading-relaxed">Start a conversation. They reply in their exact style — same tone, same energy, same love. Like they never left.</p>
+            <div class="glass-card border-beam aurora-card tilt-card p-7 reveal reveal-delay-2">
+                <div class="border-beam-glow"></div>
+                <div class="border-beam-content relative z-10">
+                    <div class="holo"></div>
+                    <div class="step-number step-glow bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">3</div>
+                    <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Talk to them again</h3>
+                    <p class="text-[14px] text-zinc-400 leading-relaxed">Start a conversation. They reply in their exact style — same tone, same energy, same love. Like they never left.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -1371,7 +1488,119 @@ window.addEventListener('scroll', () => {
     }
 }, { passive: true });
 
+// ── Web Audio Synthesizer Engine ──
+let audioCtx = null;
+let audioMuted = true;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function playClick() {
+    if (audioMuted) return;
+    try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1100, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.012, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+    } catch(e) {}
+}
+
+function playTick() {
+    if (audioMuted) return;
+    try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(160 + Math.random() * 80, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.025);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.03);
+    } catch(e) {}
+}
+
+function playChime(isAi) {
+    if (audioMuted) return;
+    try {
+        initAudio();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        if (isAi) {
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.07); // E5
+        } else {
+            osc.frequency.setValueAtTime(392.00, now); // G4
+            osc.frequency.setValueAtTime(523.25, now + 0.07); // C5
+        }
+        gain.gain.setValueAtTime(0.025, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(now + 0.23);
+    } catch(e) {}
+}
+
+// Hook Sound Toggle Button
+const soundToggle = document.getElementById('sound-toggle');
+const soundMuteIcon = document.getElementById('sound-toggle-mute');
+const soundActiveIcon = document.getElementById('sound-toggle-active');
+
+if (soundToggle) {
+    soundToggle.addEventListener('click', () => {
+        audioMuted = !audioMuted;
+        if (!audioMuted) {
+            initAudio();
+            playChime(true);
+            soundMuteIcon.classList.add('hidden');
+            soundActiveIcon.classList.remove('hidden');
+            localStorage.setItem('kotha_sound', 'on');
+        } else {
+            soundMuteIcon.classList.remove('hidden');
+            soundActiveIcon.classList.add('hidden');
+            localStorage.setItem('kotha_sound', 'off');
+        }
+    });
+    // Check saved state
+    if (localStorage.getItem('kotha_sound') === 'on') {
+        audioMuted = false;
+        soundMuteIcon.classList.add('hidden');
+        soundActiveIcon.classList.remove('hidden');
+    }
+}
+
+// Attach hover sounds to primary interaction targets
+function setupAudioHovers() {
+    const selector = '.cta-primary, .vibe-pill, #theme-toggle, #sound-toggle, #open-how-btn, #how-prev, #how-next, #how-close, .glass-card';
+    document.querySelectorAll(selector).forEach(el => {
+        el.removeEventListener('mouseenter', playClick);
+        el.addEventListener('mouseenter', playClick);
+    });
+}
+setTimeout(setupAudioHovers, 500);
+
 // ── Hero Interactive Demo Chat ──
+let windowKothaSwitchVibeChat = null; // Defined below and bound to window
+
 (function heroChat() {
     const chatArea = document.getElementById('hero-chat');
     const form = document.getElementById('demo-form');
@@ -1380,6 +1609,62 @@ window.addEventListener('scroll', () => {
     const remainingEl = document.getElementById('demo-remaining');
     const limitCta = document.getElementById('demo-limit-cta');
     const counterEl = document.getElementById('demo-counter');
+
+    // Chat mock elements to dynamically update
+    const chatFrame = document.getElementById('demo-chat-frame');
+    const headerAvatar = chatFrame.querySelector('.relative .w-10');
+    const headerName = chatFrame.querySelector('.flex-1 p.text-white');
+    const headerStatus = chatFrame.querySelector('.flex-1 p.text-emerald-400\\/80');
+
+    let currentVibe = 'nostalgic';
+    let typingIntervalId = null;
+
+    const vibeTemplates = {
+        nostalgic: {
+            name: 'Maa',
+            initials: 'M',
+            bg: 'from-rose-400 to-pink-500',
+            userText: 'Maa wo recipe batao na, aloo ke parathe wali',
+            aiResponse: 'Beta aloo ubal ke mash kar lo, phir hara dhaniya, mirchi, namak aur ajwain daal do. Atte me thoda namak oil daalke gundhna. Bas! 😊',
+            placeholder: 'Type a message to Maa...',
+            accent: '#f59e0b',
+            accentDeep: '#d97706',
+            accentRGB: '245, 158, 11'
+        },
+        funny: {
+            name: 'Rohan (Bestie)',
+            initials: 'R',
+            bg: 'from-emerald-400 to-teal-500',
+            userText: 'Oi saale, kidhar hai? Kab mil raha hai?',
+            aiResponse: 'Abe abhi utha hu yaar, thoda kaam tha. Tu bata, shaam ko chai peene chale? Last time ki tarah late mat aana 😂',
+            placeholder: 'Type a message to Rohan...',
+            accent: '#10b981',
+            accentDeep: '#047857',
+            accentRGB: '16, 185, 129'
+        },
+        romantic: {
+            name: 'Sona ❤️',
+            initials: 'S',
+            bg: 'from-pink-400 to-rose-500',
+            userText: 'Miss you, din kaisa gaya?',
+            aiResponse: 'Din toh bohot busy tha, par hamesha tumhari yaad aati rehti hai ❤️ Tum batao, ghar pahunch gaye? Khana khaya? 😘',
+            placeholder: 'Type a message to Sona...',
+            accent: '#ec4899',
+            accentDeep: '#be185d',
+            accentRGB: '236, 72, 153'
+        },
+        professional: {
+            name: 'Boss',
+            initials: 'B',
+            bg: 'from-indigo-500 to-blue-600',
+            userText: 'Sir, did you check the project presentation?',
+            aiResponse: 'Yes, checked the draft. Looks solid. Just refine the slides 5 and 6 details regarding scaling. Let\'s do a quick sync at 11 AM tomorrow. Good luck.',
+            placeholder: 'Type a message to Boss...',
+            accent: '#6366f1',
+            accentDeep: '#4f46e5',
+            accentRGB: '99, 102, 241'
+        }
+    };
 
     // Session ID for tracking
     let sessionId = localStorage.getItem('kotha_demo_sid');
@@ -1421,13 +1706,27 @@ window.addEventListener('scroll', () => {
         </div>`;
         chatArea.appendChild(div);
         scrollChat();
+
+        // Spawn interactive canvas burst particles at the input bar location
+        const canvas = document.getElementById('vibe-canvas');
+        if (canvas) {
+            const rect = chatFrame.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            const burstEvent = new CustomEvent('vibe-burst', {
+                detail: {
+                    x: rect.left - canvasRect.left + rect.width / 2,
+                    y: rect.top - canvasRect.top + rect.height - 40
+                }
+            });
+            window.dispatchEvent(burstEvent);
+        }
     }
 
-    function addAiBubble() {
+    function addAiBubble(avatarClass, initials) {
         const div = document.createElement('div');
         div.className = 'flex items-end gap-2';
         div.style.animation = 'fade-up 0.3s ease forwards';
-        div.innerHTML = `<div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold shrink-0">M</div>
+        div.innerHTML = `<div class="w-6 h-6 rounded-full bg-gradient-to-br ${avatarClass} flex items-center justify-center text-white text-[9px] font-bold shrink-0">${initials}</div>
         <div class="msg-ai px-4 py-2.5 max-w-[85%]">
             <p class="text-[13px] text-zinc-200 leading-relaxed ai-stream-text"><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.2s"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.4s"></span></p>
             <p class="text-[9px] text-zinc-500 text-right mt-1.5"><span class="text-indigo-400">AI</span></p>
@@ -1441,28 +1740,65 @@ window.addEventListener('scroll', () => {
         return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // Initial typing animation
-    const msgs = document.querySelectorAll('.chat-msg');
-    const aiText = document.getElementById('ai-typed-text');
-    const fullResponse = 'Beta aloo ubal ke mash kar lo, phir hara dhaniya, mirchi, namak aur ajwain daal do. Atte me thoda namak oil daalke gundhna. Bas! 😊';
+    // Dynamic vibe-chat reset switcher
+    windowKothaSwitchVibeChat = function(vibeKey) {
+        if (typingIntervalId) clearInterval(typingIntervalId);
+        currentVibe = vibeKey;
+        const temp = vibeTemplates[vibeKey];
+        if (!temp) return;
 
+        // Update CSS Accent Variables dynamically for Vibe Morphing
+        document.documentElement.style.setProperty('--accent', temp.accent);
+        document.documentElement.style.setProperty('--accent-deep', temp.accentDeep);
+        document.documentElement.style.setProperty('--accent-rgb', temp.accentRGB);
+        
+        // Update header details
+        headerName.textContent = temp.name;
+        headerAvatar.className = `w-10 h-10 rounded-full bg-gradient-to-br ${temp.bg} flex items-center justify-center text-white font-bold text-sm shadow-lg`;
+        headerAvatar.textContent = temp.initials;
+        input.placeholder = temp.placeholder;
+
+        // Clear chat area
+        chatArea.innerHTML = '';
+
+        // Prepopulate user msg
+        const userDiv = document.createElement('div');
+        userDiv.className = 'flex justify-end';
+        userDiv.innerHTML = `<div class="msg-user px-4 py-2.5 max-w-[85%]" style="animation:fade-up 0.3s ease forwards;">
+            <p class="text-[13px] text-white leading-relaxed">${escHtml(temp.userText)}</p>
+            <p class="text-[9px] text-white/40 text-right mt-1.5">${timeNow()} ✓✓</p>
+        </div>`;
+        chatArea.appendChild(userDiv);
+
+        // Prepopulate AI typing bubble
+        setTimeout(() => {
+            const aiStream = addAiBubble(temp.bg, temp.initials);
+            let charIndex = 0;
+            headerStatus.innerHTML = '<span class="text-[10px] text-zinc-500 animate-pulse">typing...</span>';
+            
+            // Audio typing sound triggers
+            typingIntervalId = setInterval(() => {
+                if (charIndex < temp.aiResponse.length) {
+                    if (charIndex === 0) {
+                        aiStream.textContent = '';
+                        playChime(true);
+                    }
+                    aiStream.textContent += temp.aiResponse.charAt(charIndex);
+                    charIndex++;
+                    playTick();
+                    scrollChat();
+                } else {
+                    clearInterval(typingIntervalId);
+                    headerStatus.textContent = 'Online · AI';
+                }
+            }, 30 + Math.random() * 20);
+        }, 1200);
+    };
+
+    // Run initial trigger
     setTimeout(() => {
-        msgs[0].style.transition = 'opacity 0.5s, transform 0.5s';
-        msgs[0].style.opacity = '1';
-    }, 800);
-    setTimeout(() => {
-        msgs[1].style.transition = 'opacity 0.5s, transform 0.5s';
-        msgs[1].style.opacity = '1';
-        let i = 0;
-        function typeChar() {
-            if (i < fullResponse.length) {
-                aiText.textContent = fullResponse.slice(0, i + 1);
-                i++;
-                setTimeout(typeChar, 22 + Math.random() * 12);
-            }
-        }
-        setTimeout(typeChar, 300);
-    }, 1800);
+        windowKothaSwitchVibeChat('nostalgic');
+    }, 500);
 
     // Send handler
     async function sendDemo(text) {
@@ -1472,7 +1808,9 @@ window.addEventListener('scroll', () => {
         input.disabled = true;
 
         addUserMsg(text.trim());
-        const streamEl = addAiBubble();
+        playChime(false);
+        const temp = vibeTemplates[currentVibe];
+        const streamEl = addAiBubble(temp.bg, temp.initials);
 
         try {
             const resp = await fetch('/api/demo-chat', {
@@ -1498,6 +1836,8 @@ window.addEventListener('scroll', () => {
             let started = false;
             let aiFullText = '';
 
+            headerStatus.innerHTML = '<span class="text-[10px] text-zinc-500 animate-pulse">typing...</span>';
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
@@ -1519,9 +1859,14 @@ window.addEventListener('scroll', () => {
                         if (eventType === 'start') {
                             updateCounter(data.remaining);
                         } else if (eventType === 'token') {
-                            if (!started) { streamEl.textContent = ''; started = true; }
+                            if (!started) { 
+                                streamEl.textContent = ''; 
+                                started = true; 
+                                playChime(true);
+                            }
                             aiFullText += data.text;
                             streamEl.textContent = aiFullText;
+                            playTick();
                             scrollChat();
                         } else if (eventType === 'done') {
                             updateCounter(data.remaining);
@@ -1537,6 +1882,7 @@ window.addEventListener('scroll', () => {
             isSending = false;
             sendBtn.disabled = false;
             input.disabled = false;
+            headerStatus.textContent = 'Online · AI';
             input.focus();
         }
     }
@@ -1547,7 +1893,227 @@ window.addEventListener('scroll', () => {
         input.value = '';
         sendDemo(text);
     });
+
+    // Add keydown listener inside demo input to trigger keyboard clicks
+    input.addEventListener('keydown', (e) => {
+        if (e.key.length === 1 || e.key === 'Backspace' || e.key === 'Space') {
+            playTick();
+        }
+    });
 })();
+
+// ── Canvas Particle Net Visualizer ──
+(function() {
+    const canvas = document.getElementById('vibe-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationFrameId;
+    let width = canvas.width = canvas.offsetWidth;
+    let height = canvas.height = canvas.offsetHeight;
+    
+    let activeColor = '#f59e0b'; // Default to nostalgic gold/amber
+    let particleCount = 50;
+    let connectionDist = 120;
+    let speedMult = 0.6;
+    
+    const mouse = { x: null, y: null, radius: 120 };
+    window.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+    window.addEventListener('mouseleave', () => {
+        mouse.x = null;
+        mouse.y = null;
+    });
+
+    class Particle {
+        constructor() {
+            this.reset();
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+        }
+        reset() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.size = 1.5 + Math.random() * 2.5;
+            this.vx = (Math.random() - 0.5) * 0.9 * speedMult;
+            this.vy = (Math.random() - 0.5) * 0.9 * speedMult;
+            this.alpha = 0.15 + Math.random() * 0.45;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.x < 0 || this.x > width) this.vx = -this.vx;
+            if (this.y < 0 || this.y > height) this.vy = -this.vy;
+
+            if (mouse.x !== null && mouse.y !== null) {
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < mouse.radius) {
+                    const force = (mouse.radius - dist) / mouse.radius;
+                    this.x += (dx / dist) * force * 1.5;
+                    this.y += (dy / dist) * force * 1.5;
+                }
+            }
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = activeColor;
+            ctx.globalAlpha = this.alpha;
+            ctx.fill();
+        }
+    }
+
+    function initParticles() {
+        particles = [];
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    function drawLines() {
+        ctx.globalAlpha = 0.08;
+        ctx.strokeStyle = activeColor;
+        ctx.lineWidth = 0.8;
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < connectionDist) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        drawLines();
+        animationFrameId = requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = canvas.offsetWidth;
+        height = canvas.height = canvas.offsetHeight;
+        initParticles();
+    });
+
+    // Burst particles event
+    window.addEventListener('vibe-burst', (e) => {
+        const x = e.detail?.x || width / 2;
+        const y = e.detail?.y || height / 2;
+        for (let i = 0; i < 18; i++) {
+            const p = new Particle();
+            p.x = x;
+            p.y = y;
+            p.vx = (Math.random() - 0.5) * 6 * speedMult;
+            p.vy = (Math.random() - 0.5) * 6 * speedMult;
+            p.size = 2 + Math.random() * 3;
+            p.alpha = 0.8;
+            particles.push(p);
+            setTimeout(() => {
+                const idx = particles.indexOf(p);
+                if (idx > -1) particles.splice(idx, 1);
+            }, 1200);
+        }
+    });
+
+    initParticles();
+    animate();
+
+    window.updateCanvasVibe = function(color, count, dist, speed) {
+        activeColor = color;
+        particleCount = count;
+        connectionDist = dist;
+        speedMult = speed;
+        initParticles();
+    };
+})();
+
+// ── Vibe Pill Click Handling ──
+(function() {
+    const pills = document.querySelectorAll('.vibe-pill');
+    const heroAurora = document.getElementById('hero-aurora');
+
+    const presets = {
+        nostalgic: {
+            color: '#f59e0b',
+            count: 50,
+            dist: 120,
+            speed: 0.6,
+            aurora: 'radial-gradient(ellipse 70% 60% at var(--ax,50%) var(--ay,20%), rgba(245,158,11,0.15), transparent 65%)'
+        },
+        funny: {
+            color: '#10b981',
+            count: 75,
+            dist: 90,
+            speed: 1.4,
+            aurora: 'radial-gradient(ellipse 70% 60% at var(--ax,50%) var(--ay,20%), rgba(16,185,129,0.15), transparent 65%)'
+        },
+        romantic: {
+            color: '#ec4899',
+            count: 65,
+            dist: 110,
+            speed: 0.8,
+            aurora: 'radial-gradient(ellipse 70% 60% at var(--ax,50%) var(--ay,20%), rgba(236,72,153,0.15), transparent 65%)'
+        },
+        professional: {
+            color: '#6366f1',
+            count: 55,
+            dist: 100,
+            speed: 1.0,
+            aurora: 'radial-gradient(ellipse 70% 60% at var(--ax,50%) var(--ay,20%), rgba(99,102,241,0.15), transparent 65%)'
+        }
+    };
+
+    pills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            const vibeKey = pill.getAttribute('data-vibe');
+            const pre = presets[vibeKey];
+            if (!pre) return;
+
+            // Update active pill styling
+            pills.forEach(p => {
+                p.classList.remove('active', 'font-bold');
+                p.classList.add('font-semibold');
+            });
+            pill.classList.add('active', 'font-bold');
+            pill.classList.remove('font-semibold');
+
+            // Play audio confirmation
+            playClick();
+
+            // Trigger Vibe morph in Demo Chat
+            if (windowKothaSwitchVibeChat) {
+                windowKothaSwitchVibeChat(vibeKey);
+            }
+
+            // Trigger Canvas morph
+            if (window.updateCanvasVibe) {
+                window.updateCanvasVibe(pre.color, pre.count, pre.dist, pre.speed);
+            }
+
+            // Trigger background aurora gradient change
+            if (heroAurora) {
+                heroAurora.style.background = pre.aurora;
+            }
+        });
+    });
+})();
+
 
 // ═══════════════════════════════════════════════
 // ADVANCED VISUAL EFFECTS
