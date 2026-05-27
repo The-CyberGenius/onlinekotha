@@ -689,22 +689,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     displayedMessages = allMessages.filter(msg => {
-                        // Date check
-                        if(hasDateFilter) {
-                            if (!msg.date) return false;
-                            const parts = msg.date.split('/');
-                            if (parts.length === 3) {
-                                const msgM = parseInt(parts[datePartsOrder.monthIdx]);
-                                const msgD = parseInt(parts[datePartsOrder.dayIdx]);
-                                const msgY = parts[2];
-
-                                if (m && msgM !== parseInt(m)) return false;
-                                if (d && msgD !== parseInt(d)) return false;
-                                if (y && msgY !== y) return false;
-                            } else {
-                                return false;
-                            }
-                        }
+                        // Respect active sender filter
+                        if (activeSenderFilter && msg.sender !== activeSenderFilter) return false;
 
                         // Content check
                         if (!showMedia && msg.attachment) return false;
@@ -732,23 +718,61 @@ document.addEventListener('DOMContentLoaded', () => {
                         return true;
                     });
 
+                    // Find index of the first message matching the date filter
+                    let targetIdx = -1;
+                    if (hasDateFilter) {
+                        targetIdx = displayedMessages.findIndex(msg => {
+                            if (!msg.date) return false;
+                            const parts = msg.date.split('/');
+                            if (parts.length === 3) {
+                                const msgM = parseInt(parts[datePartsOrder.monthIdx]);
+                                const msgD = parseInt(parts[datePartsOrder.dayIdx]);
+                                const msgY = parts[2];
+
+                                if (m && msgM !== parseInt(m)) return false;
+                                if (d && msgD !== parseInt(d)) return false;
+                                if (y && msgY !== y) return false;
+                                return true;
+                            }
+                            return false;
+                        });
+                    }
+
                     renderChats(-1, -1); // Clear UI
 
                     if (displayedMessages.length > 0) {
-                        // When date filter is active → jump to FIRST matching message (top of filtered results)
-                        if (hasDateFilter) {
-                            const end = Math.min(CHUNK_SIZE, displayedMessages.length);
-                            renderChats(0, end, 'reset');
-                            setTimeout(() => { scrollArea.scrollTop = 0; }, 10);
+                        if (hasDateFilter && targetIdx !== -1) {
+                            // Date matches, render chunk centered around it
+                            const start = Math.max(0, targetIdx - 30);
+                            const end = Math.min(displayedMessages.length, start + CHUNK_SIZE);
+                            renderChats(start, end, 'reset');
+                            setTimeout(() => {
+                                const targetMsg = displayedMessages[targetIdx];
+                                const targetEl = document.getElementById(`msg-${targetMsg.id}`);
+                                if (targetEl) {
+                                    targetEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                                    targetEl.classList.add('jump-highlight');
+                                    setTimeout(() => {
+                                        targetEl.classList.remove('jump-highlight');
+                                    }, 2500);
+                                }
+                            }, 80);
+                            statsInfo.innerHTML = `Jumped to date. Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> total messages.`;
                         } else {
-                            // No date filter → show newest messages at bottom
+                            // Default: show newest messages at bottom
                             const end = displayedMessages.length;
                             renderChats(Math.max(0, end - CHUNK_SIZE), end, 'reset');
                             setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 10);
-                        }
-                    }
 
-                    statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> filtered msgs.`;
+                            if (hasDateFilter && targetIdx === -1) {
+                                statsInfo.innerHTML = `<span class="text-red-500 font-semibold">No messages found on that date.</span> Showing all ${displayedMessages.length.toLocaleString()} messages.`;
+                            } else {
+                                statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> messages.`;
+                            }
+                        }
+                    } else {
+                        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">0</span> messages.`;
+                    }
 
                     // Close sidebar on mobile after applying
                     toggleSidebar(false);

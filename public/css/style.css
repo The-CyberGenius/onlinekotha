@@ -269,6 +269,16 @@ html.dark .main-chat-background {
     animation: citeFlash 2s ease-out;
 }
 
+/* Highlight a message when jumped to via date filters */
+@keyframes jumpFlash {
+    0% { outline: 2px solid #818cf8; outline-offset: 2px; background: rgba(99, 102, 241, 0.3) !important; }
+    40% { outline: 2px solid #818cf8; outline-offset: 2px; background: rgba(99, 102, 241, 0.3) !important; }
+    100% { outline: 2px dashed transparent; outline-offset: 0; background: transparent; }
+}
+.jump-highlight > div {
+    animation: jumpFlash 2.5s ease-out;
+}
+
 /* AI Input */
 .ai-input {
     width: 100%;
