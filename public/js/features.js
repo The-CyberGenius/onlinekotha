@@ -879,16 +879,35 @@
             // ── Export ──
             const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
             if (action === 'copy') {
-                C.toBlob((blob) => {
-                    if (!blob) { showToast('Export failed — try again'); return; }
-                    if (navigator.clipboard && window.ClipboardItem) {
-                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                            .then(() => showToast('✅ Copied to clipboard!'))
-                            .catch(() => fallbackDownload(blob, fname));
-                    } else {
-                        fallbackDownload(blob, fname);
+                if (navigator.clipboard && window.ClipboardItem) {
+                    try {
+                        const copyPromise = new Promise((resolve, reject) => {
+                            C.toBlob((blob) => {
+                                if (blob) resolve(blob);
+                                else reject(new Error('Canvas to blob failed'));
+                            }, 'image/png', 1.0);
+                        });
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': copyPromise })
+                        ]).then(() => {
+                            showToast('✅ Copied to clipboard!');
+                        }).catch((err) => {
+                            console.error('Clipboard write error, falling back to download:', err);
+                            C.toBlob((blob) => {
+                                if (blob) fallbackDownload(blob, fname);
+                            }, 'image/png', 1.0);
+                        });
+                    } catch (e) {
+                        console.error('ClipboardItem promise error, falling back:', e);
+                        C.toBlob((blob) => {
+                            if (blob) fallbackDownload(blob, fname);
+                        }, 'image/png', 1.0);
                     }
-                }, 'image/png', 1.0);
+                } else {
+                    C.toBlob((blob) => {
+                        if (blob) fallbackDownload(blob, fname);
+                    }, 'image/png', 1.0);
+                }
             } else {
                 syncDownload(C, fname);
             }
@@ -917,8 +936,10 @@
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 navigator.share({ files: [file], title: 'Kotha' })
                     .catch((err) => {
-                        console.warn('Share rejected, downloading directly:', err);
-                        triggerDirectDownload(dataUrl, fname);
+                        console.warn('Share rejected/failed:', err);
+                        if (err.name !== 'AbortError') {
+                            triggerDirectDownload(dataUrl, fname);
+                        }
                     });
             } else {
                 triggerDirectDownload(dataUrl, fname);
@@ -947,8 +968,10 @@
             try {
                 navigator.share({ files: [file], title: 'My Kotha' })
                     .catch((err) => {
-                        console.warn('Share rejected, downloading directly:', err);
-                        directDownload(blob, fname);
+                        console.warn('Share rejected/failed:', err);
+                        if (err.name !== 'AbortError') {
+                            directDownload(blob, fname);
+                        }
                     });
             } catch (shareErr) {
                 console.warn('Share error (e.g. no gesture), downloading directly:', shareErr);
@@ -1613,17 +1636,17 @@
             e.stopPropagation();
             e.preventDefault();
             dlBtn.style.opacity = '0.6';
-            setTimeout(() => { dlBtn.style.opacity = '1'; }, 300);
             showToast('Generating card...');
-            setTimeout(() => exportWrappedCanvas(stats, 'download'), 100);
+            exportWrappedCanvas(stats, 'download');
+            setTimeout(() => { dlBtn.style.opacity = '1'; }, 300);
         }
         function handleCopy(e) {
             e.stopPropagation();
             e.preventDefault();
             cpBtn.style.opacity = '0.6';
-            setTimeout(() => { cpBtn.style.opacity = '1'; }, 300);
             showToast('Copying...');
-            setTimeout(() => exportWrappedCanvas(stats, 'copy'), 100);
+            exportWrappedCanvas(stats, 'copy');
+            setTimeout(() => { cpBtn.style.opacity = '1'; }, 300);
         }
 
         // Both click and touchend for maximum mobile compatibility
@@ -1655,12 +1678,14 @@
                 btn.textContent = '⏳ Saving...';
                 
                 showToast(`Saving story card ${idx + 1}...`);
+                
+                // Synchronously trigger generation/download inside user gesture tick
+                exportSingleStoryCard(stats, idx);
+                
                 setTimeout(() => {
-                    exportSingleStoryCard(stats, idx).finally(() => {
-                        btn.style.opacity = '1';
-                        btn.innerHTML = originalText;
-                        storyRef.resume(); // Resume slideshow
-                    });
+                    btn.style.opacity = '1';
+                    btn.innerHTML = originalText;
+                    storyRef.resume(); // Resume slideshow
                 }, 100);
             }
             btn.addEventListener('click', handleSave);
@@ -1864,16 +1889,35 @@
             // ── Export ──
             const fname = `${stats.contactName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_stats.png`;
             if (action === 'copy') {
-                C.toBlob((blob) => {
-                    if (!blob) { showToast('Export failed — try again'); return; }
-                    if (navigator.clipboard && window.ClipboardItem) {
-                        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                            .then(() => showToast('✅ Copied to clipboard!'))
-                            .catch(() => fallbackDownload(blob, fname));
-                    } else {
-                        fallbackDownload(blob, fname);
+                if (navigator.clipboard && window.ClipboardItem) {
+                    try {
+                        const copyPromise = new Promise((resolve, reject) => {
+                            C.toBlob((blob) => {
+                                if (blob) resolve(blob);
+                                else reject(new Error('Canvas to blob failed'));
+                            }, 'image/png', 1.0);
+                        });
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': copyPromise })
+                        ]).then(() => {
+                            showToast('✅ Copied to clipboard!');
+                        }).catch((err) => {
+                            console.error('Clipboard write error, falling back to download:', err);
+                            C.toBlob((blob) => {
+                                if (blob) fallbackDownload(blob, fname);
+                            }, 'image/png', 1.0);
+                        });
+                    } catch (e) {
+                        console.error('ClipboardItem promise error, falling back:', e);
+                        C.toBlob((blob) => {
+                            if (blob) fallbackDownload(blob, fname);
+                        }, 'image/png', 1.0);
                     }
-                }, 'image/png', 1.0);
+                } else {
+                    C.toBlob((blob) => {
+                        if (blob) fallbackDownload(blob, fname);
+                    }, 'image/png', 1.0);
+                }
             } else {
                 syncDownload(C, fname);
             }
