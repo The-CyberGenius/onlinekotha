@@ -822,7 +822,7 @@ HARD RULES
                                                 <h4 style="font-weight:700;font-size:14px;color:#1e293b;">${data.title || 'AI Conversation'}</h4>
                                                 <p style="font-size:11px;color:#94a3b8;margin-top:2px;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
                                             </div>
-                                            <button onclick="this.closest('[style]').remove()" style="width:28px;height:28px;border-radius:8px;background:#f1f5f9;color:#64748b;font-size:14px;cursor:pointer;">x</button>
+                                            <button class="ai-log-popup-close" style="width:28px;height:28px;border-radius:8px;background:#f1f5f9;color:#64748b;font-size:14px;cursor:pointer;">x</button>
                                         </div>
                                         <div style="padding:16px 20px;overflow-y:auto;flex:1;">
                                             ${(data.messages || []).map(m => `
@@ -839,6 +839,7 @@ HARD RULES
                                     </div>
                                 `;
                                 modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+                                modal.querySelector('.ai-log-popup-close').addEventListener('click', () => modal.remove());
                                 document.body.appendChild(modal);
                             } catch (err) {
                                 alert('Error loading conversation: ' + err.message);
