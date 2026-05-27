@@ -877,11 +877,10 @@
             ctx.fillText('Upload your WhatsApp chat · Get your Wrapped', W / 2, H - 80);
 
             // ── Export ──
-            C.toBlob((blob) => {
-                if (!blob) { showToast('Export failed — try again'); return; }
-                const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
-
-                if (action === 'copy') {
+            const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
+            if (action === 'copy') {
+                C.toBlob((blob) => {
+                    if (!blob) { showToast('Export failed — try again'); return; }
                     if (navigator.clipboard && window.ClipboardItem) {
                         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
                             .then(() => showToast('✅ Copied to clipboard!'))
@@ -889,14 +888,57 @@
                     } else {
                         fallbackDownload(blob, fname);
                     }
-                } else {
-                    fallbackDownload(blob, fname);
-                }
-            }, 'image/png', 1.0);
+                }, 'image/png', 1.0);
+            } else {
+                syncDownload(C, fname);
+            }
         } catch (err) {
             console.error('Wrapped export error:', err);
             showToast('Export failed — ' + (err.message || 'unknown error'));
         }
+    }
+
+    function dataURLtoFile(dataurl, filename) {
+        const arr = dataurl.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+    }
+
+    function syncDownload(canvas, fname) {
+        try {
+            const dataUrl = canvas.toDataURL('image/png', 1.0);
+            const file = dataURLtoFile(dataUrl, fname);
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: 'Kotha' })
+                    .catch((err) => {
+                        console.warn('Share rejected, downloading directly:', err);
+                        triggerDirectDownload(dataUrl, fname);
+                    });
+            } else {
+                triggerDirectDownload(dataUrl, fname);
+            }
+        } catch (err) {
+            console.error('Sync download error, falling back:', err);
+            canvas.toBlob((blob) => {
+                if (blob) fallbackDownload(blob, fname);
+            }, 'image/png', 1.0);
+        }
+    }
+
+    function triggerDirectDownload(dataUrl, fname) {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast('Card saved!');
     }
 
     function fallbackDownload(blob, fname) {
@@ -1242,16 +1284,9 @@
             scenes[idx](1.0);
             drawFooter(1.0);
 
-            C.toBlob((blob) => {
-                if (!blob) {
-                    showToast('Export failed — try again');
-                    resolveCard();
-                    return;
-                }
-                const fname = `wrapped_story_${idx + 1}_${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png`;
-                fallbackDownload(blob, fname);
-                resolveCard();
-            }, 'image/png', 1.0);
+            const fname = `wrapped_story_${idx + 1}_${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png`;
+            syncDownload(C, fname);
+            resolveCard();
         });
     }
 
@@ -1827,11 +1862,10 @@
             ctx.fillText('Upload your WhatsApp chat · Get your Stats', W / 2, H - 80);
 
             // ── Export ──
-            C.toBlob((blob) => {
-                if (!blob) { showToast('Export failed — try again'); return; }
-                const fname = `${stats.contactName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_stats.png`;
-
-                if (action === 'copy') {
+            const fname = `${stats.contactName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_stats.png`;
+            if (action === 'copy') {
+                C.toBlob((blob) => {
+                    if (!blob) { showToast('Export failed — try again'); return; }
                     if (navigator.clipboard && window.ClipboardItem) {
                         navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
                             .then(() => showToast('✅ Copied to clipboard!'))
@@ -1839,10 +1873,10 @@
                     } else {
                         fallbackDownload(blob, fname);
                     }
-                } else {
-                    fallbackDownload(blob, fname);
-                }
-            }, 'image/png', 1.0);
+                }, 'image/png', 1.0);
+            } else {
+                syncDownload(C, fname);
+            }
 
         } catch (err) {
             console.error('Stats export error:', err);
