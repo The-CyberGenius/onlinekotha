@@ -789,13 +789,13 @@ button,
 /* ============ Chat Color Variables ============ */
 :root {
     --msg-text: #1e293b;
-    --msg-time-me: rgba(255, 255, 255, 0.7);
+    --msg-time-me: #5b7083;
     --msg-time-them: #64748b;
 }
 
 html.dark {
     --msg-text: #f8fafc;
-    --msg-time-me: rgba(255, 255, 255, 0.7);
+    --msg-time-me: #94a3b8;
     --msg-time-them: #94a3b8;
 }
 
@@ -1042,7 +1042,7 @@ html.dark .chat-msg-text {
 }
 
 html.dark .chat-time-me {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: #94a3b8 !important;
 }
 
 html.dark .chat-time-them {
