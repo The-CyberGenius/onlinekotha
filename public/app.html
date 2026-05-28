@@ -520,17 +520,30 @@
         </div>
         <!-- end #app -->
 
-        <!-- macOS Dock (desktop only) -->
-        <div id="mac-dock" class="hidden md:flex items-center justify-center py-1.5 shrink-0">
-            <div class="flex items-center gap-1 bg-[#2a2a2e]/90 backdrop-blur-md rounded-2xl px-3 py-1.5 border border-white/10 shadow-lg">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-transform cursor-pointer" title="Kotha">
-                    <img src="/logo.svg" alt="Kotha" class="w-7 h-7 rounded-md">
-                </div>
-                <div class="w-1 h-1 rounded-full bg-white/60 mx-0.5 shrink-0"></div>
+    </div>
+    <!-- end #mac-frame -->
+
+    <!-- macOS Dock (fixed bottom, outside frame, desktop only) -->
+    <div id="mac-dock" class="hidden md:flex fixed bottom-3 left-1/2 -translate-x-1/2 z-[9999] items-center">
+        <div class="dock-glass flex items-center gap-1.5 px-3 py-1.5 rounded-2xl">
+            <div id="dock-kotha-icon" class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer relative" title="Kotha">
+                <img src="/logo.svg" alt="Kotha" class="w-8 h-8 rounded-md dock-icon-bounce">
+                <div class="dock-indicator absolute -bottom-1.5 w-1 h-1 rounded-full bg-white/80"></div>
             </div>
         </div>
     </div>
-    <!-- end #mac-frame -->
+
+    <!-- Resize handles (8 edges/corners, desktop only) -->
+    <template id="resize-handles-tpl">
+        <div class="rh rh-n" data-dir="n"></div>
+        <div class="rh rh-s" data-dir="s"></div>
+        <div class="rh rh-e" data-dir="e"></div>
+        <div class="rh rh-w" data-dir="w"></div>
+        <div class="rh rh-ne" data-dir="ne"></div>
+        <div class="rh rh-nw" data-dir="nw"></div>
+        <div class="rh rh-se" data-dir="se"></div>
+        <div class="rh rh-sw" data-dir="sw"></div>
+    </template>
 
     <!-- Media Modal -->
     <div id="media-modal"

@@ -2014,39 +2014,90 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeBtn = document.getElementById('mac-close');
         const minBtn = document.getElementById('mac-minimize');
         const fsBtn = document.getElementById('mac-fullscreen');
+        const dock = document.getElementById('mac-dock');
+        const dockIcon = document.getElementById('dock-kotha-icon');
 
-        if (closeBtn) closeBtn.addEventListener('click', () => {
-            frame.classList.add('mac-minimized');
-            showDockRestore();
-        });
-        if (minBtn) minBtn.addEventListener('click', () => {
-            frame.classList.add('mac-minimized');
-            showDockRestore();
-        });
+        let minimized = false;
+
+        function genieMinimize() {
+            if (minimized) return;
+            minimized = true;
+            frame.classList.remove('genie-restore');
+            frame.classList.add('genie-minimize');
+            if (dock) dock.classList.add('app-hidden');
+            frame.addEventListener('animationend', function onEnd() {
+                frame.removeEventListener('animationend', onEnd);
+                frame.classList.add('mac-minimized');
+                frame.classList.remove('genie-minimize');
+            }, { once: true });
+        }
+
+        function genieRestore() {
+            if (!minimized) return;
+            minimized = false;
+            frame.classList.remove('mac-minimized', 'genie-minimize');
+            frame.classList.add('genie-restore');
+            if (dock) dock.classList.remove('app-hidden');
+            if (dockIcon) {
+                dockIcon.querySelector('img').classList.add('dock-icon-bouncing');
+                setTimeout(() => dockIcon.querySelector('img').classList.remove('dock-icon-bouncing'), 600);
+            }
+            frame.addEventListener('animationend', function onEnd() {
+                frame.removeEventListener('animationend', onEnd);
+                frame.classList.remove('genie-restore');
+            }, { once: true });
+        }
+
+        if (closeBtn) closeBtn.addEventListener('click', genieMinimize);
+        if (minBtn) minBtn.addEventListener('click', genieMinimize);
         if (fsBtn) fsBtn.addEventListener('click', () => {
             const isFs = frame.classList.toggle('mac-fullscreen');
             if (isFs) { resetPosition(); }
         });
 
-        // Dock click restores from minimize
-        function showDockRestore() {
-            const dock = document.getElementById('mac-dock');
-            if (!dock) return;
-            dock.style.position = 'fixed';
-            dock.style.bottom = '12px';
-            dock.style.left = '50%';
-            dock.style.transform = 'translateX(-50%)';
-            dock.style.zIndex = '9999';
-            dock.style.display = 'flex';
-        }
-        const dock = document.getElementById('mac-dock');
-        if (dock) dock.addEventListener('click', () => {
-            frame.classList.remove('mac-minimized');
-            dock.style.position = '';
-            dock.style.bottom = '';
-            dock.style.left = '';
-            dock.style.transform = '';
-            dock.style.zIndex = '';
+        // Dock icon click restores
+        if (dockIcon) dockIcon.addEventListener('click', () => {
+            if (minimized) genieRestore();
         });
+
+        // --- All-side resize handles ---
+        const tpl = document.getElementById('resize-handles-tpl');
+        if (tpl) {
+            frame.appendChild(tpl.content.cloneNode(true));
+            const MIN_W = 600, MIN_H = 400;
+            frame.querySelectorAll('.rh').forEach(handle => {
+                const dir = handle.dataset.dir;
+                handle.addEventListener('mousedown', (e) => {
+                    if (frame.classList.contains('mac-fullscreen')) return;
+                    initPosition();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const startX = e.clientX, startY = e.clientY;
+                    const rect = frame.getBoundingClientRect();
+                    const startL = rect.left, startT = rect.top, startW = rect.width, startH = rect.height;
+
+                    function onMove(ev) {
+                        const dx = ev.clientX - startX, dy = ev.clientY - startY;
+                        let l = startL, t = startT, w = startW, h = startH;
+
+                        if (dir.includes('e')) w = Math.max(MIN_W, startW + dx);
+                        if (dir.includes('w')) { w = Math.max(MIN_W, startW - dx); l = startL + startW - w; }
+                        if (dir.includes('s')) h = Math.max(MIN_H, startH + dy);
+                        if (dir.includes('n')) { h = Math.max(MIN_H, startH - dy); t = startT + startH - h; }
+
+                        frame.style.left = l + 'px';
+                        frame.style.top = t + 'px';
+                        frame.style.width = w + 'px';
+                        frame.style.height = h + 'px';
+                    }
+                    function onUp() {
+                        document.removeEventListener('mousemove', onMove);
+                        document.removeEventListener('mouseup', onUp);
+                    }
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
+                });
+            });
+        }
     })();
 });
