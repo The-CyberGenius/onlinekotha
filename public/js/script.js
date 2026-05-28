@@ -2027,6 +2027,7 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.remove('genie-restore');
             frame.classList.add('genie-minimize');
             if (dockDot) dockDot.style.opacity = '0';
+            if (dock) dock.style.removeProperty('display'); // Make sure dock is shown on minimize
             setTimeout(() => {
                 frame.classList.add('mac-minimized');
                 frame.classList.remove('genie-minimize');
@@ -2039,6 +2040,16 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.remove('mac-minimized', 'genie-minimize');
             frame.classList.add('genie-restore');
             if (dockDot) dockDot.style.opacity = '1';
+            
+            // If restoring while still in fullscreen mode, keep dock hidden, otherwise show it
+            if (dock) {
+                if (frame.classList.contains('mac-fullscreen')) {
+                    dock.style.setProperty('display', 'none', 'important');
+                } else {
+                    dock.style.removeProperty('display');
+                }
+            }
+
             if (dockIcon) {
                 dockIcon.classList.add('dock-bounce');
                 setTimeout(() => dockIcon.classList.remove('dock-bounce'), 600);
@@ -2052,7 +2063,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (minBtn) minBtn.addEventListener('click', genieMinimize);
         if (fsBtn) fsBtn.addEventListener('click', () => {
             const isFs = frame.classList.toggle('mac-fullscreen');
-            if (isFs) { resetPosition(); }
+            if (isFs) { 
+                resetPosition(); 
+                if (dock) dock.style.setProperty('display', 'none', 'important');
+            } else {
+                if (dock) dock.style.removeProperty('display');
+            }
         });
 
         // Dock icon click restores
