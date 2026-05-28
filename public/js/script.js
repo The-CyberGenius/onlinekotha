@@ -911,10 +911,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selector = document.getElementById('chat-selector');
                 if (selector) selector.value = chat;
                 renderChatList(chats, chat);
-                loadData(chat);
+                loadData(chat).then(() => {
+                    const inp = document.getElementById('bottom-ai-input');
+                    if (inp) inp.focus();
+                });
                 toggleSidebar(false);
-                // Auto-focus input when chat is selected
-                setTimeout(() => { const inp = document.getElementById('bottom-ai-input'); if (inp) inp.focus(); }, 150);
+                // Also try focus after sidebar animation completes (mobile)
+                setTimeout(() => { const inp = document.getElementById('bottom-ai-input'); if (inp) inp.focus(); }, 350);
             });
             chatListUI.appendChild(item);
         });
