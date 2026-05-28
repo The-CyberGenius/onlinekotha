@@ -1951,6 +1951,28 @@ document.addEventListener('DOMContentLoaded', () => {
     window.kothaGetOtherPersonName = () => otherPersonName;
     window.kothaGetCurrentChat = () => currentChat;
 
+    // ─── Auto-focus input on any keypress ───
+    // When user starts typing anywhere, focus the chat input automatically
+    document.addEventListener('keydown', (e) => {
+        // Only act when a chat is open
+        if (!currentChat) return;
+        const inp = document.getElementById('bottom-ai-input');
+        if (!inp) return;
+        // Don't steal focus if already in an input/textarea/contenteditable
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (document.activeElement && document.activeElement.isContentEditable) return;
+        // Skip modifier-combos (Ctrl+A, Cmd+K, etc.) — only printable + Enter/Space/Backspace
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        // Only act on printable keys (length 1) or Enter/Backspace
+        const isPrintable = e.key.length === 1;
+        const isEnter = e.key === 'Enter';
+        const isBackspace = e.key === 'Backspace';
+        if (!isPrintable && !isEnter && !isBackspace) return;
+        // Focus the input — the keystroke itself will land in it
+        inp.focus();
+    });
+
     // ─── macOS Window: Drag + Traffic Lights (md+ only) ───
     (function initMacFrame() {
         const frame = document.getElementById('mac-frame');
