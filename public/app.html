@@ -16,8 +16,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <!-- CSS first — critical render path -->
     <link rel="stylesheet" href="/css/style.css?v=28">
-    <!-- Tailwind CDN — defer to unblock first paint (407KB) -->
-    <script defer src="/js/tailwind.js"></script>
+    <!-- Tailwind CDN -->
+    <script src="/js/tailwind.js"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay=function(){return new Promise(function(r){if(window.Razorpay)return r();var s=document.createElement('script');s.src='https://checkout.razorpay.com/v1/checkout.js';s.onload=r;document.head.appendChild(s)})}</script>
     <script src="/js/auth-init.js"></script>

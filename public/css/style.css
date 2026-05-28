@@ -588,12 +588,7 @@ html.dark #search-action-btn { background: #00a884 !important; }
 html.dark #search-action-btn:disabled { background: #233138 !important; }
 
 /* Chat list */
-html.dark #chat-list-ui > div { border-color: transparent !important; }
-html.dark #chat-list-ui > div:hover { background: #2a3942 !important; }
-html.dark #chat-list-ui .text-\[13px\] { color: #e9edef !important; }
-html.dark #chat-list-ui .text-\[10px\] { color: #667781 !important; }
-html.dark #chat-list-ui .bg-indigo-50 { background: rgba(99,102,241,0.12) !important; border-color: rgba(99,102,241,0.25) !important; }
-html.dark #global-chat-item.bg-indigo-50 { background: rgba(99,102,241,0.12) !important; border-color: rgba(99,102,241,0.25) !important; }
+/* Tailwind handles chat list dark mode classes via script.js directly */
 
 /* Labels */
 html.dark #sidebar .uppercase.tracking-widest { color: #667781 !important; }
