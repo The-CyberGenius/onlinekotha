@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sidebar toggle — true = open, false = close, undefined = toggle
     const toggleSidebar = (open) => {
-        if (window.innerWidth >= 768) return; // only on mobile
+        if (window.innerWidth >= 1024) return; // only on mobile
         const backdrop = document.getElementById('sidebar-backdrop');
         if (open === true) {
             sidebar.classList.remove('-translate-x-full');
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mobileFilterBtn) {
         mobileFilterBtn.addEventListener('click', () => {
             // Force open the sidebar
-            if (window.innerWidth < 768) {
+            if (window.innerWidth < 1024) {
                 sidebar.classList.remove('-translate-x-full');
                 const backdrop = document.getElementById('sidebar-backdrop');
                 if (backdrop) backdrop.classList.remove('hidden');
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `
             <div class="flex flex-col mb-1 w-full" id="msg-${msg.id}">
-                <div class="max-w-[85%] md:max-w-md lg:max-w-lg relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
+                <div class="max-w-[80%] md:max-w-[70%] lg:max-w-[65%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
                     ${nameHtml}
                     ${mediaHtml}
                     ${contentHtml}
@@ -1492,7 +1492,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `
             <div class="flex flex-col mb-3.5 w-full animate-message relative group" id="global-msg-${msg.id}">
-                <div class="max-w-[85%] md:max-w-md lg:max-w-lg relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
+                <div class="max-w-[80%] md:max-w-[70%] lg:max-w-[65%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
                     ${replyBlockHtml}
                     ${nameHtml}
                     ${contentHtml}

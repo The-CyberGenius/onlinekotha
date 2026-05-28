@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <!-- CSS first — critical render path -->
-    <link rel="stylesheet" href="/css/style.css?v=28">
+    <link rel="stylesheet" href="/css/style.css?v=29">
     <!-- Tailwind CDN -->
     <script src="/js/tailwind.js"></script>
     <script>
@@ -33,10 +33,10 @@
 
     <div id="app" class="flex w-full h-full max-w-7xl mx-auto rounded-none md:rounded-[28px] shadow-2xl overflow-hidden relative bg-white/95 backdrop-blur-2xl border-0 md:border border-gray-200/50">
         <!-- Mobile sidebar backdrop -->
-        <div id="sidebar-backdrop" class="hidden md:hidden absolute inset-0 bg-black/40 z-[55]"></div>
+        <div id="sidebar-backdrop" class="hidden lg:hidden absolute inset-0 bg-black/40 z-[55]"></div>
 
         <!-- Sidebar -->
-        <div id="sidebar" class="w-full md:w-[340px] lg:w-[360px] flex flex-col absolute md:relative h-full transition-transform duration-200 left-0 bg-white dark:bg-[#111b21] z-[60] transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none border-r border-gray-200/60 dark:border-gray-800">
+        <div id="sidebar" class="w-full lg:w-[360px] flex flex-col absolute lg:relative h-full transition-transform duration-200 left-0 bg-white dark:bg-[#111b21] z-[60] transform -translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none border-r border-gray-200/60 dark:border-gray-800">
             <!-- Sidebar Header -->
             <div id="sidebar-header" class="bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-4 py-3 z-20 shrink-0 border-b border-gray-200 dark:border-gray-800 transition-colors">
                 <div class="flex items-center">
@@ -58,7 +58,7 @@
                     <button id="logout-btn" class="w-8 h-8 rounded-lg hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-500 transition" title="Logout">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                     </button>
-                    <button id="close-sidebar-btn" class="md:hidden w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 transition">
+                    <button id="close-sidebar-btn" class="lg:hidden w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 transition">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
@@ -118,31 +118,31 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="px-3 py-2 flex gap-1 shrink-0 overflow-x-auto no-scrollbar border-t border-gray-100" id="filter-buttons-container">
-                <button id="btn-top" title="Jump to top" class="action-pill text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition shrink-0">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
-                    <span class="text-[9px] font-bold leading-none">Top</span>
+            <!-- Quick Actions Dock -->
+            <div class="px-2.5 py-1.5 flex items-center gap-1.5 shrink-0 overflow-x-auto no-scrollbar border-t border-gray-200/60 dark:border-gray-800 bg-white/60 dark:bg-[#111b21]/50 backdrop-blur-sm" id="filter-buttons-container">
+                <button id="btn-top" title="Jump to top" class="dock-btn group">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 15l-6-6-6 6"/></svg>
                 </button>
-                <button id="btn-bottom" title="Jump to bottom" class="action-pill text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition shrink-0">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                    <span class="text-[9px] font-bold leading-none">Bottom</span>
+                <button id="btn-bottom" title="Jump to bottom" class="dock-btn group">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
                 </button>
-                <button id="btn-media" title="Media gallery" class="action-pill text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-xl px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition shrink-0">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
-                    <span class="text-[9px] font-bold leading-none">Media</span>
+                <div class="w-px h-5 bg-gray-200/80 dark:bg-gray-700/60 mx-0.5 shrink-0"></div>
+                <button id="btn-media" title="Media gallery" class="dock-btn-label group">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+                    <span>Media</span>
                 </button>
-                <button id="btn-analytics" title="Analytics" class="action-pill text-gray-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition shrink-0">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
-                    <span class="text-[9px] font-bold leading-none">Stats</span>
+                <button id="btn-analytics" title="Stats" class="dock-btn-label group">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/></svg>
+                    <span>Stats</span>
                 </button>
-                <button id="btn-wrapped" title="Chat Wrapped" class="action-pill text-gray-500 hover:text-amber-500 hover:bg-amber-50 rounded-xl px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition shrink-0">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    <span class="text-[9px] font-bold leading-none">Wrapped</span>
+                <button id="btn-wrapped" title="Chat Wrapped" class="dock-btn-label dock-btn-wrapped group">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>Wrapped</span>
                 </button>
-                <button id="btn-filters-toggle" title="Filters" class="action-pill text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-xl px-2.5 py-1.5 flex flex-col items-center gap-0.5 transition shrink-0 ml-auto">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-                    <span class="text-[9px] font-bold leading-none">Filter</span>
+                <div class="flex-1"></div>
+                <button id="btn-filters-toggle" title="Filters" class="dock-btn-label dock-btn-filter group ml-auto">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                    <span>Filter</span>
                 </button>
             </div>
 
@@ -219,12 +219,12 @@
         </div>
 
         <!-- Main Chat Area -->
-        <div id="main-panel" class="flex-1 flex flex-col relative w-full md:w-auto h-full bg-[#efeae2] dark:bg-[#0b141a]">
+        <div id="main-panel" class="flex-1 flex flex-col relative w-full lg:w-auto h-full bg-[#efeae2] dark:bg-[#0b141a]">
             <!-- Chat Header -->
             <div id="chat-header-bar" class="h-[60px] md:h-16 bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-3 md:px-5 z-20 w-full shrink-0 gap-2 shadow-sm transition-colors">
                 <div class="flex items-center min-w-0 flex-1">
                     <!-- Mobile sidebar toggle -->
-                    <button class="md:hidden mr-2.5 w-9 h-9 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition shrink-0" id="open-sidebar-btn" title="Menu & Chats" aria-label="Open menu">
+                    <button class="lg:hidden mr-2.5 w-9 h-9 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition shrink-0" id="open-sidebar-btn" title="Menu & Chats" aria-label="Open menu">
                         <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                     </button>
                     <!-- Avatar -->
@@ -347,7 +347,7 @@
     <!-- AI Panel removed — AI chat is now inline -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="js/script.js?v=21"></script>
+    <script src="js/script.js?v=22"></script>
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=18"></script>

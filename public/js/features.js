@@ -98,35 +98,46 @@
     });
 
     function showInstallBanner() {
-        if (document.getElementById('pwa-install-banner')) return;
-        const banner = document.createElement('div');
-        banner.id = 'pwa-install-banner';
-        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-gray-900 text-white rounded-2xl p-4 shadow-2xl z-[90] flex items-center gap-3 animate-message';
-        banner.innerHTML = `
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-bold">Install Kotha</p>
-                <p class="text-[11px] text-gray-400">Add to home screen for app-like experience</p>
-            </div>
-            <button id="pwa-install-btn" class="bg-white text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-100 transition shrink-0">Install</button>
-            <button id="pwa-dismiss-btn" class="text-gray-500 hover:text-white transition p-1 shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </button>
-        `;
-        document.body.appendChild(banner);
+        if (document.getElementById('pwa-install-banner') || localStorage.getItem('kotha_pwa_install_dismissed') === '1') return;
+        // Delay 8s so user settles in first
+        setTimeout(() => {
+            if (document.getElementById('pwa-install-banner')) return;
+            const banner = document.createElement('div');
+            banner.id = 'pwa-install-banner';
+            banner.className = 'fixed bottom-4 right-4 md:w-64 bg-gray-900/95 backdrop-blur-xl text-white rounded-2xl px-3.5 py-2.5 shadow-2xl z-[90] flex items-center gap-2.5 border border-white/10';
+            banner.style.cssText = 'animation:slideUpFade .4s cubic-bezier(.16,1,.3,1) forwards;opacity:0;';
+            banner.innerHTML = `
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-[12px] font-bold leading-tight">Install Kotha</p>
+                    <p class="text-[9px] text-gray-400 leading-tight mt-0.5">Add to home screen</p>
+                </div>
+                <button id="pwa-install-btn" class="bg-white text-gray-900 text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-gray-100 transition shrink-0">Install</button>
+                <button id="pwa-dismiss-btn" class="text-gray-500 hover:text-white transition p-0.5 shrink-0">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            `;
+            document.body.appendChild(banner);
 
-        document.getElementById('pwa-install-btn').addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const result = await deferredPrompt.userChoice;
-            if (result.outcome === 'accepted') showToast('App installed!');
-            deferredPrompt = null;
-            banner.remove();
-        });
-        document.getElementById('pwa-dismiss-btn').addEventListener('click', () => banner.remove());
-        setTimeout(() => { if (banner.parentNode) banner.remove(); }, 15000);
+            document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt();
+                const result = await deferredPrompt.userChoice;
+                if (result.outcome === 'accepted') {
+                    showToast('App installed!');
+                    localStorage.setItem('kotha_pwa_install_dismissed', '1');
+                }
+                deferredPrompt = null;
+                banner.remove();
+            });
+            document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+                banner.remove();
+                localStorage.setItem('kotha_pwa_install_dismissed', '1');
+            });
+            setTimeout(() => { if (banner.parentNode) banner.remove(); }, 10000);
+        }, 8000);
     }
 
     // ===== iOS Install Prompt =====
