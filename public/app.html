@@ -33,10 +33,29 @@
 
 <body class="flex items-center justify-center h-[100dvh] w-screen overflow-hidden p-0 md:p-4 lg:p-6">
 
-    <div id="app"
-        class="flex w-full h-full max-w-7xl mx-auto rounded-none md:rounded-[28px] shadow-2xl overflow-hidden relative bg-white border-0 md:border border-gray-200/50">
-        <!-- Mobile sidebar backdrop -->
-        <div id="sidebar-backdrop" class="hidden md:hidden absolute inset-0 bg-black/40 z-[55]"></div>
+    <!-- macOS Window Frame (wraps #app on md+, invisible on mobile) -->
+    <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-7xl md:mx-auto relative">
+        <!-- Title bar with traffic lights (desktop only) -->
+        <div id="mac-titlebar" class="hidden md:flex h-11 bg-[#38383d] rounded-t-[12px] items-center px-4 shrink-0 relative z-[200] select-none">
+            <div class="flex items-center gap-2" id="mac-traffic-lights">
+                <button id="mac-close" class="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-90 transition border border-black/10 relative group" title="Close">
+                    <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#4a0002]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+                <button id="mac-minimize" class="w-3 h-3 rounded-full bg-[#febc2e] hover:brightness-90 transition border border-black/10 relative group" title="Minimize">
+                    <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#995700]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M5 12h14"/></svg>
+                </button>
+                <button id="mac-fullscreen" class="w-3 h-3 rounded-full bg-[#28c840] hover:brightness-90 transition border border-black/10 relative group" title="Fullscreen">
+                    <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#006500]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M16 21h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+                </button>
+            </div>
+            <span class="absolute left-1/2 -translate-x-1/2 text-[13px] text-gray-400 font-medium tracking-tight pointer-events-none">Kotha</span>
+        </div>
+
+        <!-- App content -->
+        <div id="app"
+            class="flex flex-1 min-h-0 w-full overflow-hidden relative bg-white dark:bg-[#111b21]">
+            <!-- Mobile sidebar backdrop -->
+            <div id="sidebar-backdrop" class="hidden md:hidden absolute inset-0 bg-black/40 z-[55]"></div>
 
         <!-- Sidebar -->
         <div id="sidebar"
@@ -499,7 +518,19 @@
                 </div>
             </div>
         </div>
+        <!-- end #app -->
+
+        <!-- macOS Dock (desktop only) -->
+        <div id="mac-dock" class="hidden md:flex items-center justify-center py-1.5 shrink-0">
+            <div class="flex items-center gap-1 bg-[#2a2a2e]/90 backdrop-blur-md rounded-2xl px-3 py-1.5 border border-white/10 shadow-lg">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-transform cursor-pointer" title="Kotha">
+                    <img src="/logo.svg" alt="Kotha" class="w-7 h-7 rounded-md">
+                </div>
+                <div class="w-1 h-1 rounded-full bg-white/60 mx-0.5 shrink-0"></div>
+            </div>
+        </div>
     </div>
+    <!-- end #mac-frame -->
 
     <!-- Media Modal -->
     <div id="media-modal"

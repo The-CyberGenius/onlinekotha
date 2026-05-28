@@ -5,7 +5,7 @@ body {
     touch-action: manipulation;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: radial-gradient(circle at top left, #f5f3ff, #f3f4f6 70%);
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
 }
 
 /* Safe area insets for bottom bar */
@@ -485,84 +485,51 @@ button,
     }
 }
 
-/* Glass panel for the outer container on desktop */
+/* macOS window frame on desktop */
 @media (min-width: 768px) {
-    #app {
-        box-shadow:
-            0 25px 65px -15px rgba(0, 0, 0, 0.15),
-            inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.3),
-            inset -1px -1px 0 rgba(0, 0, 0, 0.05);
-        position: relative;
-        resize: both;
+    #mac-frame {
+        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.08);
+        border-radius: 12px;
         overflow: hidden;
+        resize: both;
         min-width: 600px;
         min-height: 400px;
+        position: relative;
     }
-    #app::before {
+    html.dark #mac-frame {
+        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    html.dark #mac-titlebar { background: #2a2a2e; }
+    /* Resize handle */
+    #mac-frame::after {
         content: '';
         position: absolute;
-        inset: 0;
-        pointer-events: none;
-        border-radius: inherit;
-        padding: 1px;
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.75) 0%,
-            rgba(255, 255, 255, 0.15) 25%,
-            rgba(255, 255, 255, 0) 50%,
-            rgba(255, 255, 255, 0.05) 75%,
-            rgba(255, 255, 255, 0.4) 100%
-        );
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        z-index: 100;
-    }
-    /* Resize handle indicator */
-    #app::after {
-        content: '';
-        position: absolute;
-        bottom: 4px;
-        right: 4px;
-        width: 14px;
-        height: 14px;
-        background:
-            linear-gradient(135deg, transparent 50%, rgba(99,102,241,0.25) 50%);
-        border-radius: 0 0 inherit 0;
+        bottom: 3px;
+        right: 3px;
+        width: 12px;
+        height: 12px;
+        background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.15) 50%);
         pointer-events: none;
         z-index: 101;
-    }
-    html.dark #app {
-        box-shadow:
-            0 25px 65px -15px rgba(0, 0, 0, 0.5),
-            inset 1.5px 1.5px 0 rgba(255, 255, 255, 0.12),
-            inset -1px -1px 0 rgba(0, 0, 0, 0.3);
-    }
-    html.dark #app::before {
-        background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.35) 0%,
-            rgba(255, 255, 255, 0.05) 25%,
-            rgba(255, 255, 255, 0) 50%,
-            rgba(255, 255, 255, 0.02) 75%,
-            rgba(255, 255, 255, 0.18) 100%
-        );
-    }
-    html.dark #app::after {
-        background: linear-gradient(135deg, transparent 50%, rgba(99,102,241,0.15) 50%);
+        border-radius: 0 0 4px 0;
     }
 }
-/* Drag cursor on header when draggable */
-#app.is-draggable #sidebar-header,
-#app.is-draggable #chat-header-bar {
-    cursor: grab;
+/* Drag via titlebar */
+#mac-titlebar { cursor: grab; }
+#mac-frame.is-dragging #mac-titlebar { cursor: grabbing !important; }
+#mac-frame.is-dragging { cursor: grabbing !important; user-select: none; }
+/* Fullscreen mode */
+#mac-frame.mac-fullscreen {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    resize: none !important;
 }
-#app.is-dragging {
-    cursor: grabbing !important;
-    user-select: none;
-}
-#app.is-dragging #sidebar-header,
-#app.is-dragging #chat-header-bar {
-    cursor: grabbing !important;
-}
+#mac-frame.mac-fullscreen #mac-titlebar { border-radius: 0; }
+/* Minimized */
+#mac-frame.mac-minimized { transform: scale(0) translateY(100%); opacity: 0; transition: all 350ms cubic-bezier(0.4, 0, 1, 1); }
+#mac-frame:not(.mac-minimized) { transition: transform 350ms cubic-bezier(0, 0, 0.2, 1), opacity 250ms; }
 
 /* ============ Skeleton Loading ============ */
 .skeleton {

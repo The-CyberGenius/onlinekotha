@@ -1951,73 +1951,102 @@ document.addEventListener('DOMContentLoaded', () => {
     window.kothaGetOtherPersonName = () => otherPersonName;
     window.kothaGetCurrentChat = () => currentChat;
 
-    // ─── Draggable App Container (md+ only) ───
-    (function initDrag() {
-        const app = document.getElementById('app');
-        if (!app || window.innerWidth < 768) return;
-        app.classList.add('is-draggable');
+    // ─── macOS Window: Drag + Traffic Lights (md+ only) ───
+    (function initMacFrame() {
+        const frame = document.getElementById('mac-frame');
+        const titlebar = document.getElementById('mac-titlebar');
+        if (!frame || !titlebar || window.innerWidth < 768) return;
 
-        // Switch from centered flex to absolute positioning so we can drag
+        // --- Drag via titlebar ---
         let inited = false;
         function initPosition() {
             if (inited) return;
             inited = true;
-            const r = app.getBoundingClientRect();
-            app.style.position = 'absolute';
-            app.style.left = r.left + 'px';
-            app.style.top = r.top + 'px';
-            app.style.width = r.width + 'px';
-            app.style.height = r.height + 'px';
-            app.style.margin = '0';
-            // Keep body as positioning context
+            const r = frame.getBoundingClientRect();
+            frame.style.position = 'absolute';
+            frame.style.left = r.left + 'px';
+            frame.style.top = r.top + 'px';
+            frame.style.width = r.width + 'px';
+            frame.style.height = r.height + 'px';
+            frame.style.margin = '0';
             document.body.style.position = 'relative';
+        }
+        function resetPosition() {
+            frame.style.position = '';
+            frame.style.left = '';
+            frame.style.top = '';
+            frame.style.width = '';
+            frame.style.height = '';
+            frame.style.margin = '';
+            document.body.style.position = '';
+            frame.classList.remove('is-dragging');
+            inited = false;
         }
 
         let dragging = false, sx, sy, sl, st;
-        const handles = [document.getElementById('sidebar-header'), document.getElementById('chat-header-bar')];
-
-        handles.forEach(h => {
-            if (!h) return;
-            h.addEventListener('mousedown', (e) => {
-                // Don't drag if clicking buttons/links inside header
-                if (e.target.closest('button, a, input, select')) return;
-                initPosition();
-                dragging = true;
-                sx = e.clientX; sy = e.clientY;
-                sl = parseInt(app.style.left); st = parseInt(app.style.top);
-                app.classList.add('is-dragging');
-                e.preventDefault();
-            });
+        titlebar.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button')) return;
+            if (frame.classList.contains('mac-fullscreen')) return;
+            initPosition();
+            dragging = true;
+            sx = e.clientX; sy = e.clientY;
+            sl = parseInt(frame.style.left); st = parseInt(frame.style.top);
+            frame.classList.add('is-dragging');
+            e.preventDefault();
         });
-
         document.addEventListener('mousemove', (e) => {
             if (!dragging) return;
-            const dx = e.clientX - sx, dy = e.clientY - sy;
-            app.style.left = Math.max(0, Math.min(window.innerWidth - 100, sl + dx)) + 'px';
-            app.style.top = Math.max(0, Math.min(window.innerHeight - 60, st + dy)) + 'px';
+            frame.style.left = Math.max(0, Math.min(window.innerWidth - 100, sl + (e.clientX - sx))) + 'px';
+            frame.style.top = Math.max(0, Math.min(window.innerHeight - 60, st + (e.clientY - sy))) + 'px';
         });
-
         document.addEventListener('mouseup', () => {
             if (!dragging) return;
             dragging = false;
-            app.classList.remove('is-dragging');
+            frame.classList.remove('is-dragging');
+        });
+        // Double-click titlebar to toggle fullscreen
+        titlebar.addEventListener('dblclick', (e) => {
+            if (e.target.closest('button')) return;
+            document.getElementById('mac-fullscreen').click();
         });
 
-        // Double-click header to reset position
-        handles.forEach(h => {
-            if (!h) return;
-            h.addEventListener('dblclick', (e) => {
-                if (e.target.closest('button, a, input, select')) return;
-                app.style.position = '';
-                app.style.left = '';
-                app.style.top = '';
-                app.style.width = '';
-                app.style.height = '';
-                app.style.margin = '';
-                document.body.style.position = '';
-                app.classList.remove('is-dragging');
-                inited = false;
-            });
+        // --- Traffic light buttons ---
+        const closeBtn = document.getElementById('mac-close');
+        const minBtn = document.getElementById('mac-minimize');
+        const fsBtn = document.getElementById('mac-fullscreen');
+
+        if (closeBtn) closeBtn.addEventListener('click', () => {
+            frame.classList.add('mac-minimized');
+            showDockRestore();
+        });
+        if (minBtn) minBtn.addEventListener('click', () => {
+            frame.classList.add('mac-minimized');
+            showDockRestore();
+        });
+        if (fsBtn) fsBtn.addEventListener('click', () => {
+            const isFs = frame.classList.toggle('mac-fullscreen');
+            if (isFs) { resetPosition(); }
+        });
+
+        // Dock click restores from minimize
+        function showDockRestore() {
+            const dock = document.getElementById('mac-dock');
+            if (!dock) return;
+            dock.style.position = 'fixed';
+            dock.style.bottom = '12px';
+            dock.style.left = '50%';
+            dock.style.transform = 'translateX(-50%)';
+            dock.style.zIndex = '9999';
+            dock.style.display = 'flex';
+        }
+        const dock = document.getElementById('mac-dock');
+        if (dock) dock.addEventListener('click', () => {
+            frame.classList.remove('mac-minimized');
+            dock.style.position = '';
+            dock.style.bottom = '';
+            dock.style.left = '';
+            dock.style.transform = '';
+            dock.style.zIndex = '';
         });
     })();
 });
