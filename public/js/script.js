@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sidebar toggle — true = open, false = close, undefined = toggle
     const toggleSidebar = (open) => {
-        if (window.innerWidth >= 768) return; // only on mobile
+        if (window.innerWidth >= 768 && !window.kothaCompact) return; // mobile OR compact desktop frame
         const backdrop = document.getElementById('sidebar-backdrop');
         if (open === true) {
             sidebar.classList.remove('-translate-x-full');
@@ -2055,6 +2055,27 @@ document.addEventListener('DOMContentLoaded', () => {
         syncOverlay();
         window.addEventListener('resize', syncOverlay);
 
+        // --- Compact (phone-like) mode based on the FRAME's own width ---
+        const sidebarEl = document.getElementById('sidebar');
+        function updateCompact() {
+            const compact = frame.getBoundingClientRect().width < 760;
+            if (compact === !!window.kothaCompact) return;
+            window.kothaCompact = compact;
+            frame.classList.toggle('kompact', compact);
+            if (compact) {
+                // collapse sidebar into slide-in overlay
+                if (sidebarEl) sidebarEl.classList.add('-translate-x-full');
+            } else {
+                if (sidebarEl) sidebarEl.classList.remove('-translate-x-full');
+                const bd = document.getElementById('sidebar-backdrop');
+                if (bd) bd.classList.add('hidden');
+            }
+        }
+        if (window.ResizeObserver) {
+            new ResizeObserver(updateCompact).observe(frame);
+        }
+        updateCompact();
+
         let dragging = false, sx, sy, sl, st;
         titlebar.addEventListener('mousedown', (e) => {
             if (e.target.closest('button')) return;
@@ -2156,7 +2177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- All-side resize handles (attached to the outside overlay) ---
         {
-            const MIN_W = 600, MIN_H = 400;
+            const MIN_W = 380, MIN_H = 400;
             rhOverlay.querySelectorAll('.rh').forEach(handle => {
                 const dir = handle.dataset.dir;
                 handle.addEventListener('mousedown', (e) => {
