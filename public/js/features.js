@@ -1663,15 +1663,60 @@
         });
     }
 
+    // ── Wrapped loading overlay (shown until THIS chat's messages are ready) ──
+    function showWrappedLoader() {
+        if (document.getElementById('wrapped-loader')) return;
+        const el = document.createElement('div');
+        el.id = 'wrapped-loader';
+        el.className = 'wrapped-overlay';
+        el.style.cssText = 'display:flex;align-items:center;justify-content:center;';
+        el.innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:18px;color:#fff;">
+                <div class="wrapped-spinner" style="width:54px;height:54px;border:4px solid rgba(255,255,255,0.15);border-top-color:#a78bfa;border-radius:50%;animation:wrappedSpin 0.8s linear infinite;"></div>
+                <div style="font-weight:800;letter-spacing:0.5px;font-size:13px;">Building your Wrapped…</div>
+            </div>`;
+        document.body.appendChild(el);
+    }
+    function hideWrappedLoader() {
+        const el = document.getElementById('wrapped-loader');
+        if (el) el.remove();
+    }
+
     // ── Launch Wrapped ──
-    function launchWrapped() {
+    async function launchWrapped() {
+        const targetChat = window.kothaGetCurrentChat ? window.kothaGetCurrentChat() : null;
+        if (!targetChat) { showToast('Open a chat first!'); return; }
+
+        // Wait until the messages currently loaded belong to the chat the user
+        // clicked on — prevents showing a previous chat's Wrapped (no mismatch).
+        showWrappedLoader();
+        try {
+            const t0 = Date.now();
+            while (window.kothaChatLoading || window.kothaLoadedChat !== targetChat) {
+                if (window.kothaGetCurrentChat && window.kothaGetCurrentChat() !== targetChat) {
+                    // User switched to a different chat mid-load — abort silently.
+                    hideWrappedLoader();
+                    return;
+                }
+                if (Date.now() - t0 > 15000) {
+                    hideWrappedLoader();
+                    showToast('Chat is taking too long to load. Try again.');
+                    return;
+                }
+                await new Promise(r => setTimeout(r, 80));
+            }
+        } finally {
+            // loader removed below right before building (or on early returns above)
+        }
+
         const raw = window.kothaGetAllMessages ? window.kothaGetAllMessages() : [];
-        if (!raw || raw.length === 0) { showToast('Open a chat first!'); return; }
+        if (!raw || raw.length === 0) { hideWrappedLoader(); showToast('Open a chat first!'); return; }
 
         const msgs = raw.filter(m => m.sender && m.type !== 'system');
-        if (msgs.length < 5) { showToast('Need at least 5 messages for Wrapped!'); return; }
+        if (msgs.length < 5) { hideWrappedLoader(); showToast('Need at least 5 messages for Wrapped!'); return; }
 
         const stats = computeWrappedStats(msgs);
+        hideWrappedLoader();
 
         // Build overlay
         const overlay = document.createElement('div');

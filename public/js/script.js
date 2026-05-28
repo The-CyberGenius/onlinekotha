@@ -570,6 +570,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadData = async (chatName) => {
+        // Mark messages for this chat as still loading so features (e.g. Wrapped)
+        // don't show stale data from a previously opened chat (no mismatch).
+        window.kothaChatLoading = true;
+        window.kothaLoadedChat = null;
         try {
             showSkeleton();
             statsInfo.innerText = 'Loading...';
@@ -578,10 +582,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.error) {
                 statsInfo.innerText = "Error: " + data.error;
+                window.kothaChatLoading = false;
                 return;
             }
 
             allMessages = data;
+            // Messages now belong to this chat — safe for Wrapped to read.
+            window.kothaLoadedChat = chatName;
+            window.kothaChatLoading = false;
             displayedMessages = allMessages; // Default view is everything
             datePartsOrder = detectDateFormat(allMessages);
 
@@ -853,6 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (e) {
             statsInfo.innerText = "Fetch error: " + e.message;
+            window.kothaChatLoading = false;
         }
     };
 

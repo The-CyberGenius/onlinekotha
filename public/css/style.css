@@ -1581,6 +1581,8 @@ select {
     animation: fadeIn 250ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes wrappedSpin { to { transform: rotate(360deg); } }
+
 .wrapped-container {
     width: 100%;
     max-width: 400px;

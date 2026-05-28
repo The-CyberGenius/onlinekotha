@@ -18,7 +18,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=3">
-    <link rel="stylesheet" href="/css/style.css?v=34">
+    <link rel="stylesheet" href="/css/style.css?v=35">
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay = function () { return new Promise(function (r) { if (window.Razorpay) return r(); var s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.onload = r; document.head.appendChild(s) }) }</script>
     <script src="/js/auth-init.js"></script>
@@ -632,10 +632,10 @@
     <!-- AI Panel removed — AI chat is now inline -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="js/script.js?v=26"></script>
+    <script src="js/script.js?v=27"></script>
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
-    <script src="js/features.js?v=18"></script>
+    <script src="js/features.js?v=19"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });
