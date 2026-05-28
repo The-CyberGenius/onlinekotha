@@ -237,9 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             } else if (msg.type === 'video') {
                 mediaHtml = `
-                    <video controls preload="metadata" class="w-64 max-w-full rounded-xl shadow-md border border-white/20 mb-1">
-                        <source src="${fileUrl}" type="video/mp4">
-                    </video>
+                    <div class="relative z-10 pointer-events-auto">
+                        <video controls preload="metadata" class="w-64 max-w-full rounded-xl shadow-md border border-white/20 mb-1" onclick="this.paused ? this.play() : this.pause()">
+                            <source src="${fileUrl}" type="video/mp4">
+                        </video>
+                    </div>
                 `;
             } else if (msg.type === 'audio') {
                 mediaHtml = `
@@ -587,10 +589,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Clear previous dynamically added filters if changing chats
-            const filterContainer = document.getElementById('filter-buttons-container');
-            Array.from(filterContainer.children).forEach(child => {
-                if (child.innerText.startsWith('👤')) filterContainer.removeChild(child);
-            });
+            const participantContainer = document.getElementById('participant-filters-container');
+            if (participantContainer) {
+                participantContainer.innerHTML = '';
+                participantContainer.classList.add('hidden');
+            }
 
             if (allMessages.length > 0) {
                 const senderCounts = {};
@@ -621,40 +624,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
 
-                // Add Sender Filters to the Quick Actions UI automatically (toggle on/off)
+                // Add Sender Filters to the Participant Container automatically (toggle on/off)
                 let activeSenderFilter = null;
                 const senderBtns = [];
-                senders.slice(0, 3).forEach(([sName, count]) => {
-                    if (!sName) return;
-                    const btn = document.createElement('button');
-                    btn.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
-                    btn.innerText = `👤 ${sName}`;
-                    btn.onclick = () => {
-                        if (activeSenderFilter === sName) {
-                            // Toggle OFF — show all messages
-                            activeSenderFilter = null;
-                            displayedMessages = [...allMessages];
-                            btn.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
-                            statsInfo.innerHTML = `Showing all <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages.`;
-                        } else {
-                            // Toggle ON — filter by this sender
-                            activeSenderFilter = sName;
-                            displayedMessages = allMessages.filter(msg => msg.sender === sName);
-                            // Reset all buttons, highlight active
-                            senderBtns.forEach(b => {
-                                b.className = 'text-xs bg-purple-50 border border-purple-100 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-purple-700 hover:bg-purple-100 hover:shadow transition whitespace-nowrap cursor-pointer';
-                            });
-                            btn.className = 'text-xs bg-purple-600 border border-purple-600 shadow-sm rounded-lg px-3 py-1.5 font-semibold text-white hover:bg-purple-700 hover:shadow transition whitespace-nowrap cursor-pointer';
-                            statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
-                        }
-                        renderChats(-1, -1);
-                        renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length), 'reset');
-                        setTimeout(() => scrollArea.scrollTop = 0, 10);
-                        toggleSidebar(false);
-                    };
-                    senderBtns.push(btn);
-                    filterContainer.appendChild(btn);
-                });
+                
+                if (senders.length > 0 && participantContainer) {
+                    participantContainer.classList.remove('hidden');
+                    
+                    const label = document.createElement('div');
+                    label.className = 'w-full text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5';
+                    label.innerText = 'Participants';
+                    participantContainer.appendChild(label);
+
+                    senders.slice(0, 4).forEach(([sName, count]) => {
+                        if (!sName) return;
+                        const btn = document.createElement('button');
+                        const defaultClass = 'text-[11px] bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm rounded-full px-2.5 py-1 font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5';
+                        const activeClass = 'text-[11px] bg-indigo-600 border border-indigo-600 shadow-sm rounded-full px-2.5 py-1 font-semibold text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5';
+                        
+                        btn.className = defaultClass;
+                        btn.innerHTML = `<div class="w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px]">${sName.charAt(0).toUpperCase()}</div> <span>${sName}</span>`;
+                        
+                        btn.onclick = () => {
+                            if (activeSenderFilter === sName) {
+                                // Toggle OFF
+                                activeSenderFilter = null;
+                                displayedMessages = [...allMessages];
+                                senderBtns.forEach(b => {
+                                    b.className = defaultClass;
+                                    b.querySelector('div').className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px]';
+                                });
+                                statsInfo.innerHTML = `Showing all <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages.`;
+                            } else {
+                                // Toggle ON
+                                activeSenderFilter = sName;
+                                displayedMessages = allMessages.filter(msg => msg.sender === sName);
+                                senderBtns.forEach(b => {
+                                    b.className = defaultClass + ' opacity-50';
+                                    b.querySelector('div').className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px]';
+                                });
+                                btn.className = activeClass;
+                                btn.querySelector('div').className = 'w-4 h-4 rounded-full bg-white text-indigo-600 flex items-center justify-center text-[8px]';
+                                statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
+                            }
+                            renderChats(-1, -1);
+                            renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length), 'reset');
+                            setTimeout(() => scrollArea.scrollTop = 0, 10);
+                            toggleSidebar(false);
+                        };
+                        senderBtns.push(btn);
+                        participantContainer.appendChild(btn);
+                    });
+                }
 
                 // Populate Smart Filters (Years & Days)
                 const years = new Set();
@@ -2116,14 +2137,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     const rect = frame.getBoundingClientRect();
                     const startL = rect.left, startT = rect.top, startW = rect.width, startH = rect.height;
 
+                    const SNAP = 20; // px — magnetic catch distance to screen edges
                     function onMove(ev) {
                         const dx = ev.clientX - startX, dy = ev.clientY - startY;
                         let l = startL, t = startT, w = startW, h = startH;
+                        const vw = window.innerWidth, vh = window.innerHeight;
 
-                        if (dir.includes('e')) w = Math.max(MIN_W, startW + dx);
-                        if (dir.includes('w')) { w = Math.max(MIN_W, startW - dx); l = startL + startW - w; }
-                        if (dir.includes('s')) h = Math.max(MIN_H, startH + dy);
-                        if (dir.includes('n')) { h = Math.max(MIN_H, startH - dy); t = startT + startH - h; }
+                        if (dir.includes('e')) {
+                            w = Math.max(MIN_W, startW + dx);
+                            if (Math.abs((l + w) - vw) <= SNAP) w = vw - l; // snap right edge
+                        }
+                        if (dir.includes('w')) {
+                            w = Math.max(MIN_W, startW - dx); l = startL + startW - w;
+                            if (Math.abs(l) <= SNAP) { w += l; l = 0; } // snap left edge
+                        }
+                        if (dir.includes('s')) {
+                            h = Math.max(MIN_H, startH + dy);
+                            if (Math.abs((t + h) - vh) <= SNAP) h = vh - t; // snap bottom edge
+                        }
+                        if (dir.includes('n')) {
+                            h = Math.max(MIN_H, startH - dy); t = startT + startH - h;
+                            if (Math.abs(t) <= SNAP) { h += t; t = 0; } // snap top edge
+                        }
 
                         frame.style.left = l + 'px';
                         frame.style.top = t + 'px';

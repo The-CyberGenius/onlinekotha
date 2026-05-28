@@ -6,6 +6,13 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input, textarea, [contenteditable] {
+    -webkit-user-select: auto;
+    user-select: auto;
 }
 
 /* Safe area insets for bottom bar */
@@ -488,15 +495,23 @@ button,
 /* macOS window frame on desktop */
 @media (min-width: 768px) {
     #mac-frame {
-        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.08);
+        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.25), 0 0 12px 4px rgba(255,255,255,0.4);
         border-radius: 12px;
         overflow: hidden;
         min-width: 600px;
         min-height: 400px;
         position: relative;
+        /* Silver gradient border (respects rounded corners) */
+        border: 2px solid transparent;
+        background:
+            linear-gradient(#f0f2f5, #f0f2f5) padding-box,
+            linear-gradient(145deg, #f7f8fa 0%, #c7c9d1 25%, #9b9ea8 50%, #e9eaee 72%, #b6b8c2 100%) border-box;
     }
     html.dark #mac-frame {
-        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255,255,255,0.06);
+        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.6);
+        background:
+            linear-gradient(#202c33, #202c33) padding-box,
+            linear-gradient(145deg, #6b6e78 0%, #3a3c44 28%, #82858f 52%, #2c2e35 74%, #5a5d66 100%) border-box;
     }
     html.dark #mac-titlebar { background: #2a2a2e; }
 }
@@ -504,6 +519,7 @@ button,
 #mac-titlebar { cursor: grab; }
 #mac-frame.is-dragging #mac-titlebar { cursor: grabbing !important; }
 #mac-frame.is-dragging { cursor: grabbing !important; user-select: none; }
+#mac-frame.is-dragging * { user-select: none; -webkit-user-select: none; }
 #mac-frame.mac-fullscreen {
     max-width: none !important;
     width: 100% !important;
@@ -560,18 +576,24 @@ button,
     position: absolute;
     z-index: 200;
 }
-.rh-n, .rh-s { left: 8px; right: 8px; height: 6px; cursor: ns-resize; }
-.rh-e, .rh-w { top: 8px; bottom: 8px; width: 6px; cursor: ew-resize; }
-.rh-n  { top: -3px; }
-.rh-s  { bottom: -3px; }
-.rh-e  { right: -3px; }
-.rh-w  { left: -3px; }
-.rh-ne, .rh-nw, .rh-se, .rh-sw { width: 12px; height: 12px; }
-.rh-ne { top: -4px; right: -4px; cursor: nesw-resize; }
-.rh-nw { top: -4px; left: -4px; cursor: nwse-resize; }
-.rh-se { bottom: -4px; right: -4px; cursor: nwse-resize; }
-.rh-sw { bottom: -4px; left: -4px; cursor: nesw-resize; }
-
+.rh-n, .rh-s { left: 18px; right: 18px; height: 12px; cursor: ns-resize; }
+.rh-e, .rh-w { top: 18px; bottom: 18px; width: 12px; cursor: ew-resize; }
+.rh-n  { top: -6px; }
+.rh-s  { bottom: -6px; }
+.rh-e  { right: -6px; }
+.rh-w  { left: -6px; }
+/* Larger corner "magnetic" catch zones */
+.rh-ne, .rh-nw, .rh-se, .rh-sw { width: 24px; height: 24px; }
+.rh-ne { top: -8px; right: -8px; cursor: nesw-resize; }
+.rh-nw { top: -8px; left: -8px; cursor: nwse-resize; }
+.rh-se { bottom: -8px; right: -8px; cursor: nwse-resize; }
+.rh-sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
+.rh::before {
+    content: '';
+    position: absolute;
+    inset: -6px; /* expand hit area by 6px on all sides */
+    cursor: inherit;
+}
 /* ============ Skeleton Loading ============ */
 .skeleton {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -837,6 +859,24 @@ html.dark #app {
     background: #111b21 !important;
     border-color: #2a3942 !important;
     box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ── Import / Upload modal (dark) — guaranteed, independent of Tailwind cache ── */
+html.dark #upload-modal > div {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+}
+html.dark #upload-modal #drop-zone {
+    border-color: #4b5563 !important;
+}
+html.dark #upload-modal h3,
+html.dark #upload-modal #drop-zone p:first-of-type {
+    color: #f3f4f6 !important;
+}
+html.dark #upload-modal #pick-folder-btn {
+    background: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #e5e7eb !important;
 }
 
 /* ── Sidebar ── */
