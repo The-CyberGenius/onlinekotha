@@ -897,6 +897,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderChatList(chats, chat);
                 loadData(chat);
                 toggleSidebar(false);
+                // Auto-focus input when chat is selected
+                setTimeout(() => { const inp = document.getElementById('bottom-ai-input'); if (inp) inp.focus(); }, 150);
             });
             chatListUI.appendChild(item);
         });
@@ -1929,4 +1931,74 @@ document.addEventListener('DOMContentLoaded', () => {
     window.kothaGetMyName = () => myName;
     window.kothaGetOtherPersonName = () => otherPersonName;
     window.kothaGetCurrentChat = () => currentChat;
+
+    // ─── Draggable App Container (md+ only) ───
+    (function initDrag() {
+        const app = document.getElementById('app');
+        if (!app || window.innerWidth < 768) return;
+        app.classList.add('is-draggable');
+
+        // Switch from centered flex to absolute positioning so we can drag
+        let inited = false;
+        function initPosition() {
+            if (inited) return;
+            inited = true;
+            const r = app.getBoundingClientRect();
+            app.style.position = 'absolute';
+            app.style.left = r.left + 'px';
+            app.style.top = r.top + 'px';
+            app.style.width = r.width + 'px';
+            app.style.height = r.height + 'px';
+            app.style.margin = '0';
+            // Keep body as positioning context
+            document.body.style.position = 'relative';
+        }
+
+        let dragging = false, sx, sy, sl, st;
+        const handles = [document.getElementById('sidebar-header'), document.getElementById('chat-header-bar')];
+
+        handles.forEach(h => {
+            if (!h) return;
+            h.addEventListener('mousedown', (e) => {
+                // Don't drag if clicking buttons/links inside header
+                if (e.target.closest('button, a, input, select')) return;
+                initPosition();
+                dragging = true;
+                sx = e.clientX; sy = e.clientY;
+                sl = parseInt(app.style.left); st = parseInt(app.style.top);
+                app.classList.add('is-dragging');
+                e.preventDefault();
+            });
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            const dx = e.clientX - sx, dy = e.clientY - sy;
+            app.style.left = Math.max(0, Math.min(window.innerWidth - 100, sl + dx)) + 'px';
+            app.style.top = Math.max(0, Math.min(window.innerHeight - 60, st + dy)) + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!dragging) return;
+            dragging = false;
+            app.classList.remove('is-dragging');
+        });
+
+        // Double-click header to reset position
+        handles.forEach(h => {
+            if (!h) return;
+            h.addEventListener('dblclick', (e) => {
+                if (e.target.closest('button, a, input, select')) return;
+                app.style.position = '';
+                app.style.left = '';
+                app.style.top = '';
+                app.style.width = '';
+                app.style.height = '';
+                app.style.margin = '';
+                document.body.style.position = '';
+                app.classList.remove('is-dragging');
+                inited = false;
+            });
+        });
+    })();
 });
