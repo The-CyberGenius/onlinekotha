@@ -2073,9 +2073,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Dock icon click restores
+        // Dock icon click toggles minimize/restore
         if (dockIcon) dockIcon.addEventListener('click', () => {
-            if (minimized) genieRestore();
+            if (minimized) genieRestore(); else genieMinimize();
         });
 
         // --- All-side resize handles ---
