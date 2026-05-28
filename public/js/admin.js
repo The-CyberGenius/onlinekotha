@@ -52,13 +52,28 @@
     async function loadKnown() {
         knownProviders = await (await fetch('/api/admin/known-providers')).json();
         const sel = document.getElementById('prov-name');
-        sel.innerHTML = '<option value="">Select provider...</option>';
+        sel.innerHTML = '<option value="">Select a provider…</option>';
         for (const [key, info] of Object.entries(knownProviders)) {
             const opt = document.createElement('option');
             opt.value = key;
             opt.textContent = info.label;
             sel.appendChild(opt);
         }
+
+        // Live update info panel + auto-fill base URL on selection
+        sel.addEventListener('change', () => {
+            const info = knownProviders[sel.value];
+            const panel = document.getElementById('prov-info');
+            const baseUrlInput = document.getElementById('prov-baseurl');
+            if (info) {
+                document.getElementById('prov-info-desc').textContent = info.description || '';
+                document.getElementById('prov-info-hint').textContent = info.keyHint || '';
+                panel.classList.remove('hidden');
+                if (baseUrlInput && info.baseUrl) baseUrlInput.placeholder = info.baseUrl;
+            } else {
+                panel.classList.add('hidden');
+            }
+        });
     }
 
     async function loadProviders() {
@@ -403,20 +418,24 @@ HARD RULES
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Primary model</label>
                         <select data-feat="${feature}" data-kind="primary" class="route-sel w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
+                        <p class="text-[9px] text-gray-400 mt-1">First-choice model for this feature</p>
                     </div>
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Fallback model</label>
                         <select data-feat="${feature}" data-kind="fallback" class="route-sel w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
+                        <p class="text-[9px] text-gray-400 mt-1">Used if primary fails or rate-limits</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Max tokens</label>
                         <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
+                        <p class="text-[9px] text-gray-400 mt-1">Maximum length of the AI response</p>
                     </div>
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Temperature</label>
                         <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
+                        <p class="text-[9px] text-gray-400 mt-1">0 = focused & deterministic · 1 = creative</p>
                     </div>
                 </div>
                 ${promptHtml}

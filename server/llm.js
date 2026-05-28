@@ -315,11 +315,18 @@ function pickAdapter(providerName) {
         case 'groq':
         case 'openrouter':
         case 'ollama':
+        case 'deepseek':
+        case 'qwen':
+        case 'mistral':
+        case 'xai':
+        case 'together':
+        case 'custom':
             return streamOpenAICompatible;
         case 'google':
             return streamGoogle;
         default:
-            return null;
+            // Default fallback: assume OpenAI-compatible (most providers are)
+            return streamOpenAICompatible;
     }
 }
 

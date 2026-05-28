@@ -17,7 +17,9 @@ router.use(requireAdmin);
 // Known providers with default models suggestion
 const KNOWN_PROVIDERS = {
     anthropic: {
-        label: 'Anthropic',
+        label: 'Anthropic Claude',
+        description: 'Claude family — best for nuanced conversation, coding, and long-context tasks.',
+        keyHint: 'Get key at console.anthropic.com',
         baseUrl: 'https://api.anthropic.com/v1',
         models: [
             { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5', in: 3, out: 15 },
@@ -27,39 +29,113 @@ const KNOWN_PROVIDERS = {
     },
     openai: {
         label: 'OpenAI',
+        description: 'GPT family — versatile general-purpose models with strong reasoning.',
+        keyHint: 'Get key at platform.openai.com/api-keys',
         baseUrl: 'https://api.openai.com/v1',
         models: [
             { id: 'gpt-4o', name: 'GPT-4o', in: 2.5, out: 10 },
             { id: 'gpt-4o-mini', name: 'GPT-4o mini', in: 0.15, out: 0.6 },
+            { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', in: 10, out: 30 },
         ],
     },
     google: {
         label: 'Google Gemini',
+        description: 'Gemini family — multimodal models with huge context windows (up to 2M tokens).',
+        keyHint: 'Get key at aistudio.google.com/apikey',
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
         models: [
             { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', in: 0.1, out: 0.4 },
+            { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', in: 0.075, out: 0.3 },
             { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', in: 1.25, out: 5 },
         ],
     },
     groq: {
         label: 'Groq',
+        description: 'Ultra-fast inference (LPU hardware) — Llama, Mixtral, Qwen models at low latency.',
+        keyHint: 'Get key at console.groq.com/keys',
         baseUrl: 'https://api.groq.com/openai/v1',
         models: [
             { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', in: 0.59, out: 0.79 },
             { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B', in: 0.05, out: 0.08 },
+            { id: 'qwen-2.5-32b', name: 'Qwen 2.5 32B', in: 0.79, out: 0.79 },
         ],
     },
     openrouter: {
         label: 'OpenRouter',
+        description: 'Single API for 300+ models from all major providers. Pay-per-token, no commitment.',
+        keyHint: 'Get key at openrouter.ai/keys',
         baseUrl: 'https://openrouter.ai/api/v1',
-        models: [],
+        models: [
+            { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet (via OR)', in: 3, out: 15 },
+            { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B (via OR)', in: 0.13, out: 0.4 },
+        ],
+    },
+    deepseek: {
+        label: 'DeepSeek',
+        description: 'Cost-effective Chinese models with strong coding and reasoning capabilities.',
+        keyHint: 'Get key at platform.deepseek.com',
+        baseUrl: 'https://api.deepseek.com/v1',
+        models: [
+            { id: 'deepseek-chat', name: 'DeepSeek V3 Chat', in: 0.27, out: 1.1 },
+            { id: 'deepseek-reasoner', name: 'DeepSeek R1 Reasoner', in: 0.55, out: 2.19 },
+        ],
+    },
+    qwen: {
+        label: 'Alibaba Qwen',
+        description: 'Alibaba\'s Qwen models via DashScope — strong multilingual support, esp. Asian languages.',
+        keyHint: 'Get key at dashscope.console.aliyun.com',
+        baseUrl: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1',
+        models: [
+            { id: 'qwen-max', name: 'Qwen Max', in: 1.6, out: 6.4 },
+            { id: 'qwen-plus', name: 'Qwen Plus', in: 0.4, out: 1.2 },
+            { id: 'qwen-turbo', name: 'Qwen Turbo', in: 0.05, out: 0.2 },
+        ],
+    },
+    mistral: {
+        label: 'Mistral AI',
+        description: 'European AI lab — open-weight models with strong multilingual European language support.',
+        keyHint: 'Get key at console.mistral.ai/api-keys',
+        baseUrl: 'https://api.mistral.ai/v1',
+        models: [
+            { id: 'mistral-large-latest', name: 'Mistral Large', in: 2, out: 6 },
+            { id: 'mistral-small-latest', name: 'Mistral Small', in: 0.2, out: 0.6 },
+        ],
+    },
+    xai: {
+        label: 'xAI Grok',
+        description: 'Grok models from xAI — large context, real-time information access.',
+        keyHint: 'Get key at console.x.ai',
+        baseUrl: 'https://api.x.ai/v1',
+        models: [
+            { id: 'grok-2-latest', name: 'Grok 2', in: 2, out: 10 },
+            { id: 'grok-2-mini', name: 'Grok 2 Mini', in: 0.2, out: 1 },
+        ],
+    },
+    together: {
+        label: 'Together AI',
+        description: 'Hosted open-source models — Llama, Qwen, Mixtral with competitive pricing.',
+        keyHint: 'Get key at api.together.xyz/settings/api-keys',
+        baseUrl: 'https://api.together.xyz/v1',
+        models: [
+            { id: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', name: 'Llama 3.3 70B Turbo', in: 0.88, out: 0.88 },
+        ],
     },
     ollama: {
-        label: 'Ollama (local)',
+        label: 'Ollama (Local)',
+        description: 'Run models locally on your own machine — zero cost, full privacy.',
+        keyHint: 'Use "ollama" as key. Ollama must be running on localhost:11434',
         baseUrl: 'http://localhost:11434/v1',
         models: [
             { id: 'llama3.1', name: 'Llama 3.1 8B (local)', in: 0, out: 0 },
+            { id: 'qwen2.5', name: 'Qwen 2.5 7B (local)', in: 0, out: 0 },
         ],
+    },
+    custom: {
+        label: 'Custom (OpenAI-compatible)',
+        description: 'Any OpenAI-compatible API endpoint — bring your own provider.',
+        keyHint: 'Provide your custom API key and base URL',
+        baseUrl: '',
+        models: [],
     },
 };
 
