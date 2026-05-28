@@ -504,7 +504,6 @@ button,
 #mac-titlebar { cursor: grab; }
 #mac-frame.is-dragging #mac-titlebar { cursor: grabbing !important; }
 #mac-frame.is-dragging { cursor: grabbing !important; user-select: none; }
-/* Fullscreen mode */
 #mac-frame.mac-fullscreen {
     max-width: none !important;
     width: 100% !important;
@@ -512,6 +511,9 @@ button,
     border-radius: 0 !important;
 }
 #mac-frame.mac-fullscreen #mac-titlebar { border-radius: 0; }
+#mac-frame.mac-fullscreen ~ #mac-dock {
+    display: none !important;
+}
 /* ─── Genie Effect ─── */
 #mac-frame {
     transform-origin: bottom center;

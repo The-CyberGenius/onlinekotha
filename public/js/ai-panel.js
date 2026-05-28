@@ -1,27 +1,27 @@
 (function () {
     const chatContainer = document.getElementById('ai-chat-container');
-    const scrollArea    = document.getElementById('chat-scroll-area');
-    const bottomInput   = document.getElementById('bottom-ai-input');
-    const bottomSend    = document.getElementById('bottom-ai-send');
+    const scrollArea = document.getElementById('chat-scroll-area');
+    const bottomInput = document.getElementById('bottom-ai-input');
+    const bottomSend = document.getElementById('bottom-ai-send');
 
     if (!bottomInput || !bottomSend || !chatContainer || !scrollArea) return;
 
     // Per-chat conversation tracking
-    let conversationMap  = {};   // { chatFolder: conversationId }
-    let contactNameMap   = {};   // { chatFolder: contactName }
-    let activeChat       = null;
+    let conversationMap = {};   // { chatFolder: conversationId }
+    let contactNameMap = {};   // { chatFolder: contactName }
+    let activeChat = null;
 
     // Message queue — lets user send multiple messages while AI is still responding
-    let msgQueue   = [];     // { text, chat }[]
+    let msgQueue = [];     // { text, chat }[]
     let processing = false;  // true while one AI request is in-flight
 
     // Typewriter state
-    let typeQueue           = '';
-    let typeTimer           = null;
-    let typeTarget          = null;
-    let typeCursor          = null;
-    let typeScrollArea      = null;
-    let streamFinished      = false;
+    let typeQueue = '';
+    let typeTimer = null;
+    let typeTarget = null;
+    let typeCursor = null;
+    let typeScrollArea = null;
+    let streamFinished = false;
     let onTypewriterComplete = null;
 
     // ─────────────────────────────────────────────
@@ -76,14 +76,14 @@
     function _dotResize() {
         if (!_dc) return;
         const isMobile = window.innerWidth < 768;
-        _dDPR   = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+        _dDPR = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
 
-        _dcW = scrollArea.clientWidth  || window.innerWidth;
+        _dcW = scrollArea.clientWidth || window.innerWidth;
         _dcH = scrollArea.clientHeight || window.innerHeight;
 
-        _dc.width  = Math.ceil(_dcW * _dDPR);
+        _dc.width = Math.ceil(_dcW * _dDPR);
         _dc.height = Math.ceil(_dcH * _dDPR);
-        _dc.style.width  = _dcW + 'px';
+        _dc.style.width = _dcW + 'px';
         _dc.style.height = _dcH + 'px';
         _dc.style.marginBottom = '-' + _dcH + 'px';
         _dx.setTransform(_dDPR, 0, 0, _dDPR, 0, 0);
@@ -126,7 +126,7 @@
         if (!_dx) return;
 
         const t = ts / 1000;
-        
+
         // Smoothly interpolate speed multiplier
         _dSpeed += ((_dOn ? 2.0 : 1.0) - _dSpeed) * 0.065;
 
@@ -257,12 +257,12 @@
     //  Typewriter engine
     // ─────────────────────────────────────────────
     function startTypewriter(targetEl, scrollEl) {
-        typeQueue      = '';
-        typeTarget     = targetEl;
+        typeQueue = '';
+        typeTarget = targetEl;
         typeScrollArea = scrollEl;
         streamFinished = false;
-        typeCursor     = document.createElement('span');
-        typeCursor.className   = 'ai-cursor-blink';
+        typeCursor = document.createElement('span');
+        typeCursor.className = 'ai-cursor-blink';
         typeCursor.textContent = '▎';
         targetEl.after(typeCursor);
     }
@@ -291,9 +291,9 @@
     }
 
     function cleanupTypewriter() {
-        if (typeCursor)     { typeCursor.remove(); typeCursor = null; }
+        if (typeCursor) { typeCursor.remove(); typeCursor = null; }
         if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
-        typeTarget     = null;
+        typeTarget = null;
         typeScrollArea = null;
         updateSendBtn();
         if (onTypewriterComplete) {
@@ -315,9 +315,9 @@
     // ─────────────────────────────────────────────
     //  Helpers
     // ─────────────────────────────────────────────
-    function getActiveChat()   { return window.currentChat || null; }
-    function getCurrentConvId(){ return activeChat ? (conversationMap[activeChat] || null) : null; }
-    function getContactName()  { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
+    function getActiveChat() { return window.currentChat || null; }
+    function getCurrentConvId() { return activeChat ? (conversationMap[activeChat] || null) : null; }
+    function getContactName() { return activeChat ? (contactNameMap[activeChat] || '') : ''; }
 
     let _sendBtnRaf = null;
     function updateSendBtn() {
@@ -325,7 +325,7 @@
         _sendBtnRaf = requestAnimationFrame(() => {
             _sendBtnRaf = null;
             const hasText = bottomInput.value.trim().length > 0;
-            bottomSend.disabled      = !hasText;
+            bottomSend.disabled = !hasText;
             bottomSend.style.opacity = !hasText ? '0.4' : '1';
         });
     }
@@ -427,13 +427,13 @@
     // ─────────────────────────────────────────────
     async function sendToAI(text, chatFolder) {
         const convId = conversationMap[chatFolder] || null;
-        const cName  = contactNameMap[chatFolder]  ||
+        const cName = contactNameMap[chatFolder] ||
             (document.getElementById('chat-header-name')?.innerText) || 'AI';
 
         _dotStart();
 
         const typingEl = document.createElement('div');
-        typingEl.id        = 'ai-typing-inline';
+        typingEl.id = 'ai-typing-inline';
         typingEl.className = 'flex justify-start mb-1.5 animate-message';
         typingEl.innerHTML = `
             <div class="glass-chat-them rounded-2xl rounded-bl-md px-3.5 py-2 max-w-[75%]">
@@ -446,7 +446,7 @@
         chatContainer.appendChild(typingEl);
         scrollArea.scrollTop = scrollArea.scrollHeight;
 
-        let fullText      = '';
+        let fullText = '';
         let responseBubble = null;
 
         return new Promise(async (resolve) => {
@@ -459,13 +459,13 @@
 
                 if (!resp.ok) {
                     let errMsg = `Error ${resp.status}`;
-                    try { errMsg = (await resp.json()).error || errMsg; } catch {}
+                    try { errMsg = (await resp.json()).error || errMsg; } catch { }
                     typingEl.remove();
                     appendErrorBubble(errMsg);
                     return resolve();
                 }
 
-                const reader  = resp.body.getReader();
+                const reader = resp.body.getReader();
                 const decoder = new TextDecoder();
                 let buf = '';
 
@@ -482,7 +482,7 @@
                         let event = 'message';
                         let dataLines = [];
                         for (const line of block.split('\n')) {
-                            if (line.startsWith('event:'))     event = line.slice(6).trim();
+                            if (line.startsWith('event:')) event = line.slice(6).trim();
                             else if (line.startsWith('data:')) dataLines.push(line.slice(5).trim());
                         }
                         if (!dataLines.length) continue;
@@ -559,7 +559,7 @@
     function showAiActionBar(convId, msgCount) {
         removeAiActionBar();
         const bar = document.createElement('div');
-        bar.id        = 'ai-action-bar';
+        bar.id = 'ai-action-bar';
         bar.className = 'flex items-center justify-center gap-3 py-3 animate-message';
         bar.innerHTML = `
             <div class="flex items-center gap-2 bg-white rounded-full px-2 py-1.5 shadow-sm border border-gray-200">
@@ -752,7 +752,7 @@
                     }
                     await window.kothaLoadAiHistory(chatFolder);
                     toast('Conversation deleted');
-                } catch {}
+                } catch { }
             });
         });
 
