@@ -511,8 +511,11 @@ button,
     border-radius: 0 !important;
 }
 #mac-frame.mac-fullscreen #mac-titlebar { border-radius: 0; }
-#mac-frame.mac-fullscreen ~ #mac-dock {
+#mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock {
     display: none !important;
+}
+#mac-dock {
+    height: 62px;
 }
 /* ─── Genie Effect ─── */
 #mac-frame {
