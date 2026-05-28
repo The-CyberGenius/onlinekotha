@@ -541,6 +541,7 @@ button,
     transform: perspective(800px) scaleX(0.05) scaleY(0.02) translateY(100vh);
     opacity: 0;
     pointer-events: none;
+    display: none !important;
 }
 
 /* ─── macOS Dock (fixed bottom) ─── */
