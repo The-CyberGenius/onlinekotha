@@ -2027,11 +2027,10 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.remove('genie-restore');
             frame.classList.add('genie-minimize');
             if (dockDot) dockDot.style.opacity = '0';
-            frame.addEventListener('animationend', function onEnd() {
-                frame.removeEventListener('animationend', onEnd);
+            setTimeout(() => {
                 frame.classList.add('mac-minimized');
                 frame.classList.remove('genie-minimize');
-            }, { once: true });
+            }, 500);
         }
 
         function genieRestore() {
@@ -2044,10 +2043,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 dockIcon.classList.add('dock-bounce');
                 setTimeout(() => dockIcon.classList.remove('dock-bounce'), 600);
             }
-            frame.addEventListener('animationend', function onEnd() {
-                frame.removeEventListener('animationend', onEnd);
+            setTimeout(() => {
                 frame.classList.remove('genie-restore');
-            }, { once: true });
+            }, 450);
         }
 
         if (closeBtn) closeBtn.addEventListener('click', genieMinimize);
