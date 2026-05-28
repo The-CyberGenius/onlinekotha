@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchActionBtn = document.getElementById('search-action-btn');
     const searchClearBtn = document.getElementById('search-clear-btn');
     const resultsList = document.getElementById('results-list');
-    
+
     // Quick buttons
     const btnTop = document.getElementById('btn-top');
     const btnBottom = document.getElementById('btn-bottom');
@@ -77,10 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function resolveChatNames(folderName, senders) {
         const senderNames = senders.map(s => s[0]);
         const cleanedFolder = cleanDisplayName(folderName);
-        
+
         let detectedMyName = "";
         let detectedOtherName = "";
-        
+
         // 1. Try to find "me" based on logged-in user email or name if available
         if (window.__USER__ && window.__USER__.email) {
             const emailPrefix = window.__USER__.email.split('@')[0].toLowerCase();
@@ -93,13 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 detectedMyName = matchedMe;
             }
         }
-        
+
         // 2. Try to find "me" based on common self-names
         if (!detectedMyName) {
             const selfName = senderNames.find(name => /^(you|me|myself)$/i.test(name));
             if (selfName) detectedMyName = selfName;
         }
-        
+
         // 3. Match folder name to senders to find the other person
         if (cleanedFolder && !isGarbageName(cleanedFolder)) {
             const matchedOther = senderNames.find(name => {
@@ -113,17 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 detectedOtherName = cleanedFolder;
             }
         }
-        
+
         // If we found "me", then the other person is the sender who is not "me"
         if (detectedMyName && !detectedOtherName) {
             detectedOtherName = senderNames.find(name => name !== detectedMyName) || "";
         }
-        
+
         // If we found "other", then "me" is the sender who is not "other"
         if (detectedOtherName && !detectedMyName) {
             detectedMyName = senderNames.find(name => name !== detectedOtherName) || "";
         }
-        
+
         // Fallbacks if still unresolved
         if (!detectedOtherName) {
             if (cleanedFolder && !isGarbageName(cleanedFolder)) {
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!detectedMyName) {
             detectedMyName = senderNames.find(name => name !== detectedOtherName) || senderNames[0] || "User";
         }
-        
+
         return { myName: detectedMyName, otherName: detectedOtherName };
     }
 
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeModal.addEventListener('click', closeMod);
     mediaModal.addEventListener('click', (e) => {
-        if(e.target === mediaModal) closeMod();
+        if (e.target === mediaModal) closeMod();
     });
 
     const getStringColor = (str, forceDark) => {
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sidebar toggle — true = open, false = close, undefined = toggle
     const toggleSidebar = (open) => {
-        if (window.innerWidth >= 1024) return; // only on mobile
+        if (window.innerWidth >= 768) return; // only on mobile
         const backdrop = document.getElementById('sidebar-backdrop');
         if (open === true) {
             sidebar.classList.remove('-translate-x-full');
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mobileFilterBtn) {
         mobileFilterBtn.addEventListener('click', () => {
             // Force open the sidebar
-            if (window.innerWidth < 1024) {
+            if (window.innerWidth < 768) {
                 sidebar.classList.remove('-translate-x-full');
                 const backdrop = document.getElementById('sidebar-backdrop');
                 if (backdrop) backdrop.classList.remove('hidden');
@@ -208,11 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderMessage = (msg, index) => {
         const isMe = msg.sender === myName;
-        
+
         let mediaHtml = '';
         if (msg.attachment && msg.type !== 'system') {
             const fileUrl = `/media/${encodeURIComponent(currentChat)}/${encodeURIComponent(msg.attachment)}`;
-            
+
             if (msg.type === 'image') {
                 mediaHtml = `
                     <div class="relative cursor-pointer w-64 max-w-full rounded-xl overflow-hidden img-zoom shadow-md border border-white/20 mb-1" onclick="openImageModal('${fileUrl}')">
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
         const nameHtml = !isMe ? `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>` : '';
-        
+
         let contentHtml = '';
         if (msg.text) {
             const onlyEmojis = /^[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\s]+$/gu;
@@ -295,9 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!raw) return '';
         const parts = raw.split('/');
         if (parts.length !== 3) return raw;
-        const day   = parseInt(parts[0]);
+        const day = parseInt(parts[0]);
         const month = parseInt(parts[1]);
-        let year    = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+        let year = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
         const d = new Date(year, month - 1, day);
         if (isNaN(d.getTime())) return raw;
         return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const snippet = displayedMessages.slice(startIndex, endIndex);
-        
+
         if (snippet.length === 0) return;
 
         if (mode === 'reset') {
@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chatContainer.appendChild(frag);
             renderEnd = endIndex;
         }
-        
+
         // Remove loaders visually as we approach the edges
         const topLoader = document.getElementById('top-loader');
         if (topLoader && renderStart === 0) topLoader.remove();
@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Optional Memory Prune: Keep max 600 nodes
         if (renderEnd - renderStart > 600) {
             renderEnd -= CHUNK_SIZE;
-            for(let i=0; i<CHUNK_SIZE && chatContainer.lastElementChild; i++) {
+            for (let i = 0; i < CHUNK_SIZE && chatContainer.lastElementChild; i++) {
                 chatContainer.removeChild(chatContainer.lastElementChild);
             }
         }
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Prune from top
         if (renderEnd - renderStart > 600) {
             renderStart += CHUNK_SIZE;
-            for(let i=0; i<CHUNK_SIZE && chatContainer.firstElementChild; i++) {
+            for (let i = 0; i < CHUNK_SIZE && chatContainer.firstElementChild; i++) {
                 chatContainer.removeChild(chatContainer.firstElementChild);
             }
             scrollArea.scrollTop = oldScroll; // Maintain visual position
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const scrollRatio = scrollArea.scrollTop / Math.max(1, scrollArea.scrollHeight - scrollArea.clientHeight);
                     const estimatedIdx = renderStart + Math.floor((renderEnd - renderStart) * scrollRatio);
                     const clampedIdx = Math.max(renderStart, Math.min(estimatedIdx, renderEnd - 1));
-                    
+
                     // Find date from displayedMessages array — O(1) vs O(n) DOM scan
                     const visibleMsg = displayedMessages[clampedIdx];
                     let closestDate = null;
@@ -491,14 +491,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const animatePlaceholder = (inputEl, text) => {
         if (!inputEl) return;
         inputEl.targetPlaceholderText = text;
-        
+
         if (inputEl.placeholderTimer) clearTimeout(inputEl.placeholderTimer);
         if (inputEl.cursorTimer) clearInterval(inputEl.cursorTimer);
-        
+
         let index = 0;
         let currentText = '';
         const cursorChar = ' |';
-        
+
         const type = () => {
             const currentTarget = inputEl.targetPlaceholderText || text;
             if (document.activeElement === inputEl) {
@@ -525,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 500);
             }
         };
-        
+
         if (!inputEl.placeholderListenersAdded) {
             inputEl.placeholderListenersAdded = true;
             inputEl.addEventListener('focus', () => {
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         type();
     };
 
@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     count: allMessages.filter(m => m.type !== 'system').length,
                 };
             }
-            
+
             // Clear previous dynamically added filters if changing chats
             const filterContainer = document.getElementById('filter-buttons-container');
             Array.from(filterContainer.children).forEach(child => {
@@ -581,8 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 allMessages.forEach(msg => {
                     if (msg.sender) senderCounts[msg.sender] = (senderCounts[msg.sender] || 0) + 1;
                 });
-                
-                const senders = Object.entries(senderCounts).sort((a,b) => b[1] - a[1]);
+
+                const senders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
                 const chatContactName = chatName.replace('WhatsApp Chat - ', '');
                 // Smart name cleaning — strip WhatsApp junk, underscores, dates
                 const resolved = resolveChatNames(chatContactName, senders);
@@ -591,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 headerName.innerText = otherPersonName;
                 sidebarTitle.innerText = "All Chats";
-                
+
                 if (otherPersonName) {
                     headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
                     sidebarAvatar.innerText = 'C';
@@ -643,9 +643,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Populate Smart Filters (Years & Days)
                 const years = new Set();
                 allMessages.forEach(msg => {
-                    if(!msg.date) return;
+                    if (!msg.date) return;
                     const parts = msg.date.split('/');
-                    if(parts.length === 3) years.add(parts[2]);
+                    if (parts.length === 3) years.add(parts[2]);
                 });
                 const yearSelect = document.getElementById('filter-year');
                 yearSelect.innerHTML = '<option value="">Year</option>';
@@ -655,10 +655,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const daySelect = document.getElementById('filter-day');
                 daySelect.innerHTML = '<option value="">Day</option>';
-                for(let i=1; i<=31; i++) {
+                for (let i = 1; i <= 31; i++) {
                     daySelect.innerHTML += `<option value="${i}">${i}</option>`;
                 }
-                
+
                 // Smart Filters Logic — Apply button driven (no auto-change listeners)
                 const filterMonth = document.getElementById('filter-month');
                 const toggleMedia = document.getElementById('toggle-media');
@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const showLinks = toggleLinks ? toggleLinks.checked : false;
                     const hasDateFilter = !!(d || m || y);
 
-                    if(hasDateFilter || !showMedia || !showStickers || showLinks) {
+                    if (hasDateFilter || !showMedia || !showStickers || showLinks) {
                         resetFiltersBtn.classList.remove('hidden');
                     } else {
                         resetFiltersBtn.classList.add('hidden');
@@ -696,14 +696,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (!text.includes('http') && !text.includes('www.')) return false;
                             }
 
-                            if(!showMedia) {
+                            if (!showMedia) {
                                 const mediaExts = ['.jpg', '.jpeg', '.png', '.mp4', '.mov', 'image omitted', 'video omitted', 'audio omitted', 'document omitted'];
-                                if(mediaExts.some(ext => text.includes(ext))) return false;
+                                if (mediaExts.some(ext => text.includes(ext))) return false;
                             }
 
-                            if(!showStickers) {
+                            if (!showStickers) {
                                 const stickerExts = ['.webp', 'sticker omitted'];
-                                if(stickerExts.some(ext => text.includes(ext))) return false;
+                                if (stickerExts.some(ext => text.includes(ext))) return false;
                             }
                         } else {
                             if (showLinks) return false;
@@ -780,25 +780,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 // NO auto-change listeners on dropdowns — only the Apply button triggers filtering
                 // Checkboxes still auto-apply since they're simple toggles
                 [toggleMedia, toggleStickers, toggleLinks].forEach(el => {
-                    if(el) el.addEventListener('change', applyFilters);
+                    if (el) el.addEventListener('change', applyFilters);
                 });
 
                 resetFiltersBtn.addEventListener('click', () => {
                     daySelect.value = ''; filterMonth.value = ''; yearSelect.value = '';
                     toggleMedia.checked = true; toggleStickers.checked = true;
-                    if(toggleLinks) toggleLinks.checked = false;
+                    if (toggleLinks) toggleLinks.checked = false;
                     applyFilters();
                 });
-                
+
                 // Initial render: last CHUNK_SIZE messages
                 const end = allMessages.length;
                 const start = Math.max(0, end - CHUNK_SIZE);
                 renderChats(start, end);
 
-                                setTimeout(() => {
+                setTimeout(() => {
                     scrollArea.scrollTop = scrollArea.scrollHeight;
                 }, 100);
-                
+
                 if (window.kothaLoadAiHistory) {
                     window.kothaLoadAiHistory(chatName);
                 }
@@ -1149,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bottomAiInput) bottomAiInput.focus();
     }
 
-    window.clearReplyPreview = function() {
+    window.clearReplyPreview = function () {
         window.replyingTo = null;
         if (replyPreview) replyPreview.classList.add('hidden');
         if (inputWrap) {
@@ -1167,7 +1167,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const picker = document.createElement('div');
         picker.className = 'reaction-picker absolute bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-2.5 py-1.5 flex items-center gap-1 z-50 shadow-lg';
-        
+
         const emojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
         emojis.forEach(emoji => {
             const emojiBtn = document.createElement('button');
@@ -1292,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({ isTyping })
             });
-        } catch {}
+        } catch { }
     }
 
     // Event delegation for message actions (Reply and React)
@@ -1329,7 +1329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = JSON.parse(e.data);
                 window.myGlobalAnonName = data.name;
-            } catch (err) {}
+            } catch (err) { }
         });
 
         globalEventSource.addEventListener('history', (e) => {
@@ -1389,21 +1389,21 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const typers = JSON.parse(e.data);
                 updateTypingStatus(typers);
-            } catch (err) {}
+            } catch (err) { }
         });
 
         globalEventSource.addEventListener('system', (e) => {
             try {
                 const sys = JSON.parse(e.data);
                 renderSystemMessage(sys.text);
-            } catch (err) {}
+            } catch (err) { }
         });
 
         globalEventSource.addEventListener('reaction', (e) => {
             try {
                 const data = JSON.parse(e.data);
                 updateMessageReactionsInDOM(data.messageId, data.reactions);
-            } catch (err) {}
+            } catch (err) { }
         });
 
         globalEventSource.onerror = (err) => {
@@ -1432,7 +1432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = 'flex items-center gap-2 py-0.5';
             const displayName = u.name || 'Anonymous User';
-            
+
             let avatarHtml = `<div class="w-4 h-4 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center text-[8px] shrink-0">${displayName.charAt(0).toUpperCase()}</div>`;
 
             item.innerHTML = `
@@ -1448,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isMe = window.__USER__ && msg.userId === window.__USER__.id;
         const msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
         const nameHtml = !isMe ? `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>` : '';
-        
+
         let replyBlockHtml = '';
         if (msg.replyTo) {
             replyBlockHtml = `
@@ -1542,7 +1542,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (globalChatItem) {
         globalChatItem.addEventListener('click', () => {
             if (currentChat === '__global__') return;
-            
+
             disconnectGlobalChat();
 
             currentChat = '__global__';
@@ -1644,7 +1644,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeAnalytics.addEventListener('click', closeAnModal);
     analyticsModal.addEventListener('click', (e) => {
-        if(e.target === analyticsModal) closeAnModal();
+        if (e.target === analyticsModal) closeAnModal();
     });
 
     btnAnalytics.addEventListener('click', () => {
@@ -1663,16 +1663,16 @@ document.addEventListener('DOMContentLoaded', () => {
         allMessages.forEach(msg => {
             if (msg.sender && msg.type !== 'system') senderCounts[msg.sender] = (senderCounts[msg.sender] || 0) + 1;
         });
-        
+
         let contributorsHtml = '';
-        const sortedContributors = Object.entries(senderCounts).sort((a,b) => b[1] - a[1]).slice(0, 3);
+        const sortedContributors = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
         sortedContributors.forEach(([sName, count], idx) => {
             const pct = Math.round((count / totalMsgs) * 100);
             const colors = ['text-indigo-400 bg-indigo-500/10', 'text-pink-400 bg-pink-500/10', 'text-emerald-400 bg-emerald-500/10'];
             const barColors = ['bg-indigo-500', 'bg-pink-500', 'bg-emerald-500'];
             const cClass = colors[idx] || 'text-teal-400 bg-teal-500/10';
             const bColor = barColors[idx] || 'bg-teal-500';
-            
+
             contributorsHtml += `
                 <div>
                     <div class="flex justify-between items-center text-xs mb-1">
@@ -1816,7 +1816,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const regex = new RegExp(`(${query})`, 'gi');
             limitRes.forEach(msg => {
                 const highlightedText = msg.text.replace(regex, `<span class="bg-indigo-200 text-indigo-900 font-bold px-1 rounded">$1</span>`);
-                
+
                 resultsHtml += `
                     <div class="p-4 bg-white/60 hover:bg-white/90 backdrop-blur shadow-sm cursor-pointer border border-white/50 transition-all rounded-2xl mb-2 hover:shadow-md transform hover:-translate-y-0.5" onclick="jumpToMsg(${msg.id})">
                         <div class="flex justify-between items-center mb-1">
@@ -1828,7 +1828,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             });
             resultsList.innerHTML = resultsHtml;
-            
+
             searchActionBtn.innerHTML = 'Find';
             searchActionBtn.disabled = false;
         }, 15);
@@ -1911,8 +1911,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === '/') {
             const activeEl = document.activeElement;
             if (activeEl && (
-                activeEl.tagName === 'INPUT' || 
-                activeEl.tagName === 'TEXTAREA' || 
+                activeEl.tagName === 'INPUT' ||
+                activeEl.tagName === 'TEXTAREA' ||
                 activeEl.isContentEditable
             )) {
                 return;
