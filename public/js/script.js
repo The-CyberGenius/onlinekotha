@@ -2034,6 +2034,27 @@ document.addEventListener('DOMContentLoaded', () => {
             inited = false;
         }
 
+        // --- Resize handles overlay (lives OUTSIDE the frame so it isn't clipped) ---
+        const rhOverlay = document.createElement('div');
+        rhOverlay.id = 'rh-overlay';
+        const rhTpl = document.getElementById('resize-handles-tpl');
+        if (rhTpl) rhOverlay.appendChild(rhTpl.content.cloneNode(true));
+        document.body.appendChild(rhOverlay);
+        function syncOverlay() {
+            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-minimized')) {
+                rhOverlay.style.display = 'none';
+                return;
+            }
+            const r = frame.getBoundingClientRect();
+            rhOverlay.style.display = 'block';
+            rhOverlay.style.left = r.left + 'px';
+            rhOverlay.style.top = r.top + 'px';
+            rhOverlay.style.width = r.width + 'px';
+            rhOverlay.style.height = r.height + 'px';
+        }
+        syncOverlay();
+        window.addEventListener('resize', syncOverlay);
+
         let dragging = false, sx, sy, sl, st;
         titlebar.addEventListener('mousedown', (e) => {
             if (e.target.closest('button')) return;
@@ -2049,6 +2070,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!dragging) return;
             frame.style.left = Math.max(0, Math.min(window.innerWidth - 100, sl + (e.clientX - sx))) + 'px';
             frame.style.top = Math.max(0, Math.min(window.innerHeight - 60, st + (e.clientY - sy))) + 'px';
+            syncOverlay();
         });
         document.addEventListener('mouseup', () => {
             if (!dragging) return;
@@ -2075,6 +2097,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function genieMinimize() {
             if (minimized) return;
             minimized = true;
+            rhOverlay.style.display = 'none';
             frame.classList.remove('genie-restore');
             frame.classList.add('genie-minimize');
             if (dockDot) dockDot.style.opacity = '0';
@@ -2107,6 +2130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             setTimeout(() => {
                 frame.classList.remove('genie-restore');
+                syncOverlay();
             }, 450);
         }
 
@@ -2116,12 +2140,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (minBtn) minBtn.addEventListener('click', genieMinimize);
         if (fsBtn) fsBtn.addEventListener('click', () => {
             const isFs = frame.classList.toggle('mac-fullscreen');
-            if (isFs) { 
-                resetPosition(); 
+            if (isFs) {
+                resetPosition();
                 if (dock) dock.style.setProperty('display', 'none', 'important');
             } else {
                 if (dock) dock.style.removeProperty('display');
             }
+            requestAnimationFrame(syncOverlay);
         });
 
         // Dock icon click toggles minimize/restore
@@ -2129,12 +2154,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (minimized) genieRestore(); else genieMinimize();
         });
 
-        // --- All-side resize handles ---
-        const tpl = document.getElementById('resize-handles-tpl');
-        if (tpl) {
-            frame.appendChild(tpl.content.cloneNode(true));
+        // --- All-side resize handles (attached to the outside overlay) ---
+        {
             const MIN_W = 600, MIN_H = 400;
-            frame.querySelectorAll('.rh').forEach(handle => {
+            rhOverlay.querySelectorAll('.rh').forEach(handle => {
                 const dir = handle.dataset.dir;
                 handle.addEventListener('mousedown', (e) => {
                     if (frame.classList.contains('mac-fullscreen')) return;
@@ -2172,6 +2195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         frame.style.top = t + 'px';
                         frame.style.width = w + 'px';
                         frame.style.height = h + 'px';
+                        syncOverlay();
                     }
                     function onUp() {
                         document.removeEventListener('mousemove', onMove);

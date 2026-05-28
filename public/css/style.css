@@ -571,29 +571,30 @@ button,
     animation: dockBounce 600ms ease-in-out;
 }
 
-/* ─── All-Side Resize Handles ─── */
+/* ─── Resize handles overlay (sits OUTSIDE the window frame) ─── */
+#rh-overlay {
+    position: fixed;
+    z-index: 9998;
+    pointer-events: none; /* only the handles catch the mouse */
+    display: none;
+}
 .rh {
     position: absolute;
-    z-index: 200;
+    pointer-events: auto;
 }
-.rh-n, .rh-s { left: 18px; right: 18px; height: 12px; cursor: ns-resize; }
-.rh-e, .rh-w { top: 18px; bottom: 18px; width: 12px; cursor: ew-resize; }
-.rh-n  { top: -6px; }
-.rh-s  { bottom: -6px; }
-.rh-e  { right: -6px; }
-.rh-w  { left: -6px; }
-/* Larger corner "magnetic" catch zones */
-.rh-ne, .rh-nw, .rh-se, .rh-sw { width: 24px; height: 24px; }
-.rh-ne { top: -8px; right: -8px; cursor: nesw-resize; }
-.rh-nw { top: -8px; left: -8px; cursor: nwse-resize; }
-.rh-se { bottom: -8px; right: -8px; cursor: nwse-resize; }
-.rh-sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
-.rh::before {
-    content: '';
-    position: absolute;
-    inset: -6px; /* expand hit area by 6px on all sides */
-    cursor: inherit;
-}
+/* Edge catch zones live entirely OUTSIDE the frame border */
+.rh-n, .rh-s { left: 16px; right: 16px; height: 14px; cursor: ns-resize; }
+.rh-e, .rh-w { top: 16px; bottom: 16px; width: 14px; cursor: ew-resize; }
+.rh-n  { top: -14px; }
+.rh-s  { bottom: -14px; }
+.rh-e  { right: -14px; }
+.rh-w  { left: -14px; }
+/* Corner catch zones (outside) */
+.rh-ne, .rh-nw, .rh-se, .rh-sw { width: 22px; height: 22px; }
+.rh-ne { top: -16px; right: -16px; cursor: nesw-resize; }
+.rh-nw { top: -16px; left: -16px; cursor: nwse-resize; }
+.rh-se { bottom: -16px; right: -16px; cursor: nwse-resize; }
+.rh-sw { bottom: -16px; left: -16px; cursor: nesw-resize; }
 /* ============ Skeleton Loading ============ */
 .skeleton {
     background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
