@@ -495,7 +495,7 @@ button,
 /* macOS window frame on desktop */
 @media (min-width: 768px) {
     #mac-frame {
-        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.25), 0 0 12px 4px rgba(255,255,255,0.4);
+        box-shadow: 0 25px 65px -15px rgba(0, 0, 0, 0.25);
         border-radius: 12px;
         overflow: hidden;
         min-width: 600px;

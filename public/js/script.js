@@ -236,11 +236,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } else if (msg.type === 'video') {
+                const vext = (msg.attachment.split('.').pop() || '').toLowerCase();
+                const vmime = vext === 'mov' ? 'video/quicktime'
+                    : vext === 'webm' ? 'video/webm'
+                    : vext === '3gp' ? 'video/3gpp'
+                    : vext === 'mkv' ? 'video/x-matroska'
+                    : vext === 'avi' ? 'video/x-msvideo'
+                    : 'video/mp4';
                 mediaHtml = `
-                    <div class="relative z-10 pointer-events-auto">
-                        <video controls preload="metadata" class="w-64 max-w-full rounded-xl shadow-md border border-white/20 mb-1" onclick="this.paused ? this.play() : this.pause()">
-                            <source src="${fileUrl}" type="video/mp4">
+                    <div class="relative z-10 pointer-events-auto mb-1">
+                        <video controls playsinline preload="metadata" class="w-64 max-w-full rounded-xl shadow-md border border-white/20 bg-black">
+                            <source src="${fileUrl}" type="${vmime}">
                         </video>
+                        <a href="${fileUrl}" target="_blank" download class="block text-[11px] font-bold ${isMe ? 'opacity-70' : 'text-indigo-500'} hover:underline mt-1">Download video</a>
                     </div>
                 `;
             } else if (msg.type === 'audio') {

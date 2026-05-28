@@ -18,7 +18,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=3">
-    <link rel="stylesheet" href="/css/style.css?v=31">
+    <link rel="stylesheet" href="/css/style.css?v=32">
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay = function () { return new Promise(function (r) { if (window.Razorpay) return r(); var s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.onload = r; document.head.appendChild(s) }) }</script>
     <script src="/js/auth-init.js"></script>
@@ -253,6 +253,9 @@
                 </button>
             </div>
 
+            <!-- Scrollable lower region (participants + filters + results) -->
+            <div class="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col">
+
             <!-- Participant Filters (Dynamic) -->
             <div id="participant-filters-container" class="hidden px-3 pb-3 flex flex-wrap gap-1.5 shrink-0 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
                 <!-- Buttons injected by JS -->
@@ -390,10 +393,12 @@
             </div>
 
             <!-- Stats/Info & Results -->
-            <div class="overflow-y-auto flex-1 px-4 pt-3 pb-4" id="search-results">
+            <div class="flex-1 px-4 pt-3 pb-4" id="search-results">
                 <p class="text-[11px] text-gray-400 font-medium mb-3" id="stats-info">Loading...</p>
                 <div id="results-list" class="flex flex-col gap-1.5"></div>
             </div>
+
+            </div><!-- /scrollable lower region -->
         </div>
 
         <!-- Main Chat Area -->
@@ -529,8 +534,8 @@
     <!-- macOS Dock (fixed at bottom of screen, desktop only) -->
     <div id="mac-dock" style="bottom: 2px;" class="hidden md:flex fixed left-1/2 -translate-x-1/2 z-[9999] items-center justify-center">
         <div class="flex items-center gap-1 bg-[#1c1c1e]/70 backdrop-blur-xl rounded-2xl px-2 py-1.5 border border-white/[0.12] shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
-            <div id="dock-kotha-icon" class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer relative group shadow-lg" title="Kotha">
-                <img src="/logo.svg" alt="Kotha" class="w-8 h-8 drop-shadow-md">
+            <div id="dock-kotha-icon" class="w-12 h-12 rounded-xl bg-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer relative group shadow-lg" title="Kotha">
+                <img src="/logo.svg" alt="Kotha" class="w-8 h-8">
                 <div id="dock-dot" class="absolute -bottom-[6px] w-1 h-1 rounded-full bg-white/90 transition-opacity"></div>
             </div>
         </div>
@@ -627,7 +632,7 @@
     <!-- AI Panel removed — AI chat is now inline -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="js/script.js?v=23"></script>
+    <script src="js/script.js?v=24"></script>
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=18"></script>
