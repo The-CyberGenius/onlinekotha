@@ -541,33 +541,16 @@ button,
     pointer-events: none;
 }
 
-/* ─── Bottom Dock ─── */
-.dock-glass {
-    background: rgba(30, 30, 35, 0.65);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-}
-.dock-indicator {
-    box-shadow: 0 0 4px rgba(255,255,255,0.5);
-}
-/* Dock icon bounce on click */
+/* ─── macOS Dock (fixed bottom) ─── */
 @keyframes dockBounce {
     0%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-12px); }
-    50% { transform: translateY(-6px); }
-    70% { transform: translateY(-9px); }
+    25% { transform: translateY(-14px); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(-8px); }
 }
-.dock-icon-bouncing {
+.dock-bounce {
     animation: dockBounce 600ms ease-in-out;
 }
-/* Hide dock indicator when app is visible */
-#mac-dock .dock-indicator { opacity: 0; transition: opacity 200ms; }
-#mac-dock.app-hidden .dock-indicator { opacity: 1; }
 
 /* ─── All-Side Resize Handles ─── */
 .rh {

@@ -2019,12 +2019,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let minimized = false;
 
+        const dockDot = document.getElementById('dock-dot');
+
         function genieMinimize() {
             if (minimized) return;
             minimized = true;
             frame.classList.remove('genie-restore');
             frame.classList.add('genie-minimize');
-            if (dock) dock.classList.add('app-hidden');
+            if (dockDot) dockDot.style.opacity = '0';
             frame.addEventListener('animationend', function onEnd() {
                 frame.removeEventListener('animationend', onEnd);
                 frame.classList.add('mac-minimized');
@@ -2037,10 +2039,10 @@ document.addEventListener('DOMContentLoaded', () => {
             minimized = false;
             frame.classList.remove('mac-minimized', 'genie-minimize');
             frame.classList.add('genie-restore');
-            if (dock) dock.classList.remove('app-hidden');
+            if (dockDot) dockDot.style.opacity = '1';
             if (dockIcon) {
-                dockIcon.querySelector('img').classList.add('dock-icon-bouncing');
-                setTimeout(() => dockIcon.querySelector('img').classList.remove('dock-icon-bouncing'), 600);
+                dockIcon.classList.add('dock-bounce');
+                setTimeout(() => dockIcon.classList.remove('dock-bounce'), 600);
             }
             frame.addEventListener('animationend', function onEnd() {
                 frame.removeEventListener('animationend', onEnd);
