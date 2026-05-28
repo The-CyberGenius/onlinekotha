@@ -472,6 +472,19 @@ button,
     scrollbar-width: none;
 }
 
+/* Desktop sidebar collapse */
+@media (min-width: 768px) {
+    #sidebar {
+        transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1), min-width 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #sidebar.sidebar-collapsed {
+        width: 0 !important;
+        min-width: 0 !important;
+        overflow: hidden;
+        border-right-width: 0;
+    }
+}
+
 /* Glass panel for the outer container on desktop */
 @media (min-width: 768px) {
     #app {

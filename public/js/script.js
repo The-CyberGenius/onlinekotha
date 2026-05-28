@@ -192,6 +192,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
 
+    // Desktop sidebar collapse/expand
+    const collapseBtn = document.getElementById('collapse-sidebar-btn');
+    const collapseIcon = document.getElementById('collapse-icon');
+    if (collapseBtn) {
+        const savedState = localStorage.getItem('kotha_sidebar_collapsed');
+        if (savedState === '1') {
+            sidebar.classList.add('sidebar-collapsed');
+            if (collapseIcon) collapseIcon.style.transform = 'rotate(180deg)';
+        }
+        collapseBtn.addEventListener('click', () => {
+            const collapsed = sidebar.classList.toggle('sidebar-collapsed');
+            if (collapseIcon) collapseIcon.style.transform = collapsed ? 'rotate(180deg)' : '';
+            localStorage.setItem('kotha_sidebar_collapsed', collapsed ? '1' : '0');
+        });
+    }
+
     const mobileFilterBtn = document.getElementById('mobile-filter-btn');
     if (mobileFilterBtn) {
         mobileFilterBtn.addEventListener('click', () => {
