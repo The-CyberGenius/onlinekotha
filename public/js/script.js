@@ -2059,7 +2059,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 450);
         }
 
-        if (closeBtn) closeBtn.addEventListener('click', genieMinimize);
+        if (closeBtn) closeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
         if (minBtn) minBtn.addEventListener('click', genieMinimize);
         if (fsBtn) fsBtn.addEventListener('click', () => {
             const isFs = frame.classList.toggle('mac-fullscreen');
