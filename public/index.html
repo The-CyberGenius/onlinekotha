@@ -449,7 +449,7 @@
         html.light .text-zinc-500 { color: var(--text-muted) !important; }
         html.light .text-zinc-600 { color: var(--text-muted) !important; }
 
-        html.light .bg-[#060608] { background-color: var(--bg) !important; }
+        html.light .bg-\[\#060608\] { background-color: var(--bg) !important; }
         html.light .bg-white\/\[0\.01\] { background-color: var(--surface) !important; }
         html.light .bg-white\/\[0\.04\] { background-color: var(--surface) !important; }
         html.light .bg-white\/\[0\.05\] { background-color: var(--surface-hover) !important; }
@@ -471,9 +471,18 @@
             color: var(--text-muted) !important;
         }
 
-        /* Ensure primary actions & user bubbles remain light text */
-        .cta-primary, .cta-primary * { color: #ffffff !important; }
-        .msg-user, .msg-user * { color: #ffffff !important; }
+        /* Ensure proper contrast for primary actions & user bubbles */
+        .cta-primary, .cta-primary * { color: var(--bg) !important; }
+        .msg-user, .msg-user * { color: var(--bg) !important; }
+        
+        /* Overrides to beat html.light .text-white specificity */
+        html.light .cta-primary.text-white,
+        html.light .cta-primary .text-white,
+        html.light .msg-user .text-white {
+            color: var(--bg) !important;
+        }
+        
+        html.light .bg-slate-800 { background-color: #e2e8f0 !important; }
 
         @media (max-width: 768px) {
             .cursor-spot { display: none; }
@@ -596,7 +605,7 @@
                 <form id="demo-form" class="mt-4 flex items-center gap-2 bg-white/[0.04] rounded-full px-4 py-1.5 border border-white/[0.06] focus-within:border-indigo-500/30 transition-colors">
                     <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Type a message to Maa..." class="bg-transparent text-[13px] text-white placeholder-zinc-600 flex-1 outline-none py-1.5">
                     <button type="submit" id="demo-send" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-white transition shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                 </form>
 
