@@ -38,12 +38,20 @@ function ensureStrategy() {
             if (!email) return done(new Error('Google account has no email'));
 
             let user = db.prepare('SELECT * FROM users WHERE google_id = ?').get(googleId);
+            if (user) {
+                // Refresh avatar/name on every Google login so it stays current
+                db.prepare(
+                    `UPDATE users SET display_name = COALESCE(?, display_name), avatar_url = COALESCE(?, avatar_url) WHERE id = ?`
+                ).run(displayName, avatarUrl, user.id);
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+            }
             if (!user) {
                 user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
                 if (user) {
+                    // Always update avatar/name from Google — keeps them fresh
                     db.prepare(
                         `UPDATE users SET google_id = ?, email_verified = 1,
-                         display_name = COALESCE(display_name, ?), avatar_url = COALESCE(avatar_url, ?)
+                         display_name = COALESCE(?, display_name), avatar_url = COALESCE(?, avatar_url)
                          WHERE id = ?`
                     ).run(googleId, displayName, avatarUrl, user.id);
                     user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);

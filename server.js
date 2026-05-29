@@ -197,15 +197,11 @@ app.get('/media/*rest', requireUser, (req, res, next) => {
 
     if (!fs.existsSync(fullPath)) return res.status(404).end();
 
-    // Set proper Content-Type for video files so browsers can stream/seek them.
-    // Especially important: .mov is video/mp4 on the wire (same container, Chrome needs this).
     const ext = path.extname(fullPath).toLowerCase();
     const MIME_MAP = {
         '.mp4': 'video/mp4', '.mov': 'video/mp4', '.m4v': 'video/mp4',
-        '.webm': 'video/webm',
-        '.3gp': 'video/3gpp',
-        '.mkv': 'video/x-matroska',
-        '.avi': 'video/x-msvideo',
+        '.webm': 'video/webm', '.3gp': 'video/3gpp',
+        '.mkv': 'video/x-matroska', '.avi': 'video/x-msvideo',
         '.m4a': 'audio/mp4', '.aac': 'audio/aac',
         '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg',
         '.opus': 'audio/ogg; codecs=opus', '.wav': 'audio/wav',
@@ -213,7 +209,41 @@ app.get('/media/*rest', requireUser, (req, res, next) => {
         '.png': 'image/png', '.gif': 'image/gif',
         '.webp': 'image/webp', '.heic': 'image/heic',
     };
-    if (MIME_MAP[ext]) res.setHeader('Content-Type', MIME_MAP[ext]);
+
+    const mime = MIME_MAP[ext];
+    const isVideo = mime && mime.startsWith('video/');
+
+    if (isVideo) {
+        // Manual range-aware streaming for video — res.sendFile overwrites Content-Type
+        // which breaks .mov playback in Chrome (needs video/mp4 not video/quicktime)
+        const stat = fs.statSync(fullPath);
+        const fileSize = stat.size;
+        const rangeHeader = req.headers.range;
+
+        if (rangeHeader) {
+            const parts = rangeHeader.replace(/bytes=/, '').split('-');
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : Math.min(start + 10 * 1024 * 1024 - 1, fileSize - 1);
+            const chunkSize = end - start + 1;
+            res.writeHead(206, {
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunkSize,
+                'Content-Type': mime,
+            });
+            fs.createReadStream(fullPath, { start, end }).pipe(res);
+        } else {
+            res.writeHead(200, {
+                'Content-Length': fileSize,
+                'Content-Type': mime,
+                'Accept-Ranges': 'bytes',
+            });
+            fs.createReadStream(fullPath).pipe(res);
+        }
+        return;
+    }
+
+    if (mime) res.setHeader('Content-Type', mime);
     res.sendFile(fullPath);
 });
 
