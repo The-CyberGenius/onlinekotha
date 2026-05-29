@@ -480,6 +480,28 @@ app.get('/api/dm/conversations', requireUser, (req, res) => {
 });
 
 // Get messages for a conversation (paginated, newest first)
+// Delete own DM message
+app.delete('/api/dm/messages/:id', requireUser, (req, res) => {
+    const msgId = Number(req.params.id);
+    const msg = db.prepare('SELECT * FROM dm_messages WHERE id = ?').get(msgId);
+    if (!msg) return res.status(404).json({ error: 'Not found' });
+    if (msg.sender_id !== req.user.id) return res.status(403).json({ error: 'Not your message' });
+
+    db.prepare('UPDATE dm_messages SET body = ?, type = ? WHERE id = ?')
+      .run('This message was deleted', 'deleted', msgId);
+
+    // Notify both users via socket
+    const conv = db.prepare('SELECT * FROM dm_conversations WHERE id = ?').get(msg.conv_id);
+    if (conv) {
+        const otherId = conv.user_a === req.user.id ? conv.user_b : conv.user_a;
+        [req.user.id, otherId].forEach(uid => {
+            const sockets = onlineUsers.get(uid);
+            if (sockets) sockets.forEach(sid => io.to(sid).emit('dm:deleted', { msg_id: msgId, conv_id: msg.conv_id }));
+        });
+    }
+    res.json({ ok: true });
+});
+
 // HTTP fallback for sending a message (used when socket.io isn't connected yet)
 app.post('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     const convId = Number(req.params.id);
