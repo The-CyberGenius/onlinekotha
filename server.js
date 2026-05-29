@@ -480,6 +480,40 @@ app.get('/api/dm/conversations', requireUser, (req, res) => {
 });
 
 // Get messages for a conversation (paginated, newest first)
+// HTTP fallback for sending a message (used when socket.io isn't connected yet)
+app.post('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
+    const convId = Number(req.params.id);
+    const body   = (req.body?.body || '').trim();
+    if (!body) return res.status(400).json({ error: 'Empty message' });
+
+    const conv = db.prepare(
+        'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
+    ).get(convId, req.user.id, req.user.id);
+    if (!conv) return res.status(403).json({ error: 'Not your conversation' });
+
+    const now    = Date.now();
+    const result = db.prepare(
+        'INSERT INTO dm_messages (conv_id, sender_id, body, type, created_at, read_at) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run(convId, req.user.id, body, 'text', now, now);
+
+    const msg = {
+        id: result.lastInsertRowid, conv_id: convId,
+        sender_id: req.user.id, body, type: 'text',
+        created_at: now, read_at: now,
+        display_name: req.user.display_name || req.user.email.split('@')[0],
+        avatar_url: req.user.avatar_url,
+    };
+
+    // Push via socket.io if the other user is online
+    const otherId = conv.user_a === req.user.id ? conv.user_b : conv.user_a;
+    [req.user.id, otherId].forEach(uid => {
+        const sockets = onlineUsers.get(uid);
+        if (sockets) sockets.forEach(sid => io.to(sid).emit('dm:message', msg));
+    });
+
+    res.json(msg);
+});
+
 app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     const convId = Number(req.params.id);
     const conv = db.prepare(

@@ -2235,3 +2235,21 @@ html.dark #btn-wrapped:hover {
         left: 150%;
     }
 }
+/* ── DM Panel dark mode ───────────────────────────────────── */
+html.dark #sidebar-dm-tab { background: #111b21; }
+html.dark #sidebar-dm-tab input { background:#202c33 !important; color:#e9edef !important; border-color:#3b4a54 !important; }
+html.dark #sidebar-dm-tab input::placeholder { color:#8696a0 !important; }
+html.dark #dm-chat-area { background:#0b141a !important; }
+html.dark #dm-chat-area #dm-messages { background:#0b141a !important; }
+html.dark .dm-row:hover { background: rgba(134,150,160,.08) !important; }
+html.dark #dm-new-btn { background:#00a884 !important; }
+
+/* Tab buttons dark mode */
+html.dark #tab-chats-btn:not(.bg-indigo-600),
+html.dark #tab-dm-btn:not(.bg-indigo-600) {
+    color: #8696a0 !important;
+}
+html.dark #tab-chats-btn:not(.bg-indigo-600):hover,
+html.dark #tab-dm-btn:not(.bg-indigo-600):hover {
+    background: rgba(134,150,160,.1) !important;
+}

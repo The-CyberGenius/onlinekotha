@@ -131,31 +131,35 @@
         updateBadge();
     }
 
+    function dk() { return document.documentElement.classList.contains('dark'); }
+
     function renderConvs() {
         if (!convList) return;
+        const dark = dk();
         if (!convs.length) {
             convList.innerHTML = `
-                <div style="text-align:center;padding:32px 16px">
-                    <div style="font-size:32px;margin-bottom:12px">💬</div>
-                    <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px">No messages yet</div>
-                    <div style="font-size:11px;color:#9ca3af">Search someone's email above to start chatting</div>
+                <div style="text-align:center;padding:40px 16px">
+                    <div style="font-size:36px;margin-bottom:14px">✉️</div>
+                    <div style="font-size:14px;font-weight:700;color:${dark?'#e5e7eb':'#111827'};margin-bottom:6px">No conversations yet</div>
+                    <div style="font-size:12px;color:${dark?'#6b7280':'#9ca3af'}">Search by email above to start a conversation</div>
                 </div>`;
             return;
         }
         convList.innerHTML = convs.map(c => `
-            <div class="dm-row" data-id="${c.conv_id}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-radius:12px;margin:2px 6px;transition:background .15s;${c.conv_id===activeConvId?'background:rgba(99,102,241,.08)':''}">
+            <div class="dm-row" data-id="${c.conv_id}"
+                style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;border-radius:14px;margin:2px 8px;transition:background .15s;${c.conv_id===activeConvId?(dark?'background:rgba(99,102,241,.18)':'background:rgba(99,102,241,.08)'):''}">
                 <div style="position:relative;flex-shrink:0">
-                    ${avatar(c.other, 44)}
-                    <span class="dm-dot-${c.other.id}" style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;background:#d1d5db;border:2px solid #fff"></span>
+                    ${avatar(c.other, 46)}
+                    <span class="dm-dot-${c.other.id}" style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#d1d5db;border:2px solid ${dark?'#111b21':'#fff'}"></span>
                 </div>
                 <div style="flex:1;min-width:0">
-                    <div style="display:flex;justify-content:space-between;gap:4px;align-items:baseline">
-                        <span style="font-size:13px;font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.other.display_name)}</span>
-                        <span style="font-size:10px;color:#9ca3af;flex-shrink:0">${timeAgo(c.last_at)}</span>
+                    <div style="display:flex;justify-content:space-between;gap:4px;align-items:baseline;margin-bottom:2px">
+                        <span style="font-size:13.5px;font-weight:600;color:${dark?'#f3f4f6':'#111827'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.other.display_name)}</span>
+                        <span style="font-size:10px;color:${dark?'#6b7280':'#9ca3af'};flex-shrink:0">${timeAgo(c.last_at)}</span>
                     </div>
-                    <div style="font-size:12px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.last_msg||'Tap to open')}</div>
+                    <div style="font-size:12px;color:${dark?'#9ca3af':'#6b7280'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.last_msg||'Tap to open')}</div>
                 </div>
-                ${c.unread?`<span style="background:#ef4444;color:#fff;font-size:9px;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">${c.unread>9?'9+':c.unread}</span>`:''}
+                ${c.unread?`<span style="background:#6366f1;color:#fff;font-size:9px;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">${c.unread>9?'9+':c.unread}</span>`:''}
             </div>`).join('');
 
         convList.querySelectorAll('.dm-row').forEach(el => {
@@ -200,28 +204,54 @@
     function appendMsg(msg) {
         if (!chatMsgs) return;
         const isMe = msg.sender_id === me?.id;
+        const dark = dk();
         const el = document.createElement('div');
-        el.style.cssText = `display:flex;justify-content:${isMe?'flex-end':'flex-start'};margin-bottom:3px`;
+        el.style.cssText = `display:flex;justify-content:${isMe?'flex-end':'flex-start'};margin-bottom:2px;padding:0 4px`;
+        const bubbleBg  = isMe ? '#6366f1' : (dark ? '#2a3942' : '#ffffff');
+        const bubbleClr = isMe ? '#ffffff' : (dark ? '#e9edef' : '#111827');
+        const bubbleBdr = isMe ? 'none' : `1px solid ${dark?'#3b4a54':'#e5e7eb'}`;
         el.innerHTML = `
-            <div style="max-width:74%;display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
-                <div style="padding:9px 13px;border-radius:${isMe?'18px 18px 4px 18px':'18px 18px 18px 4px'};font-size:13px;line-height:1.45;word-break:break-word;
-                    ${isMe?'background:#6366f1;color:#fff':'background:#fff;color:#111827;border:1px solid #e5e7eb;box-shadow:0 1px 2px rgba(0,0,0,.05)'}">
+            <div style="max-width:72%;display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
+                <div style="padding:9px 14px;border-radius:${isMe?'18px 4px 18px 18px':'4px 18px 18px 18px'};font-size:13.5px;line-height:1.5;word-break:break-word;
+                    background:${bubbleBg};color:${bubbleClr};border:${bubbleBdr};
+                    box-shadow:0 1px 3px rgba(0,0,0,${dark?'.2':'.07'})">
                     ${esc(msg.body)}
                 </div>
-                <span style="font-size:10px;color:#9ca3af;margin-top:2px;${isMe?'margin-right:3px':'margin-left:3px'}">${fmtTime(msg.created_at)}</span>
+                <span style="font-size:10px;color:${dark?'#8696a0':'#8696a0'};margin-top:3px;${isMe?'margin-right:4px':'margin-left:4px'}">${fmtTime(msg.created_at)}</span>
             </div>`;
         chatMsgs.appendChild(el);
     }
 
     function scrollBottom() { if(chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight; }
 
-    // ── Send ──────────────────────────────────────────────────
-    function send() {
+    // ── Send (socket first, HTTP fallback) ───────────────────
+    async function send() {
         const body = chatInput?.value.trim();
-        if (!body || !activeConvId || !socket) return;
-        socket.emit('dm:send', {conv_id:activeConvId, body});
+        if (!body || !activeConvId) return;
         chatInput.value = '';
         chatInput.focus();
+
+        if (socket?.connected) {
+            socket.emit('dm:send', {conv_id: activeConvId, body});
+        } else {
+            // HTTP fallback — works even before socket.io is deployed
+            try {
+                const r = await fetch(`/api/dm/conversations/${activeConvId}/messages`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({body}),
+                });
+                if (r.ok) {
+                    const msg = await r.json();
+                    appendMsg(msg);
+                    scrollBottom();
+                    // Update conv list preview
+                    const idx = convs.findIndex(c => c.conv_id === activeConvId);
+                    if (idx >= 0) { convs[idx].last_msg = body; convs[idx].last_at = msg.created_at; }
+                    renderConvs();
+                }
+            } catch(e) { console.error('[DM send]', e); }
+        }
     }
 
     chatSend?.addEventListener('click', send);
