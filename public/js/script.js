@@ -237,18 +237,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             } else if (msg.type === 'video') {
                 const vext = (msg.attachment.split('.').pop() || '').toLowerCase();
-                const vmime = vext === 'mov' ? 'video/quicktime'
-                    : vext === 'webm' ? 'video/webm'
+                // .mov = server sends video/mp4 (same H.264 container, Chrome can play it)
+                // .mkv / .avi may not play in browser — show player + download fallback
+                const browserPlayable = ['mp4', 'mov', 'm4v', 'webm', '3gp'].includes(vext);
+                const vmime = vext === 'webm' ? 'video/webm'
                     : vext === '3gp' ? 'video/3gpp'
-                    : vext === 'mkv' ? 'video/x-matroska'
-                    : vext === 'avi' ? 'video/x-msvideo'
                     : 'video/mp4';
                 mediaHtml = `
                     <div class="relative z-10 pointer-events-auto mb-1">
-                        <video controls playsinline preload="metadata" class="w-64 max-w-full rounded-xl shadow-md border border-white/20 bg-black">
+                        ${browserPlayable ? `
+                        <video controls playsinline preload="metadata" class="w-64 max-w-full rounded-xl shadow-md border border-white/20 bg-black"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
                             <source src="${fileUrl}" type="${vmime}">
                         </video>
-                        <a href="${fileUrl}" target="_blank" download class="block text-[11px] font-bold ${isMe ? 'opacity-70' : 'text-indigo-500'} hover:underline mt-1">Download video</a>
+                        <a href="${fileUrl}" target="_blank" download style="display:none" class="block text-[11px] font-bold ${isMe ? 'opacity-70' : 'text-indigo-500'} hover:underline mt-1">⬇ Can't play — Download video</a>
+                        ` : `
+                        <div class="w-64 h-16 rounded-xl bg-black/30 flex items-center justify-center text-xs text-gray-400">
+                            <span>📹 ${escH(msg.attachment.split('/').pop() || 'video')}</span>
+                        </div>
+                        `}
+                        <a href="${fileUrl}" target="_blank" download class="block text-[11px] font-bold ${isMe ? 'opacity-70' : 'text-indigo-500'} hover:underline mt-1">⬇ Download video</a>
                     </div>
                 `;
             } else if (msg.type === 'audio') {

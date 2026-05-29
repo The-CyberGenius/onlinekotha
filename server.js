@@ -191,6 +191,24 @@ app.get('/media/*rest', requireUser, (req, res, next) => {
     if (!fullPath.startsWith(userBase)) return res.status(403).end();
 
     if (!fs.existsSync(fullPath)) return res.status(404).end();
+
+    // Set proper Content-Type for video files so browsers can stream/seek them.
+    // Especially important: .mov is video/mp4 on the wire (same container, Chrome needs this).
+    const ext = path.extname(fullPath).toLowerCase();
+    const MIME_MAP = {
+        '.mp4': 'video/mp4', '.mov': 'video/mp4', '.m4v': 'video/mp4',
+        '.webm': 'video/webm',
+        '.3gp': 'video/3gpp',
+        '.mkv': 'video/x-matroska',
+        '.avi': 'video/x-msvideo',
+        '.m4a': 'audio/mp4', '.aac': 'audio/aac',
+        '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg',
+        '.opus': 'audio/ogg; codecs=opus', '.wav': 'audio/wav',
+        '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+        '.png': 'image/png', '.gif': 'image/gif',
+        '.webp': 'image/webp', '.heic': 'image/heic',
+    };
+    if (MIME_MAP[ext]) res.setHeader('Content-Type', MIME_MAP[ext]);
     res.sendFile(fullPath);
 });
 
