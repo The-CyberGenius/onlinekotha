@@ -406,8 +406,8 @@
             </div><!-- /scrollable lower region -->
         </div><!-- /sidebar -->
 
-        <!-- ── DM Sidebar Section (inside sidebar flow, toggled by tab) ── -->
-        <div id="dm-sidebar-section" class="hidden absolute inset-0 z-[65] flex flex-col bg-white dark:bg-[#111b21] border-r border-gray-200/60 dark:border-gray-800">
+        <!-- ── DM Sidebar Section — same position/size as #sidebar, overlays it ── -->
+        <div id="dm-sidebar-section" class="hidden w-full md:w-[340px] lg:w-[360px] shrink-0 absolute md:relative h-full left-0 z-[65] flex flex-col bg-white dark:bg-[#111b21] border-r border-gray-200/60 dark:border-gray-800 shadow-2xl md:shadow-none transition-transform duration-200">
             <!-- DM Header -->
             <div class="bg-[#f0f2f5] dark:bg-[#202c33] flex items-center gap-2 px-3 py-3 shrink-0 border-b border-gray-200 dark:border-gray-800">
                 <button id="dm-close-btn" class="w-8 h-8 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 transition" title="Back to Chats">
@@ -696,7 +696,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/script.js?v=28"></script>
+    <script src="js/script.js?v=29"></script>
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=19"></script>

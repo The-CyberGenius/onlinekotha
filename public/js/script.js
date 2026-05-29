@@ -1049,16 +1049,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">Bring a chat to life</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Bring a chat to life</h2>
                 <p class="text-sm text-gray-500 max-w-sm leading-relaxed mb-2">Upload your WhatsApp export and see it beautifully — search through years of messages and talk to your memories with AI.</p>
                 <div class="flex items-center gap-4 text-[11px] text-gray-400 font-medium mb-6">
                     <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
                     <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
                     <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Free</span>
                 </div>
-                <button id="empty-upload-btn" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-sm rounded-2xl px-7 py-3.5 transition shadow-lg shadow-indigo-300/30 hover:shadow-indigo-400/40 flex items-center gap-2 mx-auto">
+                <button id="empty-upload-btn" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-sm rounded-2xl px-7 py-3.5 transition shadow-lg shadow-indigo-300/30 hover:shadow-indigo-400/40 flex items-center gap-2 mx-auto mb-3">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    Import WhatsApp Chat
+                    Import Chat
+                </button>
+                <button id="empty-dm-btn" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 font-bold text-sm rounded-2xl px-7 py-3 transition hover:bg-indigo-50 dark:hover:bg-indigo-950/40 flex items-center gap-2 mx-auto shadow-sm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Message Someone
                 </button>
             </div>
         `;
@@ -1066,6 +1070,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.addEventListener('click', () => {
             const openUploadBtn = document.getElementById('open-upload-btn');
             if (openUploadBtn) openUploadBtn.click();
+        });
+        const dmBtn = document.getElementById('empty-dm-btn');
+        if (dmBtn) dmBtn.addEventListener('click', () => {
+            // Open DM sidebar via the btn-dm button
+            const btnDm = document.getElementById('btn-dm');
+            if (btnDm) btnDm.click();
         });
     }
     function removeEmptyState() {
