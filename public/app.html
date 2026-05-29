@@ -132,7 +132,7 @@
             </div>
 
             <!-- ── CHATS TAB content ── -->
-            <div id="sidebar-chats-tab">
+            <div id="sidebar-chats-tab" class="flex-1 min-h-0 flex flex-col overflow-hidden">
 
             <!-- Trial / Plan badge -->
             <div id="plan-banner" class="hidden px-4 pt-3 shrink-0">
@@ -524,13 +524,17 @@
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </button>
-                    <button id="ask-ai-btn" class="ai-sparkle-btn" title="Ask AI about this chat" aria-label="Ask AI">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+                    <!-- DM shortcut button (replaces AI sparkle) -->
+                    <button id="btn-dm" title="Direct Messages" aria-label="Direct Messages"
+                        class="ai-sparkle-btn relative" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <path d="M22 6l-10 7L2 6"/>
                         </svg>
+                        <span id="dm-unread-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black rounded-full w-4 h-4 flex items-center justify-center leading-none border-2 border-white">0</span>
                     </button>
+                    <!-- AI sparkle kept hidden so ai-panel.js doesn't break -->
+                    <button id="ask-ai-btn" class="hidden ai-sparkle-btn" title="Ask AI" aria-label="Ask AI"></button>
                 </div>
             </div>
 
@@ -707,7 +711,7 @@
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=19"></script>
-    <script src="js/dm.js?v=3"></script>
+    <script src="js/dm.js?v=4"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });

@@ -287,11 +287,18 @@
         if(unreadBadge){ unreadBadge.textContent=n>9?'9+':n; unreadBadge.classList.toggle('hidden',n===0); }
     }
 
-    // ── Empty state button ────────────────────────────────────
-    document.getElementById('empty-dm-btn')?.addEventListener('click', () => showDmTab());
+    // ── DM button in chat header → switch to Messages tab ────
+    document.getElementById('btn-dm')?.addEventListener('click', () => {
+        // Open sidebar on mobile first
+        if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+        showDmTab();
+    });
 
-    // ── btn-dm in header (if exists) ─────────────────────────
-    document.getElementById('btn-dm')?.addEventListener('click', () => showDmTab());
+    // ── Empty state button ────────────────────────────────────
+    document.getElementById('empty-dm-btn')?.addEventListener('click', () => {
+        if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+        showDmTab();
+    });
 
     init();
     window.dmShowTab = showDmTab;
