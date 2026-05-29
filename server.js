@@ -558,7 +558,8 @@ app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
         'UPDATE dm_messages SET read_at = ? WHERE conv_id = ? AND sender_id != ? AND read_at IS NULL'
     ).run(Date.now(), convId, req.user.id);
 
-    res.json(msgs.reverse());
+    // Include my_id so frontend knows which side is "me" — guaranteed correct
+    res.json({ messages: msgs.reverse(), my_id: req.user.id });
 });
 
 // ─────────────────────────────────────────────

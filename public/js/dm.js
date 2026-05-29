@@ -211,7 +211,13 @@
         if (typingEl)   typingEl.style.display = 'none';
 
         const r    = await fetch(`/api/dm/conversations/${convId}/messages`);
-        const msgs = await r.json();
+        const data = await r.json();
+        const msgs = data.messages || data; // backward compat
+
+        // Server tells us definitively which ID is "mine" — no race condition
+        if (data.my_id) me = me || {};
+        if (data.my_id) me.id = Number(data.my_id);
+
         if (chatMsgs) {
             chatMsgs.innerHTML = '';
             if (!msgs.length) {
