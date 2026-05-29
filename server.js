@@ -689,6 +689,15 @@ io.on('connection', (socket) => {
     });
 });
 
+// Contact form (no auth required)
+app.post('/api/contact', (req, res) => {
+    const { name, email, topic, message } = req.body || {};
+    if (!email || !message) return res.status(400).json({ error: 'Missing fields' });
+    // Log to console (admin can see in pm2 logs) — extend with email if needed
+    console.log(`[CONTACT] ${new Date().toISOString()} | ${topic || 'General'} | ${email} (${name}): ${message}`);
+    res.json({ ok: true });
+});
+
 // 404 fallback (must be last)
 app.use((req, res) => {
     if (req.path.startsWith('/api/')) {
