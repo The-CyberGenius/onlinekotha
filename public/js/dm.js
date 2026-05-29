@@ -198,6 +198,11 @@
         updateBadge();
         renderConvs();
 
+        // On mobile / compact mode → close sidebar so chat takes full screen
+        if (window.innerWidth < 768 || window.kothaCompact) {
+            if (window.kothaSidebarClose) window.kothaSidebarClose();
+        }
+
         if (chatArea)   chatArea.style.display = 'flex';
         if (chatName)   chatName.textContent = c.other.display_name;
         if (chatAvatar) chatAvatar.innerHTML  = avatar(c.other, 38);
@@ -378,7 +383,13 @@
         typingTimer = setTimeout(()=>socket.emit('dm:typing',{conv_id:activeConvId,typing:false}),1500);
     });
 
-    backBtn?.addEventListener('click', closeConv);
+    backBtn?.addEventListener('click', () => {
+        closeConv();
+        // On mobile, reopen sidebar to show conversation list
+        if (window.innerWidth < 768 || window.kothaCompact) {
+            if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+        }
+    });
 
     // ── Email search ──────────────────────────────────────────
     async function doSearch() {
