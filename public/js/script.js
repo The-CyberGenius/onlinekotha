@@ -637,7 +637,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (otherPersonName) {
                     headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
-                    sidebarAvatar.innerText = 'C';
+                    if (sidebarAvatar) sidebarAvatar.innerText = 'C';
                 }
 
                 // Animate bottom input placeholder typewriter effect
