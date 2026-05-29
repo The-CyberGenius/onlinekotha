@@ -19,12 +19,21 @@
         const info = document.getElementById('sidebar-user-info');
         if (info) info.textContent = me.user.display_name || me.user.email;
 
-        // Show profile picture if available (Google login)
-        const sidebarAvatar = document.getElementById('sidebar-avatar');
-        if (sidebarAvatar && me.user.avatar_url) {
-            sidebarAvatar.innerHTML = `<img src="${me.user.avatar_url}" alt="" class="w-10 h-10 rounded-xl object-cover">`;
-        } else if (sidebarAvatar && me.user.display_name) {
-            sidebarAvatar.textContent = me.user.display_name.charAt(0).toUpperCase();
+        // ── My avatar + email in sidebar header ──
+        const emailDisplay = document.getElementById('my-email-display');
+        if (emailDisplay) emailDisplay.textContent = me.user.email || '';
+
+        const avatarInitials = document.getElementById('my-avatar-initials');
+        const avatarImg      = document.getElementById('my-avatar-img');
+        const avatarPhoto    = document.getElementById('my-avatar-photo');
+
+        if (me.user.avatar_url && avatarPhoto) {
+            avatarPhoto.src = me.user.avatar_url;
+            avatarImg?.classList.remove('hidden');
+            avatarInitials?.classList.add('hidden');
+        } else if (avatarInitials) {
+            const name = me.user.display_name || me.user.email || '?';
+            avatarInitials.textContent = name.charAt(0).toUpperCase();
         }
 
         // Show display name below avatar

@@ -60,12 +60,17 @@
             <!-- Sidebar Header -->
             <div id="sidebar-header"
                 class="bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-4 py-3 z-20 shrink-0 border-b border-gray-200 dark:border-gray-800 transition-colors">
-                <div class="flex items-center">
-                    <img src="/logo.svg" alt="Kotha Logo"
-                        class="w-10 h-10 rounded-full cursor-pointer hover:opacity-80 transition" id="sidebar-avatar" />
-                    <div class="ml-3">
-                        <h2 class="text-[15px] font-semibold text-gray-900 dark:text-gray-100 tracking-tight"
-                            id="sidebar-title">Chats</h2>
+                <div class="flex items-center gap-3">
+                    <!-- User avatar (Google photo or initials) -->
+                    <div id="my-avatar-wrap" class="relative shrink-0 cursor-pointer" title="Your account">
+                        <div id="my-avatar-img" class="hidden w-9 h-9 rounded-full overflow-hidden border-2 border-indigo-400/40">
+                            <img id="my-avatar-photo" src="" class="w-full h-full object-cover" alt="">
+                        </div>
+                        <div id="my-avatar-initials" class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[13px] font-bold border-2 border-indigo-400/40">?</div>
+                    </div>
+                    <div>
+                        <h2 class="text-[14px] font-semibold text-gray-900 dark:text-gray-100 tracking-tight leading-tight" id="sidebar-title">Chats</h2>
+                        <p class="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[140px]" id="my-email-display"></p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1">
@@ -709,7 +714,7 @@
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=19"></script>
-    <script src="js/dm.js?v=10"></script>
+    <script src="js/dm.js?v=11"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });

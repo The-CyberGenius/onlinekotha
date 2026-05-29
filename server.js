@@ -544,14 +544,15 @@ app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     if (!conv) return res.status(403).json({ error: 'Not your conversation' });
 
     const before = Number(req.query.before) || Date.now() + 1000;
+    const after  = Number(req.query.after)  || 0;
     const msgs = db.prepare(`
         SELECT dm.*, u.display_name, u.avatar_url, u.email
         FROM dm_messages dm
         JOIN users u ON u.id = dm.sender_id
-        WHERE dm.conv_id = ? AND dm.created_at < ?
+        WHERE dm.conv_id = ? AND dm.created_at < ? AND dm.created_at > ?
         ORDER BY dm.created_at DESC
         LIMIT 40
-    `).all(convId, before);
+    `).all(convId, before, after);
 
     // Mark messages as read
     db.prepare(

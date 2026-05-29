@@ -90,12 +90,20 @@
 
     // ── Init ─────────────────────────────────────────────────
     async function init() {
-        const r = await fetch('/api/me');
-        const d = await r.json();
-        if (!d.user) return;
-        me = d.user;
-        me.id = Number(me.id); // ensure number for comparison
+        // Use existing window.__USER__ (set by auth-init.js) — no extra fetch needed
+        if (window.__USER__) {
+            me = window.__USER__;
+            me.id = Number(me.id);
+        } else {
+            // Fallback: fetch if __USER__ not ready yet
+            const r = await fetch('/api/me');
+            const d = await r.json();
+            if (!d.user) return;
+            me = d.user;
+            me.id = Number(me.id);
+        }
         connectSocket();
+        startPolling(); // Fallback if socket doesn't connect
     }
 
     // ── Socket ────────────────────────────────────────────────
@@ -203,6 +211,7 @@
             if (window.kothaSidebarClose) window.kothaSidebarClose();
         }
 
+        lastPollAt = Date.now() - 5000; // load last 5s of msgs on open
         if (chatArea)   chatArea.style.display = 'flex';
         if (chatName)   chatName.textContent = c.other.display_name;
         if (chatAvatar) chatAvatar.innerHTML  = avatar(c.other, 38);
@@ -450,6 +459,37 @@
         const b = document.getElementById('dm-unread-badge');
         if(b){ b.textContent=n>9?'9+':n; b.classList.toggle('hidden',n===0); }
     }
+
+    // ── Polling fallback (when socket not connected) ──────────
+    let lastPollAt = Date.now();
+    let pollTimer  = null;
+
+    function startPolling() {
+        if (pollTimer) return;
+        pollTimer = setInterval(async () => {
+            if (socket?.connected) return; // socket works, no need to poll
+            if (!activeConvId) return;     // nothing open
+
+            try {
+                const r    = await fetch(`/api/dm/conversations/${activeConvId}/messages?after=${lastPollAt}`);
+                if (!r.ok) return;
+                const data = await r.json();
+                const msgs = (data.messages || data).filter(m => m.created_at > lastPollAt && Number(m.sender_id) !== Number(me?.id));
+                if (msgs.length) {
+                    msgs.forEach(m => { m.sender_id = Number(m.sender_id); appendMsg(m); });
+                    scrollBottom();
+                    lastPollAt = msgs[msgs.length-1].created_at;
+                    // update conv list preview
+                    const idx = convs.findIndex(c => c.conv_id === activeConvId);
+                    if (idx >= 0) { convs[idx].last_msg = msgs[msgs.length-1].body; convs[idx].last_at = msgs[msgs.length-1].created_at; }
+                    renderConvs();
+                }
+            } catch {}
+        }, 2500); // poll every 2.5s when no socket
+    }
+
+    // Reset poll timestamp when conv opens
+    const _origOpen = openConv;
 
     // ── External triggers ─────────────────────────────────────
     document.getElementById('btn-dm')?.addEventListener('click', () => {
