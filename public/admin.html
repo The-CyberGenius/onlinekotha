@@ -12,33 +12,6 @@
         .tab-active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* ============ Admin Dark Mode ============ */
-        html.dark body { background: #0f172a !important; }
-        html.dark .bg-white,
-        html.dark .bg-gray-50 { background-color: #1e293b !important; }
-        html.dark .bg-gray-100 { background-color: #334155 !important; }
-        html.dark .bg-gray-200\/60,
-        html.dark .bg-gray-200 { background-color: #334155 !important; }
-        html.dark .border-gray-100,
-        html.dark .border-gray-200 { border-color: #334155 !important; }
-        html.dark .text-gray-900,
-        html.dark .text-gray-800 { color: #f1f5f9 !important; }
-        html.dark .text-gray-700,
-        html.dark .text-gray-600 { color: #cbd5e1 !important; }
-        html.dark .text-gray-500,
-        html.dark .text-gray-400 { color: #94a3b8 !important; }
-        html.dark input,
-        html.dark select,
-        html.dark textarea { background-color: #0f172a !important; color: #f1f5f9 !important; border-color: #334155 !important; }
-        html.dark input::placeholder,
-        html.dark textarea::placeholder { color: #64748b !important; }
-        html.dark .tab-active { background: #4f46e5 !important; color: #fff !important; }
-        html.dark .hover\:bg-gray-50:hover,
-        html.dark .hover\:bg-gray-100:hover { background-color: #334155 !important; }
-        html.dark table th,
-        html.dark table td { border-color: #334155 !important; }
-        html.dark #theme-toggle { background-color: #1e293b; border-color: #334155; color: #cbd5e1; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
@@ -52,7 +25,6 @@
                 <p class="text-[10px] text-gray-500" id="admin-email-info"></p>
             </div>
             <div class="flex gap-1.5">
-                <button id="theme-toggle" title="Toggle dark mode" class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">🌙</button>
                 <a href="/app.html" class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">← Open App</a>
                 <button id="logout-btn" class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">Logout</button>
             </div>
@@ -243,23 +215,6 @@
         </section>
     </div>
 
-    <script>
-        // Apply persisted theme immediately + wire toggle (shares kotha_dark key with the app)
-        (function () {
-            if (localStorage.getItem('kotha_dark') === '1') document.documentElement.classList.add('dark');
-            window.addEventListener('DOMContentLoaded', function () {
-                var btn = document.getElementById('theme-toggle');
-                if (!btn) return;
-                function sync() { btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙'; }
-                sync();
-                btn.addEventListener('click', function () {
-                    var on = document.documentElement.classList.toggle('dark');
-                    localStorage.setItem('kotha_dark', on ? '1' : '0');
-                    sync();
-                });
-            });
-        })();
-    </script>
     <script src="/js/admin.js?v=6"></script>
 </body>
 </html>
