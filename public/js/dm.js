@@ -65,6 +65,10 @@
         tabChatsBtn?.classList.add('bg-indigo-600','text-white','shadow-sm');
         tabDmBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
         tabDmBtn?.classList.add('text-gray-500','dark:text-gray-400');
+        // Hide DM chat overlay so imported chats are visible again
+        if (chatArea) chatArea.style.display = 'none';
+        activeConvId = null;
+        closeCtxMenu();
     }
     function showDmTab() {
         chatsTab?.classList.add('hidden');
