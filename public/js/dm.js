@@ -1,334 +1,299 @@
-// dm.js — User-to-User Direct Messages (socket.io powered)
+// dm.js — Direct Messages (tab-based, inside sidebar)
 (function () {
     'use strict';
 
-    // ── Helpers ──────────────────────────────────────────────
-    function escH(s) {
+    // ── Helpers ───────────────────────────────────────────────
+    function esc(s) {
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
     function timeAgo(ts) {
         if (!ts) return '';
-        const diff = Date.now() - ts;
-        if (diff < 60000) return 'now';
-        if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
-        if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
-        return new Date(ts).toLocaleDateString();
+        const d = Date.now() - ts;
+        if (d < 60000)   return 'now';
+        if (d < 3600000) return Math.floor(d/60000) + 'm';
+        if (d < 86400000)return Math.floor(d/3600000) + 'h';
+        return new Date(ts).toLocaleDateString('en-IN');
     }
-    function formatTime(ts) {
-        return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    function fmtTime(ts) {
+        return new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
     }
-    function avatarEl(user, sizePx = 40) {
+    function avatar(user, px) {
         const name = user.display_name || user.email || '?';
-        const initials = name.charAt(0).toUpperCase();
+        const init = name.charAt(0).toUpperCase();
+        const style = `width:${px}px;height:${px}px;border-radius:50%;flex-shrink:0;`;
         if (user.avatar_url) {
-            return `<img src="${escH(user.avatar_url)}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;background:#6366f1;color:#fff;font-weight:700;font-size:${Math.floor(sizePx*0.35)}px;display:none;align-items:center;justify-content:center;flex-shrink:0">${escH(initials)}</div>`;
+            return `<img src="${esc(user.avatar_url)}" style="${style}object-fit:cover" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+                    <div style="${style}background:#6366f1;color:#fff;font-weight:700;font-size:${Math.floor(px*.36)}px;display:none;align-items:center;justify-content:center">${esc(init)}</div>`;
         }
-        return `<div style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;background:#6366f1;color:#fff;font-weight:700;font-size:${Math.floor(sizePx*0.35)}px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${escH(initials)}</div>`;
+        return `<div style="${style}background:#6366f1;color:#fff;font-weight:700;font-size:${Math.floor(px*.36)}px;display:flex;align-items:center;justify-content:center">${esc(init)}</div>`;
     }
 
     // ── State ─────────────────────────────────────────────────
-    let socket       = null;
-    let me           = null;
-    let activeConvId = null;
-    let conversations = [];
+    let me = null, socket = null, activeConvId = null;
+    let convs = [];
 
-    // ── DOM refs ──────────────────────────────────────────────
-    const dmSidebar   = document.getElementById('dm-sidebar-section');
-    const convList    = document.getElementById('dm-conv-list');
-    const chatArea    = document.getElementById('dm-chat-area');
-    const chatMsgs    = document.getElementById('dm-messages');
-    const chatInput   = document.getElementById('dm-input');
-    const chatSend    = document.getElementById('dm-send-btn');
-    const chatName    = document.getElementById('dm-chat-name');
-    const chatStatus  = document.getElementById('dm-chat-status');
-    const chatAvatar  = document.getElementById('dm-chat-avatar');
-    const searchInput = document.getElementById('dm-search-email');
-    const searchBtn   = document.getElementById('dm-search-btn');
-    const searchResult= document.getElementById('dm-search-result');
-    const typingEl    = document.getElementById('dm-typing-indicator');
-    const unreadBadge = document.getElementById('dm-unread-badge');
-    const dmBackBtn   = document.getElementById('dm-back-btn');
-    const dmCloseBtn  = document.getElementById('dm-close-btn');
-    const dmNewBtn    = document.getElementById('dm-new-btn');
-    const dmNewForm   = document.getElementById('dm-new-form');
-    const btnDm       = document.getElementById('btn-dm');
+    // ── DOM ───────────────────────────────────────────────────
+    const tabChatsBtn  = document.getElementById('tab-chats-btn');
+    const tabDmBtn     = document.getElementById('tab-dm-btn');
+    const chatsTab     = document.getElementById('sidebar-chats-tab');
+    const dmTab        = document.getElementById('sidebar-dm-tab');
+    const convList     = document.getElementById('dm-conv-list');
+    const searchInput  = document.getElementById('dm-search-email');
+    const searchBtn    = document.getElementById('dm-search-btn');
+    const searchResult = document.getElementById('dm-search-result');
+    const newMsgBtn    = document.getElementById('dm-new-btn');
+    const unreadBadge  = document.getElementById('dm-unread-badge');
+    const chatArea     = document.getElementById('dm-chat-area');
+    const chatMsgs     = document.getElementById('dm-messages');
+    const chatInput    = document.getElementById('dm-input');
+    const chatSend     = document.getElementById('dm-send-btn');
+    const chatName     = document.getElementById('dm-chat-name');
+    const chatStatus   = document.getElementById('dm-chat-status');
+    const chatAvatar   = document.getElementById('dm-chat-avatar');
+    const backBtn      = document.getElementById('dm-back-btn');
+    const typingEl     = document.getElementById('dm-typing-indicator');
 
-    if (!dmSidebar) return;
+    if (!tabDmBtn) return;
 
-    // ── Open / close DM sidebar ───────────────────────────────
-    function openDmSidebar() {
-        dmSidebar.classList.remove('hidden');
-        loadConversations();
+    // ── Tab switching ─────────────────────────────────────────
+    function showChatsTab() {
+        chatsTab?.classList.remove('hidden');
+        dmTab?.classList.add('hidden');
+        tabChatsBtn?.classList.remove('text-gray-500','dark:text-gray-400','hover:bg-gray-100','dark:hover:bg-gray-800');
+        tabChatsBtn?.classList.add('bg-indigo-600','text-white','shadow-sm');
+        tabDmBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
+        tabDmBtn?.classList.add('text-gray-500','dark:text-gray-400');
     }
-    function closeDmSidebar() {
-        dmSidebar.classList.add('hidden');
-        closeDmChat();
+    function showDmTab() {
+        chatsTab?.classList.add('hidden');
+        dmTab?.classList.remove('hidden');
+        tabDmBtn?.classList.remove('text-gray-500','dark:text-gray-400');
+        tabDmBtn?.classList.add('bg-indigo-600','text-white','shadow-sm');
+        tabChatsBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
+        tabChatsBtn?.classList.add('text-gray-500','dark:text-gray-400');
+        loadConvs();
     }
 
-    btnDm?.addEventListener('click', () => {
-        if (dmSidebar.classList.contains('hidden')) openDmSidebar();
-        else closeDmSidebar();
-    });
-    dmCloseBtn?.addEventListener('click', closeDmSidebar);
+    tabChatsBtn?.addEventListener('click', showChatsTab);
+    tabDmBtn?.addEventListener('click', showDmTab);
 
-    // + New chat button toggles search form
-    dmNewBtn?.addEventListener('click', () => {
-        dmNewForm?.classList.toggle('hidden');
-        if (!dmNewForm?.classList.contains('hidden')) searchInput?.focus();
+    // ── New message: toggle search ────────────────────────────
+    newMsgBtn?.addEventListener('click', () => {
+        if (searchInput) {
+            searchInput.parentElement?.parentElement?.classList.toggle('hidden');
+            searchInput.focus();
+        }
     });
 
     // ── Init ─────────────────────────────────────────────────
     async function init() {
-        const res  = await fetch('/api/me');
-        const data = await res.json();
-        if (!data.user) return;
-        me = data.user;
+        const r = await fetch('/api/me');
+        const d = await r.json();
+        if (!d.user) return;
+        me = d.user;
         connectSocket();
     }
 
     // ── Socket ────────────────────────────────────────────────
     function connectSocket() {
-        socket = window.io ? io({ transports: ['websocket', 'polling'] }) : null;
-        if (!socket) { console.warn('[DM] socket.io not loaded'); return; }
+        if (!window.io) { console.warn('[DM] socket.io not available'); return; }
+        socket = io({ transports: ['websocket','polling'] });
 
-        socket.on('dm:message', (msg) => {
-            // Update conv list preview
-            const idx = conversations.findIndex(c => c.conv_id === msg.conv_id);
+        socket.on('dm:message', msg => {
+            const idx = convs.findIndex(c => c.conv_id === msg.conv_id);
             if (idx >= 0) {
-                conversations[idx].last_msg = msg.body;
-                conversations[idx].last_at  = msg.created_at;
-                if (msg.conv_id !== activeConvId && msg.sender_id !== me.id) {
-                    conversations[idx].unread = (conversations[idx].unread || 0) + 1;
-                }
-                const [c] = conversations.splice(idx, 1);
-                conversations.unshift(c);
-            } else {
-                loadConversations();
-                return;
-            }
-            renderConvList();
-            updateUnreadBadge();
-
-            if (msg.conv_id === activeConvId) {
-                appendMessage(msg);
-                scrollBottom();
-            }
+                convs[idx].last_msg = msg.body;
+                convs[idx].last_at  = msg.created_at;
+                if (msg.conv_id !== activeConvId && msg.sender_id !== me?.id)
+                    convs[idx].unread = (convs[idx].unread||0) + 1;
+                convs.unshift(...convs.splice(idx,1));
+            } else { loadConvs(); return; }
+            renderConvs();
+            updateBadge();
+            if (msg.conv_id === activeConvId) { appendMsg(msg); scrollBottom(); }
         });
 
-        socket.on('dm:typing', ({ conv_id, user_id, typing }) => {
+        socket.on('dm:typing', ({conv_id, user_id, typing}) => {
             if (conv_id !== activeConvId || user_id === me?.id) return;
-            if (typingEl) typingEl.classList.toggle('hidden', !typing);
+            typingEl?.classList.toggle('hidden', !typing);
         });
 
-        socket.on('user:online',  ({ user_id }) => setPresence(user_id, true));
-        socket.on('user:offline', ({ user_id }) => setPresence(user_id, false));
+        socket.on('user:online',  ({user_id}) => setDot(user_id, true));
+        socket.on('user:offline', ({user_id}) => setDot(user_id, false));
     }
 
     // ── Load conversations ────────────────────────────────────
-    async function loadConversations() {
-        const res = await fetch('/api/dm/conversations');
-        if (!res.ok) return;
-        conversations = await res.json();
-        renderConvList();
-        updateUnreadBadge();
+    async function loadConvs() {
+        const r = await fetch('/api/dm/conversations');
+        if (!r.ok) return;
+        convs = await r.json();
+        renderConvs();
+        updateBadge();
     }
 
-    function renderConvList() {
+    function renderConvs() {
         if (!convList) return;
-        if (conversations.length === 0) {
-            convList.innerHTML = `<p style="text-align:center;color:#9ca3af;font-size:12px;padding:32px 16px">No messages yet.<br>Tap <b>+</b> to start chatting.</p>`;
+        if (!convs.length) {
+            convList.innerHTML = `
+                <div style="text-align:center;padding:32px 16px">
+                    <div style="font-size:32px;margin-bottom:12px">💬</div>
+                    <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px">No messages yet</div>
+                    <div style="font-size:11px;color:#9ca3af">Search someone's email above to start chatting</div>
+                </div>`;
             return;
         }
-        convList.innerHTML = conversations.map(c => `
-            <div class="dm-conv-item" data-conv="${c.conv_id}"
-                style="display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;border-radius:12px;margin:2px 6px;transition:background 0.15s;${c.conv_id === activeConvId ? 'background:#f3f4f6' : ''}">
+        convList.innerHTML = convs.map(c => `
+            <div class="dm-row" data-id="${c.conv_id}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-radius:12px;margin:2px 6px;transition:background .15s;${c.conv_id===activeConvId?'background:rgba(99,102,241,.08)':''}">
                 <div style="position:relative;flex-shrink:0">
-                    ${avatarEl(c.other, 44)}
-                    <span class="dm-dot-${c.other.id}" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:#d1d5db;border:2px solid #fff"></span>
+                    ${avatar(c.other, 44)}
+                    <span class="dm-dot-${c.other.id}" style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;background:#d1d5db;border:2px solid #fff"></span>
                 </div>
                 <div style="flex:1;min-width:0">
-                    <div style="display:flex;justify-content:space-between;align-items:baseline">
-                        <span style="font-size:13px;font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${escH(c.other.display_name)}</span>
-                        <span style="font-size:10px;color:#9ca3af;flex-shrink:0;margin-left:6px">${timeAgo(c.last_at)}</span>
+                    <div style="display:flex;justify-content:space-between;gap:4px;align-items:baseline">
+                        <span style="font-size:13px;font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.other.display_name)}</span>
+                        <span style="font-size:10px;color:#9ca3af;flex-shrink:0">${timeAgo(c.last_at)}</span>
                     </div>
-                    <div style="font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(c.last_msg || 'Tap to open')}</div>
+                    <div style="font-size:12px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.last_msg||'Tap to open')}</div>
                 </div>
-                ${c.unread ? `<span style="background:#6366f1;color:#fff;font-size:9px;font-weight:700;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">${c.unread > 9 ? '9+' : c.unread}</span>` : ''}
-            </div>
-        `).join('');
+                ${c.unread?`<span style="background:#ef4444;color:#fff;font-size:9px;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">${c.unread>9?'9+':c.unread}</span>`:''}
+            </div>`).join('');
 
-        // hover styles via JS (Tailwind not guaranteed for dynamic)
-        convList.querySelectorAll('.dm-conv-item').forEach(el => {
-            el.addEventListener('mouseenter', () => { if (Number(el.dataset.conv) !== activeConvId) el.style.background = '#f9fafb'; });
-            el.addEventListener('mouseleave', () => { if (Number(el.dataset.conv) !== activeConvId) el.style.background = ''; });
-            el.addEventListener('click', () => openConv(Number(el.dataset.conv)));
+        convList.querySelectorAll('.dm-row').forEach(el => {
+            el.addEventListener('mouseenter', ()=>{ if(+el.dataset.id!==activeConvId) el.style.background='rgba(99,102,241,.06)'; });
+            el.addEventListener('mouseleave', ()=>{ if(+el.dataset.id!==activeConvId) el.style.background=''; });
+            el.addEventListener('click', ()=> openConv(+el.dataset.id));
         });
     }
 
     // ── Open conversation ─────────────────────────────────────
     async function openConv(convId) {
         activeConvId = convId;
-        const conv = conversations.find(c => c.conv_id === convId);
-        if (!conv) return;
+        const c = convs.find(x => x.conv_id === convId);
+        if (!c) return;
+        c.unread = 0;
+        updateBadge();
+        renderConvs();
 
-        conv.unread = 0;
-        updateUnreadBadge();
-        renderConvList();
-
-        // Show chat area (overlays main panel)
-        if (chatArea) chatArea.classList.remove('hidden');
-        if (dmNewForm) dmNewForm.classList.add('hidden');
-        if (searchResult) searchResult.innerHTML = '';
-        if (searchInput) searchInput.value = '';
-
-        // Set header
-        if (chatName) chatName.textContent = conv.other.display_name;
-        if (chatAvatar) chatAvatar.innerHTML = avatarEl(conv.other, 38);
+        if (chatArea)   chatArea.classList.remove('hidden');
+        if (chatName)   chatName.textContent = c.other.display_name;
+        if (chatAvatar) chatAvatar.innerHTML = avatar(c.other, 38);
         if (chatStatus) chatStatus.textContent = '';
+        if (chatMsgs)   chatMsgs.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:24px">Loading…</div>';
 
-        // Load messages
-        if (chatMsgs) chatMsgs.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px">Loading…</div>';
-        const res  = await fetch(`/api/dm/conversations/${convId}/messages`);
-        const msgs = await res.json();
-
+        const r = await fetch(`/api/dm/conversations/${convId}/messages`);
+        const msgs = await r.json();
         if (chatMsgs) {
             chatMsgs.innerHTML = '';
-            if (msgs.length === 0) {
-                chatMsgs.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:32px 16px">Say hello! 👋</div>';
-            } else {
-                msgs.forEach(m => appendMessage(m));
-            }
+            if (!msgs.length) chatMsgs.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:32px 16px">Send a message to start! 👋</div>';
+            else msgs.forEach(appendMsg);
         }
         scrollBottom();
-        if (chatInput) chatInput.focus();
+        chatInput?.focus();
     }
 
-    function closeDmChat() {
+    function closeConv() {
         activeConvId = null;
-        if (chatArea) chatArea.classList.add('hidden');
+        chatArea?.classList.add('hidden');
     }
 
-    // ── Append message bubble ─────────────────────────────────
-    function appendMessage(msg) {
+    // ── Message bubble ────────────────────────────────────────
+    function appendMsg(msg) {
         if (!chatMsgs) return;
         const isMe = msg.sender_id === me?.id;
-        const el   = document.createElement('div');
-        el.style.cssText = `display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:2px`;
+        const el = document.createElement('div');
+        el.style.cssText = `display:flex;justify-content:${isMe?'flex-end':'flex-start'};margin-bottom:3px`;
         el.innerHTML = `
-            <div style="max-width:72%;display:flex;flex-direction:column;align-items:${isMe ? 'flex-end' : 'flex-start'}">
-                <div style="padding:8px 12px;border-radius:${isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};font-size:13px;line-height:1.4;word-break:break-word;
-                    ${isMe ? 'background:#6366f1;color:#fff' : 'background:#fff;color:#1f2937;border:1px solid #e5e7eb;box-shadow:0 1px 2px rgba(0,0,0,0.06)'}">
-                    ${escH(msg.body)}
+            <div style="max-width:74%;display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
+                <div style="padding:9px 13px;border-radius:${isMe?'18px 18px 4px 18px':'18px 18px 18px 4px'};font-size:13px;line-height:1.45;word-break:break-word;
+                    ${isMe?'background:#6366f1;color:#fff':'background:#fff;color:#111827;border:1px solid #e5e7eb;box-shadow:0 1px 2px rgba(0,0,0,.05)'}">
+                    ${esc(msg.body)}
                 </div>
-                <span style="font-size:10px;color:#9ca3af;margin-top:2px;${isMe ? 'margin-right:4px' : 'margin-left:4px'}">${formatTime(msg.created_at)}</span>
+                <span style="font-size:10px;color:#9ca3af;margin-top:2px;${isMe?'margin-right:3px':'margin-left:3px'}">${fmtTime(msg.created_at)}</span>
             </div>`;
         chatMsgs.appendChild(el);
     }
 
-    function scrollBottom() {
-        if (chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight;
-    }
+    function scrollBottom() { if(chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight; }
 
-    // ── Send message ──────────────────────────────────────────
-    function sendMessage() {
+    // ── Send ──────────────────────────────────────────────────
+    function send() {
         const body = chatInput?.value.trim();
         if (!body || !activeConvId || !socket) return;
-        socket.emit('dm:send', { conv_id: activeConvId, body });
+        socket.emit('dm:send', {conv_id:activeConvId, body});
         chatInput.value = '';
         chatInput.focus();
     }
 
-    chatSend?.addEventListener('click', sendMessage);
-    chatInput?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
+    chatSend?.addEventListener('click', send);
+    chatInput?.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
 
-    // Typing indicator emit
-    let typingDebounce = null;
+    let typingTimer;
     chatInput?.addEventListener('input', () => {
-        if (!socket || !activeConvId) return;
-        socket.emit('dm:typing', { conv_id: activeConvId, typing: true });
-        clearTimeout(typingDebounce);
-        typingDebounce = setTimeout(() => socket?.emit('dm:typing', { conv_id: activeConvId, typing: false }), 1500);
+        if(!socket||!activeConvId) return;
+        socket.emit('dm:typing',{conv_id:activeConvId,typing:true});
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(()=>socket.emit('dm:typing',{conv_id:activeConvId,typing:false}),1500);
     });
 
-    // Back button
-    dmBackBtn?.addEventListener('click', closeDmChat);
+    backBtn?.addEventListener('click', closeConv);
 
     // ── Email search ──────────────────────────────────────────
     async function doSearch() {
         const email = searchInput?.value.trim();
-        if (!email || !searchResult) return;
-        searchResult.innerHTML = '<span style="font-size:11px;color:#9ca3af">Searching…</span>';
-
-        const res  = await fetch(`/api/dm/search?email=${encodeURIComponent(email)}`);
-        const data = await res.json();
-
-        if (!data.user) {
-            searchResult.innerHTML = '<span style="font-size:11px;color:#9ca3af">No user found with that email.</span>';
+        if (!email) return;
+        if (searchResult) searchResult.innerHTML = '<span style="font-size:11px;color:#9ca3af">Searching…</span>';
+        const r = await fetch(`/api/dm/search?email=${encodeURIComponent(email)}`);
+        const d = await r.json();
+        if (!d.user) {
+            if(searchResult) searchResult.innerHTML = '<span style="font-size:11px;color:#9ca3af">No user found.</span>';
             return;
         }
-        const u = data.user;
+        const u = d.user;
         const div = document.createElement('div');
         div.style.cssText = 'display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin-top:6px';
-        div.innerHTML = `
-            ${avatarEl(u, 36)}
-            <div style="flex:1;min-width:0">
-                <div style="font-size:13px;font-weight:600;color:#1f2937">${escH(u.display_name)}</div>
-                <div style="font-size:11px;color:#6b7280">${escH(u.email)}</div>
-            </div>
-            <button id="dm-start-btn" style="background:#6366f1;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap">Start Chat</button>`;
-        searchResult.innerHTML = '';
-        searchResult.appendChild(div);
-
-        div.querySelector('#dm-start-btn')?.addEventListener('click', async () => {
-            const r = await fetch('/api/dm/conversations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: u.id }),
-            });
-            const d = await r.json();
-            if (d.conv_id) {
-                if (!conversations.find(c => c.conv_id === d.conv_id)) {
-                    conversations.unshift({ conv_id: d.conv_id, other: d.other, last_msg: '', last_at: 0, unread: 0 });
-                }
-                dmNewForm?.classList.add('hidden');
-                searchResult.innerHTML = '';
-                searchInput.value = '';
-                renderConvList();
-                openConv(d.conv_id);
+        div.innerHTML = `${avatar(u,36)}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#111827">${esc(u.display_name)}</div><div style="font-size:11px;color:#6b7280">${esc(u.email)}</div></div>
+            <button id="dm-start" style="background:#6366f1;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:8px;border:none;cursor:pointer">Chat</button>`;
+        if(searchResult){searchResult.innerHTML='';searchResult.appendChild(div);}
+        div.querySelector('#dm-start')?.addEventListener('click', async () => {
+            const res = await fetch('/api/dm/conversations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:u.id})});
+            const data = await res.json();
+            if(data.conv_id){
+                if(!convs.find(c=>c.conv_id===data.conv_id)) convs.unshift({conv_id:data.conv_id,other:data.other,last_msg:'',last_at:0,unread:0});
+                if(searchResult) searchResult.innerHTML='';
+                if(searchInput) searchInput.value='';
+                renderConvs();
+                openConv(data.conv_id);
             }
         });
     }
 
     searchBtn?.addEventListener('click', doSearch);
-    searchInput?.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+    searchInput?.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 
-    // ── Presence dots ─────────────────────────────────────────
-    function setPresence(userId, online) {
-        document.querySelectorAll(`.dm-dot-${userId}`).forEach(el => {
+    // ── Presence ──────────────────────────────────────────────
+    function setDot(uid, online) {
+        document.querySelectorAll(`.dm-dot-${uid}`).forEach(el => {
             el.style.background = online ? '#22c55e' : '#d1d5db';
         });
-        if (activeConvId) {
-            const conv = conversations.find(c => c.conv_id === activeConvId);
-            if (conv?.other.id === userId && chatStatus) {
-                chatStatus.textContent = online ? 'online' : '';
-            }
+        if(chatStatus && activeConvId) {
+            const c = convs.find(x=>x.conv_id===activeConvId);
+            if(c?.other.id===uid) chatStatus.textContent = online ? 'online' : '';
         }
     }
 
-    // ── Unread badge on DM icon ───────────────────────────────
-    function updateUnreadBadge() {
-        const total = conversations.reduce((s, c) => s + (c.unread || 0), 0);
-        if (unreadBadge) {
-            unreadBadge.textContent = total > 9 ? '9+' : total;
-            unreadBadge.classList.toggle('hidden', total === 0);
-        }
+    // ── Unread badge ──────────────────────────────────────────
+    function updateBadge() {
+        const n = convs.reduce((s,c)=>s+(c.unread||0),0);
+        if(unreadBadge){ unreadBadge.textContent=n>9?'9+':n; unreadBadge.classList.toggle('hidden',n===0); }
     }
 
-    // ── Start ─────────────────────────────────────────────────
+    // ── Empty state button ────────────────────────────────────
+    document.getElementById('empty-dm-btn')?.addEventListener('click', () => showDmTab());
+
+    // ── btn-dm in header (if exists) ─────────────────────────
+    document.getElementById('btn-dm')?.addEventListener('click', () => showDmTab());
+
     init();
-
+    window.dmShowTab = showDmTab;
     window.dmOpenConv = openConv;
-    window.dmLoadConversations = loadConversations;
 })();
