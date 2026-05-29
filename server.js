@@ -480,6 +480,19 @@ app.get('/api/dm/conversations', requireUser, (req, res) => {
 });
 
 // Get messages for a conversation (paginated, newest first)
+// Clear all messages in a DM conversation (soft-delete for this user only)
+app.delete('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
+    const convId = Number(req.params.id);
+    const conv = db.prepare(
+        'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
+    ).get(convId, req.user.id, req.user.id);
+    if (!conv) return res.status(403).json({ error: 'Not your conversation' });
+
+    // Hard delete all messages in this conversation
+    db.prepare('DELETE FROM dm_messages WHERE conv_id = ?').run(convId);
+    res.json({ ok: true });
+});
+
 // Delete own DM message
 app.delete('/api/dm/messages/:id', requireUser, (req, res) => {
     const msgId = Number(req.params.id);

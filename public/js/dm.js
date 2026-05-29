@@ -53,6 +53,7 @@
     const chatStatus   = document.getElementById('dm-chat-status');
     const chatAvatar   = document.getElementById('dm-chat-avatar');
     const backBtn      = document.getElementById('dm-back-btn');
+    const clearBtn     = document.getElementById('dm-clear-btn');
     const typingEl     = document.getElementById('dm-typing-indicator');
 
     if (!tabDmBtn) return;
@@ -403,6 +404,27 @@
         // On mobile, reopen sidebar to show conversation list
         if (window.innerWidth < 768 || window.kothaCompact) {
             if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+        }
+    });
+
+    // Clear all messages in conversation
+    clearBtn?.addEventListener('click', async () => {
+        if (!activeConvId) return;
+        const c = convs.find(x => x.conv_id === activeConvId);
+        const name = c?.other.display_name || 'this conversation';
+        if (!confirm(`Clear all messages with ${name}? This cannot be undone.`)) return;
+
+        const r = await fetch(`/api/dm/conversations/${activeConvId}/messages`, { method: 'DELETE' });
+        if (r.ok) {
+            if (chatMsgs) chatMsgs.innerHTML = `
+                <div style="text-align:center;padding:40px 16px">
+                    <div style="font-size:28px;margin-bottom:8px">🗑️</div>
+                    <div style="font-size:13px;color:#8696a0">Chat cleared</div>
+                </div>`;
+            // Update conv list
+            const idx = convs.findIndex(x => x.conv_id === activeConvId);
+            if (idx >= 0) { convs[idx].last_msg = ''; convs[idx].last_at = 0; }
+            renderConvs();
         }
     });
 

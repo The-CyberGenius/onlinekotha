@@ -1602,6 +1602,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bottomAiInput) {
             animatePlaceholder(bottomAiInput, `Continue With virtual ${otherPersonName}…`);
         }
+        // Restore header to current chat's contact name
+        if (headerName && otherPersonName) headerName.innerText = otherPersonName;
         const statusEl = document.querySelector('#chat-header-name + div p');
         if (statusEl) statusEl.innerText = 'online';
 

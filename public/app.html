@@ -464,6 +464,13 @@
                         <div id="dm-chat-name" class="text-[15px] font-semibold text-gray-800 dark:text-gray-100 truncate leading-tight"></div>
                         <div id="dm-chat-status" class="text-[11px] text-gray-400"></div>
                     </div>
+                    <!-- Clear chat button -->
+                    <button id="dm-clear-btn" title="Clear conversation"
+                        class="w-8 h-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-center text-gray-400 hover:text-red-500 transition shrink-0">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                    </button>
                 </div>
                 <!-- Messages -->
                 <div id="dm-messages" class="flex-1 min-h-0 overflow-y-auto px-3 md:px-6 py-3 flex flex-col gap-1"></div>
@@ -710,11 +717,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/script.js?v=30"></script>
+    <script src="js/script.js?v=31"></script>
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=19"></script>
-    <script src="js/dm.js?v=11"></script>
+    <script src="js/dm.js?v=12"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });
