@@ -58,6 +58,7 @@
             <button data-tab="integrations" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Integrations</button>
             <button data-tab="settings" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Limits</button>
             <button data-tab="users" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Users</button>
+            <button data-tab="dm-logs" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">DM Logs</button>
         </div>
 
         <!-- Providers Tab -->
@@ -213,8 +214,172 @@
                 <div id="user-list" class="text-sm"></div>
             </div>
         </section>
+
+        <!-- DM Logs Tab (government compliance) -->
+        <section id="tab-dm-logs" class="tab-content hidden">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                    <div>
+                        <h2 class="font-extrabold text-gray-800 text-sm">DM Conversation Logs</h2>
+                        <p class="text-[10px] text-gray-400 mt-0.5">Admin access for legal &amp; government compliance. All logs stored server-side.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="dm-log-search" type="text" placeholder="Search by email or name…"
+                            class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 w-52 outline-none focus:ring-2 focus:ring-indigo-300">
+                        <button id="dm-log-search-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Search</button>
+                    </div>
+                </div>
+
+                <!-- Conversations list -->
+                <div id="dm-log-list" class="text-sm">
+                    <p class="text-gray-400 text-xs py-4 text-center">Loading…</p>
+                </div>
+                <div id="dm-log-pagination" class="flex gap-2 justify-end mt-3 text-xs"></div>
+
+                <!-- Message view (shown when a conversation is selected) -->
+                <div id="dm-log-viewer" class="hidden mt-4 border-t pt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <button id="dm-log-back" class="text-xs text-indigo-600 hover:underline mr-3">← Back</button>
+                            <span id="dm-log-viewer-title" class="text-sm font-bold text-gray-800"></span>
+                        </div>
+                        <a id="dm-log-download-btn" href="#" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">⬇ Download .txt</a>
+                    </div>
+                    <div id="dm-log-messages" class="max-h-[500px] overflow-y-auto flex flex-col gap-2 bg-gray-50 rounded-xl p-3"></div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script src="/js/admin.js?v=6"></script>
+    <script>
+    // ── DM Logs Tab ──────────────────────────────────────────────────────────
+    (function() {
+        let dmPage = 1;
+        let dmSearch = '';
+
+        function timeStr(ts) {
+            if (!ts) return '—';
+            return new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        }
+
+        async function loadDmLogs(page, search) {
+            dmPage  = page  || 1;
+            dmSearch = search !== undefined ? search : dmSearch;
+            const url = `/admin/dm/conversations?page=${dmPage}&limit=20${dmSearch ? '&search=' + encodeURIComponent(dmSearch) : ''}`;
+            const res  = await fetch(url);
+            const data = await res.json();
+            renderDmList(data);
+        }
+
+        function renderDmList(data) {
+            const el = document.getElementById('dm-log-list');
+            const pg = document.getElementById('dm-log-pagination');
+            if (!el) return;
+
+            if (!data.rows || data.rows.length === 0) {
+                el.innerHTML = '<p class="text-gray-400 text-xs py-4 text-center">No DM conversations found.</p>';
+                pg.innerHTML = '';
+                return;
+            }
+
+            el.innerHTML = `
+                <table class="w-full text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-500 uppercase text-[9px] tracking-wider">
+                            <th class="text-left py-2 px-2 border-b">ID</th>
+                            <th class="text-left py-2 px-2 border-b">User A</th>
+                            <th class="text-left py-2 px-2 border-b">User B</th>
+                            <th class="text-left py-2 px-2 border-b">Messages</th>
+                            <th class="text-left py-2 px-2 border-b">Last Activity</th>
+                            <th class="text-left py-2 px-2 border-b">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.rows.map(r => `
+                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
+                            <td class="py-2 px-2 text-gray-400">#${r.id}</td>
+                            <td class="py-2 px-2">
+                                <div class="font-semibold text-gray-700">${r.user_a_name || ''}</div>
+                                <div class="text-gray-400">${r.user_a_email}</div>
+                            </td>
+                            <td class="py-2 px-2">
+                                <div class="font-semibold text-gray-700">${r.user_b_name || ''}</div>
+                                <div class="text-gray-400">${r.user_b_email}</div>
+                            </td>
+                            <td class="py-2 px-2 text-center font-bold text-gray-700">${r.msg_count}</td>
+                            <td class="py-2 px-2 text-gray-400">${timeStr(r.last_at)}</td>
+                            <td class="py-2 px-2">
+                                <button class="dm-view-btn text-indigo-600 hover:underline font-bold mr-2" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
+                                <a href="/admin/dm/conversations/${r.id}/download" class="text-green-600 hover:underline font-bold">Download</a>
+                            </td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+
+            // Pagination
+            const pages = Math.ceil(data.total / data.limit);
+            pg.innerHTML = `
+                <span class="text-gray-400 mr-2">Page ${dmPage} of ${pages} (${data.total} total)</span>
+                ${dmPage > 1 ? `<button id="dm-pg-prev" class="bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded font-bold transition">← Prev</button>` : ''}
+                ${dmPage < pages ? `<button id="dm-pg-next" class="bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded font-bold transition">Next →</button>` : ''}`;
+
+            document.getElementById('dm-pg-prev')?.addEventListener('click', () => loadDmLogs(dmPage - 1));
+            document.getElementById('dm-pg-next')?.addEventListener('click', () => loadDmLogs(dmPage + 1));
+
+            // View buttons
+            el.querySelectorAll('.dm-view-btn').forEach(btn => {
+                btn.addEventListener('click', () => viewDmConv(Number(btn.dataset.id), btn.dataset.a, btn.dataset.b));
+            });
+        }
+
+        async function viewDmConv(convId, emailA, emailB) {
+            document.getElementById('dm-log-list').classList.add('hidden');
+            document.getElementById('dm-log-pagination').classList.add('hidden');
+            const viewer = document.getElementById('dm-log-viewer');
+            viewer.classList.remove('hidden');
+            document.getElementById('dm-log-viewer-title').textContent = `${emailA} ↔ ${emailB}`;
+            document.getElementById('dm-log-download-btn').href = `/admin/dm/conversations/${convId}/download`;
+
+            const msgsEl = document.getElementById('dm-log-messages');
+            msgsEl.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Loading…</p>';
+
+            const res  = await fetch(`/admin/dm/conversations/${convId}/messages`);
+            const data = await res.json();
+            if (!res.ok) { msgsEl.innerHTML = '<p class="text-red-500 text-xs">Error loading messages.</p>'; return; }
+
+            if (data.messages.length === 0) {
+                msgsEl.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No messages yet.</p>';
+                return;
+            }
+
+            msgsEl.innerHTML = data.messages.map(m => `
+                <div class="flex gap-2 text-xs">
+                    <span class="shrink-0 font-semibold text-gray-500 w-28 truncate" title="${m.sender_email}">${m.sender_name || m.sender_email}</span>
+                    <span class="text-gray-300 shrink-0">${timeStr(m.created_at)}</span>
+                    <span class="text-gray-700 flex-1">${m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('dm-log-back')?.addEventListener('click', () => {
+            document.getElementById('dm-log-viewer').classList.add('hidden');
+            document.getElementById('dm-log-list').classList.remove('hidden');
+            document.getElementById('dm-log-pagination').classList.remove('hidden');
+        });
+
+        document.getElementById('dm-log-search-btn')?.addEventListener('click', () => {
+            loadDmLogs(1, document.getElementById('dm-log-search').value.trim());
+        });
+        document.getElementById('dm-log-search')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') loadDmLogs(1, e.target.value.trim());
+        });
+
+        // Load when tab is clicked
+        document.querySelector('[data-tab="dm-logs"]')?.addEventListener('click', () => {
+            if (!document.getElementById('dm-log-list').querySelector('table')) loadDmLogs(1);
+        });
+    })();
+    </script>
 </body>
 </html>

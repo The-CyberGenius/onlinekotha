@@ -553,6 +553,127 @@ router.get('/users/:id/conversations/:convId/download', (req, res) => {
     res.send(log);
 });
 
+// ─── DM Logs (government compliance / admin oversight) ────────────────────────
+
+// List all DM conversations (paginated)
+router.get('/dm/conversations', (req, res) => {
+    const page  = Math.max(1, Number(req.query.page)  || 1);
+    const limit = Math.min(100, Number(req.query.limit) || 50);
+    const offset = (page - 1) * limit;
+    const search = (req.query.search || '').toLowerCase().trim();
+
+    let rows, total;
+    if (search) {
+        const like = `%${search}%`;
+        rows = db.prepare(`
+            SELECT dc.id, dc.created_at,
+                   ua.id AS user_a_id, ua.email AS user_a_email, ua.display_name AS user_a_name,
+                   ub.id AS user_b_id, ub.email AS user_b_email, ub.display_name AS user_b_name,
+                   (SELECT COUNT(*) FROM dm_messages WHERE conv_id = dc.id) AS msg_count,
+                   (SELECT created_at FROM dm_messages WHERE conv_id = dc.id ORDER BY id DESC LIMIT 1) AS last_at
+            FROM dm_conversations dc
+            JOIN users ua ON ua.id = dc.user_a
+            JOIN users ub ON ub.id = dc.user_b
+            WHERE LOWER(ua.email) LIKE ? OR LOWER(ub.email) LIKE ?
+               OR LOWER(ua.display_name) LIKE ? OR LOWER(ub.display_name) LIKE ?
+            ORDER BY last_at DESC NULLS LAST
+            LIMIT ? OFFSET ?
+        `).all(like, like, like, like, limit, offset);
+        total = db.prepare(`
+            SELECT COUNT(*) AS n FROM dm_conversations dc
+            JOIN users ua ON ua.id = dc.user_a
+            JOIN users ub ON ub.id = dc.user_b
+            WHERE LOWER(ua.email) LIKE ? OR LOWER(ub.email) LIKE ?
+               OR LOWER(ua.display_name) LIKE ? OR LOWER(ub.display_name) LIKE ?
+        `).get(like, like, like, like).n;
+    } else {
+        rows = db.prepare(`
+            SELECT dc.id, dc.created_at,
+                   ua.id AS user_a_id, ua.email AS user_a_email, ua.display_name AS user_a_name,
+                   ub.id AS user_b_id, ub.email AS user_b_email, ub.display_name AS user_b_name,
+                   (SELECT COUNT(*) FROM dm_messages WHERE conv_id = dc.id) AS msg_count,
+                   (SELECT created_at FROM dm_messages WHERE conv_id = dc.id ORDER BY id DESC LIMIT 1) AS last_at
+            FROM dm_conversations dc
+            JOIN users ua ON ua.id = dc.user_a
+            JOIN users ub ON ub.id = dc.user_b
+            ORDER BY last_at DESC NULLS LAST
+            LIMIT ? OFFSET ?
+        `).all(limit, offset);
+        total = db.prepare('SELECT COUNT(*) AS n FROM dm_conversations').get().n;
+    }
+
+    res.json({ rows, total, page, limit });
+});
+
+// Get all messages in a DM conversation
+router.get('/dm/conversations/:id/messages', (req, res) => {
+    const convId = Number(req.params.id);
+    const conv = db.prepare(`
+        SELECT dc.*,
+               ua.email AS user_a_email, ua.display_name AS user_a_name,
+               ub.email AS user_b_email, ub.display_name AS user_b_name
+        FROM dm_conversations dc
+        JOIN users ua ON ua.id = dc.user_a
+        JOIN users ub ON ub.id = dc.user_b
+        WHERE dc.id = ?
+    `).get(convId);
+    if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+
+    const msgs = db.prepare(`
+        SELECT dm.*, u.email AS sender_email, u.display_name AS sender_name
+        FROM dm_messages dm
+        JOIN users u ON u.id = dm.sender_id
+        WHERE dm.conv_id = ?
+        ORDER BY dm.created_at ASC
+    `).all(convId);
+
+    res.json({ conv, messages: msgs });
+});
+
+// Download DM conversation as plain text log
+router.get('/dm/conversations/:id/download', (req, res) => {
+    const convId = Number(req.params.id);
+    const conv = db.prepare(`
+        SELECT dc.*,
+               ua.email AS user_a_email, COALESCE(ua.display_name, ua.email) AS user_a_name,
+               ub.email AS user_b_email, COALESCE(ub.display_name, ub.email) AS user_b_name
+        FROM dm_conversations dc
+        JOIN users ua ON ua.id = dc.user_a
+        JOIN users ub ON ub.id = dc.user_b
+        WHERE dc.id = ?
+    `).get(convId);
+    if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+
+    const msgs = db.prepare(`
+        SELECT dm.*, COALESCE(u.display_name, u.email) AS sender_name, u.email AS sender_email
+        FROM dm_messages dm
+        JOIN users u ON u.id = dm.sender_id
+        WHERE dm.conv_id = ?
+        ORDER BY dm.created_at ASC
+    `).all(convId);
+
+    let log = `DM CONVERSATION LOG — KOTHA ADMIN EXPORT\n`;
+    log += `Generated: ${new Date().toISOString()}\n`;
+    log += `Conversation ID: ${convId}\n`;
+    log += `Participants:\n`;
+    log += `  - ${conv.user_a_name} <${conv.user_a_email}>\n`;
+    log += `  - ${conv.user_b_name} <${conv.user_b_email}>\n`;
+    log += `Started: ${new Date(conv.created_at).toISOString()}\n`;
+    log += `Total messages: ${msgs.length}\n`;
+    log += `${'='.repeat(60)}\n\n`;
+
+    for (const m of msgs) {
+        const time = new Date(m.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+        log += `[${time} IST] ${m.sender_name} <${m.sender_email}>:\n`;
+        log += `${m.body}\n\n`;
+    }
+
+    const safeName = `dm_log_conv${convId}_${Date.now()}`;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.txt"`);
+    res.send(log);
+});
+
 router.get('/usage/summary', (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
