@@ -33,7 +33,12 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
+const http = require('http');
+const { Server: SocketIO } = require('socket.io');
+
 const app = express();
+const httpServer = http.createServer(app);
+const io = new SocketIO(httpServer, { cors: { origin: false } });
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
@@ -388,6 +393,201 @@ RULES:
     }
 });
 
+// ─────────────────────────────────────────────
+// DM REST API
+// ─────────────────────────────────────────────
+
+// Search user by email (exact match, privacy: only returns id + display_name + avatar_url)
+app.get('/api/dm/search', requireUser, (req, res) => {
+    const email = (req.query.email || '').toLowerCase().trim();
+    if (!email) return res.status(400).json({ error: 'email required' });
+    if (email === req.user.email) return res.status(400).json({ error: 'That\'s you!' });
+
+    const found = db.prepare(
+        'SELECT id, display_name, avatar_url, email FROM users WHERE LOWER(email) = ?'
+    ).get(email);
+    if (!found) return res.json({ user: null });
+
+    res.json({
+        user: {
+            id: found.id,
+            display_name: found.display_name || found.email.split('@')[0],
+            avatar_url: found.avatar_url,
+            email: found.email,
+        },
+    });
+});
+
+// Get or create a DM conversation with another user
+app.post('/api/dm/conversations', requireUser, (req, res) => {
+    const otherId = Number(req.body.user_id);
+    if (!otherId || otherId === req.user.id) return res.status(400).json({ error: 'invalid user_id' });
+
+    const other = db.prepare('SELECT id, display_name, avatar_url, email FROM users WHERE id = ?').get(otherId);
+    if (!other) return res.status(404).json({ error: 'User not found' });
+
+    // Canonical order: smaller id = user_a
+    const [a, b] = req.user.id < otherId ? [req.user.id, otherId] : [otherId, req.user.id];
+
+    db.prepare(
+        'INSERT OR IGNORE INTO dm_conversations (user_a, user_b, created_at) VALUES (?, ?, ?)'
+    ).run(a, b, Date.now());
+
+    const conv = db.prepare(
+        'SELECT id FROM dm_conversations WHERE user_a = ? AND user_b = ?'
+    ).get(a, b);
+
+    res.json({
+        conv_id: conv.id,
+        other: {
+            id: other.id,
+            display_name: other.display_name || other.email.split('@')[0],
+            avatar_url: other.avatar_url,
+        },
+    });
+});
+
+// List all DM conversations for current user
+app.get('/api/dm/conversations', requireUser, (req, res) => {
+    const rows = db.prepare(`
+        SELECT
+            dc.id AS conv_id,
+            CASE WHEN dc.user_a = ? THEN dc.user_b ELSE dc.user_a END AS other_id,
+            (SELECT body FROM dm_messages WHERE conv_id = dc.id ORDER BY id DESC LIMIT 1) AS last_msg,
+            (SELECT created_at FROM dm_messages WHERE conv_id = dc.id ORDER BY id DESC LIMIT 1) AS last_at,
+            (SELECT COUNT(*) FROM dm_messages WHERE conv_id = dc.id AND sender_id != ? AND read_at IS NULL) AS unread
+        FROM dm_conversations dc
+        WHERE dc.user_a = ? OR dc.user_b = ?
+        ORDER BY last_at DESC NULLS LAST
+    `).all(req.user.id, req.user.id, req.user.id, req.user.id);
+
+    const result = rows.map(r => {
+        const u = db.prepare('SELECT id, display_name, avatar_url, email FROM users WHERE id = ?').get(r.other_id);
+        return {
+            conv_id: r.conv_id,
+            other: {
+                id: u.id,
+                display_name: u.display_name || u.email.split('@')[0],
+                avatar_url: u.avatar_url,
+            },
+            last_msg: r.last_msg || '',
+            last_at: r.last_at || 0,
+            unread: r.unread || 0,
+        };
+    });
+
+    res.json(result);
+});
+
+// Get messages for a conversation (paginated, newest first)
+app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
+    const convId = Number(req.params.id);
+    const conv = db.prepare(
+        'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
+    ).get(convId, req.user.id, req.user.id);
+    if (!conv) return res.status(403).json({ error: 'Not your conversation' });
+
+    const before = Number(req.query.before) || Date.now() + 1000;
+    const msgs = db.prepare(`
+        SELECT dm.*, u.display_name, u.avatar_url, u.email
+        FROM dm_messages dm
+        JOIN users u ON u.id = dm.sender_id
+        WHERE dm.conv_id = ? AND dm.created_at < ?
+        ORDER BY dm.created_at DESC
+        LIMIT 40
+    `).all(convId, before);
+
+    // Mark messages as read
+    db.prepare(
+        'UPDATE dm_messages SET read_at = ? WHERE conv_id = ? AND sender_id != ? AND read_at IS NULL'
+    ).run(Date.now(), convId, req.user.id);
+
+    res.json(msgs.reverse());
+});
+
+// ─────────────────────────────────────────────
+// Socket.IO — real-time DM
+// ─────────────────────────────────────────────
+const onlineUsers = new Map(); // userId → Set of socketIds
+
+io.use((socket, next) => {
+    // Authenticate via session cookie (same cookie as HTTP)
+    const req = socket.request;
+    cookieParser()(req, {}, () => {});
+    authMiddleware(req, {}, () => {});
+    if (!req.user) return next(new Error('Unauthorized'));
+    socket.user = req.user;
+    next();
+});
+
+io.on('connection', (socket) => {
+    const uid = socket.user.id;
+    if (!onlineUsers.has(uid)) onlineUsers.set(uid, new Set());
+    onlineUsers.get(uid).add(socket.id);
+
+    // Broadcast presence
+    socket.broadcast.emit('user:online', { user_id: uid });
+
+    socket.on('dm:send', (data) => {
+        const { conv_id, body } = data;
+        if (!conv_id || !body || !body.trim()) return;
+
+        // Verify sender is part of this conversation
+        const conv = db.prepare(
+            'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
+        ).get(conv_id, uid, uid);
+        if (!conv) return;
+
+        const now = Date.now();
+        const result = db.prepare(
+            'INSERT INTO dm_messages (conv_id, sender_id, body, type, created_at) VALUES (?, ?, ?, ?, ?)'
+        ).run(conv_id, uid, body.trim(), 'text', now);
+
+        const msg = {
+            id: result.lastInsertRowid,
+            conv_id,
+            sender_id: uid,
+            body: body.trim(),
+            type: 'text',
+            created_at: now,
+            read_at: null,
+            display_name: socket.user.display_name || socket.user.email.split('@')[0],
+            avatar_url: socket.user.avatar_url,
+        };
+
+        // Send to both users (all their open sockets)
+        const otherId = conv.user_a === uid ? conv.user_b : conv.user_a;
+        [uid, otherId].forEach(targetId => {
+            const sockets = onlineUsers.get(targetId);
+            if (sockets) sockets.forEach(sid => io.to(sid).emit('dm:message', msg));
+        });
+
+        // Mark as read immediately for sender (already seen)
+        db.prepare('UPDATE dm_messages SET read_at = ? WHERE id = ?').run(now, result.lastInsertRowid);
+    });
+
+    socket.on('dm:typing', ({ conv_id, typing }) => {
+        const conv = db.prepare(
+            'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
+        ).get(conv_id, uid, uid);
+        if (!conv) return;
+        const otherId = conv.user_a === uid ? conv.user_b : conv.user_a;
+        const sockets = onlineUsers.get(otherId);
+        if (sockets) sockets.forEach(sid => io.to(sid).emit('dm:typing', { conv_id, user_id: uid, typing }));
+    });
+
+    socket.on('disconnect', () => {
+        const set = onlineUsers.get(uid);
+        if (set) {
+            set.delete(socket.id);
+            if (set.size === 0) {
+                onlineUsers.delete(uid);
+                socket.broadcast.emit('user:offline', { user_id: uid });
+            }
+        }
+    });
+});
+
 // 404 fallback (must be last)
 app.use((req, res) => {
     if (req.path.startsWith('/api/')) {
@@ -396,7 +596,7 @@ app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
     if (!process.env.ENCRYPTION_SECRET) {
         console.warn('⚠️  ENCRYPTION_SECRET missing in .env — providers admin pages will fail');

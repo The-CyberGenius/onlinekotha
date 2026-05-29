@@ -175,6 +175,35 @@ safeAddColumn('users', 'avatar_url', 'TEXT');
 safeAddColumn('users', 'display_name', 'TEXT');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 
+// ── DM (user-to-user chat) tables ──
+db.exec(`
+CREATE TABLE IF NOT EXISTS dm_conversations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_a INTEGER NOT NULL,
+  user_b INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_a) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_b) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(user_a, user_b)
+);
+CREATE INDEX IF NOT EXISTS idx_dm_conv_a ON dm_conversations(user_a);
+CREATE INDEX IF NOT EXISTS idx_dm_conv_b ON dm_conversations(user_b);
+
+CREATE TABLE IF NOT EXISTS dm_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  conv_id INTEGER NOT NULL,
+  sender_id INTEGER NOT NULL,
+  body TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'text',
+  media_url TEXT,
+  created_at INTEGER NOT NULL,
+  read_at INTEGER,
+  FOREIGN KEY (conv_id) REFERENCES dm_conversations(id) ON DELETE CASCADE,
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_dm_msg_conv ON dm_messages(conv_id, created_at);
+`);
+
 // Default settings
 const defaults = {
     daily_spend_cap_usd: '5',
