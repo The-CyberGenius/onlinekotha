@@ -7,69 +7,92 @@
         return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
     function timeAgo(ts) {
+        if (!ts) return '';
         const diff = Date.now() - ts;
         if (diff < 60000) return 'now';
-        if (diff < 3600000) return Math.floor(diff/60000) + 'm';
-        if (diff < 86400000) return Math.floor(diff/3600000) + 'h';
+        if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+        if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
         return new Date(ts).toLocaleDateString();
     }
     function formatTime(ts) {
         return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-    function avatarHtml(user, size = 9) {
-        const s = `w-${size} h-${size}`;
+    function avatarEl(user, sizePx = 40) {
+        const name = user.display_name || user.email || '?';
+        const initials = name.charAt(0).toUpperCase();
         if (user.avatar_url) {
-            return `<img src="${escH(user.avatar_url)}" class="${s} rounded-full object-cover shrink-0" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                    <div class="${s} rounded-full bg-indigo-500 text-white text-xs font-bold flex items-center justify-center shrink-0" style="display:none">${escH((user.display_name||'?').charAt(0).toUpperCase())}</div>`;
+            return `<img src="${escH(user.avatar_url)}" style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;background:#6366f1;color:#fff;font-weight:700;font-size:${Math.floor(sizePx*0.35)}px;display:none;align-items:center;justify-content:center;flex-shrink:0">${escH(initials)}</div>`;
         }
-        return `<div class="${s} rounded-full bg-indigo-500 text-white text-xs font-bold flex items-center justify-center shrink-0">${escH((user.display_name||'?').charAt(0).toUpperCase())}</div>`;
+        return `<div style="width:${sizePx}px;height:${sizePx}px;border-radius:50%;background:#6366f1;color:#fff;font-weight:700;font-size:${Math.floor(sizePx*0.35)}px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${escH(initials)}</div>`;
     }
 
     // ── State ─────────────────────────────────────────────────
-    let socket = null;
-    let me = null;          // current user from /api/me
+    let socket       = null;
+    let me           = null;
     let activeConvId = null;
-    let conversations = []; // cached list
-    let typingTimers = {};
+    let conversations = [];
 
     // ── DOM refs ──────────────────────────────────────────────
-    const panel     = document.getElementById('dm-panel');
-    const convList  = document.getElementById('dm-conv-list');
-    const chatArea  = document.getElementById('dm-chat-area');
-    const chatMsgs  = document.getElementById('dm-messages');
-    const chatInput = document.getElementById('dm-input');
-    const chatSend  = document.getElementById('dm-send-btn');
-    const chatName  = document.getElementById('dm-chat-name');
-    const chatAvatar= document.getElementById('dm-chat-avatar');
+    const dmSidebar   = document.getElementById('dm-sidebar-section');
+    const convList    = document.getElementById('dm-conv-list');
+    const chatArea    = document.getElementById('dm-chat-area');
+    const chatMsgs    = document.getElementById('dm-messages');
+    const chatInput   = document.getElementById('dm-input');
+    const chatSend    = document.getElementById('dm-send-btn');
+    const chatName    = document.getElementById('dm-chat-name');
+    const chatStatus  = document.getElementById('dm-chat-status');
+    const chatAvatar  = document.getElementById('dm-chat-avatar');
     const searchInput = document.getElementById('dm-search-email');
     const searchBtn   = document.getElementById('dm-search-btn');
     const searchResult= document.getElementById('dm-search-result');
-    const typingEl  = document.getElementById('dm-typing-indicator');
+    const typingEl    = document.getElementById('dm-typing-indicator');
     const unreadBadge = document.getElementById('dm-unread-badge');
-    const dmBackBtn = document.getElementById('dm-back-btn');
+    const dmBackBtn   = document.getElementById('dm-back-btn');
+    const dmCloseBtn  = document.getElementById('dm-close-btn');
+    const dmNewBtn    = document.getElementById('dm-new-btn');
+    const dmNewForm   = document.getElementById('dm-new-form');
+    const btnDm       = document.getElementById('btn-dm');
 
-    if (!panel) return; // DM panel not in DOM
+    if (!dmSidebar) return;
+
+    // ── Open / close DM sidebar ───────────────────────────────
+    function openDmSidebar() {
+        dmSidebar.classList.remove('hidden');
+        loadConversations();
+    }
+    function closeDmSidebar() {
+        dmSidebar.classList.add('hidden');
+        closeDmChat();
+    }
+
+    btnDm?.addEventListener('click', () => {
+        if (dmSidebar.classList.contains('hidden')) openDmSidebar();
+        else closeDmSidebar();
+    });
+    dmCloseBtn?.addEventListener('click', closeDmSidebar);
+
+    // + New chat button toggles search form
+    dmNewBtn?.addEventListener('click', () => {
+        dmNewForm?.classList.toggle('hidden');
+        if (!dmNewForm?.classList.contains('hidden')) searchInput?.focus();
+    });
 
     // ── Init ─────────────────────────────────────────────────
     async function init() {
-        const meRes = await fetch('/api/me');
-        const meData = await meRes.json();
-        if (!meData.user) return; // not logged in
-        me = meData.user;
-
+        const res  = await fetch('/api/me');
+        const data = await res.json();
+        if (!data.user) return;
+        me = data.user;
         connectSocket();
-        loadConversations();
     }
 
     // ── Socket ────────────────────────────────────────────────
     function connectSocket() {
-        socket = io({ transports: ['websocket', 'polling'] });
-
-        socket.on('connect', () => console.log('[DM] socket connected'));
-        socket.on('connect_error', (e) => console.warn('[DM] socket error', e.message));
+        socket = window.io ? io({ transports: ['websocket', 'polling'] }) : null;
+        if (!socket) { console.warn('[DM] socket.io not loaded'); return; }
 
         socket.on('dm:message', (msg) => {
-            // Update conversation list
+            // Update conv list preview
             const idx = conversations.findIndex(c => c.conv_id === msg.conv_id);
             if (idx >= 0) {
                 conversations[idx].last_msg = msg.body;
@@ -77,15 +100,15 @@
                 if (msg.conv_id !== activeConvId && msg.sender_id !== me.id) {
                     conversations[idx].unread = (conversations[idx].unread || 0) + 1;
                 }
-                // Move to top
                 const [c] = conversations.splice(idx, 1);
                 conversations.unshift(c);
             } else {
-                loadConversations(); // new conversation
+                loadConversations();
+                return;
             }
             renderConvList();
+            updateUnreadBadge();
 
-            // If this conv is open, append message
             if (msg.conv_id === activeConvId) {
                 appendMessage(msg);
                 scrollBottom();
@@ -93,12 +116,12 @@
         });
 
         socket.on('dm:typing', ({ conv_id, user_id, typing }) => {
-            if (conv_id !== activeConvId || user_id === me.id) return;
+            if (conv_id !== activeConvId || user_id === me?.id) return;
             if (typingEl) typingEl.classList.toggle('hidden', !typing);
         });
 
-        socket.on('user:online',  ({ user_id }) => updateOnlineStatus(user_id, true));
-        socket.on('user:offline', ({ user_id }) => updateOnlineStatus(user_id, false));
+        socket.on('user:online',  ({ user_id }) => setPresence(user_id, true));
+        socket.on('user:offline', ({ user_id }) => setPresence(user_id, false));
     }
 
     // ── Load conversations ────────────────────────────────────
@@ -113,61 +136,65 @@
     function renderConvList() {
         if (!convList) return;
         if (conversations.length === 0) {
-            convList.innerHTML = `<div class="text-xs text-gray-400 text-center py-6 px-3">No chats yet.<br>Search someone by email to start!</div>`;
+            convList.innerHTML = `<p style="text-align:center;color:#9ca3af;font-size:12px;padding:32px 16px">No messages yet.<br>Tap <b>+</b> to start chatting.</p>`;
             return;
         }
         convList.innerHTML = conversations.map(c => `
-            <div class="dm-conv-item flex items-center gap-3 px-3 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition rounded-lg mx-1 ${c.conv_id === activeConvId ? 'bg-gray-100 dark:bg-gray-800' : ''}"
-                 data-conv="${c.conv_id}">
-                <div class="relative shrink-0">
-                    ${avatarHtml(c.other, 10)}
-                    <span class="dm-presence-${c.other.id} absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-gray-900 bg-gray-300"></span>
+            <div class="dm-conv-item" data-conv="${c.conv_id}"
+                style="display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;border-radius:12px;margin:2px 6px;transition:background 0.15s;${c.conv_id === activeConvId ? 'background:#f3f4f6' : ''}">
+                <div style="position:relative;flex-shrink:0">
+                    ${avatarEl(c.other, 44)}
+                    <span class="dm-dot-${c.other.id}" style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:#d1d5db;border:2px solid #fff"></span>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-baseline">
-                        <span class="text-[13px] font-semibold text-gray-800 dark:text-gray-100 truncate">${escH(c.other.display_name)}</span>
-                        <span class="text-[10px] text-gray-400 shrink-0 ml-1">${c.last_at ? timeAgo(c.last_at) : ''}</span>
+                <div style="flex:1;min-width:0">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline">
+                        <span style="font-size:13px;font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px">${escH(c.other.display_name)}</span>
+                        <span style="font-size:10px;color:#9ca3af;flex-shrink:0;margin-left:6px">${timeAgo(c.last_at)}</span>
                     </div>
-                    <div class="text-[12px] text-gray-500 dark:text-gray-400 truncate">${escH(c.last_msg || 'Tap to open')}</div>
+                    <div style="font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(c.last_msg || 'Tap to open')}</div>
                 </div>
-                ${c.unread ? `<span class="bg-indigo-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center shrink-0">${c.unread > 9 ? '9+' : c.unread}</span>` : ''}
+                ${c.unread ? `<span style="background:#6366f1;color:#fff;font-size:9px;font-weight:700;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">${c.unread > 9 ? '9+' : c.unread}</span>` : ''}
             </div>
         `).join('');
 
+        // hover styles via JS (Tailwind not guaranteed for dynamic)
         convList.querySelectorAll('.dm-conv-item').forEach(el => {
+            el.addEventListener('mouseenter', () => { if (Number(el.dataset.conv) !== activeConvId) el.style.background = '#f9fafb'; });
+            el.addEventListener('mouseleave', () => { if (Number(el.dataset.conv) !== activeConvId) el.style.background = ''; });
             el.addEventListener('click', () => openConv(Number(el.dataset.conv)));
         });
     }
 
-    // ── Open a conversation ───────────────────────────────────
+    // ── Open conversation ─────────────────────────────────────
     async function openConv(convId) {
         activeConvId = convId;
         const conv = conversations.find(c => c.conv_id === convId);
         if (!conv) return;
 
-        // Reset unread
         conv.unread = 0;
         updateUnreadBadge();
         renderConvList();
 
-        // Show chat area, hide search
+        // Show chat area (overlays main panel)
         if (chatArea) chatArea.classList.remove('hidden');
+        if (dmNewForm) dmNewForm.classList.add('hidden');
         if (searchResult) searchResult.innerHTML = '';
         if (searchInput) searchInput.value = '';
 
         // Set header
         if (chatName) chatName.textContent = conv.other.display_name;
-        if (chatAvatar) chatAvatar.innerHTML = avatarHtml(conv.other, 9);
+        if (chatAvatar) chatAvatar.innerHTML = avatarEl(conv.other, 38);
+        if (chatStatus) chatStatus.textContent = '';
 
         // Load messages
-        if (chatMsgs) chatMsgs.innerHTML = '<div class="text-xs text-center text-gray-400 py-4">Loading…</div>';
-        const res = await fetch(`/api/dm/conversations/${convId}/messages`);
+        if (chatMsgs) chatMsgs.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:20px">Loading…</div>';
+        const res  = await fetch(`/api/dm/conversations/${convId}/messages`);
         const msgs = await res.json();
 
         if (chatMsgs) {
             chatMsgs.innerHTML = '';
             if (msgs.length === 0) {
-                chatMsgs.innerHTML = '<div class="text-xs text-center text-gray-400 py-6">Say hello! 👋</div>';
+                chatMsgs.innerHTML = '<div style="text-align:center;color:#9ca3af;font-size:12px;padding:32px 16px">Say hello! 👋</div>';
             } else {
                 msgs.forEach(m => appendMessage(m));
             }
@@ -176,23 +203,25 @@
         if (chatInput) chatInput.focus();
     }
 
-    // ── Append one message bubble ────────────────────────────
+    function closeDmChat() {
+        activeConvId = null;
+        if (chatArea) chatArea.classList.add('hidden');
+    }
+
+    // ── Append message bubble ─────────────────────────────────
     function appendMessage(msg) {
         if (!chatMsgs) return;
-        const isMe = msg.sender_id === me.id;
-        const name = msg.display_name || msg.email?.split('@')[0] || '?';
-        const el = document.createElement('div');
-        el.className = `flex ${isMe ? 'justify-end' : 'justify-start'} mb-1.5`;
+        const isMe = msg.sender_id === me?.id;
+        const el   = document.createElement('div');
+        el.style.cssText = `display:flex;justify-content:${isMe ? 'flex-end' : 'flex-start'};margin-bottom:2px`;
         el.innerHTML = `
-            <div class="max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col">
-                ${!isMe ? `<span class="text-[10px] text-gray-400 mb-0.5 ml-1">${escH(name)}</span>` : ''}
-                <div class="px-3 py-2 rounded-2xl text-[13px] leading-snug break-words
-                    ${isMe ? 'bg-indigo-500 text-white rounded-br-sm' : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 shadow-sm rounded-bl-sm border border-gray-100 dark:border-gray-600'}">
+            <div style="max-width:72%;display:flex;flex-direction:column;align-items:${isMe ? 'flex-end' : 'flex-start'}">
+                <div style="padding:8px 12px;border-radius:${isMe ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};font-size:13px;line-height:1.4;word-break:break-word;
+                    ${isMe ? 'background:#6366f1;color:#fff' : 'background:#fff;color:#1f2937;border:1px solid #e5e7eb;box-shadow:0 1px 2px rgba(0,0,0,0.06)'}">
                     ${escH(msg.body)}
                 </div>
-                <span class="text-[10px] text-gray-400 mt-0.5 ${isMe ? 'mr-1' : 'ml-1'}">${formatTime(msg.created_at)}</span>
-            </div>
-        `;
+                <span style="font-size:10px;color:#9ca3af;margin-top:2px;${isMe ? 'margin-right:4px' : 'margin-left:4px'}">${formatTime(msg.created_at)}</span>
+            </div>`;
         chatMsgs.appendChild(el);
     }
 
@@ -209,46 +238,50 @@
         chatInput.focus();
     }
 
-    if (chatSend) chatSend.addEventListener('click', sendMessage);
-    if (chatInput) {
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-        });
-        // Typing indicator
-        let typingDebounce = null;
-        chatInput.addEventListener('input', () => {
-            if (!socket || !activeConvId) return;
-            socket.emit('dm:typing', { conv_id: activeConvId, typing: true });
-            clearTimeout(typingDebounce);
-            typingDebounce = setTimeout(() => socket.emit('dm:typing', { conv_id: activeConvId, typing: false }), 1500);
-        });
-    }
+    chatSend?.addEventListener('click', sendMessage);
+    chatInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    });
+
+    // Typing indicator emit
+    let typingDebounce = null;
+    chatInput?.addEventListener('input', () => {
+        if (!socket || !activeConvId) return;
+        socket.emit('dm:typing', { conv_id: activeConvId, typing: true });
+        clearTimeout(typingDebounce);
+        typingDebounce = setTimeout(() => socket?.emit('dm:typing', { conv_id: activeConvId, typing: false }), 1500);
+    });
+
+    // Back button
+    dmBackBtn?.addEventListener('click', closeDmChat);
 
     // ── Email search ──────────────────────────────────────────
     async function doSearch() {
         const email = searchInput?.value.trim();
         if (!email || !searchResult) return;
-        searchResult.innerHTML = '<span class="text-xs text-gray-400">Searching…</span>';
+        searchResult.innerHTML = '<span style="font-size:11px;color:#9ca3af">Searching…</span>';
 
-        const res = await fetch(`/api/dm/search?email=${encodeURIComponent(email)}`);
+        const res  = await fetch(`/api/dm/search?email=${encodeURIComponent(email)}`);
         const data = await res.json();
 
         if (!data.user) {
-            searchResult.innerHTML = '<span class="text-xs text-gray-400">No user found with that email.</span>';
+            searchResult.innerHTML = '<span style="font-size:11px;color:#9ca3af">No user found with that email.</span>';
             return;
         }
         const u = data.user;
-        searchResult.innerHTML = `
-            <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-3 mt-2">
-                ${avatarHtml(u, 10)}
-                <div class="flex-1 min-w-0">
-                    <div class="text-[13px] font-semibold text-gray-800 dark:text-gray-100">${escH(u.display_name)}</div>
-                    <div class="text-[11px] text-gray-400">${escH(u.email)}</div>
-                </div>
-                <button id="dm-start-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Chat</button>
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin-top:6px';
+        div.innerHTML = `
+            ${avatarEl(u, 36)}
+            <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:600;color:#1f2937">${escH(u.display_name)}</div>
+                <div style="font-size:11px;color:#6b7280">${escH(u.email)}</div>
             </div>
-        `;
-        document.getElementById('dm-start-btn')?.addEventListener('click', async () => {
+            <button id="dm-start-btn" style="background:#6366f1;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;white-space:nowrap">Start Chat</button>`;
+        searchResult.innerHTML = '';
+        searchResult.appendChild(div);
+
+        div.querySelector('#dm-start-btn')?.addEventListener('click', async () => {
             const r = await fetch('/api/dm/conversations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -256,34 +289,35 @@
             });
             const d = await r.json();
             if (d.conv_id) {
-                // Add to list if not already there
                 if (!conversations.find(c => c.conv_id === d.conv_id)) {
-                    conversations.unshift({
-                        conv_id: d.conv_id,
-                        other: d.other,
-                        last_msg: '',
-                        last_at: 0,
-                        unread: 0,
-                    });
+                    conversations.unshift({ conv_id: d.conv_id, other: d.other, last_msg: '', last_at: 0, unread: 0 });
                 }
+                dmNewForm?.classList.add('hidden');
+                searchResult.innerHTML = '';
+                searchInput.value = '';
                 renderConvList();
                 openConv(d.conv_id);
             }
         });
     }
 
-    if (searchBtn) searchBtn.addEventListener('click', doSearch);
-    if (searchInput) searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+    searchBtn?.addEventListener('click', doSearch);
+    searchInput?.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
 
-    // ── Online presence ───────────────────────────────────────
-    function updateOnlineStatus(userId, online) {
-        document.querySelectorAll(`.dm-presence-${userId}`).forEach(el => {
-            el.classList.toggle('bg-green-400', online);
-            el.classList.toggle('bg-gray-300', !online);
+    // ── Presence dots ─────────────────────────────────────────
+    function setPresence(userId, online) {
+        document.querySelectorAll(`.dm-dot-${userId}`).forEach(el => {
+            el.style.background = online ? '#22c55e' : '#d1d5db';
         });
+        if (activeConvId) {
+            const conv = conversations.find(c => c.conv_id === activeConvId);
+            if (conv?.other.id === userId && chatStatus) {
+                chatStatus.textContent = online ? 'online' : '';
+            }
+        }
     }
 
-    // ── Unread badge (on DM nav button) ──────────────────────
+    // ── Unread badge on DM icon ───────────────────────────────
     function updateUnreadBadge() {
         const total = conversations.reduce((s, c) => s + (c.unread || 0), 0);
         if (unreadBadge) {
@@ -292,16 +326,9 @@
         }
     }
 
-    // ── Back button (mobile compact) ─────────────────────────
-    if (dmBackBtn) dmBackBtn.addEventListener('click', () => {
-        activeConvId = null;
-        if (chatArea) chatArea.classList.add('hidden');
-    });
-
     // ── Start ─────────────────────────────────────────────────
     init();
 
-    // Expose for external use
-    window.dmLoadConversations = loadConversations;
     window.dmOpenConv = openConv;
+    window.dmLoadConversations = loadConversations;
 })();
