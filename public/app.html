@@ -448,7 +448,7 @@
             class="flex-1 flex flex-col relative w-full md:w-auto min-w-0 h-full bg-[#efeae2] dark:bg-[#0b141a]">
 
             <!-- ── DM Chat View (absolute overlay, shown when DM conversation is open) ── -->
-            <div id="dm-chat-area" class="hidden absolute inset-0 z-[30] flex flex-col bg-[#efeae2] dark:bg-[#0b141a]">
+            <div id="dm-chat-area" style="display:none;position:absolute;inset:0;z-index:30;flex-direction:column;background:#efeae2" class="dark:bg-[#0b141a]">
                 <!-- DM Chat Header -->
                 <div class="h-[60px] md:h-16 bg-[#f0f2f5] dark:bg-[#202c33] flex items-center gap-3 px-3 md:px-5 shrink-0 shadow-sm">
                     <button id="dm-back-btn" class="w-9 h-9 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 transition shrink-0" title="Back">
@@ -533,8 +533,6 @@
                         </svg>
                         <span id="dm-unread-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black rounded-full w-4 h-4 flex items-center justify-center leading-none border-2 border-white">0</span>
                     </button>
-                    <!-- AI sparkle kept hidden so ai-panel.js doesn't break -->
-                    <button id="ask-ai-btn" class="hidden ai-sparkle-btn" title="Ask AI" aria-label="Ask AI"></button>
                 </div>
             </div>
 
@@ -711,7 +709,7 @@
     <script src="js/upload.js?v=14"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=19"></script>
-    <script src="js/dm.js?v=4"></script>
+    <script src="js/dm.js?v=5"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });

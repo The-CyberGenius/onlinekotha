@@ -174,7 +174,7 @@
         updateBadge();
         renderConvs();
 
-        if (chatArea)   chatArea.classList.remove('hidden');
+        if (chatArea)   chatArea.style.display = 'flex';
         if (chatName)   chatName.textContent = c.other.display_name;
         if (chatAvatar) chatAvatar.innerHTML = avatar(c.other, 38);
         if (chatStatus) chatStatus.textContent = '';
@@ -193,7 +193,7 @@
 
     function closeConv() {
         activeConvId = null;
-        chatArea?.classList.add('hidden');
+        if (chatArea) chatArea.style.display = 'none';
     }
 
     // ── Message bubble ────────────────────────────────────────
