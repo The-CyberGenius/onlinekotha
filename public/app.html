@@ -18,7 +18,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=3">
-    <link rel="stylesheet" href="/css/style.css?v=36">
+    <link rel="stylesheet" href="/css/style.css?v=37">
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay = function () { return new Promise(function (r) { if (window.Razorpay) return r(); var s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.onload = r; document.head.appendChild(s) }) }</script>
     <script src="/js/auth-init.js?v=2"></script>
@@ -28,7 +28,7 @@
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
 </head>
 
-<body style="padding-bottom: 65px;" class="flex flex-col items-center justify-center h-[100dvh] w-screen overflow-hidden p-0 md:p-4 lg:p-6">
+<body class="app-shell flex flex-col items-center justify-center h-[100dvh] w-screen overflow-hidden p-0 md:p-4 lg:p-6">
 
     <!-- macOS Window Frame (wraps #app on md+, invisible on mobile) -->
     <div id="mac-frame" class="flex flex-col w-full h-full md:h-full md:max-w-7xl md:mx-auto relative">
@@ -616,8 +616,8 @@
     <!-- end #mac-frame -->
     </div>
 
-    <!-- macOS Dock (fixed at bottom of screen — desktop + mobile) -->
-    <div id="mac-dock" style="bottom: 8px;" class="flex fixed left-1/2 -translate-x-1/2 z-[9999] items-center justify-center">
+    <!-- macOS Dock (fixed at bottom of screen, desktop only) -->
+    <div id="mac-dock" style="bottom: 2px;" class="hidden md:flex fixed left-1/2 -translate-x-1/2 z-[9999] items-center justify-center">
         <div class="flex items-center gap-1 bg-[#1c1c1e]/70 backdrop-blur-xl rounded-2xl px-2 py-1.5 border border-white/[0.12] shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
             <div id="dock-kotha-icon" class="w-12 h-12 rounded-xl bg-white flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer relative group shadow-lg" title="Kotha">
                 <img src="/logo.svg" alt="Kotha" class="w-8 h-8">
@@ -727,16 +727,6 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });
         }
-        // On mobile, dock icon acts as a "home" button → opens the sidebar (chat list)
-        (function () {
-            const dock = document.getElementById('dock-kotha-icon');
-            if (!dock) return;
-            dock.addEventListener('click', function () {
-                if (window.innerWidth < 768) {
-                    if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                }
-            });
-        })();
     </script>
 
     <!-- Analytics Modal -->
