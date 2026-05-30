@@ -33,6 +33,7 @@
     let me = null, socket = null, activeConvId = null;
     let convs = [];
     let contextMenu = null;
+    let renderedIds = new Set();   // message IDs already on screen (dedup socket+poll)
 
     // ── DOM ───────────────────────────────────────────────────
     const tabChatsBtn  = document.getElementById('tab-chats-btn');
@@ -104,7 +105,8 @@
             me.id = Number(me.id);
         }
         connectSocket();
-        startPolling(); // Fallback if socket doesn't connect
+        startPolling();      // active-conversation real-time (always on)
+        startConvPolling();  // conversation-list real-time
     }
 
     // ── Socket ────────────────────────────────────────────────
@@ -212,7 +214,8 @@
             if (window.kothaSidebarClose) window.kothaSidebarClose();
         }
 
-        lastPollAt = Date.now() - 5000; // load last 5s of msgs on open
+        renderedIds = new Set();        // reset dedup tracker for this conversation
+        lastPollAt = 0;
         if (chatArea)   chatArea.style.display = 'flex';
         if (chatName)   chatName.textContent = c.other.display_name;
         if (chatAvatar) chatAvatar.innerHTML  = avatar(c.other, 38);
@@ -239,6 +242,7 @@
                 let lastDate = '';
                 msgs.forEach(m => {
                     m.sender_id = Number(m.sender_id);
+                    if (m.created_at > lastPollAt) lastPollAt = m.created_at;
                     const d = new Date(m.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
                     if (d !== lastDate) { appendDateDivider(d); lastDate = d; }
                     appendMsg(m);
@@ -267,6 +271,11 @@
     // ── Message bubble ────────────────────────────────────────
     function appendMsg(msg) {
         if (!chatMsgs) return;
+        // Dedup — same message may arrive via socket AND poll
+        if (msg.id != null) {
+            if (renderedIds.has(msg.id)) return;
+            renderedIds.add(msg.id);
+        }
         const isMe    = Number(msg.sender_id) === Number(me?.id);
         const dark    = dk();
         const deleted = msg.type === 'deleted';
@@ -483,35 +492,50 @@
     }
 
     // ── Polling fallback (when socket not connected) ──────────
-    let lastPollAt = Date.now();
+    let lastPollAt = 0;
     let pollTimer  = null;
+    let convPollTimer = null;
 
+    // Poll the OPEN conversation for new messages — always runs (socket is a bonus,
+    // not a requirement). appendMsg dedups by id so socket + poll never double up.
     function startPolling() {
         if (pollTimer) return;
         pollTimer = setInterval(async () => {
-            if (socket?.connected) return; // socket works, no need to poll
-            if (!activeConvId) return;     // nothing open
-
+            if (!activeConvId) return;
             try {
                 const r    = await fetch(`/api/dm/conversations/${activeConvId}/messages?after=${lastPollAt}`);
                 if (!r.ok) return;
                 const data = await r.json();
-                const msgs = (data.messages || data).filter(m => m.created_at > lastPollAt && Number(m.sender_id) !== Number(me?.id));
-                if (msgs.length) {
-                    msgs.forEach(m => { m.sender_id = Number(m.sender_id); appendMsg(m); });
+                const all  = data.messages || data;
+                let added = false, last = null;
+                all.forEach(m => {
+                    m.sender_id = Number(m.sender_id);
+                    if (m.created_at > lastPollAt) lastPollAt = m.created_at;
+                    if (msgIsNew(m)) { appendMsg(m); added = true; last = m; }
+                });
+                if (added) {
                     scrollBottom();
-                    lastPollAt = msgs[msgs.length-1].created_at;
-                    // update conv list preview
                     const idx = convs.findIndex(c => c.conv_id === activeConvId);
-                    if (idx >= 0) { convs[idx].last_msg = msgs[msgs.length-1].body; convs[idx].last_at = msgs[msgs.length-1].created_at; }
-                    renderConvs();
+                    if (idx >= 0 && last) { convs[idx].last_msg = last.body; convs[idx].last_at = last.created_at; renderConvs(); }
                 }
             } catch {}
-        }, 2500); // poll every 2.5s when no socket
+        }, 2000);
     }
 
-    // Reset poll timestamp when conv opens
-    const _origOpen = openConv;
+    // Poll the conversation LIST so incoming messages in other chats show up
+    // (unread badge, preview, ordering) without a refresh.
+    function startConvPolling() {
+        if (convPollTimer) return;
+        convPollTimer = setInterval(() => {
+            if (!dmTab || dmTab.classList.contains('hidden')) return; // only when Messages tab visible
+            if (activeConvId) return; // don't disrupt while reading a chat
+            loadConvs();
+        }, 4000);
+    }
+
+    function msgIsNew(m) {
+        return m.id == null || !renderedIds.has(m.id);
+    }
 
     // ── External triggers ─────────────────────────────────────
     document.getElementById('btn-dm')?.addEventListener('click', () => {
