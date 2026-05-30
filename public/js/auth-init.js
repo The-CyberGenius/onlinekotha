@@ -27,13 +27,14 @@
         const avatarImg      = document.getElementById('my-avatar-img');
         const avatarPhoto    = document.getElementById('my-avatar-photo');
 
+        // Always set initials first (fallback if photo missing or fails to load)
+        const myName = me.user.display_name || me.user.email || '?';
+        if (avatarInitials) avatarInitials.textContent = myName.charAt(0).toUpperCase();
+
         if (me.user.avatar_url && avatarPhoto) {
             avatarPhoto.src = me.user.avatar_url;
             avatarImg?.classList.remove('hidden');
             avatarInitials?.classList.add('hidden');
-        } else if (avatarInitials) {
-            const name = me.user.display_name || me.user.email || '?';
-            avatarInitials.textContent = name.charAt(0).toUpperCase();
         }
 
         // Show display name below avatar
