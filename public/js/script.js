@@ -583,15 +583,23 @@ document.addEventListener('DOMContentLoaded', () => {
         window.kothaChatLoading = true;
         window.kothaLoadedChat = null;
         try {
-            showSkeleton();
-            statsInfo.innerText = 'Loading...';
-            const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
-            const data = await resp.json();
+            // ── Client-side cache: re-opening a chat is instant (no network/re-fetch) ──
+            if (!window._chatMsgCache) window._chatMsgCache = {};
+            let data = window._chatMsgCache[chatName];
 
-            if (data.error) {
-                statsInfo.innerText = "Error: " + data.error;
-                window.kothaChatLoading = false;
-                return;
+            if (!data) {
+                showSkeleton();
+                statsInfo.innerText = 'Loading...';
+                const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
+                data = await resp.json();
+
+                if (data.error) {
+                    statsInfo.innerText = "Error: " + data.error;
+                    window.kothaChatLoading = false;
+                    return;
+                }
+                // Stash in cache for instant re-open
+                window._chatMsgCache[chatName] = data;
             }
 
             allMessages = data;
@@ -604,11 +612,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // Cache last message preview for sidebar display
             if (!window._chatMetaCache) window._chatMetaCache = {};
             if (allMessages.length > 0) {
-                const lastTextMsg = [...allMessages].reverse().find(m => m.text && m.type !== 'system');
+                // Backward loop instead of [...arr].reverse() — avoids copying huge arrays
+                let lastTextMsg = null, count = 0;
+                for (let i = allMessages.length - 1; i >= 0; i--) {
+                    const m = allMessages[i];
+                    if (m.type !== 'system') {
+                        count++;
+                        if (!lastTextMsg && m.text) lastTextMsg = m;
+                    }
+                }
                 window._chatMetaCache[chatName] = {
                     lastMessage: lastTextMsg ? (lastTextMsg.text.length > 40 ? lastTextMsg.text.slice(0, 40) + '…' : lastTextMsg.text) : '',
                     lastTime: lastTextMsg?.time || '',
-                    count: allMessages.filter(m => m.type !== 'system').length,
+                    count: count,
                 };
             }
 

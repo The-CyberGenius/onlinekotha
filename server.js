@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
@@ -59,6 +60,10 @@ if (!fs.existsSync(SRC_DIR)) fs.mkdirSync(SRC_DIR, { recursive: true });
 
 // Stripe webhook needs raw body — must come BEFORE express.json()
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
+
+// Gzip responses — huge win for large /api/messages JSON (text ~85% smaller).
+// Skips SSE (Cache-Control: no-transform) and binary media automatically.
+app.use(compression());
 
 app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
