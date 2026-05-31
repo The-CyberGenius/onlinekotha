@@ -59,6 +59,19 @@
 
     if (!tabDmBtn) return;
 
+    // ── State persistence (survives refresh) ──────────────────
+    const LS = {
+        view:  'kotha_dm_view',          // 'chats' | 'messages'
+        conv:  'kotha_dm_active_conv',    // open conversation id
+        draft: (id) => 'kotha_dm_draft_' + id,
+    };
+    function saveDraft() {
+        if (!activeConvId || !chatInput) return;
+        const v = chatInput.value;
+        if (v) localStorage.setItem(LS.draft(activeConvId), v);
+        else   localStorage.removeItem(LS.draft(activeConvId));
+    }
+
     // ── Tab switching ─────────────────────────────────────────
     function showChatsTab() {
         chatsTab?.classList.remove('hidden');
@@ -71,6 +84,8 @@
         if (chatArea) chatArea.style.display = 'none';
         activeConvId = null;
         closeCtxMenu();
+        localStorage.setItem(LS.view, 'chats');
+        localStorage.removeItem(LS.conv);
     }
     function showDmTab() {
         chatsTab?.classList.add('hidden');
@@ -79,6 +94,7 @@
         tabDmBtn?.classList.add('bg-indigo-600','text-white','shadow-sm');
         tabChatsBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
         tabChatsBtn?.classList.add('text-gray-500','dark:text-gray-400');
+        localStorage.setItem(LS.view, 'messages');
         loadConvs();
     }
 
@@ -107,6 +123,16 @@
         connectSocket();
         startPolling();      // active-conversation real-time (always on)
         startConvPolling();  // conversation-list real-time
+
+        // ── Restore previous view/conversation after refresh ──
+        if (localStorage.getItem(LS.view) === 'messages') {
+            showDmTab();              // switch to Messages tab (also loads convs)
+            await loadConvs();        // ensure list is ready
+            const savedConv = Number(localStorage.getItem(LS.conv));
+            if (savedConv && convs.find(c => c.conv_id === savedConv)) {
+                openConv(savedConv);  // reopen the same conversation + restore draft
+            }
+        }
     }
 
     // ── Socket ────────────────────────────────────────────────
@@ -250,13 +276,20 @@
             }
         }
         scrollBottom();
-        chatInput?.focus();
+
+        // Persist + restore draft
+        localStorage.setItem(LS.conv, String(convId));
+        if (chatInput) {
+            chatInput.value = localStorage.getItem(LS.draft(convId)) || '';
+            chatInput.focus();
+        }
     }
 
     function closeConv() {
         activeConvId = null;
         if (chatArea) chatArea.style.display = 'none';
         closeCtxMenu();
+        localStorage.removeItem(LS.conv);
     }
 
     // ── Date divider ──────────────────────────────────────────
@@ -372,8 +405,10 @@
     async function send() {
         const body = chatInput?.value.trim();
         if (!body || !activeConvId) return;
+        const convAtSend = activeConvId;
         chatInput.value = '';
         chatInput.focus();
+        localStorage.removeItem(LS.draft(convAtSend)); // clear saved draft
 
         if (socket?.connected) {
             socket.emit('dm:send', {conv_id: activeConvId, body});
@@ -402,6 +437,7 @@
 
     let typingTimer;
     chatInput?.addEventListener('input', () => {
+        saveDraft(); // persist what's typed (survives refresh)
         if(!socket?.connected||!activeConvId) return;
         socket.emit('dm:typing',{conv_id:activeConvId,typing:true});
         clearTimeout(typingTimer);
