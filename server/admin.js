@@ -514,19 +514,36 @@ router.post('/purge-spam', (req, res) => {
           AND LOWER(u.email) LIKE '%@example.com'
     `).all();
 
-    let deleted = 0;
-    const delUser = db.transaction((id) => {
+    const ids = spam.map(r => r.id);
+    if (ids.length === 0) return res.json({ ok: true, deleted: 0 });
+
+    // Filesystem cleanup first (outside the DB transaction). Most spam bots
+    // have no uploaded files, so these dirs usually don't exist — fast.
+    for (const id of ids) {
         const uDir = path.join(SRC_DIR, `u_${id}`);
-        if (fs.existsSync(uDir)) fs.rmSync(uDir, { recursive: true, force: true });
-        db.prepare('DELETE FROM usage_log WHERE user_id = ?').run(id);
-        db.prepare('DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = ?)').run(id);
-        db.prepare('DELETE FROM conversations WHERE user_id = ?').run(id);
-        db.prepare('DELETE FROM chats WHERE user_id = ?').run(id);
-        db.prepare('DELETE FROM sessions WHERE user_id = ?').run(id);
-        db.prepare('DELETE FROM dm_conversations WHERE user_a = ? OR user_b = ?').run(id, id);
-        db.prepare('DELETE FROM users WHERE id = ?').run(id);
+        try { if (fs.existsSync(uDir)) fs.rmSync(uDir, { recursive: true, force: true }); } catch {}
+    }
+
+    // Bulk DB delete in chunks (avoids 1000+ separate transactions → timeout,
+    // and stays under SQLite's bound-variable limit).
+    const CHUNK = 200;
+    const purgeChunk = db.transaction((chunk) => {
+        const ph = chunk.map(() => '?').join(',');
+        db.prepare(`DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id IN (${ph}))`).run(...chunk);
+        db.prepare(`DELETE FROM conversations WHERE user_id IN (${ph})`).run(...chunk);
+        db.prepare(`DELETE FROM usage_log WHERE user_id IN (${ph})`).run(...chunk);
+        db.prepare(`DELETE FROM chats WHERE user_id IN (${ph})`).run(...chunk);
+        db.prepare(`DELETE FROM sessions WHERE user_id IN (${ph})`).run(...chunk);
+        db.prepare(`DELETE FROM dm_messages WHERE conv_id IN (SELECT id FROM dm_conversations WHERE user_a IN (${ph}) OR user_b IN (${ph}))`).run(...chunk, ...chunk);
+        db.prepare(`DELETE FROM dm_conversations WHERE user_a IN (${ph}) OR user_b IN (${ph})`).run(...chunk, ...chunk);
+        db.prepare(`DELETE FROM users WHERE id IN (${ph})`).run(...chunk);
     });
-    for (const row of spam) { try { delUser(row.id); deleted++; } catch {} }
+
+    let deleted = 0;
+    for (let i = 0; i < ids.length; i += CHUNK) {
+        const chunk = ids.slice(i, i + CHUNK);
+        try { purgeChunk(chunk); deleted += chunk.length; } catch (e) { console.error('purge chunk failed:', e.message); }
+    }
 
     res.json({ ok: true, deleted });
 });
