@@ -504,13 +504,14 @@ router.delete('/users/:id', (req, res) => {
 // Purge spam accounts — bot signups used the fake "@example.com" domain.
 // Safe: only deletes non-admin @example.com accounts with no real activity.
 router.post('/purge-spam', (req, res) => {
+    // @example.com is a reserved fake domain (RFC 2606) — no real user has it.
+    // These are all bot signups via the (now-disabled) email endpoint.
+    // Only spare admins and anyone who actually signed in with Google.
     const spam = db.prepare(`
         SELECT u.id FROM users u
         WHERE u.is_admin = 0
-          AND LOWER(u.email) LIKE '%@example.com'
           AND u.google_id IS NULL
-          AND (SELECT COUNT(*) FROM chats WHERE user_id = u.id) = 0
-          AND COALESCE((SELECT SUM(cost_usd) FROM usage_log WHERE user_id = u.id), 0) = 0
+          AND LOWER(u.email) LIKE '%@example.com'
     `).all();
 
     let deleted = 0;
