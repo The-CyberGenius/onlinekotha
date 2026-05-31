@@ -588,9 +588,17 @@
     function persistState() {
         const onMessages = dmTab && !dmTab.classList.contains('hidden');
         localStorage.setItem(LS.view, onMessages ? 'messages' : 'chats');
-        const convOpen = chatArea && chatArea.style.display === 'flex' && activeConvId;
-        if (convOpen) localStorage.setItem(LS.conv, String(activeConvId));
-        else          localStorage.removeItem(LS.conv);
+
+        // On mobile the sidebar (conversation list) slides OVER the chat — if it's
+        // visible, the user is looking at the list, not the conversation.
+        const sidebar = document.getElementById('sidebar');
+        const isMobile = window.innerWidth < 768;
+        const sidebarShown = sidebar && !sidebar.classList.contains('-translate-x-full');
+        const chatVisible = chatArea && chatArea.style.display === 'flex' && activeConvId;
+        const inConversation = chatVisible && !(isMobile && sidebarShown);
+
+        if (inConversation) localStorage.setItem(LS.conv, String(activeConvId));
+        else                localStorage.removeItem(LS.conv);
         saveDraft();
     }
     window.addEventListener('pagehide', persistState);
