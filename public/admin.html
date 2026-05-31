@@ -210,6 +210,7 @@
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-3">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-extrabold text-gray-800 text-sm">Users</h2>
+                    <button id="purge-spam-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-lg transition">🧹 Purge spam (@example.com)</button>
                 </div>
                 <div id="user-list" class="text-sm"></div>
             </div>
@@ -378,6 +379,18 @@
         // Load when tab is clicked
         document.querySelector('[data-tab="dm-logs"]')?.addEventListener('click', () => {
             if (!document.getElementById('dm-log-list').querySelector('table')) loadDmLogs(1);
+        });
+
+        // Purge spam accounts
+        document.getElementById('purge-spam-btn')?.addEventListener('click', async function () {
+            if (!confirm('Delete all bot/spam accounts (@example.com, no activity)? This cannot be undone.')) return;
+            this.disabled = true; this.textContent = 'Purging…';
+            try {
+                const r = await fetch('/admin/purge-spam', { method: 'POST' });
+                const d = await r.json();
+                alert(d.ok ? `Deleted ${d.deleted} spam accounts.` : (d.error || 'Failed'));
+                location.reload();
+            } catch { alert('Network error'); this.disabled = false; this.textContent = '🧹 Purge spam (@example.com)'; }
         });
     })();
     </script>

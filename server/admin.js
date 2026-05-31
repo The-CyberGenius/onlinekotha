@@ -501,6 +501,35 @@ router.delete('/users/:id', (req, res) => {
     res.json({ ok: true });
 });
 
+// Purge spam accounts — bot signups used the fake "@example.com" domain.
+// Safe: only deletes non-admin @example.com accounts with no real activity.
+router.post('/purge-spam', (req, res) => {
+    const spam = db.prepare(`
+        SELECT u.id FROM users u
+        WHERE u.is_admin = 0
+          AND LOWER(u.email) LIKE '%@example.com'
+          AND u.google_id IS NULL
+          AND (SELECT COUNT(*) FROM chats WHERE user_id = u.id) = 0
+          AND COALESCE((SELECT SUM(cost_usd) FROM usage_log WHERE user_id = u.id), 0) = 0
+    `).all();
+
+    let deleted = 0;
+    const delUser = db.transaction((id) => {
+        const uDir = path.join(SRC_DIR, `u_${id}`);
+        if (fs.existsSync(uDir)) fs.rmSync(uDir, { recursive: true, force: true });
+        db.prepare('DELETE FROM usage_log WHERE user_id = ?').run(id);
+        db.prepare('DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = ?)').run(id);
+        db.prepare('DELETE FROM conversations WHERE user_id = ?').run(id);
+        db.prepare('DELETE FROM chats WHERE user_id = ?').run(id);
+        db.prepare('DELETE FROM sessions WHERE user_id = ?').run(id);
+        db.prepare('DELETE FROM dm_conversations WHERE user_a = ? OR user_b = ?').run(id, id);
+        db.prepare('DELETE FROM users WHERE id = ?').run(id);
+    });
+    for (const row of spam) { try { delUser(row.id); deleted++; } catch {} }
+
+    res.json({ ok: true, deleted });
+});
+
 // ---------- AI Conversation Logs (Admin) ----------
 router.get('/users/:id/conversations', (req, res) => {
     const userId = Number(req.params.id);
