@@ -583,6 +583,22 @@
         showDmTab();
     });
 
+    // ── Snapshot the EXACT on-screen state right before leaving/refresh ──
+    // Reads real DOM state so we never reopen a chat when the user was on the list.
+    function persistState() {
+        const onMessages = dmTab && !dmTab.classList.contains('hidden');
+        localStorage.setItem(LS.view, onMessages ? 'messages' : 'chats');
+        const convOpen = chatArea && chatArea.style.display === 'flex' && activeConvId;
+        if (convOpen) localStorage.setItem(LS.conv, String(activeConvId));
+        else          localStorage.removeItem(LS.conv);
+        saveDraft();
+    }
+    window.addEventListener('pagehide', persistState);
+    window.addEventListener('beforeunload', persistState);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') persistState();
+    });
+
     // ── Start ─────────────────────────────────────────────────
     init();
     window.dmShowTab   = showDmTab;
