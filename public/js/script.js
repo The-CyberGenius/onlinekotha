@@ -602,6 +602,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 window._chatMsgCache[chatName] = data;
             }
 
+            // Safety: if the user switched to a different chat while this was
+            // loading, abort — never render one chat's data under another's name.
+            if (currentChat !== chatName) { window.kothaChatLoading = false; return; }
+
             allMessages = data;
             // Messages now belong to this chat — safe for Wrapped to read.
             window.kothaLoadedChat = chatName;

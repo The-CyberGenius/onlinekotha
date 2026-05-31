@@ -74,6 +74,11 @@
                 Continue with Google
             </a>
 
+            <!-- Signup is Google-only (shown in Sign Up mode) -->
+            <p id="signup-google-note" class="hidden text-xs text-gray-500 text-center bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 mb-2">
+                New accounts use <b class="text-gray-700">Google sign-in</b> for your security. Tap “Continue with Google” above.
+            </p>
+
             <div id="auth-divider" class="hidden items-center gap-4 mb-6">
                 <div class="flex-1 h-px bg-gray-200"></div>
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">or with email</span>
@@ -152,6 +157,14 @@
             forgotLink.style.display = isLogin ? 'block' : 'none';
             trialInfo.classList.toggle('hidden', isLogin);
             errorMsg.classList.add('hidden');
+
+            // Signup is Google-only: hide the email/password form in Sign Up mode
+            const authForm = document.getElementById('auth-form');
+            const authDivider = document.getElementById('auth-divider');
+            const googleNote = document.getElementById('signup-google-note');
+            if (authForm) authForm.style.display = isLogin ? '' : 'none';
+            if (authDivider) authDivider.style.display = isLogin ? '' : 'none';
+            if (googleNote) googleNote.classList.toggle('hidden', isLogin);
         }
 
         tabLogin.addEventListener('click', () => switchMode('login'));

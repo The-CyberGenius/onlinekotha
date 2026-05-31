@@ -82,20 +82,14 @@ const authLimiter = rateLimit({
 });
 
 // ---------- Auth routes ----------
+// Email/password signup is DISABLED — Google sign-in only.
+// This stops automated/bot account creation (e.g. @example.com spam).
+// Existing email accounts can still log in via /api/auth/login.
 app.post('/api/auth/signup', authLimiter, async (req, res) => {
-    try {
-        const { email, password } = req.body || {};
-        if (!email || !password) return res.status(400).json({ error: 'email + password required' });
-        if (password.length < 6) return res.status(400).json({ error: 'password min 6 chars' });
-        const user = createUser(email.trim(), password);
-        const { token, expiresAt } = login(email.trim(), password);
-        res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
-        sendVerifyEmail(user).catch(err => console.error('verify email failed:', err.message));
-        res.json({ ok: true, user: { ...user, effective_plan: effectivePlan(user) } });
-    } catch (err) {
-        if (err.code === 'EMAIL_EXISTS') return res.status(409).json({ error: 'Email already registered' });
-        res.status(500).json({ error: err.message });
-    }
+    return res.status(403).json({
+        error: 'Sign up with Google to continue. Email/password registration is disabled.',
+        google_only: true,
+    });
 });
 
 app.get('/api/auth/verify', (req, res) => {
