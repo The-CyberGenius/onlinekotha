@@ -180,6 +180,11 @@ app.get('/app', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
 
+// Share Target fallback — if the service worker isn't active yet, the shared
+// POST hits the server. Just bounce into the app (SW handles it once installed).
+app.post('/share-target', (req, res) => res.redirect('/app'));
+app.get('/share-target', (req, res) => res.redirect('/app'));
+
 // Health check
 app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 

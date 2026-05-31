@@ -125,6 +125,28 @@
         });
     }
 
+    // ── Paste chat text ──────────────────────────────────────
+    const togglePasteBtn = document.getElementById('toggle-paste-btn');
+    const pasteArea      = document.getElementById('paste-area');
+    const pasteText      = document.getElementById('paste-text');
+    const pasteImportBtn = document.getElementById('paste-import-btn');
+
+    if (togglePasteBtn && pasteArea) {
+        togglePasteBtn.addEventListener('click', () => {
+            pasteArea.classList.toggle('hidden');
+            if (!pasteArea.classList.contains('hidden')) pasteText?.focus();
+        });
+    }
+    if (pasteImportBtn) {
+        pasteImportBtn.addEventListener('click', () => {
+            const text = (pasteText?.value || '').trim();
+            if (!text) { showError('Paste some chat text first.'); return; }
+            // Wrap into a _chat.txt File and reuse the normal upload pipeline
+            const file = new File([text], '_chat.txt', { type: 'text/plain' });
+            uploadFiles([file]);
+        });
+    }
+
     function uploadFiles(files) {
         resetUI();
         progressWrap.classList.remove('hidden');
@@ -172,4 +194,26 @@
         xhr.onerror = () => showError('Network error');
         xhr.send(form);
     }
+
+    // ── Share Target: file shared from WhatsApp → PWA ────────
+    // The service worker stashes the shared file in a Cache and redirects to
+    // /app?shared=1. We pick it up here and run the normal import.
+    async function handleSharedFile() {
+        if (!new URLSearchParams(location.search).has('shared')) return;
+        try {
+            const cache = await caches.open('kotha-share');
+            const res = await cache.match('/__shared_chat');
+            if (res) {
+                const blob = await res.blob();
+                const name = res.headers.get('x-filename') || 'shared_chat.zip';
+                const file = new File([blob], name, { type: blob.type || 'application/zip' });
+                await cache.delete('/__shared_chat');
+                openModal();
+                uploadFiles([file]);
+            }
+        } catch (e) { /* no shared file */ }
+        // Clean the URL
+        history.replaceState({}, '', '/app');
+    }
+    handleSharedFile();
 })();

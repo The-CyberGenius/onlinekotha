@@ -1,5 +1,5 @@
 // Service Worker for Kotha PWA
-const CACHE_NAME = 'kotha-v2';
+const CACHE_NAME = 'kotha-v3';
 const STATIC_ASSETS = [
     '/css/style.css',
     '/js/tailwind.js',
@@ -30,7 +30,26 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
     const url = new URL(e.request.url);
-    
+
+    // ── Share Target: receive a file shared from WhatsApp (POST /share-target) ──
+    if (e.request.method === 'POST' && url.pathname === '/share-target') {
+        e.respondWith((async () => {
+            try {
+                const form = await e.request.formData();
+                const file = form.get('files');
+                if (file) {
+                    const cache = await caches.open('kotha-share');
+                    // Stash the shared file with its name so the page can pick it up
+                    const headers = new Headers({ 'x-filename': file.name || 'shared_chat.zip' });
+                    await cache.put('/__shared_chat', new Response(file, { headers }));
+                }
+            } catch (err) { /* ignore */ }
+            // Redirect into the app, which will pick up the stashed file
+            return Response.redirect('/app?shared=1', 303);
+        })());
+        return;
+    }
+
     // Network-first for API, navigation, and auth routes
     if (e.request.mode === 'navigate' || url.pathname.startsWith('/api/') || url.pathname === '/app' || url.pathname === '/login.html') {
         e.respondWith(

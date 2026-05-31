@@ -656,7 +656,7 @@
         class="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity duration-300 px-4">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6 border border-gray-100">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-lg font-bold text-gray-900">Import WhatsApp Chat</h3>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">Import Chat</h3>
                 <button id="close-upload"
                     class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -686,6 +686,24 @@
                 </div>
                 <input type="file" id="file-input-zip" accept=".zip" class="hidden">
                 <input type="file" id="file-input-folder" webkitdirectory directory multiple class="hidden">
+            </div>
+
+            <!-- OR paste text -->
+            <div class="flex items-center gap-3 my-4">
+                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+                <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">or</span>
+                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+            <button id="toggle-paste-btn"
+                class="w-full text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition flex items-center justify-center gap-2 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/30">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                Paste chat text instead
+            </button>
+            <div id="paste-area" class="hidden mt-3">
+                <textarea id="paste-text" rows="6" placeholder="Paste the contents of your _chat.txt here…&#10;&#10;e.g.&#10;3/22/23, 4:51 PM - Rahul: hey&#10;3/22/23, 4:52 PM - You: hi!"
+                    class="w-full text-[12px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-400 transition font-mono resize-none"></textarea>
+                <button id="paste-import-btn"
+                    class="mt-2 w-full bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-semibold hover:bg-indigo-700 transition shadow-sm">Import pasted chat</button>
             </div>
 
             <div id="upload-progress" class="mt-4 hidden">
@@ -719,7 +737,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/script.js?v=33"></script>
-    <script src="js/upload.js?v=14"></script>
+    <script src="js/upload.js?v=15"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=19"></script>
     <script src="js/dm.js?v=16"></script>
