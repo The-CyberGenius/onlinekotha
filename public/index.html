@@ -1732,51 +1732,55 @@
 
         <!-- ═══════════ FOOTER ═══════════ -->
         <footer class="mt-auto border-t border-white/[0.06] bg-[#060608]">
-            <div class="max-w-5xl mx-auto px-5 sm:px-8 pt-10 pb-6">
+            <div style="max-width:1024px;margin:0 auto;padding:40px 24px 24px">
                 <!-- Top row -->
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-8">
+                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:40px;margin-bottom:32px">
                     <!-- Brand -->
-                    <div>
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <img src="/logo.svg" alt="Kotha Logo" class="w-7 h-7" />
-                            <span class="font-bold text-[15px] text-white">Kotha</span>
+                    <div style="min-width:200px">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+                            <img src="/logo.svg" alt="Kotha Logo" style="width:28px;height:28px" />
+                            <span style="font-weight:700;font-size:15px;color:#fff">Kotha</span>
                         </div>
-                        <p class="text-[12px] text-zinc-500 max-w-[220px] leading-relaxed">Relive your conversations. Chat with memories.</p>
+                        <p style="font-size:12px;color:#71717a;max-width:220px;line-height:1.6">Relive your conversations. Chat with memories.</p>
                     </div>
                     <!-- Links -->
-                    <div class="flex flex-wrap gap-x-8 gap-y-3">
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Product</span>
-                            <a href="#how" class="text-[12px] text-zinc-500 hover:text-white transition">How it works</a>
-                            <a href="#pricing" class="text-[12px] text-zinc-500 hover:text-white transition">Pricing</a>
-                            <a href="/app.html" class="text-[12px] text-zinc-500 hover:text-white transition">Open App</a>
-                            <a href="/blog.html" class="text-[12px] text-zinc-500 hover:text-white transition">Blog</a>
+                    <div style="display:flex;flex-wrap:wrap;gap:48px">
+                        <div style="display:flex;flex-direction:column;gap:10px">
+                            <span style="font-size:10px;font-weight:700;color:#52525b;text-transform:uppercase;letter-spacing:.12em;margin-bottom:2px">Product</span>
+                            <a href="#how" class="foot-link">How it works</a>
+                            <a href="#pricing" class="foot-link">Pricing</a>
+                            <a href="/app.html" class="foot-link">Open App</a>
+                            <a href="/blog.html" class="foot-link">Blog</a>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Legal</span>
-                            <a href="/privacy.html" class="text-[12px] text-zinc-500 hover:text-white transition">Privacy Policy</a>
-                            <a href="/terms.html" class="text-[12px] text-zinc-500 hover:text-white transition">Terms of Service</a>
-                            <a href="/refund.html" class="text-[12px] text-zinc-500 hover:text-white transition">Refund Policy</a>
+                        <div style="display:flex;flex-direction:column;gap:10px">
+                            <span style="font-size:10px;font-weight:700;color:#52525b;text-transform:uppercase;letter-spacing:.12em;margin-bottom:2px">Legal</span>
+                            <a href="/privacy.html" class="foot-link">Privacy Policy</a>
+                            <a href="/terms.html" class="foot-link">Terms of Service</a>
+                            <a href="/refund.html" class="foot-link">Refund Policy</a>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Support</span>
-                            <a href="/contact.html" class="text-[12px] text-zinc-500 hover:text-white transition">Contact Us</a>
-                            <a href="#faq" class="text-[12px] text-zinc-500 hover:text-white transition">FAQ</a>
-                            <a href="/login.html" class="text-[12px] text-zinc-500 hover:text-white transition">Login</a>
-                            <a href="/login.html#signup" class="text-[12px] text-zinc-500 hover:text-white transition">Sign up free</a>
+                        <div style="display:flex;flex-direction:column;gap:10px">
+                            <span style="font-size:10px;font-weight:700;color:#52525b;text-transform:uppercase;letter-spacing:.12em;margin-bottom:2px">Support</span>
+                            <a href="/contact.html" class="foot-link">Contact Us</a>
+                            <a href="#faq" class="foot-link">FAQ</a>
+                            <a href="/login.html" class="foot-link">Login</a>
+                            <a href="/login.html#signup" class="foot-link">Sign up free</a>
                         </div>
                     </div>
                 </div>
                 <!-- Bottom row -->
-                <div class="border-t border-white/[0.04] pt-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <span class="text-[11px] text-zinc-700">&copy; <span id="year"></span> Kotha. All rights reserved.</span>
-                    <div class="flex items-center gap-1.5">
-                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                        <span class="text-[11px] text-zinc-600">All systems operational</span>
+                <div style="border-top:1px solid rgba(255,255,255,.05);padding-top:20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+                    <span style="font-size:11px;color:#52525b">&copy; <span id="year"></span> Kotha. All rights reserved.</span>
+                    <div style="display:flex;align-items:center;gap:6px">
+                        <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e"></span>
+                        <span style="font-size:11px;color:#71717a">All systems operational</span>
                     </div>
                 </div>
             </div>
         </footer>
+        <style>
+            .foot-link { font-size:12.5px; color:#a1a1aa; text-decoration:none; transition:color .15s; }
+            .foot-link:hover { color:#fff; }
+        </style>
 
         <!-- Back to top button -->
         <button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})"
