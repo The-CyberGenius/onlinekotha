@@ -117,6 +117,18 @@ function selectContext(messages, query, opts = {}) {
     const dateHints = extractDateHints(query);
     const hasDateHints = dateHints.months.length > 0 || dateHints.years.length > 0;
 
+    // Phrase detection — find notable multi-word phrases in the query so we can
+    // surface messages that literally contain them (e.g. "i love you", "miss you").
+    const qLower = ' ' + String(query || '').toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+    const qWords = qLower.trim().split(' ').filter(Boolean);
+    const KNOWN_PHRASES = ['i love you', 'love you', 'miss you', 'i miss you', 'love u', 'miss u', 'good night', 'good morning', 'i hate you'];
+    const phrases = KNOWN_PHRASES.filter(p => qLower.includes(' ' + p + ' '));
+    // also add any contiguous 2-word run of meaningful words from the query
+    for (let i = 0; i < qWords.length - 1; i++) {
+        const w1 = qWords[i], w2 = qWords[i + 1];
+        if (w1.length > 2 && w2.length > 2) phrases.push(w1 + ' ' + w2);
+    }
+
     const scored = messages.map((m, i) => {
         const tokens = tokenizedMessages[i];
         const len = tokens.length || 1;
@@ -129,6 +141,15 @@ function selectContext(messages, query, opts = {}) {
                 if (!tf[term]) continue;
                 const f = tf[term];
                 score += (idf[term] * f * (k1 + 1)) / (f + k1 * (1 - b + (b * len) / avgLen));
+            }
+        }
+
+        // Phrase boost — message literally contains a phrase from the query.
+        // Heavily surfaces "i love you" type factual lookups across the full history.
+        if (phrases.length && m.text) {
+            const mt = ' ' + m.text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+            for (const p of phrases) {
+                if (mt.includes(' ' + p + ' ')) { score += 6; break; }
             }
         }
 
