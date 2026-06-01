@@ -130,6 +130,9 @@ async function streamOpenAICompatible({ model, messages, systemPrompt, maxTokens
             messages: chatMessages,
             max_tokens: maxTokens,
             temperature,
+            // Anti-repetition: stops the model looping the same phrase/sentence
+            frequency_penalty: 0.7,
+            presence_penalty: 0.4,
             stream: true,
             stream_options: { include_usage: true },
         }),
@@ -257,7 +260,11 @@ async function callLLM({ feature, messages, systemPrompt, userId, onToken, signa
     if (!primary && !fallback) throw new LLMError('No models available for this feature', 'NO_MODEL');
 
     const finalSystemPrompt = systemPrompt || route.system_prompt;
-    const maxTokens = route.max_tokens || 1024;
+    // Roleplay replies must be short WhatsApp texts — cap output so the model
+    // can't ramble/loop. Other features keep their configured limit.
+    const maxTokens = feature === 'chat'
+        ? Math.min(route.max_tokens || 220, 220)
+        : (route.max_tokens || 1024);
     const temperature = route.temperature ?? 0.7;
 
     const attempts = [primary, fallback].filter(Boolean);
