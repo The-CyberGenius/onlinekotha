@@ -171,12 +171,11 @@ async function streamGoogle({ model, messages, systemPrompt, maxTokens, temperat
 
     const body = {
         contents,
+        // NOTE: Gemini rejects frequency/presence penalty ("Penalty is not enabled")
+        // so repetition is controlled via the system prompt + short maxOutputTokens.
         generationConfig: {
             maxOutputTokens: maxTokens,
             temperature,
-            // Anti-repetition — stops Gemini looping the same phrase/sentence
-            frequencyPenalty: 0.7,
-            presencePenalty: 0.4,
             thinkingConfig: { thinkingBudget: 0 },
         },
         safetySettings: [
