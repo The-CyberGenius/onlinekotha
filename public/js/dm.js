@@ -108,18 +108,20 @@
 
     // ── Init ─────────────────────────────────────────────────
     async function init() {
-        // Use existing window.__USER__ (set by auth-init.js) — no extra fetch needed
-        if (window.__USER__) {
-            me = window.__USER__;
-            me.id = Number(me.id);
-        } else {
-            // Fallback: fetch if __USER__ not ready yet
-            const r = await fetch('/api/me');
-            const d = await r.json();
-            if (!d.user) return;
-            me = d.user;
-            me.id = Number(me.id);
-        }
+        // Resolve current user (correct endpoint is /api/auth/me).
+        // NOTE: even if this fails, we still start polling — openConv sets me.id
+        // from the messages response, so real-time must not depend on this.
+        try {
+            if (window.__USER__) {
+                me = window.__USER__;
+            } else {
+                const r = await fetch('/api/auth/me');
+                const d = await r.json();
+                if (d && d.user) me = d.user;
+            }
+            if (me) me.id = Number(me.id);
+        } catch (e) { /* ignore — polling still runs below */ }
+
         connectSocket();
         startPolling();      // active-conversation real-time (always on)
         startConvPolling();  // conversation-list real-time
