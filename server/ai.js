@@ -135,6 +135,9 @@ router.post('/chat', aiGate, async (req, res) => {
     const { selected, stats } = selectContext(chatMessages, message, { topK: 50, includeRecent: 20 });
     const contextBlock = formatContext(selected, chat);
 
+    // Deep persona analysis — humor, slang, emojis, love terms, timing, language
+    const personaProfile = analyzePersona(chatMessages, contactName, userName);
+
     // SSE response setup
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -164,6 +167,7 @@ router.post('/chat', aiGate, async (req, res) => {
         systemPrompt = route.system_prompt
             .replace(/\{\{contactName\}\}/g, contactName)
             .replace(/\{\{userName\}\}/g, userName)
+            .replace(/\{\{persona\}\}/g, personaProfile)
             .replace(/\{\{contextBlock\}\}/g, contextBlock)
             .replace(/\{\{currentDate\}\}/g, dateStr)
             .replace(/\{\{currentTime\}\}/g, timeStr)
@@ -171,14 +175,19 @@ router.post('/chat', aiGate, async (req, res) => {
             .replace(/\{\{historyNote\}\}/g, historyNote)
             .replace(/\$\{contactName\}/g, contactName)
             .replace(/\$\{userName\}/g, userName)
+            .replace(/\$\{persona\}/g, personaProfile)
             .replace(/\$\{contextBlock\}/g, contextBlock)
             .replace(/\$\{currentDate\}/g, dateStr)
             .replace(/\$\{currentTime\}/g, timeStr)
             .replace(/\$\{totalMessages\}/g, String(totalMsgs))
             .replace(/\$\{historyNote\}/g, historyNote);
+        // If custom prompt has no persona placeholder, prepend the analysis so it's never lost
+        if (personaProfile && !/persona/i.test(route.system_prompt)) {
+            systemPrompt = personaProfile + '\n\n' + systemPrompt;
+        }
     } else {
-        // Build default roleplay prompt (pass stats so AI knows how much history exists)
-        systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats);
+        // Build default roleplay prompt (pass stats + persona analysis)
+        systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats, personaProfile);
     }
     const llmMessages = history.map(h => ({ role: h.role, content: h.content }));
 
@@ -223,7 +232,89 @@ router.post('/chat', aiGate, async (req, res) => {
     }
 });
 
-function buildRoleplayPrompt(contactName, userName, contextBlock, currentDate, currentTime, stats) {
+// ─── Deep persona analysis: study the contact's real texting DNA ───
+function analyzePersona(messages, contactName, userName) {
+    const mine = messages.filter(m => m.sender === contactName && m.type === 'text' && m.text);
+    if (mine.length < 3) return '';
+    const texts = mine.map(m => m.text);
+    const joined = ' ' + texts.join('  ').toLowerCase() + ' ';
+
+    // Date span
+    const dated = messages.filter(m => m.date && m.type !== 'system');
+    const firstDate = dated[0]?.date, lastDate = dated[dated.length - 1]?.date;
+
+    // Who texts more
+    const counts = {};
+    messages.forEach(m => { if (m.sender && m.type !== 'system') counts[m.sender] = (counts[m.sender] || 0) + 1; });
+    const mineCount = counts[contactName] || 0, otherCount = counts[userName] || 0;
+    const balance = mineCount > otherCount * 1.4 ? `${contactName} texts more (chattier)` :
+                    otherCount > mineCount * 1.4 ? `${contactName} replies less (more reserved)` : 'both text about equally';
+
+    // Active time of day
+    const hours = {};
+    mine.forEach(m => { const h = parseHour(m.time); if (h != null) hours[Math.floor(h)] = (hours[Math.floor(h)] || 0) + 1; });
+    const topHour = Object.entries(hours).sort((a, b) => b[1] - a[1])[0];
+    const timeOfDay = topHour ? describeHour(Number(topHour[0])) : null;
+
+    // Emojis
+    const emojis = joined.match(/\p{Extended_Pictographic}/gu) || [];
+    const ef = {}; emojis.forEach(e => ef[e] = (ef[e] || 0) + 1);
+    const topEmojis = Object.entries(ef).sort((a, b) => b[1] - a[1]).slice(0, 6).map(e => e[0]);
+
+    // Signature slang / fillers actually present
+    const SLANG = ['yaar','yrr','bhai','bro','arre','arey','matlab','basically','acha','accha','haan','haa','nhi','nahi','toh','na','kya','abey','abe','oye','lol','haha','hehe','lmao','hmm','hmmm','bas','chal','dekh','sun','wese','waise','scene','vibe','bc','damn','okk','okie'];
+    const slang = SLANG.filter(w => joined.includes(' ' + w + ' ') || joined.includes(w + ' ')).slice(0, 12);
+
+    // Affection / love terms
+    const LOVE = ['jaan','jaanu','baby','babu','love you','luv u','miss you','miss u','cutie','sweetheart','pyaar','pyar','dear','sona','😘','🥰','😍','❤️','♥️'];
+    const love = LOVE.filter(w => joined.includes(w)).slice(0, 6);
+
+    // Short-forms / typing style
+    const SHORT = ['kl','kal','bht','bohot','nhi','kr','krna','rha','rhi','h ','hn','y ','k ','tmr','rn','msg','pls','plz'];
+    const shorts = SHORT.map(s => s.trim()).filter(s => joined.includes(' ' + s + ' ')).slice(0, 8);
+
+    // Avg length & language
+    const avgWords = Math.round(texts.reduce((s, t) => s + t.trim().split(/\s+/).length, 0) / texts.length);
+    const HIN = ['hai','nahi','kya','tum','mai','main','mujhe','tumhe','kar','raha','rahi','rhe','ho','ka','ki','ke','me','se','bhi','aur','kyun','kaise','kuch','accha','theek','bata','batao','chahiye'];
+    let hin = 0, tot = 0;
+    joined.split(/\s+/).forEach(w => { if (w) { tot++; if (HIN.includes(w)) hin++; } });
+    const ratio = tot ? hin / tot : 0;
+    const lang = ratio > 0.12 ? 'Hinglish, Hindi-leaning' : ratio > 0.04 ? 'Hinglish (balanced mix)' : 'mostly English';
+
+    const L = [];
+    L.push(`═══ ${contactName.toUpperCase()}'s TEXTING DNA (analyzed from ${mineCount} of their real messages) ═══`);
+    if (firstDate && lastDate) L.push(`• You two have talked from ${firstDate} to ${lastDate}.`);
+    L.push(`• Chat balance: ${balance}.`);
+    if (timeOfDay) L.push(`• ${contactName} is most active ${timeOfDay}.`);
+    L.push(`• Typical message length: ${avgWords <= 4 ? 'very short & snappy' : avgWords <= 10 ? 'short to medium' : 'often longer'} (~${avgWords} words). MATCH this length.`);
+    L.push(`• Language: ${lang}. Mirror this exact mix.`);
+    if (slang.length) L.push(`• Signature slang/fillers (USE these naturally): ${slang.join(', ')}`);
+    if (shorts.length) L.push(`• Short-forms they actually type: ${shorts.join(', ')} — spell words the same lazy way.`);
+    if (topEmojis.length) L.push(`• Emojis they use: ${topEmojis.join(' ')} — use these, at their frequency.`);
+    else L.push(`• They rarely use emojis — so YOU should rarely use emojis too.`);
+    if (love.length) L.push(`• Affection style: warm — uses ${love.join(', ')}. Show love their way.`);
+    L.push(`• Humor: pick up their joking/teasing style from the history below and echo it.`);
+    return L.join('\n');
+}
+
+function parseHour(t) {
+    if (!t) return null;
+    const m = String(t).match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
+    if (!m) return null;
+    let h = parseInt(m[1]);
+    const ap = (m[3] || '').toLowerCase();
+    if (ap === 'pm' && h < 12) h += 12;
+    if (ap === 'am' && h === 12) h = 0;
+    return h;
+}
+function describeHour(h) {
+    if (h >= 5 && h < 12) return 'in the morning';
+    if (h >= 12 && h < 17) return 'in the afternoon';
+    if (h >= 17 && h < 21) return 'in the evening';
+    return 'late at night';
+}
+
+function buildRoleplayPrompt(contactName, userName, contextBlock, currentDate, currentTime, stats, personaProfile) {
     const totalMsgs = stats && stats.totalMessages ? stats.totalMessages : null;
     const historyNote = totalMsgs ? ` (${totalMsgs} messages in full history)` : '';
 
@@ -232,6 +323,7 @@ function buildRoleplayPrompt(contactName, userName, contextBlock, currentDate, c
 ═══ YOUR IDENTITY ═══
 
 You ARE ${contactName}. The chat history below is YOUR actual memory — real conversations you've had with ${userName}.${historyNote ? ` Total: ${totalMsgs} messages.` : ''}
+${personaProfile ? '\n' + personaProfile + '\n\nStudy the DNA above carefully — then BECOME this person. Replicate their exact vibe so ' + userName + ' truly feels they are talking to the real ' + contactName + '.\n' : ''}
 
 ═══ HOW TO RESPOND ═══
 
