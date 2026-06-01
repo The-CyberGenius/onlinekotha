@@ -2164,44 +2164,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const dockDot = document.getElementById('dock-dot');
 
+        // Vector from frame center → dock-icon center (so the genie targets the icon)
+        function dockVector() {
+            const fr = frame.getBoundingClientRect();
+            if (!dockIcon) return { dx: 0, dy: window.innerHeight };
+            const dr = dockIcon.getBoundingClientRect();
+            return {
+                dx: (dr.left + dr.width / 2) - (fr.left + fr.width / 2),
+                dy: (dr.top + dr.height / 2) - (fr.top + fr.height / 2),
+            };
+        }
+
         function genieMinimize() {
             if (minimized) return;
             minimized = true;
             rhOverlay.style.display = 'none';
-            frame.classList.remove('genie-restore');
-            frame.classList.add('genie-minimize');
             if (dockDot) dockDot.style.opacity = '0';
-            if (dock) dock.style.removeProperty('display'); // Make sure dock is shown on minimize
+            if (dock) dock.style.removeProperty('display'); // dock visible to receive it
+
+            const { dx, dy } = dockVector();
+            frame.style.transformOrigin = 'center center';
+            frame.style.transition = 'transform 480ms cubic-bezier(0.4,0,0.6,1), opacity 460ms ease';
+            requestAnimationFrame(() => {
+                frame.style.transform = `translate(${dx}px, ${dy}px) scale(0.04)`;
+                frame.style.opacity = '0';
+            });
             setTimeout(() => {
                 frame.classList.add('mac-minimized');
-                frame.classList.remove('genie-minimize');
-            }, 500);
+                frame.style.transition = 'none';
+                frame.style.transform = '';
+                frame.style.opacity = '';
+                // dock icon little bounce on land
+                if (dockIcon) { dockIcon.classList.add('dock-bounce'); setTimeout(() => dockIcon.classList.remove('dock-bounce'), 500); }
+            }, 490);
         }
 
         function genieRestore() {
             if (!minimized) return;
             minimized = false;
-            frame.classList.remove('mac-minimized', 'genie-minimize');
-            frame.classList.add('genie-restore');
             if (dockDot) dockDot.style.opacity = '1';
-            
-            // If restoring while still in fullscreen mode, keep dock hidden, otherwise show it
             if (dock) {
-                if (frame.classList.contains('mac-fullscreen')) {
-                    dock.style.setProperty('display', 'none', 'important');
-                } else {
-                    dock.style.removeProperty('display');
-                }
+                if (frame.classList.contains('mac-fullscreen')) dock.style.setProperty('display', 'none', 'important');
+                else dock.style.removeProperty('display');
             }
 
-            if (dockIcon) {
-                dockIcon.classList.add('dock-bounce');
-                setTimeout(() => dockIcon.classList.remove('dock-bounce'), 600);
-            }
-            setTimeout(() => {
-                frame.classList.remove('genie-restore');
-                syncOverlay();
-            }, 450);
+            // Reveal at natural position, then start FROM the dock icon and grow back
+            frame.classList.remove('mac-minimized');
+            const { dx, dy } = dockVector();
+            frame.style.transition = 'none';
+            frame.style.transformOrigin = 'center center';
+            frame.style.transform = `translate(${dx}px, ${dy}px) scale(0.04)`;
+            frame.style.opacity = '0';
+            // next frame: animate back to identity
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                frame.style.transition = 'transform 450ms cubic-bezier(0.2,0,0.2,1), opacity 400ms ease';
+                frame.style.transform = '';
+                frame.style.opacity = '';
+            }));
+            if (dockIcon) { dockIcon.classList.add('dock-bounce'); setTimeout(() => dockIcon.classList.remove('dock-bounce'), 600); }
+            setTimeout(() => { frame.style.transition = ''; syncOverlay(); }, 470);
         }
 
         if (closeBtn) closeBtn.addEventListener('click', () => {
