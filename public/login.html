@@ -80,6 +80,9 @@
             </div>
 
             <form id="auth-form" class="space-y-5 hidden">
+                <!-- Honeypot — hidden from humans; bots fill it and get rejected -->
+                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"
+                    style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
                 <!-- Floating Label Input: Email -->
                 <div class="relative group">
                     <input type="email" id="email" class="block rounded-2xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50/50 border-2 border-gray-100 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 peer shadow-sm" placeholder=" " required />
@@ -107,12 +110,17 @@
                 <p id="trial-info" class="text-xs text-indigo-700 font-semibold text-center bg-indigo-50 border border-indigo-100 rounded-xl py-3 px-4 hidden mt-6 shadow-sm">
                     ✨ New users get a <b>1 day free trial</b> of AI features!
                 </p>
+
+                <p class="text-center text-xs text-gray-500 mt-3">
+                    <span id="email-mode-text">New here?</span>
+                    <button type="button" id="email-mode-toggle" class="font-bold text-indigo-600 hover:text-indigo-500 transition ml-1">Create an account</button>
+                </p>
             </form>
         </div>
     </div>
 
     <script>
-        const mode = 'login'; // email form is login-only; signup is Google-only
+        let mode = 'login'; // 'login' or 'signup' (email form)
         const submitBtn = document.getElementById('submit-btn');
         const btnText = document.getElementById('btn-text');
         const errorMsg = document.getElementById('error-msg');
@@ -124,7 +132,7 @@
             return '/app';
         }
 
-        // Reveal the email-login form (for existing accounts only)
+        // Reveal the email form
         document.getElementById('show-email-btn')?.addEventListener('click', function () {
             document.getElementById('auth-form')?.classList.remove('hidden');
             document.getElementById('auth-divider')?.classList.remove('hidden');
@@ -133,10 +141,23 @@
             document.getElementById('email')?.focus();
         });
 
+        // Toggle between Login and Sign Up (email form)
+        document.getElementById('email-mode-toggle')?.addEventListener('click', function () {
+            mode = mode === 'login' ? 'signup' : 'login';
+            const isLogin = mode === 'login';
+            btnText.textContent = isLogin ? 'Sign In' : 'Create Account';
+            document.getElementById('email-mode-text').textContent = isLogin ? 'New here?' : 'Already have an account?';
+            this.textContent = isLogin ? 'Create an account' : 'Log in instead';
+            document.getElementById('trial-info')?.classList.toggle('hidden', isLogin);
+            document.getElementById('forgot-link').style.display = isLogin ? 'block' : 'none';
+            errorMsg.classList.add('hidden');
+        });
+
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const website = document.getElementById('website')?.value || ''; // honeypot
             errorMsg.classList.add('hidden');
             submitBtn.disabled = true;
             btnText.textContent = 'Please wait...';
@@ -146,11 +167,11 @@
                 const resp = await fetch(endpoint, {
                     method: 'POST',
                     headers: {'content-type':'application/json'},
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password, website })
                 });
 
                 if (resp.ok) {
-                    window.location.href = mode === 'signup' ? '/login.html?msg=verify' : getNext();
+                    window.location.href = getNext();
                 } else {
                     const err = await resp.json();
                     errorMsg.textContent = err.error || 'Authentication failed';

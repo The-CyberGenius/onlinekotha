@@ -81,15 +81,52 @@ const authLimiter = rateLimit({
     validate: false,
 });
 
+// Stricter limit for signups — blocks rapid bot account creation
+const signupLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 6,                    // max 6 new accounts per IP per hour
+    message: { error: 'Too many sign-up attempts. Please try again later.' },
+    validate: false,
+});
+
+// Reject fake/disposable/garbage emails (the pattern the bot attack used)
+const BLOCKED_EMAIL_DOMAINS = new Set([
+    'example.com', 'example.org', 'example.net', 'test.com', 'test.test',
+    'its_not_secure.comm', 'mailinator.com', 'tempmail.com', 'guerrillamail.com',
+    '10minutemail.com', 'throwaway.email', 'yopmail.com',
+]);
+function isValidRealEmail(email) {
+    email = String(email || '').toLowerCase().trim();
+    if (email.length > 120) return false;
+    if (/[<>\s"']/.test(email)) return false;                       // injection / spaces
+    if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(email)) return false; // real format + TLD
+    const domain = email.split('@')[1];
+    if (BLOCKED_EMAIL_DOMAINS.has(domain)) return false;
+    if (!domain.includes('.')) return false;
+    return true;
+}
+
 // ---------- Auth routes ----------
-// Email/password signup is DISABLED — Google sign-in only.
-// This stops automated/bot account creation (e.g. @example.com spam).
-// Existing email accounts can still log in via /api/auth/login.
-app.post('/api/auth/signup', authLimiter, async (req, res) => {
-    return res.status(403).json({
-        error: 'Sign up with Google to continue. Email/password registration is disabled.',
-        google_only: true,
-    });
+// Email/password signup with anti-bot protection (honeypot + email validation
+// + strict rate limit). Google sign-in remains the recommended path.
+app.post('/api/auth/signup', signupLimiter, async (req, res) => {
+    try {
+        const { email, password, website } = req.body || {};
+        // Honeypot — real users never fill this hidden field; bots do.
+        if (website) return res.status(400).json({ error: 'Sign-up failed.' });
+        if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+        if (String(password).length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        if (!isValidRealEmail(email)) return res.status(400).json({ error: 'Please enter a valid email address' });
+
+        const user = createUser(email.trim(), password);
+        const { token, expiresAt } = login(email.trim(), password);
+        res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
+        sendVerifyEmail(user).catch(err => console.error('verify email failed:', err.message));
+        res.json({ ok: true, user: { ...user, effective_plan: effectivePlan(user) } });
+    } catch (err) {
+        if (err.code === 'EMAIL_EXISTS') return res.status(409).json({ error: 'Email already registered' });
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.get('/api/auth/verify', (req, res) => {
