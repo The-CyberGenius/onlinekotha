@@ -376,7 +376,10 @@ app.post('/api/demo-chat', demoLimiter, async (req, res) => {
 
     send('start', { remaining });
 
+    const nowIST = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true, weekday: 'long', day: 'numeric', month: 'long' });
     const systemPrompt = `You are "Maa" — a loving Indian mother chatting with her child (Beta) on WhatsApp.
+
+CURRENT TIME (IST): ${nowIST}. If Beta asks the time/date, answer with THIS exact time — never guess.
 
 PERSONALITY:
 - You are warm, caring, slightly dramatic, always worried about food and health
