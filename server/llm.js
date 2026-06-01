@@ -171,7 +171,14 @@ async function streamGoogle({ model, messages, systemPrompt, maxTokens, temperat
 
     const body = {
         contents,
-        generationConfig: { maxOutputTokens: maxTokens, temperature, thinkingConfig: { thinkingBudget: 0 } },
+        generationConfig: {
+            maxOutputTokens: maxTokens,
+            temperature,
+            // Anti-repetition — stops Gemini looping the same phrase/sentence
+            frequencyPenalty: 0.7,
+            presencePenalty: 0.4,
+            thinkingConfig: { thinkingBudget: 0 },
+        },
         safetySettings: [
             { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
             { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
