@@ -1,54 +1,6 @@
 // Retrieves the most relevant messages from a chat history for an AI question.
-// No vector DB / embeddings — uses BM25-ish lexical scoring + recency boost + date awareness.
+// No vector DB / embeddings — uses BM25-ish lexical scoring + recency boost.
 // Fast, free, good enough for v1.
-
-// English + Hindi month aliases for date-aware query parsing
-const MONTH_ALIASES = {
-    jan: 1, january: 1, janwari: 1,
-    feb: 2, february: 2, farvari: 2,
-    mar: 3, march: 3,
-    apr: 4, april: 4,
-    may: 5,
-    jun: 6, june: 6,
-    jul: 7, july: 7,
-    aug: 8, august: 8,
-    sep: 9, september: 9, sept: 9,
-    oct: 10, october: 10,
-    nov: 11, november: 11,
-    dec: 12, december: 12,
-};
-
-/**
- * Extract date clues from the user's query — months, years, specific days.
- * Supports "december 2023", "14/12/22", "last november", etc.
- */
-function extractDateHints(query) {
-    const lower = (query || '').toLowerCase();
-    const months = new Set();
-    const years  = new Set();
-    let dayHint  = null;
-
-    for (const [alias, num] of Object.entries(MONTH_ALIASES)) {
-        if (lower.includes(alias)) months.add(num);
-    }
-
-    // 4-digit year like 2022, 2023, 2024
-    const yearMatch = lower.match(/\b(20\d{2})\b/);
-    if (yearMatch) years.add(parseInt(yearMatch[1]));
-
-    // Explicit date pattern DD/MM/YY(YY) or DD-MM-YY(YY)
-    const dateMatch = lower.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-    if (dateMatch) {
-        dayHint = parseInt(dateMatch[1]);
-        months.add(parseInt(dateMatch[2]));
-        if (dateMatch[3]) {
-            const yr = parseInt(dateMatch[3]);
-            years.add(yr < 100 ? 2000 + yr : yr);
-        }
-    }
-
-    return { months: [...months], years: [...years], day: dayHint };
-}
 
 const STOP_WORDS = new Set([
     'the', 'is', 'a', 'an', 'and', 'or', 'but', 'if', 'then', 'i', 'you', 'he', 'she',
@@ -81,11 +33,11 @@ function uniq(arr) {
  */
 function selectContext(messages, query, opts = {}) {
     const {
-        topK = 50,
+        topK = 25,
         windowBefore = 2,
         windowAfter = 2,
         recencyWeight = 0.15,
-        includeRecent = 20,
+        includeRecent = 10,
     } = opts;
 
     if (!messages || !messages.length) return { selected: [], stats: { matched: 0 } };
@@ -108,26 +60,10 @@ function selectContext(messages, query, opts = {}) {
         idf[t] = Math.log(1 + (n - df[t] + 0.5) / (df[t] + 0.5));
     }
 
-    // BM25-lite + recency + date boost
+    // BM25-lite + recency
     const k1 = 1.4;
     const b = 0.7;
     const avgLen = tokenizedMessages.reduce((s, t) => s + t.length, 0) / Math.max(1, n) || 1;
-
-    // Extract date hints from query for boosting temporally relevant messages
-    const dateHints = extractDateHints(query);
-    const hasDateHints = dateHints.months.length > 0 || dateHints.years.length > 0;
-
-    // Phrase detection — find notable multi-word phrases in the query so we can
-    // surface messages that literally contain them (e.g. "i love you", "miss you").
-    const qLower = ' ' + String(query || '').toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
-    const qWords = qLower.trim().split(' ').filter(Boolean);
-    const KNOWN_PHRASES = ['i love you', 'love you', 'miss you', 'i miss you', 'love u', 'miss u', 'good night', 'good morning', 'i hate you'];
-    const phrases = KNOWN_PHRASES.filter(p => qLower.includes(' ' + p + ' '));
-    // also add any contiguous 2-word run of meaningful words from the query
-    for (let i = 0; i < qWords.length - 1; i++) {
-        const w1 = qWords[i], w2 = qWords[i + 1];
-        if (w1.length > 2 && w2.length > 2) phrases.push(w1 + ' ' + w2);
-    }
 
     const scored = messages.map((m, i) => {
         const tokens = tokenizedMessages[i];
@@ -144,34 +80,9 @@ function selectContext(messages, query, opts = {}) {
             }
         }
 
-        // Phrase boost — message literally contains a phrase from the query.
-        // Heavily surfaces "i love you" type factual lookups across the full history.
-        if (phrases.length && m.text) {
-            const mt = ' ' + m.text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
-            for (const p of phrases) {
-                if (mt.includes(' ' + p + ' ')) { score += 6; break; }
-            }
-        }
-
         // Recency boost: most recent message i=n-1 → +recencyWeight max
         const recency = (i / Math.max(1, n - 1)) * recencyWeight;
-
-        // Date boost: if query mentions a month/year, heavily surface messages from that period
-        // Chat dates are in DD/MM/YY(YY) Indian format — parts[0]=day, parts[1]=month, parts[2]=year
-        let dateBoost = 0;
-        if (hasDateHints && m.date) {
-            const parts = m.date.split('/');
-            if (parts.length === 3) {
-                const mDay   = parseInt(parts[0]);
-                const mMonth = parseInt(parts[1]);
-                const mYear  = parseInt(parts[2].length === 2 ? `20${parts[2]}` : parts[2]);
-                if (dateHints.months.includes(mMonth)) dateBoost += 0.8;
-                if (dateHints.years.includes(mYear))   dateBoost += 0.4;
-                if (dateHints.day && dateHints.day === mDay) dateBoost += 0.3;
-            }
-        }
-
-        return { idx: i, score: score + recency * (score > 0 ? 1 : 0.1) + dateBoost };
+        return { idx: i, score: score + recency * (score > 0 ? 1 : 0.1) };
     });
 
     // Pick top-K by score
@@ -235,4 +146,4 @@ Rules:
 - Keep replies short and human — 2-5 sentences unless asked for detail.
 - Never invent dates, names, or events that aren't in the chat. Never make up quotes.`;
 
-module.exports = { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT, extractDateHints };
+module.exports = { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT };

@@ -5,8 +5,7 @@
       "name": "kotha",
       "runtimeExecutable": "node",
       "runtimeArgs": ["server.js"],
-      "port": 3000,
-      "autoPort": true
+      "port": 3000
     }
   ]
 }

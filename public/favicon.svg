@@ -1,15 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4F46E5" />
-      <stop offset="100%" stop-color="#9333EA" />
-    </linearGradient>
-    <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#EC4899" />
-      <stop offset="100%" stop-color="#8B5CF6" />
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a855f7"/>
     </linearGradient>
   </defs>
-  <path d="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" fill="none" stroke="url(#g1)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="url(#g2)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="65" cy="30" r="7" fill="#fff" />
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <path d="M16 22c0-2 2-4 4-4h24c2 0 4 2 4 4v14c0 2-2 4-4 4H28l-8 8v-8h-1c-2 0-3-2-3-4V22z" fill="white"/>
 </svg>

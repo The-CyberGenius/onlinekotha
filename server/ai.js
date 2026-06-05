@@ -14,7 +14,11 @@ router.use(requireUser);
 // ---------- Plan + rate-limit gates ----------
 function aiGate(req, res, next) {
     const plan = effectivePlan(req.user);
+    if (plan !== 'trial' && plan !== 'paid') {
+        return res.status(402).json({ error: 'Trial ended. Upgrade to keep chatting.' });
+    }
 
+    const dailyMax = Number(getSetting('paid_user_daily_messages', '500'));
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const usedToday = db.prepare(
@@ -23,25 +27,8 @@ function aiGate(req, res, next) {
          WHERE c.user_id = ? AND cm.role = 'user' AND cm.created_at >= ?`
     ).get(req.user.id, startOfDay.getTime()).n;
 
-    // Paid plan = truly unlimited, no cap check at all
-    if (plan === 'paid') return next();
-
-    if (plan === 'free') {
-        // Free tier: small daily cap
-        const freeMax = Number(getSetting('free_user_daily_messages', '3'));
-        if (freeMax > 0 && usedToday >= freeMax) {
-            return res.status(429).json({
-                error: `Free tier: ${freeMax} messages/day used. Resets at midnight.`,
-                limit: freeMax,
-                used: usedToday,
-            });
-        }
-    } else {
-        // Trial users: higher cap but still limited
-        const trialMax = Number(getSetting('paid_user_daily_messages', '500'));
-        if (trialMax > 0 && usedToday >= trialMax) {
-            return res.status(429).json({ error: `Daily limit (${trialMax}) reached. Resets at midnight.` });
-        }
+    if (dailyMax > 0 && usedToday >= dailyMax) {
+        return res.status(429).json({ error: `Daily limit (${dailyMax}) reached. Resets at midnight.` });
     }
     next();
 }
@@ -122,21 +109,9 @@ router.post('/chat', aiGate, async (req, res) => {
         `SELECT role, content FROM conv_messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 12`
     ).all(convId).reverse();
 
-    // Detect sender names (most messages = user, second = contact)
-    const senderCounts = {};
-    for (const m of chatMessages) {
-        if (m.sender && m.type !== 'system') senderCounts[m.sender] = (senderCounts[m.sender] || 0) + 1;
-    }
-    const sortedSenders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
-    const userName = sortedSenders[0]?.[0] || 'User';
-    const contactName = sortedSenders[1]?.[0] || sortedSenders[0]?.[0] || 'Friend';
-
-    // Build context from chat (larger window + date-aware boosting)
-    const { selected, stats } = selectContext(chatMessages, message, { topK: 50, includeRecent: 20 });
+    // Build context from chat
+    const { selected, stats } = selectContext(chatMessages, message);
     const contextBlock = formatContext(selected, chat);
-
-    // Deep persona analysis — humor, slang, emojis, love terms, timing, language
-    const personaProfile = analyzePersona(chatMessages, contactName, userName);
 
     // SSE response setup
     res.setHeader('Content-Type', 'text/event-stream');
@@ -150,45 +125,10 @@ router.post('/chat', aiGate, async (req, res) => {
         res.write(`data: ${JSON.stringify(data)}\n\n`);
     };
 
-    // Current time for AI awareness
-    const serverNow = new Date();
-    const timeStr = serverNow.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
-    const dateStr = serverNow.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
+    send('start', { conversationId: convId, stats });
 
-    send('start', { conversationId: convId, stats, contactName, userName, time: timeStr, date: dateStr });
-
-    // Load custom system prompt if configured in DB, else fallback to default template
-    const route = db.prepare('SELECT system_prompt FROM routes WHERE feature = ?').get('chat');
-    let systemPrompt;
-    if (route && route.system_prompt) {
-        const totalMsgs = stats && stats.totalMessages ? stats.totalMessages : 0;
-        const historyNote = totalMsgs ? ` (${totalMsgs} messages in full history)` : '';
-        
-        systemPrompt = route.system_prompt
-            .replace(/\{\{contactName\}\}/g, contactName)
-            .replace(/\{\{userName\}\}/g, userName)
-            .replace(/\{\{persona\}\}/g, personaProfile)
-            .replace(/\{\{contextBlock\}\}/g, contextBlock)
-            .replace(/\{\{currentDate\}\}/g, dateStr)
-            .replace(/\{\{currentTime\}\}/g, timeStr)
-            .replace(/\{\{totalMessages\}\}/g, String(totalMsgs))
-            .replace(/\{\{historyNote\}\}/g, historyNote)
-            .replace(/\$\{contactName\}/g, contactName)
-            .replace(/\$\{userName\}/g, userName)
-            .replace(/\$\{persona\}/g, personaProfile)
-            .replace(/\$\{contextBlock\}/g, contextBlock)
-            .replace(/\$\{currentDate\}/g, dateStr)
-            .replace(/\$\{currentTime\}/g, timeStr)
-            .replace(/\$\{totalMessages\}/g, String(totalMsgs))
-            .replace(/\$\{historyNote\}/g, historyNote);
-        // If custom prompt has no persona placeholder, prepend the analysis so it's never lost
-        if (personaProfile && !/persona/i.test(route.system_prompt)) {
-            systemPrompt = personaProfile + '\n\n' + systemPrompt;
-        }
-    } else {
-        // Build default roleplay prompt (pass stats + persona analysis)
-        systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats, personaProfile);
-    }
+    // Build prompt
+    const systemPrompt = `${DEFAULT_SYSTEM_PROMPT}\n\n--- Chat context ---\n${contextBlock}\n--- End context ---`;
     const llmMessages = history.map(h => ({ role: h.role, content: h.content }));
 
     let fullText = '';
@@ -209,12 +149,7 @@ router.post('/chat', aiGate, async (req, res) => {
         });
 
         const citations = extractCitations(fullText);
-        // Strip any leaked context-header tags (e.g. [#144789 19/05/26 11:43 PM sender])
-        const cleanText = fullText
-            .replace(/\[#\d+[^\]\n]*\]/g, '')
-            .replace(/[ \t]{2,}/g, ' ')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
+        const cleanText = fullText;
 
         db.prepare(
             `INSERT INTO conv_messages (conversation_id, role, content, citations, created_at)
@@ -232,163 +167,6 @@ router.post('/chat', aiGate, async (req, res) => {
     }
 });
 
-// ─── Deep persona analysis: study the contact's real texting DNA ───
-function analyzePersona(messages, contactName, userName) {
-    const mine = messages.filter(m => m.sender === contactName && m.type === 'text' && m.text);
-    if (mine.length < 3) return '';
-    const texts = mine.map(m => m.text);
-    const joined = ' ' + texts.join('  ').toLowerCase() + ' ';
-
-    // Date span
-    const dated = messages.filter(m => m.date && m.type !== 'system');
-    const firstDate = dated[0]?.date, lastDate = dated[dated.length - 1]?.date;
-
-    // Who texts more
-    const counts = {};
-    messages.forEach(m => { if (m.sender && m.type !== 'system') counts[m.sender] = (counts[m.sender] || 0) + 1; });
-    const mineCount = counts[contactName] || 0, otherCount = counts[userName] || 0;
-    const balance = mineCount > otherCount * 1.4 ? `${contactName} texts more (chattier)` :
-                    otherCount > mineCount * 1.4 ? `${contactName} replies less (more reserved)` : 'both text about equally';
-
-    // Active time of day
-    const hours = {};
-    mine.forEach(m => { const h = parseHour(m.time); if (h != null) hours[Math.floor(h)] = (hours[Math.floor(h)] || 0) + 1; });
-    const topHour = Object.entries(hours).sort((a, b) => b[1] - a[1])[0];
-    const timeOfDay = topHour ? describeHour(Number(topHour[0])) : null;
-
-    // Emojis
-    const emojis = joined.match(/\p{Extended_Pictographic}/gu) || [];
-    const ef = {}; emojis.forEach(e => ef[e] = (ef[e] || 0) + 1);
-    const topEmojis = Object.entries(ef).sort((a, b) => b[1] - a[1]).slice(0, 6).map(e => e[0]);
-
-    // Signature slang / fillers actually present
-    const SLANG = ['yaar','yrr','bhai','bro','arre','arey','matlab','basically','acha','accha','haan','haa','nhi','nahi','toh','na','kya','abey','abe','oye','lol','haha','hehe','lmao','hmm','hmmm','bas','chal','dekh','sun','wese','waise','scene','vibe','bc','damn','okk','okie'];
-    const slang = SLANG.filter(w => joined.includes(' ' + w + ' ') || joined.includes(w + ' ')).slice(0, 12);
-
-    // Affection / love terms
-    const LOVE = ['jaan','jaanu','baby','babu','love you','luv u','miss you','miss u','cutie','sweetheart','pyaar','pyar','dear','sona','😘','🥰','😍','❤️','♥️'];
-    const love = LOVE.filter(w => joined.includes(w)).slice(0, 6);
-
-    // Short-forms / typing style
-    const SHORT = ['kl','kal','bht','bohot','nhi','kr','krna','rha','rhi','h ','hn','y ','k ','tmr','rn','msg','pls','plz'];
-    const shorts = SHORT.map(s => s.trim()).filter(s => joined.includes(' ' + s + ' ')).slice(0, 8);
-
-    // Avg length & language
-    const avgWords = Math.round(texts.reduce((s, t) => s + t.trim().split(/\s+/).length, 0) / texts.length);
-    const HIN = ['hai','nahi','kya','tum','mai','main','mujhe','tumhe','kar','raha','rahi','rhe','ho','ka','ki','ke','me','se','bhi','aur','kyun','kaise','kuch','accha','theek','bata','batao','chahiye'];
-    let hin = 0, tot = 0;
-    joined.split(/\s+/).forEach(w => { if (w) { tot++; if (HIN.includes(w)) hin++; } });
-    const ratio = tot ? hin / tot : 0;
-    const lang = ratio > 0.12 ? 'Hinglish, Hindi-leaning' : ratio > 0.04 ? 'Hinglish (balanced mix)' : 'mostly English';
-
-    const L = [];
-    L.push(`═══ ${contactName.toUpperCase()}'s TEXTING DNA (analyzed from ${mineCount} of their real messages) ═══`);
-    if (firstDate && lastDate) L.push(`• You two have talked from ${firstDate} to ${lastDate}.`);
-    L.push(`• Chat balance: ${balance}.`);
-    if (timeOfDay) L.push(`• ${contactName} is most active ${timeOfDay}.`);
-    L.push(`• Typical message length: ${avgWords <= 4 ? 'very short & snappy' : avgWords <= 10 ? 'short to medium' : 'often longer'} (~${avgWords} words). MATCH this length.`);
-    L.push(`• Language: ${lang}. Mirror this exact mix.`);
-    if (slang.length) L.push(`• Signature slang/fillers (USE these naturally): ${slang.join(', ')}`);
-    if (shorts.length) L.push(`• Short-forms they actually type: ${shorts.join(', ')} — spell words the same lazy way.`);
-    if (topEmojis.length) L.push(`• Emojis they use: ${topEmojis.join(' ')} — use these, at their frequency.`);
-    else L.push(`• They rarely use emojis — so YOU should rarely use emojis too.`);
-    if (love.length) L.push(`• Affection style: warm — uses ${love.join(', ')}. Show love their way.`);
-    L.push(`• Humor: pick up their joking/teasing style from the history below and echo it.`);
-    return L.join('\n');
-}
-
-function parseHour(t) {
-    if (!t) return null;
-    const m = String(t).match(/(\d{1,2}):(\d{2})\s*(am|pm)?/i);
-    if (!m) return null;
-    let h = parseInt(m[1]);
-    const ap = (m[3] || '').toLowerCase();
-    if (ap === 'pm' && h < 12) h += 12;
-    if (ap === 'am' && h === 12) h = 0;
-    return h;
-}
-function describeHour(h) {
-    if (h >= 5 && h < 12) return 'in the morning';
-    if (h >= 12 && h < 17) return 'in the afternoon';
-    if (h >= 17 && h < 21) return 'in the evening';
-    return 'late at night';
-}
-
-function buildRoleplayPrompt(contactName, userName, contextBlock, currentDate, currentTime, stats, personaProfile) {
-    const totalMsgs = stats && stats.totalMessages ? stats.totalMessages : null;
-    const historyNote = totalMsgs ? ` (${totalMsgs} messages in full history)` : '';
-
-    return `You are ${contactName}, texting ${userName} on WhatsApp. Right now: ${currentTime} IST, ${currentDate}.
-
-═══ YOUR IDENTITY ═══
-
-You ARE ${contactName}. The chat history below is YOUR actual memory — real conversations you've had with ${userName}.${historyNote ? ` Total: ${totalMsgs} messages.` : ''}
-${personaProfile ? '\n' + personaProfile + '\n\nStudy the DNA above carefully — then BECOME this person. Replicate their exact vibe so ' + userName + ' truly feels they are talking to the real ' + contactName + '.\n' : ''}
-
-═══ HOW TO RESPOND ═══
-
-BEFORE replying, absorb from history:
-• ${contactName}'s EXACT writing style — spelling, shortcuts, typos, punctuation
-• Language pattern — pure Hindi / English / Hinglish mix ratio (match it precisely)
-• Emoji usage — frequency and which specific emojis (if rare in history = rare in replies)
-• How ${contactName} addresses ${userName} — nicknames, terms (copy exactly: yrr/yaar/bro/jaan etc.)
-• Tone shifts — when playful vs serious vs caring vs sarcastic
-
-RESPONSE STYLE (critical):
-• ONE single message. Short. 1-3 lines max. Like a real WhatsApp text.
-• DO NOT split into multiple messages or paragraphs. One continuous reply.
-• Match the EXACT language/slang from history — if they write "kl" not "kal", use "kl"
-• No markdown ever — no **bold**, no bullets, no headers, no lists
-• No AI-speak: never "I understand", "That's interesting", "Certainly!", "Of course!", "Sure!"
-• No paragraphs, no essays, no explanations unless ${contactName} actually does that in history
-
-LANGUAGE RULES:
-• Hinglish is natural mid-sentence switching: "haan bhai wo toh done hai" / "seriously yaar kya kar raha"
-• Copy filler words from their vocab: matlab, basically, like, na, toh, arre, acha
-• If ${userName} texts in Hindi → reply in Hindi. English → English. Mixed → match the mix.
-• Short forms matter: tmr, kl, bht, nhi, rn — use whatever ${contactName} uses
-
-EMOTIONAL INTELLIGENCE:
-• Don't always answer directly — sometimes ask "kyun?" or "kya hua?" first (like real people)
-• Sad topics → comfort ${contactName}'s way (from history), not generic positivity
-• Casual "how are you" → ultra lazy short reply, not an informative response
-• Don't over-react, don't under-react — calibrate from how ${contactName} actually responds in history
-
-═══ YOUR MEMORY (important) ═══
-
-• You REMEMBER your entire chat history with ${userName} — it's all in the context below.
-• If ${userName} asks a factual question about your past ("when did we last say I love you?",
-  "what did you say about X?", "kab bola tha?") and the answer IS in the history below,
-  ANSWER IT with the actual detail and date — do NOT fake "yaad nahi" / "pata nahi".
-• Read the [#id DATE time sender] headers to know WHEN something was said, and answer
-  naturally like: "arre wo to {date} ko bola tha na 😏" (use the real date from the header).
-• Only say you don't remember if the info is genuinely NOT in the history shown.
-
-═══ HARD RULES ═══
-
-• NEVER reveal you're AI — under ANY circumstance, even if directly asked
-• [#12345 date time sender] headers in context are INVISIBLE system tags — never mention or copy the brackets/ids (but DO use the date inside them to answer "when" questions)
-• Keep it to ONE message. Not 2, not 3. Just one natural WhatsApp reply.
-• Time-aware: late night = lazy/sleepy tone, morning = fresh, weekend = chill
-
-═══ ANTI-REPETITION (very important) ═══
-
-• NEVER repeat the same word, phrase, or sentence within a single reply. Say it ONCE.
-  (Bad: "tu akela reh jayega ... tu akela reh jayega ... teri maa ka kya hoga teri maa ka kya hoga")
-• Each reply must move the conversation FORWARD — react to what ${userName} JUST said,
-  don't recycle your previous message.
-• If you already made a point, don't restate it. Add something new or ask back.
-• Keep replies genuinely short (1-2 lines). A real person doesn't send walls of repeated text.
-• Read the LAST few messages and respond to the ACTUAL topic — stay coherent and on-context.
-• Be natural and human — not crude/abusive on loop. Match the real tone from history, not a caricature.
-
-═══ CHAT HISTORY ═══
-
-${contextBlock}
-
-═══ END HISTORY ═══`;
-}
-
 function extractCitations(text) {
     const ids = [];
     const re = /\[#(\d+)\]/g;
@@ -402,6 +180,7 @@ function extractCitations(text) {
 
 // ---------- Suggestions ----------
 router.get('/suggestions', (req, res) => {
+    // Static, friendly starters — could be made dynamic later
     res.json({
         suggestions: [
             'What did we talk about most?',
@@ -412,116 +191,5 @@ router.get('/suggestions', (req, res) => {
         ],
     });
 });
-
-// ---------- "On This Day" Memories ----------
-router.get('/memories', async (req, res) => {
-    const chatFolder = req.query.chat;
-    if (!chatFolder) return res.status(400).json({ error: 'chat required' });
-
-    const chatDir = path.join(userDir(req.user.id), chatFolder);
-    let chatMessages;
-    try {
-        const parsed = await getMessages(chatDir);
-        chatMessages = parsed.messages;
-    } catch {
-        return res.json({ memories: [] });
-    }
-
-    const today = new Date();
-    const todayMonth = today.getMonth() + 1;
-    const todayDay = today.getDate();
-
-    // Find messages from this day in previous years
-    // Chat dates are DD/MM/YY Indian format — parts[0]=day, parts[1]=month
-    const memories = [];
-    for (const msg of chatMessages) {
-        if (!msg.date || msg.type === 'system') continue;
-        const parts = msg.date.split('/');
-        if (parts.length !== 3) continue;
-        const msgDay   = parseInt(parts[0]);
-        const msgMonth = parseInt(parts[1]);
-        if (msgMonth === todayMonth && msgDay === todayDay) {
-            memories.push(msg);
-        }
-    }
-
-    // Limit to 20 most interesting (those with text)
-    const filtered = memories
-        .filter(m => m.text && m.text.length > 5)
-        .slice(0, 20);
-
-    res.json({
-        memories: filtered,
-        count: memories.length,
-        date: `${todayMonth}/${todayDay}`,
-    });
-});
-
-// ---------- Chat Summary (quick stats) ----------
-router.get('/summary', async (req, res) => {
-    const chatFolder = req.query.chat;
-    if (!chatFolder) return res.status(400).json({ error: 'chat required' });
-
-    const chatDir = path.join(userDir(req.user.id), chatFolder);
-    let chatMessages;
-    try {
-        const parsed = await getMessages(chatDir);
-        chatMessages = parsed.messages;
-    } catch {
-        return res.status(404).json({ error: 'Chat not found' });
-    }
-
-    const total = chatMessages.filter(m => m.type !== 'system').length;
-    const media = chatMessages.filter(m => m.attachment && m.type !== 'system').length;
-    const links = chatMessages.filter(m => m.text && (m.text.includes('http') || m.text.includes('www.'))).length;
-
-    // Sender breakdown
-    const senderCounts = {};
-    for (const m of chatMessages) {
-        if (m.sender && m.type !== 'system') senderCounts[m.sender] = (senderCounts[m.sender] || 0) + 1;
-    }
-    const senders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
-
-    // Date range
-    const dates = chatMessages.filter(m => m.date).map(m => m.date);
-    const firstDate = dates[0] || null;
-    const lastDate = dates[dates.length - 1] || null;
-
-    // Most active hour
-    const hourCounts = {};
-    for (const m of chatMessages) {
-        if (!m.time) continue;
-        const hour = parseInt(m.time.split(':')[0]);
-        if (!isNaN(hour)) hourCounts[hour] = (hourCounts[hour] || 0) + 1;
-    }
-    const peakHour = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0];
-
-    // Emoji count
-    const emojiRegex = /[\u{1f300}-\u{1f9ff}\u{2600}-\u{27bf}]/gu;
-    let emojiCount = 0;
-    for (const m of chatMessages) {
-        if (m.text) emojiCount += (m.text.match(emojiRegex) || []).length;
-    }
-
-    res.json({
-        total,
-        media,
-        links,
-        emojiCount,
-        senders,
-        firstDate,
-        lastDate,
-        peakHour: peakHour ? { hour: parseInt(peakHour[0]), count: peakHour[1] } : null,
-        daysSpan: firstDate && lastDate ? Math.ceil((parseDateStr(lastDate) - parseDateStr(firstDate)) / 86400000) : 0,
-    });
-});
-
-// DD/MM/YY(YY) Indian WhatsApp format — parts[0]=day, parts[1]=month, parts[2]=year
-function parseDateStr(dateStr) {
-    const parts = dateStr.split('/');
-    if (parts.length !== 3) return 0;
-    const y = parts[2].length === 2 ? `20${parts[2]}` : parts[2];
-    return new Date(parseInt(y), parseInt(parts[1]) - 1, parseInt(parts[0])).getTime();
-}
 
 module.exports = router;
