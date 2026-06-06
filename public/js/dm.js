@@ -522,11 +522,13 @@
         }
     }
 
-    // ── Unread badge ──────────────────────────────────────────
     function updateBadge() {
         const n = convs.reduce((s,c)=>s+(c.unread||0),0);
-        const b = document.getElementById('dm-unread-badge');
-        if(b){ b.textContent=n>9?'9+':n; b.classList.toggle('hidden',n===0); }
+        const badges = document.querySelectorAll('.dm-unread-badge');
+        badges.forEach(b => {
+            b.textContent = n > 9 ? '9+' : n;
+            b.classList.toggle('hidden', n === 0);
+        });
     }
 
     // ── Polling fallback (when socket not connected) ──────────
