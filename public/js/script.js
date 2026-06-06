@@ -192,6 +192,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
 
+    // Swipe left to close sidebar
+    let sidebarTouchStartX = 0;
+    sidebar.addEventListener('touchstart', e => {
+        if (e.touches.length > 1) return;
+        sidebarTouchStartX = e.touches[0].clientX;
+    }, {passive: true});
+    sidebar.addEventListener('touchend', e => {
+        const deltaX = e.changedTouches[0].clientX - sidebarTouchStartX;
+        if (deltaX < -50) { // Swiped left by 50px
+            toggleSidebar(false);
+        }
+    });
+
     // Desktop sidebar collapse/expand
     const collapseBtn = document.getElementById('collapse-sidebar-btn');
     const collapseIcon = document.getElementById('collapse-icon');

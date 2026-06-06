@@ -881,13 +881,60 @@
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                     </button>
                 </div>
-                <img id="kotha-lightbox-img" src="" class="max-w-[95vw] max-h-[90vh] object-contain rounded-md shadow-2xl scale-95 transition-transform duration-200" style="user-select: none;">
+                <img id="kotha-lightbox-img" src="" class="max-w-[95vw] max-h-[90vh] object-contain rounded-md shadow-2xl scale-95 transition-transform duration-200" style="user-select: none; touch-action: none;">
             `;
             document.body.appendChild(overlay);
+
+            // Add Swipe to close
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+            const img = document.getElementById('kotha-lightbox-img');
+            
+            img.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 1) return; // ignore pinch
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                img.style.transition = 'none';
+                overlay.style.transition = 'none';
+            }, {passive: true});
+
+            img.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const deltaY = currentY - startY;
+                
+                // Resistance when dragging
+                img.style.transform = `translateY(${deltaY}px) scale(1)`;
+                const opacity = Math.max(0.4, 1 - Math.abs(deltaY) / window.innerHeight);
+                overlay.style.backgroundColor = `rgba(0,0,0,${opacity * 0.95})`;
+            }, {passive: true});
+
+            img.addEventListener('touchend', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const deltaY = currentY - startY;
+                
+                img.style.transition = 'transform 0.2s ease-out';
+                overlay.style.transition = 'background-color 0.2s ease-out, opacity 0.2s ease-out';
+                
+                if (Math.abs(deltaY) > 100) {
+                    // Swipe was long enough, close it
+                    img.style.transform = `translateY(${deltaY > 0 ? window.innerHeight : -window.innerHeight}px) scale(0.9)`;
+                    overlay.style.opacity = '0';
+                    setTimeout(window.kothaCloseLightbox, 200);
+                } else {
+                    // Snap back
+                    img.style.transform = 'translateY(0) scale(1)';
+                    overlay.style.backgroundColor = 'rgba(0,0,0,0.95)';
+                }
+            });
         }
         
         const img = document.getElementById('kotha-lightbox-img');
         img.src = src;
+        img.style.transform = '';
+        overlay.style.backgroundColor = '';
         
         // Show
         overlay.style.display = 'flex';
@@ -906,6 +953,10 @@
             if (img) {
                 img.classList.remove('scale-100');
                 img.classList.add('scale-95');
+                setTimeout(() => {
+                    img.style.transform = '';
+                    overlay.style.backgroundColor = '';
+                }, 200);
             }
             setTimeout(() => { overlay.style.display = 'none'; }, 200);
         }
