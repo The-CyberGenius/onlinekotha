@@ -1061,29 +1061,44 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
         container.innerHTML = `
             <div class="h-full flex flex-col items-center justify-center px-8 text-center" id="empty-state">
-                <div class="empty-state-float mb-6">
-                    <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center shadow-lg shadow-indigo-200/50 relative">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <div class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-orange-400 flex items-center justify-center shadow-md empty-state-pulse">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+                <div class="empty-state-float mb-8 relative">
+                    <div class="absolute inset-0 bg-indigo-400 blur-3xl opacity-20 rounded-full dark:opacity-30"></div>
+                    <div class="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/40 dark:to-gray-900 border border-indigo-100/50 dark:border-indigo-800/50 flex items-center justify-center shadow-2xl shadow-indigo-200/40 dark:shadow-indigo-900/40 relative z-10 backdrop-blur-sm">
+                        <svg width="48" height="48" viewBox="-2 -2 28 28" fill="none" stroke="url(#chat-grad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <defs>
+                                <linearGradient id="chat-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#818cf8" />
+                                    <stop offset="100%" stop-color="#6366f1" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <div class="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-300/30 empty-state-pulse border-2 border-white dark:border-gray-900">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Bring a chat to life</h2>
-                <p class="text-sm text-gray-500 max-w-sm leading-relaxed mb-2">Upload your WhatsApp export and see it beautifully — search through years of messages and talk to your memories with AI.</p>
-                <div class="flex items-center gap-4 text-[11px] text-gray-400 font-medium mb-6">
-                    <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
-                    <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
-                    <span class="flex items-center gap-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Free</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 mb-3">Bring your chats to life</h2>
+                <p class="text-[15px] text-gray-500 dark:text-gray-400 max-w-md leading-relaxed mb-8">Upload your WhatsApp export and see it beautifully. Search through years of messages and rediscover your memories with AI.</p>
+                
+                <div class="flex items-center justify-center gap-6 text-[12px] text-gray-400 dark:text-gray-500 font-medium mb-10">
+                    <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> 100% Private</span>
+                    <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
+                    <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Lightning Fast</span>
                 </div>
-                <button id="empty-upload-btn" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-sm rounded-2xl px-7 py-3.5 transition shadow-lg shadow-indigo-300/30 hover:shadow-indigo-400/40 flex items-center gap-2 mx-auto mb-3">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    Import Chat
-                </button>
-                <button id="empty-dm-btn" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 font-bold text-sm rounded-2xl px-7 py-3 transition hover:bg-indigo-50 dark:hover:bg-indigo-950/40 flex items-center gap-2 mx-auto shadow-sm">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    Message Someone
-                </button>
+
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <button id="empty-upload-btn" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold text-[15px] rounded-2xl px-8 py-3.5 transition-all shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 flex items-center gap-2.5 min-w-[200px] justify-center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        Import Chat
+                    </button>
+                    <button id="empty-dm-btn" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[15px] rounded-2xl px-8 py-3.5 transition-all hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 hover:border-indigo-200 dark:hover:border-indigo-800 flex items-center gap-2.5 shadow-sm hover:shadow min-w-[200px] justify-center">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Message Someone
+                    </button>
+                </div>
             </div>
         `;
         const btn = document.getElementById('empty-upload-btn');
