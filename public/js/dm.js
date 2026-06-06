@@ -643,10 +643,10 @@
                 formData.append('file', file);
                 
                 try {
-                    const res = await fetch('/upload', { method: 'POST', body: formData });
+                    const res = await fetch('/api/dm/upload', { method: 'POST', body: formData });
                     const data = await res.json();
                     if (data.url) {
-                        send('audio', data.url);
+                        send(null, 'audio', data.url, 'Voice Note');
                     } else {
                         alert('Upload failed: ' + (data.error || 'Unknown error'));
                     }
