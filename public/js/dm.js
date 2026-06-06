@@ -117,9 +117,13 @@
             if (el) {
                 const bubble = el.querySelector('.dm-bubble');
                 if (bubble) {
+                    let pressTimer;
                     bubble.addEventListener('contextmenu', e => { e.preventDefault(); showCtxMenu(e, m.id, isMe); });
-                    bubble.addEventListener('touchstart', (() => { let t; return ev => { t = setTimeout(() => showCtxMenu(ev.touches[0], m.id, isMe), 600); }; })(), { passive: true });
-                    bubble.addEventListener('touchend', () => clearTimeout(undefined), { passive: true });
+                    bubble.addEventListener('touchstart', ev => {
+                        pressTimer = setTimeout(() => showCtxMenu(ev.touches[0], m.id, isMe), 600);
+                    }, { passive: true });
+                    bubble.addEventListener('touchend', () => clearTimeout(pressTimer), { passive: true });
+                    bubble.addEventListener('touchmove', () => clearTimeout(pressTimer), { passive: true });
                 }
             }
         }
@@ -368,6 +372,9 @@
 
     // ── Open conversation ─────────────────────────────────────
     async function openConv(convId) {
+        if (window.location.hash !== `#chat-${convId}`) {
+            history.pushState(null, '', `#chat-${convId}`);
+        }
         activeConvId = convId;
         const c = convs.find(x => x.conv_id === convId);
         if (!c) return;
@@ -428,7 +435,11 @@
         }
     }
 
-    function closeConv() {
+    function closeConv(fromHash = false) {
+        if (!fromHash && window.location.hash.startsWith('#chat-')) {
+            window.location.hash = '';
+            return;
+        }
         activeConvId = null;
         if (chatArea) chatArea.style.display = 'none';
         document.getElementById('dm-empty-state')?.classList.remove('hidden');
@@ -864,6 +875,9 @@
 
     // ── Lightbox (Image Viewer) ───────────────────────────────
     window.kothaOpenLightbox = function(src) {
+        if (window.location.hash !== '#lightbox') {
+            history.pushState(null, '', '#lightbox');
+        }
         let overlay = document.getElementById('kotha-lightbox');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -945,7 +959,11 @@
         img.classList.add('scale-100');
     };
 
-    window.kothaCloseLightbox = function() {
+    window.kothaCloseLightbox = function(fromHash = false) {
+        if (!fromHash && window.location.hash === '#lightbox') {
+            window.location.hash = '';
+            return;
+        }
         const overlay = document.getElementById('kotha-lightbox');
         if (overlay) {
             const img = document.getElementById('kotha-lightbox-img');
@@ -964,6 +982,25 @@
 
     // ── Start ─────────────────────────────────────────────────
     init();
+
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash;
+        if (hash.startsWith('#chat-')) {
+            const id = Number(hash.replace('#chat-', ''));
+            if (id && id !== activeConvId) openConv(id);
+        } else if (hash === '#lightbox') {
+            // Do nothing, lightbox handles itself
+        } else {
+            // No hash or unrecognized hash -> close active states
+            if (document.getElementById('kotha-lightbox') && document.getElementById('kotha-lightbox').style.display !== 'none') {
+                window.kothaCloseLightbox(true);
+            }
+            if (activeConvId) {
+                closeConv(true);
+            }
+        }
+    });
+
     window.dmShowTab   = showDmTab;
     window.dmOpenConv  = openConv;
 })();
