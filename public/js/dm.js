@@ -46,7 +46,7 @@
         if (deleted) {
             contentHtml = '🚫 This message was deleted';
         } else if (m.type === 'image' && m.media_url) {
-            contentHtml = `<img src="${m.media_url}" class="w-[240px] h-[240px] rounded-lg cursor-zoom-in hover:opacity-90 transition object-cover" onclick="window.kothaOpenLightbox(this.src)" loading="lazy" style="background: #eee;">`;
+            contentHtml = `<img src="${m.media_url}" style="width: 240px; height: 240px; object-fit: cover; border-radius: 8px; background: #eee; cursor: zoom-in;" class="hover:opacity-90 transition" onclick="window.kothaOpenLightbox(this.src)" loading="lazy">`;
             if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         } else if (m.type === 'audio' && m.media_url) {
             contentHtml = `<audio controls src="${m.media_url}" class="max-w-[200px] md:max-w-[250px] outline-none" style="height: 36px;"></audio>`;
