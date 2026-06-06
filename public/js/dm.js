@@ -101,7 +101,7 @@
             <div id="${msgElId}" class="flex gap-2 text-sm ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1 group relative">
                 ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
                 <div class="max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                    <div class="dm-bubble px-3 py-2 rounded-2xl shadow-sm leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'}">
+                    <div class="dm-bubble break-words px-3 py-2 rounded-2xl shadow-sm leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'}">
                         ${contentHtml}
                         <div class="flex items-center justify-end mt-1 space-x-1" style="min-width: 45px;">
                             <span class="text-[10px] opacity-60">${timeStr}</span>
@@ -205,6 +205,7 @@
         tabDmBtn?.classList.add('text-gray-500','dark:text-gray-400');
         // Hide DM chat overlay so imported chats are visible again
         if (chatArea) chatArea.style.display = 'none';
+        document.getElementById('dm-empty-state')?.classList.add('hidden');
         activeConvId = null;
         closeCtxMenu();
         localStorage.setItem(LS.view, 'chats');
@@ -218,6 +219,9 @@
         tabChatsBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
         tabChatsBtn?.classList.add('text-gray-500','dark:text-gray-400');
         localStorage.setItem(LS.view, 'messages');
+        if (!activeConvId) {
+            document.getElementById('dm-empty-state')?.classList.remove('hidden');
+        }
         loadConvs();
     }
 
@@ -378,7 +382,9 @@
 
         renderedIds = new Set();        // reset dedup tracker for this conversation
         lastPollAt = 0;
+        localStorage.setItem(LS.conv, convId);
         if (chatArea)   chatArea.style.display = 'flex';
+        document.getElementById('dm-empty-state')?.classList.add('hidden');
         if (chatName)   chatName.textContent = c.other.display_name;
         if (chatAvatar) chatAvatar.innerHTML  = avatar(c.other, 38);
         if (chatStatus) chatStatus.textContent = '';
@@ -425,6 +431,7 @@
     function closeConv() {
         activeConvId = null;
         if (chatArea) chatArea.style.display = 'none';
+        document.getElementById('dm-empty-state')?.classList.remove('hidden');
         closeCtxMenu();
         localStorage.removeItem(LS.conv);
     }
@@ -449,17 +456,27 @@
         contextMenu.style.cssText = `position:fixed;z-index:9999;background:${dark?'#233138':'#fff'};border-radius:12px;
             box-shadow:0 8px 32px rgba(0,0,0,${dark?'.4':'.15'});padding:6px;min-width:160px;
             border:1px solid ${dark?'#3b4a54':'#e5e7eb'}`;
-        contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
-        contextMenu.style.top  = Math.min(e.clientY, window.innerHeight - 100) + 'px';
-
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            contextMenu.style.left = '50%';
+            contextMenu.style.transform = 'translateX(-50%)';
+            contextMenu.style.bottom = '100px';
+            contextMenu.style.top = 'auto';
+            contextMenu.style.width = '250px';
+            contextMenu.style.boxShadow = '0 10px 40px rgba(0,0,0,0.3)';
+            contextMenu.style.padding = '10px';
+        } else {
+            contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+            contextMenu.style.top  = Math.min(e.clientY, window.innerHeight - 100) + 'px';
+        }
         const actions = [
             { icon:'📋', label:'Copy',   fn: () => { const el=document.getElementById(`dm-msg-${msgId}`); navigator.clipboard?.writeText(el?.querySelector('.dm-bubble')?.textContent?.trim()||''); } },
         ];
         if (isMe) actions.push({ icon:'🗑️', label:'Delete', color:'#ef4444', fn: () => deleteMsg(msgId) });
 
         contextMenu.innerHTML = actions.map(a => `
-            <div class="dm-ctx-item" data-fn="${a.label}" style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:${a.color||(dark?'#e9edef':'#111827')}">
-                <span>${a.icon}</span><span>${a.label}</span>
+            <div class="dm-ctx-item" data-fn="${a.label}" style="display:flex;align-items:center;gap:12px;padding:${isMobile ? '14px' : '9px 14px'};border-radius:8px;cursor:pointer;font-size:${isMobile ? '15px' : '13px'};font-weight:500;color:${a.color||(dark?'#e9edef':'#111827')}">
+                <span style="font-size:${isMobile?'18px':'14px'}">${a.icon}</span><span>${a.label}</span>
             </div>`).join('');
 
         document.body.appendChild(contextMenu);

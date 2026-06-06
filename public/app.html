@@ -18,7 +18,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=3">
-    <link rel="stylesheet" href="/css/style.css?v=38">
+    <link rel="stylesheet" href="/css/style.css?v=39">
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay = function () { return new Promise(function (r) { if (window.Razorpay) return r(); var s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.onload = r; document.head.appendChild(s) }) }</script>
     <script src="/js/auth-init.js?v=2"></script>
@@ -453,6 +453,17 @@
         <div id="main-panel"
             class="flex-1 flex flex-col relative w-full md:w-auto min-w-0 h-full bg-[#efeae2] dark:bg-[#0b141a]">
 
+            <!-- ── DM Empty State (shown when DM tab is open but no chat is selected) ── -->
+            <div id="dm-empty-state" class="hidden absolute inset-0 z-[25] flex-col items-center justify-center bg-[#f0f2f5] dark:bg-[#202c33] border-l border-gray-200 dark:border-gray-800">
+                <div class="text-center max-w-sm px-6">
+                    <div class="w-24 h-24 mx-auto mb-6 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-indigo-500"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-light text-gray-800 dark:text-gray-200 mb-4">Kotha Messages</h2>
+                    <p class="text-[13px] text-gray-500 dark:text-gray-400">Select a message from the sidebar to start a conversation, or tap the new chat icon.</p>
+                </div>
+            </div>
+
             <!-- ── DM Chat View (absolute overlay, shown when DM conversation is open) ── -->
             <div id="dm-chat-area" style="display:none;position:absolute;inset:0;z-index:30;flex-direction:column;background:#efeae2" class="dark:bg-[#0b141a]">
                 <!-- DM Chat Header -->
@@ -768,7 +779,7 @@
     <script src="js/upload.js?v=15"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=20"></script>
-    <script src="js/dm.js?v=26"></script>
+    <script src="js/dm.js?v=27"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });
