@@ -48,8 +48,30 @@
         } else if (m.type === 'image' && m.media_url) {
             contentHtml = `<img src="${m.media_url}" style="width: 240px; height: 240px; object-fit: cover; border-radius: 8px; background: #eee; cursor: zoom-in;" class="hover:opacity-90 transition" onclick="window.kothaOpenLightbox(this.src)" loading="lazy">`;
             if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+        } else if (m.type === 'video' && m.media_url) {
+            contentHtml = `<video src="${m.media_url}" style="width: 240px; height: 240px; object-fit: cover; border-radius: 8px; background: #000; cursor: pointer;" class="hover:opacity-90 transition" controls preload="metadata"></video>`;
+            if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         } else if (m.type === 'audio' && m.media_url) {
-            contentHtml = `<audio controls src="${m.media_url}" class="max-w-[200px] md:max-w-[250px] outline-none" style="height: 36px;"></audio>`;
+            const avatarUrl = isMe ? (me?.avatar_url || '/images/default-avatar.png') : (document.getElementById('dm-chat-avatar')?.src || '/images/default-avatar.png');
+            contentHtml = `
+            <div class="kotha-audio-player flex items-center gap-3 bg-black/5 dark:bg-white/5 p-2.5 rounded-2xl" style="width: 260px;">
+                <img src="${avatarUrl}" class="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-200 dark:border-gray-700">
+                <button onclick="window.kothaToggleAudio(this)" class="w-9 h-9 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white shrink-0 transition shadow-sm" style="padding-left: 2px;">
+                    <svg class="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="pause-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="transform: translateX(-1px);"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
+                    <input type="range" min="0" max="100" value="0" class="audio-slider w-full h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full appearance-none cursor-pointer outline-none" oninput="window.kothaSeekAudio(this)">
+                    <div class="flex justify-between mt-1.5">
+                        <span class="audio-time text-[10px] text-gray-500 dark:text-gray-400 font-medium">00:00</span>
+                        <span class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline opacity-70"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path></svg>
+                        </span>
+                    </div>
+                </div>
+                <audio src="${m.media_url}" preload="metadata" ontimeupdate="window.kothaUpdateAudioTime(this)" onended="window.kothaAudioEnded(this)" class="hidden"></audio>
+            </div>
+            `;
             if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         } else if (m.type === 'document' && m.media_url) {
             contentHtml = `<a href="${m.media_url}" target="_blank" class="flex items-center gap-2 bg-black/10 dark:bg-white/10 p-2 rounded-lg hover:bg-black/20 dark:hover:bg-white/20 transition underline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>${m.body || 'Document'}</a>`;
@@ -380,6 +402,7 @@
         localStorage.setItem(LS.conv, String(convId));
         if (chatInput) {
             chatInput.value = localStorage.getItem(LS.draft(convId)) || '';
+            chatInput.dispatchEvent(new Event('input')); // Trigger toggle logic
             chatInput.focus();
         }
     }
@@ -464,13 +487,16 @@
         if (!file || !activeConvId) return;
         
         let fileType = 'document';
-        if (file.type.startsWith('image/')) {
+        const nameUpper = file.name.toUpperCase();
+        if (file.type.startsWith('image/') || nameUpper.endsWith('.JPG') || nameUpper.endsWith('.PNG') || nameUpper.endsWith('.JPEG') || nameUpper.endsWith('.WEBP')) {
             fileType = 'image';
-            // Compress the image before uploading
-            file = await compressImage(file, 0.7, 1200);
+            // Compress the image before uploading (only if it's actually an image type we can compress)
+            if (file.type.startsWith('image/')) {
+                file = await compressImage(file, 0.7, 1200);
+            }
         }
-        else if (file.type.startsWith('audio/')) fileType = 'audio';
-        else if (file.type.startsWith('video/')) fileType = 'video';
+        else if (file.type.startsWith('audio/') || nameUpper.endsWith('.MP3') || nameUpper.endsWith('.WAV') || nameUpper.endsWith('.OGG') || nameUpper.endsWith('.M4A')) fileType = 'audio';
+        else if (file.type.startsWith('video/') || nameUpper.endsWith('.MP4') || nameUpper.endsWith('.MOV') || nameUpper.endsWith('.MKV') || nameUpper.endsWith('.WEBM')) fileType = 'video';
 
         const fd = new FormData();
         fd.append('file', file);
@@ -503,12 +529,18 @@
         if (forcedType === 'text') {
             body = chatInput?.value.trim();
             if (!body && !forcedMediaUrl) return;
-            chatInput.value = '';
-            chatInput.focus();
+            if (chatInput) {
+                chatInput.value = '';
+                chatInput.dispatchEvent(new Event('input')); // Trigger toggle logic
+            }
+            chatInput?.focus();
             localStorage.removeItem(LS.draft(activeConvId));
         } else {
             body = fallbackBody || chatInput?.value.trim() || '';
-            chatInput.value = '';
+            if (chatInput) {
+                chatInput.value = '';
+                chatInput.dispatchEvent(new Event('input')); // Trigger toggle logic
+            }
         }
 
         const convAtSend = activeConvId;
@@ -852,3 +884,66 @@
     window.dmShowTab   = showDmTab;
     window.dmOpenConv  = openConv;
 })();
+
+// ── Global Audio Player Handlers ─────────────────────────────────────────
+window.kothaToggleAudio = function(btn) {
+    const wrapper = btn.closest('.kotha-audio-player');
+    const audio = wrapper.querySelector('audio');
+    const playIcon = wrapper.querySelector('.play-icon');
+    const pauseIcon = wrapper.querySelector('.pause-icon');
+    
+    if (audio.paused) {
+        // Pause all other audios
+        document.querySelectorAll('.kotha-audio-player audio').forEach(a => {
+            if (a !== audio && !a.paused) {
+                a.pause();
+                const w = a.closest('.kotha-audio-player');
+                w.querySelector('.play-icon').classList.remove('hidden');
+                w.querySelector('.pause-icon').classList.add('hidden');
+            }
+        });
+        audio.play().catch(console.error);
+        playIcon.classList.add('hidden');
+        pauseIcon.classList.remove('hidden');
+    } else {
+        audio.pause();
+        playIcon.classList.remove('hidden');
+        pauseIcon.classList.add('hidden');
+    }
+};
+
+window.kothaUpdateAudioTime = function(audio) {
+    const wrapper = audio.closest('.kotha-audio-player');
+    const timeEl = wrapper.querySelector('.audio-time');
+    const slider = wrapper.querySelector('.audio-slider');
+    
+    if (audio.duration) {
+        slider.value = (audio.currentTime / audio.duration) * 100 || 0;
+    }
+    
+    const elapsed = Math.floor(audio.currentTime);
+    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    timeEl.textContent = `${m}:${s}`;
+};
+
+window.kothaSeekAudio = function(slider) {
+    const wrapper = slider.closest('.kotha-audio-player');
+    const audio = wrapper.querySelector('audio');
+    if (audio.duration) {
+        audio.currentTime = (slider.value / 100) * audio.duration;
+    }
+};
+
+window.kothaAudioEnded = function(audio) {
+    const wrapper = audio.closest('.kotha-audio-player');
+    const playIcon = wrapper.querySelector('.play-icon');
+    const pauseIcon = wrapper.querySelector('.pause-icon');
+    const slider = wrapper.querySelector('.audio-slider');
+    const timeEl = wrapper.querySelector('.audio-time');
+    
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
+    slider.value = 0;
+    timeEl.textContent = '00:00';
+};
