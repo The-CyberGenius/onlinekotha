@@ -74,7 +74,22 @@
             `;
             if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         } else if (m.type === 'document' && m.media_url) {
-            contentHtml = `<a href="${m.media_url}" target="_blank" class="flex items-center gap-2 bg-black/10 dark:bg-white/10 p-2 rounded-lg hover:bg-black/20 dark:hover:bg-white/20 transition underline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>${m.body || 'Document'}</a>`;
+            const isPdf = m.media_url.toLowerCase().split('?')[0].endsWith('.pdf') || (m.body && m.body.toLowerCase().endsWith('.pdf'));
+            if (isPdf) {
+                contentHtml = `
+                <a href="${m.media_url}" target="_blank" class="block w-[240px] bg-white dark:bg-[#202c33] rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:opacity-90 transition shadow-sm">
+                    <div class="h-24 bg-red-50 dark:bg-red-950/30 flex flex-col items-center justify-center relative">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-red-500"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
+                        <span class="absolute bottom-2 right-2 text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded shadow-sm tracking-wider">PDF</span>
+                    </div>
+                    <div class="p-3 bg-gray-50 dark:bg-[#111b21] border-t border-gray-100 dark:border-gray-800">
+                        <div class="text-[13px] font-semibold text-gray-800 dark:text-gray-200 truncate" title="${m.body || 'Document.pdf'}">${m.body || 'Document.pdf'}</div>
+                        <div class="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wide">Document</div>
+                    </div>
+                </a>`;
+            } else {
+                contentHtml = `<a href="${m.media_url}" target="_blank" class="flex items-center gap-2 bg-black/10 dark:bg-white/10 p-2.5 rounded-lg hover:bg-black/20 dark:hover:bg-white/20 transition underline shadow-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg><span class="truncate max-w-[180px] text-[13px]">${m.body || 'Document'}</span></a>`;
+            }
         } else {
             contentHtml = (m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
