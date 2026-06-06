@@ -478,7 +478,23 @@
                 <!-- Typing indicator -->
                 <div id="dm-typing-indicator" class="hidden px-5 pb-1 text-[11px] text-gray-400 italic">typing…</div>
                 <!-- Input bar -->
-                <div class="shrink-0 px-3 py-2.5 border-t border-gray-200/60 dark:border-gray-800 bg-[#f0f2f5] dark:bg-[#202c33] flex gap-2 items-center">
+                <div class="shrink-0 px-3 py-2.5 border-t border-gray-200/60 dark:border-gray-800 bg-[#f0f2f5] dark:bg-[#202c33] flex gap-2 items-center relative">
+                    <!-- Recording Overlay -->
+                    <div id="dm-recording-overlay" class="absolute inset-0 bg-[#f0f2f5] dark:bg-[#202c33] z-10 items-center justify-between px-4 hidden">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>
+                            <span id="dm-recording-time" class="text-sm font-medium text-gray-700 dark:text-gray-200">00:00</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="dm-recording-cancel" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-full transition">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                            <button id="dm-recording-send" class="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white transition shadow-sm">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
                     <input type="file" id="dm-file-input" class="hidden" accept="image/*,audio/*,video/*,.pdf,.doc,.docx">
                     <button id="dm-attach-btn" class="w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 transition shrink-0" title="Attach media">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -487,7 +503,13 @@
                     </button>
                     <input id="dm-input" type="text" placeholder="Type a message…"
                         class="flex-1 text-[13px] bg-white dark:bg-gray-800 rounded-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 outline-none focus:ring-2 focus:ring-indigo-400 text-gray-800 dark:text-gray-100 placeholder-gray-400 transition">
-                    <button id="dm-send-btn" class="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white transition shrink-0 shadow-sm">
+                    
+                    <button id="dm-mic-btn" class="w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 transition shrink-0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                    <button id="dm-send-btn" class="w-10 h-10 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white transition shrink-0 shadow-sm hidden">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2L15 22 11 13 2 9l20-7z"/></svg>
                     </button>
                 </div>
@@ -746,7 +768,7 @@
     <script src="js/upload.js?v=15"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=19"></script>
-    <script src="js/dm.js?v=22"></script>
+    <script src="js/dm.js?v=23"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });

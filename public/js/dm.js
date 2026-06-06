@@ -137,6 +137,12 @@
     const clearBtn     = document.getElementById('dm-clear-btn');
     const typingEl     = document.getElementById('dm-typing-indicator');
 
+    const dmMicBtn         = document.getElementById('dm-mic-btn');
+    const dmRecOverlay     = document.getElementById('dm-recording-overlay');
+    const dmRecTime        = document.getElementById('dm-recording-time');
+    const dmRecCancel      = document.getElementById('dm-recording-cancel');
+    const dmRecSend        = document.getElementById('dm-recording-send');
+
     if (!tabDmBtn) return;
 
     // ── State persistence (survives refresh) ──────────────────
@@ -535,11 +541,97 @@
     let typingTimer;
     chatInput?.addEventListener('input', () => {
         saveDraft(); // persist what's typed (survives refresh)
+        
+        // Toggle Mic / Send buttons
+        if (chatInput.value.trim().length > 0) {
+            chatSend?.classList.remove('hidden');
+            dmMicBtn?.classList.add('hidden');
+        } else {
+            chatSend?.classList.add('hidden');
+            dmMicBtn?.classList.remove('hidden');
+        }
+
         if(!socket?.connected||!activeConvId) return;
         socket.emit('dm:typing',{conv_id:activeConvId,typing:true});
         clearTimeout(typingTimer);
         typingTimer = setTimeout(()=>socket.emit('dm:typing',{conv_id:activeConvId,typing:false}),1500);
     });
+
+    // ── Voice Recording Logic ─────────────────────────────────
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recInterval = null;
+    let recStartTime = 0;
+
+    async function startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            dmRecOverlay.classList.remove('hidden');
+            dmRecOverlay.classList.add('flex');
+            
+            recStartTime = Date.now();
+            dmRecTime.textContent = '00:00';
+            recInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - recStartTime) / 1000);
+                const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                const s = String(elapsed % 60).padStart(2, '0');
+                dmRecTime.textContent = `${m}:${s}`;
+            }, 1000);
+
+        } catch (err) {
+            console.error('Mic access denied or error:', err);
+            alert('Could not access microphone.');
+        }
+    }
+
+    function stopRecording(cancel = false) {
+        if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+        
+        clearInterval(recInterval);
+        dmRecOverlay.classList.add('hidden');
+        dmRecOverlay.classList.remove('flex');
+
+        mediaRecorder.onstop = async () => {
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            
+            if (!cancel && audioChunks.length > 0) {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const file = new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' });
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                try {
+                    const res = await fetch('/upload', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.url) {
+                        send('audio', data.url);
+                    } else {
+                        alert('Upload failed: ' + (data.error || 'Unknown error'));
+                    }
+                } catch (e) {
+                    console.error('Audio upload error:', e);
+                    alert('Audio upload failed.');
+                }
+            }
+            audioChunks = [];
+        };
+
+        mediaRecorder.stop();
+    }
+
+    dmMicBtn?.addEventListener('click', startRecording);
+    dmRecCancel?.addEventListener('click', () => stopRecording(true));
+    dmRecSend?.addEventListener('click', () => stopRecording(false));
 
     backBtn?.addEventListener('click', () => {
         closeConv();
