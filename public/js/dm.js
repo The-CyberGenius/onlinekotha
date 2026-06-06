@@ -33,12 +33,6 @@
         });
     }
 
-    // ── State ─────────────────────────────────────────────────
-    let me = null, socket = null, activeConvId = null;
-    let convs = [];
-    let contextMenu = null;
-    let renderedIds = new Set();   // message IDs already on screen (dedup socket+poll)
-    let currentUploadXhr = null; // for cancel
 
     function appendMsg(m) {
         if (!chatMsgs) return;
@@ -46,9 +40,12 @@
         if (document.getElementById(msgElId)) return; // dedup
         
         const isMe = m.sender_id === me?.id;
+        const deleted = m.type === 'deleted';
         let contentHtml = '';
         
-        if (m.type === 'image' && m.media_url) {
+        if (deleted) {
+            contentHtml = '🚫 This message was deleted';
+        } else if (m.type === 'image' && m.media_url) {
             contentHtml = `<img src="${m.media_url}" class="max-w-[200px] md:max-w-[250px] rounded-lg cursor-pointer hover:opacity-90 transition object-cover" onclick="window.open(this.src,'_blank')" loading="lazy" style="min-height: 100px; background: #eee;">`;
             if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         } else if (m.type === 'audio' && m.media_url) {
@@ -77,6 +74,18 @@
                 </div>
             </div>`;
         chatMsgs.insertAdjacentHTML('beforeend', html);
+
+        if (isMe && !deleted) {
+            const el = document.getElementById(msgElId);
+            if (el) {
+                const bubble = el.querySelector('.dm-bubble');
+                if (bubble) {
+                    bubble.addEventListener('contextmenu', e => { e.preventDefault(); showCtxMenu(e, m.id, isMe); });
+                    bubble.addEventListener('touchstart', (() => { let t; return ev => { t = setTimeout(() => showCtxMenu(ev.touches[0], m.id, isMe), 600); }; })(), { passive: true });
+                    bubble.addEventListener('touchend', () => clearTimeout(undefined), { passive: true });
+                }
+            }
+        }
     }
     function timeAgo(ts) {
         if (!ts) return '';
@@ -385,76 +394,7 @@
         chatMsgs?.appendChild(el);
     }
 
-    // ── Message bubble ────────────────────────────────────────
-    function appendMsg(msg) {
-        if (!chatMsgs) return;
-        // Dedup — same message may arrive via socket AND poll
-        if (msg.id != null) {
-            if (renderedIds.has(msg.id)) return;
-            renderedIds.add(msg.id);
-        }
-        const isMe    = Number(msg.sender_id) === Number(me?.id);
-        const dark    = dk();
-        const deleted = msg.type === 'deleted';
-
-        const bubbleBg  = deleted ? (dark?'#1f2c33':'#f5f6f6') : isMe ? '#6366f1' : (dark?'#2a3942':'#fff');
-        const bubbleClr = deleted ? (dark?'#8696a0':'#8696a0') : isMe ? '#fff' : (dark?'#e9edef':'#111827');
-        const timeclr   = isMe ? 'rgba(255,255,255,0.7)' : (dark?'#8696a0':'#8696a0');
-
-        let contentHtml = '';
-        if (deleted) {
-            contentHtml = '🚫 This message was deleted';
-        } else if (msg.type === 'image' && msg.media_url) {
-            contentHtml = `<img src="${msg.media_url}" style="max-width:200px;border-radius:8px;cursor:pointer;object-fit:cover;min-height:100px;background:#eee;margin-bottom:4px;" onclick="window.open(this.src,'_blank')" loading="lazy">`;
-            if (msg.body) contentHtml += `<div>${esc(msg.body)}</div>`;
-        } else if (msg.type === 'audio' && msg.media_url) {
-            contentHtml = `<audio controls src="${msg.media_url}" style="max-width:200px;height:36px;outline:none;margin-bottom:4px;"></audio>`;
-            if (msg.body) contentHtml += `<div>${esc(msg.body)}</div>`;
-        } else if (msg.type === 'document' && msg.media_url) {
-            contentHtml = `<a href="${msg.media_url}" target="_blank" style="display:flex;align-items:center;gap:6px;background:rgba(0,0,0,0.1);padding:8px;border-radius:8px;text-decoration:underline;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>
-                ${esc(msg.body || 'Document')}</a>`;
-        } else {
-            contentHtml = esc(msg.body);
-        }
-
-        const readHtml = isMe ? `<span id="dm-tick-${msg.id}" style="margin-left:4px;font-size:11px;color:${msg.read_at ? '#3b82f6' : (dark?'#6b7280':'#9ca3af')}">✓${msg.read_at ? '✓' : ''}</span>` : '';
-
-        const el = document.createElement('div');
-        el.id = `dm-msg-${msg.id}`;
-        el.dataset.msgId = msg.id;
-        el.dataset.isMe  = isMe ? '1' : '0';
-        el.style.cssText = `display:flex;justify-content:${isMe?'flex-end':'flex-start'};margin-bottom:2px;padding:0 8px;position:relative`;
-        el.innerHTML = `
-            <div style="max-width:70%;display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'}">
-                <div class="dm-bubble" style="padding:8px 13px 6px;border-radius:${isMe?'18px 4px 18px 18px':'4px 18px 18px 18px'};
-                    font-size:13.5px;line-height:1.5;word-break:break-word;
-                    background:${bubbleBg};color:${bubbleClr};
-                    border:${isMe?'none':(dark?'none':'1px solid #e9edef')};
-                    box-shadow:0 1px 2px rgba(0,0,0,${dark?'.15':'.06'});
-                    ${deleted?'font-style:italic;opacity:.7':''}
-                    cursor:${isMe&&!deleted?'pointer':'default'}">
-                    ${contentHtml}
-                    <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:2px;">
-                        <span style="font-size:10px;opacity:0.8;">${fmtTime(msg.created_at)}</span>
-                        ${readHtml}
-                    </div>
-                </div>
-            </div>`;
-
-        // Right-click / long-press to delete (only own, non-deleted messages)
-        if (isMe && !deleted) {
-            const bubble = el.querySelector('.dm-bubble');
-            bubble.addEventListener('contextmenu', e => { e.preventDefault(); showCtxMenu(e, msg.id, isMe); });
-            bubble.addEventListener('touchstart', (() => {
-                let t;
-                return ev => { t = setTimeout(() => showCtxMenu(ev.touches[0], msg.id, isMe), 600); };
-            })(), { passive: true });
-            bubble.addEventListener('touchend', () => clearTimeout(undefined), { passive: true });
-        }
-
-        chatMsgs.appendChild(el);
-    }
+    
 
     // ── Context menu (delete) ─────────────────────────────────
     function showCtxMenu(e, msgId, isMe) {
