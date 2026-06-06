@@ -134,6 +134,31 @@ CREATE TABLE IF NOT EXISTS conv_messages (
   FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_convmsg_conv ON conv_messages(conversation_id);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  provider TEXT NOT NULL DEFAULT 'razorpay',
+  order_id TEXT UNIQUE NOT NULL,
+  payment_id TEXT,
+  amount INTEGER NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'INR',
+  plan TEXT,
+  status TEXT NOT NULL DEFAULT 'captured',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
+ 
+CREATE TABLE IF NOT EXISTS global_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  sender TEXT NOT NULL,
+  text TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_global_messages_user ON global_messages(user_id);
 `);
 
 // Migrations: ALTER existing users table for new columns
@@ -145,19 +170,59 @@ safeAddColumn('users', 'stripe_customer_id', 'TEXT');
 safeAddColumn('users', 'stripe_subscription_id', 'TEXT');
 safeAddColumn('users', 'plan_renews_at', 'INTEGER');
 safeAddColumn('users', 'google_id', 'TEXT');
+safeAddColumn('chats', 'deleted_by_user', 'INTEGER NOT NULL DEFAULT 0');
 safeAddColumn('users', 'avatar_url', 'TEXT');
 safeAddColumn('users', 'display_name', 'TEXT');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 
+// ── DM (user-to-user chat) tables ──
+db.exec(`
+CREATE TABLE IF NOT EXISTS dm_conversations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_a INTEGER NOT NULL,
+  user_b INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_a) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_b) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(user_a, user_b)
+);
+CREATE INDEX IF NOT EXISTS idx_dm_conv_a ON dm_conversations(user_a);
+CREATE INDEX IF NOT EXISTS idx_dm_conv_b ON dm_conversations(user_b);
+
+CREATE TABLE IF NOT EXISTS dm_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  conv_id INTEGER NOT NULL,
+  sender_id INTEGER NOT NULL,
+  body TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'text',
+  media_url TEXT,
+  created_at INTEGER NOT NULL,
+  read_at INTEGER,
+  FOREIGN KEY (conv_id) REFERENCES dm_conversations(id) ON DELETE CASCADE,
+  FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_dm_msg_conv ON dm_messages(conv_id, created_at);
+`);
+
 // Default settings
 const defaults = {
     daily_spend_cap_usd: '5',
-    trial_duration_hours: '24',
-    free_user_daily_messages: '0',
+    trial_duration_hours: '72',
+    free_user_daily_messages: '3',
     paid_user_daily_messages: '500',
 };
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 for (const [k, v] of Object.entries(defaults)) insertSetting.run(k, v);
+
+// Migrate old defaults → new values
+const curTrial = db.prepare("SELECT value FROM settings WHERE key = 'trial_duration_hours'").get();
+if (curTrial && curTrial.value === '24') {
+    db.prepare("UPDATE settings SET value = '72' WHERE key = 'trial_duration_hours'").run();
+}
+const curFree = db.prepare("SELECT value FROM settings WHERE key = 'free_user_daily_messages'").get();
+if (curFree && curFree.value === '0') {
+    db.prepare("UPDATE settings SET value = '3' WHERE key = 'free_user_daily_messages'").run();
+}
 
 function getSetting(key, fallback = null) {
     const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);

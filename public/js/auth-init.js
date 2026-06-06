@@ -2,7 +2,7 @@
 (async function () {
     let me;
     try {
-        me = await (await fetch('/api/auth/me')).json();
+        me = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
     } catch {
         window.location.href = '/login.html?next=/app';
         return;
@@ -15,9 +15,33 @@
 
     window.__USER__ = me.user;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    const initDOM = () => {
         const info = document.getElementById('sidebar-user-info');
-        if (info) info.textContent = me.user.email;
+        if (info) info.textContent = me.user.display_name || me.user.email;
+
+        // ── My avatar + email in sidebar header ──
+        const emailDisplay = document.getElementById('my-email-display');
+        if (emailDisplay) emailDisplay.textContent = me.user.email || '';
+
+        const avatarInitials = document.getElementById('my-avatar-initials');
+        const avatarImg      = document.getElementById('my-avatar-img');
+        const avatarPhoto    = document.getElementById('my-avatar-photo');
+
+        // Always set initials first (fallback if photo missing or fails to load)
+        const myName = me.user.display_name || me.user.email || '?';
+        if (avatarInitials) avatarInitials.textContent = myName.charAt(0).toUpperCase();
+
+        if (me.user.avatar_url && avatarPhoto) {
+            avatarPhoto.src = me.user.avatar_url;
+            avatarImg?.classList.remove('hidden');
+            avatarInitials?.classList.add('hidden');
+        }
+
+        // Show display name below avatar
+        const sidebarTitle = document.getElementById('sidebar-title');
+        if (sidebarTitle && me.user.display_name) {
+            sidebarTitle.textContent = me.user.display_name;
+        }
 
         if (me.user.is_admin) {
             const link = document.getElementById('admin-link');
@@ -27,18 +51,28 @@
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', async () => {
-                await fetch('/api/auth/logout', { method: 'POST' });
-                window.location.href = '/login.html';
+                try {
+                    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+                } catch {}
+                // Force clear cookie client-side as backup
+                document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+                window.location.replace('/login.html');
             });
         }
 
         renderPlanBadge(me.user);
-    });
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDOM);
+    } else {
+        initDOM();
+    }
 
     function renderPlanBadge(user) {
-        const banner = document.getElementById('plan-banner');
-        const badge = document.getElementById('plan-badge');
-        const text = document.getElementById('plan-text');
+        const banner  = document.getElementById('plan-banner');
+        const badge   = document.getElementById('plan-badge');
+        const text    = document.getElementById('plan-text');
         const upgrade = document.getElementById('upgrade-btn');
         if (!banner || !badge || !text) return;
 
@@ -48,84 +82,122 @@
         if (plan === 'trial') {
             const remainingMs = user.trial_expires_at - Date.now();
             const hours = Math.max(0, Math.floor(remainingMs / 3600000));
-            const mins = Math.max(0, Math.floor((remainingMs % 3600000) / 60000));
+            const mins  = Math.max(0, Math.floor((remainingMs % 3600000) / 60000));
             badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 border border-indigo-200';
-            text.innerHTML = `🎁 Trial: <b>${hours}h ${mins}m</b> remaining`;
+            text.innerHTML  = `🎁 Trial: <b>${hours}h ${mins}m</b> · Unlimited AI`;
+            if (upgrade) { upgrade.classList.remove('hidden'); upgrade.textContent = 'Upgrade ₹99/mo'; }
         } else if (plan === 'paid') {
             badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-green-100 text-green-800 border border-green-200';
-            text.innerHTML = `✓ Paid plan · AI unlocked`;
+            text.innerHTML  = `✓ Pro plan · Unlimited AI`;
+            if (upgrade) upgrade.classList.add('hidden');
         } else {
-            badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-amber-50 text-amber-800 border border-amber-200';
-            text.innerHTML = `Trial ended · AI chat locked`;
-            if (upgrade) upgrade.classList.remove('hidden');
+            badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-gray-100 text-gray-700 border border-gray-200';
+            text.innerHTML  = `Free tier · 3 AI chats/day`;
+            if (upgrade) { upgrade.classList.remove('hidden'); upgrade.textContent = 'Upgrade ₹99/mo'; }
         }
 
-        if (upgrade) {
-            upgrade.addEventListener('click', () => openUpgradeModal());
-        }
-    }
+        // ── Razorpay upgrade flow ─────────────────────────────────────────
+        if (upgrade && !upgrade._rzpBound) {
+            upgrade._rzpBound = true;
+            upgrade.addEventListener('click', async () => {
+                upgrade.disabled = true;
+                upgrade.textContent = 'Loading...';
 
-    function openUpgradeModal() {
-        if (document.getElementById('upgrade-modal-overlay')) return;
-        const overlay = document.createElement('div');
-        overlay.id = 'upgrade-modal-overlay';
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;';
-        overlay.innerHTML = `
-            <div style="background:white;border-radius:24px;max-width:440px;width:100%;padding:32px;box-shadow:0 24px 60px -20px rgba(0,0,0,0.3);">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                    <h3 style="font-weight:800;font-size:20px;color:#0f172a;">Upgrade to Pro</h3>
-                    <button id="upg-close" style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;color:#64748b;font-weight:700;">✕</button>
-                </div>
-                <p style="color:#475569;font-size:14px;margin-bottom:20px;line-height:1.6;">Unlock unlimited AI conversations with your chat history.</p>
-
-                <div style="display:flex;flex-direction:column;gap:12px;">
-                    <button data-plan="pro" class="upg-btn" style="text-align:left;border:1px solid #e2e8f0;border-radius:16px;padding:16px;cursor:pointer;transition:all 200ms;background:white;">
-                        <div style="display:flex;justify-content:space-between;align-items:start;">
-                            <div>
-                                <div style="font-weight:700;color:#0f172a;font-size:15px;">Pro</div>
-                                <div style="font-size:12px;color:#64748b;margin-top:2px;">Monthly · cancel anytime</div>
-                            </div>
-                            <div style="font-weight:800;color:#0f172a;font-size:18px;">$5<span style="font-size:12px;color:#94a3b8;font-weight:600;">/mo</span></div>
-                        </div>
-                    </button>
-                    <button data-plan="lifetime" class="upg-btn" style="text-align:left;border:1px solid #e2e8f0;border-radius:16px;padding:16px;cursor:pointer;transition:all 200ms;background:linear-gradient(180deg,#0f172a,#1e293b);color:white;">
-                        <div style="display:flex;justify-content:space-between;align-items:start;">
-                            <div>
-                                <div style="font-weight:700;font-size:15px;">Lifetime</div>
-                                <div style="font-size:12px;opacity:0.7;margin-top:2px;">Pay once · forever yours</div>
-                            </div>
-                            <div style="font-weight:800;font-size:18px;">$49</div>
-                        </div>
-                    </button>
-                </div>
-                <p id="upg-err" style="color:#dc2626;font-size:12px;font-weight:600;margin-top:14px;text-align:center;display:none;"></p>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-        document.getElementById('upg-close').onclick = () => overlay.remove();
-        overlay.querySelectorAll('.upg-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const plan = btn.dataset.plan;
-                btn.disabled = true;
-                btn.style.opacity = '0.6';
                 try {
-                    const r = await fetch('/api/billing/checkout', {
+                    // 1. Fetch key_id + plan info
+                    const plansRes = await fetch('/api/billing/plans');
+                    const plansData = await plansRes.json();
+
+                    if (!plansData.available || !plansData.key_id) {
+                        alert('Payment gateway not configured yet. Please check back soon!');
+                        return;
+                    }
+
+                    const selectedPlan = plansData.plans[0]; // pro_monthly
+
+                    // 2. Create Razorpay order on backend
+                    const orderRes = await fetch('/api/billing/create-order', {
                         method: 'POST',
                         headers: { 'content-type': 'application/json' },
-                        body: JSON.stringify({ plan }),
+                        body: JSON.stringify({ plan: selectedPlan.id }),
                     });
-                    const data = await r.json();
-                    if (!r.ok) throw new Error(data.error || 'Failed');
-                    window.location.href = data.url;
+                    if (!orderRes.ok) {
+                        const err = await orderRes.json();
+                        throw new Error(err.error || 'Failed to create order');
+                    }
+                    const { order_id, amount, currency } = await orderRes.json();
+
+                    // 3. Open Razorpay modal
+                    const options = {
+                        key:         plansData.key_id,
+                        amount,
+                        currency,
+                        name:        'Kotha',
+                        description: selectedPlan.description,
+                        order_id,
+                        prefill: {
+                            email: user.email,
+                            name:  user.display_name || user.email,
+                        },
+                        theme: { color: '#6366f1' },
+                        modal: {
+                            ondismiss: () => {
+                                upgrade.disabled    = false;
+                                upgrade.textContent = 'Upgrade ₹99/mo';
+                            },
+                        },
+                        handler: async (response) => {
+                            // 4. Verify signature on backend
+                            try {
+                                const verifyRes = await fetch('/api/billing/verify-payment', {
+                                    method: 'POST',
+                                    headers: { 'content-type': 'application/json' },
+                                    body: JSON.stringify({
+                                        razorpay_order_id:   response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature:  response.razorpay_signature,
+                                        plan: selectedPlan.id,
+                                    }),
+                                });
+                                const result = await verifyRes.json();
+                                if (result.ok) {
+                                    // 5. Update UI — no page reload needed
+                                    badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-green-100 text-green-800 border border-green-200';
+                                    text.innerHTML  = `✓ Pro plan · Unlimited AI`;
+                                    upgrade.classList.add('hidden');
+                                    if (window.__USER__) window.__USER__.effective_plan = 'paid';
+                                    // Toast if available
+                                    if (window.kothaToast) window.kothaToast('🎉 Pro unlocked! Unlimited AI chats activated.');
+                                    else alert('🎉 Payment successful! Pro plan activated.');
+                                } else {
+                                    throw new Error(result.error || 'Verification failed');
+                                }
+                            } catch (err) {
+                                console.error('Payment verify error:', err);
+                                alert('Payment received but verification failed. Please contact support with your payment ID: ' + response.razorpay_payment_id);
+                                upgrade.disabled    = false;
+                                upgrade.textContent = 'Upgrade ₹99/mo';
+                            }
+                        },
+                    };
+
+                    if (window._loadRazorpay) await window._loadRazorpay();
+                    const rzp = new window.Razorpay(options);
+                    rzp.on('payment.failed', (response) => {
+                        console.error('Payment failed:', response.error);
+                        alert(`Payment failed: ${response.error.description}`);
+                        upgrade.disabled    = false;
+                        upgrade.textContent = 'Upgrade ₹99/mo';
+                    });
+                    rzp.open();
+
                 } catch (err) {
-                    const e = document.getElementById('upg-err');
-                    e.textContent = err.message;
-                    e.style.display = 'block';
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
+                    console.error('Checkout error:', err);
+                    alert(err.message || 'Something went wrong. Please try again.');
+                    upgrade.disabled    = false;
+                    upgrade.textContent = 'Upgrade ₹99/mo';
                 }
             });
-        });
+        }
     }
 })();

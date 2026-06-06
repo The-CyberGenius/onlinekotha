@@ -130,6 +130,9 @@ async function streamOpenAICompatible({ model, messages, systemPrompt, maxTokens
             messages: chatMessages,
             max_tokens: maxTokens,
             temperature,
+            // Anti-repetition: stops the model looping the same phrase/sentence
+            frequency_penalty: 0.7,
+            presence_penalty: 0.4,
             stream: true,
             stream_options: { include_usage: true },
         }),
@@ -168,7 +171,19 @@ async function streamGoogle({ model, messages, systemPrompt, maxTokens, temperat
 
     const body = {
         contents,
-        generationConfig: { maxOutputTokens: maxTokens, temperature },
+        // NOTE: Gemini rejects frequency/presence penalty ("Penalty is not enabled")
+        // so repetition is controlled via the system prompt + short maxOutputTokens.
+        generationConfig: {
+            maxOutputTokens: maxTokens,
+            temperature,
+            thinkingConfig: { thinkingBudget: 0 },
+        },
+        safetySettings: [
+            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        ],
     };
     if (systemPrompt) body.systemInstruction = { parts: [{ text: systemPrompt }] };
 
@@ -209,7 +224,8 @@ async function readSSE(stream, onEvent) {
     while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+        // Normalize CRLF → LF (Google Gemini uses \r\n)
+        buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, '\n');
 
         let idx;
         while ((idx = buffer.indexOf('\n\n')) !== -1) {
@@ -250,7 +266,11 @@ async function callLLM({ feature, messages, systemPrompt, userId, onToken, signa
     if (!primary && !fallback) throw new LLMError('No models available for this feature', 'NO_MODEL');
 
     const finalSystemPrompt = systemPrompt || route.system_prompt;
-    const maxTokens = route.max_tokens || 1024;
+    // Roleplay replies must be short WhatsApp texts — cap output so the model
+    // can't ramble/loop. Other features keep their configured limit.
+    const maxTokens = feature === 'chat'
+        ? Math.min(route.max_tokens || 220, 220)
+        : (route.max_tokens || 1024);
     const temperature = route.temperature ?? 0.7;
 
     const attempts = [primary, fallback].filter(Boolean);
@@ -308,11 +328,18 @@ function pickAdapter(providerName) {
         case 'groq':
         case 'openrouter':
         case 'ollama':
+        case 'deepseek':
+        case 'qwen':
+        case 'mistral':
+        case 'xai':
+        case 'together':
+        case 'custom':
             return streamOpenAICompatible;
         case 'google':
             return streamGoogle;
         default:
-            return null;
+            // Default fallback: assume OpenAI-compatible (most providers are)
+            return streamOpenAICompatible;
     }
 }
 

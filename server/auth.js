@@ -79,7 +79,8 @@ function createSession(userId) {
 function getSession(token) {
     if (!token) return null;
     const row = db.prepare(
-        `SELECT s.token, s.expires_at, u.id, u.email, u.plan, u.trial_expires_at, u.is_admin
+        `SELECT s.token, s.expires_at, u.id, u.email, u.plan, u.trial_expires_at, u.is_admin,
+                u.display_name, u.avatar_url
          FROM sessions s JOIN users u ON u.id = s.user_id
          WHERE s.token = ?`
     ).get(token);
@@ -96,6 +97,8 @@ function getSession(token) {
             plan: row.plan,
             trial_expires_at: row.trial_expires_at,
             is_admin: !!row.is_admin,
+            display_name: row.display_name || null,
+            avatar_url: row.avatar_url || null,
         },
     };
 }
@@ -106,11 +109,12 @@ function logout(token) {
 
 function effectivePlan(user) {
     if (!user) return 'anonymous';
+    if (user.is_admin) return 'paid';
     if (user.plan === 'paid') return 'paid';
     if (user.plan === 'trial' && user.trial_expires_at && user.trial_expires_at > Date.now()) {
         return 'trial';
     }
-    return 'free';
+    return 'free'; // Free tier: 3 AI msgs/day
 }
 
 function canUseAI(user) {
