@@ -1696,7 +1696,7 @@ select {
 .wrapped-nav-tap {
     position: absolute;
     top: 60px;
-    bottom: 0;
+    bottom: 120px;
     width: 25%;
     z-index: 140;
     cursor: pointer;

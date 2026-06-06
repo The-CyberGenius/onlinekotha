@@ -1035,8 +1035,11 @@
         }
     }
 
-    // Helper used previously to convert dataUrl to file (removed since we use canvas.toBlob directly now)
-
+    function fallbackDownload(blob, fname) {
+        const dataUrl = URL.createObjectURL(blob);
+        performDirectDownload(dataUrl, fname);
+        setTimeout(() => URL.revokeObjectURL(dataUrl), 10000);
+    }
 
     function syncDownload(canvas, fname) {
         try {
