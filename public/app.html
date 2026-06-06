@@ -488,6 +488,17 @@
                 <div id="dm-messages" class="flex-1 min-h-0 overflow-y-auto px-3 md:px-6 py-3 flex flex-col gap-1"></div>
                 <!-- Typing indicator -->
                 <div id="dm-typing-indicator" class="hidden px-5 pb-1 text-[11px] text-gray-400 italic">typing…</div>
+                
+                <!-- Scroll to bottom button -->
+                <button id="dm-scroll-bottom-btn" 
+                    class="absolute bottom-[85px] right-4 w-10 h-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-full flex items-center justify-center text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 translate-y-10 opacity-0 pointer-events-none z-40">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    <!-- Unread badge -->
+                    <span id="dm-scroll-unread-badge" class="hidden absolute -top-1 -right-1 bg-indigo-500 text-white text-[10px] font-bold px-1.5 min-w-[18px] h-[18px] rounded-full flex items-center justify-center border-2 border-white dark:border-gray-800"></span>
+                </button>
+
                 <!-- Input bar -->
                 <div class="shrink-0 px-3 py-2.5 border-t border-gray-200/60 dark:border-gray-800 bg-[#f0f2f5] dark:bg-[#202c33] flex gap-2 items-center relative">
                     <!-- Recording Overlay -->
@@ -779,7 +790,7 @@
     <script src="js/upload.js?v=15"></script>
     <script src="js/ai-panel.js?v=28"></script>
     <script src="js/features.js?v=20"></script>
-    <script src="js/dm.js?v=29"></script>
+    <script src="js/dm.js?v=30"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });

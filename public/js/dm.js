@@ -177,6 +177,8 @@
     const backBtn      = document.getElementById('dm-back-btn');
     const clearBtn     = document.getElementById('dm-clear-btn');
     const typingEl     = document.getElementById('dm-typing-indicator');
+    const scrollBottomBtn = document.getElementById('dm-scroll-bottom-btn');
+    const scrollUnreadBadge = document.getElementById('dm-scroll-unread-badge');
 
     const dmMicBtn         = document.getElementById('dm-mic-btn');
     const dmRecOverlay     = document.getElementById('dm-recording-overlay');
@@ -285,7 +287,21 @@
             } else { loadConvs(); return; }
             renderConvs();
             updateBadge();
-            if (msg.conv_id === activeConvId) { appendMsg(msg); scrollBottom(); }
+            if (msg.conv_id === activeConvId) { 
+                appendMsg(msg); 
+                const distanceToBottom = chatMsgs.scrollHeight - chatMsgs.scrollTop - chatMsgs.clientHeight;
+                if (distanceToBottom > 200) {
+                    if (scrollUnreadBadge) {
+                        scrollUnreadBadge.classList.remove('hidden');
+                        const currentBadge = parseInt(scrollUnreadBadge.textContent || '0');
+                        scrollUnreadBadge.textContent = currentBadge + 1;
+                        scrollBottomBtn.classList.add('animate-bounce');
+                        setTimeout(() => scrollBottomBtn.classList.remove('animate-bounce'), 1000);
+                    }
+                } else {
+                    scrollBottom(); 
+                }
+            }
         });
 
         socket.on('dm:deleted', ({msg_id, conv_id}) => {
@@ -518,6 +534,22 @@
     }
 
     function scrollBottom() { if(chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight; }
+
+    if (chatMsgs && scrollBottomBtn) {
+        chatMsgs.addEventListener('scroll', () => {
+            const distanceToBottom = chatMsgs.scrollHeight - chatMsgs.scrollTop - chatMsgs.clientHeight;
+            if (distanceToBottom > 150) {
+                scrollBottomBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
+            } else {
+                scrollBottomBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
+                if (scrollUnreadBadge) {
+                    scrollUnreadBadge.classList.add('hidden');
+                    scrollUnreadBadge.textContent = '0';
+                }
+            }
+        });
+        scrollBottomBtn.addEventListener('click', scrollBottom);
+    }
 
     // ── Send ──────────────────────────────────────────────────
     const attachBtn = document.getElementById('dm-attach-btn');
