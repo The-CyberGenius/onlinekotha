@@ -625,9 +625,18 @@ app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     `).all(convId, before, after);
 
     // Mark messages as read
-    db.prepare(
+    const now = Date.now();
+    const updateResult = db.prepare(
         'UPDATE dm_messages SET read_at = ? WHERE conv_id = ? AND sender_id != ? AND read_at IS NULL'
-    ).run(Date.now(), convId, req.user.id);
+    ).run(now, convId, req.user.id);
+
+    if (updateResult.changes > 0) {
+        const otherId = conv.user_a === req.user.id ? conv.user_b : conv.user_a;
+        const sockets = onlineUsers.get(otherId);
+        if (sockets) {
+            sockets.forEach(sid => io.to(sid).emit('dm:read', { conv_id: convId }));
+        }
+    }
 
     // Include my_id so frontend knows which side is "me" — guaranteed correct
     res.json({ messages: msgs.reverse(), my_id: req.user.id });
