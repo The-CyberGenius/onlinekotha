@@ -224,7 +224,12 @@
                         <h2 class="font-extrabold text-gray-800 text-sm">DM Conversation Logs</h2>
                         <p class="text-[10px] text-gray-400 mt-0.5">Admin access for legal &amp; government compliance. All logs stored server-side.</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="/api/admin/dm/export-all" download class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm border border-green-700 flex items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Export All (ZIP)
+                        </a>
+                        <div class="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
                         <input id="dm-log-search" type="text" placeholder="Search by email or name…"
                             class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 w-52 outline-none focus:ring-2 focus:ring-indigo-300">
                         <button id="dm-log-search-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Search</button>

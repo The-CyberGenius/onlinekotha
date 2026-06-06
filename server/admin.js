@@ -721,6 +721,68 @@ router.get('/dm/conversations/:id/download', (req, res) => {
     res.send(log);
 });
 
+// Download ALL DM conversations as a single zip
+router.get('/dm/export-all', (req, res) => {
+    const convs = db.prepare(`
+        SELECT dc.*,
+               ua.email AS user_a_email, COALESCE(ua.display_name, ua.email) AS user_a_name,
+               ub.email AS user_b_email, COALESCE(ub.display_name, ub.email) AS user_b_name
+        FROM dm_conversations dc
+        JOIN users ua ON ua.id = dc.user_a
+        JOIN users ub ON ub.id = dc.user_b
+    `).all();
+
+    const msgs = db.prepare(`
+        SELECT dm.*, COALESCE(u.display_name, u.email) AS sender_name, u.email AS sender_email
+        FROM dm_messages dm
+        JOIN users u ON u.id = dm.sender_id
+        ORDER BY dm.conv_id ASC, dm.created_at ASC
+    `).all();
+
+    const msgMap = {};
+    for (const m of msgs) {
+        if (!msgMap[m.conv_id]) msgMap[m.conv_id] = [];
+        msgMap[m.conv_id].push(m);
+    }
+
+    const safeName = `kotha_all_dms_export_${Date.now()}`;
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.zip"`);
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    archive.on('error', (err) => { 
+        console.error('Archiver error:', err);
+        if (!res.headersSent) res.status(500).end(); 
+    });
+    archive.pipe(res);
+
+    for (const conv of convs) {
+        const cMsgs = msgMap[conv.id] || [];
+        let log = `DM CONVERSATION LOG — KOTHA ADMIN EXPORT\n`;
+        log += `Generated: ${new Date().toISOString()}\n`;
+        log += `Conversation ID: ${conv.id}\n`;
+        log += `Participants:\n`;
+        log += `  - ${conv.user_a_name} <${conv.user_a_email}>\n`;
+        log += `  - ${conv.user_b_name} <${conv.user_b_email}>\n`;
+        log += `Started: ${new Date(conv.created_at).toISOString()}\n`;
+        log += `Total messages: ${cMsgs.length}\n`;
+        log += `${'='.repeat(60)}\n\n`;
+
+        for (const m of cMsgs) {
+            const time = new Date(m.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+            log += `[${time} IST] ${m.sender_name} <${m.sender_email}>:\n`;
+            log += `${m.body}\n\n`;
+        }
+        
+        const safeEmailA = conv.user_a_email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+        const safeEmailB = conv.user_b_email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+        const fileName = `conv_${conv.id}_${safeEmailA}_${safeEmailB}.txt`;
+        archive.append(log, { name: fileName });
+    }
+
+    archive.finalize();
+});
+
 router.get('/usage/summary', (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
