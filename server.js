@@ -4,6 +4,17 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
+
+const dmUploadDir = path.join(__dirname, 'public', 'uploads', 'dm');
+if (!fs.existsSync(dmUploadDir)) fs.mkdirSync(dmUploadDir, { recursive: true });
+const dmUpload = multer({
+    storage: multer.diskStorage({
+        destination: dmUploadDir,
+        filename: (req, file, cb) => cb(null, `dm_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`)
+    }),
+    limits: { fileSize: 50 * 1024 * 1024 }
+});
 
 const { db } = require('./server/db');
 const {
@@ -553,10 +564,19 @@ app.delete('/api/dm/messages/:id', requireUser, (req, res) => {
 });
 
 // HTTP fallback for sending a message (used when socket.io isn't connected yet)
+app.post('/api/dm/upload', requireUser, dmUpload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    const url = `/uploads/dm/${req.file.filename}`;
+    res.json({ url });
+});
+
 app.post('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     const convId = Number(req.params.id);
     const body   = (req.body?.body || '').trim();
-    if (!body) return res.status(400).json({ error: 'Empty message' });
+    const type   = req.body?.type || 'text';
+    const media_url = req.body?.media_url || null;
+
+    if (!body && !media_url) return res.status(400).json({ error: 'Empty message' });
 
     const conv = db.prepare(
         'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
@@ -565,12 +585,12 @@ app.post('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
 
     const now    = Date.now();
     const result = db.prepare(
-        'INSERT INTO dm_messages (conv_id, sender_id, body, type, created_at, read_at) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(convId, req.user.id, body, 'text', now, now);
+        'INSERT INTO dm_messages (conv_id, sender_id, body, type, media_url, created_at, read_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).run(convId, req.user.id, body, type, media_url, now, now);
 
     const msg = {
         id: result.lastInsertRowid, conv_id: convId,
-        sender_id: req.user.id, body, type: 'text',
+        sender_id: req.user.id, body, type, media_url: media_url,
         created_at: now, read_at: now,
         display_name: req.user.display_name || req.user.email.split('@')[0],
         avatar_url: req.user.avatar_url,
@@ -638,7 +658,11 @@ io.on('connection', (socket) => {
 
     socket.on('dm:send', (data) => {
         const { conv_id, body } = data;
-        if (!conv_id || !body || !body.trim()) return;
+        const type = data.type || 'text';
+        const media_url = data.media_url || null;
+        
+        if (!conv_id) return;
+        if ((!body || !body.trim()) && !media_url) return;
 
         // Verify sender is part of this conversation
         const conv = db.prepare(
@@ -648,15 +672,16 @@ io.on('connection', (socket) => {
 
         const now = Date.now();
         const result = db.prepare(
-            'INSERT INTO dm_messages (conv_id, sender_id, body, type, created_at) VALUES (?, ?, ?, ?, ?)'
-        ).run(conv_id, uid, body.trim(), 'text', now);
+            'INSERT INTO dm_messages (conv_id, sender_id, body, type, media_url, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+        ).run(conv_id, uid, body ? body.trim() : '', type, media_url, now);
 
         const msg = {
             id: result.lastInsertRowid,
             conv_id,
             sender_id: uid,
-            body: body.trim(),
-            type: 'text',
+            body: body ? body.trim() : '',
+            type,
+            media_url,
             created_at: now,
             read_at: null,
             display_name: socket.user.display_name || socket.user.email.split('@')[0],

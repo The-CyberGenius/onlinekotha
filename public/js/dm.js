@@ -7,6 +7,37 @@
         return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
     function dk() { return document.documentElement.classList.contains('dark'); }
+    function appendMsg(m) {
+        if (!chatMsgs) return;
+        const msgElId = `dm-msg-${m.id}`;
+        if (document.getElementById(msgElId)) return; // dedup
+        
+        const isMe = m.sender_id === me?.id;
+        let contentHtml = '';
+        
+        if (m.type === 'image' && m.media_url) {
+            contentHtml = `<img src="${m.media_url}" class="max-w-[200px] md:max-w-[250px] rounded-lg cursor-pointer hover:opacity-90 transition" onclick="window.open(this.src,'_blank')">`;
+            if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+        } else if (m.type === 'audio' && m.media_url) {
+            contentHtml = `<audio controls src="${m.media_url}" class="max-w-[200px] md:max-w-[250px]"></audio>`;
+            if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+        } else if (m.type === 'document' && m.media_url) {
+            contentHtml = `<a href="${m.media_url}" target="_blank" class="flex items-center gap-2 bg-black/10 dark:bg-white/10 p-2 rounded-lg hover:bg-black/20 dark:hover:bg-white/20 transition underline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg>${m.body || 'Document'}</a>`;
+        } else {
+            contentHtml = m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        const html = `
+            <div id="${msgElId}" class="flex gap-2 text-sm ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1 group relative">
+                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
+                <div class="max-w-[75%] md:max-w-[65%]">
+                    <div class="px-3 py-2 rounded-2xl shadow-sm leading-relaxed ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'}">
+                        ${contentHtml}
+                    </div>
+                </div>
+            </div>`;
+        chatMsgs.insertAdjacentHTML('beforeend', html);
+    }
     function timeAgo(ts) {
         if (!ts) return '';
         const d = Date.now() - ts;
@@ -404,22 +435,69 @@
     function scrollBottom() { if(chatMsgs) chatMsgs.scrollTop = chatMsgs.scrollHeight; }
 
     // ── Send ──────────────────────────────────────────────────
-    async function send() {
-        const body = chatInput?.value.trim();
-        if (!body || !activeConvId) return;
+    const attachBtn = document.getElementById('dm-attach-btn');
+    const fileInput = document.getElementById('dm-file-input');
+
+    attachBtn?.addEventListener('click', () => fileInput?.click());
+
+    fileInput?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file || !activeConvId) return;
+        
+        let fileType = 'document';
+        if (file.type.startsWith('image/')) fileType = 'image';
+        else if (file.type.startsWith('audio/')) fileType = 'audio';
+        else if (file.type.startsWith('video/')) fileType = 'video';
+
+        const fd = new FormData();
+        fd.append('file', file);
+        
+        const originalPlaceholder = chatInput.placeholder;
+        chatInput.placeholder = 'Uploading media...';
+        chatInput.disabled = true;
+        
+        try {
+            const r = await fetch('/api/dm/upload', { method: 'POST', body: fd });
+            const data = await r.json();
+            if (data.url) {
+                send(null, fileType, data.url, file.name);
+            } else {
+                alert('Upload failed: ' + (data.error || 'unknown'));
+            }
+        } catch(err) {
+            console.error('Upload error', err);
+            alert('Upload error');
+        } finally {
+            chatInput.placeholder = originalPlaceholder;
+            chatInput.disabled = false;
+            fileInput.value = '';
+            chatInput.focus();
+        }
+    });
+
+    async function send(ev, forcedType = 'text', forcedMediaUrl = null, fallbackBody = '') {
+        let body = '';
+        if (forcedType === 'text') {
+            body = chatInput?.value.trim();
+            if (!body && !forcedMediaUrl) return;
+            chatInput.value = '';
+            chatInput.focus();
+            localStorage.removeItem(LS.draft(activeConvId));
+        } else {
+            body = fallbackBody || chatInput?.value.trim() || '';
+            chatInput.value = '';
+        }
+
         const convAtSend = activeConvId;
-        chatInput.value = '';
-        chatInput.focus();
-        localStorage.removeItem(LS.draft(convAtSend)); // clear saved draft
 
         if (socket?.connected) {
-            socket.emit('dm:send', {conv_id: activeConvId, body});
+            socket.emit('dm:send', {conv_id: activeConvId, body, type: forcedType, media_url: forcedMediaUrl});
         } else {
             try {
                 const r = await fetch(`/api/dm/conversations/${activeConvId}/messages`, {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({body}),
+                    body: JSON.stringify({body, type: forcedType, media_url: forcedMediaUrl}),
                 });
                 if (r.ok) {
                     const msg = await r.json();
@@ -427,7 +505,7 @@
                     appendMsg(msg);
                     scrollBottom();
                     const idx = convs.findIndex(c => c.conv_id === activeConvId);
-                    if (idx >= 0) { convs[idx].last_msg = body; convs[idx].last_at = msg.created_at; }
+                    if (idx >= 0) { convs[idx].last_msg = (forcedType === 'text' ? body : `[${forcedType}]`); convs[idx].last_at = msg.created_at; }
                     renderConvs();
                 }
             } catch(e) { console.error('[DM send]', e); }
