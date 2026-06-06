@@ -46,7 +46,7 @@
         if (deleted) {
             contentHtml = '🚫 This message was deleted';
         } else if (m.type === 'image' && m.media_url) {
-            contentHtml = `<img src="${m.media_url}" class="max-w-[200px] md:max-w-[250px] rounded-lg cursor-pointer hover:opacity-90 transition object-cover" onclick="window.open(this.src,'_blank')" loading="lazy" style="min-height: 100px; background: #eee;">`;
+            contentHtml = `<img src="${m.media_url}" class="w-[240px] h-[240px] rounded-lg cursor-zoom-in hover:opacity-90 transition object-cover" onclick="window.kothaOpenLightbox(this.src)" loading="lazy" style="background: #eee;">`;
             if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         } else if (m.type === 'audio' && m.media_url) {
             contentHtml = `<audio controls src="${m.media_url}" class="max-w-[200px] md:max-w-[250px] outline-none" style="height: 36px;"></audio>`;
@@ -705,6 +705,55 @@
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') persistState();
     });
+
+    // ── Lightbox (Image Viewer) ───────────────────────────────
+    window.kothaOpenLightbox = function(src) {
+        let overlay = document.getElementById('kotha-lightbox');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'kotha-lightbox';
+            overlay.className = 'fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center opacity-0 transition-opacity duration-200 backdrop-blur-sm cursor-zoom-out';
+            overlay.onclick = function(e) {
+                if (e.target === overlay || e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    window.kothaCloseLightbox();
+                }
+            };
+            
+            overlay.innerHTML = `
+                <div class="absolute top-4 right-4 z-50">
+                    <button onclick="window.kothaCloseLightbox()" class="text-white hover:text-gray-300 bg-black/50 hover:bg-black/80 rounded-full p-2 transition">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <img id="kotha-lightbox-img" src="" class="max-w-[95vw] max-h-[90vh] object-contain rounded-md shadow-2xl scale-95 transition-transform duration-200" style="user-select: none;">
+            `;
+            document.body.appendChild(overlay);
+        }
+        
+        const img = document.getElementById('kotha-lightbox-img');
+        img.src = src;
+        
+        // Show
+        overlay.style.display = 'flex';
+        // Trigger reflow for animation
+        overlay.offsetHeight; 
+        overlay.classList.remove('opacity-0');
+        img.classList.remove('scale-95');
+        img.classList.add('scale-100');
+    };
+
+    window.kothaCloseLightbox = function() {
+        const overlay = document.getElementById('kotha-lightbox');
+        if (overlay) {
+            const img = document.getElementById('kotha-lightbox-img');
+            overlay.classList.add('opacity-0');
+            if (img) {
+                img.classList.remove('scale-100');
+                img.classList.add('scale-95');
+            }
+            setTimeout(() => { overlay.style.display = 'none'; }, 200);
+        }
+    };
 
     // ── Start ─────────────────────────────────────────────────
     init();
