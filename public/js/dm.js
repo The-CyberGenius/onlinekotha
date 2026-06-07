@@ -230,10 +230,10 @@
     function showChatsTab() {
         chatsTab?.classList.remove('hidden');
         dmTab?.classList.add('hidden');
-        tabChatsBtn?.classList.remove('text-gray-500','dark:text-gray-400');
+        tabChatsBtn?.classList.remove('text-gray-500','dark:text-gray-400','hover:bg-gray-100','dark:hover:bg-gray-800');
         tabChatsBtn?.classList.add('bg-indigo-600','text-white','shadow-sm');
         tabDmBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
-        tabDmBtn?.classList.add('text-gray-500','dark:text-gray-400');
+        tabDmBtn?.classList.add('text-gray-500','dark:text-gray-400','hover:bg-gray-100','dark:hover:bg-gray-800');
         // Hide DM chat overlay so imported chats are visible again
         if (chatArea) chatArea.style.display = 'none';
         document.getElementById('dm-empty-state')?.classList.add('hidden');
@@ -245,10 +245,10 @@
     function showDmTab() {
         chatsTab?.classList.add('hidden');
         dmTab?.classList.remove('hidden');
-        tabDmBtn?.classList.remove('text-gray-500','dark:text-gray-400');
+        tabDmBtn?.classList.remove('text-gray-500','dark:text-gray-400','hover:bg-gray-100','dark:hover:bg-gray-800');
         tabDmBtn?.classList.add('bg-indigo-600','text-white','shadow-sm');
         tabChatsBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
-        tabChatsBtn?.classList.add('text-gray-500','dark:text-gray-400');
+        tabChatsBtn?.classList.add('text-gray-500','dark:text-gray-400','hover:bg-gray-100','dark:hover:bg-gray-800');
         localStorage.setItem(LS.view, 'messages');
         if (!activeConvId) {
             document.getElementById('dm-empty-state')?.classList.remove('hidden');
