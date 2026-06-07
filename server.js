@@ -24,6 +24,7 @@ const {
     login,
     logout,
     effectivePlan,
+    getSession,
 } = require('./server/auth');
 const { getMessages } = require('./server/cache');
 const { upload, handleUpload, SRC_DIR, userDir } = require('./server/upload');
@@ -341,6 +342,32 @@ const demoLimiter = rateLimit({
     validate: false,
 });
 
+function getDemoLimitAndUsage(req, sessionId) {
+    let session = null;
+    if (req.cookies && req.cookies.session_token) {
+        session = getSession(req.cookies.session_token);
+    }
+
+    let key, limit;
+    if (session) {
+        const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }).split(',')[0];
+        key = `user_${session.id}_${dateStr}`;
+        limit = 3; // 3 per day for logged in
+    } else {
+        key = `guest_${req.ip}_${sessionId || 'x'}`;
+        limit = 2; // 2 once for guests
+    }
+
+    const usage = demoUsage.get(key) || { count: 0, history: [] };
+    return { session, key, limit, usage };
+}
+
+app.get('/api/demo-chat/status', (req, res) => {
+    const { sessionId } = req.query || {};
+    const { limit, usage } = getDemoLimitAndUsage(req, sessionId);
+    res.json({ remaining: Math.max(0, limit - usage.count), limit });
+});
+
 app.post('/api/demo-chat', demoLimiter, async (req, res) => {
     const { message, sessionId } = req.body || {};
     if (!message || typeof message !== 'string' || message.trim().length === 0)
@@ -348,14 +375,13 @@ app.post('/api/demo-chat', demoLimiter, async (req, res) => {
     if (message.length > 300)
         return res.status(400).json({ error: 'Message too long' });
 
-    const key = `${req.ip}_${sessionId || 'x'}`;
-    const usage = demoUsage.get(key) || { count: 0, history: [] };
+    const { session, key, limit, usage } = getDemoLimitAndUsage(req, sessionId);
 
-    if (usage.count >= DEMO_LIMIT) {
+    if (usage.count >= limit) {
         return res.status(429).json({
-            error: 'Demo limit reached! Sign up for free to keep chatting.',
+            error: session ? 'Daily limit reached for demo chat. Check back tomorrow!' : 'Demo limit reached! Sign up for free to keep chatting.',
             remaining: 0,
-            limit: DEMO_LIMIT,
+            limit: limit,
         });
     }
 
@@ -365,13 +391,13 @@ app.post('/api/demo-chat', demoLimiter, async (req, res) => {
     if (usage.history.length > 12) usage.history = usage.history.slice(-12);
     demoUsage.set(key, usage);
 
-    // Cleanup old sessions every 1000 requests
+    // Cleanup old sessions
     if (demoUsage.size > 5000) {
         const entries = [...demoUsage.entries()];
         entries.slice(0, 2000).forEach(([k]) => demoUsage.delete(k));
     }
 
-    const remaining = DEMO_LIMIT - usage.count;
+    const remaining = limit - usage.count;
 
     // SSE setup
     res.setHeader('Content-Type', 'text/event-stream');

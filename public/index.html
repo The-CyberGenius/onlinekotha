@@ -1848,21 +1848,30 @@
                     localStorage.setItem('kotha_demo_sid', sessionId);
                 }
 
-                let remaining = parseInt(localStorage.getItem('kotha_demo_rem') ?? '10');
+                let remaining = 2; // Default fallback
                 let isSending = false;
 
                 function updateCounter(r) {
                     remaining = r;
-                    localStorage.setItem('kotha_demo_rem', r);
                     remainingEl.textContent = r + ' msgs left';
                     if (r <= 3) remainingEl.classList.add('text-amber-400');
                     if (r <= 0) {
                         form.classList.add('hidden');
                         limitCta.classList.remove('hidden');
                         counterEl.innerHTML = '<span class="text-[9px] font-bold text-red-400">0 left</span>';
+                    } else {
+                        form.classList.remove('hidden');
+                        limitCta.classList.add('hidden');
+                        counterEl.innerHTML = '';
                     }
                 }
-                updateCounter(remaining);
+
+                // Fetch true remaining count from server
+                fetch(`/api/demo-chat/status?sessionId=${sessionId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.remaining !== undefined) updateCounter(data.remaining);
+                    }).catch(err => console.error(err));
 
                 function timeNow() {
                     return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
