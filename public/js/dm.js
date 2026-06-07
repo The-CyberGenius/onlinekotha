@@ -78,13 +78,13 @@
                 </button>
                 <div class="flex-1 min-w-0 flex flex-col justify-center -mt-0.5 mr-1">
                     <div class="relative h-4 flex items-center group cursor-pointer w-full" onclick="window.kothaSeekAudioDirect(this, event)">
-                        <div class="w-full h-1 bg-gray-300 dark:bg-[#ffffff30] rounded-full overflow-hidden pointer-events-none">
-                            <div class="audio-progress h-full bg-[#53bdeb] dark:bg-[#53bdeb]" style="width: 0%;"></div>
+                        <div class="w-full h-1 bg-gray-300 dark:bg-gray-500 rounded-full overflow-hidden pointer-events-none">
+                            <div class="audio-progress h-full bg-[#53bdeb]" style="width: 0%;"></div>
                         </div>
-                        <div class="audio-thumb absolute top-1/2 -mt-1.5 w-3 h-3 bg-[#53bdeb] rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style="left: 0%; transform: translateX(-50%);"></div>
+                        <div class="audio-thumb absolute top-1/2 -mt-1.5 w-3 h-3 bg-[#53bdeb] rounded-full shadow-sm transition-opacity pointer-events-none" style="left: 0%; transform: translateX(-50%);"></div>
                     </div>
                     <div class="flex justify-between items-center text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wide" style="margin-top: 1px;">
-                        <span class="audio-time">0:00</span>
+                        <span class="audio-time"><span class="current-time">0:00</span> <span class="time-separator hidden">/</span> <span class="total-time"></span></span>
                     </div>
                 </div>
                 <audio src="${m.media_url}" preload="metadata" onloadedmetadata="window.kothaAudioLoaded(this)" ontimeupdate="window.kothaUpdateAudioTime(this)" onended="window.kothaAudioEnded(this)" onerror="window.kothaAudioError(this)" class="hidden"></audio>
@@ -1105,9 +1105,19 @@ window.kothaAudioLoaded = function(audio) {
     const wrapper = audio.closest('.kotha-audio-player');
     if (!wrapper) return;
     const timeEl = wrapper.querySelector('.audio-time');
+    
     if (audio.duration && audio.duration !== Infinity && !isNaN(audio.duration)) {
         const d = Math.floor(audio.duration);
-        timeEl.textContent = `${Math.floor(d/60)}:${String(d%60).padStart(2,'0')}`;
+        const formattedTotal = `${Math.floor(d/60)}:${String(d%60).padStart(2,'0')}`;
+        
+        if (timeEl.querySelector('.current-time')) {
+            timeEl.querySelector('.current-time').textContent = formattedTotal;
+            timeEl.querySelector('.total-time').textContent = '';
+            timeEl.querySelector('.time-separator').classList.add('hidden');
+            timeEl.dataset.total = formattedTotal;
+        } else {
+            timeEl.textContent = formattedTotal;
+        }
     }
 };
 
@@ -1119,10 +1129,8 @@ window.kothaUpdateAudioTime = function(audio) {
     const thumb = wrapper.querySelector('.audio-thumb');
     
     let duration = audio.duration;
-    // WebM files sometimes return Infinity duration initially
     if (duration === Infinity || isNaN(duration)) {
-        // Fallback or attempt to parse
-        duration = audio.currentTime + 1; // dummy fallback
+        duration = audio.currentTime + 1; // fallback
     }
 
     if (duration) {
@@ -1134,14 +1142,27 @@ window.kothaUpdateAudioTime = function(audio) {
     const elapsed = Math.floor(audio.currentTime);
     const m = Math.floor(elapsed / 60);
     const s = String(elapsed % 60).padStart(2, '0');
-    if(timeEl) timeEl.textContent = `${m}:${s}`;
+    const formattedCurrent = `${m}:${s}`;
+    
+    if (timeEl) {
+        const currEl = timeEl.querySelector('.current-time');
+        const sepEl = timeEl.querySelector('.time-separator');
+        const totalEl = timeEl.querySelector('.total-time');
+        
+        if (currEl && sepEl && totalEl && timeEl.dataset.total) {
+            currEl.textContent = formattedCurrent;
+            sepEl.classList.remove('hidden');
+            totalEl.textContent = timeEl.dataset.total;
+        } else {
+            timeEl.textContent = formattedCurrent;
+        }
+    }
 };
 
 window.kothaSeekAudioDirect = function(container, e) {
     const wrapper = container.closest('.kotha-audio-player');
     const audio = wrapper.querySelector('audio');
     
-    // Some browsers need a duration to seek properly
     if (audio.duration && audio.duration !== Infinity) {
         const rect = container.getBoundingClientRect();
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
@@ -1168,12 +1189,23 @@ window.kothaAudioEnded = function(audio) {
     if(pauseIcon) pauseIcon.classList.add('hidden');
     if(progress) progress.style.width = '0%';
     if(thumb) thumb.style.left = '0%';
+    
     if(timeEl) {
-        if(audio.duration && audio.duration !== Infinity) {
-             const d = Math.floor(audio.duration);
-             timeEl.textContent = `${Math.floor(d/60)}:${String(d%60).padStart(2,'0')}`;
+        const currEl = timeEl.querySelector('.current-time');
+        const sepEl = timeEl.querySelector('.time-separator');
+        const totalEl = timeEl.querySelector('.total-time');
+        
+        if (audio.duration && audio.duration !== Infinity && timeEl.dataset.total) {
+             if (currEl) {
+                 currEl.textContent = timeEl.dataset.total;
+                 sepEl.classList.add('hidden');
+                 totalEl.textContent = '';
+             } else {
+                 timeEl.textContent = timeEl.dataset.total;
+             }
         } else {
-             timeEl.textContent = '0:00';
+             if (currEl) currEl.textContent = '0:00';
+             else timeEl.textContent = '0:00';
         }
     }
 };
