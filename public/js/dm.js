@@ -1207,9 +1207,9 @@ window.kothaAudioEnded = function(audio) {
     }
 };// Auto-focus on typing
 document.addEventListener('keydown', function(e) {
-    const dmView = document.getElementById('dm-view');
-    if (dmView && !dmView.classList.contains('hidden')) {
-        const input = document.getElementById('dm-msg-input');
+    const dmChatArea = document.getElementById('dm-chat-area');
+    if (dmChatArea && dmChatArea.style.display !== 'none') {
+        const input = document.getElementById('dm-input');
         if (input && document.activeElement !== input && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
             if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
                 input.focus();
