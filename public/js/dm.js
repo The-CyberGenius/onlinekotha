@@ -1045,18 +1045,27 @@ window.kothaToggleAudio = function(btn) {
     const pauseIcon = wrapper.querySelector('.pause-icon');
     
     if (audio.paused) {
-        // Pause all other audios
         document.querySelectorAll('.kotha-audio-player audio').forEach(a => {
             if (a !== audio && !a.paused) {
                 a.pause();
                 const w = a.closest('.kotha-audio-player');
-                w.querySelector('.play-icon').classList.remove('hidden');
-                w.querySelector('.pause-icon').classList.add('hidden');
+                if(w) {
+                    w.querySelector('.play-icon')?.classList.remove('hidden');
+                    w.querySelector('.pause-icon')?.classList.add('hidden');
+                }
             }
         });
-        audio.play().catch(console.error);
-        playIcon.classList.add('hidden');
-        pauseIcon.classList.remove('hidden');
+        
+        audio.play().then(() => {
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+        }).catch(err => {
+            console.error('Playback failed:', err);
+            // Fallback for iOS/Safari WebM issues: alert user
+            if(err.name === 'NotSupportedError') {
+                alert('This audio format may not be supported by your current browser (iOS Safari).');
+            }
+        });
     } else {
         audio.pause();
         playIcon.classList.remove('hidden');
@@ -1064,38 +1073,79 @@ window.kothaToggleAudio = function(btn) {
     }
 };
 
+window.kothaAudioLoaded = function(audio) {
+    const wrapper = audio.closest('.kotha-audio-player');
+    if (!wrapper) return;
+    const timeEl = wrapper.querySelector('.audio-time');
+    if (audio.duration && audio.duration !== Infinity && !isNaN(audio.duration)) {
+        const d = Math.floor(audio.duration);
+        timeEl.textContent = `${Math.floor(d/60)}:${String(d%60).padStart(2,'0')}`;
+    }
+};
+
 window.kothaUpdateAudioTime = function(audio) {
     const wrapper = audio.closest('.kotha-audio-player');
+    if (!wrapper) return;
     const timeEl = wrapper.querySelector('.audio-time');
-    const slider = wrapper.querySelector('.audio-slider');
+    const progress = wrapper.querySelector('.audio-progress');
+    const thumb = wrapper.querySelector('.audio-thumb');
     
-    if (audio.duration) {
-        slider.value = (audio.currentTime / audio.duration) * 100 || 0;
+    let duration = audio.duration;
+    // WebM files sometimes return Infinity duration initially
+    if (duration === Infinity || isNaN(duration)) {
+        // Fallback or attempt to parse
+        duration = audio.currentTime + 1; // dummy fallback
+    }
+
+    if (duration) {
+        const pct = (audio.currentTime / duration) * 100 || 0;
+        if(progress) progress.style.width = pct + '%';
+        if(thumb) thumb.style.left = pct + '%';
     }
     
     const elapsed = Math.floor(audio.currentTime);
-    const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+    const m = Math.floor(elapsed / 60);
     const s = String(elapsed % 60).padStart(2, '0');
-    timeEl.textContent = `${m}:${s}`;
+    if(timeEl) timeEl.textContent = `${m}:${s}`;
 };
 
-window.kothaSeekAudio = function(slider) {
-    const wrapper = slider.closest('.kotha-audio-player');
+window.kothaSeekAudioDirect = function(container, e) {
+    const wrapper = container.closest('.kotha-audio-player');
     const audio = wrapper.querySelector('audio');
-    if (audio.duration) {
-        audio.currentTime = (slider.value / 100) * audio.duration;
+    
+    // Some browsers need a duration to seek properly
+    if (audio.duration && audio.duration !== Infinity) {
+        const rect = container.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const pct = x / rect.width;
+        audio.currentTime = pct * audio.duration;
+        window.kothaUpdateAudioTime(audio);
     }
+};
+
+window.kothaAudioError = function(audio) {
+    console.error('Audio failed to load', audio.src);
 };
 
 window.kothaAudioEnded = function(audio) {
     const wrapper = audio.closest('.kotha-audio-player');
+    if (!wrapper) return;
     const playIcon = wrapper.querySelector('.play-icon');
     const pauseIcon = wrapper.querySelector('.pause-icon');
-    const slider = wrapper.querySelector('.audio-slider');
+    const progress = wrapper.querySelector('.audio-progress');
+    const thumb = wrapper.querySelector('.audio-thumb');
     const timeEl = wrapper.querySelector('.audio-time');
     
-    playIcon.classList.remove('hidden');
-    pauseIcon.classList.add('hidden');
-    slider.value = 0;
-    timeEl.textContent = '00:00';
+    if(playIcon) playIcon.classList.remove('hidden');
+    if(pauseIcon) pauseIcon.classList.add('hidden');
+    if(progress) progress.style.width = '0%';
+    if(thumb) thumb.style.left = '0%';
+    if(timeEl) {
+        if(audio.duration && audio.duration !== Infinity) {
+             const d = Math.floor(audio.duration);
+             timeEl.textContent = `${Math.floor(d/60)}:${String(d%60).padStart(2,'0')}`;
+        } else {
+             timeEl.textContent = '0:00';
+        }
+    }
 };
