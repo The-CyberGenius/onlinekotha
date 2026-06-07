@@ -41,38 +41,54 @@
         
         const isMe = m.sender_id === me?.id;
         const deleted = m.type === 'deleted';
-        let contentHtml = '';
-        
+        let extraClass = '';
         if (deleted) {
-            contentHtml = '🚫 This message was deleted';
+            contentHtml = `
+                <div class="flex items-center gap-1.5 opacity-70 italic text-[14px]">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-80"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                    This message was deleted
+                </div>`;
         } else if (m.type === 'image' && m.media_url) {
-            contentHtml = `<img src="${m.media_url}" style="width: 240px; height: 240px; object-fit: cover; border-radius: 8px; background: #eee; cursor: zoom-in;" class="hover:opacity-90 transition" onclick="window.kothaOpenLightbox(this.src)" loading="lazy">`;
-            if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+            extraClass = '!p-1'; // tighter padding for images
+            contentHtml = `<div class="relative w-full max-w-[280px]">
+                <img src="${m.media_url}" style="width: 100%; height: auto; border-radius: 12px; background: transparent; cursor: zoom-in;" class="block shadow-sm" onclick="window.kothaOpenLightbox(this.src)" loading="lazy">
+                ${m.body && m.body !== 'image.jpg' && m.body !== 'Voice Note' ? `<div class="px-2 pb-1 pt-1.5 text-[14px] leading-snug">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+            </div>`;
         } else if (m.type === 'video' && m.media_url) {
-            contentHtml = `<video src="${m.media_url}" style="width: 240px; height: 240px; object-fit: cover; border-radius: 8px; background: #000; cursor: pointer;" class="hover:opacity-90 transition" controls preload="metadata"></video>`;
-            if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+            extraClass = '!p-1';
+            contentHtml = `<div class="relative w-full max-w-[280px]">
+                <video src="${m.media_url}" style="width: 100%; border-radius: 12px; background: #000;" controls preload="metadata" playsinline class="block shadow-sm"></video>
+                ${m.body ? `<div class="px-2 pb-1 pt-1.5 text-[14px] leading-snug">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+            </div>`;
         } else if (m.type === 'audio' && m.media_url) {
             const avatarUrl = isMe ? (me?.avatar_url || '/images/default-avatar.png') : (document.getElementById('dm-chat-avatar')?.src || '/images/default-avatar.png');
+            extraClass = '!pr-2 !pl-1.5 !pt-1.5 !pb-1';
             contentHtml = `
-            <div class="kotha-audio-player flex items-center gap-3 bg-black/5 dark:bg-white/5 p-2.5 rounded-2xl" style="width: 260px;">
-                <img src="${avatarUrl}" class="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-200 dark:border-gray-700">
-                <button onclick="window.kothaToggleAudio(this)" class="w-9 h-9 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white shrink-0 transition shadow-sm" style="padding-left: 2px;">
-                    <svg class="play-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    <svg class="pause-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="transform: translateX(-1px);"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                </button>
-                <div class="flex-1 min-w-0 flex flex-col justify-center">
-                    <input type="range" min="0" max="100" value="0" class="audio-slider w-full h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full appearance-none cursor-pointer outline-none" oninput="window.kothaSeekAudio(this)">
-                    <div class="flex justify-between mt-1.5">
-                        <span class="audio-time text-[10px] text-gray-500 dark:text-gray-400 font-medium">00:00</span>
-                        <span class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline opacity-70"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path></svg>
-                        </span>
+            <div class="kotha-audio-player flex items-center gap-2" style="width: 250px;">
+                <div class="relative shrink-0 ml-0.5">
+                    <img src="${avatarUrl}" class="w-11 h-11 rounded-full object-cover border-2 ${isMe ? 'border-[#d9fdd3] dark:border-[#005c4b]' : 'border-white dark:border-[#202c33]'} shadow-sm">
+                    <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-[#25D366] rounded-full border-2 border-white dark:border-[#005c4b] flex items-center justify-center">
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" class="text-white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                     </div>
                 </div>
-                <audio src="${m.media_url}" preload="metadata" ontimeupdate="window.kothaUpdateAudioTime(this)" onended="window.kothaAudioEnded(this)" class="hidden"></audio>
+                <button onclick="window.kothaToggleAudio(this)" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white shrink-0 transition">
+                    <svg class="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="pause-icon hidden" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <div class="flex-1 min-w-0 flex flex-col justify-center -mt-0.5 mr-1">
+                    <div class="relative h-4 flex items-center group cursor-pointer w-full" onclick="window.kothaSeekAudioDirect(this, event)">
+                        <div class="w-full h-1 bg-gray-300 dark:bg-[#ffffff30] rounded-full overflow-hidden pointer-events-none">
+                            <div class="audio-progress h-full bg-[#53bdeb] dark:bg-[#53bdeb]" style="width: 0%;"></div>
+                        </div>
+                        <div class="audio-thumb absolute top-1/2 -mt-1.5 w-3 h-3 bg-[#53bdeb] rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style="left: 0%; transform: translateX(-50%);"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wide" style="margin-top: 1px;">
+                        <span class="audio-time">0:00</span>
+                    </div>
+                </div>
+                <audio src="${m.media_url}" preload="metadata" onloadedmetadata="window.kothaAudioLoaded(this)" ontimeupdate="window.kothaUpdateAudioTime(this)" onended="window.kothaAudioEnded(this)" onerror="window.kothaAudioError(this)" class="hidden"></audio>
             </div>
             `;
-            if (m.body) contentHtml += `<div class="mt-1">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         } else if (m.type === 'document' && m.media_url) {
             const isPdf = m.media_url.toLowerCase().split('?')[0].endsWith('.pdf') || (m.body && m.body.toLowerCase().endsWith('.pdf'));
             if (isPdf) {
@@ -91,22 +107,38 @@
                 contentHtml = `<a href="${m.media_url}" target="_blank" class="flex items-center gap-2 bg-black/10 dark:bg-white/10 p-2.5 rounded-lg hover:bg-black/20 dark:hover:bg-white/20 transition underline shadow-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg><span class="truncate max-w-[180px] text-[13px]">${m.body || 'Document'}</span></a>`;
             }
         } else {
-            contentHtml = (m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            contentHtml = `<div class="text-[15px] leading-snug">${(m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         }
 
         const timeStr = new Date(m.created_at || Date.now()).toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true});
-        const readHtml = isMe ? `<span id="dm-tick-${m.id}" class="ml-1 text-[11px] ${m.read_at ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}">✓${m.read_at ? '✓' : ''}</span>` : '';
+        
+        let readHtml = '';
+        if (isMe) {
+            readHtml = m.read_at ? 
+            `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#53bdeb] ml-1 shrink-0"><path d="M5 12l5 5L20 7"/><path d="M5 17l5-5-5-5" class="opacity-0"/><path d="M10 17l10-10"/></svg>` 
+            : 
+            `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400 ml-1 shrink-0"><path d="M5 12l5 5L20 7"/></svg>`;
+        }
+
+        let timeOverlay = (m.type === 'image' || m.type === 'video') ? 
+            `<div class="absolute bottom-1 right-2 bg-black/40 rounded-full px-1.5 py-0.5 flex items-center gap-0.5 text-white backdrop-blur-sm z-10"><span class="text-[10px] opacity-90">${timeStr}</span>${readHtml ? readHtml.replace('text-[#53bdeb]', 'text-[#53bdeb]').replace('text-gray-400', 'text-white') : ''}</div>`
+            : 
+            `<div class="flex items-end justify-end mt-0.5 space-x-1 float-right clear-both relative top-1.5" style="min-width: 50px; margin-left: 8px; margin-bottom: -4px;">
+                <span class="text-[10px] opacity-60">${timeStr}</span>
+                ${readHtml}
+            </div>`;
+
+        if (m.type === 'image' || m.type === 'video') {
+            timeOverlay = `<div class="absolute bottom-2 right-3 flex items-center gap-1 bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded-full z-10 shadow-sm backdrop-blur-sm"><span class="opacity-90">${timeStr}</span>${readHtml ? readHtml.replace('text-gray-400', 'text-white/80') : ''}</div>`;
+        }
 
         const html = `
-            <div id="${msgElId}" class="flex gap-2 text-sm ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1 group relative">
-                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
-                <div class="max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                    <div class="dm-bubble break-words px-3 py-2 rounded-2xl shadow-sm leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'}">
+            <div id="${msgElId}" class="flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1.5 group relative px-2 md:px-0">
+                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0 self-end mb-1" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm self-end mb-1\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
+                <div class="max-w-[85%] md:max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'} relative">
+                    <div class="dm-bubble break-words px-2.5 py-1.5 rounded-[18px] shadow-sm relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-br-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800/60 text-gray-800 dark:text-gray-100 rounded-bl-sm'} ${extraClass}">
                         ${contentHtml}
-                        <div class="flex items-center justify-end mt-1 space-x-1" style="min-width: 45px;">
-                            <span class="text-[10px] opacity-60">${timeStr}</span>
-                            ${readHtml}
-                        </div>
+                        ${m.type === 'image' || m.type === 'video' ? timeOverlay : timeOverlay}
                     </div>
                 </div>
             </div>`;
