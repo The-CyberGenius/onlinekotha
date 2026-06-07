@@ -87,6 +87,11 @@ function getOnlineUsers() {
     return Array.from(unique.values());
 }
 
+// REST endpoint for polling online count
+router.get('/online-count', requireUser, (req, res) => {
+    res.json({ count: getOnlineUsers().length });
+});
+
 // SSE stream endpoint
 router.get('/stream', requireUser, (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');

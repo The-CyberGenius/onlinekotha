@@ -1252,6 +1252,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomAiInput = document.getElementById('bottom-ai-input');
     const clearGlobalChatBtn = document.getElementById('clear-global-chat-btn');
 
+    // Poll online count independently of SSE so the sidebar updates globally
+    async function pollGlobalOnlineCount() {
+        if (currentChat === '__global__') return; // SSE handles it when inside
+        try {
+            const r = await fetch('/api/global-chat/online-count');
+            const data = await r.json();
+            if (globalOnlineCount) {
+                globalOnlineCount.textContent = `${data.count} user${data.count === 1 ? '' : 's'} online`;
+            }
+        } catch (err) {}
+    }
+    setInterval(pollGlobalOnlineCount, 5000);
+    pollGlobalOnlineCount();
+
     // Reply and Reaction State variables
     window.replyingTo = null;
     let activePicker = null;
