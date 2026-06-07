@@ -72,16 +72,13 @@
                         <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" class="text-white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                     </div>
                 </div>
-                <button onclick="window.kothaToggleAudio(this)" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white shrink-0 transition">
+                <button onclick="window.kothaToggleAudio(this)" class="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white shrink-0 transition outline-none focus:outline-none">
                     <svg class="play-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     <svg class="pause-icon hidden" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
                 <div class="flex-1 min-w-0 flex flex-col justify-center -mt-0.5 mr-1">
-                    <div class="relative h-4 flex items-center group cursor-pointer w-full" onclick="window.kothaSeekAudioDirect(this, event)">
-                        <div class="w-full h-1 bg-gray-300 dark:bg-gray-500 rounded-full overflow-hidden pointer-events-none">
-                            <div class="audio-progress h-full bg-[#53bdeb]" style="width: 0%;"></div>
-                        </div>
-                        <div class="audio-thumb absolute top-1/2 -mt-1.5 w-3 h-3 bg-[#53bdeb] rounded-full shadow-sm transition-opacity pointer-events-none" style="left: 0%; transform: translateX(-50%);"></div>
+                    <div class="relative flex items-center w-full h-4">
+                        <input type="range" min="0" max="100" value="0" class="audio-slider w-full cursor-pointer outline-none focus:outline-none" style="accent-color: #53bdeb; height: 3px;" oninput="window.kothaSeekAudioNative(this)">
                     </div>
                     <div class="flex justify-between items-center text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wide" style="margin-top: 1px;">
                         <span class="audio-time"><span class="current-time">0:00</span> <span class="time-separator hidden">/</span> <span class="total-time"></span></span>
@@ -1125,8 +1122,7 @@ window.kothaUpdateAudioTime = function(audio) {
     const wrapper = audio.closest('.kotha-audio-player');
     if (!wrapper) return;
     const timeEl = wrapper.querySelector('.audio-time');
-    const progress = wrapper.querySelector('.audio-progress');
-    const thumb = wrapper.querySelector('.audio-thumb');
+    const slider = wrapper.querySelector('.audio-slider');
     
     let duration = audio.duration;
     if (duration === Infinity || isNaN(duration)) {
@@ -1135,8 +1131,7 @@ window.kothaUpdateAudioTime = function(audio) {
 
     if (duration) {
         const pct = (audio.currentTime / duration) * 100 || 0;
-        if(progress) progress.style.width = pct + '%';
-        if(thumb) thumb.style.left = pct + '%';
+        if(slider && document.activeElement !== slider) slider.value = pct;
     }
     
     const elapsed = Math.floor(audio.currentTime);
@@ -1159,15 +1154,13 @@ window.kothaUpdateAudioTime = function(audio) {
     }
 };
 
-window.kothaSeekAudioDirect = function(container, e) {
-    const wrapper = container.closest('.kotha-audio-player');
+window.kothaSeekAudioNative = function(slider) {
+    const wrapper = slider.closest('.kotha-audio-player');
+    if (!wrapper) return;
     const audio = wrapper.querySelector('audio');
     
     if (audio.duration && audio.duration !== Infinity) {
-        const rect = container.getBoundingClientRect();
-        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-        const pct = x / rect.width;
-        audio.currentTime = pct * audio.duration;
+        audio.currentTime = (slider.value / 100) * audio.duration;
         window.kothaUpdateAudioTime(audio);
     }
 };
@@ -1181,14 +1174,12 @@ window.kothaAudioEnded = function(audio) {
     if (!wrapper) return;
     const playIcon = wrapper.querySelector('.play-icon');
     const pauseIcon = wrapper.querySelector('.pause-icon');
-    const progress = wrapper.querySelector('.audio-progress');
-    const thumb = wrapper.querySelector('.audio-thumb');
+    const slider = wrapper.querySelector('.audio-slider');
     const timeEl = wrapper.querySelector('.audio-time');
     
     if(playIcon) playIcon.classList.remove('hidden');
     if(pauseIcon) pauseIcon.classList.add('hidden');
-    if(progress) progress.style.width = '0%';
-    if(thumb) thumb.style.left = '0%';
+    if(slider) slider.value = 0;
     
     if(timeEl) {
         const currEl = timeEl.querySelector('.current-time');
@@ -1208,4 +1199,15 @@ window.kothaAudioEnded = function(audio) {
              else timeEl.textContent = '0:00';
         }
     }
-};
+};// Auto-focus on typing
+document.addEventListener('keydown', function(e) {
+    const dmView = document.getElementById('dm-view');
+    if (dmView && !dmView.classList.contains('hidden')) {
+        const input = document.getElementById('dm-msg-input');
+        if (input && document.activeElement !== input && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1) {
+                input.focus();
+            }
+        }
+    }
+});
