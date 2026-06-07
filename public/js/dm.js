@@ -41,6 +41,7 @@
         
         const isMe = m.sender_id === me?.id;
         const deleted = m.type === 'deleted';
+        let contentHtml = '';
         let extraClass = '';
         if (deleted) {
             contentHtml = `
