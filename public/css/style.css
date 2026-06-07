@@ -18,6 +18,14 @@ input, textarea, [contenteditable] {
     user-select: auto;
 }
 
+*:focus {
+    outline: none !important;
+}
+button:focus, a:focus, input:focus, textarea:focus, [tabindex]:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 /* Safe area insets for bottom bar */
 @supports (padding: env(safe-area-inset-bottom)) {
     #bottom-ai-bar {
