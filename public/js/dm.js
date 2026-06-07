@@ -1018,7 +1018,7 @@
 
     window.kothaCloseLightbox = function(fromHash = false) {
         if (!fromHash && window.location.hash === '#lightbox') {
-            window.location.hash = '';
+            history.back();
             return;
         }
         const overlay = document.getElementById('kotha-lightbox');
@@ -1042,16 +1042,22 @@
 
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash;
+
+        // 1. Always ensure lightbox closes if hash is not #lightbox
+        if (hash !== '#lightbox') {
+            if (document.getElementById('kotha-lightbox') && document.getElementById('kotha-lightbox').style.display !== 'none') {
+                window.kothaCloseLightbox(true);
+            }
+        }
+
+        // 2. Handle Chat Hash
         if (hash.startsWith('#chat-')) {
             const id = Number(hash.replace('#chat-', ''));
             if (id && id !== activeConvId) openConv(id);
         } else if (hash === '#lightbox') {
-            // Do nothing, lightbox handles itself
+            // User is looking at a photo, do not alter chat state
         } else {
-            // No hash or unrecognized hash -> close active states
-            if (document.getElementById('kotha-lightbox') && document.getElementById('kotha-lightbox').style.display !== 'none') {
-                window.kothaCloseLightbox(true);
-            }
+            // No hash or unrecognized hash -> close active chat
             if (activeConvId) {
                 closeConv(true);
             }
