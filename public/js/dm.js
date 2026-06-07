@@ -121,25 +121,20 @@
             `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400 ml-1 shrink-0"><path d="M5 12l5 5L20 7"/></svg>`;
         }
 
-        let timeOverlay = (m.type === 'image' || m.type === 'video') ? 
-            `<div class="absolute bottom-1 right-2 bg-black/40 rounded-full px-1.5 py-0.5 flex items-center gap-0.5 text-white backdrop-blur-sm z-10"><span class="text-[10px] opacity-90">${timeStr}</span>${readHtml ? readHtml.replace('text-[#53bdeb]', 'text-[#53bdeb]').replace('text-gray-400', 'text-white') : ''}</div>`
-            : 
-            `<div class="flex items-end justify-end mt-0.5 space-x-1 float-right clear-both relative top-1.5" style="min-width: 50px; margin-left: 8px; margin-bottom: -4px;">
-                <span class="text-[10px] opacity-60">${timeStr}</span>
-                ${readHtml}
-            </div>`;
-
+        let timeOverlay = '';
         if (m.type === 'image' || m.type === 'video') {
-            timeOverlay = `<div class="absolute bottom-2 right-3 flex items-center gap-1 bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded-full z-10 shadow-sm backdrop-blur-sm"><span class="opacity-90">${timeStr}</span>${readHtml ? readHtml.replace('text-gray-400', 'text-white/80') : ''}</div>`;
+            timeOverlay = `<div class="absolute bottom-2 right-3 flex items-center gap-1 bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded-full z-10 shadow-sm backdrop-blur-sm" style="font-size: 10px;"><span class="opacity-90">${timeStr}</span>${readHtml ? readHtml.replace('text-gray-400', 'text-white/80') : ''}</div>`;
+        } else {
+            timeOverlay = `<div class="flex items-center justify-end mt-1 space-x-1" style="min-width: 45px;"><span class="text-[10px] opacity-60" style="font-size: 10px;">${timeStr}</span>${readHtml}</div>`;
         }
 
         const html = `
-            <div id="${msgElId}" class="flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1.5 group relative px-2 md:px-0">
-                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0 self-end mb-1" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm self-end mb-1\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
-                <div class="max-w-[85%] md:max-w-[70%] flex flex-col ${isMe ? 'items-end' : 'items-start'} relative">
-                    <div class="dm-bubble break-words px-2.5 py-1.5 rounded-[18px] shadow-sm relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-br-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800/60 text-gray-800 dark:text-gray-100 rounded-bl-sm'} ${extraClass}">
+            <div id="${msgElId}" class="flex gap-2 text-sm ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1 relative">
+                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
+                <div class="max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                    <div class="dm-bubble break-words px-3 py-2 rounded-2xl shadow-sm leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'} ${extraClass}">
                         ${contentHtml}
-                        ${m.type === 'image' || m.type === 'video' ? timeOverlay : timeOverlay}
+                        ${timeOverlay}
                     </div>
                 </div>
             </div>`;
