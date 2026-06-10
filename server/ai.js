@@ -122,14 +122,18 @@ router.post('/chat', aiGate, async (req, res) => {
         `SELECT role, content FROM conv_messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 12`
     ).all(convId).reverse();
 
-    // Detect sender names (most messages = user, second = contact)
-    const senderCounts = {};
-    for (const m of chatMessages) {
-        if (m.sender && m.type !== 'system') senderCounts[m.sender] = (senderCounts[m.sender] || 0) + 1;
+    // Detect sender names: use frontend provided names, or fallback to message counts
+    let { userName, contactName } = req.body || {};
+    
+    if (!userName || !contactName) {
+        const senderCounts = {};
+        for (const m of chatMessages) {
+            if (m.sender && m.type !== 'system') senderCounts[m.sender] = (senderCounts[m.sender] || 0) + 1;
+        }
+        const sortedSenders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
+        if (!userName) userName = sortedSenders[0]?.[0] || 'User';
+        if (!contactName) contactName = sortedSenders[1]?.[0] || sortedSenders[0]?.[0] || 'Friend';
     }
-    const sortedSenders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
-    const userName = sortedSenders[0]?.[0] || 'User';
-    const contactName = sortedSenders[1]?.[0] || sortedSenders[0]?.[0] || 'Friend';
 
     // Build context from chat (larger window + date-aware boosting)
     const { selected, stats } = selectContext(chatMessages, message, { topK: 50, includeRecent: 20 });

@@ -429,6 +429,7 @@
         const convId = conversationMap[chatFolder] || null;
         const cName = contactNameMap[chatFolder] ||
             (document.getElementById('chat-header-name')?.innerText) || 'AI';
+        const uName = (typeof window.kothaGetMyName === 'function') ? window.kothaGetMyName() : 'User';
 
         _dotStart();
 
@@ -454,7 +455,7 @@
                 const resp = await fetch('/api/ai/chat', {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ chat: chatFolder, message: text, conversationId: convId }),
+                    body: JSON.stringify({ chat: chatFolder, message: text, conversationId: convId, contactName: cName, userName: uName }),
                 });
 
                 if (!resp.ok) {
