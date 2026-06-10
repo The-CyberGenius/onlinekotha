@@ -80,18 +80,16 @@ function uniq(arr) {
  * @returns Array of messages with id, sender, text, date, time, type
  */
 function selectContext(messages, query, opts = {}) {
-    const {
-        topK = 50,
-        windowBefore = 2,
-        windowAfter = 2,
-        recencyWeight = 0.15,
-        includeRecent = 20,
-    } = opts;
+    let topK = opts.topK || 50;
+    const windowBefore = opts.windowBefore || 2;
+    const windowAfter = opts.windowAfter || 2;
+    const recencyWeight = opts.recencyWeight !== undefined ? opts.recencyWeight : 0.15;
+    const includeRecent = opts.includeRecent !== undefined ? opts.includeRecent : 20;
 
     if (!messages || !messages.length) return { selected: [], stats: { matched: 0 } };
 
-    const queryTerms = uniq(tokenize(query));
     const n = messages.length;
+    const queryTerms = uniq(tokenize(query));
 
     // Compute IDF for query terms
     const df = {};
@@ -115,7 +113,16 @@ function selectContext(messages, query, opts = {}) {
 
     // Extract date hints from query for boosting temporally relevant messages
     const dateHints = extractDateHints(query);
-    const hasDateHints = dateHints.months.length > 0 || dateHints.years.length > 0;
+    const hasDateHints = dateHints.months.length > 0 || dateHints.years.length > 0 || dateHints.day !== null;
+
+    // Detect if user wants a broad summary
+    const isSummarize = /(summarize|summary|what happened|what did we|history of|recap|tell me about)/i.test(query);
+    const hasWeekdayHint = /(monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|yesterday|today)/i.test(query);
+
+    // Expand context window massively for date lookups, broad summaries, or weekday questions
+    if (hasDateHints || isSummarize || hasWeekdayHint) {
+        topK = Math.max(topK, 600); 
+    }
 
     const scored = messages.map((m, i) => {
         const tokens = tokenizedMessages[i];
