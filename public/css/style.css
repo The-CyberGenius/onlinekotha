@@ -541,6 +541,11 @@ button,
     width: 100% !important;
     height: 100% !important;
     border-radius: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    z-index: 9999;
 }
 #mac-frame.mac-fullscreen #mac-titlebar { border-radius: 0; }
 #mac-dock {
