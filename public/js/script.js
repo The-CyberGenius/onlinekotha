@@ -11,6 +11,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchClearBtn = document.getElementById('search-clear-btn');
     const resultsList = document.getElementById('results-list');
 
+    // Search Modal Elements
+    const searchModal = document.getElementById('search-modal');
+    const closeSearchModalBtn = document.getElementById('close-search-modal');
+    const searchModalResults = document.getElementById('search-modal-results');
+    const searchModalStats = document.getElementById('search-modal-stats');
+
+    const closeSearchModal = () => {
+        if (!searchModal) return;
+        searchModal.classList.remove('opacity-100');
+        searchModal.classList.add('opacity-0');
+        setTimeout(() => {
+            searchModal.classList.add('hidden');
+        }, 300);
+    };
+
+    if (closeSearchModalBtn) {
+        closeSearchModalBtn.addEventListener('click', closeSearchModal);
+    }
+    if (searchModal) {
+        searchModal.addEventListener('click', (e) => {
+            if (e.target === searchModal) closeSearchModal();
+        });
+    }
+
     // Quick buttons
     const btnTop = document.getElementById('btn-top');
     const btnBottom = document.getElementById('btn-bottom');
@@ -1925,7 +1949,8 @@ document.addEventListener('DOMContentLoaded', () => {
         searchBox.value = '';
         searchClearBtn.classList.add('hidden');
         searchActionBtn.disabled = true;
-        resultsList.innerHTML = '';
+        if (resultsList) resultsList.innerHTML = '';
+        if (searchModalResults) searchModalResults.innerHTML = '';
         statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
         if (displayedMessages.length !== allMessages.length) {
             displayedMessages = allMessages;
@@ -1950,7 +1975,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     filtered.push(allMessages[i]);
                 }
             }
-            statsInfo.innerHTML = `Found <span class="font-bold text-indigo-600 dark:text-indigo-400">${filtered.length.toLocaleString()}</span> matches for "${query}".`;
+
+            const statsHtml = `Found <span class="font-bold text-indigo-600 dark:text-indigo-400">${filtered.length.toLocaleString()}</span> matches for "${query}".`;
+            statsInfo.innerHTML = statsHtml;
+            if (searchModalStats) searchModalStats.innerHTML = statsHtml;
 
             let resultsHtml = '';
             const limitRes = filtered.slice(-100);
@@ -1959,16 +1987,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const highlightedText = msg.text.replace(regex, `<span class="bg-indigo-200 text-indigo-900 font-bold px-1 rounded">$1</span>`);
 
                 resultsHtml += `
-                    <div class="p-4 bg-white/60 hover:bg-white/90 backdrop-blur shadow-sm cursor-pointer border border-white/50 transition-all rounded-2xl mb-2 hover:shadow-md transform hover:-translate-y-0.5" onclick="jumpToMsg(${msg.id})">
+                    <div class="p-4 bg-gray-50/50 hover:bg-white dark:bg-gray-800/50 dark:hover:bg-gray-800 backdrop-blur shadow-sm cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-xl mb-2 hover:shadow-md transform hover:-translate-y-0.5" onclick="jumpToMsg(${msg.id})">
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-xs font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender)}">${msg.sender}</span> 
                             <span class="text-[10px] text-gray-500 font-semibold">${msg.date} ${msg.time}</span>
                         </div>
-                        <p class="text-[13px] text-gray-800 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
+                        <p class="text-[13px] text-gray-800 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
                     </div>
                 `;
             });
-            resultsList.innerHTML = resultsHtml;
+
+            if (searchModalResults) {
+                searchModalResults.innerHTML = resultsHtml;
+                if (searchModal) {
+                    searchModal.classList.remove('hidden');
+                    void searchModal.offsetWidth; // trigger reflow
+                    searchModal.classList.remove('opacity-0');
+                    searchModal.classList.add('opacity-100');
+                }
+            } else if (resultsList) {
+                resultsList.innerHTML = resultsHtml;
+            }
 
             searchActionBtn.innerHTML = 'Find';
             searchActionBtn.disabled = false;
@@ -2007,6 +2046,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderChats(start, end);
 
             toggleSidebar(false);
+            if (typeof closeSearchModal === 'function') closeSearchModal();
 
             setTimeout(() => {
                 const el = document.getElementById(`msg-${id}`);
