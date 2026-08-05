@@ -155,7 +155,9 @@ async function handleUpload(req, res) {
                     if (m.sender && m.type !== 'system') senders[m.sender] = (senders[m.sender] || 0) + 1;
                 });
                 const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
-                if (sorted.length > 0) {
+                if (sorted.length > 2) {
+                    finalDisplayName = `Group Chat (${sorted.length} members)`;
+                } else if (sorted.length > 0) {
                     finalDisplayName = sorted[1] || sorted[0];
                 }
             } catch (e) {

@@ -152,6 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!detectedOtherName) {
             if (cleanedFolder && !isGarbageName(cleanedFolder)) {
                 detectedOtherName = cleanedFolder;
+            } else if (senderNames.length > 2) {
+                detectedOtherName = `Group Chat (${senderNames.length} members)`;
             } else {
                 detectedOtherName = senderNames[1] || senderNames[0] || "User";
             }
