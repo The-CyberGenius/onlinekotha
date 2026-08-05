@@ -179,6 +179,9 @@ app.get('/api/auth/me', (req, res) => {
 // ---------- Admin (must come BEFORE static so /admin routes aren't shadowed) ----------
 app.use('/api/admin', adminRouter);
 
+// /admin → redirect to /admin.html
+app.get('/admin', (req, res) => res.redirect('/admin.html'));
+
 // /app → main viewer (app.html), redirect to login if not authed
 app.get('/app', (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');

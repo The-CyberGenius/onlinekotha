@@ -470,7 +470,7 @@ router.get('/impersonate/start', (req, res) => {
 
 router.get('/impersonate/stop', (req, res) => {
     res.clearCookie('admin_impersonate_uid', { path: '/' });
-    res.redirect('/admin');
+    res.redirect('/admin.html');
 });
 
 // ---------- Manage user plan / trial ----------

@@ -1059,8 +1059,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const urlParams = new URLSearchParams(window.location.search);
                     const targetChat = urlParams.get('chat');
                     let startChat = chats[0];
-                    if (targetChat && chats.includes(targetChat)) {
-                        startChat = targetChat;
+                    if (targetChat) {
+                        const match = chats.find(c => c === targetChat || c.toLowerCase() === targetChat.toLowerCase());
+                        if (match) startChat = match;
                     }
 
                     selector.value = startChat;
