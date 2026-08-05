@@ -967,7 +967,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const isActive = chat === activeChat;
 
             // Get last message preview from cache if available
-            const chatMeta = window._chatMetaCache?.[chat];
             const lastMsg = chatMeta?.lastMessage || '';
             const lastTime = chatMeta?.lastTime || '';
             const msgCount = chatMeta?.count || '';
