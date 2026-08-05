@@ -115,12 +115,13 @@ function selectContext(messages, query, opts = {}) {
     const dateHints = extractDateHints(query);
     const hasDateHints = dateHints.months.length > 0 || dateHints.years.length > 0 || dateHints.day !== null;
 
-    // Detect if user wants a broad summary
+    // Detect if user wants a broad summary or date/time information
     const isSummarize = /(summarize|summary|what happened|what did we|history of|recap|tell me about)/i.test(query);
     const hasWeekdayHint = /(monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|yesterday|today)/i.test(query);
+    const isTemporalQuery = /(date|tarikh|tariq|kab|when|konsi date|kis din|konsa din|pehle|baat|history|time|upr|upar|yaad|dhund|dhoond)/i.test(query);
 
     // Expand context window massively for date lookups, broad summaries, or weekday questions
-    if (hasDateHints || isSummarize || hasWeekdayHint) {
+    if (hasDateHints || isSummarize || hasWeekdayHint || isTemporalQuery) {
         topK = Math.max(topK, 600); 
     }
 
@@ -162,6 +163,14 @@ function selectContext(messages, query, opts = {}) {
 
     // Pick top-K by score
     let chosen = [...scored].sort((a, b) => b.score - a.score).slice(0, topK).map(s => s.idx);
+
+    // Uniformly sample timeline for date/summary queries so AI knows dates across the whole chat
+    if (hasDateHints || isSummarize || isTemporalQuery) {
+        const step = Math.max(1, Math.floor(n / 60));
+        for (let i = 0; i < n; i += step) {
+            chosen.push(i);
+        }
+    }
 
     // Plus always include the last `includeRecent` messages for tail context
     const tail = [];
