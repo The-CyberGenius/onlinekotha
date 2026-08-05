@@ -9,10 +9,10 @@
 - **IP**: 13.204.243.185
 - **Instance**: t3.micro (908MB RAM, 2 vCPU burstable)
 - **OS**: Ubuntu
-- **SSH Key**: `/Users/shivaprajapat/Downloads/kotha-key.pem`
+- **SSH Key**: `/Users/shivaprajapat/Downloads/kotha-new-key`
 - **SSH Command**:
   ```bash
-  ssh -i /Users/shivaprajapat/Downloads/kotha-key.pem ubuntu@13.204.243.185
+  ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185
   ```
 - **App Path on Server**: `/var/www/onlinekotha`
 - **Process Manager**: PM2 (app name: kotha)
@@ -21,7 +21,7 @@
 
 ## 🚀 Deploy Command
 ```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-key.pem ubuntu@13.204.243.185 "cd /var/www/onlinekotha && git pull origin main && pm2 restart kotha"
+ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "cd /var/www/onlinekotha && git pull origin main && pm2 restart kotha"
 ```
 
 ## 🩺 Health Check
@@ -107,27 +107,27 @@ git add . && git commit -m "message" && git push origin main
 
 **Deploy to production**
 ```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-key.pem ubuntu@13.204.243.185 "cd /var/www/onlinekotha && git pull origin main && pm2 restart kotha"
+ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "cd /var/www/onlinekotha && git pull origin main && pm2 restart kotha"
 ```
 
 **Check PM2 logs on server**
 ```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-key.pem ubuntu@13.204.243.185 "pm2 logs kotha --lines 50"
+ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "pm2 logs kotha --lines 50"
 ```
 
 **Check PM2 status**
 ```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-key.pem ubuntu@13.204.243.185 "pm2 status"
+ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "pm2 status"
 ```
 
 **Restart Nginx (if needed)**
 ```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-key.pem ubuntu@13.204.243.185 "sudo systemctl restart nginx"
+ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "sudo systemctl restart nginx"
 ```
 
 **Install new npm package on server**
 ```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-key.pem ubuntu@13.204.243.185 "cd /var/www/onlinekotha && npm install <package-name> --production && pm2 restart kotha"
+ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "cd /var/www/onlinekotha && npm install <package-name> --production && pm2 restart kotha"
 ```
 
 ## ✅ Completed Features (44 tasks)
