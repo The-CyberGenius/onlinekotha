@@ -6,6 +6,7 @@ const { db, getSetting, setSetting } = require('./db');
 const { encrypt, decrypt, maskKey } = require('./crypto');
 const { requireAdmin } = require('./auth');
 const { userDir, SRC_DIR } = require('./upload');
+const { getMessages } = require('./cache');
 const integ = require('./integrations');
 const email = require('./email');
 const billing = require('./billing');
@@ -437,6 +438,25 @@ router.get('/users/:id/chats/:chatId/download', (req, res) => {
     archive.pipe(res);
     archive.directory(chatDir, safeName);
     archive.finalize();
+});
+
+// Get a user's chat messages for admin viewing
+router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
+    const userId = Number(req.params.id);
+    const chatId = Number(req.params.chatId);
+    const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
+    if (!chat) return res.status(404).json({ error: 'Chat not found' });
+
+    const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+    if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
+
+    try {
+        const result = await getMessages(chatDir);
+        res.json(result.messages);
+    } catch (err) {
+        if (err.code === 'NO_CHAT_FILE') return res.status(404).json({ error: 'Chat file not found' });
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // ---------- Manage user plan / trial ----------
