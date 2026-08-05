@@ -692,6 +692,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 headerName.innerText = otherPersonName;
                 sidebarTitle.innerText = "All Chats";
 
+                if (window._chatMetaCache[chatName]) {
+                    window._chatMetaCache[chatName].contactName = otherPersonName;
+                }
+                renderChatList(loadedChats, currentChat);
+
                 if (otherPersonName) {
                     headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
                     if (sidebarAvatar) sidebarAvatar.innerText = 'C';
@@ -950,7 +955,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         chats.forEach((chat, idx) => {
-            const displayName = cleanDisplayName(chat.replace('WhatsApp Chat - ', ''));
+            let displayName = cleanDisplayName(chat.replace('WhatsApp Chat - ', ''));
+            const chatMeta = window._chatMetaCache?.[chat];
+            if (isGarbageName(displayName) && chatMeta?.contactName) {
+                displayName = chatMeta.contactName;
+            }
             const initial = displayName.charAt(0).toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
             const isActive = chat === activeChat;

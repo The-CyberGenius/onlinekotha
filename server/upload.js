@@ -144,10 +144,29 @@ async function handleUpload(req, res) {
         rmrf(sessionDir);
 
         const folderName = path.basename(finalDir);
+        let finalDisplayName = baseName;
+
+        // If baseName is generic (e.g. "Chat", "WhatsApp Chat"), try to parse the real contact name
+        if (/^(chat|whatsapp|whatsappchat|unknown|group|user)$/i.test(baseName.replace(/[\s\-_]/g, ''))) {
+            try {
+                const parsed = await parseChatFile(findChatFile(finalDir));
+                const senders = {};
+                (parsed.messages || []).forEach(m => {
+                    if (m.sender && m.type !== 'system') senders[m.sender] = (senders[m.sender] || 0) + 1;
+                });
+                const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
+                if (sorted.length > 0) {
+                    finalDisplayName = sorted[1] || sorted[0];
+                }
+            } catch (e) {
+                console.warn('Could not parse contact name for generic upload:', e.message);
+            }
+        }
+
         db.prepare(
             `INSERT OR IGNORE INTO chats (user_id, folder_name, display_name, created_at)
              VALUES (?, ?, ?, ?)`
-        ).run(req.user.id, folderName, baseName, Date.now());
+        ).run(req.user.id, folderName, finalDisplayName, Date.now());
 
         return res.json({ ok: true, chat: folderName });
     } catch (err) {
