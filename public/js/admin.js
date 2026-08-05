@@ -527,11 +527,34 @@ HARD RULES
         }
     });
 
+    let cachedUsers = [];
     async function loadUsers() {
-        const rows = await (await fetch('/api/admin/users')).json();
+        cachedUsers = await (await fetch('/api/admin/users')).json();
+        renderUserList(cachedUsers);
+
+        const searchInput = document.getElementById('admin-user-search');
+        if (searchInput && !searchInput._bound) {
+            searchInput._bound = true;
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                if (!query) {
+                    renderUserList(cachedUsers);
+                    return;
+                }
+                const filtered = cachedUsers.filter(u => 
+                    String(u.id).includes(query) ||
+                    (u.email && u.email.toLowerCase().includes(query)) ||
+                    (u.display_name && u.display_name.toLowerCase().includes(query))
+                );
+                renderUserList(filtered);
+            });
+        }
+    }
+
+    function renderUserList(rows) {
         const list = document.getElementById('user-list');
         if (!rows.length) {
-            list.innerHTML = '<div class="text-center py-8 text-gray-400"><p class="text-4xl mb-2">👥</p><p class="font-bold">No users yet</p></div>';
+            list.innerHTML = '<div class="text-center py-8 text-gray-400"><p class="text-4xl mb-2">👥</p><p class="font-bold">No users match query</p></div>';
             return;
         }
         list.innerHTML = `<p class="text-xs text-gray-500 mb-3">${rows.length} total users</p>`;

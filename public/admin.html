@@ -208,9 +208,12 @@
         <!-- Users Tab -->
         <section id="tab-users" class="tab-content hidden">
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-3">
-                <div class="flex justify-between items-center mb-2">
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
                     <h2 class="font-extrabold text-gray-800 text-sm">Users</h2>
-                    <button id="purge-spam-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-lg transition">🧹 Purge spam (@example.com)</button>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="admin-user-search" placeholder="Search users (email, name, ID)..." class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 w-64">
+                        <button id="purge-spam-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-lg transition">🧹 Purge spam</button>
+                    </div>
                 </div>
                 <div id="user-list" class="text-sm"></div>
             </div>

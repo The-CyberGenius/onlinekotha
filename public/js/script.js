@@ -1932,105 +1932,83 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Explicit Button-Triggered Search Logic
+    const searchResultsContainer = document.getElementById('search-results');
+
     searchBox.addEventListener('input', (e) => {
         const val = e.target.value.trim();
         const lowerVal = val.toLowerCase();
         
-        // Instantly filter chat list
-        if (loadedChats && loadedChats.length > 0) {
-            const filtered = loadedChats.filter(c => c.toLowerCase().includes(lowerVal));
-            renderChatList(filtered, currentChat);
-        }
-
         if (val.length > 0) {
             searchClearBtn.classList.remove('hidden');
         } else {
             searchClearBtn.classList.add('hidden');
         }
 
-        if (val.length >= 3) {
-            searchActionBtn.disabled = false;
-        } else {
-            searchActionBtn.disabled = true;
+        // Live filter chat list
+        if (loadedChats && loadedChats.length > 0) {
+            const filteredChats = loadedChats.filter(c => c.toLowerCase().includes(lowerVal));
+            renderChatList(filteredChats, currentChat);
         }
-    });
 
-    searchBox.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !searchActionBtn.disabled) {
-            searchActionBtn.click();
+        if (lowerVal.length < 2) {
+            if (searchResultsContainer) searchResultsContainer.classList.add('hidden');
+            if (resultsList) resultsList.innerHTML = '';
+            return;
+        }
+
+        // Deep search in loaded messages
+        const filteredMsgs = [];
+        if (allMessages && allMessages.length > 0) {
+            for (let i = 0; i < allMessages.length; i++) {
+                if (allMessages[i].text && allMessages[i].text.toLowerCase().includes(lowerVal)) {
+                    filteredMsgs.push(allMessages[i]);
+                }
+            }
+        }
+
+        if (statsInfo) {
+            statsInfo.innerHTML = `Found <span class="font-bold text-indigo-600 dark:text-indigo-400">${filteredMsgs.length.toLocaleString()}</span> message matches.`;
+        }
+
+        if (resultsList) {
+            if (filteredMsgs.length === 0) {
+                resultsList.innerHTML = `<div class="text-xs text-gray-400 py-2 text-center">No message matches found</div>`;
+            } else {
+                let resultsHtml = '';
+                const limitRes = filteredMsgs.slice(-50);
+                const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                limitRes.forEach(msg => {
+                    const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
+                    resultsHtml += `
+                        <div class="p-2.5 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-xl mb-1.5" onclick="jumpToMsg(${msg.id})">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender)}">${msg.sender || 'User'}</span> 
+                                <span class="text-[9px] text-gray-400 font-semibold">${msg.date || ''} ${msg.time || ''}</span>
+                            </div>
+                            <p class="text-xs text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
+                        </div>
+                    `;
+                });
+                resultsList.innerHTML = resultsHtml;
+            }
+        }
+
+        if (searchResultsContainer) {
+            searchResultsContainer.classList.remove('hidden');
         }
     });
 
     searchClearBtn.addEventListener('click', () => {
         searchBox.value = '';
         searchClearBtn.classList.add('hidden');
-        searchActionBtn.disabled = true;
         if (loadedChats) {
             renderChatList(loadedChats, currentChat);
         }
+        if (searchResultsContainer) searchResultsContainer.classList.add('hidden');
         if (resultsList) resultsList.innerHTML = '';
-        if (searchModalResults) searchModalResults.innerHTML = '';
-        statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
-        if (displayedMessages.length !== allMessages.length) {
-            displayedMessages = allMessages;
-            const end = displayedMessages.length;
-            renderChats(Math.max(0, end - CHUNK_SIZE), end);
-            setTimeout(() => scrollArea.scrollTop = scrollArea.scrollHeight, 10);
+        if (statsInfo) {
+            statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
         }
-    });
-
-    searchActionBtn.addEventListener('click', () => {
-        const query = searchBox.value.toLowerCase().trim();
-        if (query.length < 3) return;
-
-        searchActionBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-        searchActionBtn.disabled = true;
-
-        // Yield to browser context to render spinner, then execute heavy search loop
-        setTimeout(() => {
-            const filtered = [];
-            for (let i = 0; i < allMessages.length; i++) {
-                if (allMessages[i].text && allMessages[i].text.toLowerCase().includes(query)) {
-                    filtered.push(allMessages[i]);
-                }
-            }
-
-            const statsHtml = `Found <span class="font-bold text-indigo-600 dark:text-indigo-400">${filtered.length.toLocaleString()}</span> matches for "${query}".`;
-            statsInfo.innerHTML = statsHtml;
-            if (searchModalStats) searchModalStats.innerHTML = statsHtml;
-
-            let resultsHtml = '';
-            const limitRes = filtered.slice(-100);
-            const regex = new RegExp(`(${query})`, 'gi');
-            limitRes.forEach(msg => {
-                const highlightedText = msg.text.replace(regex, `<span class="bg-indigo-200 text-indigo-900 font-bold px-1 rounded">$1</span>`);
-
-                resultsHtml += `
-                    <div class="p-4 bg-gray-50/50 hover:bg-white dark:bg-gray-800/50 dark:hover:bg-gray-800 backdrop-blur shadow-sm cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-xl mb-2 hover:shadow-md transform hover:-translate-y-0.5" onclick="jumpToMsg(${msg.id})">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender)}">${msg.sender}</span> 
-                            <span class="text-[10px] text-gray-500 font-semibold">${msg.date} ${msg.time}</span>
-                        </div>
-                        <p class="text-[13px] text-gray-800 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
-                    </div>
-                `;
-            });
-
-            if (searchModalResults) {
-                searchModalResults.innerHTML = resultsHtml;
-                if (searchModal) {
-                    searchModal.classList.remove('hidden');
-                    void searchModal.offsetWidth; // trigger reflow
-                    searchModal.classList.remove('opacity-0');
-                    searchModal.classList.add('opacity-100');
-                }
-            } else if (resultsList) {
-                resultsList.innerHTML = resultsHtml;
-            }
-
-            searchActionBtn.innerHTML = 'Find';
-            searchActionBtn.disabled = false;
-        }, 15);
     });
 
     // ── Dark Mode Toggle ──
