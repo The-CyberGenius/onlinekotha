@@ -957,11 +957,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         chats.forEach((chat, idx) => {
-            let displayName = cleanDisplayName(chat.replace('WhatsApp Chat - ', ''));
             const chatMeta = window._chatMetaCache?.[chat];
-            if (isGarbageName(displayName) && chatMeta?.contactName) {
-                displayName = chatMeta.contactName;
-            }
+            let displayName = chatMeta?.contactName || cleanDisplayName(chat.replace('WhatsApp Chat - ', ''));
             const initial = displayName.charAt(0).toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
             const isActive = chat === activeChat;
