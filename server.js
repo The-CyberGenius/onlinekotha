@@ -278,7 +278,7 @@ app.get('/api/chats', requireUser, (req, res) => {
         .filter(d => d.isDirectory())
         .map(d => d.name)
         .filter(name => {
-            if (deletedSet.has(name)) return false;
+            if (!req.user.is_impersonating && deletedSet.has(name)) return false;
             const dir = path.join(myDir, name);
             return fs.readdirSync(dir).some(f => /chat.*\.txt$/i.test(f));
         });

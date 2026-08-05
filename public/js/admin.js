@@ -730,7 +730,7 @@ HARD RULES
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                             .zip
                                         </a>
-                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg px-2 py-1 transition">
+                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg px-2 py-1 transition">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                             Open
                                         </button>
@@ -749,10 +749,11 @@ HARD RULES
                             const chatId = openBtn.dataset.adminOpenChat;
                             const uid = openBtn.dataset.uid;
                             const cname = openBtn.dataset.cname;
+                            const folder = openBtn.dataset.folder;
                             openBtn.textContent = '...';
                             openBtn.disabled = true;
                             // Redirect to impersonation endpoint which will set cookie and redirect to /app
-                            window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent('WhatsApp Chat - ' + cname)}`;
+                            window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`;
                         });
                     });
 
