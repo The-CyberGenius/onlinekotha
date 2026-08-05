@@ -987,10 +987,42 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${msgCount ? `<span class="text-[9px] text-gray-400 font-medium shrink-0">${msgCount} msgs</span>` : ''}
                     </div>
                 </div>
-                <button class="chat-del-btn shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition opacity-0 group-hover:opacity-100" title="Delete chat" data-chat="${chat}">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
+                <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
+                    <button class="chat-rename-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition" title="Rename chat" data-chat="${chat}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="chat-del-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition" title="Delete chat" data-chat="${chat}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
             `;
+            // Rename button
+            item.querySelector('.chat-rename-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const newName = prompt(`Rename "${displayName}" to:`, displayName);
+                if (!newName || !newName.trim() || newName.trim() === displayName) return;
+                const cleanNewName = newName.trim();
+                try {
+                    const r = await fetch(`/api/chats/${encodeURIComponent(chat)}/rename`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ newName: cleanNewName })
+                    });
+                    if (!r.ok) throw new Error('Rename failed');
+                    if (!window._chatMetaCache) window._chatMetaCache = {};
+                    if (!window._chatMetaCache[chat]) window._chatMetaCache[chat] = {};
+                    window._chatMetaCache[chat].contactName = cleanNewName;
+                    
+                    if (chat === currentChat) {
+                        const headerName = document.getElementById('contact-name');
+                        if (headerName) headerName.innerText = cleanNewName;
+                    }
+                    renderChatList(loadedChats, currentChat);
+                } catch (err) {
+                    alert('Rename failed: ' + err.message);
+                }
+            });
+
             // Delete button
             item.querySelector('.chat-del-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -1053,6 +1085,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const resp = await fetch('/api/chats');
             const chats = await resp.json();
             loadedChats = chats;
+
+            fetch('/api/chats/meta').then(r => r.json()).then(metaMap => {
+                if (!window._chatMetaCache) window._chatMetaCache = {};
+                for (const [folder, dName] of Object.entries(metaMap)) {
+                    if (!window._chatMetaCache[folder]) window._chatMetaCache[folder] = {};
+                    window._chatMetaCache[folder].contactName = dName;
+                }
+                renderChatList(loadedChats, currentChat);
+            }).catch(() => {});
             const selector = document.getElementById('chat-selector');
             if (!selector) return;
             selector.innerHTML = '<option value="">Select a chat...</option>';

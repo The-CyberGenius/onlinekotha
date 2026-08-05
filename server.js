@@ -288,6 +288,15 @@ app.get('/api/chats', requireUser, (req, res) => {
     res.json(folders);
 });
 
+app.get('/api/chats/meta', requireUser, (req, res) => {
+    const rows = db.prepare('SELECT folder_name, display_name FROM chats WHERE user_id = ?').all(req.user.id);
+    const map = {};
+    for (const r of rows) {
+        if (r.display_name) map[r.folder_name] = r.display_name;
+    }
+    res.json(map);
+});
+
 app.get('/api/messages', requireUser, async (req, res) => {
     const chatName = req.query.chat;
     if (!chatName) return res.status(400).json({ error: 'No chat specified' });
@@ -327,6 +336,22 @@ app.delete('/api/chats/:name', requireUser, (req, res) => {
     db.prepare('UPDATE chats SET deleted_by_user = 1 WHERE user_id = ? AND folder_name = ?')
         .run(req.user.id, req.params.name);
     res.json({ ok: true });
+});
+
+app.put('/api/chats/:name/rename', requireUser, (req, res) => {
+    const { newName } = req.body || {};
+    if (!newName || !newName.trim()) return res.status(400).json({ error: 'newName is required' });
+    const cleanName = newName.trim();
+    
+    const existing = db.prepare('SELECT id FROM chats WHERE user_id = ? AND folder_name = ?').get(req.user.id, req.params.name);
+    if (existing) {
+        db.prepare('UPDATE chats SET display_name = ? WHERE user_id = ? AND folder_name = ?')
+            .run(cleanName, req.user.id, req.params.name);
+    } else {
+        db.prepare('INSERT INTO chats (user_id, folder_name, display_name, created_at) VALUES (?, ?, ?, ?)')
+            .run(req.user.id, req.params.name, cleanName, Date.now());
+    }
+    res.json({ ok: true, display_name: cleanName });
 });
 
 app.use('/api/ai', aiRouter);
