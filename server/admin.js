@@ -459,6 +459,20 @@ router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
     }
 });
 
+// ---------- Impersonation ----------
+router.get('/impersonate/start', (req, res) => {
+    const uid = req.query.uid;
+    const chat = req.query.chat || '';
+    if (!uid) return res.status(400).send('UID required');
+    res.cookie('admin_impersonate_uid', uid, { httpOnly: true, path: '/' });
+    res.redirect(`/app?chat=${encodeURIComponent(chat)}`);
+});
+
+router.get('/impersonate/stop', (req, res) => {
+    res.clearCookie('admin_impersonate_uid', { path: '/' });
+    res.redirect('/admin');
+});
+
 // ---------- Manage user plan / trial ----------
 router.patch('/users/:id/plan', (req, res) => {
     const userId = Number(req.params.id);

@@ -1056,13 +1056,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     removeEmptyState();
                     renderChatList(chats, '');
                 } else {
-                    selector.value = chats[0];
-                    currentChat = chats[0];
-                    window.currentChat = chats[0];
-                    loadData(chats[0]);
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const targetChat = urlParams.get('chat');
+                    let startChat = chats[0];
+                    if (targetChat && chats.includes(targetChat)) {
+                        startChat = targetChat;
+                    }
+
+                    selector.value = startChat;
+                    currentChat = startChat;
+                    window.currentChat = startChat;
+                    loadData(startChat);
                     removeEmptyState();
                     // Render visual chat list
-                    renderChatList(chats, chats[0]);
+                    renderChatList(chats, startChat);
                 }
             } else {
                 if (currentChat !== '__global__') {

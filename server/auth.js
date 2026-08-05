@@ -127,7 +127,15 @@ function authMiddleware(req, res, next) {
     const token = req.cookies && req.cookies.session;
     const session = getSession(token);
     req.session = session;
-    req.user = session ? session.user : null;
+    if (session && session.user) {
+        req.user = { ...session.user };
+        if (req.user.is_admin && req.cookies && req.cookies.admin_impersonate_uid) {
+            req.user.id = Number(req.cookies.admin_impersonate_uid);
+            req.user.is_impersonating = true;
+        }
+    } else {
+        req.user = null;
+    }
     next();
 }
 

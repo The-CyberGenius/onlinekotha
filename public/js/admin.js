@@ -745,49 +745,14 @@ HARD RULES
                     `;
                     // Admin chat open handlers
                     area.querySelectorAll('[data-admin-open-chat]').forEach(openBtn => {
-                        openBtn.addEventListener('click', async () => {
+                        openBtn.addEventListener('click', () => {
                             const chatId = openBtn.dataset.adminOpenChat;
                             const uid = openBtn.dataset.uid;
                             const cname = openBtn.dataset.cname;
                             openBtn.textContent = '...';
                             openBtn.disabled = true;
-                            try {
-                                const r = await fetch(`/api/admin/users/${uid}/chats/${chatId}/messages`);
-                                if (!r.ok) throw new Error((await r.json()).error || 'Failed to fetch');
-                                const messages = await r.json();
-                                
-                                const modal = document.createElement('div');
-                                modal.className = 'fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4';
-                                
-                                const msgHtml = messages.map(m => `
-                                    <div class="mb-3 ${m.is_system ? 'text-center text-[10px] font-bold text-gray-500' : ''}">
-                                        ${m.is_system ? m.text : `
-                                            <div class="text-[10px] font-bold text-gray-500 mb-0.5">${m.sender} <span class="font-normal opacity-70 ml-1">${new Date(m.date).toLocaleString()}</span></div>
-                                            <div class="text-xs text-gray-800 bg-white p-2.5 rounded-xl inline-block border border-gray-100 shadow-sm max-w-[85%] whitespace-pre-wrap">${m.text}</div>
-                                        `}
-                                    </div>
-                                `).join('');
-
-                                modal.innerHTML = `
-                                    <div class="bg-gray-50 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-                                        <div class="bg-white px-4 py-3 border-b flex justify-between items-center sticky top-0 z-10">
-                                            <div class="font-bold text-gray-800 text-sm">${cname} <span class="text-[10px] font-bold text-gray-400 ml-2 bg-gray-100 px-2 py-0.5 rounded-full">${messages.length} msgs</span></div>
-                                            <button class="close-modal bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-full w-7 h-7 flex items-center justify-center transition font-bold text-xs">✕</button>
-                                        </div>
-                                        <div class="p-4 overflow-y-auto flex-1 bg-[#efeae2]">
-                                            ${msgHtml || '<div class="text-center text-gray-400 text-xs font-bold py-10">No messages found</div>'}
-                                        </div>
-                                    </div>
-                                `;
-                                document.body.appendChild(modal);
-                                modal.querySelector('.close-modal').addEventListener('click', () => modal.remove());
-                                modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-                            } catch (err) {
-                                alert('Error: ' + err.message);
-                            } finally {
-                                openBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Open';
-                                openBtn.disabled = false;
-                            }
+                            // Redirect to impersonation endpoint which will set cookie and redirect to /app
+                            window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent('WhatsApp Chat - ' + cname)}`;
                         });
                     });
 

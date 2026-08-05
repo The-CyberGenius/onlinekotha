@@ -61,6 +61,18 @@
         }
 
         renderPlanBadge(me.user);
+
+        // Impersonation Banner
+        if (me.user.is_impersonating) {
+            const banner = document.createElement('div');
+            banner.className = 'fixed top-0 left-0 w-full bg-red-600 text-white text-xs font-bold text-center py-1.5 z-[9999] shadow-md flex items-center justify-center gap-4';
+            banner.innerHTML = `
+                <span>⚠️ Admin Impersonation Mode Active. Viewing as ${me.user.email}</span>
+                <a href="/api/admin/impersonate/stop" class="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-white no-underline transition">Exit Mode</a>
+            `;
+            document.body.appendChild(banner);
+            document.body.style.paddingTop = '28px';
+        }
     };
 
     if (document.readyState === 'loading') {
