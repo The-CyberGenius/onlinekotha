@@ -1926,6 +1926,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Explicit Button-Triggered Search Logic
     searchBox.addEventListener('input', (e) => {
         const val = e.target.value.trim();
+        const lowerVal = val.toLowerCase();
+        
+        // Instantly filter chat list
+        if (loadedChats && loadedChats.length > 0) {
+            const filtered = loadedChats.filter(c => c.toLowerCase().includes(lowerVal));
+            renderChatList(filtered, currentChat);
+        }
+
         if (val.length > 0) {
             searchClearBtn.classList.remove('hidden');
         } else {
@@ -1949,6 +1957,9 @@ document.addEventListener('DOMContentLoaded', () => {
         searchBox.value = '';
         searchClearBtn.classList.add('hidden');
         searchActionBtn.disabled = true;
+        if (loadedChats) {
+            renderChatList(loadedChats, currentChat);
+        }
         if (resultsList) resultsList.innerHTML = '';
         if (searchModalResults) searchModalResults.innerHTML = '';
         statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
