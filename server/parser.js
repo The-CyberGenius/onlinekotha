@@ -2,12 +2,18 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
+// Robust Date and Time matching to support various WhatsApp formats
+const DATE_PAT = `\\d{1,4}[\\/\\-\\.]\\d{1,2}[\\/\\-\\.]\\d{1,4}`;
+const TIME_PAT = `\\d{1,2}:\\d{2}(?::\\d{2})?\\s*(?:[APap][\\.\\s]*[Mm]\\.?)?`;
+
 // iOS: [3/22/23, 4:51:35 PM] Sender Name: Message
-const IOS_REGEX = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\]\s*(.*?):\s*(.*)$/;
+const IOS_REGEX = new RegExp(`^\\[(${DATE_PAT})[,\\s]+(${TIME_PAT})\\]\\s*(.*?):\\s*(.*)$`);
+
+// Web/Desktop: [16:51, 3/22/23] Sender Name: Message
+const WEB_REGEX = new RegExp(`^\\[(${TIME_PAT})[,\\s]+(${DATE_PAT})\\]\\s*(.*?):\\s*(.*)$`);
 
 // Android: 3/22/23, 4:51 PM - Sender Name: Message
-// Also handles: 3/22/23, 16:51 - Sender Name: Message (24-hour)
-const ANDROID_REGEX = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\s*-\s*(.*?):\s*(.*)$/;
+const ANDROID_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})\\s*-\\s*(.*?):\\s*(.*)$`);
 
 // iOS attachment: <attached: filename.ext>
 // Android attachment: filename.ext (file attached)
@@ -31,15 +37,31 @@ function classifyAttachment(filename) {
 function detectFormat(line) {
     if (IOS_REGEX.test(line)) return 'ios';
     if (ANDROID_REGEX.test(line)) return 'android';
+    if (WEB_REGEX.test(line)) return 'web';
     return null;
 }
 
 function parseLine(line, format) {
-    const regex = format === 'ios' ? IOS_REGEX : ANDROID_REGEX;
+    let regex = IOS_REGEX;
+    if (format === 'android') regex = ANDROID_REGEX;
+    else if (format === 'web') regex = WEB_REGEX;
+
     const match = line.match(regex);
     if (!match) return null;
 
-    const [, date, time, sender, rawText] = match;
+    let date, time, sender, rawText;
+    if (format === 'web') {
+        time = match[1];
+        date = match[2];
+        sender = match[3];
+        rawText = match[4];
+    } else {
+        date = match[1];
+        time = match[2];
+        sender = match[3];
+        rawText = match[4];
+    }
+    
     let text = rawText;
     let attachment = null;
     let type = 'text';
@@ -76,7 +98,8 @@ async function parseChatFile(chatFilePath) {
     let currentMessage = null;
 
     for await (const rawLine of rl) {
-        const line = rawLine.replace(/[‎‏‪-‮]/g, '');
+        // Remove left-to-right marks and other invisible chars that break regex
+        const line = rawLine.replace(/[\u200E\u200F\u202A\u202B\u202C\u202D\u202E]/g, '').replace(/[\u202F\u00A0]/g, ' ');
 
         if (!detectedFormat) {
             detectedFormat = detectFormat(line);
