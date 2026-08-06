@@ -7,19 +7,24 @@ const integ = require('./integrations');
 
 const router = express.Router();
 
-function getBaseUrl() {
+function getBaseUrl(req) {
+    if (req) {
+        const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        if (host) return `${proto}://${host}`;
+    }
     return integ.get('integ.app.base_url') || process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
 }
 
 // Register Passport strategy lazily on each OAuth start. Idempotent.
 let registeredFingerprint = null;
 
-function ensureStrategy() {
+function ensureStrategy(req) {
     const clientId = integ.get('integ.oauth.google_client_id');
     const clientSecret = integ.get('integ.oauth.google_client_secret');
     if (!clientId || !clientSecret) return false;
 
-    const callbackURL = `${getBaseUrl()}/api/auth/google/callback`;
+    const callbackURL = `${getBaseUrl(req)}/api/auth/google/callback`;
     const fingerprint = `${clientId}|${clientSecret}|${callbackURL}`;
     if (fingerprint === registeredFingerprint) return true;
 
@@ -97,14 +102,14 @@ router.get('/status', (req, res) => {
 });
 
 router.get('/google', (req, res, next) => {
-    if (!ensureStrategy()) return res.status(503).send('Google OAuth not configured');
+    if (!ensureStrategy(req)) return res.status(503).send('Google OAuth not configured');
     const next_ = typeof req.query.next === 'string' && req.query.next.startsWith('/') ? req.query.next : '/app';
     const state = Buffer.from(JSON.stringify({ next: next_ })).toString('base64url');
     passport.authenticate('google', { session: false, state })(req, res, next);
 });
 
 router.get('/google/callback', (req, res, next) => {
-    if (!ensureStrategy()) return res.redirect('/login.html?error=oauth_disabled');
+    if (!ensureStrategy(req)) return res.redirect('/login.html?error=oauth_disabled');
     passport.authenticate('google', { session: false, failureRedirect: '/login.html?error=oauth_failed' },
         (err, user) => {
             if (err || !user) {
