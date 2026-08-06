@@ -265,6 +265,7 @@ async function callLLM({ feature, messages, systemPrompt, userId, onToken, signa
     const fallback = getModelWithProvider(route.fallback_model_id);
     if (!primary && !fallback) throw new LLMError('No models available for this feature', 'NO_MODEL');
 
+    const finalSystemPrompt = systemPrompt || route.system_prompt;
     const maxTokens = route.max_tokens || 1024;
     const temperature = route.temperature ?? 0.7;
 
