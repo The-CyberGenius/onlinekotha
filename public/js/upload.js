@@ -16,6 +16,15 @@
     if (!modal || !openBtn) return;
 
     function openModal() {
+        if (window.__IS_GUEST__) {
+            const guestStatus = window.__GUEST_STATUS__ || {};
+            if ((guestStatus.chatsRemaining ?? 1) <= 0) {
+                if (window.openAuthModal) {
+                    window.openAuthModal('Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!');
+                }
+                return;
+            }
+        }
         modal.classList.remove('hidden');
         requestAnimationFrame(() => modal.classList.remove('opacity-0'));
         resetUI();
@@ -148,6 +157,17 @@
     }
 
     function uploadFiles(files) {
+        if (window.__IS_GUEST__) {
+            const guestStatus = window.__GUEST_STATUS__ || {};
+            if ((guestStatus.chatsRemaining ?? 1) <= 0) {
+                closeModal();
+                if (window.openAuthModal) {
+                    window.openAuthModal('Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!');
+                }
+                return;
+            }
+        }
+
         resetUI();
         progressWrap.classList.remove('hidden');
 
@@ -178,11 +198,22 @@
                 const resp = JSON.parse(xhr.responseText);
                 if (xhr.status >= 200 && xhr.status < 300 && resp.ok) {
                     progressStatus.textContent = 'Done!';
+                    if (window.__IS_GUEST__ && window.__GUEST_STATUS__) {
+                        window.__GUEST_STATUS__.chatsRemaining = Math.max(0, (window.__GUEST_STATUS__.chatsRemaining || 1) - 1);
+                        window.__GUEST_STATUS__.chatsImported = (window.__GUEST_STATUS__.chatsImported || 0) + 1;
+                        const remEl = document.getElementById('guest-chat-rem');
+                        if (remEl) remEl.textContent = window.__GUEST_STATUS__.chatsRemaining;
+                    }
                     setTimeout(() => {
                         closeModal();
                         if (window.refreshChats) window.refreshChats(resp.chat);
                         else window.location.reload();
                     }, 400);
+                } else if (resp.requireAuth || xhr.status === 403) {
+                    closeModal();
+                    if (window.openAuthModal) {
+                        window.openAuthModal(resp.error || 'Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!');
+                    }
                 } else {
                     showError(resp.error || 'Upload failed');
                 }

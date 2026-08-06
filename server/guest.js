@@ -60,7 +60,8 @@ function getGuestStatus(req, res) {
     const fp = getFingerprint(req);
     const record = getGuestRecord(guestId, ip, fp);
 
-    const chatsImported = record ? record.chats_imported : 0;
+    const actualChats = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ?').get(guestId)?.c || 0;
+    const chatsImported = Math.max(record ? record.chats_imported : 0, actualChats);
     const aiMsgsUsed = record ? record.ai_messages_count : 0;
 
     return {

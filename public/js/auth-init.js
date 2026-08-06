@@ -50,9 +50,12 @@
 
     const initDOM = () => {
         if (window.__IS_GUEST__) {
-            // Setup Guest Banner
+            // Setup Guest Banner & Sign In Button
             const banner = document.getElementById('guest-preview-banner');
             if (banner) banner.classList.remove('hidden');
+
+            const guestSigninBtn = document.getElementById('guest-signin-btn');
+            if (guestSigninBtn) guestSigninBtn.classList.remove('hidden');
 
             const guestStatus = window.__GUEST_STATUS__ || {};
             const chatRem = document.getElementById('guest-chat-rem');
@@ -69,6 +72,12 @@
 
             const avatarInitials = document.getElementById('my-avatar-initials');
             if (avatarInitials) avatarInitials.textContent = 'G';
+
+            const avatarWrap = document.getElementById('my-avatar-wrap');
+            if (avatarWrap) {
+                avatarWrap.title = 'Click to Sign In with Google';
+                avatarWrap.onclick = () => window.openAuthModal();
+            }
 
             const sidebarTitle = document.getElementById('sidebar-title');
             if (sidebarTitle) sidebarTitle.textContent = 'Guest Mode';
