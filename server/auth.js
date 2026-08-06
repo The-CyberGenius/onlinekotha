@@ -146,6 +146,15 @@ function requireUser(req, res, next) {
     next();
 }
 
+function requireUserOrGuest(req, res, next) {
+    if (req.user) return next();
+    const { getGuestStatus } = require('./guest');
+    const status = getGuestStatus(req, res);
+    req.isGuest = true;
+    req.guestStatus = status;
+    next();
+}
+
 function requireAdmin(req, res, next) {
     if (!req.user || !req.user.is_admin) {
         return res.status(403).json({ error: 'Admin only' });
@@ -164,5 +173,6 @@ module.exports = {
     canUseAI,
     authMiddleware,
     requireUser,
+    requireUserOrGuest,
     requireAdmin,
 };

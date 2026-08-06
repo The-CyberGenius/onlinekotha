@@ -159,6 +159,17 @@ CREATE TABLE IF NOT EXISTS global_messages (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_global_messages_user ON global_messages(user_id);
+CREATE TABLE IF NOT EXISTS guest_sessions (
+  id TEXT PRIMARY KEY,
+  ip TEXT NOT NULL,
+  fingerprint TEXT,
+  chats_imported INTEGER DEFAULT 0,
+  ai_messages_count INTEGER DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_guest_sessions_ip ON guest_sessions(ip);
+CREATE INDEX IF NOT EXISTS idx_guest_sessions_fp ON guest_sessions(fingerprint);
 `);
 
 // Migrations: ALTER existing users table for new columns
@@ -171,6 +182,8 @@ safeAddColumn('users', 'stripe_subscription_id', 'TEXT');
 safeAddColumn('users', 'plan_renews_at', 'INTEGER');
 safeAddColumn('users', 'google_id', 'TEXT');
 safeAddColumn('chats', 'deleted_by_user', 'INTEGER NOT NULL DEFAULT 0');
+safeAddColumn('chats', 'guest_id', 'TEXT');
+safeAddColumn('conversations', 'guest_id', 'TEXT');
 safeAddColumn('users', 'avatar_url', 'TEXT');
 safeAddColumn('users', 'display_name', 'TEXT');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}

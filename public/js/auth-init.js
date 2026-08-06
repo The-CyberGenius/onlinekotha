@@ -9,13 +9,78 @@
     }
 
     if (!me.user) {
-        window.location.href = '/login.html?next=/app';
-        return;
+        window.__IS_GUEST__ = true;
+        window.__GUEST_STATUS__ = me.guest || {};
+        window.__USER__ = null;
+    } else {
+        window.__USER__ = me.user;
+        window.__IS_GUEST__ = false;
     }
 
-    window.__USER__ = me.user;
+    // Global Modal Controllers
+    window.openAuthModal = function (reason) {
+        const modal = document.getElementById('auth-modal');
+        if (!modal) return;
+        if (reason) {
+            const sub = document.getElementById('auth-modal-sub');
+            if (sub) sub.textContent = reason;
+        }
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            const card = modal.querySelector('div');
+            if (card) {
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }
+        });
+    };
+
+    window.closeAuthModal = function () {
+        const modal = document.getElementById('auth-modal');
+        if (!modal) return;
+        modal.classList.add('opacity-0');
+        const card = modal.querySelector('div');
+        if (card) {
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    };
 
     const initDOM = () => {
+        if (window.__IS_GUEST__) {
+            // Setup Guest Banner
+            const banner = document.getElementById('guest-preview-banner');
+            if (banner) banner.classList.remove('hidden');
+
+            const guestStatus = window.__GUEST_STATUS__ || {};
+            const chatRem = document.getElementById('guest-chat-rem');
+            const aiRem = document.getElementById('guest-ai-rem');
+            if (chatRem) chatRem.textContent = guestStatus.chatsRemaining ?? 1;
+            if (aiRem) aiRem.textContent = guestStatus.aiMsgsRemaining ?? 10;
+
+            // Guest Sidebar Profile
+            const info = document.getElementById('sidebar-user-info');
+            if (info) info.textContent = 'Guest User';
+
+            const emailDisplay = document.getElementById('my-email-display');
+            if (emailDisplay) emailDisplay.textContent = 'Free Preview Mode';
+
+            const avatarInitials = document.getElementById('my-avatar-initials');
+            if (avatarInitials) avatarInitials.textContent = 'G';
+
+            const sidebarTitle = document.getElementById('sidebar-title');
+            if (sidebarTitle) sidebarTitle.textContent = 'Guest Mode';
+
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.title = 'Sign in to save account';
+                logoutBtn.onclick = () => window.openAuthModal();
+            }
+            return;
+        }
+
         const info = document.getElementById('sidebar-user-info');
         if (info) info.textContent = me.user.display_name || me.user.email;
 
@@ -54,7 +119,6 @@
                 try {
                     await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
                 } catch {}
-                // Force clear cookie client-side as backup
                 document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
                 window.location.replace('/login.html');
             });

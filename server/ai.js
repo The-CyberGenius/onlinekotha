@@ -1,18 +1,32 @@
 const express = require('express');
 const path = require('path');
 const { db, getSetting } = require('./db');
-const { requireUser } = require('./auth');
-const { getMessages } = require('./cache');
-const { userDir } = require('./upload');
-const { callLLM, LLMError } = require('./llm');
-const { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT } = require('./context');
-const { effectivePlan } = require('./auth');
+const { requireUserOrGuest } = require('./auth');
+const { getGuestStatus, recordGuestAIMessage } = require('./guest');
 
 const router = express.Router();
-router.use(requireUser);
+router.use(requireUserOrGuest);
+
+// Helper for owner ID (User ID or Guest ID)
+function getOwner(req) {
+    if (req.user) return { userId: req.user.id, guestId: null, dirKey: req.user.id };
+    return { userId: 0, guestId: req.guestStatus.guestId, dirKey: req.guestStatus.guestId };
+}
 
 // ---------- Plan + rate-limit gates ----------
 function aiGate(req, res, next) {
+    if (!req.user) {
+        const guestStatus = getGuestStatus(req, res);
+        if (!guestStatus.canUseAI) {
+            return res.status(403).json({
+                error: 'Guest limit reached (10/10 free AI messages used). Sign in with Google to continue chatting!',
+                requireAuth: true,
+                guest: guestStatus,
+            });
+        }
+        return next();
+    }
+
     const plan = effectivePlan(req.user);
 
     const startOfDay = new Date();
@@ -49,19 +63,28 @@ function aiGate(req, res, next) {
 // ---------- Conversations CRUD ----------
 router.get('/conversations', (req, res) => {
     const chatFolder = req.query.chat;
-    const rows = db.prepare(
-        `SELECT c.id, c.title, c.chat_folder, c.created_at, c.updated_at,
-                (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
-         FROM conversations c
-         WHERE c.user_id = ? ${chatFolder ? 'AND c.chat_folder = ?' : ''}
-         ORDER BY c.updated_at DESC`
-    ).all(...(chatFolder ? [req.user.id, chatFolder] : [req.user.id]));
+    const { userId, guestId } = getOwner(req);
+    const sql = req.user
+        ? `SELECT c.id, c.title, c.chat_folder, c.created_at, c.updated_at,
+                  (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
+           FROM conversations c WHERE c.user_id = ? ${chatFolder ? 'AND c.chat_folder = ?' : ''}
+           ORDER BY c.updated_at DESC`
+        : `SELECT c.id, c.title, c.chat_folder, c.created_at, c.updated_at,
+                  (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
+           FROM conversations c WHERE c.guest_id = ? ${chatFolder ? 'AND c.chat_folder = ?' : ''}
+           ORDER BY c.updated_at DESC`;
+    const params = req.user ? (chatFolder ? [userId, chatFolder] : [userId]) : (chatFolder ? [guestId, chatFolder] : [guestId]);
+    const rows = db.prepare(sql).all(...params);
     res.json(rows);
 });
 
 router.get('/conversations/:id', (req, res) => {
-    const conv = db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?')
-        .get(Number(req.params.id), req.user.id);
+    const { userId, guestId } = getOwner(req);
+    const sql = req.user
+        ? 'SELECT * FROM conversations WHERE id = ? AND user_id = ?'
+        : 'SELECT * FROM conversations WHERE id = ? AND guest_id = ?';
+    const params = req.user ? [Number(req.params.id), userId] : [Number(req.params.id), guestId];
+    const conv = db.prepare(sql).get(...params);
     if (!conv) return res.status(404).json({ error: 'Not found' });
     const msgs = db.prepare(
         'SELECT id, role, content, citations, created_at FROM conv_messages WHERE conversation_id = ? ORDER BY id'
@@ -73,8 +96,12 @@ router.get('/conversations/:id', (req, res) => {
 });
 
 router.delete('/conversations/:id', (req, res) => {
-    const conv = db.prepare('SELECT id FROM conversations WHERE id = ? AND user_id = ?')
-        .get(Number(req.params.id), req.user.id);
+    const { userId, guestId } = getOwner(req);
+    const sql = req.user
+        ? 'SELECT id FROM conversations WHERE id = ? AND user_id = ?'
+        : 'SELECT id FROM conversations WHERE id = ? AND guest_id = ?';
+    const params = req.user ? [Number(req.params.id), userId] : [Number(req.params.id), guestId];
+    const conv = db.prepare(sql).get(...params);
     if (!conv) return res.status(404).json({ error: 'Not found' });
     db.prepare('DELETE FROM conversations WHERE id = ?').run(conv.id);
     res.json({ ok: true });
@@ -85,8 +112,10 @@ router.post('/chat', aiGate, async (req, res) => {
     const { chat, message, conversationId } = req.body || {};
     if (!chat || !message) return res.status(400).json({ error: 'chat + message required' });
 
+    const { userId, guestId, dirKey } = getOwner(req);
+
     // Load chat messages for context
-    const chatDir = path.join(userDir(req.user.id), chat);
+    const chatDir = path.join(userDir(dirKey), chat);
     let chatMessages;
     try {
         const parsed = await getMessages(chatDir);
@@ -100,14 +129,25 @@ router.post('/chat', aiGate, async (req, res) => {
     if (!convId) {
         const now = Date.now();
         const title = message.slice(0, 60);
-        const info = db.prepare(
-            `INSERT INTO conversations (user_id, chat_folder, title, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?)`
-        ).run(req.user.id, chat, title, now, now);
-        convId = info.lastInsertRowid;
+        if (req.user) {
+            const info = db.prepare(
+                `INSERT INTO conversations (user_id, chat_folder, title, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?)`
+            ).run(userId, chat, title, now, now);
+            convId = info.lastInsertRowid;
+        } else {
+            const info = db.prepare(
+                `INSERT INTO conversations (user_id, guest_id, chat_folder, title, created_at, updated_at)
+                 VALUES (0, ?, ?, ?, ?, ?)`
+            ).run(guestId, chat, title, now, now);
+            convId = info.lastInsertRowid;
+        }
     } else {
-        const owned = db.prepare('SELECT id FROM conversations WHERE id = ? AND user_id = ?')
-            .get(convId, req.user.id);
+        const sql = req.user
+            ? 'SELECT id FROM conversations WHERE id = ? AND user_id = ?'
+            : 'SELECT id FROM conversations WHERE id = ? AND guest_id = ?';
+        const params = req.user ? [convId, userId] : [convId, guestId];
+        const owned = db.prepare(sql).get(...params);
         if (!owned) return res.status(404).json({ error: 'Conversation not found' });
     }
 
@@ -195,7 +235,7 @@ router.post('/chat', aiGate, async (req, res) => {
             feature: 'chat',
             messages: llmMessages,
             systemPrompt,
-            userId: req.user.id,
+            userId: req.user ? req.user.id : 0,
             signal: abortController.signal,
             onToken: (token) => {
                 fullText += token;
@@ -217,6 +257,10 @@ router.post('/chat', aiGate, async (req, res) => {
         ).run(convId, cleanText, JSON.stringify(citations), Date.now());
 
         db.prepare('UPDATE conversations SET updated_at = ? WHERE id = ?').run(Date.now(), convId);
+
+        if (!req.user) {
+            recordGuestAIMessage(req, res);
+        }
 
         send('done', { citations, conversationId: convId });
     } catch (err) {

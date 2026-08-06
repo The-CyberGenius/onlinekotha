@@ -167,13 +167,25 @@ app.post('/api/auth/logout', (req, res) => {
 // OAuth routes (Google) — mounted under /api/auth so they sit alongside the rest
 app.use('/api/auth', oauthRouter);
 
+const { requireUserOrGuest } = require('./server/auth');
+const { getGuestStatus, getOrCreateGuestId } = require('./server/guest');
+
 app.get('/api/auth/me', (req, res) => {
-    if (!req.user) return res.json({ user: null });
+    const guestStatus = getGuestStatus(req, res);
+    if (!req.user) {
+        return res.json({
+            user: null,
+            is_guest: true,
+            guest: guestStatus,
+        });
+    }
     res.json({
         user: {
             ...req.user,
             effective_plan: effectivePlan(req.user),
         },
+        is_guest: false,
+        guest: guestStatus,
     });
 });
 
@@ -183,10 +195,9 @@ app.use('/api/admin', adminRouter);
 // /admin → redirect to /admin.html
 app.get('/admin', (req, res) => res.redirect('/admin.html'));
 
-// /app → main viewer (app.html), redirect to login if not authed
+// /app → main viewer (app.html). Allows both authenticated users & guests!
 app.get('/app', (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    if (!req.user) return res.redirect('/login.html');
     res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
 
@@ -201,18 +212,22 @@ app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 // Static frontend (landing /, login, admin, css, js, etc.)
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Helper to get storage directory for either User or Guest
+function getOwnerId(req, res) {
+    if (req.user) return req.user.id;
+    return getOrCreateGuestId(req, res);
+}
+
 // Media: serve only the requesting user's files
-// URL: /media/<chatFolder>/<filename>  → src/u_<userId>/<chatFolder>/<filename>
-app.get('/media/*rest', requireUser, (req, res, next) => {
-    // Express 5: req.params.rest is an array of decoded path segments
+app.get('/media/*rest', requireUserOrGuest, (req, res, next) => {
+    const ownerId = getOwnerId(req, res);
     const rel = Array.isArray(req.params.rest)
         ? req.params.rest.join('/')
         : req.params.rest;
-    const userRel = `u_${req.user.id}/${rel}`;
+    const userRel = `u_${ownerId}/${rel}`;
     const fullPath = path.resolve(SRC_DIR, userRel);
 
-    // Prevent path traversal
-    const userBase = path.resolve(SRC_DIR, `u_${req.user.id}`);
+    const userBase = path.resolve(SRC_DIR, `u_${ownerId}`);
     if (!fullPath.startsWith(userBase)) return res.status(403).end();
 
     if (!fs.existsSync(fullPath)) return res.status(404).end();
@@ -234,8 +249,6 @@ app.get('/media/*rest', requireUser, (req, res, next) => {
     const isVideo = mime && mime.startsWith('video/');
 
     if (isVideo) {
-        // Manual range-aware streaming for video — res.sendFile overwrites Content-Type
-        // which breaks .mov playback in Chrome (needs video/mp4 not video/quicktime)
         const stat = fs.statSync(fullPath);
         const fileSize = stat.size;
         const rangeHeader = req.headers.range;
@@ -267,30 +280,40 @@ app.get('/media/*rest', requireUser, (req, res, next) => {
     res.sendFile(fullPath);
 });
 
-// ---------- Chats API (user-scoped) ----------
-app.get('/api/chats', requireUser, (req, res) => {
-    const myDir = userDir(req.user.id);
+// ---------- Chats API (user or guest scoped) ----------
+app.get('/api/chats', requireUserOrGuest, (req, res) => {
+    const ownerId = getOwnerId(req, res);
+    const myDir = userDir(ownerId);
     if (!fs.existsSync(myDir)) return res.json([]);
-    // Get soft-deleted folder names to exclude
-    const deletedRows = db.prepare(
-        'SELECT folder_name FROM chats WHERE user_id = ? AND deleted_by_user = 1'
-    ).all(req.user.id);
-    const deletedSet = new Set(deletedRows.map(r => r.folder_name));
+    
+    let deletedSet = new Set();
+    if (req.user) {
+        const deletedRows = db.prepare(
+            'SELECT folder_name FROM chats WHERE user_id = ? AND deleted_by_user = 1'
+        ).all(req.user.id);
+        deletedSet = new Set(deletedRows.map(r => r.folder_name));
+    }
 
     const folders = fs
         .readdirSync(myDir, { withFileTypes: true })
         .filter(d => d.isDirectory())
         .map(d => d.name)
         .filter(name => {
-            if (!req.user.is_impersonating && deletedSet.has(name)) return false;
+            if (req.user && !req.user.is_impersonating && deletedSet.has(name)) return false;
             const dir = path.join(myDir, name);
             return !!findChatFile(dir);
         });
     res.json(folders);
 });
 
-app.get('/api/chats/meta', requireUser, (req, res) => {
-    const rows = db.prepare('SELECT folder_name, display_name FROM chats WHERE user_id = ?').all(req.user.id);
+app.get('/api/chats/meta', requireUserOrGuest, (req, res) => {
+    const ownerId = getOwnerId(req, res);
+    let rows = [];
+    if (req.user) {
+        rows = db.prepare('SELECT folder_name, display_name FROM chats WHERE user_id = ?').all(req.user.id);
+    } else {
+        rows = db.prepare('SELECT folder_name, display_name FROM chats WHERE guest_id = ?').all(ownerId);
+    }
     const map = {};
     for (const r of rows) {
         if (r.display_name) map[r.folder_name] = r.display_name;
@@ -298,11 +321,12 @@ app.get('/api/chats/meta', requireUser, (req, res) => {
     res.json(map);
 });
 
-app.get('/api/messages', requireUser, async (req, res) => {
+app.get('/api/messages', requireUserOrGuest, async (req, res) => {
     const chatName = req.query.chat;
     if (!chatName) return res.status(400).json({ error: 'No chat specified' });
 
-    const myDir = userDir(req.user.id);
+    const ownerId = getOwnerId(req, res);
+    const myDir = userDir(ownerId);
     const chatDir = path.join(myDir, chatName);
     if (!path.normalize(chatDir).startsWith(myDir)) {
         return res.status(403).json({ error: 'Invalid path' });
@@ -318,7 +342,7 @@ app.get('/api/messages', requireUser, async (req, res) => {
     }
 });
 
-app.post('/api/upload', requireUser, (req, res, next) => {
+app.post('/api/upload', (req, res, next) => {
     upload.array('files')(req, res, err => {
         if (err) {
             if (err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: 'File too large — max 500 MB' });

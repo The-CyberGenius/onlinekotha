@@ -116,6 +116,10 @@ router.get('/google/callback', (req, res, next) => {
                 console.error('OAuth callback error:', err);
                 return res.redirect('/login.html?error=oauth_failed');
             }
+            const { claimGuestData } = require('./guest');
+            const guestId = req.cookies && req.cookies.kotha_guest_id;
+            if (guestId) claimGuestData(guestId, user.id);
+
             const { token, expiresAt } = createSession(user.id);
             const IS_PROD = process.env.NODE_ENV === 'production';
             res.cookie('session', token, {
@@ -195,6 +199,10 @@ router.post('/google/onetap', async (req, res) => {
             ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl);
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
         }
+
+        const { claimGuestData } = require('./guest');
+        const guestId = req.cookies && req.cookies.kotha_guest_id;
+        if (guestId) claimGuestData(guestId, user.id);
 
         const { token, expiresAt } = createSession(user.id);
         const IS_PROD = process.env.NODE_ENV === 'production';

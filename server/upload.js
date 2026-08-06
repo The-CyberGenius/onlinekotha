@@ -96,13 +96,25 @@ function rmrf(dir) {
 
 async function handleUpload(req, res) {
     try {
-        if (!req.user) return res.status(401).json({ error: 'Login required' });
+        const { getGuestStatus, recordGuestChatImport } = require('./guest');
+        let ownerId = req.user ? req.user.id : null;
+        let guestId = null;
+
+        if (!ownerId) {
+            const guestStatus = getGuestStatus(req, res);
+            if (!guestStatus.canImportChat) {
+                if (req.uploadSessionId) rmrf(path.join(TMP_DIR, req.uploadSessionId));
+                return res.status(403).json({ error: 'Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!', requireAuth: true });
+            }
+            guestId = guestStatus.guestId;
+            ownerId = guestId;
+        }
 
         const files = req.files || [];
         if (!files.length) return res.status(400).json({ error: 'No files uploaded' });
 
         const sessionDir = path.join(TMP_DIR, req.uploadSessionId);
-        const myDir = userDir(req.user.id);
+        const myDir = userDir(ownerId);
 
         const zipFile = files.find(f => f.originalname.toLowerCase().endsWith('.zip'));
         let finalDir;
@@ -165,10 +177,20 @@ async function handleUpload(req, res) {
             }
         }
 
-        db.prepare(
-            `INSERT OR IGNORE INTO chats (user_id, folder_name, display_name, created_at)
-             VALUES (?, ?, ?, ?)`
-        ).run(req.user.id, folderName, finalDisplayName, Date.now());
+        if (req.user) {
+            db.prepare(
+                `INSERT OR IGNORE INTO chats (user_id, folder_name, display_name, created_at)
+                 VALUES (?, ?, ?, ?)`
+            ).run(req.user.id, folderName, finalDisplayName, Date.now());
+        } else {
+            db.prepare(
+                `INSERT OR IGNORE INTO chats (user_id, guest_id, folder_name, display_name, created_at)
+                 VALUES (0, ?, ?, ?, ?)`
+            ).run(guestId, folderName, finalDisplayName, Date.now());
+            recordGuestChatImport(req, res);
+        }
+
+        return res.json({ ok: true, chat: folderName });
 
         return res.json({ ok: true, chat: folderName });
     } catch (err) {
