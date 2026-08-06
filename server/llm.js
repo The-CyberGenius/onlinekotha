@@ -265,12 +265,7 @@ async function callLLM({ feature, messages, systemPrompt, userId, onToken, signa
     const fallback = getModelWithProvider(route.fallback_model_id);
     if (!primary && !fallback) throw new LLMError('No models available for this feature', 'NO_MODEL');
 
-    const finalSystemPrompt = systemPrompt || route.system_prompt;
-    // Roleplay replies must be short WhatsApp texts — cap output so the model
-    // can't ramble/loop. Other features keep their configured limit.
-    const maxTokens = feature === 'chat'
-        ? Math.min(route.max_tokens || 220, 220)
-        : (route.max_tokens || 1024);
+    const maxTokens = route.max_tokens || 1024;
     const temperature = route.temperature ?? 0.7;
 
     const attempts = [primary, fallback].filter(Boolean);

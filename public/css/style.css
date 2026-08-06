@@ -13,9 +13,27 @@ body {
     user-select: none;
 }
 
-input, textarea, [contenteditable] {
-    -webkit-user-select: auto;
-    user-select: auto;
+input, textarea, [contenteditable], .glass-chat-me, .glass-chat-them, .select-text, #chat-container, #chat-scroll-area, .ai-response-text, .msg-bubble-content, [id^="msg-"] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}
+
+/* Clickable link styling in chat messages */
+.chat-link {
+    color: #4f46e5;
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    word-break: break-all;
+    transition: opacity 0.15s ease;
+}
+.chat-link:hover {
+    opacity: 0.8;
+}
+html.dark .chat-link {
+    color: #818cf8;
 }
 
 *:focus {

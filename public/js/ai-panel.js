@@ -520,9 +520,12 @@
                                     .replace(/[ \t]{2,}/g, ' ')
                                     .replace(/\n{3,}/g, '\n\n')
                                     .trim();
-                                if (cleanedText !== fullText && responseBubble) {
+                                if (responseBubble) {
                                     const textEl = responseBubble.querySelector('.ai-response-text');
-                                    if (textEl) textEl.textContent = cleanedText;
+                                    if (textEl) {
+                                        const html = (typeof window.kothaLinkify === 'function') ? window.kothaLinkify(cleanedText) : escapeHTML(cleanedText);
+                                        textEl.innerHTML = html;
+                                    }
                                 }
                                 _dotStop();
                                 resolve();
@@ -615,11 +618,12 @@
     function appendUserBubble(text, timestamp) {
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-end mb-1.5 animate-message';
+        wrap.className = 'flex justify-end mb-1.5 animate-message select-text';
+        const formattedText = (typeof window.kothaLinkify === 'function') ? window.kothaLinkify(text) : escapeHTML(text);
         wrap.innerHTML = `
-            <div class="glass-chat-me rounded-2xl rounded-br-md px-3.5 py-2 max-w-[75%]">
-                <p style="color:var(--msg-text)" class="text-[14px] leading-normal">${escapeHTML(text)}</p>
-                <p style="color:var(--msg-time-me)" class="text-[9px] text-right mt-0.5">${time}</p>
+            <div class="glass-chat-me rounded-2xl rounded-br-md px-3.5 py-2 max-w-[75%] select-text">
+                <p style="color:var(--msg-text)" class="text-[14px] leading-normal select-text">${formattedText}</p>
+                <p style="color:var(--msg-time-me)" class="text-[9px] text-right mt-0.5 select-none">${time}</p>
             </div>`;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
@@ -628,12 +632,12 @@
     function appendContactBubble(name, timestamp) {
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
-        wrap.className = 'flex justify-start mb-1.5 animate-message-ai';
+        wrap.className = 'flex justify-start mb-1.5 animate-message-ai select-text';
         wrap.innerHTML = `
-            <div class="glass-chat-them rounded-2xl rounded-bl-md px-3.5 py-2 max-w-[75%]">
-                <p class="text-[10px] font-bold mb-0.5 tracking-wide" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
-                <p style="color:var(--msg-text)" class="ai-response-text text-[14px] leading-normal"></p>
-                <p style="color:var(--msg-time-them)" class="ai-bubble-time text-[9px] text-right mt-0.5">${time}</p>
+            <div class="glass-chat-them rounded-2xl rounded-bl-md px-3.5 py-2 max-w-[75%] select-text">
+                <p class="text-[10px] font-bold mb-0.5 tracking-wide select-none" style="color: #6366f1">${escapeHTML(name || 'AI')}</p>
+                <p style="color:var(--msg-text)" class="ai-response-text text-[14px] leading-normal select-text"></p>
+                <p style="color:var(--msg-time-them)" class="ai-bubble-time text-[9px] text-right mt-0.5 select-none">${time}</p>
             </div>`;
         chatContainer.appendChild(wrap);
         scrollArea.scrollTop = scrollArea.scrollHeight;
@@ -782,7 +786,10 @@
                     appendUserBubble(msg.content, msg.created_at);
                 } else if (msg.role === 'assistant') {
                     const wrap = appendContactBubble(name, msg.created_at);
-                    wrap.querySelector('.ai-response-text').textContent = msg.content;
+                    const textEl = wrap.querySelector('.ai-response-text');
+                    if (textEl) {
+                        textEl.innerHTML = (typeof window.kothaLinkify === 'function') ? window.kothaLinkify(msg.content) : escapeHTML(msg.content);
+                    }
                 }
             });
             setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 50);
