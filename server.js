@@ -28,6 +28,7 @@ const {
 } = require('./server/auth');
 const { getMessages } = require('./server/cache');
 const { upload, handleUpload, SRC_DIR, userDir } = require('./server/upload');
+const { findChatFile } = require('./server/parser');
 const adminRouter = require('./server/admin');
 const aiRouter = require('./server/ai');
 const globalChatRouter = require('./server/globalChat');
@@ -283,7 +284,7 @@ app.get('/api/chats', requireUser, (req, res) => {
         .filter(name => {
             if (!req.user.is_impersonating && deletedSet.has(name)) return false;
             const dir = path.join(myDir, name);
-            return fs.readdirSync(dir).some(f => /chat.*\.txt$/i.test(f));
+            return !!findChatFile(dir);
         });
     res.json(folders);
 });

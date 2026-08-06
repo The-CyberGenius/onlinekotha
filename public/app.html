@@ -745,15 +745,18 @@
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                     </svg>
                 </div>
-                <p class="font-semibold text-gray-800 mb-1">Drop your chat export here</p>
-                <p class="text-xs text-gray-500 mb-5">WhatsApp export (.zip) or extracted folder</p>
-                <div class="flex gap-2 justify-center">
+                <p class="font-semibold text-gray-800 mb-1">Select your WhatsApp chat file</p>
+                <p class="text-xs text-gray-500 mb-5">Upload the .zip file exported from WhatsApp</p>
+                <div class="flex flex-col sm:flex-row gap-2 justify-center">
                     <button id="pick-zip-btn"
-                        class="bg-indigo-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-indigo-700 transition shadow-sm">Choose
-                        .zip</button>
+                        class="bg-indigo-600 text-white rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-indigo-700 transition shadow-sm flex items-center justify-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                        Upload WhatsApp .zip File
+                    </button>
                     <button id="pick-folder-btn"
-                        class="bg-white border border-gray-200 text-gray-700 rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-50 transition shadow-sm">Choose
-                        folder</button>
+                        class="bg-white border border-gray-200 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-gray-50 transition shadow-sm">
+                        Upload Folder
+                    </button>
                 </div>
                 <input type="file" id="file-input-zip" accept=".zip" class="hidden">
                 <input type="file" id="file-input-folder" webkitdirectory directory multiple class="hidden">
