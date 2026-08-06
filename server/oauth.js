@@ -133,4 +133,80 @@ router.get('/google/callback', (req, res, next) => {
     )(req, res, next);
 });
 
+router.get('/google/client-id', (req, res) => {
+    const clientId = integ.get('integ.oauth.google_client_id') || process.env.GOOGLE_CLIENT_ID || null;
+    res.json({ clientId });
+});
+
+router.post('/google/onetap', async (req, res) => {
+    const { credential } = req.body || {};
+    if (!credential) return res.status(400).json({ error: 'credential required' });
+
+    try {
+        const resp = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+        if (!resp.ok) {
+            const errText = await resp.text();
+            return res.status(401).json({ error: 'Invalid Google One-Tap token', details: errText });
+        }
+        const payload = await resp.json();
+
+        const googleId = payload.sub;
+        const email = (payload.email || '').toLowerCase().trim();
+        const displayName = payload.name || null;
+        const avatarUrl = payload.picture || null;
+
+        if (!email) return res.status(400).json({ error: 'Google account has no email' });
+
+        let user = db.prepare('SELECT * FROM users WHERE google_id = ?').get(googleId);
+        if (user) {
+            db.prepare(
+                `UPDATE users SET display_name = COALESCE(?, display_name), avatar_url = COALESCE(?, avatar_url) WHERE id = ?`
+            ).run(displayName, avatarUrl, user.id);
+            user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+        }
+        if (!user) {
+            user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+            if (user) {
+                db.prepare(
+                    `UPDATE users SET google_id = ?, email_verified = 1,
+                     display_name = COALESCE(?, display_name), avatar_url = COALESCE(?, avatar_url)
+                     WHERE id = ?`
+                ).run(googleId, displayName, avatarUrl, user.id);
+                user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+            }
+        }
+        if (!user) {
+            const now = Date.now();
+            const trialHours = Number(getSetting('trial_duration_hours', '24'));
+            const trialExpiresAt = now + trialHours * 60 * 60 * 1000;
+            const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+            const isAdmin = adminEmail && email === adminEmail ? 1 : 0;
+
+            const info = db.prepare(
+                `INSERT INTO users
+                   (email, password_hash, created_at, plan, trial_expires_at, is_admin,
+                    email_verified, google_id, display_name, avatar_url)
+                 VALUES (?, '', ?, 'trial', ?, ?, 1, ?, ?, ?)`
+            ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl);
+            user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+        }
+
+        const { token, expiresAt } = createSession(user.id);
+        const IS_PROD = process.env.NODE_ENV === 'production';
+        res.cookie('session', token, {
+            httpOnly: true,
+            sameSite: 'lax',
+            path: '/',
+            ...(IS_PROD && { secure: true }),
+            expires: new Date(expiresAt),
+        });
+
+        const redirect = user.is_admin ? '/admin.html' : '/app';
+        res.json({ ok: true, redirect, user: { id: user.id, email: user.email, display_name: user.display_name, avatar_url: user.avatar_url } });
+    } catch (err) {
+        console.error('Google One-Tap error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = { router, configured, resetStrategy };

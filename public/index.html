@@ -5,6 +5,7 @@
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         // Prevent Flash of Incorrect Theme (FOIT)
         (function () {
@@ -2541,6 +2542,41 @@
                     else { close(); window.location.href = '/login.html#signup'; }
                 });
                 document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+            })();
+
+            // Google One-Tap auto-prompt for non-logged in visitors
+            (function() {
+                fetch('/api/auth/me')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.user) return; // User already logged in
+                        fetch('/api/auth/google/client-id')
+                            .then(res => res.json())
+                            .then(idData => {
+                                if (idData.clientId && window.google && window.google.accounts) {
+                                    google.accounts.id.initialize({
+                                        client_id: idData.clientId,
+                                        callback: async function (response) {
+                                            if (!response.credential) return;
+                                            try {
+                                                const res = await fetch('/api/auth/google/onetap', {
+                                                    method: 'POST',
+                                                    headers: { 'content-type': 'application/json' },
+                                                    body: JSON.stringify({ credential: response.credential }),
+                                                });
+                                                const resData = await res.json();
+                                                if (resData.ok && resData.redirect) {
+                                                    window.location.href = resData.redirect;
+                                                }
+                                            } catch (e) {
+                                                console.error('One-Tap error', e);
+                                            }
+                                        }
+                                    });
+                                    google.accounts.id.prompt();
+                                }
+                            }).catch(()=>{});
+                    }).catch(()=>{});
             })();
         </script>
 </body>

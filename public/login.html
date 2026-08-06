@@ -3,6 +3,7 @@
 <head>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GKQ286KWDG');</script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Sign in — Kotha</title>
@@ -166,17 +167,40 @@
             }
         });
 
-        // Config check for Google OAuth
-        fetch('/api/auth/status')
+        // Config check for Google OAuth & One-Tap
+        fetch('/api/auth/google/client-id')
             .then(res => res.json())
             .then(data => {
-                if (data.google) {
+                if (data.clientId) {
                     const btn = document.getElementById('google-btn');
                     btn.classList.remove('hidden');
-                    btn.classList.add('flex'); // explicitly add flex
+                    btn.classList.add('flex');
                     btn.href = `/api/auth/google?next=${encodeURIComponent(getNext())}`;
+
+                    // Google One-Tap 1-Click Prompt
+                    if (window.google && window.google.accounts) {
+                        google.accounts.id.initialize({
+                            client_id: data.clientId,
+                            callback: async function (response) {
+                                if (!response.credential) return;
+                                try {
+                                    const res = await fetch('/api/auth/google/onetap', {
+                                        method: 'POST',
+                                        headers: { 'content-type': 'application/json' },
+                                        body: JSON.stringify({ credential: response.credential }),
+                                    });
+                                    const resData = await res.json();
+                                    if (resData.ok && resData.redirect) {
+                                        window.location.href = resData.redirect;
+                                    }
+                                } catch (e) {
+                                    console.error('One-Tap error', e);
+                                }
+                            }
+                        });
+                        google.accounts.id.prompt();
+                    }
                 } else {
-                    // Google not configured — fall back to showing email login directly
                     document.getElementById('show-email-btn')?.click();
                 }
             }).catch(()=>{});

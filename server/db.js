@@ -206,22 +206,18 @@ CREATE INDEX IF NOT EXISTS idx_dm_msg_conv ON dm_messages(conv_id, created_at);
 
 // Default settings
 const defaults = {
-    daily_spend_cap_usd: '5',
+    daily_spend_cap_usd: '0',
     trial_duration_hours: '72',
-    free_user_daily_messages: '3',
+    free_user_daily_messages: '5',
     paid_user_daily_messages: '500',
 };
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 for (const [k, v] of Object.entries(defaults)) insertSetting.run(k, v);
 
 // Migrate old defaults → new values
-const curTrial = db.prepare("SELECT value FROM settings WHERE key = 'trial_duration_hours'").get();
-if (curTrial && curTrial.value === '24') {
-    db.prepare("UPDATE settings SET value = '72' WHERE key = 'trial_duration_hours'").run();
-}
 const curFree = db.prepare("SELECT value FROM settings WHERE key = 'free_user_daily_messages'").get();
-if (curFree && curFree.value === '0') {
-    db.prepare("UPDATE settings SET value = '3' WHERE key = 'free_user_daily_messages'").run();
+if (curFree && (curFree.value === '0' || curFree.value === '3')) {
+    db.prepare("UPDATE settings SET value = '5' WHERE key = 'free_user_daily_messages'").run();
 }
 
 function getSetting(key, fallback = null) {
