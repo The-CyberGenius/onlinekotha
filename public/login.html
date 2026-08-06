@@ -69,46 +69,7 @@
             </a>
             <p class="text-[11px] text-gray-400 text-center mb-6">New here? Continuing with Google creates your account instantly.</p>
 
-            <!-- Existing email accounts only — collapsed by default -->
-            <button type="button" id="show-email-btn" class="block mx-auto text-xs font-semibold text-gray-400 hover:text-indigo-600 transition mb-2">
-                Sign in with email instead
-            </button>
 
-            <div id="auth-divider" class="hidden items-center gap-4 mb-6">
-                <div class="flex-1 h-px bg-gray-200"></div>
-                <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">existing accounts</span>
-                <div class="flex-1 h-px bg-gray-200"></div>
-            </div>
-
-            <form id="auth-form" class="space-y-5 hidden">
-                <!-- Floating Label Input: Email -->
-                <div class="relative group">
-                    <input type="email" id="email" class="block rounded-2xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50/50 border-2 border-gray-100 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 peer shadow-sm" placeholder=" " required />
-                    <label for="email" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 peer-autofill:scale-75 peer-autofill:-translate-y-3 font-bold uppercase tracking-wider cursor-text">Email address</label>
-                </div>
-                
-                <!-- Floating Label Input: Password -->
-                <div class="relative group">
-                    <input type="password" id="password" minlength="6" class="block rounded-2xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50/50 border-2 border-gray-100 focus:bg-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all duration-300 peer shadow-sm" placeholder=" " required />
-                    <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 peer-autofill:scale-75 peer-autofill:-translate-y-3 font-bold uppercase tracking-wider cursor-text">Password</label>
-                </div>
-
-                <div class="flex items-center justify-between mt-2">
-                    <p id="error-msg" class="text-xs text-red-600 font-bold hidden"></p>
-                    <a href="/forgot.html" id="forgot-link" class="text-sm font-bold text-indigo-600 hover:text-indigo-500 ml-auto transition-colors">Forgot password?</a>
-                </div>
-
-                <button type="submit" id="submit-btn" class="relative overflow-hidden w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(99,102,241,0.3)] focus:outline-none focus:ring-4 focus:ring-indigo-500/50 mt-6 group">
-                    <span class="relative z-10 flex items-center justify-center gap-2">
-                        <span id="btn-text">Sign In</span>
-                        <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </span>
-                </button>
-                
-                <p id="trial-info" class="text-xs text-indigo-700 font-semibold text-center bg-indigo-50 border border-indigo-100 rounded-xl py-3 px-4 hidden mt-6 shadow-sm">
-                    ✨ New users get a <b>1 day free trial</b> of AI features!
-                </p>
-            </form>
         </div>
     </div>
 
@@ -125,47 +86,7 @@
             return '/app';
         }
 
-        // Reveal the email-login form (for existing accounts only)
-        document.getElementById('show-email-btn')?.addEventListener('click', function () {
-            document.getElementById('auth-form')?.classList.remove('hidden');
-            document.getElementById('auth-divider')?.classList.remove('hidden');
-            document.getElementById('auth-divider')?.classList.add('flex');
-            this.style.display = 'none';
-            document.getElementById('email')?.focus();
-        });
 
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            errorMsg.classList.add('hidden');
-            submitBtn.disabled = true;
-            btnText.textContent = 'Please wait...';
-
-            try {
-                const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
-                const resp = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: {'content-type':'application/json'},
-                    body: JSON.stringify({ email, password })
-                });
-
-                if (resp.ok) {
-                    window.location.href = mode === 'signup' ? '/login.html?msg=verify' : getNext();
-                } else {
-                    const err = await resp.json();
-                    errorMsg.textContent = err.error || 'Authentication failed';
-                    errorMsg.classList.remove('hidden');
-                    submitBtn.disabled = false;
-                    btnText.textContent = mode === 'login' ? 'Sign In' : 'Create Account';
-                }
-            } catch (err) {
-                errorMsg.textContent = 'Network error. Try again.';
-                errorMsg.classList.remove('hidden');
-                submitBtn.disabled = false;
-                btnText.textContent = mode === 'login' ? 'Sign In' : 'Create Account';
-            }
-        });
 
         // Config check for Google OAuth & One-Tap
         fetch('/api/auth/google/client-id')
@@ -200,18 +121,7 @@
                         });
                         google.accounts.id.prompt();
                     }
-                } else {
-                    document.getElementById('show-email-btn')?.click();
-                }
-            }).catch(()=>{});
 
-        // Optional verify message
-        if (new URLSearchParams(window.location.search).get('msg') === 'verify') {
-            errorMsg.textContent = 'Verification email sent! Check your inbox.';
-            errorMsg.classList.remove('text-red-600');
-            errorMsg.classList.add('text-emerald-600');
-            errorMsg.classList.remove('hidden');
-        }
     </script>
 </body>
 </html>
