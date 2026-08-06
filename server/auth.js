@@ -141,7 +141,7 @@ function authMiddleware(req, res, next) {
 
 function requireUser(req, res, next) {
     if (!req.user) {
-        return res.status(401).json({ error: 'Login required' });
+        return res.status(401).json({ error: 'Login required', requireAuth: true });
     }
     next();
 }

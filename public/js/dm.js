@@ -259,6 +259,12 @@
     tabChatsBtn?.addEventListener('click', showChatsTab);
     tabDmBtn?.addEventListener('click', showDmTab);
     newMsgBtn?.addEventListener('click', () => {
+        if (window.__IS_GUEST__) {
+            if (window.openAuthModal) {
+                window.openAuthModal('Sign in with Google to send direct messages to other users!');
+            }
+            return;
+        }
         const box = searchInput?.closest('.dm-search-box');
         box?.classList.toggle('hidden');
         searchInput?.focus();
@@ -796,10 +802,22 @@
 
     // ── Email search ──────────────────────────────────────────
     async function doSearch() {
+        if (window.__IS_GUEST__) {
+            if (window.openAuthModal) {
+                window.openAuthModal('Sign in with Google to search and send direct messages to other users!');
+            }
+            return;
+        }
         const email = searchInput?.value.trim();
         if (!email) return;
         if (searchResult) searchResult.innerHTML = '<span style="font-size:11px;color:#8696a0">Searching…</span>';
         const r    = await fetch(`/api/dm/search?email=${encodeURIComponent(email)}`);
+        if (r.status === 401 || r.status === 403) {
+            if (window.openAuthModal) {
+                window.openAuthModal('Sign in with Google to search and send direct messages to other users!');
+            }
+            return;
+        }
         const data = await r.json();
 
         if (!data.user) {
