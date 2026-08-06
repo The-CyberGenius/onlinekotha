@@ -74,19 +74,12 @@
     </div>
 
     <script>
-        const mode = 'login'; // email form is login-only; signup is Google-only
-        const submitBtn = document.getElementById('submit-btn');
-        const btnText = document.getElementById('btn-text');
-        const errorMsg = document.getElementById('error-msg');
-
         function getNext() {
             const params = new URLSearchParams(window.location.search);
             const n = params.get('next');
             if (n && n.startsWith('/')) return n;
             return '/app';
         }
-
-
 
         // Config check for Google OAuth & One-Tap
         fetch('/api/auth/google/client-id')
