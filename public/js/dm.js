@@ -493,13 +493,26 @@
         localStorage.setItem(LS.conv, convId);
         if (chatArea)   chatArea.style.display = 'flex';
         document.getElementById('dm-empty-state')?.classList.add('hidden');
-        if (chatName)   chatName.textContent = c.other.display_name;
+        if (chatName) {
+            chatName.innerHTML = `
+                <div style="display:inline-flex;align-items:center;gap:6px">
+                    <span>${esc(c.other.display_name)}</span>
+                    <button id="dm-rename-btn" title="Rename contact (only visible to you)" style="background:transparent;border:none;cursor:pointer;font-size:12px;opacity:0.6;padding:2px 4px;border-radius:4px;transition:all .15s" onmouseenter="this.style.opacity='1';this.style.background='rgba(99,102,241,0.1)'" onmouseleave="this.style.opacity='0.6';this.style.background='transparent'">✏️</button>
+                </div>
+            `;
+            document.getElementById('dm-rename-btn')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                promptRename(c.other);
+            });
+        }
         if (chatAvatar) chatAvatar.innerHTML  = avatar(c.other, 38);
         const isOtherOnline = onlineUserIds.has(Number(c.other.id));
         if (chatStatus) {
-            chatStatus.innerHTML = isOtherOnline 
-                ? `<span style="color:#22c55e;font-weight:600;font-size:11px;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>online</span>` 
+            const emailHtml = c.other.email ? `<span style="font-size:11px;opacity:0.75;margin-right:6px">${esc(c.other.email)}</span>` : '';
+            const onlineHtml = isOtherOnline 
+                ? `<span style="color:#22c55e;font-weight:600;font-size:11px;display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>online</span>` 
                 : '';
+            chatStatus.innerHTML = `${emailHtml}${onlineHtml}`;
         }
         if (chatMsgs)   chatMsgs.innerHTML = `<div style="text-align:center;color:#8696a0;font-size:12px;padding:24px">Loading…</div>`;
         if (typingEl)   typingEl.style.display = 'none';
@@ -919,7 +932,35 @@
     searchBtn?.addEventListener('click', doSearch);
     searchInput?.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 
-    // ── Presence ──────────────────────────────────────────────
+    // ── Presence & Contact Rename ──────────────────────────────
+    async function promptRename(other) {
+        const currentName = other.display_name || '';
+        const email = other.email || '';
+        const newName = prompt(`Set Custom Nickname for ${email}:\n(Leave empty to reset to original name)`, currentName);
+        if (newName === null) return;
+
+        try {
+            const res = await fetch(`/api/dm/contacts/${other.id}/nickname`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname: newName.trim() })
+            });
+            const data = await res.json();
+            if (data.ok) {
+                other.display_name = data.display_name;
+                const conv = convs.find(x => Number(x.other.id) === Number(other.id));
+                if (conv) conv.other.display_name = data.display_name;
+                renderConvs();
+                if (activeConvId) openConv(activeConvId);
+            } else {
+                alert(data.error || 'Failed to rename contact');
+            }
+        } catch(err) {
+            console.error('[promptRename]', err);
+            alert('Error renaming contact');
+        }
+    }
+
     function setDot(uid, online) {
         uid = Number(uid);
         if (online) onlineUserIds.add(uid);
@@ -931,9 +972,11 @@
         if(chatStatus && activeConvId) {
             const c = convs.find(x=>x.conv_id===activeConvId);
             if(c && Number(c.other.id)===uid) {
-                chatStatus.innerHTML = online 
-                    ? `<span style="color:#22c55e;font-weight:600;font-size:11px;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>online</span>` 
+                const emailHtml = c.other.email ? `<span style="font-size:11px;opacity:0.75;margin-right:6px">${esc(c.other.email)}</span>` : '';
+                const onlineHtml = online 
+                    ? `<span style="color:#22c55e;font-weight:600;font-size:11px;display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>online</span>` 
                     : '';
+                chatStatus.innerHTML = `${emailHtml}${onlineHtml}`;
             }
         }
     }

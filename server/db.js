@@ -215,6 +215,16 @@ CREATE TABLE IF NOT EXISTS dm_messages (
   FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_dm_msg_conv ON dm_messages(conv_id, created_at);
+
+CREATE TABLE IF NOT EXISTS dm_contact_nicknames (
+  user_id INTEGER NOT NULL,
+  contact_id INTEGER NOT NULL,
+  nickname TEXT NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, contact_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (contact_id) REFERENCES users(id) ON DELETE CASCADE
+);
 `);
 
 // Default settings

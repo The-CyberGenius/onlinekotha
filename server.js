@@ -571,11 +571,16 @@ app.post('/api/dm/conversations', requireUser, (req, res) => {
         'SELECT id FROM dm_conversations WHERE user_a = ? AND user_b = ?'
     ).get(a, b);
 
+    const nickRow = db.prepare('SELECT nickname FROM dm_contact_nicknames WHERE user_id = ? AND contact_id = ?').get(req.user.id, otherId);
+    const originalName = other.display_name || other.email.split('@')[0];
+
     res.json({
         conv_id: conv.id,
         other: {
             id: other.id,
-            display_name: other.display_name || other.email.split('@')[0],
+            display_name: nickRow ? nickRow.nickname : originalName,
+            original_display_name: originalName,
+            email: other.email,
             avatar_url: other.avatar_url,
         },
     });
@@ -597,12 +602,16 @@ app.get('/api/dm/conversations', requireUser, (req, res) => {
 
     const result = rows.map(r => {
         const u = db.prepare('SELECT id, display_name, avatar_url, email FROM users WHERE id = ?').get(r.other_id);
+        const nickRow = db.prepare('SELECT nickname FROM dm_contact_nicknames WHERE user_id = ? AND contact_id = ?').get(req.user.id, r.other_id);
+        const originalName = u ? (u.display_name || u.email.split('@')[0]) : 'User';
         return {
             conv_id: r.conv_id,
             other: {
-                id: u.id,
-                display_name: u.display_name || u.email.split('@')[0],
-                avatar_url: u.avatar_url,
+                id: u ? u.id : r.other_id,
+                display_name: nickRow ? nickRow.nickname : originalName,
+                original_display_name: originalName,
+                email: u ? u.email : '',
+                avatar_url: u ? u.avatar_url : null,
             },
             last_msg: r.last_msg || '',
             last_at: r.last_at || 0,
@@ -611,6 +620,32 @@ app.get('/api/dm/conversations', requireUser, (req, res) => {
     });
 
     res.json(result);
+});
+
+// Set custom nickname for a contact
+app.put('/api/dm/contacts/:contactId/nickname', requireUser, (req, res) => {
+    const contactId = Number(req.params.contactId);
+    const nickname = (req.body?.nickname || '').trim();
+    const userId = req.user.id;
+
+    if (!contactId) return res.status(400).json({ error: 'Invalid contactId' });
+
+    const contact = db.prepare('SELECT display_name, email FROM users WHERE id = ?').get(contactId);
+    if (!contact) return res.status(404).json({ error: 'Contact not found' });
+    const originalName = contact.display_name || contact.email.split('@')[0];
+
+    if (!nickname) {
+        db.prepare('DELETE FROM dm_contact_nicknames WHERE user_id = ? AND contact_id = ?').run(userId, contactId);
+        return res.json({ ok: true, nickname: null, display_name: originalName, original_display_name: originalName });
+    }
+
+    db.prepare(`
+        INSERT INTO dm_contact_nicknames (user_id, contact_id, nickname, updated_at)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(user_id, contact_id) DO UPDATE SET nickname = excluded.nickname, updated_at = excluded.updated_at
+    `).run(userId, contactId, nickname, Date.now());
+
+    res.json({ ok: true, nickname, display_name: nickname, original_display_name: originalName });
 });
 
 // Get messages for a conversation (paginated, newest first)
