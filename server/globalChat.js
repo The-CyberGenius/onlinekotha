@@ -16,8 +16,15 @@ const ANIMALS = [
     'Monkey', 'Giraffe', 'Koala', 'Kangaroo', 'Zebra', 'Lemur', 'Sloth', 'Hedgehog', 'Beaver', 'Panda'
 ];
 
-// Helper to generate a consistent anonymous name based on user ID
+// Helper to generate or fetch custom anonymous name for user ID
 function getAnonymousName(userId) {
+    try {
+        const u = db.prepare('SELECT global_alias FROM users WHERE id = ?').get(userId);
+        if (u && u.global_alias && u.global_alias.trim()) {
+            return u.global_alias.trim();
+        }
+    } catch (e) { }
+
     const userIdStr = String(userId);
     let hash = 0;
     for (let i = 0; i < userIdStr.length; i++) {
@@ -244,6 +251,55 @@ router.post('/react', requireUser, (req, res) => {
 
     broadcast('reaction', { messageId, reactions: counts });
     res.json({ ok: true });
+});
+
+// Update custom global chat alias
+router.put('/alias', requireUser, (req, res) => {
+    const { alias } = req.body || {};
+    const newAlias = (alias || '').trim().slice(0, 30);
+
+    if (!newAlias) {
+        db.prepare('UPDATE users SET global_alias = NULL WHERE id = ?').run(req.user.id);
+    } else {
+        db.prepare('UPDATE users SET global_alias = ? WHERE id = ?').run(newAlias, req.user.id);
+    }
+
+    const updatedName = getAnonymousName(req.user.id);
+
+    // Send updated init event to active SSE connection for this user
+    for (const [key, client] of clients.entries()) {
+        if (client.user.id === req.user.id) {
+            client.res.write(`event: init\ndata: ${JSON.stringify({ name: updatedName })}\n\n`);
+        }
+    }
+
+    // Broadcast updated online list
+    broadcast('online-list', getOnlineUsers());
+
+    res.json({ ok: true, name: updatedName });
+});
+
+// Delete message for everyone (own message or admin)
+router.delete('/messages/:id', requireUser, (req, res) => {
+    const messageId = Number(req.params.id);
+    if (!messageId) return res.status(400).json({ error: 'Invalid messageId' });
+
+    const msg = db.prepare('SELECT * FROM global_messages WHERE id = ?').get(messageId);
+    if (!msg) return res.status(404).json({ error: 'Message not found' });
+
+    if (msg.user_id !== req.user.id && !req.user.is_admin) {
+        return res.status(403).json({ error: 'Not your message' });
+    }
+
+    db.prepare('DELETE FROM global_messages WHERE id = ?').run(messageId);
+
+    const idx = activeMessages.findIndex(m => Number(m.id) === messageId);
+    if (idx >= 0) activeMessages.splice(idx, 1);
+    userReactions.delete(messageId);
+
+    broadcast('delete-message', { messageId });
+
+    res.json({ ok: true, messageId });
 });
 
 // Clear endpoint (Admin only)

@@ -1529,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch { }
     }
 
-    // Event delegation for message actions (Reply and React)
+    // Event delegation for message actions (Reply, React, Delete)
     chatContainer.addEventListener('click', (e) => {
         const replyBtn = e.target.closest('.reply-btn');
         if (replyBtn) {
@@ -1546,7 +1546,43 @@ document.addEventListener('DOMContentLoaded', () => {
             showReactionPicker(reactTrigger, msgId);
             return;
         }
+
+        const delBtn = e.target.closest('.delete-msg-btn');
+        if (delBtn) {
+            const msgId = delBtn.dataset.msgId;
+            if (!confirm('Delete this message for everyone in Global Chat?')) return;
+            fetch(`/api/global-chat/messages/${msgId}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(d => { if (!d.ok) alert(d.error || 'Failed to delete'); })
+                .catch(err => console.error('[Delete Msg Error]', err));
+            return;
+        }
     });
+
+    async function promptChangeGlobalAlias() {
+        const currentName = window.myGlobalAnonName || '';
+        const newAlias = prompt(`Set your Global Chat Handle / Nickname:\n(Only visible in Global Chat. Leave empty to use random animal name)`, currentName);
+        if (newAlias === null) return;
+
+        try {
+            const r = await fetch('/api/global-chat/alias', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ alias: newAlias.trim() })
+            });
+            const d = await r.json();
+            if (d.ok) {
+                window.myGlobalAnonName = d.name;
+                const aliasLabel = document.querySelector('#change-global-alias-btn span');
+                if (aliasLabel) aliasLabel.textContent = `Alias: ${d.name}`;
+            } else {
+                alert(d.error || 'Failed to update alias');
+            }
+        } catch(err) {
+            console.error('[promptChangeGlobalAlias]', err);
+            alert('Error updating alias');
+        }
+    }
 
     function connectGlobalChat() {
         if (globalEventSource) return;
@@ -1563,6 +1599,18 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = JSON.parse(e.data);
                 window.myGlobalAnonName = data.name;
+                if (currentChat === '__global__' && headerName) {
+                    headerName.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            <span>Global Chat Room</span>
+                            <button id="change-global-alias-btn" title="Set your custom anonymous handle" class="text-xs px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition flex items-center gap-1 font-medium">
+                                <span>Alias: ${escapeHTML(data.name)}</span>
+                                <span class="text-[10px]">✏️</span>
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('change-global-alias-btn')?.addEventListener('click', promptChangeGlobalAlias);
+                }
             } catch (err) { }
         });
 
@@ -1640,6 +1688,19 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) { }
         });
 
+        globalEventSource.addEventListener('delete-message', (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                const msgEl = document.getElementById(`global-msg-${data.messageId}`);
+                if (msgEl) {
+                    msgEl.style.transition = 'all 0.2s ease-out';
+                    msgEl.style.opacity = '0';
+                    msgEl.style.transform = 'scale(0.95)';
+                    setTimeout(() => msgEl.remove(), 200);
+                }
+            } catch (err) { }
+        });
+
         globalEventSource.onerror = (err) => {
             console.error('Global EventSource error:', err);
         };
@@ -1696,7 +1757,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentHtml = `<p style="color:var(--msg-text)" class="text-[14px] leading-normal font-medium whitespace-pre-wrap break-words">${escapeHTML(msg.text)}</p>`;
         const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
 
-        // Actions: reply & react
+        // Actions: reply, react & delete (for own messages)
         const actionsHtml = `
             <div class="msg-actions absolute top-1/2 -translate-y-1/2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 flex items-center gap-1 z-30 ${isMe ? 'right-full mr-2 flex-row-reverse' : 'left-full ml-2'}">
                 <button class="msg-action-btn reply-btn w-6 h-6 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-indigo-600 transition" title="Reply" data-msg-id="${msg.id}" data-sender="${escapeHTML(msg.sender)}" data-text="${escapeHTML(msg.text)}">
@@ -1705,6 +1766,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button class="msg-action-btn react-trigger-btn w-6 h-6 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-amber-500 transition" title="React" data-msg-id="${msg.id}">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
                 </button>
+                ${isMe || (window.__USER__ && (window.__USER__.is_admin === 1 || window.__USER__.is_admin === true)) ? `
+                <button class="msg-action-btn delete-msg-btn w-6 h-6 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-500 hover:text-red-600 transition" title="Delete for everyone" data-msg-id="${msg.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>` : ''}
             </div>
         `;
 
@@ -1794,7 +1859,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.__USER__ && (window.__USER__.is_admin === 1 || window.__USER__.is_admin === true)) {
                 if (clearGlobalChatBtn) clearGlobalChatBtn.classList.remove('hidden');
             }
-            if (headerName) headerName.innerText = 'Global Chat Room';
+            if (headerName) {
+                const myAlias = window.myGlobalAnonName || '';
+                headerName.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span>Global Chat Room</span>
+                        <button id="change-global-alias-btn" title="Set your custom anonymous handle" class="text-xs px-2 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition flex items-center gap-1 font-medium">
+                            <span>Alias: ${escapeHTML(myAlias || 'Set Alias')}</span>
+                            <span class="text-[10px]">✏️</span>
+                        </button>
+                    </div>
+                `;
+                document.getElementById('change-global-alias-btn')?.addEventListener('click', promptChangeGlobalAlias);
+            }
             if (sidebarTitle) sidebarTitle.innerText = 'Global Chat';
             const statusEl = document.querySelector('#chat-header-name + div p');
             if (statusEl) statusEl.innerText = 'Connecting...';

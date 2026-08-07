@@ -186,6 +186,7 @@ safeAddColumn('chats', 'guest_id', 'TEXT');
 safeAddColumn('conversations', 'guest_id', 'TEXT');
 safeAddColumn('users', 'avatar_url', 'TEXT');
 safeAddColumn('users', 'display_name', 'TEXT');
+safeAddColumn('users', 'global_alias', 'TEXT');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 
 // ── DM (user-to-user chat) tables ──
