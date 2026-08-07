@@ -1,8 +1,12 @@
 const express = require('express');
 const path = require('path');
 const { db, getSetting } = require('./db');
-const { requireUserOrGuest } = require('./auth');
+const { requireUserOrGuest, effectivePlan } = require('./auth');
 const { getGuestStatus, recordGuestAIMessage } = require('./guest');
+const { getMessages } = require('./cache');
+const { userDir } = require('./upload');
+const { callLLM, LLMError } = require('./llm');
+const { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT } = require('./context');
 
 const router = express.Router();
 router.use(requireUserOrGuest);
