@@ -61,22 +61,25 @@
             extraClass = '!p-1'; // tighter padding for images
             const caption = m.body && !/^(favicon\.svg|image\.(jpg|png|svg|jpeg|webp)|voice note|_chat\.txt)$/i.test(m.body.trim()) ? m.body : '';
             contentHtml = `
-            <div class="relative group/media overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-indigo-400/50 min-w-[160px]">
-                <div class="relative overflow-hidden rounded-xl bg-white/80 dark:bg-black/40 flex items-center justify-center min-h-[120px] max-w-[280px] sm:max-w-[320px] p-2">
+            <div class="relative group/media overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-indigo-400/50 w-[240px] sm:w-[260px] h-[220px] sm:h-[240px] flex flex-col justify-between">
+                <div class="relative overflow-hidden rounded-xl bg-white/80 dark:bg-black/40 flex items-center justify-center flex-1 w-full p-2.5">
                     <img src="${m.media_url}" 
                          alt="${caption || 'Media'}" 
-                         class="w-full max-h-[300px] object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-[1.02]" 
+                         class="w-full h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-105" 
                          onclick="window.kothaOpenLightbox(this.src)" 
                          loading="lazy"
                          onerror="this.onerror=null;this.src='/favicon.svg';">
                 </div>
-                ${caption ? `<div class="px-2 pb-1 pt-1.5 text-[14px] leading-snug break-words">${caption.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+                ${caption ? `<div class="px-2 pb-1 pt-1.5 text-[13px] leading-snug break-words truncate shrink-0">${caption.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
             </div>`;
         } else if (m.type === 'video' && m.media_url) {
             extraClass = '!p-1';
-            contentHtml = `<div class="relative w-full max-w-[280px]">
-                <video src="${m.media_url}" style="width: 100%; border-radius: 12px; background: #000;" controls preload="metadata" playsinline class="block shadow-sm"></video>
-                ${m.body ? `<div class="px-2 pb-1 pt-1.5 text-[14px] leading-snug">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+            contentHtml = `
+            <div class="relative group/media overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 w-[240px] sm:w-[260px] h-[220px] sm:h-[240px] flex flex-col justify-between">
+                <div class="relative overflow-hidden rounded-xl bg-black flex items-center justify-center flex-1 w-full">
+                    <video src="${m.media_url}" style="width: 100%; height: 100%; object-fit: contain;" controls preload="metadata" playsinline class="block shadow-sm"></video>
+                </div>
+                ${m.body ? `<div class="px-2 pb-1 pt-1.5 text-[13px] leading-snug break-words truncate shrink-0">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
             </div>`;
         } else if (m.type === 'audio' && m.media_url) {
             const avatarUrl = isMe ? (me?.avatar_url || '/images/default-avatar.png') : (document.getElementById('dm-chat-avatar')?.src || '/images/default-avatar.png');

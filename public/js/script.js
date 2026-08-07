@@ -283,8 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (msg.type === 'image') {
                 mediaHtml = `
-                    <div class="relative cursor-pointer w-64 max-w-full rounded-xl overflow-hidden img-zoom shadow-md border border-white/20 mb-1" onclick="openImageModal('${fileUrl}')">
-                        <img src="${fileUrl}" loading="lazy" class="w-full h-auto object-cover max-h-[300px]" alt="Image">
+                    <div class="relative group/media overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-indigo-400/50 w-[240px] sm:w-[260px] h-[220px] sm:h-[240px] flex flex-col justify-between mb-1" onclick="openImageModal('${fileUrl}')">
+                        <div class="relative overflow-hidden rounded-xl bg-white/80 dark:bg-black/40 flex items-center justify-center flex-1 w-full p-2.5">
+                            <img src="${fileUrl}" loading="lazy" class="w-full h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-105" alt="Image" onerror="this.onerror=null;this.src='/favicon.svg';">
+                        </div>
                     </div>
                 `;
             } else if (msg.type === 'video') {
