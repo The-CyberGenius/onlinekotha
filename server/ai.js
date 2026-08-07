@@ -8,6 +8,8 @@ const { userDir } = require('./upload');
 const { callLLM, LLMError } = require('./llm');
 const { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT } = require('./context');
 
+const { countWords, checkBurstLimit } = require('./rateLimit');
+
 const router = express.Router();
 router.use(requireUserOrGuest);
 
@@ -116,7 +118,16 @@ router.post('/chat', aiGate, async (req, res) => {
     const { chat, message, conversationId } = req.body || {};
     if (!chat || !message) return res.status(400).json({ error: 'chat + message required' });
 
+    if (countWords(message) > 300) {
+        return res.status(400).json({ error: 'Message exceeds limit (max 300 words). Please shorten your message to prevent server slowdown.' });
+    }
+
     const { userId, guestId, dirKey } = getOwner(req);
+    const ownerKey = req.user ? `ai_${userId}` : `ai_guest_${guestId}`;
+    const burstCheck = checkBurstLimit(ownerKey);
+    if (!burstCheck.allowed) {
+        return res.status(429).json({ error: burstCheck.error });
+    }
 
     // Load chat messages for context
     const chatDir = path.join(userDir(dirKey), chat);

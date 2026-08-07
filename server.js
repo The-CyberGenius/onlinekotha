@@ -29,6 +29,7 @@ const {
 const { getMessages } = require('./server/cache');
 const { upload, handleUpload, SRC_DIR, userDir } = require('./server/upload');
 const { findChatFile } = require('./server/parser');
+const { countWords, checkBurstLimit } = require('./server/rateLimit');
 const adminRouter = require('./server/admin');
 const aiRouter = require('./server/ai');
 const globalChatRouter = require('./server/globalChat');
@@ -663,6 +664,15 @@ app.post('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
 
     if (!body && !media_url) return res.status(400).json({ error: 'Empty message' });
 
+    if (body && countWords(body) > 300) {
+        return res.status(400).json({ error: 'Message exceeds limit (max 300 words). Please shorten your message to prevent server slowdown.' });
+    }
+
+    const burstCheck = checkBurstLimit(`dm_${req.user.id}`);
+    if (!burstCheck.allowed) {
+        return res.status(429).json({ error: burstCheck.error });
+    }
+
     const conv = db.prepare(
         'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
     ).get(convId, req.user.id, req.user.id);
@@ -773,6 +783,15 @@ io.on('connection', (socket) => {
         
         if (!conv_id) return;
         if ((!body || !body.trim()) && !media_url) return;
+
+        if (body && countWords(body) > 300) {
+            return socket.emit('dm:error', { error: 'Message exceeds limit (max 300 words). Please shorten your message to prevent server slowdown.' });
+        }
+
+        const burstCheck = checkBurstLimit(`dm_${uid}`);
+        if (!burstCheck.allowed) {
+            return socket.emit('dm:error', { error: burstCheck.error });
+        }
 
         // Verify sender is part of this conversation
         const conv = db.prepare(

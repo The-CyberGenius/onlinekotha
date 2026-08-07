@@ -391,6 +391,9 @@
 
         socket.on('user:online',  ({user_id}) => setDot(Number(user_id), true));
         socket.on('user:offline', ({user_id}) => setDot(Number(user_id), false));
+        socket.on('dm:error', ({ error }) => {
+            alert(error || 'Failed to send message');
+        });
         socket.on('dm:read', ({conv_id}) => {
             if (activeConvId === conv_id) {
                 // Update all grey ticks to blue double ticks
@@ -696,6 +699,13 @@
         if (forcedType === 'text') {
             body = chatInput?.value.trim();
             if (!body && !forcedMediaUrl) return;
+
+            const words = body.split(/\s+/).filter(Boolean).length;
+            if (words > 300) {
+                alert('⚠️ Message too long! Maximum limit is 300 words per message to prevent server slowdown.');
+                return;
+            }
+
             if (chatInput) {
                 chatInput.value = '';
                 chatInput.dispatchEvent(new Event('input')); // Trigger toggle logic
