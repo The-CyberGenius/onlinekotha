@@ -41,13 +41,12 @@ const KNOWN_PROVIDERS = {
     },
     google: {
         label: 'Google Gemini',
-        description: 'Gemini family — multimodal models with huge context windows (up to 2M tokens).',
+        description: 'Gemini family — fast, reliable multimodal models with huge context windows.',
         keyHint: 'Get key at aistudio.google.com/apikey',
         baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
         models: [
-            { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', in: 0.1, out: 0.4 },
-            { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', in: 0.075, out: 0.3 },
-            { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', in: 1.25, out: 5 },
+            { id: 'gemini-flash-latest', name: 'Gemini Flash (Latest)', in: 0.1, out: 0.4 },
+            { id: 'gemini-flash-lite-latest', name: 'Gemini Flash Lite (Latest)', in: 0.075, out: 0.3 },
         ],
     },
     groq: {
