@@ -6,4 +6,5 @@ src/
 .DS_Store
 *.log
 kotha.db
+backups/
 newReadme.md
