@@ -43,17 +43,34 @@
         const deleted = m.type === 'deleted';
         let contentHtml = '';
         let extraClass = '';
+        const mediaUrlLower = (m.media_url || '').toLowerCase().split('?')[0];
+        const isImgType = m.type === 'image' || (m.media_url && (
+            mediaUrlLower.endsWith('.svg') || mediaUrlLower.endsWith('.png') ||
+            mediaUrlLower.endsWith('.jpg') || mediaUrlLower.endsWith('.jpeg') ||
+            mediaUrlLower.endsWith('.gif') || mediaUrlLower.endsWith('.webp') ||
+            mediaUrlLower.endsWith('.heic')
+        ));
+
         if (deleted) {
             contentHtml = `
                 <div class="flex items-center gap-1.5 opacity-70 italic text-[14px]">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="opacity-80"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
                     This message was deleted
                 </div>`;
-        } else if (m.type === 'image' && m.media_url) {
+        } else if (isImgType && m.media_url) {
             extraClass = '!p-1'; // tighter padding for images
-            contentHtml = `<div class="relative w-full max-w-[280px]">
-                <img src="${m.media_url}" style="width: 100%; height: auto; border-radius: 12px; background: transparent; cursor: zoom-in;" class="block shadow-sm" onclick="window.kothaOpenLightbox(this.src)" loading="lazy">
-                ${m.body && m.body !== 'image.jpg' && m.body !== 'Voice Note' ? `<div class="px-2 pb-1 pt-1.5 text-[14px] leading-snug">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+            const caption = m.body && !/^(favicon\.svg|image\.(jpg|png|svg|jpeg|webp)|voice note|_chat\.txt)$/i.test(m.body.trim()) ? m.body : '';
+            contentHtml = `
+            <div class="relative group/media overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-indigo-400/50 min-w-[160px]">
+                <div class="relative overflow-hidden rounded-xl bg-white/80 dark:bg-black/40 flex items-center justify-center min-h-[120px] max-w-[280px] sm:max-w-[320px] p-2">
+                    <img src="${m.media_url}" 
+                         alt="${caption || 'Media'}" 
+                         class="w-full max-h-[300px] object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-[1.02]" 
+                         onclick="window.kothaOpenLightbox(this.src)" 
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='/favicon.svg';">
+                </div>
+                ${caption ? `<div class="px-2 pb-1 pt-1.5 text-[14px] leading-snug break-words">${caption.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
             </div>`;
         } else if (m.type === 'video' && m.media_url) {
             extraClass = '!p-1';
@@ -119,7 +136,7 @@
         }
 
         let timeOverlay = '';
-        if (m.type === 'image' || m.type === 'video') {
+        if (isImgType || m.type === 'video') {
             timeOverlay = `<div class="absolute bottom-2 right-3 flex items-center gap-1 bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded-full z-10 shadow-sm backdrop-blur-sm" style="font-size: 10px;"><span class="opacity-90">${timeStr}</span>${readHtml ? readHtml.replace('text-gray-400', 'text-white/80') : ''}</div>`;
         } else {
             timeOverlay = `<div class="flex items-center justify-end mt-1 space-x-1" style="min-width: 45px;"><span class="text-[10px] opacity-60" style="font-size: 10px;">${timeStr}</span>${readHtml}</div>`;
@@ -594,11 +611,16 @@
         
         let fileType = 'document';
         const nameUpper = file.name.toUpperCase();
-        if (file.type.startsWith('image/') || nameUpper.endsWith('.JPG') || nameUpper.endsWith('.PNG') || nameUpper.endsWith('.JPEG') || nameUpper.endsWith('.WEBP')) {
+        const isSvg = nameUpper.endsWith('.SVG') || file.type === 'image/svg+xml';
+        const isImage = file.type.startsWith('image/') || isSvg || nameUpper.endsWith('.JPG') || nameUpper.endsWith('.PNG') || nameUpper.endsWith('.JPEG') || nameUpper.endsWith('.WEBP') || nameUpper.endsWith('.GIF');
+
+        if (isImage) {
             fileType = 'image';
-            // Compress the image before uploading (only if it's actually an image type we can compress)
-            if (file.type.startsWith('image/')) {
-                file = await compressImage(file, 0.7, 1200);
+            // Compress only raster images (skip SVG vector files)
+            if (file.type.startsWith('image/') && !isSvg) {
+                try {
+                    file = await compressImage(file, 0.7, 1200);
+                } catch(err) { console.warn('[compressImage error]', err); }
             }
         }
         else if (file.type.startsWith('audio/') || nameUpper.endsWith('.MP3') || nameUpper.endsWith('.WAV') || nameUpper.endsWith('.OGG') || nameUpper.endsWith('.M4A')) fileType = 'audio';

@@ -243,6 +243,7 @@ app.get('/media/*rest', requireUserOrGuest, (req, res, next) => {
         '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
         '.png': 'image/png', '.gif': 'image/gif',
         '.webp': 'image/webp', '.heic': 'image/heic',
+        '.svg': 'image/svg+xml', '.svgz': 'image/svg+xml',
     };
 
     const mime = MIME_MAP[ext];
