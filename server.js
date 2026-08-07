@@ -722,10 +722,15 @@ app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     res.json({ messages: msgs.reverse(), my_id: req.user.id });
 });
 
+// DM Presence API endpoint
+app.get('/api/dm/presence', requireUser, (req, res) => {
+    const onlineIds = Array.from(onlineUsers.keys()).map(Number);
+    res.json({ online_user_ids: onlineIds });
+});
+
 // ─────────────────────────────────────────────
 // Socket.IO — real-time DM
 // ─────────────────────────────────────────────
-const onlineUsers = new Map(); // userId → Set of socketIds
 
 io.use((socket, next) => {
     // Authenticate via session cookie (same cookie as HTTP)
@@ -738,12 +743,23 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    const uid = socket.user.id;
+    const uid = Number(socket.user.id);
+    const isFirstConnection = !onlineUsers.has(uid) || onlineUsers.get(uid).size === 0;
     if (!onlineUsers.has(uid)) onlineUsers.set(uid, new Set());
     onlineUsers.get(uid).add(socket.id);
 
-    // Broadcast presence
-    socket.broadcast.emit('user:online', { user_id: uid });
+    // Send immediate initial presence list to this newly connected user
+    const currentOnlineIds = Array.from(onlineUsers.keys()).map(Number);
+    socket.emit('presence:init', { online_user_ids: currentOnlineIds });
+
+    // Broadcast user:online to everyone else if this is their first active socket
+    if (isFirstConnection) {
+        io.emit('user:online', { user_id: uid });
+    }
+
+    socket.on('dm:get_presence', () => {
+        socket.emit('presence:init', { online_user_ids: Array.from(onlineUsers.keys()).map(Number) });
+    });
 
     socket.on('dm:send', (data) => {
         const { conv_id, body } = data;
@@ -804,7 +820,7 @@ io.on('connection', (socket) => {
             set.delete(socket.id);
             if (set.size === 0) {
                 onlineUsers.delete(uid);
-                socket.broadcast.emit('user:offline', { user_id: uid });
+                io.emit('user:offline', { user_id: uid });
             }
         }
     });

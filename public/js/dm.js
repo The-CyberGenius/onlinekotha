@@ -3,6 +3,9 @@
     'use strict';
 
     // ── Helpers ───────────────────────────────────────────────
+    // ── Global Online Presence Store ──────────────────────────
+    const onlineUserIds = new Set();
+
     function esc(s) {
         return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
@@ -374,6 +377,18 @@
             if (typingEl) typingEl.style.display = typing ? 'block' : 'none';
         });
 
+        socket.on('presence:init', ({ online_user_ids }) => {
+            onlineUserIds.clear();
+            if (Array.isArray(online_user_ids)) {
+                online_user_ids.forEach(id => onlineUserIds.add(Number(id)));
+            }
+            renderConvs();
+            if (activeConvId) {
+                const c = convs.find(x => x.conv_id === activeConvId);
+                if (c) setDot(Number(c.other.id), onlineUserIds.has(Number(c.other.id)));
+            }
+        });
+
         socket.on('user:online',  ({user_id}) => setDot(Number(user_id), true));
         socket.on('user:offline', ({user_id}) => setDot(Number(user_id), false));
         socket.on('dm:read', ({conv_id}) => {
@@ -391,11 +406,23 @@
 
     // ── Load conversations ────────────────────────────────────
     async function loadConvs() {
-        const r = await fetch('/api/dm/conversations');
-        if (!r.ok) return;
-        convs = await r.json();
-        renderConvs();
-        updateBadge();
+        try {
+            const [rConvs, rPresence] = await Promise.all([
+                fetch('/api/dm/conversations'),
+                fetch('/api/dm/presence').catch(() => null)
+            ]);
+            if (rPresence && rPresence.ok) {
+                const pData = await rPresence.json();
+                if (Array.isArray(pData.online_user_ids)) {
+                    onlineUserIds.clear();
+                    pData.online_user_ids.forEach(id => onlineUserIds.add(Number(id)));
+                }
+            }
+            if (!rConvs.ok) return;
+            convs = await rConvs.json();
+            renderConvs();
+            updateBadge();
+        } catch(e) { console.error('[loadConvs]', e); }
     }
 
     function renderConvs() {
@@ -413,12 +440,15 @@
         const bg     = dark ? '#111b21' : '#fff';
         const hover  = dark ? 'rgba(134,150,160,.1)' : 'rgba(99,102,241,.06)';
         const active = dark ? 'rgba(99,102,241,.18)' : 'rgba(99,102,241,.09)';
-        convList.innerHTML = convs.map(c => `
+        convList.innerHTML = convs.map(c => {
+            const isOnline = onlineUserIds.has(Number(c.other.id));
+            const dotBg = isOnline ? '#22c55e' : '#d1d5db';
+            return `
             <div class="dm-row" data-id="${c.conv_id}"
                 style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;border-radius:14px;margin:2px 8px;transition:background .15s;${c.conv_id===activeConvId?`background:${active}`:''}">
                 <div style="position:relative;flex-shrink:0">
                     ${avatar(c.other, 46)}
-                    <span class="dm-dot-${c.other.id}" style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#d1d5db;border:2px solid ${dark?'#111b21':'#fff'}"></span>
+                    <span class="dm-dot-${c.other.id}" style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:${dotBg};border:2px solid ${dark?'#111b21':'#fff'}"></span>
                 </div>
                 <div style="flex:1;min-width:0">
                     <div style="display:flex;justify-content:space-between;gap:4px;align-items:baseline;margin-bottom:2px">
@@ -428,7 +458,8 @@
                     <div style="font-size:12px;color:${dark?'#8696a0':'#6b7280'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.last_msg||'Tap to open')}</div>
                 </div>
                 ${c.unread?`<span style="background:#6366f1;color:#fff;font-size:9px;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">${c.unread>9?'9+':c.unread}</span>`:''}
-            </div>`).join('');
+            </div>`;
+        }).join('');
 
         convList.querySelectorAll('.dm-row').forEach(el => {
             el.addEventListener('mouseenter', () => { if(+el.dataset.id!==activeConvId) el.style.background=hover; });
@@ -461,7 +492,12 @@
         document.getElementById('dm-empty-state')?.classList.add('hidden');
         if (chatName)   chatName.textContent = c.other.display_name;
         if (chatAvatar) chatAvatar.innerHTML  = avatar(c.other, 38);
-        if (chatStatus) chatStatus.textContent = '';
+        const isOtherOnline = onlineUserIds.has(Number(c.other.id));
+        if (chatStatus) {
+            chatStatus.innerHTML = isOtherOnline 
+                ? `<span style="color:#22c55e;font-weight:600;font-size:11px;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>online</span>` 
+                : '';
+        }
         if (chatMsgs)   chatMsgs.innerHTML = `<div style="text-align:center;color:#8696a0;font-size:12px;padding:24px">Loading…</div>`;
         if (typingEl)   typingEl.style.display = 'none';
 
@@ -875,12 +911,20 @@
 
     // ── Presence ──────────────────────────────────────────────
     function setDot(uid, online) {
+        uid = Number(uid);
+        if (online) onlineUserIds.add(uid);
+        else onlineUserIds.delete(uid);
+
         document.querySelectorAll(`.dm-dot-${uid}`).forEach(el => {
             el.style.background = online ? '#22c55e' : '#d1d5db';
         });
         if(chatStatus && activeConvId) {
             const c = convs.find(x=>x.conv_id===activeConvId);
-            if(c?.other.id===uid) chatStatus.textContent = online ? '● online' : '';
+            if(c && Number(c.other.id)===uid) {
+                chatStatus.innerHTML = online 
+                    ? `<span style="color:#22c55e;font-weight:600;font-size:11px;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>online</span>` 
+                    : '';
+            }
         }
     }
 
