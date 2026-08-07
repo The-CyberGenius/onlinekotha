@@ -169,15 +169,17 @@ async function streamGoogle({ model, messages, systemPrompt, maxTokens, temperat
         parts: [{ text: m.content }],
     }));
 
+    const generationConfig = {
+        maxOutputTokens: maxTokens,
+        temperature,
+    };
+    if (model.model_id && model.model_id.includes('thinking')) {
+        generationConfig.thinkingConfig = { thinkingBudget: 0 };
+    }
+
     const body = {
         contents,
-        // NOTE: Gemini rejects frequency/presence penalty ("Penalty is not enabled")
-        // so repetition is controlled via the system prompt + short maxOutputTokens.
-        generationConfig: {
-            maxOutputTokens: maxTokens,
-            temperature,
-            thinkingConfig: { thinkingBudget: 0 },
-        },
+        generationConfig,
         safetySettings: [
             { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
             { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
