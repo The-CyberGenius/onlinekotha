@@ -1250,7 +1250,7 @@ function showAdminTranslateModal(chatId, uid, chatName) {
             const response = await fetch(`/api/admin/users/${uid}/chats/${chatId}/translate`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ lang }),
+                body: JSON.stringify({ lang, offset: Number(btn.dataset.offset || 0) }),
             });
 
             if (!response.ok) {
@@ -1279,43 +1279,53 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                             const data = JSON.parse(line.slice(6));
 
                             if (event === 'start') {
-                                progressLabel.textContent = `Translating ${data.total} messages via Google Translate…`;
+                                const totalInChat = data.totalInChat || data.total;
+                                const showing = data.total;
+                                const batchCount = data.batches || Math.ceil(showing / 100);
+                                progressLabel.textContent = totalInChat > showing
+                                    ? `Translating latest ${showing.toLocaleString()} of ${totalInChat.toLocaleString()} messages (${batchCount} batch API calls)…`
+                                    : `Translating ${showing.toLocaleString()} messages in ${batchCount} batch calls…`;
                                 progressPct.textContent = '0%';
                             } else if (event === 'progress') {
                                 const pct = Math.round((data.done / data.total) * 100);
                                 progressBar.style.width = pct + '%';
-                                progressLabel.textContent = `Translated ${data.done} of ${data.total} messages…`;
+                                progressLabel.textContent = `Batch translating… ${data.done.toLocaleString()} / ${data.total.toLocaleString()} done`;
                                 progressPct.textContent = pct + '%';
-                                // Append the latest batch of messages as they arrive
-                                if (data.done > allTranslated.length) {
-                                    // will be rendered at done event
-                                }
                             } else if (event === 'done') {
                                 progressBar.style.width = '100%';
                                 progressPct.textContent = '100%';
-                                progressLabel.textContent = `✅ Done! ${data.translated.length} messages translated`;
+                                progressLabel.textContent = `✅ Done! ${data.translated.length.toLocaleString()} messages translated`;
 
-                                // Render any remaining (if not already streamed)
-                                if (allTranslated.length === 0) {
-                                    appendMessages(data.translated);
-                                }
+                                appendMessages(data.translated);
 
-                                // Add header + copy button
+                                // Header + copy button + "load more" if hasMore
                                 const msgs = document.getElementById('atm-msgs');
                                 if (msgs) {
                                     const header = document.createElement('div');
-                                    header.style.cssText = 'margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;';
+                                    header.style.cssText = 'margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;';
+                                    const totalInChat = data.totalInChat || data.translated.length;
                                     header.innerHTML = `
-                                        <span style="font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 10px;border-radius:20px;">${langLabel} · ${data.translated.length} messages</span>
-                                        <button id="atm-copy-btn" style="font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">📋 Copy All</button>
+                                        <span style="font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 10px;border-radius:20px;">${langLabel} · ${data.translated.length.toLocaleString()} messages${totalInChat > data.translated.length ? ` of ${totalInChat.toLocaleString()} total` : ''}</span>
+                                        <div style="display:flex;gap:6px;">
+                                            ${data.hasMore ? `<button id="atm-load-more-btn" style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">⬆️ Load Older</button>` : ''}
+                                            <button id="atm-copy-btn" style="font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">📋 Copy All</button>
+                                        </div>
                                     `;
                                     body.insertBefore(header, msgs);
+
                                     document.getElementById('atm-copy-btn')?.addEventListener('click', () => {
                                         const text = data.translated.map(m => `[${m.sender}] ${m.translated}`).join('\n');
                                         navigator.clipboard.writeText(text).then(() => {
                                             const cb = document.getElementById('atm-copy-btn');
                                             if (cb) { cb.textContent = '✅ Copied!'; setTimeout(() => { if(cb) cb.textContent = '📋 Copy All'; }, 2000); }
                                         });
+                                    });
+
+                                    // Load older messages
+                                    document.getElementById('atm-load-more-btn')?.addEventListener('click', () => {
+                                        modal.remove();
+                                        // Re-open with offset to load older chunk
+                                        showAdminTranslateModalWithOffset(chatId, uid, chatName, (data.offset || 0) + data.translated.length, lang);
                                     });
                                 }
                             }
@@ -1324,6 +1334,7 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                     }
                 }
             }
+
         } catch (err) {
             body.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:13px;font-weight:600;">❌ ${err.message}</div>`;
             progressWrap.style.display = 'none';
@@ -1340,5 +1351,21 @@ function showAdminTranslateModal(chatId, uid, chatName) {
         style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
         document.head.appendChild(style);
     }
+}
+
+// Opens translate modal with a specific offset (for "Load Older" pagination)
+function showAdminTranslateModalWithOffset(chatId, uid, chatName, offset, lang) {
+    showAdminTranslateModal(chatId, uid, chatName);
+    // After modal opens, auto-trigger translate with offset + the chosen lang
+    setTimeout(() => {
+        const radio = document.querySelector(`input[name="atm-lang"][value="${lang}"]`);
+        if (radio) radio.checked = true;
+        // Store offset on the button so the click handler can read it
+        const btn = document.getElementById('atm-go-btn');
+        if (btn) {
+            btn.dataset.offset = String(offset);
+            btn.click();
+        }
+    }, 50);
 }
 
