@@ -1162,7 +1162,7 @@ function showAdminTranslateModal(chatId, uid, chatName) {
             <!-- Progress bar (hidden initially) -->
             <div id="atm-progress-wrap" style="display:none;padding:10px 22px;background:#fffbeb;border-bottom:1px solid #fde68a;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-                    <span id="atm-progress-label" style="font-size:11px;font-weight:600;color:#92400e;">Processing batch 0 of 0…</span>
+                    <span id="atm-progress-label" style="font-size:11px;font-weight:600;color:#92400e;">Starting translation…</span>
                     <span id="atm-progress-pct" style="font-size:11px;font-weight:700;color:#d97706;">0%</span>
                 </div>
                 <div style="background:#fde68a;border-radius:99px;height:6px;overflow:hidden;">
@@ -1175,13 +1175,13 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                 <div style="text-align:center;padding:40px 20px;color:#9ca3af;">
                     <div style="font-size:32px;margin-bottom:10px;">🌍</div>
                     <div style="font-size:13px;font-weight:500;">Select a language and click <strong>Translate Now</strong></div>
-                    <div style="font-size:11px;margin-top:6px;">AI translates in smart batches — works on any chat size. Up to 300 messages.</div>
+                    <div style="font-size:11px;margin-top:6px;">Works on any chat size — no token limits. Powered by Google Translate.</div>
                 </div>
             </div>
 
             <!-- Footer -->
             <div style="padding:10px 22px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
-                Powered by your configured AI model &bull; Batch mode — reliable on large chats
+                Powered by Google Translate (free) &bull; Zero token cost &bull; Works on any chat size
             </div>
         </div>
     `;
@@ -1279,15 +1279,17 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                             const data = JSON.parse(line.slice(6));
 
                             if (event === 'start') {
-                                progressLabel.textContent = `Processing batch 0 of ${data.batches}… (${data.total} messages)`;
+                                progressLabel.textContent = `Translating ${data.total} messages via Google Translate…`;
                                 progressPct.textContent = '0%';
                             } else if (event === 'progress') {
                                 const pct = Math.round((data.done / data.total) * 100);
                                 progressBar.style.width = pct + '%';
-                                progressLabel.textContent = `Batch ${data.batch} of ${data.totalBatches} (${data.done}/${data.total} done)`;
+                                progressLabel.textContent = `Translated ${data.done} of ${data.total} messages…`;
                                 progressPct.textContent = pct + '%';
-                            } else if (event === 'batch_error') {
-                                console.warn(`Batch ${data.batch} failed:`, data.error);
+                                // Append the latest batch of messages as they arrive
+                                if (data.done > allTranslated.length) {
+                                    // will be rendered at done event
+                                }
                             } else if (event === 'done') {
                                 progressBar.style.width = '100%';
                                 progressPct.textContent = '100%';

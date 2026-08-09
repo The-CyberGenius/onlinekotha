@@ -459,11 +459,38 @@ router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
     }
 });
 
-// Translate a user's chat — Admin only (batch + streaming SSE)
+// ---------- Free Google Translate helper (no API key needed) ----------
+async function googleTranslate(text, targetLang) {
+    if (!text || !text.trim()) return text;
+    // Use Google Translate free endpoint (client=gtx)
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(text)}`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+        const resp = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const data = await resp.json();
+        // data[0] is array of [translated_chunk, original_chunk]
+        if (Array.isArray(data[0])) {
+            return data[0].map(chunk => chunk[0]).filter(Boolean).join('');
+        }
+        return text;
+    } catch {
+        clearTimeout(timeout);
+        return text; // fallback to original on error
+    }
+}
+
+// Translate a user's chat — Admin only (Google Translate API, SSE progress, zero tokens)
 router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
     const userId = Number(req.params.id);
     const chatId = Number(req.params.chatId);
     const targetLang = (req.body?.lang || 'hinglish').toLowerCase();
+
+    // Map our lang names to Google Translate language codes
+    // Hinglish = translate source to Hindi (hi), English = en
+    const gtLang = targetLang === 'english' ? 'en' : 'hi';
 
     const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
     if (!chat) return res.status(404).json({ error: 'Chat not found' });
@@ -483,10 +510,10 @@ router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
         return res.json({ translated: [], chatName: chat.display_name || chat.folder_name, lang: targetLang });
     }
 
-    // Cap at last 300 messages
-    const slice = messages.slice(-300);
+    // Translate all messages (no cap — works on any size!)
+    const slice = messages;
 
-    // SSE setup — stream progress to admin panel
+    // SSE setup
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
     res.setHeader('X-Accel-Buffering', 'no');
@@ -497,80 +524,38 @@ router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
         try { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); } catch {}
     };
 
-    const langLabel = targetLang === 'english' ? 'English' : 'Hinglish';
-    const langInstruction = targetLang === 'english'
-        ? 'Translate every message into clear, natural English. Preserve the original tone and slang.'
-        : 'Translate every message into Hinglish (casual Hindi in Roman script mixed with English). Keep emotion and informality intact. Example: "Kya baat kar raha hai yaar", "Chal na please".';
+    const chatName = chat.display_name || chat.folder_name;
+    send('start', { total: slice.length, chatName, lang: targetLang });
 
-    const systemPrompt = `You are a professional chat translator. You receive a short numbered list of WhatsApp messages. Return ONLY a valid JSON array of translated strings — one per input message, same order. No markdown, no explanation, no extra text. Just the JSON array.`;
-
-    // Batch processing: 20 messages per LLM call
-    const BATCH_SIZE = 20;
     const translated = [];
-    const totalBatches = Math.ceil(slice.length / BATCH_SIZE);
+    const CONCURRENCY = 5; // parallel requests at a time
 
-    send('start', {
-        total: slice.length,
-        batches: totalBatches,
-        chatName: chat.display_name || chat.folder_name,
-        lang: targetLang
-    });
+    for (let i = 0; i < slice.length; i += CONCURRENCY) {
+        const chunk = slice.slice(i, i + CONCURRENCY);
 
-    for (let b = 0; b < totalBatches; b++) {
-        const batchStart = b * BATCH_SIZE;
-        const batch = slice.slice(batchStart, batchStart + BATCH_SIZE);
+        const results = await Promise.all(chunk.map(async (m) => {
+            const translatedText = await googleTranslate(m.text, gtLang);
+            return {
+                sender: m.sender,
+                timestamp: m.timestamp,
+                original: m.text,
+                translated: translatedText,
+            };
+        }));
 
-        send('progress', { batch: b + 1, totalBatches, done: translated.length, total: slice.length });
+        translated.push(...results);
 
-        const transcript = batch.map((m, i) => `[${i + 1}] ${m.sender}: ${m.text}`).join('\n');
-        const userMessage = `Translate these ${batch.length} chat messages into ${langLabel}. ${langInstruction}\n\nReturn ONLY a JSON array of exactly ${batch.length} strings.\n\nMessages:\n${transcript}`;
+        // Send progress every CONCURRENCY messages
+        send('progress', { done: translated.length, total: slice.length });
 
-        let batchResponse = '';
-        try {
-            await callLLM({
-                feature: 'chat',
-                messages: [{ role: 'user', content: userMessage }],
-                systemPrompt,
-                userId: req.user?.id,
-                maxTokens: 2048,
-                onToken: (tok) => { batchResponse += tok; },
-            });
-
-            let batchTranslations = [];
-            const match = batchResponse.match(/\[[\s\S]*\]/);
-            if (match) batchTranslations = JSON.parse(match[0]);
-
-            for (let i = 0; i < batch.length; i++) {
-                translated.push({
-                    sender: batch[i].sender,
-                    timestamp: batch[i].timestamp,
-                    original: batch[i].text,
-                    translated: (batchTranslations[i] && typeof batchTranslations[i] === 'string')
-                        ? batchTranslations[i]
-                        : batch[i].text,
-                });
-            }
-        } catch (err) {
-            // Batch failed — gracefully fall back to original text, don't abort entire job
-            console.error(`[translate] Batch ${b + 1}/${totalBatches} failed:`, err.message);
-            for (const m of batch) {
-                translated.push({
-                    sender: m.sender,
-                    timestamp: m.timestamp,
-                    original: m.text,
-                    translated: m.text,
-                });
-            }
-            send('batch_error', { batch: b + 1, error: err.message });
-        }
-
-        // Small delay between batches to avoid rate-limit
-        if (b < totalBatches - 1) await new Promise(r => setTimeout(r, 300));
+        // Small pause to avoid hammering the API
+        if (i + CONCURRENCY < slice.length) await new Promise(r => setTimeout(r, 80));
     }
 
-    send('done', { translated, chatName: chat.display_name || chat.folder_name, lang: targetLang });
+    send('done', { translated, chatName, lang: targetLang });
     res.end();
 });
+
 
 
 // ---------- Impersonation ----------
