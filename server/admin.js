@@ -11,6 +11,7 @@ const integ = require('./integrations');
 const email = require('./email');
 const billing = require('./billing');
 const oauth = require('./oauth');
+const { callLLM } = require('./llm');
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -456,6 +457,83 @@ router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
         if (err.code === 'NO_CHAT_FILE') return res.status(404).json({ error: 'Chat file not found' });
         res.status(500).json({ error: err.message });
     }
+});
+
+// Translate a user's chat — Admin only
+router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
+    const userId = Number(req.params.id);
+    const chatId = Number(req.params.chatId);
+    const targetLang = (req.body?.lang || 'hinglish').toLowerCase(); // 'hinglish' or 'english'
+
+    const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
+    if (!chat) return res.status(404).json({ error: 'Chat not found' });
+
+    const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+    if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
+
+    let messages;
+    try {
+        const result = await getMessages(chatDir);
+        messages = result.messages || [];
+    } catch (err) {
+        return res.status(500).json({ error: 'Could not parse chat: ' + err.message });
+    }
+
+    if (!messages.length) return res.json({ translated: [] });
+
+    // Take latest 200 messages max to avoid hitting token limits
+    const slice = messages.slice(-200);
+
+    // Build a compact chat transcript for the AI
+    const transcript = slice.map((m, i) =>
+        `[${i + 1}] ${m.sender}: ${m.text}`
+    ).join('\n');
+
+    const langInstruction = targetLang === 'english'
+        ? 'Translate every message into clear, natural English. Keep the original tone and slang as close as possible.'
+        : 'Translate every message into Hinglish (a casual mix of Hindi written in English/Roman script and English). Keep the original emotion, slang, and informality intact. For example: "Kya baat kar raha hai yaar", "Chal na please", "Bhai sun".';
+
+    const systemPrompt = `You are a professional chat translator. The user will give you a numbered WhatsApp chat transcript. Your job is to translate each message line and return ONLY a valid JSON array — no explanation, no markdown, no extra text. The array must have the exact same number of entries as the input, each entry being the translated text string (in order). Nothing else.`;
+
+    const userMessage = `Translate the following ${slice.length} chat messages into ${targetLang === 'english' ? 'English' : 'Hinglish (Hindi in Roman script mixed with English)'}. ${langInstruction}
+
+Return ONLY a JSON array of ${slice.length} translated strings. Example format: ["translated msg 1", "translated msg 2", ...]
+
+Chat:
+${transcript}`;
+
+    let fullResponse = '';
+    try {
+        await callLLM({
+            feature: 'chat',
+            messages: [{ role: 'user', content: userMessage }],
+            systemPrompt,
+            userId: req.user?.id,
+            onToken: (tok) => { fullResponse += tok; },
+        });
+    } catch (err) {
+        return res.status(500).json({ error: 'AI translation failed: ' + err.message });
+    }
+
+    // Parse the JSON array from the response
+    let translations = [];
+    try {
+        const match = fullResponse.match(/\[[\s\S]*\]/);
+        if (!match) throw new Error('No JSON array found in response');
+        translations = JSON.parse(match[0]);
+    } catch (e) {
+        return res.status(500).json({ error: 'Failed to parse translation response. Try again.' });
+    }
+
+    // Merge translations back with original sender + timestamp info
+    const translated = slice.map((m, i) => ({
+        sender: m.sender,
+        timestamp: m.timestamp,
+        original: m.text,
+        translated: translations[i] || m.text,
+    }));
+
+    res.json({ translated, chatName: chat.display_name || chat.folder_name, lang: targetLang });
 });
 
 // ---------- Impersonation ----------

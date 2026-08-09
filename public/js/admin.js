@@ -769,6 +769,9 @@ HARD RULES
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                             .zip
                                         </a>
+                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-md px-1.5 py-1 transition" title="Translate chat with AI">
+                                            🌐
+                                        </button>
                                         <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md px-1.5 py-1 transition">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                             Open
@@ -793,6 +796,16 @@ HARD RULES
                             openBtn.disabled = true;
                             // Redirect to impersonation endpoint which will set cookie and redirect to /app
                             window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`;
+                        });
+                    });
+
+                    // Admin chat translate handlers
+                    area.querySelectorAll('[data-admin-translate-chat]').forEach(tBtn => {
+                        tBtn.addEventListener('click', () => {
+                            const chatId = tBtn.dataset.adminTranslateChat;
+                            const tUid = tBtn.dataset.uid;
+                            const cname = tBtn.dataset.cname;
+                            showAdminTranslateModal(chatId, tUid, cname);
                         });
                     });
 
@@ -1113,3 +1126,139 @@ HARD RULES
     await loadSettings();
     await loadUsers();
 })();
+
+// ======= Admin Chat Translation Modal =======
+function showAdminTranslateModal(chatId, uid, chatName) {
+    // Remove any existing modal
+    document.getElementById('admin-translate-modal')?.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'admin-translate-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+    modal.innerHTML = `
+        <div style="background:#fff;border-radius:20px;width:100%;max-width:700px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.3);overflow:hidden;">
+            <!-- Header -->
+            <div style="padding:18px 22px 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+                <div>
+                    <div style="font-size:15px;font-weight:700;color:#1a1a1a;">🌐 AI Chat Translator</div>
+                    <div style="font-size:11px;color:#6b7280;margin-top:2px;max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${chatName}</div>
+                </div>
+                <button id="atm-close" style="width:32px;height:32px;border-radius:50%;border:none;background:#f3f4f6;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#6b7280;">×</button>
+            </div>
+
+            <!-- Language picker + translate button -->
+            <div style="padding:14px 22px;border-bottom:1px solid #f9fafb;display:flex;align-items:center;gap:10px;background:#fafafa;">
+                <span style="font-size:12px;font-weight:600;color:#374151;">Translate to:</span>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#d97706;">
+                    <input type="radio" name="atm-lang" value="hinglish" checked style="accent-color:#d97706;"> 🇮🇳 Hinglish
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#2563eb;">
+                    <input type="radio" name="atm-lang" value="english" style="accent-color:#2563eb;"> 🇬🇧 English
+                </label>
+                <button id="atm-go-btn" style="margin-left:auto;padding:8px 18px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(217,119,6,0.3);">
+                    <span id="atm-btn-icon">✨</span> Translate Now
+                </button>
+            </div>
+
+            <!-- Translated content area -->
+            <div id="atm-body" style="flex:1;overflow-y:auto;padding:16px 22px;">
+                <div style="text-align:center;padding:40px 20px;color:#9ca3af;">
+                    <div style="font-size:32px;margin-bottom:10px;">🌍</div>
+                    <div style="font-size:13px;font-weight:500;">Select a language and click <strong>Translate Now</strong></div>
+                    <div style="font-size:11px;margin-top:6px;">AI will translate the last 200 messages. Takes ~10–30 seconds.</div>
+                </div>
+            </div>
+
+            <!-- Footer info -->
+            <div style="padding:10px 22px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
+                Powered by your configured AI model &bull; Last 200 messages only
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close handlers
+    const closeModal = () => modal.remove();
+    document.getElementById('atm-close').addEventListener('click', closeModal);
+    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+    // Translate button
+    document.getElementById('atm-go-btn').addEventListener('click', async () => {
+        const lang = document.querySelector('input[name="atm-lang"]:checked')?.value || 'hinglish';
+        const btn = document.getElementById('atm-go-btn');
+        const icon = document.getElementById('atm-btn-icon');
+        const body = document.getElementById('atm-body');
+
+        btn.disabled = true;
+        icon.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;"></span>';
+        btn.style.opacity = '0.75';
+
+        body.innerHTML = `
+            <div style="text-align:center;padding:40px 20px;">
+                <div style="width:40px;height:40px;border:3px solid #fde68a;border-top-color:#f59e0b;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;"></div>
+                <div style="font-size:13px;font-weight:600;color:#374151;">Translating to ${lang === 'hinglish' ? '🇮🇳 Hinglish' : '🇬🇧 English'}…</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:6px;">AI is reading the full chat. Please wait…</div>
+            </div>
+        `;
+
+        try {
+            const r = await fetch(`/api/admin/users/${uid}/chats/${chatId}/translate`, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ lang }),
+            });
+            const data = await r.json();
+
+            if (!r.ok) throw new Error(data.error || 'Translation failed');
+
+            const items = data.translated || [];
+            if (!items.length) {
+                body.innerHTML = `<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">No messages found to translate.</div>`;
+                return;
+            }
+
+            // Render the translated chat beautifully
+            const langLabel = lang === 'hinglish' ? '🇮🇳 Hinglish' : '🇬🇧 English';
+            body.innerHTML = `
+                <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 10px;border-radius:20px;">${langLabel} · ${items.length} messages</span>
+                    <button id="atm-copy-btn" style="font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">📋 Copy All</button>
+                </div>
+                <div id="atm-msgs" style="display:flex;flex-direction:column;gap:6px;">
+                    ${items.map(m => `
+                        <div style="background:#f9fafb;border-radius:10px;padding:8px 12px;border-left:3px solid ${m.sender === items[0]?.sender ? '#f59e0b' : '#6366f1'};">
+                            <div style="font-size:10px;font-weight:700;color:${m.sender === items[0]?.sender ? '#d97706' : '#6366f1'};margin-bottom:3px;">${m.sender || 'Unknown'} <span style="font-weight:400;color:#9ca3af;">${m.timestamp || ''}</span></div>
+                            <div style="font-size:12px;color:#1f2937;line-height:1.5;">${m.translated}</div>
+                            <div style="font-size:10px;color:#d1d5db;margin-top:3px;font-style:italic;">Original: ${m.original}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Copy all handler
+            document.getElementById('atm-copy-btn')?.addEventListener('click', () => {
+                const text = items.map(m => `[${m.sender}] ${m.translated}`).join('\n');
+                navigator.clipboard.writeText(text).then(() => {
+                    const copyBtn = document.getElementById('atm-copy-btn');
+                    if (copyBtn) { copyBtn.textContent = '✅ Copied!'; setTimeout(() => { copyBtn.textContent = '📋 Copy All'; }, 2000); }
+                });
+            });
+
+        } catch (err) {
+            body.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:13px;font-weight:600;">❌ ${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            icon.textContent = '✨';
+            btn.style.opacity = '1';
+        }
+    });
+
+    // Add spin keyframe if not already present
+    if (!document.getElementById('atm-spin-style')) {
+        const style = document.createElement('style');
+        style.id = 'atm-spin-style';
+        style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+        document.head.appendChild(style);
+    }
+}
