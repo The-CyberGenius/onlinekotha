@@ -509,6 +509,7 @@ ${transcript}`;
             messages: [{ role: 'user', content: userMessage }],
             systemPrompt,
             userId: req.user?.id,
+            maxTokens: 8192,  // Large output needed to translate up to 200 messages
             onToken: (tok) => { fullResponse += tok; },
         });
     } catch (err) {

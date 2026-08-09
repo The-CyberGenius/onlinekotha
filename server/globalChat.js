@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { db } = require('./db');
 const { requireUser } = require('./auth');
+const { countWords, checkBurstLimit } = require('./rateLimit');
 
 // Adjectives and Animals for anonymous names
 const ADJECTIVES = [
@@ -151,6 +152,17 @@ router.post('/send', requireUser, (req, res) => {
     }
     if (text.length > 1000) {
         return res.status(400).json({ error: 'Message too long (max 1000 chars)' });
+    }
+
+    // Word limit (same as AI chat + DM)
+    if (countWords(text) > 300) {
+        return res.status(400).json({ error: 'Message exceeds limit (max 300 words). Please shorten your message to prevent server slowdown.' });
+    }
+
+    // Burst rate limit: 10 messages per 30 seconds
+    const burstCheck = checkBurstLimit(`global_${req.user.id}`);
+    if (!burstCheck.allowed) {
+        return res.status(429).json({ error: burstCheck.error });
     }
 
     const now = Date.now();

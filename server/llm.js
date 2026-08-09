@@ -257,7 +257,7 @@ async function readSSE(stream, onEvent) {
 }
 
 // ---------- Main entry ----------
-async function callLLM({ feature, messages, systemPrompt, userId, onToken, signal }) {
+async function callLLM({ feature, messages, systemPrompt, userId, onToken, signal, maxTokens: maxTokensOverride }) {
     checkSpendCap();
 
     const route = getRoute(feature);
@@ -268,7 +268,7 @@ async function callLLM({ feature, messages, systemPrompt, userId, onToken, signa
     if (!primary && !fallback) throw new LLMError('No models available for this feature', 'NO_MODEL');
 
     const finalSystemPrompt = systemPrompt || route.system_prompt;
-    const maxTokens = route.max_tokens || 1024;
+    const maxTokens = maxTokensOverride || route.max_tokens || 1024;
     const temperature = route.temperature ?? 0.7;
 
     const attempts = [primary, fallback].filter(Boolean);

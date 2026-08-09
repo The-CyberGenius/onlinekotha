@@ -542,7 +542,7 @@ app.get('/api/dm/search', requireUser, (req, res) => {
             id: found.id,
             display_name: found.display_name || found.email.split('@')[0],
             avatar_url: found.avatar_url,
-            email: found.email,
+            // email intentionally NOT returned — privacy: only you know the email you searched
         },
     });
 });
