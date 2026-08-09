@@ -1129,7 +1129,6 @@ HARD RULES
 
 // ======= Admin Chat Translation Modal =======
 function showAdminTranslateModal(chatId, uid, chatName) {
-    // Remove any existing modal
     document.getElementById('admin-translate-modal')?.remove();
 
     const modal = document.createElement('div');
@@ -1160,93 +1159,172 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                 </button>
             </div>
 
+            <!-- Progress bar (hidden initially) -->
+            <div id="atm-progress-wrap" style="display:none;padding:10px 22px;background:#fffbeb;border-bottom:1px solid #fde68a;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                    <span id="atm-progress-label" style="font-size:11px;font-weight:600;color:#92400e;">Processing batch 0 of 0…</span>
+                    <span id="atm-progress-pct" style="font-size:11px;font-weight:700;color:#d97706;">0%</span>
+                </div>
+                <div style="background:#fde68a;border-radius:99px;height:6px;overflow:hidden;">
+                    <div id="atm-progress-bar" style="background:linear-gradient(90deg,#f59e0b,#d97706);height:100%;width:0%;transition:width 0.3s ease;border-radius:99px;"></div>
+                </div>
+            </div>
+
             <!-- Translated content area -->
             <div id="atm-body" style="flex:1;overflow-y:auto;padding:16px 22px;">
                 <div style="text-align:center;padding:40px 20px;color:#9ca3af;">
                     <div style="font-size:32px;margin-bottom:10px;">🌍</div>
                     <div style="font-size:13px;font-weight:500;">Select a language and click <strong>Translate Now</strong></div>
-                    <div style="font-size:11px;margin-top:6px;">AI will translate the last 200 messages. Takes ~10–30 seconds.</div>
+                    <div style="font-size:11px;margin-top:6px;">AI translates in smart batches — works on any chat size. Up to 300 messages.</div>
                 </div>
             </div>
 
-            <!-- Footer info -->
+            <!-- Footer -->
             <div style="padding:10px 22px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
-                Powered by your configured AI model &bull; Last 200 messages only
+                Powered by your configured AI model &bull; Batch mode — reliable on large chats
             </div>
         </div>
     `;
 
     document.body.appendChild(modal);
 
-    // Close handlers
     const closeModal = () => modal.remove();
     document.getElementById('atm-close').addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-    // Translate button
     document.getElementById('atm-go-btn').addEventListener('click', async () => {
         const lang = document.querySelector('input[name="atm-lang"]:checked')?.value || 'hinglish';
         const btn = document.getElementById('atm-go-btn');
         const icon = document.getElementById('atm-btn-icon');
         const body = document.getElementById('atm-body');
+        const progressWrap = document.getElementById('atm-progress-wrap');
+        const progressBar = document.getElementById('atm-progress-bar');
+        const progressLabel = document.getElementById('atm-progress-label');
+        const progressPct = document.getElementById('atm-progress-pct');
 
         btn.disabled = true;
         icon.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;"></span>';
         btn.style.opacity = '0.75';
 
-        body.innerHTML = `
-            <div style="text-align:center;padding:40px 20px;">
-                <div style="width:40px;height:40px;border:3px solid #fde68a;border-top-color:#f59e0b;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 14px;"></div>
-                <div style="font-size:13px;font-weight:600;color:#374151;">Translating to ${lang === 'hinglish' ? '🇮🇳 Hinglish' : '🇬🇧 English'}…</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:6px;">AI is reading the full chat. Please wait…</div>
-            </div>
-        `;
+        const langLabel = lang === 'hinglish' ? '🇮🇳 Hinglish' : '🇬🇧 English';
+        progressWrap.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressLabel.textContent = 'Starting translation…';
+        progressPct.textContent = '0%';
+
+        body.innerHTML = `<div id="atm-msgs" style="display:flex;flex-direction:column;gap:6px;"></div>`;
+
+        const allTranslated = [];
+        const senderColors = {};
+        const palette = ['#f59e0b','#6366f1','#10b981','#ef4444','#8b5cf6','#0ea5e9'];
+        let colorIdx = 0;
+
+        function getSenderColor(sender) {
+            if (!senderColors[sender]) {
+                senderColors[sender] = palette[colorIdx % palette.length];
+                colorIdx++;
+            }
+            return senderColors[sender];
+        }
+
+        function appendMessages(items) {
+            const container = document.getElementById('atm-msgs');
+            if (!container) return;
+            items.forEach(m => {
+                allTranslated.push(m);
+                const color = getSenderColor(m.sender || 'Unknown');
+                const div = document.createElement('div');
+                div.style.cssText = `background:#f9fafb;border-radius:10px;padding:8px 12px;border-left:3px solid ${color};`;
+                div.innerHTML = `
+                    <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:3px;">${m.sender || 'Unknown'} <span style="font-weight:400;color:#9ca3af;">${m.timestamp || ''}</span></div>
+                    <div style="font-size:12px;color:#1f2937;line-height:1.5;">${m.translated}</div>
+                    ${m.translated !== m.original ? `<div style="font-size:10px;color:#d1d5db;margin-top:3px;font-style:italic;">Original: ${m.original}</div>` : ''}
+                `;
+                container.appendChild(div);
+                // Auto-scroll to latest
+                container.scrollIntoView({ block: 'end', behavior: 'smooth' });
+            });
+        }
 
         try {
-            const r = await fetch(`/api/admin/users/${uid}/chats/${chatId}/translate`, {
+            const response = await fetch(`/api/admin/users/${uid}/chats/${chatId}/translate`, {
                 method: 'POST',
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({ lang }),
             });
-            const data = await r.json();
 
-            if (!r.ok) throw new Error(data.error || 'Translation failed');
-
-            const items = data.translated || [];
-            if (!items.length) {
-                body.innerHTML = `<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">No messages found to translate.</div>`;
-                return;
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Translation failed');
             }
 
-            // Render the translated chat beautifully
-            const langLabel = lang === 'hinglish' ? '🇮🇳 Hinglish' : '🇬🇧 English';
-            body.innerHTML = `
-                <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-                    <span style="font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 10px;border-radius:20px;">${langLabel} · ${items.length} messages</span>
-                    <button id="atm-copy-btn" style="font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">📋 Copy All</button>
-                </div>
-                <div id="atm-msgs" style="display:flex;flex-direction:column;gap:6px;">
-                    ${items.map(m => `
-                        <div style="background:#f9fafb;border-radius:10px;padding:8px 12px;border-left:3px solid ${m.sender === items[0]?.sender ? '#f59e0b' : '#6366f1'};">
-                            <div style="font-size:10px;font-weight:700;color:${m.sender === items[0]?.sender ? '#d97706' : '#6366f1'};margin-bottom:3px;">${m.sender || 'Unknown'} <span style="font-weight:400;color:#9ca3af;">${m.timestamp || ''}</span></div>
-                            <div style="font-size:12px;color:#1f2937;line-height:1.5;">${m.translated}</div>
-                            <div style="font-size:10px;color:#d1d5db;margin-top:3px;font-style:italic;">Original: ${m.original}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
 
-            // Copy all handler
-            document.getElementById('atm-copy-btn')?.addEventListener('click', () => {
-                const text = items.map(m => `[${m.sender}] ${m.translated}`).join('\n');
-                navigator.clipboard.writeText(text).then(() => {
-                    const copyBtn = document.getElementById('atm-copy-btn');
-                    if (copyBtn) { copyBtn.textContent = '✅ Copied!'; setTimeout(() => { copyBtn.textContent = '📋 Copy All'; }, 2000); }
-                });
-            });
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // keep incomplete line
+
+                let event = '';
+                for (const line of lines) {
+                    if (line.startsWith('event: ')) {
+                        event = line.slice(7).trim();
+                    } else if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+
+                            if (event === 'start') {
+                                progressLabel.textContent = `Processing batch 0 of ${data.batches}… (${data.total} messages)`;
+                                progressPct.textContent = '0%';
+                            } else if (event === 'progress') {
+                                const pct = Math.round((data.done / data.total) * 100);
+                                progressBar.style.width = pct + '%';
+                                progressLabel.textContent = `Batch ${data.batch} of ${data.totalBatches} (${data.done}/${data.total} done)`;
+                                progressPct.textContent = pct + '%';
+                            } else if (event === 'batch_error') {
+                                console.warn(`Batch ${data.batch} failed:`, data.error);
+                            } else if (event === 'done') {
+                                progressBar.style.width = '100%';
+                                progressPct.textContent = '100%';
+                                progressLabel.textContent = `✅ Done! ${data.translated.length} messages translated`;
+
+                                // Render any remaining (if not already streamed)
+                                if (allTranslated.length === 0) {
+                                    appendMessages(data.translated);
+                                }
+
+                                // Add header + copy button
+                                const msgs = document.getElementById('atm-msgs');
+                                if (msgs) {
+                                    const header = document.createElement('div');
+                                    header.style.cssText = 'margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;';
+                                    header.innerHTML = `
+                                        <span style="font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 10px;border-radius:20px;">${langLabel} · ${data.translated.length} messages</span>
+                                        <button id="atm-copy-btn" style="font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">📋 Copy All</button>
+                                    `;
+                                    body.insertBefore(header, msgs);
+                                    document.getElementById('atm-copy-btn')?.addEventListener('click', () => {
+                                        const text = data.translated.map(m => `[${m.sender}] ${m.translated}`).join('\n');
+                                        navigator.clipboard.writeText(text).then(() => {
+                                            const cb = document.getElementById('atm-copy-btn');
+                                            if (cb) { cb.textContent = '✅ Copied!'; setTimeout(() => { if(cb) cb.textContent = '📋 Copy All'; }, 2000); }
+                                        });
+                                    });
+                                }
+                            }
+                        } catch {}
+                        event = '';
+                    }
+                }
+            }
         } catch (err) {
             body.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:13px;font-weight:600;">❌ ${err.message}</div>`;
+            progressWrap.style.display = 'none';
         } finally {
             btn.disabled = false;
             icon.textContent = '✨';
@@ -1254,7 +1332,6 @@ function showAdminTranslateModal(chatId, uid, chatName) {
         }
     });
 
-    // Add spin keyframe if not already present
     if (!document.getElementById('atm-spin-style')) {
         const style = document.createElement('style');
         style.id = 'atm-spin-style';
@@ -1262,3 +1339,4 @@ function showAdminTranslateModal(chatId, uid, chatName) {
         document.head.appendChild(style);
     }
 }
+

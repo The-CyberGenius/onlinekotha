@@ -459,11 +459,11 @@ router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
     }
 });
 
-// Translate a user's chat — Admin only
+// Translate a user's chat — Admin only (batch + streaming SSE)
 router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
     const userId = Number(req.params.id);
     const chatId = Number(req.params.chatId);
-    const targetLang = (req.body?.lang || 'hinglish').toLowerCase(); // 'hinglish' or 'english'
+    const targetLang = (req.body?.lang || 'hinglish').toLowerCase();
 
     const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
     if (!chat) return res.status(404).json({ error: 'Chat not found' });
@@ -479,63 +479,99 @@ router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
         return res.status(500).json({ error: 'Could not parse chat: ' + err.message });
     }
 
-    if (!messages.length) return res.json({ translated: [] });
+    if (!messages.length) {
+        return res.json({ translated: [], chatName: chat.display_name || chat.folder_name, lang: targetLang });
+    }
 
-    // Take latest 200 messages max to avoid hitting token limits
-    const slice = messages.slice(-200);
+    // Cap at last 300 messages
+    const slice = messages.slice(-300);
 
-    // Build a compact chat transcript for the AI
-    const transcript = slice.map((m, i) =>
-        `[${i + 1}] ${m.sender}: ${m.text}`
-    ).join('\n');
+    // SSE setup — stream progress to admin panel
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
 
+    const send = (event, data) => {
+        try { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); } catch {}
+    };
+
+    const langLabel = targetLang === 'english' ? 'English' : 'Hinglish';
     const langInstruction = targetLang === 'english'
-        ? 'Translate every message into clear, natural English. Keep the original tone and slang as close as possible.'
-        : 'Translate every message into Hinglish (a casual mix of Hindi written in English/Roman script and English). Keep the original emotion, slang, and informality intact. For example: "Kya baat kar raha hai yaar", "Chal na please", "Bhai sun".';
+        ? 'Translate every message into clear, natural English. Preserve the original tone and slang.'
+        : 'Translate every message into Hinglish (casual Hindi in Roman script mixed with English). Keep emotion and informality intact. Example: "Kya baat kar raha hai yaar", "Chal na please".';
 
-    const systemPrompt = `You are a professional chat translator. The user will give you a numbered WhatsApp chat transcript. Your job is to translate each message line and return ONLY a valid JSON array — no explanation, no markdown, no extra text. The array must have the exact same number of entries as the input, each entry being the translated text string (in order). Nothing else.`;
+    const systemPrompt = `You are a professional chat translator. You receive a short numbered list of WhatsApp messages. Return ONLY a valid JSON array of translated strings — one per input message, same order. No markdown, no explanation, no extra text. Just the JSON array.`;
 
-    const userMessage = `Translate the following ${slice.length} chat messages into ${targetLang === 'english' ? 'English' : 'Hinglish (Hindi in Roman script mixed with English)'}. ${langInstruction}
+    // Batch processing: 20 messages per LLM call
+    const BATCH_SIZE = 20;
+    const translated = [];
+    const totalBatches = Math.ceil(slice.length / BATCH_SIZE);
 
-Return ONLY a JSON array of ${slice.length} translated strings. Example format: ["translated msg 1", "translated msg 2", ...]
+    send('start', {
+        total: slice.length,
+        batches: totalBatches,
+        chatName: chat.display_name || chat.folder_name,
+        lang: targetLang
+    });
 
-Chat:
-${transcript}`;
+    for (let b = 0; b < totalBatches; b++) {
+        const batchStart = b * BATCH_SIZE;
+        const batch = slice.slice(batchStart, batchStart + BATCH_SIZE);
 
-    let fullResponse = '';
-    try {
-        await callLLM({
-            feature: 'chat',
-            messages: [{ role: 'user', content: userMessage }],
-            systemPrompt,
-            userId: req.user?.id,
-            maxTokens: 8192,  // Large output needed to translate up to 200 messages
-            onToken: (tok) => { fullResponse += tok; },
-        });
-    } catch (err) {
-        return res.status(500).json({ error: 'AI translation failed: ' + err.message });
+        send('progress', { batch: b + 1, totalBatches, done: translated.length, total: slice.length });
+
+        const transcript = batch.map((m, i) => `[${i + 1}] ${m.sender}: ${m.text}`).join('\n');
+        const userMessage = `Translate these ${batch.length} chat messages into ${langLabel}. ${langInstruction}\n\nReturn ONLY a JSON array of exactly ${batch.length} strings.\n\nMessages:\n${transcript}`;
+
+        let batchResponse = '';
+        try {
+            await callLLM({
+                feature: 'chat',
+                messages: [{ role: 'user', content: userMessage }],
+                systemPrompt,
+                userId: req.user?.id,
+                maxTokens: 2048,
+                onToken: (tok) => { batchResponse += tok; },
+            });
+
+            let batchTranslations = [];
+            const match = batchResponse.match(/\[[\s\S]*\]/);
+            if (match) batchTranslations = JSON.parse(match[0]);
+
+            for (let i = 0; i < batch.length; i++) {
+                translated.push({
+                    sender: batch[i].sender,
+                    timestamp: batch[i].timestamp,
+                    original: batch[i].text,
+                    translated: (batchTranslations[i] && typeof batchTranslations[i] === 'string')
+                        ? batchTranslations[i]
+                        : batch[i].text,
+                });
+            }
+        } catch (err) {
+            // Batch failed — gracefully fall back to original text, don't abort entire job
+            console.error(`[translate] Batch ${b + 1}/${totalBatches} failed:`, err.message);
+            for (const m of batch) {
+                translated.push({
+                    sender: m.sender,
+                    timestamp: m.timestamp,
+                    original: m.text,
+                    translated: m.text,
+                });
+            }
+            send('batch_error', { batch: b + 1, error: err.message });
+        }
+
+        // Small delay between batches to avoid rate-limit
+        if (b < totalBatches - 1) await new Promise(r => setTimeout(r, 300));
     }
 
-    // Parse the JSON array from the response
-    let translations = [];
-    try {
-        const match = fullResponse.match(/\[[\s\S]*\]/);
-        if (!match) throw new Error('No JSON array found in response');
-        translations = JSON.parse(match[0]);
-    } catch (e) {
-        return res.status(500).json({ error: 'Failed to parse translation response. Try again.' });
-    }
-
-    // Merge translations back with original sender + timestamp info
-    const translated = slice.map((m, i) => ({
-        sender: m.sender,
-        timestamp: m.timestamp,
-        original: m.text,
-        translated: translations[i] || m.text,
-    }));
-
-    res.json({ translated, chatName: chat.display_name || chat.folder_name, lang: targetLang });
+    send('done', { translated, chatName: chat.display_name || chat.folder_name, lang: targetLang });
+    res.end();
 });
+
 
 // ---------- Impersonation ----------
 router.get('/impersonate/start', (req, res) => {
