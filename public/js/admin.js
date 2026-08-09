@@ -1,4 +1,18 @@
 (async function () {
+    function formatDateTime(ts) {
+        if (!ts) return 'N/A';
+        const d = new Date(ts);
+        if (isNaN(d.getTime())) return 'N/A';
+        return d.toLocaleString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+
     // Gate
     const meResp = await fetch('/api/auth/me');
     const me = await meResp.json();
@@ -587,10 +601,10 @@ HARD RULES
                             <span class="text-[9px] text-gray-500 truncate">${u.email}</span>
                             ${planBadge} ${loginMethod}
                         </div>
-                        <div class="flex gap-2 text-[9px] text-gray-400 font-medium">
+                        <div class="flex gap-2 text-[9px] text-gray-400 font-medium items-center flex-wrap">
                             <span>💬 ${u.chat_count}</span>
                             <span>💰 $${u.total_cost.toFixed(3)}</span>
-                            <span>📅 ${new Date(u.created_at).toLocaleDateString()}</span>
+                            <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded" title="Registration Date & Time">📅 Registered: ${formatDateTime(u.created_at)}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0 ml-2">
@@ -737,8 +751,8 @@ HARD RULES
                             <div class="grid grid-cols-12 gap-2 px-3 py-2 text-[9px] font-bold uppercase text-gray-400 tracking-wider border-b border-gray-100">
                                 <div class="col-span-4">Chat Name</div>
                                 <div class="col-span-2 text-center">Messages</div>
-                                <div class="col-span-2">Imported</div>
-                                <div class="col-span-4 text-right">Actions</div>
+                                <div class="col-span-3">Imported Date & Time</div>
+                                <div class="col-span-3 text-right">Actions</div>
                             </div>
                             ${chats.map(c => `
                                 <div class="grid grid-cols-12 gap-2 px-3 py-2.5 items-center hover:bg-white transition text-sm border-b border-gray-50 last:border-0" data-admin-chat-row="${c.id}">
@@ -746,9 +760,9 @@ HARD RULES
                                         ${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}
                                         ${c.deleted_by_user ? '<span class="ml-1 text-[9px] font-bold bg-red-100 text-red-500 px-1.5 py-0.5 rounded-full">user deleted</span>' : ''}
                                     </div>
-                                    <div class="col-span-2 text-center text-xs text-gray-500">${c.message_count || 0}</div>
-                                    <div class="col-span-2 text-[10px] text-gray-400">${new Date(c.created_at).toLocaleDateString()}</div>
-                                    <div class="col-span-4 text-right flex items-center justify-end gap-1">
+                                    <div class="col-span-2 text-center text-xs text-gray-500 font-medium">${c.message_count || 0}</div>
+                                    <div class="col-span-3 text-[10px] font-semibold text-gray-600">${formatDateTime(c.created_at)}</div>
+                                    <div class="col-span-3 text-right flex items-center justify-end gap-1">
                                         <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="inline-flex items-center gap-1 text-[10px] font-bold bg-teal-500 text-white hover:bg-teal-600 rounded-lg px-2 py-1 transition no-underline shadow-sm">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                             .zip
@@ -837,7 +851,7 @@ HARD RULES
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="min-w-0 flex-1">
                                             <p class="text-xs font-bold text-gray-800 truncate">${c.title || 'Untitled'}</p>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${new Date(c.updated_at).toLocaleDateString()}</p>
+                                            <p class="text-[10px] text-gray-400 mt-0.5">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
                                         </div>
                                         <div class="flex gap-1 shrink-0">
                                             <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg px-2 py-1 transition">View</button>
