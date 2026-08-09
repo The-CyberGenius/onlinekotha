@@ -4,6 +4,7 @@ const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const { db, getSetting } = require('./db');
 const { createSession } = require('./auth');
 const integ = require('./integrations');
+const geoip = require('geoip-lite');
 
 const router = express.Router();
 
@@ -33,7 +34,8 @@ function ensureStrategy(req) {
         clientSecret: clientSecret,
         callbackURL,
         scope: ['profile', 'email'],
-    }, (accessToken, refreshToken, profile, done) => {
+        passReqToCallback: true,
+    }, (req, accessToken, refreshToken, profile, done) => {
         try {
             const email = (profile.emails?.[0]?.value || '').toLowerCase().trim();
             const googleId = profile.id;
@@ -70,12 +72,19 @@ function ensureStrategy(req) {
                 const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
                 const isAdmin = adminEmail && email === adminEmail ? 1 : 0;
 
+                const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+                let country = null;
+                if (ip) {
+                    const geo = geoip.lookup(ip);
+                    if (geo) country = geo.country;
+                }
+
                 const info = db.prepare(
                     `INSERT INTO users
                        (email, password_hash, created_at, plan, trial_expires_at, is_admin,
-                        email_verified, google_id, display_name, avatar_url)
-                     VALUES (?, '', ?, 'trial', ?, ?, 1, ?, ?, ?)`
-                ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl);
+                        email_verified, google_id, display_name, avatar_url, ip_address, country)
+                     VALUES (?, '', ?, 'trial', ?, ?, 1, ?, ?, ?, ?, ?)`
+                ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl, ip, country);
                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
             }
 
@@ -191,12 +200,19 @@ router.post('/google/onetap', async (req, res) => {
             const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
             const isAdmin = adminEmail && email === adminEmail ? 1 : 0;
 
+            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+            let country = null;
+            if (ip) {
+                const geo = geoip.lookup(ip);
+                if (geo) country = geo.country;
+            }
+
             const info = db.prepare(
                 `INSERT INTO users
                    (email, password_hash, created_at, plan, trial_expires_at, is_admin,
-                    email_verified, google_id, display_name, avatar_url)
-                 VALUES (?, '', ?, 'trial', ?, ?, 1, ?, ?, ?)`
-            ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl);
+                    email_verified, google_id, display_name, avatar_url, ip_address, country)
+                 VALUES (?, '', ?, 'trial', ?, ?, 1, ?, ?, ?, ?, ?)`
+            ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl, ip, country);
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
         }
 

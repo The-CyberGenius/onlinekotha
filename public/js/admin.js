@@ -601,10 +601,12 @@ HARD RULES
                             <span class="text-[9px] text-gray-500 truncate">${u.email}</span>
                             ${planBadge} ${loginMethod}
                         </div>
-                        <div class="flex gap-2 text-[9px] text-gray-400 font-medium items-center flex-wrap">
+                        <div class="flex gap-2 text-[9px] text-gray-400 font-medium items-center flex-wrap mt-1">
                             <span>💬 ${u.chat_count}</span>
                             <span>💰 $${u.total_cost.toFixed(3)}</span>
-                            <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded" title="Registration Date & Time">📅 Registered: ${formatDateTime(u.created_at)}</span>
+                            ${u.ip_address ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
+                            ${u.country ? `<span class="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-100" title="Country">📍 ${u.country}</span>` : ''}
+                            <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100" title="Registration Date & Time">📅 Registered: ${formatDateTime(u.created_at)}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0 ml-2">
@@ -748,30 +750,30 @@ HARD RULES
                     }
                     area.innerHTML = `
                         <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
-                            <div class="grid grid-cols-12 gap-2 px-3 py-2 text-[9px] font-bold uppercase text-gray-400 tracking-wider border-b border-gray-100">
-                                <div class="col-span-4">Chat Name</div>
-                                <div class="col-span-2 text-center">Messages</div>
-                                <div class="col-span-3">Imported Date & Time</div>
-                                <div class="col-span-3 text-right">Actions</div>
+                            <div class="flex items-center gap-2 px-3 py-2 text-[9px] font-bold uppercase text-gray-400 tracking-wider border-b border-gray-100">
+                                <div class="flex-1 min-w-0">Chat Name</div>
+                                <div class="w-16 text-center shrink-0 hidden sm:block">Messages</div>
+                                <div class="w-32 shrink-0 hidden md:block">Imported Date & Time</div>
+                                <div class="w-36 text-right shrink-0">Actions</div>
                             </div>
                             ${chats.map(c => `
-                                <div class="grid grid-cols-12 gap-2 px-3 py-2.5 items-center hover:bg-white transition text-sm border-b border-gray-50 last:border-0" data-admin-chat-row="${c.id}">
-                                    <div class="col-span-4 font-bold text-gray-800 truncate text-xs">
+                                <div class="flex items-center gap-2 px-3 py-2.5 hover:bg-white transition text-sm border-b border-gray-50 last:border-0" data-admin-chat-row="${c.id}">
+                                    <div class="flex-1 min-w-0 font-bold text-gray-800 truncate text-xs">
                                         ${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}
                                         ${c.deleted_by_user ? '<span class="ml-1 text-[9px] font-bold bg-red-100 text-red-500 px-1.5 py-0.5 rounded-full">user deleted</span>' : ''}
                                     </div>
-                                    <div class="col-span-2 text-center text-xs text-gray-500 font-medium">${c.message_count || 0}</div>
-                                    <div class="col-span-3 text-[10px] font-semibold text-gray-600">${formatDateTime(c.created_at)}</div>
-                                    <div class="col-span-3 text-right flex items-center justify-end gap-1">
-                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="inline-flex items-center gap-1 text-[10px] font-bold bg-teal-500 text-white hover:bg-teal-600 rounded-lg px-2 py-1 transition no-underline shadow-sm">
+                                    <div class="w-16 text-center text-xs text-gray-500 font-medium shrink-0 hidden sm:block">${c.message_count || 0}</div>
+                                    <div class="w-32 text-[10px] font-semibold text-gray-600 shrink-0 truncate hidden md:block">${formatDateTime(c.created_at)}</div>
+                                    <div class="w-36 text-right flex items-center justify-end gap-1 shrink-0">
+                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="inline-flex items-center gap-1 text-[10px] font-bold bg-teal-500 text-white hover:bg-teal-600 rounded-md px-1.5 py-1 transition no-underline shadow-sm">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                             .zip
                                         </a>
-                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg px-2 py-1 transition">
+                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md px-1.5 py-1 transition">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                             Open
                                         </button>
-                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-red-50 text-red-500 hover:bg-red-100 rounded-lg px-2 py-1 transition">
+                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-red-50 text-red-500 hover:bg-red-100 rounded-md px-1.5 py-1 transition">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                             Del
                                         </button>

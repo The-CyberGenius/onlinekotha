@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS users (
   email_verified INTEGER NOT NULL DEFAULT 0,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
-  plan_renews_at INTEGER
+  plan_renews_at INTEGER,
+  ip_address TEXT,
+  country TEXT
 );
 
 CREATE TABLE IF NOT EXISTS email_tokens (
@@ -187,6 +189,8 @@ safeAddColumn('conversations', 'guest_id', 'TEXT');
 safeAddColumn('users', 'avatar_url', 'TEXT');
 safeAddColumn('users', 'display_name', 'TEXT');
 safeAddColumn('users', 'global_alias', 'TEXT');
+safeAddColumn('users', 'ip_address', 'TEXT');
+safeAddColumn('users', 'country', 'TEXT');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 
 // ── DM (user-to-user chat) tables ──
