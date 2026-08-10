@@ -459,37 +459,61 @@ router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
     }
 });
 
-// ---------- Free Google Translate helper (no API key needed) ----------
-async function googleTranslate(text, targetLang) {
-    if (!text || !text.trim()) return text;
-    // Use Google Translate free endpoint (client=gtx)
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(text)}`;
+// ---------- Smart Delimiter-Batch Google Translate ----------
+// Instead of 1 API call per message, we join 100 messages with |||SEP|||
+// and translate the whole block in ONE call. 100x fewer requests.
+const DELIM = ' ||| ';
+
+async function googleTranslateBatch(texts, targetLang) {
+    // Filter out empty messages
+    const nonEmpty = texts.map((t, i) => ({ t, i, empty: !t || !t.trim() }));
+    const toTranslate = nonEmpty.filter(x => !x.empty);
+
+    if (!toTranslate.length) return texts;
+
+    // Join with delimiter and translate as one block
+    const combined = toTranslate.map(x => x.t).join(DELIM);
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(combined)}`;
+
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
     try {
         const resp = await fetch(url, { signal: controller.signal });
         clearTimeout(timeout);
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         const data = await resp.json();
-        // data[0] is array of [translated_chunk, original_chunk]
+
+        // Extract translated text
+        let translatedFull = '';
         if (Array.isArray(data[0])) {
-            return data[0].map(chunk => chunk[0]).filter(Boolean).join('');
+            translatedFull = data[0].map(chunk => chunk[0]).filter(Boolean).join('');
         }
-        return text;
+
+        // Split back by delimiter
+        const parts = translatedFull.split(/\s*\|\|\|\s*/);
+
+        // Re-map back to original indices (with fallback to original)
+        const result = [...texts];
+        toTranslate.forEach((x, pi) => {
+            result[x.i] = parts[pi] || x.t;
+        });
+        return result;
+
     } catch {
         clearTimeout(timeout);
-        return text; // fallback to original on error
+        return texts; // fallback: return originals
     }
 }
 
-// Translate a user's chat — Admin only (Google Translate API, SSE progress, zero tokens)
+// Translate a user's chat — Admin only (Delimiter Batch, SSE, instant on any size)
 router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
     const userId = Number(req.params.id);
     const chatId = Number(req.params.chatId);
     const targetLang = (req.body?.lang || 'hinglish').toLowerCase();
+    const offset = Number(req.body?.offset || 0);   // for "load more"
+    const LIMIT  = 1000;  // messages per translation session
 
-    // Map our lang names to Google Translate language codes
-    // Hinglish = translate source to Hindi (hi), English = en
     const gtLang = targetLang === 'english' ? 'en' : 'hi';
 
     const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
@@ -507,11 +531,14 @@ router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
     }
 
     if (!messages.length) {
-        return res.json({ translated: [], chatName: chat.display_name || chat.folder_name, lang: targetLang });
+        return res.json({ translated: [], chatName: chat.display_name || chat.folder_name, lang: targetLang, total: 0 });
     }
 
-    // Translate all messages (no cap — works on any size!)
-    const slice = messages;
+    // Take LIMIT messages from the end (newest first), respect offset for "load more"
+    const totalMessages = messages.length;
+    const startIdx = Math.max(0, totalMessages - LIMIT - offset);
+    const endIdx   = Math.max(0, totalMessages - offset);
+    const slice    = messages.slice(startIdx, endIdx);
 
     // SSE setup
     res.setHeader('Content-Type', 'text/event-stream');
@@ -525,36 +552,63 @@ router.post('/users/:id/chats/:chatId/translate', async (req, res) => {
     };
 
     const chatName = chat.display_name || chat.folder_name;
-    send('start', { total: slice.length, chatName, lang: targetLang });
+    const BATCH_SIZE = 100;  // messages per API call (delimiter-joined)
+    const CONCURRENCY = 10;  // concurrent API calls
+    const totalBatches = Math.ceil(slice.length / BATCH_SIZE);
 
-    const translated = [];
-    const CONCURRENCY = 5; // parallel requests at a time
+    send('start', {
+        total: slice.length,
+        totalInChat: totalMessages,
+        batches: totalBatches,
+        chatName,
+        lang: targetLang,
+        hasMore: startIdx > 0,  // more messages available
+    });
 
-    for (let i = 0; i < slice.length; i += CONCURRENCY) {
-        const chunk = slice.slice(i, i + CONCURRENCY);
+    const translated = new Array(slice.length);
 
-        const results = await Promise.all(chunk.map(async (m) => {
-            const translatedText = await googleTranslate(m.text, gtLang);
-            return {
-                sender: m.sender,
-                timestamp: m.timestamp,
-                original: m.text,
-                translated: translatedText,
-            };
+    // Process batches in groups of CONCURRENCY
+    for (let g = 0; g < totalBatches; g += CONCURRENCY) {
+        const batchGroup = [];
+
+        for (let b = g; b < Math.min(g + CONCURRENCY, totalBatches); b++) {
+            const start = b * BATCH_SIZE;
+            const end   = Math.min(start + BATCH_SIZE, slice.length);
+            batchGroup.push({ start, end, b });
+        }
+
+        // Translate all batches in this group concurrently
+        await Promise.all(batchGroup.map(async ({ start, end, b }) => {
+            const msgTexts = slice.slice(start, end).map(m => m.text);
+            const results  = await googleTranslateBatch(msgTexts, gtLang);
+
+            for (let i = 0; i < results.length; i++) {
+                const m = slice[start + i];
+                translated[start + i] = {
+                    sender: m.sender,
+                    timestamp: m.timestamp,
+                    original: m.text,
+                    translated: results[i],
+                };
+            }
         }));
 
-        translated.push(...results);
-
-        // Send progress every CONCURRENCY messages
-        send('progress', { done: translated.length, total: slice.length });
-
-        // Small pause to avoid hammering the API
-        if (i + CONCURRENCY < slice.length) await new Promise(r => setTimeout(r, 80));
+        // Progress after each concurrent group
+        const done = Math.min((g + CONCURRENCY) * BATCH_SIZE, slice.length);
+        send('progress', { done: Math.min(done, slice.length), total: slice.length });
     }
 
-    send('done', { translated, chatName, lang: targetLang });
+    send('done', {
+        translated: translated.filter(Boolean),
+        chatName,
+        lang: targetLang,
+        totalInChat: totalMessages,
+        hasMore: startIdx > 0,
+        offset,
+    });
     res.end();
 });
+
 
 
 

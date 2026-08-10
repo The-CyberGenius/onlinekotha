@@ -210,8 +210,19 @@ app.get('/share-target', (req, res) => res.redirect('/app'));
 // Health check
 app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 
-// Static frontend (landing /, login, admin, css, js, etc.)
-app.use(express.static(path.join(__dirname, 'public')));
+// Static frontend (landing /, login, admin, css, js, etc.) with caching
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '7d',
+    etag: true,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+        } else {
+            res.setHeader('Vary', 'Accept-Encoding');
+        }
+    }
+}));
+
 
 // Helper to get storage directory for either User or Guest
 function getOwnerId(req, res) {
