@@ -212,7 +212,7 @@ app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 
 // Static frontend (landing /, login, admin, css, js, etc.) with caching
 app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: '7d',
+    maxAge: '365d',
     etag: true,
     setHeaders: (res, filePath) => {
         if (filePath.endsWith('.html')) {

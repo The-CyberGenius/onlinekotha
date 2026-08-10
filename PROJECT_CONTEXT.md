@@ -1,134 +1,235 @@
-# KOTHA — Complete Project Context
+# 🌐 Kotha (onlinekotha.com) — Project Architecture & Complete Context
 
-## 📌 Project Overview
-- **Name**: Kotha — WhatsApp Chat Viewer + AI Roleplay
-- **Stack**: Node.js (Express 5.2.1) + SQLite + Vanilla HTML/JS + Tailwind CSS
-- **Domain**: https://onlinekotha.com
+> **Last Updated**: August 2026  
+> **Repository**: [The-CyberGenius/onlinekotha](https://github.com/The-CyberGenius/onlinekotha)  
+> **Production URL**: [https://www.onlinekotha.com](https://www.onlinekotha.com)
 
-## 🖥️ AWS EC2 Server
-- **IP**: 13.204.243.185
-- **Instance**: t3.micro (908MB RAM, 2 vCPU burstable)
-- **OS**: Ubuntu
-- **SSH Key**: `/Users/shivaprajapat/Downloads/kotha-new-key`
-- **SSH Command**:
-  ```bash
-  ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185
-  ```
-- **App Path on Server**: `/var/www/onlinekotha`
-- **Process Manager**: PM2 (app name: kotha)
-- **Web Server**: Nginx (reverse proxy)
-- **SSL**: Certbot (Let's Encrypt)
+---
 
-## 🚀 Deploy Command
-```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "cd /var/www/onlinekotha && git pull origin main && pm2 restart kotha"
+## 1. Executive Summary & Core Product Vision
+
+**Kotha** (Bengali/Hindi for *"Talk"* or *"Words"*) is a high-performance web application designed to archive, visualize, and interact with WhatsApp chat exports. It transforms static raw chat logs into rich, interactive memories while offering AI-powered personality cloning—allowing users to chat with AI avatars that speak, joke, and respond in the exact style, tone, language (including Hinglish/Hindi/English), and emoji patterns of their loved ones.
+
+### Core Value Propositions & Features:
+1. **WhatsApp Export Viewer**: Renders `.txt` and `.zip` WhatsApp chat exports into a modern WhatsApp-like UI, supporting images, audio files, videos, and multi-sender color coding.
+2. **AI Personality Cloning**: Uses LLMs (Gemini / OpenAI) to analyze raw chat histories and generate an AI agent that converses like the specific contact. Context includes deep memory extraction (dates, events, sensitive info).
+3. **On This Day & Memory Search**: Quick search through thousands of historical messages and instant memory surface on anniversaries or specific dates.
+4. **Admin Chat Translator (Massive Scale)**: Allows administrators to translate user chats (e.g., Russian, Portuguese, Hindi, Spanish) to **Hinglish** or **English** in real-time using a custom **Delimiter-Batch Google Translate Engine** with zero AI token cost. Now features offset-based pagination to handle **1 Lakh+ message chats** smoothly.
+5. **Real-time Community & Direct Messaging**: Public Global Chat room and private 1-on-1 Direct Messaging (DM) powered by `Socket.IO`, complete with typing indicators, presence, and unread receipts.
+6. **Guest & Subscription Modes**: Free instant guest preview mode, user accounts, and Razorpay billing integration for Pro plans.
+7. **SEO & Performance Optimized**: Achieving near-perfect Lighthouse scores (Performance: 100/90+, Accessibility: 100, SEO: 100). Fully dynamic meta tags, automated sitemaps, JSON-LD schema, and heavily compressed assets.
+
+---
+
+## 2. Technology Stack & Architecture
+
+### Backend & Core Infrastructure
+* **Runtime**: Node.js (v20+ ES6 / CommonJS)
+* **Framework**: Express.js (v5.2)
+* **Real-time Engine**: Socket.IO (v4.8) for live Direct Messaging, presence detection, and typing indicators.
+* **Database**: SQLite3 via `better-sqlite3` (v12.10) running in **WAL (Write-Ahead Logging)** mode for extremely high concurrency and read/write speeds.
+* **Security, Hardening & Rate Limiting**:
+  * `helmet` (v8.2) for HTTP security headers.
+  * `express-rate-limit` for DDoS & endpoint abuse protection.
+  * Custom **Burst Limiter** (`checkBurstLimit` in `rateLimit.js`) to prevent API spam (e.g., maximum 10 messages per 30 seconds for DMs/Global Chat).
+  * Strict maximum word count (300 words per message) for server protection.
+  * `bcryptjs` for salted password hashing and secure HTTP-only cookie session management.
+* **Performance Enhancements**:
+  * `compression` middleware (Gzip) reducing JSON payload sizes (e.g., 50MB chat payload compressed to ~7MB). SSE (Server-Sent Events) and binary files are automatically bypassed.
+* **File Uploads & Archives**: `multer`, `unzipper`, `archiver` for handling multi-MB ZIP archives containing thousands of chat text logs & media files.
+* **Geo Location**: `geoip-lite` for IP-to-country resolution on registration/login.
+* **Payments**: Razorpay API (`razorpay` v2.9) for subscription management in INR.
+
+### Frontend Architecture
+* **Core Technology**: Vanilla JavaScript (Modular ES6+ architecture), HTML5 Semantic markup.
+* **Styling**: Tailwind CSS v3 (Custom purged build: `tailwind.min.css`) + Vanilla CSS for dynamic glassmorphism and animations.
+* **Progressive Web App (PWA)**: Service Worker (`sw.js`), `manifest.json`, Web Share Target integration (allows sharing `.zip` exports directly from WhatsApp to Kotha).
+* **Performance & SEO Excellence**:
+  * **Core Web Vitals Optimized**: Google Fonts preconnect with `font-display: swap`.
+  * **Static Caching**: 7-day browser caching headers (`maxAge: '7d'`, `ETag`, `Vary: Accept-Encoding`) via Express for CSS/JS/Images.
+  * **SEO Metadata**: Schema.org JSON-LD (SoftwareApplication, FAQPage), OpenGraph (`og:*`), Canonical tags, Search Console indexed `sitemap.xml`, and clean `robots.txt`. Dedicated SEO blog pages.
+
+---
+
+## 3. Database Schema (`server/db.js`)
+
+SQLite database is located at `data/kotha.db` with foreign key enforcement and WAL mode enabled.
+
+```mermaid
+erDiagram
+    users ||--o{ chats : owns
+    users ||--o{ conversations : initiates
+    users ||--o{ global_messages : posts
+    users ||--o{ dm_messages : sends
+    users ||--o{ payments : makes
+    conversations ||--o{ conv_messages : contains
+    dm_conversations ||--o{ dm_messages : contains
+    
+    users {
+        int id PK
+        string email UK
+        string password_hash
+        string display_name
+        string avatar_url
+        string global_alias
+        string plan "trial | pro"
+        int trial_expires_at
+        int is_admin
+        int email_verified
+        string ip_address
+        string country
+    }
+
+    chats {
+        int id PK
+        int user_id FK
+        string folder_name
+        string display_name
+        int message_count
+        string format
+        string guest_id
+    }
+
+    conversations {
+        int id PK
+        int user_id FK
+        string chat_folder
+        string title
+        int created_at
+    }
+
+    conv_messages {
+        int id PK
+        int conversation_id FK
+        string role "user | assistant | system"
+        string content
+        string citations
+    }
+
+    global_messages {
+        int id PK
+        int user_id FK
+        string sender
+        string text
+        int created_at
+    }
+
+    dm_conversations {
+        int id PK
+        int user_a FK
+        int user_b FK
+        int created_at
+    }
+
+    dm_messages {
+        int id PK
+        int conv_id FK
+        int sender_id FK
+        string body
+        string type
+        string media_url
+        int created_at
+        int read_at
+    }
+    
+    dm_contact_nicknames {
+        int user_id FK
+        int contact_id FK
+        string nickname
+    }
 ```
 
-## 🩺 Health Check
-```bash
-curl https://onlinekotha.com/healthz
+---
+
+## 4. Key Subsystems Deep Dive
+
+### 4.1. WhatsApp Chat Parser & Archive Handler (`server/parser.js`, `server/upload.js`)
+* Supports multi-standard WhatsApp export date formats:
+  * `DD/MM/YY, HH:MM - Sender: Message`
+  * `[DD/MM/YYYY, HH:MM:SS AM/PM] Sender: Message`
+  * `MM/DD/YY, HH:MM AM/PM - Sender: Message` (US/Indian standard)
+* Extract media attachment references (e.g., `IMG-20230512-WA0001.jpg (file attached)`) and links them to local uploaded files in `data/u_<user_id>/<chat_folder>/`. Supports chunked binary streaming of large videos with HTTP `206 Partial Content`.
+
+### 4.2. AI Personality Extraction Engine (`server/ai.js`, `server/llm.js`)
+* **Prompt Engineering**: The system builds a dynamic roleplay prompt (e.g., Hinglish context) by reading up to 50 recent/relevant chat turns using basic vectorization/keyword matching (`server/context.js`).
+* **Memory & Knowledge**: The AI is strictly instructed to pull dates, events, and sensitive information exclusively from the chat context provided. It never hallucinates past dates.
+* **LLM Fallback Engine**: Configurable AI routes with primary and fallback models (e.g., Google Gemini 2.5/3 Pro/Flash or OpenAI GPT-4o). Streams tokens back to the web client in real time using Server-Sent Events (SSE).
+
+### 4.3. Admin Smart Delimiter-Batch Translator (`server/admin.js`)
+* **Zero Token Cost**: Uses Google Translate's free API endpoint (`translate.googleapis.com/translate_a/single?client=gtx`).
+* **Delimiter Batching (`|||`)**: Concatenates 100 chat messages into a single string (`Msg1 ||| Msg2 ||| Msg3`), reducing API HTTP requests by 100x (e.g., 100,000 messages translated in ~1,000 requests instead of 100,000).
+* **Concurrency & Streaming**: Executes 10 concurrent batch requests at a time and streams progress updates via **Server-Sent Events (SSE)** to the Admin UI modal.
+* **Pagination & Massive Scale**: To prevent browser freezing on massive chats (100k+ messages), the backend uses an **Offset Pagination** system. It slices chunks of 1,000 messages (newest first). The Admin UI has an `⬆️ Load Older (1000 messages)` button, allowing infinite seamless back-scroll translation without memory overload.
+
+### 4.4. Real-time Direct Messaging & Global Chat
+* **Socket.IO (DMs)**: True real-time architecture utilizing `io.emit`. Tracks user presence (Online/Offline list), typing states, and read receipts (`read_at` timestamps).
+* **DM Privacy**: User emails are completely hidden from API responses when searching or initiating DMs. Only `display_name` and `avatar_url` are exposed. Users can also set local nicknames for contacts (`dm_contact_nicknames`).
+* **Global Chat Spam Protection**: 300-word limit per message. Burst protection (Max 10 messages per 30 seconds per IP/User).
+
+---
+
+## 5. Repository File Structure Map
+
+```
+/
+├── server.js               # Primary Express server entrypoint, middleware, static routing, Socket.io
+├── package.json            # Node.js dependencies & scripts
+├── PROJECT_CONTEXT.md      # Comprehensive project context & architecture documentation
+├── server/
+│   ├── admin.js            # Admin endpoints, user management, streaming SSE translation (Offset paginated)
+│   ├── ai.js               # AI chat personality cloning logic & prompt generation
+│   ├── auth.js             # User authentication, registration, session management
+│   ├── billing.js          # Razorpay subscription & payment webhooks
+│   ├── cache.js            # In-memory caching layer for large chat JSONs
+│   ├── context.js          # Chat context retrieval & vector/token window slicing
+│   ├── crypto.js           # Encryption helpers for stored API keys
+│   ├── db.js               # SQLite database setup, table definitions & migrations
+│   ├── dm.js               # 1-on-1 Direct Messaging REST & Socket HTTP fallback routes
+│   ├── email.js            # Nodemailer transactional email delivery (verification, password reset)
+│   ├── globalChat.js       # Public community chat stream with rate/length limiters
+│   ├── guest.js            # Guest session creation & temporary storage handling
+│   ├── integrations.js     # Third-party service connectors
+│   ├── llm.js              # Unified LLM caller with streaming & fallback provider routing
+│   ├── oauth.js            # Google OAuth 2.0 Passport integration
+│   ├── parser.js           # WhatsApp chat export regex parser
+│   ├── rateLimit.js        # Custom Burst rate limiter & word counting
+│   └── upload.js           # Multer file upload & zip extraction handler
+└── public/
+    ├── index.html          # Main landing page (SEO, Schema.org JSON-LD, pricing, testimonials)
+    ├── app.html            # Main web app dashboard (chat viewer, AI chat, memory search, DMs)
+    ├── login.html          # User authentication page (SEO indexed)
+    ├── admin.html          # Admin management dashboard
+    ├── blog.html           # SEO blog index
+    ├── blog/               # SEO content articles (exporting chats, AI cloning, privacy)
+    ├── sitemap.xml         # Search Console sitemap index
+    ├── robots.txt          # Web crawler access instructions
+    ├── manifest.json       # Progressive Web App manifest
+    ├── sw.js               # Service Worker for offline caching & Web Share Target
+    ├── css/                # Tailwind minified styles
+    └── js/                 # Modular client scripts (script.js, admin.js, dm.js, features.js)
 ```
 
-## 📦 GitHub Repository
-- **URL**: https://github.com/The-CyberGenius/onlinekotha.git
-- **Branch**: main
-- **Local Path**: `/Users/shivaprajapat/Desktop/kotha`
+---
 
-## 🔐 Environment Variables (Production .env)
-- `ENCRYPTION_SECRET`: 101097ef2912074859d3113f77a58679e28202373f26425ed383d54a93a972cb
-- `ADMIN_EMAIL`: (the email you signed up with first — makes you admin)
-- `PORT`: 3000
+## 6. Deployment & Operations
 
-## 🔑 Google OAuth (Sign in with Google)
-- **Client ID**: Saved in admin panel DB (Integrations tab)
-- **Client Secret**: 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
-- **Google Cloud Console**: https://console.cloud.google.com
-- **Redirect URI**: https://onlinekotha.com/api/auth/google/callback
-> **⚠️ You still need to add in Google Cloud Console:**
-> - Authorized JavaScript origins: https://onlinekotha.com
-> - Authorized redirect URIs: https://onlinekotha.com/api/auth/google/callback
+### Production Server Architecture:
+* **Host**: AWS EC2 Linux Instance (`ubuntu@13.204.243.185`)
+* **Web Server / Reverse Proxy**: Nginx (Handles SSL termination & proxies HTTP/WebSocket traffic to Node.js. Handles static file caching fallback).
+* **Process Manager**: PM2 (`pm2 start server.js --name kotha`)
 
-## 📁 Key File Structure
-`/Users/shivaprajapat/Desktop/kotha/`
-├── `server.js`                    # Main Express server
-├── `package.json`
-├── `.env`                         # Local env vars
-├── `kotha.db`                     # SQLite database
-├── `server/`
-│   ├── `db.js`                    # SQLite setup + schema
-│   ├── `auth.js`                  # Auth: signup, login, logout, sessions
-│   ├── `admin.js`                 # Admin API routes
-│   ├── `ai.js`                    # AI chat endpoint (SSE streaming)
-│   ├── `billing.js`               # Stripe billing + webhooks
-│   ├── `cache.js`                 # Chat message parser + cache
-│   ├── `email.js`                 # Email verification + password reset
-│   ├── `oauth.js`                 # Google OAuth routes
-│   ├── `upload.js`                # File upload handler (multer)
-│   └── `integrations.js`          # DB-backed config (encrypted)
-├── `public/`
-│   ├── `index.html`               # Landing page
-│   ├── `app.html`                 # Main chat viewer
-│   ├── `login.html`               # Login/signup page
-│   ├── `admin.html`               # Admin panel
-│   ├── `404.html`                 # Error page
-│   ├── `favicon.svg`
-│   ├── `css/style.css`            # Main styles
-│   └── `js/`
-│       ├── `script.js`            # Chat viewer logic
-│       ├── `upload.js`            # Upload handler
-│       ├── `ai-panel.js`          # AI chat frontend
-│       ├── `admin.js`             # Admin panel frontend
-│       ├── `auth-init.js`         # Auth state check
-│       └── `tailwind.js`          # Tailwind standalone
-├── `src/`                         # User uploaded chat files
-│   └── `u_{userId}/`              # Per-user folders
-│       └── `{chatFolder}/`        # Each imported chat
-
-## 🏗️ Architecture Notes
-- **Cookie name**: `session` (httpOnly, sameSite: lax)
-- **Cookie clear fix (Chrome)**: Must pass `{ httpOnly: true, sameSite: 'lax', path: '/' }` to `clearCookie`
-- **archiver**: Must use v7.0.1 (CJS compatible) — v8 is ESM-only, breaks `require()`
-- **Per-chat AI**: `conversationMap` + `contactNameMap` objects keyed by chat folder name
-- **Cache busting**: All script/CSS tags use `?v=5` query params
-- **Admin access**: First user who signs up with `ADMIN_EMAIL` env var becomes admin
-- **Media serving**: `/media/*` route serves from `src/u_{userId}/` with path traversal protection
-
-## 🛠️ Useful Commands
-
-**Local dev**
+### Automated One-Line Deployment Script:
+When updating the codebase, push to GitHub and immediately trigger a pull & restart on the EC2 instance via SSH:
 ```bash
-cd /Users/shivaprajapat/Desktop/kotha && node server.js
+cd /Users/shivaprajapat/Desktop/OK
+git add -A && git commit -m "update" && git push origin main && ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -i /Users/shivaprajapat/Downloads/kotha-new-key.pem ubuntu@13.204.243.185 "cd /var/www/onlinekotha && git pull origin main && pm2 restart kotha && echo SERVER UPDATE DONE"
 ```
 
-**Git push**
-```bash
-git add . && git commit -m "message" && git push origin main
-```
+---
 
-**Deploy to production**
-```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "cd /var/www/onlinekotha && git pull origin main && pm2 restart kotha"
-```
+## 7. Developer Guidelines
 
-**Check PM2 logs on server**
-```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "pm2 logs kotha --lines 50"
-```
-
-**Check PM2 status**
-```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "pm2 status"
-```
-
-**Restart Nginx (if needed)**
-```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "sudo systemctl restart nginx"
-```
-
-**Install new npm package on server**
-```bash
-ssh -i /Users/shivaprajapat/Downloads/kotha-new-key ubuntu@13.204.243.185 "cd /var/www/onlinekotha && npm install <package-name> --production && pm2 restart kotha"
-```
-
-## ✅ Completed Features (44 tasks)
-Signup/Login, Google OAuth, Email verify, Password reset, Chat upload (zip/folder), WhatsApp parser (iOS+Android), Beautiful viewer, Search + filters, Analytics, Media gallery, AI chat (streaming SSE), Per-chat AI context, Admin panel (providers, models, routing, integrations, limits, users), User delete + chat download (zip), Stripe billing, Landing page, Mobile responsive, SSL, PM2 production
+1. **Database Changes**: Add new columns using `safeAddColumn(table, column, definition)` inside `server/db.js` to preserve existing SQLite WAL data.
+2. **API Contracts**: Keep API parameter signatures strict to prevent runtime type errors. Ensure you enforce size limits (like `countWords(text) > 300`) to prevent DB clogging.
+3. **SEO Integrity**: Any new public page must include `<link rel="canonical">`, `<meta name="description">`, responsive `<meta name="viewport">` without zoom blocks, and be registered in `public/sitemap.xml`. Always aim for a 95+ score on Lighthouse Performance and SEO audits.
+4. **Performance & Concurrency**: For heavy tasks (like parsing massive zips or translating 100k messages), ALWAYS use streaming, batching, offsets, and Server-Sent Events (SSE) to prevent Node.js event-loop blocking and browser RAM crashes.

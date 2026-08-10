@@ -127,8 +127,11 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/tailwind.min.css?v=1">
+    <!-- Performance: defer Tailwind (non-critical) -->
+    <link rel="preload" href="/css/tailwind.min.css?v=1" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/css/tailwind.min.css?v=1"></noscript>
     <!-- Performance: defer Tailwind (non-critical) -->
     <script>document.addEventListener('DOMContentLoaded', () => { if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => { }) });</script>
     <style>
@@ -718,8 +721,8 @@
 
     <!-- ═══════════ NAV ═══════════ -->
     <nav class="fixed top-0 w-full z-50" id="nav">
-        <div class="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2.5 group">
+        <div class="max-w-6xl mx-auto px-5 sm:px-8 py-3 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2.5 group p-2 -ml-2" aria-label="Go to homepage">
                 <img src="/logo.svg" alt="Kotha Logo" class="w-8 h-8 group-hover:scale-105 transition-transform" />
                 <span class="font-extrabold text-[17px] tracking-tight text-white">Kotha</span>
             </a>
@@ -742,12 +745,12 @@
                     </svg>
                 </button>
                 <a href="/login.html"
-                    class="hidden sm:inline-flex text-[13px] font-semibold text-zinc-400 hover:text-white transition px-4 py-2"
+                    class="hidden sm:inline-flex text-[13px] font-semibold text-zinc-400 hover:text-white transition px-4 py-3 min-h-[48px] items-center"
                     id="nav-login">Log in</a>
                 <button id="nav-logout-btn"
-                    class="hidden text-[13px] font-semibold text-zinc-400 hover:text-red-400 transition px-4 py-2">Logout</button>
+                    class="hidden text-[13px] font-semibold text-zinc-400 hover:text-red-400 transition px-4 py-3 min-h-[48px] items-center">Logout</button>
                 <a href="/login.html#signup" id="nav-cta"
-                    class="cta-primary text-white text-[13px] font-bold px-5 py-2.5 rounded-xl inline-flex items-center gap-2">
+                    class="cta-primary text-white text-[13px] font-bold px-5 py-3 min-h-[48px] rounded-xl inline-flex items-center gap-2">
                     Get Started
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round">
@@ -865,9 +868,9 @@
                         class="mt-4 flex items-center gap-2 bg-white/[0.04] rounded-full px-4 py-1.5 border border-white/[0.06] focus-within:border-indigo-500/30 transition-colors">
                         <input type="text" id="demo-input" maxlength="300" autocomplete="off"
                             placeholder="Type a message to Maa..."
-                            class="bg-transparent text-[13px] text-white placeholder-zinc-600 flex-1 outline-none py-1.5">
-                        <button type="submit" id="demo-send"
-                            class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-white transition shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
+                            class="bg-transparent text-[13px] text-white placeholder-zinc-600 flex-1 outline-none py-2 min-h-[48px]">
+                        <button type="submit" id="demo-send" aria-label="Send message"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white transition shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                             </svg>
