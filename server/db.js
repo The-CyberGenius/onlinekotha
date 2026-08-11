@@ -232,6 +232,9 @@ CREATE TABLE IF NOT EXISTS dm_contact_nicknames (
 );
 `);
 
+// Insert dummy guest user for foreign key constraints
+db.prepare("INSERT OR IGNORE INTO users (id, email, password_hash, created_at, plan, is_admin, email_verified) VALUES (0, 'guest@onlinekotha.com', 'guest', 0, 'guest', 0, 1)").run();
+
 // Default settings
 const defaults = {
     daily_spend_cap_usd: '0',
