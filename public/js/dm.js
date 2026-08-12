@@ -333,16 +333,61 @@
             msg.sender_id = Number(msg.sender_id);
             const isFromMe = msg.sender_id === (me?.user?.id || me?.id);
 
-            // Notification Logic
+            // Strong Notification Logic (Sound + In-App Toast + Browser Notification)
             if (!isFromMe) {
+                // 1. Play "Pop" Sound using Web Audio API
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.15);
+                } catch(e) {}
+
+                const title = msg.display_name || 'New Message';
+                const bodyText = msg.type === 'image' ? '📷 Image' : (msg.body || 'New message');
+
+                // 2. In-App Toast (always shows if activeConvId is not this chat, or if document is hidden)
+                if (document.hidden || msg.conv_id !== activeConvId) {
+                    const toast = document.createElement('div');
+                    toast.innerHTML = `
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <img src="${msg.avatar_url || '/favicon-96.png'}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                            <div>
+                                <div style="font-weight:700;font-size:14px;color:#111827;">${title}</div>
+                                <div style="font-size:12px;color:#4b5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${bodyText}</div>
+                            </div>
+                        </div>
+                    `;
+                    toast.style.cssText = 'position:fixed;top:-100px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border:1px solid #e5e7eb;padding:12px 16px;border-radius:16px;z-index:9999;box-shadow:0 12px 32px rgba(0,0,0,0.12);cursor:pointer;transition:top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);max-width:90%;width:max-content;';
+                    document.body.appendChild(toast);
+                    
+                    toast.onclick = () => {
+                        toast.remove();
+                        window.focus();
+                        openConv(msg.conv_id, title, msg.avatar_url, msg.sender_id);
+                    };
+
+                    requestAnimationFrame(() => toast.style.top = '24px');
+                    setTimeout(() => {
+                        toast.style.top = '-100px';
+                        setTimeout(() => toast.remove(), 400);
+                    }, 4000);
+                }
+
+                // 3. Browser Native Notification (if hidden)
                 if (Notification.permission === 'default') {
                     Notification.requestPermission();
-                } else if (Notification.permission === 'granted' && (document.hidden || msg.conv_id !== activeConvId)) {
-                    const title = msg.display_name || 'New Message';
-                    const n = new Notification(title, {
-                        body: msg.type === 'image' ? '📷 Image' : (msg.body || 'New message'),
-                        icon: msg.avatar_url || '/favicon-96.png'
-                    });
+                } else if (Notification.permission === 'granted' && document.hidden) {
+                    const n = new Notification(title, { body: bodyText, icon: msg.avatar_url || '/favicon-96.png' });
                     n.onclick = () => {
                         window.focus();
                         openConv(msg.conv_id, title, msg.avatar_url, msg.sender_id);
