@@ -5,6 +5,25 @@
     // ── Helpers ───────────────────────────────────────────────
     // ── Global Online Presence Store ──────────────────────────
     const onlineUserIds = new Set();
+    
+    let titleBlinkInterval = null;
+    let originalTitle = document.title;
+    function startTitleBlink(name) {
+        if (titleBlinkInterval) clearInterval(titleBlinkInterval);
+        originalTitle = document.title;
+        let showMessage = true;
+        titleBlinkInterval = setInterval(() => {
+            document.title = showMessage ? `💬 New message from ${name}` : originalTitle;
+            showMessage = !showMessage;
+        }, 1500);
+    }
+    function stopTitleBlink() {
+        if (titleBlinkInterval) clearInterval(titleBlinkInterval);
+        titleBlinkInterval = null;
+        document.title = 'OnlineKotha'; // Reset safely to original
+    }
+    window.addEventListener('focus', stopTitleBlink);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) stopTitleBlink(); });
 
     function esc(s) {
         return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -375,6 +394,10 @@
                         window.focus();
                         openConv(msg.conv_id, title, msg.avatar_url, msg.sender_id);
                     };
+
+                    if (document.hidden) {
+                        startTitleBlink(title);
+                    }
 
                     requestAnimationFrame(() => toast.style.top = '24px');
                     setTimeout(() => {
