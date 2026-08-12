@@ -562,6 +562,7 @@ app.get('/api/dm/search', requireUser, (req, res) => {
 // DM Presence & Real-time State Store
 // ─────────────────────────────────────────────
 const onlineUsers = new Map(); // userId → Set of socketIds
+app.locals.onlineUsers = onlineUsers;
 
 // Get or create a DM conversation with another user
 app.post('/api/dm/conversations', requireUser, (req, res) => {

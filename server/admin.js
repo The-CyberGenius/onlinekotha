@@ -374,12 +374,16 @@ router.get('/users', (req, res) => {
     const rows = db
         .prepare(
             `SELECT u.id, u.email, u.plan, u.trial_expires_at, u.created_at, u.is_admin,
-                    u.google_id, u.display_name, u.avatar_url, u.ip_address, u.country,
+                    u.google_id, u.display_name, u.avatar_url, u.ip_address, u.country, u.last_active_at,
                     (SELECT COUNT(*) FROM chats WHERE user_id = u.id) AS chat_count,
                     (SELECT COALESCE(SUM(cost_usd), 0) FROM usage_log WHERE user_id = u.id) AS total_cost
              FROM users u ORDER BY u.id DESC`
         )
         .all();
+    const onlineUsers = req.app.locals.onlineUsers;
+    rows.forEach(r => {
+        r.is_online = onlineUsers && onlineUsers.has(r.id);
+    });
     res.json(rows);
 });
 

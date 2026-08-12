@@ -24,9 +24,18 @@ CREATE TABLE IF NOT EXISTS users (
   stripe_subscription_id TEXT,
   plan_renews_at INTEGER,
   ip_address TEXT,
-  country TEXT
+  country TEXT,
+  last_active_at INTEGER
 );
+`);
 
+try {
+    db.exec(`ALTER TABLE users ADD COLUMN last_active_at INTEGER;`);
+} catch (err) {
+    // Column might already exist, safe to ignore
+}
+
+db.exec(`
 CREATE TABLE IF NOT EXISTS email_tokens (
   token TEXT PRIMARY KEY,
   user_id INTEGER NOT NULL,

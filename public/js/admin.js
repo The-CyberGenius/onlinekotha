@@ -590,6 +590,14 @@ HARD RULES
                 ? `<img src="${u.avatar_url}" class="w-10 h-10 rounded-xl object-cover shadow-sm" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm\\'>${initials}</div>'">`
                 : `<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">${initials}</div>`;
 
+            const onlineDot = u.is_online
+                ? `<span class="relative flex h-2.5 w-2.5 ml-1 flex-shrink-0" title="Online"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span></span>`
+                : '';
+            
+            const lastActive = u.last_active_at
+                ? `<span class="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100" title="Last Active">⏱️ ${new Date(u.last_active_at).toLocaleString()}</span>`
+                : '';
+
             const card = document.createElement('div');
             card.className = 'bg-white rounded-lg p-2 mb-1.5 border border-gray-100 shadow-sm hover:shadow-md transition';
             card.innerHTML = `
@@ -597,7 +605,7 @@ HARD RULES
                     <div class="shrink-0 w-6 h-6">${avatarHtml.replace('w-10 h-10', 'w-6 h-6 text-[10px] rounded-md').replace('rounded-xl', 'rounded-md')}</div>
                     <div class="min-w-0 flex-1 flex flex-col md:flex-row md:items-center justify-between gap-1">
                         <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="font-bold text-gray-900 text-[11px] truncate">${u.display_name || u.email.split('@')[0]}</span>
+                            <span class="font-bold text-gray-900 text-[11px] truncate flex items-center">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
                             <span class="text-[9px] text-gray-500 truncate">${u.email}</span>
                             ${planBadge} ${loginMethod}
                         </div>
@@ -606,7 +614,8 @@ HARD RULES
                             <span>💰 $${u.total_cost.toFixed(3)}</span>
                             ${u.ip_address ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
                             ${u.country ? `<span class="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-100" title="Country">📍 ${u.country}</span>` : ''}
-                            <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100" title="Registration Date & Time">📅 Registered: ${formatDateTime(u.created_at)}</span>
+                            <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100" title="Registration Date & Time">📅 Reg: ${formatDateTime(u.created_at)}</span>
+                            ${lastActive}
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0 ml-2">

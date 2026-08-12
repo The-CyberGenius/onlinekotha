@@ -80,7 +80,7 @@ function getSession(token) {
     if (!token) return null;
     const row = db.prepare(
         `SELECT s.token, s.expires_at, u.id, u.email, u.plan, u.trial_expires_at, u.is_admin,
-                u.display_name, u.avatar_url
+                u.display_name, u.avatar_url, u.last_active_at
          FROM sessions s JOIN users u ON u.id = s.user_id
          WHERE s.token = ?`
     ).get(token);
@@ -99,6 +99,7 @@ function getSession(token) {
             is_admin: !!row.is_admin,
             display_name: row.display_name || null,
             avatar_url: row.avatar_url || null,
+            last_active_at: row.last_active_at || null,
         },
     };
 }
@@ -132,6 +133,15 @@ function authMiddleware(req, res, next) {
         if (req.user.is_admin && req.cookies && req.cookies.admin_impersonate_uid) {
             req.user.id = Number(req.cookies.admin_impersonate_uid);
             req.user.is_impersonating = true;
+        } else {
+            // Update last_active_at (throttled to 5 minutes)
+            const now = Date.now();
+            if (!req.user.last_active_at || (now - req.user.last_active_at) > 5 * 60 * 1000) {
+                try {
+                    db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(now, req.user.id);
+                    req.user.last_active_at = now;
+                } catch(e) {}
+            }
         }
     } else {
         req.user = null;
