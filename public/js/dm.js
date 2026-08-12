@@ -331,17 +331,41 @@
 
         socket.on('dm:message', msg => {
             msg.sender_id = Number(msg.sender_id);
+            const isFromMe = msg.sender_id === (me?.user?.id || me?.id);
+
+            // Notification Logic
+            if (!isFromMe) {
+                if (Notification.permission === 'default') {
+                    Notification.requestPermission();
+                } else if (Notification.permission === 'granted' && (document.hidden || msg.conv_id !== activeConvId)) {
+                    const title = msg.display_name || 'New Message';
+                    const n = new Notification(title, {
+                        body: msg.type === 'image' ? '📷 Image' : (msg.body || 'New message'),
+                        icon: msg.avatar_url || '/favicon-96.png'
+                    });
+                    n.onclick = () => {
+                        window.focus();
+                        openConv(msg.conv_id, title, msg.avatar_url, msg.sender_id);
+                    };
+                }
+            }
+
             const idx = convs.findIndex(c => c.conv_id === msg.conv_id);
             if (idx >= 0) {
                 convs[idx].last_msg = msg.body;
                 convs[idx].last_at  = msg.created_at;
-                if (msg.conv_id !== activeConvId && msg.sender_id !== me?.id)
+                if (msg.conv_id !== activeConvId && !isFromMe)
                     convs[idx].unread = (convs[idx].unread||0) + 1;
                 convs.unshift(...convs.splice(idx,1));
             } else { loadConvs(); return; }
+            
             renderConvs();
             updateBadge();
-            if (msg.conv_id === activeConvId) { 
+            
+            if (msg.conv_id === activeConvId) {
+                if (!isFromMe) {
+                    socket.emit('dm:mark_read', { conv_id: msg.conv_id });
+                }
                 appendMsg(msg); 
                 const distanceToBottom = chatMsgs.scrollHeight - chatMsgs.scrollTop - chatMsgs.clientHeight;
                 if (distanceToBottom > 200) {
@@ -473,6 +497,7 @@
 
     // ── Open conversation ─────────────────────────────────────
     async function openConv(convId) {
+        if (Notification.permission === 'default') Notification.requestPermission();
         if (window.location.hash !== `#chat-${convId}`) {
             history.pushState(null, '', `#chat-${convId}`);
         }

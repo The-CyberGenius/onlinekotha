@@ -874,6 +874,26 @@ io.on('connection', (socket) => {
         db.prepare('UPDATE dm_messages SET read_at = ? WHERE id = ?').run(now, result.lastInsertRowid);
     });
 
+    socket.on('dm:mark_read', ({ conv_id }) => {
+        const conv = db.prepare(
+            'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
+        ).get(conv_id, uid, uid);
+        if (!conv) return;
+
+        const now = Date.now();
+        const updateResult = db.prepare(
+            'UPDATE dm_messages SET read_at = ? WHERE conv_id = ? AND sender_id != ? AND read_at IS NULL'
+        ).run(now, conv_id, uid);
+
+        if (updateResult.changes > 0) {
+            const otherId = conv.user_a === uid ? conv.user_b : conv.user_a;
+            const sockets = onlineUsers.get(otherId);
+            if (sockets) {
+                sockets.forEach(sid => io.to(sid).emit('dm:read', { conv_id }));
+            }
+        }
+    });
+
     socket.on('dm:typing', ({ conv_id, typing }) => {
         const conv = db.prepare(
             'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
