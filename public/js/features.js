@@ -94,7 +94,7 @@
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        showInstallBanner();
+        setTimeout(showInstallBanner, 5000);
     });
 
     function showInstallBanner() {
@@ -134,7 +134,7 @@
     const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 
     if (isIOS && !isStandalone) {
-        setTimeout(showIOSInstallBanner, 4000);
+        setTimeout(showIOSInstallBanner, 5000);
     }
 
     function showIOSInstallBanner() {

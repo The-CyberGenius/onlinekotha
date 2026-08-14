@@ -155,9 +155,9 @@
         let readHtml = '';
         if (isMe) {
             readHtml = m.read_at ? 
-            `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#53bdeb] ml-1 shrink-0"><path d="M5 12l5 5L20 7"/><path d="M5 17l5-5-5-5" class="opacity-0"/><path d="M10 17l10-10"/></svg>` 
+            `<svg id="dm-tick-${m.id}" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dm-tick text-[#53bdeb] ml-1 shrink-0"><path d="M5 12l5 5L20 7"/><path d="M5 17l5-5-5-5" class="opacity-0"/><path d="M10 17l10-10"/></svg>` 
             : 
-            `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400 ml-1 shrink-0"><path d="M5 12l5 5L20 7"/></svg>`;
+            `<svg id="dm-tick-${m.id}" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dm-tick text-gray-400 ml-1 shrink-0"><path d="M5 12l5 5L20 7"/></svg>`;
         }
 
         let timeOverlay = '';
@@ -292,7 +292,9 @@
         tabChatsBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
         tabChatsBtn?.classList.add('text-gray-500','dark:text-gray-400','hover:bg-gray-100','dark:hover:bg-gray-800');
         localStorage.setItem(LS.view, 'messages');
-        if (!activeConvId) {
+        // Only show empty state if no chat is currently open AND no saved conv to restore
+        const savedConv = Number(localStorage.getItem(LS.conv));
+        if (!activeConvId && !savedConv) {
             document.getElementById('dm-empty-state')?.classList.remove('hidden');
         }
         loadConvs();
@@ -489,11 +491,11 @@
         socket.on('dm:read', ({conv_id}) => {
             if (activeConvId === conv_id) {
                 // Update all grey ticks to blue double ticks
-                const ticks = document.querySelectorAll('span[id^="dm-tick-"].text-gray-400');
+                const ticks = document.querySelectorAll('.dm-tick.text-gray-400, .dm-tick.text-white\\\\/80');
                 ticks.forEach(t => {
-                    t.classList.remove('text-gray-400', 'dark:text-gray-500');
-                    t.classList.add('text-blue-500');
-                    t.textContent = '✓✓';
+                    t.classList.remove('text-gray-400', 'text-white/80', 'dark:text-gray-500');
+                    t.classList.add('text-[#53bdeb]');
+                    t.innerHTML = '<path d="M5 12l5 5L20 7"/><path d="M5 17l5-5-5-5" class="opacity-0"/><path d="M10 17l10-10"/>';
                 });
             }
         });

@@ -871,8 +871,6 @@ io.on('connection', (socket) => {
             if (sockets) sockets.forEach(sid => io.to(sid).emit('dm:message', msg));
         });
 
-        // Mark as read immediately for sender (already seen)
-        db.prepare('UPDATE dm_messages SET read_at = ? WHERE id = ?').run(now, result.lastInsertRowid);
     });
 
     socket.on('dm:mark_read', ({ conv_id }) => {

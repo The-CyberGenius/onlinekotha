@@ -8,3 +8,7 @@ src/
 kotha.db
 backups/
 newReadme.md
+test_*.js
+schema.js
+*.pages
+
