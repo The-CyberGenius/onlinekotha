@@ -618,6 +618,10 @@ button,
 #mac-dock {
     height: 62px;
 }
+#dock-glass-bar, #dock-kotha-icon, #dock-dot {
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
 /* ─── Genie Effect ─── */
 #mac-frame {
     transform-origin: bottom center;
