@@ -2266,67 +2266,6 @@ html.dark #btn-wrapped:hover {
     }
 }
 
-
-#btn-wrapped:hover {
-    transform: scale(1.04) translateY(-1px);
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(236, 72, 153, 0.22) 100%) !important;
-    box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
-    border-color: rgba(245, 158, 11, 0.6) !important;
-    color: #92400e !important;
-}
-
-#btn-wrapped::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -150%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transform: skewX(-20deg);
-    animation: shimmerWrapped 4s infinite linear;
-}
-
-/* Dark mode Wrapped button overrides */
-html.dark #btn-wrapped {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 70, 239, 0.2) 100%) !important;
-    border-color: rgba(245, 158, 11, 0.45) !important;
-    color: #fbbf24 !important;
-}
-
-html.dark #btn-wrapped:hover {
-    color: #ffffff !important;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), 0 0 30px rgba(217, 70, 239, 0.25);
-    border-color: rgba(251, 191, 36, 0.85) !important;
-}
-
-@keyframes pulseWrapped {
-
-    0%,
-    100% {
-        box-shadow: 0 0 4px rgba(245, 158, 11, 0.15);
-        transform: scale(1);
-    }
-
-    50% {
-        box-shadow: 0 0 14px rgba(245, 158, 11, 0.4), 0 0 22px rgba(236, 72, 153, 0.2);
-        transform: scale(1.03);
-    }
-}
-
-@keyframes shimmerWrapped {
-    0% {
-        left: -150%;
-    }
-
-    30% {
-        left: 150%;
-    }
-
-    100% {
-        left: 150%;
-    }
-}
 /* ── DM Panel dark mode ───────────────────────────────────── */
 html.dark #sidebar-dm-tab { background: #111b21; }
 html.dark #sidebar-dm-tab input { background:#202c33 !important; color:#e9edef !important; border-color:#3b4a54 !important; }
@@ -2344,4 +2283,68 @@ html.dark #tab-dm-btn:not(.bg-indigo-600) {
 html.dark #tab-chats-btn:not(.bg-indigo-600):hover,
 html.dark #tab-dm-btn:not(.bg-indigo-600):hover {
     background: rgba(134,150,160,.1) !important;
+}
+
+/* ── Dark Mode: Dock Logo Visibility ─── */
+html.dark #dock-kotha-icon img {
+    filter: brightness(1.35) saturate(1.3) drop-shadow(0 0 6px rgba(139, 92, 246, 0.4));
+}
+
+/* ── Dark Mode: Font Rendering Optimization ─── */
+html.dark {
+    font-synthesis: none;
+    -webkit-text-stroke: 0.2px transparent;
+}
+html.dark body {
+    font-weight: 400;
+}
+
+/* ── Dark Mode: AI Input Override ─── */
+html.dark .ai-input {
+    background: #1f2c34 !important;
+    border-color: #3b4a54 !important;
+    color: #e9edef !important;
+}
+html.dark .ai-input::placeholder {
+    color: #667781 !important;
+}
+html.dark .ai-input:focus {
+    border-color: rgba(99, 102, 241, 0.4) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08) !important;
+}
+
+/* ── Dark Mode: Loading Shimmer ─── */
+html.dark .loading-shimmer {
+    background: linear-gradient(90deg, #1f2c34 25%, #2a3942 50%, #1f2c34 75%) !important;
+    background-size: 200% 100%;
+}
+
+/* ── Fullscreen: Hide Dock & Remove Body Padding ─── */
+#mac-frame.mac-fullscreen ~ #mac-dock {
+    display: none !important;
+}
+body.app-shell:has(#mac-frame.mac-fullscreen) {
+    padding-bottom: 0 !important;
+}
+
+/* ── Dark Mode: Logout Button Hover ─── */
+html.dark #logout-btn:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    color: #fca5a5 !important;
+}
+
+/* ── Dark Mode: Upload Modal Container ─── */
+html.dark #upload-modal .bg-white {
+    background: #1f2c34 !important;
+    border-color: #2a3942 !important;
+}
+
+/* ── Dark Mode: Onboarding Input Fields ─── */
+html.dark .onboarding-card input {
+    background: #2a3942 !important;
+    border-color: #3b4a54 !important;
+    color: #e9edef !important;
+}
+html.dark .onboarding-card input::placeholder {
+    color: #667781 !important;
 }

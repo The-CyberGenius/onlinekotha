@@ -233,3 +233,36 @@ git add -A && git commit -m "update" && git push origin main && ssh -o StrictHos
 2. **API Contracts**: Keep API parameter signatures strict to prevent runtime type errors. Ensure you enforce size limits (like `countWords(text) > 300`) to prevent DB clogging.
 3. **SEO Integrity**: Any new public page must include `<link rel="canonical">`, `<meta name="description">`, responsive `<meta name="viewport">` without zoom blocks, and be registered in `public/sitemap.xml`. Always aim for a 95+ score on Lighthouse Performance and SEO audits.
 4. **Performance & Concurrency**: For heavy tasks (like parsing massive zips or translating 100k messages), ALWAYS use streaming, batching, offsets, and Server-Sent Events (SSE) to prevent Node.js event-loop blocking and browser RAM crashes.
+
+---
+
+## 8. Changelog
+
+### v2.5.0 — Comprehensive UI/UX Audit & Polish (August 14, 2026)
+
+**Full project audit** covering CSS integrity, dark/light mode consistency, dock behavior, font rendering, responsiveness, animations, and deployment optimization.
+
+#### 🐛 Bug Fixes
+| # | Area | Issue | Fix |
+|---|------|-------|-----|
+| 1 | **CSS** | ~60 lines of duplicate rules for `#btn-wrapped`, `@keyframes pulseWrapped`, and `@keyframes shimmerWrapped` at the bottom of `style.css` (lines 2270–2329 were exact copies of 2197–2267) | Removed the duplicate block, reducing CSS file size by ~1.5KB |
+| 2 | **Dark Mode — Dock** | Dock logo (`logo.svg`) used fixed purple gradients that became invisible against the dark dock background (`dark:bg-[#1c1c2e]`), resulting in low contrast | Added CSS `filter: brightness(1.35) saturate(1.3) drop-shadow()` for `html.dark #dock-kotha-icon img` |
+| 3 | **Dark Mode — Fonts** | White-on-dark text suffered from "halation" (appears visually thicker on OLED/LCD), making fonts look unoptimized in dark mode | Added `font-synthesis: none` and `-webkit-text-stroke: 0.2px transparent` to `html.dark` for crisp rendering |
+| 4 | **Dark Mode — AI Input** | `.ai-input` class had `background: white` and light-mode-only borders with no dark override, causing bright white flash in AI chat panels | Added complete dark mode overrides for `.ai-input`, `.ai-input::placeholder`, and `.ai-input:focus` |
+| 5 | **Dark Mode — Shimmer** | `.loading-shimmer` used light-mode-only gradient colors (`#f3f4f6 → #e5e7eb`) with no dark variant | Added `html.dark .loading-shimmer` with dark palette (`#1f2c34 → #2a3942`) |
+| 6 | **Dark Mode — Logout** | Logout button hover used `hover:bg-red-50` (light pink) which looked garish on dark backgrounds | Added `dark:hover:bg-red-900/20` and `dark:hover:text-red-400` for subtle dark mode hover |
+| 7 | **Dark Mode — Upload Modal** | Upload modal inner container had `class="bg-white"` with no dark Tailwind class, relying solely on CSS override which sometimes missed due to nesting specificity | Added `html.dark #upload-modal .bg-white` CSS override as safety net |
+| 8 | **Dark Mode — Onboarding** | Onboarding card had dark overrides for text/headings but not for input fields inside it | Added `html.dark .onboarding-card input` and `::placeholder` dark styles |
+| 9 | **Meta Tags** | `theme-color` meta was `#6366f1` (indigo) for light mode, which didn't match the actual visible UI color (`#f0f2f5` sidebar header) | Changed to `#f0f2f5` in both `app.html` and `script.js` toggle function |
+
+#### ✨ Enhancements
+| # | Area | Enhancement |
+|---|------|-------------|
+| 10 | **Fullscreen Mode** | Dock remained visible when app was in macOS fullscreen mode since it's a separate fixed element | Added `#mac-frame.mac-fullscreen ~ #mac-dock { display: none }` and `body.app-shell:has(.mac-fullscreen) { padding-bottom: 0 }` |
+| 11 | **Dark Mode — Logout UX** | Logout button hover had no distinct dark mode style, using default light-mode colors | Added explicit dark mode hover colors (`red-900/20` bg, `red-400` text) |
+
+#### 📁 Files Modified
+- `public/css/style.css` — Removed duplicates, added 12 new CSS rule blocks for dark mode completeness
+- `public/app.html` — Fixed `theme-color` meta, added dark Tailwind classes to logout button
+- `public/js/script.js` — Updated `toggleTheme()` light mode meta-color
+- `PROJECT_CONTEXT.md` — Added this changelog
