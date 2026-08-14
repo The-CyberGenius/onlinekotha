@@ -334,6 +334,11 @@
         startPolling();      // active-conversation real-time (always on)
         startConvPolling();  // conversation-list real-time
 
+        // Listen for theme toggles to dynamically re-render colors & typography
+        window.addEventListener('kotha-theme-change', () => {
+            renderConvs();
+        });
+
         // ── Restore previous view/conversation after refresh ──
         if (localStorage.getItem(LS.view) === 'messages') {
             showDmTab();              // switch to Messages tab (also loads convs)
@@ -529,17 +534,16 @@
             convList.innerHTML = `
                 <div style="text-align:center;padding:48px 16px">
                     <div style="font-size:38px;margin-bottom:14px">💬</div>
-                    <div style="font-size:14px;font-weight:700;color:${dark?'#e5e7eb':'#111827'};margin-bottom:6px">No messages yet</div>
-                    <div style="font-size:12px;color:${dark?'#6b7280':'#9ca3af'}">Search by email above to start chatting</div>
+                    <div class="dm-row-title" style="font-size:14px;font-weight:700;margin-bottom:6px">No messages yet</div>
+                    <div class="dm-row-msg" style="font-size:12px">Search by email above to start chatting</div>
                 </div>`;
             return;
         }
-        const bg     = dark ? '#111b21' : '#fff';
-        const hover  = dark ? 'rgba(134,150,160,.1)' : 'rgba(99,102,241,.06)';
-        const active = dark ? 'rgba(99,102,241,.18)' : 'rgba(99,102,241,.09)';
+        const hover  = dark ? 'rgba(134,150,160,.12)' : 'rgba(99,102,241,.06)';
+        const active = dark ? 'rgba(99,102,241,.24)' : 'rgba(99,102,241,.09)';
         convList.innerHTML = convs.map(c => {
             const isOnline = onlineUserIds.has(Number(c.other.id));
-            const dotBg = isOnline ? '#22c55e' : '#d1d5db';
+            const dotBg = isOnline ? '#22c55e' : '#9ca3af';
             return `
             <div class="dm-row" data-id="${c.conv_id}"
                 style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;border-radius:14px;margin:2px 8px;transition:background .15s;${c.conv_id===activeConvId?`background:${active}`:''}">
@@ -549,10 +553,10 @@
                 </div>
                 <div style="flex:1;min-width:0">
                     <div style="display:flex;justify-content:space-between;gap:4px;align-items:baseline;margin-bottom:2px">
-                        <span style="font-size:13.5px;font-weight:600;color:${dark?'#e9edef':'#111827'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.other.display_name)}</span>
-                        <span style="font-size:10px;color:${dark?'#8696a0':'#aab8c2'};flex-shrink:0">${timeAgo(c.last_at)}</span>
+                        <span class="dm-row-title">${esc(c.other.display_name)}</span>
+                        <span class="dm-row-time">${timeAgo(c.last_at)}</span>
                     </div>
-                    <div style="font-size:12px;color:${dark?'#8696a0':'#6b7280'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.last_msg||'Tap to open')}</div>
+                    <div class="dm-row-msg">${esc(c.last_msg||'Tap to open')}</div>
                 </div>
                 ${c.unread?`<span style="background:#6366f1;color:#fff;font-size:9px;font-weight:800;border-radius:99px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0">${c.unread>9?'9+':c.unread}</span>`:''}
             </div>`;

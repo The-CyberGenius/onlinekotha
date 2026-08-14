@@ -2171,6 +2171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('kotha_dark', isDark ? '1' : '0');
             updateDmIcon();
+            window.dispatchEvent(new CustomEvent('kotha-theme-change', { detail: { dark: isDark } }));
         });
     }
 
