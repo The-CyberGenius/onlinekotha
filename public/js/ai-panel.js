@@ -44,8 +44,7 @@
         _dotResize();
         new ResizeObserver(_dotResize).observe(scrollArea);
         // Redraw idle dots after dark mode toggle
-        const dmBtn = document.getElementById('dark-mode-btn');
-        if (dmBtn) dmBtn.addEventListener('click', () => {
+        window.addEventListener('kotha-theme-change', () => {
             requestAnimationFrame(() => { if (!_dId) _dotDrawOnce(); });
         });
 
