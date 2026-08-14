@@ -20,8 +20,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
-    <link rel="stylesheet" href="/css/tailwind.min.css?v=3">
-    <link rel="stylesheet" href="/css/style.css?v=1780853568">
+    <link rel="stylesheet" href="/css/tailwind.min.css?v=4">
+    <link rel="stylesheet" href="/css/style.css?v=1780860001">
     <style>
         /* DM area theming - must override inline styles via !important for dark mode */
         #dm-chat-area {
@@ -43,7 +43,35 @@
     <!-- Razorpay — lazy loaded when payment modal is needed -->
     <script>window._loadRazorpay = function () { return new Promise(function (r) { if (window.Razorpay) return r(); var s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.onload = r; document.head.appendChild(s) }) }</script>
     <script src="/js/auth-init.js?v=2"></script>
-    <script>if (localStorage.getItem('kotha_dark') === '1') document.documentElement.classList.add('dark')</script>
+    <script>
+        (function() {
+            var isDark = localStorage.getItem('kotha_dark') === '1';
+            if (isDark) document.documentElement.classList.add('dark');
+
+            window.kothaToggleTheme = function() {
+                document.documentElement.classList.toggle('dark');
+                var dark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('kotha_dark', dark ? '1' : '0');
+                var dmIcon = document.getElementById('dm-icon');
+                if (dmIcon) {
+                    dmIcon.innerHTML = dark
+                        ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+                        : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+                }
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.content = dark ? '#111b21' : '#6366f1';
+                window.dispatchEvent(new CustomEvent('kotha-theme-change', { detail: { dark: dark } }));
+            };
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var dark = document.documentElement.classList.contains('dark');
+                var dmIcon = document.getElementById('dm-icon');
+                if (dmIcon && dark) {
+                    dmIcon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+                }
+            });
+        })();
+    </script>
     <!-- Google Analytics — async, non-blocking -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
@@ -121,7 +149,8 @@
                         </svg>
                     </a>
                     <button id="dark-mode-btn"
-                        class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition"
+                        onclick="window.kothaToggleTheme && window.kothaToggleTheme()"
+                        class="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer"
                         title="Toggle dark mode">
                         <svg id="dm-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -901,11 +930,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/script.js?v=1780854353"></script>
-    <script src="js/upload.js?v=15"></script>
-    <script src="js/ai-panel.js?v=28"></script>
-    <script src="js/features.js?v=20"></script>
-    <script src="js/dm.js?v=1780856330"></script>
+    <script src="js/script.js?v=1780860002"></script>
+    <script src="js/upload.js?v=1780860002"></script>
+    <script src="js/ai-panel.js?v=1780860002"></script>
+    <script src="js/features.js?v=1780860002"></script>
+    <script src="js/dm.js?v=1780860002"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });
