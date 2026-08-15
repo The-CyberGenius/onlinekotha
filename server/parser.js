@@ -140,6 +140,13 @@ function findChatFile(folderPath) {
         }
     }
 
+    // Fallback: just return the first .txt file found
+    for (const entry of entries) {
+        if (entry.isFile() && entry.name.toLowerCase().endsWith('.txt')) {
+            return path.join(folderPath, entry.name);
+        }
+    }
+
     return null;
 }
 
