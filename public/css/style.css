@@ -2370,6 +2370,12 @@ html.dark .dark\:shadow-xl {
 html.dark .dark\:border-gray-800\/60 {
     border-color: rgba(31, 41, 55, 0.6) !important;
 }
+.z-\[10000\] {
+    z-index: 10000 !important;
+}
+.z-\[10010\] {
+    z-index: 10010 !important;
+}
 
 html.dark .onboarding-card input {
     background: #2a3942 !important;
