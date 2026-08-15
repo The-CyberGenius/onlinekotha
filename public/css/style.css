@@ -2320,10 +2320,10 @@ html.dark .loading-shimmer {
 }
 
 /* ── Fullscreen: Hide Dock & Remove Body Padding ─── */
-#mac-frame.mac-fullscreen ~ #mac-dock {
+#mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock {
     display: none !important;
 }
-body.app-shell:has(#mac-frame.mac-fullscreen) {
+body.app-shell:has(#mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize)) {
     padding-bottom: 0 !important;
 }
 
