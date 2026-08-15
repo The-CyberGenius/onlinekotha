@@ -595,23 +595,23 @@ HARD RULES
                 : '';
             
             const lastActive = u.last_active_at
-                ? `<span class="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100" title="Last Active">⏱️ ${new Date(u.last_active_at).toLocaleString()}</span>`
+                ? `<span class="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100" title="Last Active">⏱️ ${formatDateTime(u.last_active_at)}</span>`
                 : '';
 
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg p-2 mb-1.5 border border-gray-100 shadow-sm hover:shadow-md transition';
+            card.className = 'bg-white rounded-lg p-3 mb-2 border border-gray-100 shadow-sm hover:shadow-md transition';
             card.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <div class="shrink-0 w-6 h-6">${avatarHtml.replace('w-10 h-10', 'w-6 h-6 text-[10px] rounded-md').replace('rounded-xl', 'rounded-md')}</div>
-                    <div class="min-w-0 flex-1 flex flex-col md:flex-row md:items-center justify-between gap-1">
-                        <div class="flex items-center gap-1.5 flex-wrap">
-                            <span class="font-bold text-gray-900 text-[11px] truncate flex items-center">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
-                            <span class="text-[9px] text-gray-500 truncate">${u.email}</span>
+                <div class="flex items-start gap-3">
+                    <div class="shrink-0">${avatarHtml.replace('w-10 h-10', 'w-8 h-8 text-xs rounded-lg').replace('rounded-xl', 'rounded-lg')}</div>
+                    <div class="min-w-0 flex-1 flex flex-col gap-1.5">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-gray-900 text-xs truncate flex items-center">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
+                            <span class="text-[10px] text-gray-500 truncate">${u.email}</span>
                             ${planBadge} ${loginMethod}
                         </div>
-                        <div class="flex gap-2 text-[9px] text-gray-400 font-medium items-center flex-wrap mt-1">
-                            <span>💬 ${u.chat_count}</span>
-                            <span>💰 $${u.total_cost.toFixed(3)}</span>
+                        <div class="flex items-center gap-2 flex-wrap text-[10px] text-gray-500">
+                            <span class="font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">💬 ${u.chat_count}</span>
+                            <span class="font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">💰 $${u.total_cost.toFixed(3)}</span>
                             ${u.ip_address ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
                             ${u.country ? `<span class="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-100" title="Country">📍 ${u.country}</span>` : ''}
                             <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100" title="Registration Date & Time">📅 Reg: ${formatDateTime(u.created_at)}</span>
