@@ -238,7 +238,7 @@ git add -A && git commit -m "update" && git push origin main && ssh -o StrictHos
 
 ## 8. Changelog
 
-### v2.5.0 — Comprehensive UI/UX Audit & Polish (August 14, 2026)
+### v0.1 — Comprehensive UI/UX Audit & Polish (August 14, 2026)
 
 **Full project audit** covering CSS integrity, dark/light mode consistency, dock behavior, font rendering, responsiveness, animations, and deployment optimization.
 
