@@ -140,7 +140,7 @@ function authMiddleware(req, res, next) {
                 try {
                     db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(now, req.user.id);
                     req.user.last_active_at = now;
-                } catch(e) {}
+                } catch (e) { }
             }
         }
     } else {

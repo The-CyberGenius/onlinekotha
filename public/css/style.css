@@ -2339,7 +2339,38 @@ html.dark #upload-modal .bg-white {
     border-color: #2a3942 !important;
 }
 
-/* ── Dark Mode: Onboarding Input Fields ─── */
+/* ── Dark Mode: Missing Tailwind Classes ─── */
+html.dark .dark\:bg-\[\#1c1c2e\] {
+    background-color: #1c1c2e !important;
+}
+html.dark .dark\:text-white {
+    color: #ffffff !important;
+}
+html.dark .dark\:text-gray-400 {
+    color: #9ca3af !important;
+}
+html.dark .dark\:text-gray-500 {
+    color: #6b7280 !important;
+}
+html.dark .dark\:bg-indigo-900\/40 {
+    background-color: rgba(49, 46, 129, 0.4) !important;
+}
+html.dark .dark\:text-indigo-300 {
+    color: #a5b4fc !important;
+}
+html.dark .dark\:border-indigo-800\/50 {
+    border-color: rgba(55, 48, 163, 0.5) !important;
+}
+html.dark .dark\:border-white\/10 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+html.dark .dark\:shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+html.dark .dark\:border-gray-800\/60 {
+    border-color: rgba(31, 41, 55, 0.6) !important;
+}
+
 html.dark .onboarding-card input {
     background: #2a3942 !important;
     border-color: #3b4a54 !important;
