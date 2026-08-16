@@ -17,10 +17,10 @@ function newToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
-function createUser(email, password) {
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+function createUser(email, password, options = {}) {
+    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
     if (existing) {
-        const err = new Error('Email already registered');
+        const err = new Error('Email is already registered. Please sign in with your PIN or Google.');
         err.code = 'EMAIL_EXISTS';
         throw err;
     }
@@ -30,14 +30,21 @@ function createUser(email, password) {
     const trialExpiresAt = now + trialHours * 60 * 60 * 1000;
 
     const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
-    const isAdmin = adminEmail && email.toLowerCase() === adminEmail ? 1 : 0;
+    const isAdmin = adminEmail && email.toLowerCase().trim() === adminEmail ? 1 : 0;
+
+    const displayName = options.display_name ? options.display_name.trim() : null;
+    const phone = options.phone ? options.phone.trim() : null;
+    const phoneCountryCode = options.phone_country_code ? options.phone_country_code.trim() : '+91';
+    const phonePrompted = phone ? 1 : 0;
+    const ip = options.ip || null;
+    const country = options.country || null;
 
     const info = db
         .prepare(
-            `INSERT INTO users (email, password_hash, created_at, plan, trial_expires_at, is_admin)
-             VALUES (?, ?, ?, 'trial', ?, ?)`
+            `INSERT INTO users (email, password_hash, created_at, plan, trial_expires_at, is_admin, display_name, phone, phone_country_code, phone_prompted, ip_address, country, email_verified)
+             VALUES (?, ?, ?, 'trial', ?, ?, ?, ?, ?, ?, ?, ?, 1)`
         )
-        .run(email.toLowerCase(), hashPassword(password), now, trialExpiresAt, isAdmin);
+        .run(email.toLowerCase().trim(), hashPassword(password), now, trialExpiresAt, isAdmin, displayName, phone, phoneCountryCode, phonePrompted, ip, country);
 
     return getUserById(info.lastInsertRowid);
 }

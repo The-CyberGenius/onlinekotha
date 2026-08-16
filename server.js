@@ -21,6 +21,7 @@ const {
     authMiddleware,
     requireUser,
     createUser,
+    createSession,
     login,
     logout,
     effectivePlan,
@@ -52,13 +53,20 @@ const http = require('http');
 const { Server: SocketIO } = require('socket.io');
 
 const app = express();
-const httpServer = http.createServer(app);
-const io = new SocketIO(httpServer, { cors: { origin: false } });
+const server = http.createServer(app);
+const io = new SocketIO(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+app.set('io', io);
+
+// Trust proxy for rate limiter (running behind Nginx)
+app.set('trust proxy', 1);
+
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
-
-// Trust Nginx reverse proxy (for rate-limit, secure cookies, etc.)
-app.set('trust proxy', 1);
 
 // Shared cookie options — must be identical for set and clear
 const COOKIE_OPTS = {
@@ -70,40 +78,84 @@ const COOKIE_OPTS = {
 
 if (!fs.existsSync(SRC_DIR)) fs.mkdirSync(SRC_DIR, { recursive: true });
 
-// app.use(helmet({ contentSecurityPolicy: false }));
+// ---------- Security & Middlewares ----------
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+}));
+app.use(compression({
+    filter: (req, res) => {
+        if (req.headers['accept'] && req.headers['accept'].includes('text/event-stream')) {
+            return false;
+        }
+        return compression.filter(req, res);
+    }
+}));
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(authMiddleware);
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 60,
+    validate: false,
+});
 
 // Stripe webhook needs raw body — must come BEFORE express.json()
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
-
-// Gzip responses — huge win for large /api/messages JSON (text ~85% smaller).
-// Skips SSE (Cache-Control: no-transform) and binary media automatically.
-app.use(compression());
 
 app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     next();
 });
 
-app.use(express.json({ limit: '2mb' }));
-app.use(cookieParser());
-app.use(authMiddleware);
-
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 requests per IP
-    message: { error: 'Too many requests, please try again after 15 minutes' },
-    validate: false,
-});
-
 // ---------- Auth routes ----------
-// Email/password signup is DISABLED — Google sign-in only.
-// This stops automated/bot account creation (e.g. @example.com spam).
-// Existing email accounts can still log in via /api/auth/login.
+// Self-serve Signup with Name, Email, 6-Digit PIN, and Optional Phone
 app.post('/api/auth/signup', authLimiter, async (req, res) => {
-    return res.status(403).json({
-        error: 'Sign up with Google to continue. Email/password registration is disabled.',
-        google_only: true,
-    });
+    try {
+        const { email, pin, password, name, display_name, phone, phone_country_code } = req.body || {};
+        if (!email) return res.status(400).json({ error: 'Email is required' });
+        
+        const cleanEmail = email.toLowerCase().trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+            return res.status(400).json({ error: 'Please enter a valid email address' });
+        }
+
+        const authSecret = (pin || password || '').trim();
+        if (!authSecret || authSecret.length < 4) {
+            return res.status(400).json({ error: 'Please enter a 4 to 6-digit PIN' });
+        }
+
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        let country = null;
+        if (ip) {
+            try {
+                const geoip = require('geoip-lite');
+                const geo = geoip.lookup(ip);
+                if (geo) country = geo.country;
+            } catch {}
+        }
+
+        const user = createUser(cleanEmail, authSecret, {
+            display_name: name || display_name,
+            phone,
+            phone_country_code,
+            ip,
+            country,
+        });
+
+        // Claim guest data if guest was active
+        const { claimGuestData } = require('./server/guest');
+        const guestId = req.cookies && req.cookies.kotha_guest_id;
+        if (guestId) claimGuestData(guestId, user.id);
+
+        const { token, expiresAt } = createSession(user.id);
+        res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
+        res.json({ ok: true, user });
+    } catch (err) {
+        res.status(400).json({ error: err.message || 'Signup failed' });
+    }
 });
 
 app.get('/api/auth/verify', (req, res) => {
@@ -128,7 +180,7 @@ app.post('/api/auth/forgot', async (req, res) => {
 app.post('/api/auth/reset', async (req, res) => {
     const { token, password } = req.body || {};
     if (!token || !password) return res.status(400).json({ error: 'token + password required' });
-    if (password.length < 6) return res.status(400).json({ error: 'password min 6 chars' });
+    if (password.length < 4) return res.status(400).json({ error: 'PIN min 4 chars' });
     const row = consumeToken(token, 'reset');
     if (!row) return res.status(400).json({ error: 'Invalid or expired link' });
     const hash = bcrypt.hashSync(password, 10);
@@ -148,13 +200,23 @@ app.post('/api/auth/resend-verify', (req, res) => {
 
 app.post('/api/auth/login', authLimiter, (req, res) => {
     try {
-        const { email, password } = req.body || {};
-        if (!email || !password) return res.status(400).json({ error: 'email + password required' });
-        const { token, expiresAt } = login(email.trim(), password);
+        const { email, pin, password } = req.body || {};
+        if (!email) return res.status(400).json({ error: 'Email is required' });
+        const pass = (pin || password || '').trim();
+        if (!pass) return res.status(400).json({ error: '6-digit PIN or password required' });
+
+        const { token, expiresAt } = login(email.trim(), pass);
+
+        // Claim guest data if guest was active
+        const { claimGuestData } = require('./server/guest');
+        const guestId = req.cookies && req.cookies.kotha_guest_id;
+        const row = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
+        if (guestId && row) claimGuestData(guestId, row.id);
+
         res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
         res.json({ ok: true });
     } catch (err) {
-        res.status(401).json({ error: err.message });
+        res.status(401).json({ error: err.message || 'Invalid email or PIN' });
     }
 });
 

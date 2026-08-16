@@ -48,6 +48,116 @@
         setTimeout(() => modal.classList.add('hidden'), 300);
     };
 
+    window.switchModalAuthTab = function (tab) {
+        const signinBtn = document.getElementById('modal-tab-signin');
+        const signupBtn = document.getElementById('modal-tab-signup');
+        const signinForm = document.getElementById('modal-signin-form');
+        const signupForm = document.getElementById('modal-signup-form');
+        const errEl = document.getElementById('modal-auth-error');
+        if (errEl) errEl.classList.add('hidden');
+
+        if (tab === 'signin') {
+            if (signinBtn) signinBtn.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 shadow-sm cursor-pointer';
+            if (signupBtn) signupBtn.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all modal-sub hover:text-gray-900 dark:hover:text-white cursor-pointer';
+            signinForm?.classList.remove('hidden');
+            signupForm?.classList.add('hidden');
+        } else {
+            if (signupBtn) signupBtn.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 shadow-sm cursor-pointer';
+            if (signinBtn) signinBtn.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all modal-sub hover:text-gray-900 dark:hover:text-white cursor-pointer';
+            signupForm?.classList.remove('hidden');
+            signinForm?.classList.add('hidden');
+        }
+    };
+
+    window.handleModalEmailLogin = async function (e) {
+        e.preventDefault();
+        const email = (document.getElementById('modal-signin-email')?.value || '').trim();
+        const pin = (document.getElementById('modal-signin-pin')?.value || '').trim();
+        const btn = document.getElementById('modal-signin-btn');
+        const errEl = document.getElementById('modal-auth-error');
+        if (errEl) errEl.classList.add('hidden');
+
+        if (!email || !pin) {
+            if (errEl) { errEl.textContent = 'Please enter your email and 6-digit PIN'; errEl.classList.remove('hidden'); }
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Signing in...';
+        }
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ email, pin }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) throw new Error(data.error || 'Invalid email or PIN');
+
+            window.location.reload();
+        } catch (err) {
+            if (errEl) {
+                errEl.textContent = err.message || 'Login failed';
+                errEl.classList.remove('hidden');
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+            }
+        }
+    };
+
+    window.handleModalEmailSignup = async function (e) {
+        e.preventDefault();
+        const name = (document.getElementById('modal-signup-name')?.value || '').trim();
+        const email = (document.getElementById('modal-signup-email')?.value || '').trim();
+        const pin = (document.getElementById('modal-signup-pin')?.value || '').trim();
+        const phone = (document.getElementById('modal-signup-phone')?.value || '').trim();
+        const phoneCountryCode = (document.getElementById('modal-signup-phone-code')?.value || '+91').trim();
+        const btn = document.getElementById('modal-signup-btn');
+        const errEl = document.getElementById('modal-auth-error');
+        if (errEl) errEl.classList.add('hidden');
+
+        if (!email || !pin) {
+            if (errEl) { errEl.textContent = 'Email and 6-digit PIN are required'; errEl.classList.remove('hidden'); }
+            return;
+        }
+        if (pin.length < 4) {
+            if (errEl) { errEl.textContent = 'PIN must be 4 to 6 digits'; errEl.classList.remove('hidden'); }
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Creating account...';
+        }
+
+        try {
+            const res = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ email, pin, name, phone, phone_country_code: phoneCountryCode }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) throw new Error(data.error || 'Signup failed');
+
+            window.location.reload();
+        } catch (err) {
+            if (errEl) {
+                errEl.textContent = err.message || 'Signup failed';
+                errEl.classList.remove('hidden');
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Create Account & Sign In';
+            }
+        }
+    };
+
     let currentProfileEditMode = false;
 
     window.openProfileModal = function (isEditMode = false) {
