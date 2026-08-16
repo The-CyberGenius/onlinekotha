@@ -558,7 +558,8 @@ HARD RULES
                 const filtered = cachedUsers.filter(u => 
                     String(u.id).includes(query) ||
                     (u.email && u.email.toLowerCase().includes(query)) ||
-                    (u.display_name && u.display_name.toLowerCase().includes(query))
+                    (u.display_name && u.display_name.toLowerCase().includes(query)) ||
+                    (u.phone && u.phone.toLowerCase().includes(query))
                 );
                 renderUserList(filtered);
             });
@@ -598,6 +599,10 @@ HARD RULES
                 ? `<span class="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100" title="Last Active">⏱️ ${formatDateTime(u.last_active_at)}</span>`
                 : '';
 
+            const phoneBadge = u.phone
+                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" class="bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold px-1.5 py-0.5 rounded border border-purple-100 transition inline-flex items-center gap-1" title="User Phone Number">📱 ${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
+                : '';
+
             const card = document.createElement('div');
             card.className = 'bg-white rounded-lg p-3 mb-2 border border-gray-100 shadow-sm hover:shadow-md transition';
             card.innerHTML = `
@@ -610,6 +615,7 @@ HARD RULES
                             ${planBadge} ${loginMethod}
                         </div>
                         <div class="flex items-center gap-2 flex-wrap text-[10px] text-gray-500">
+                            ${phoneBadge}
                             <span class="font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">💬 ${u.chat_count}</span>
                             <span class="font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">💰 $${u.total_cost.toFixed(3)}</span>
                             ${u.ip_address ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100" title="IP Address">🌐 ${u.ip_address}</span>` : ''}

@@ -48,6 +48,142 @@
         setTimeout(() => modal.classList.add('hidden'), 300);
     };
 
+    let currentProfileEditMode = false;
+
+    window.openProfileModal = function (isEditMode = false) {
+        const modal = document.getElementById('profile-modal');
+        if (!modal) return;
+        currentProfileEditMode = isEditMode;
+
+        const titleEl = document.getElementById('profile-modal-title');
+        const subEl = document.getElementById('profile-modal-sub');
+        const nameInput = document.getElementById('profile-name-input');
+        const phoneInput = document.getElementById('profile-phone-input');
+        const phoneCode = document.getElementById('profile-phone-code');
+        const skipBtn = document.getElementById('profile-skip-btn');
+        const saveBtn = document.getElementById('profile-save-btn');
+        const errEl = document.getElementById('profile-modal-error');
+
+        if (errEl) errEl.classList.add('hidden');
+
+        if (me && me.user) {
+            if (nameInput) nameInput.value = me.user.display_name || '';
+            if (phoneInput) phoneInput.value = me.user.phone || '';
+            if (phoneCode && me.user.phone_country_code) phoneCode.value = me.user.phone_country_code;
+        }
+
+        if (isEditMode) {
+            if (titleEl) titleEl.textContent = 'Edit Profile & Mobile';
+            if (subEl) subEl.textContent = 'Update your display name and mobile number below.';
+            if (skipBtn) skipBtn.textContent = 'Cancel';
+            if (saveBtn) saveBtn.textContent = 'Save Changes';
+        } else {
+            if (titleEl) titleEl.textContent = 'Complete Your Profile';
+            if (subEl) subEl.textContent = 'Add your name & phone number to personalize your experience. (Optional)';
+            if (skipBtn) skipBtn.textContent = 'Skip for now →';
+            if (saveBtn) saveBtn.textContent = 'Save & Continue';
+        }
+
+        modal.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            const card = modal.querySelector('div');
+            if (card) {
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }
+        });
+    };
+
+    window.closeProfileModal = async function (isSkip = false) {
+        const modal = document.getElementById('profile-modal');
+        if (!modal) return;
+        modal.classList.add('opacity-0');
+        const card = modal.querySelector('div');
+        if (card) {
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+        setTimeout(() => modal.classList.add('hidden'), 300);
+
+        if (isSkip && !currentProfileEditMode && me && me.user && !me.user.phone_prompted) {
+            try {
+                await fetch('/api/user/profile/skip', { method: 'POST', credentials: 'same-origin' });
+                me.user.phone_prompted = true;
+            } catch {}
+        }
+    };
+
+    window.handleProfileSubmit = async function (e) {
+        e.preventDefault();
+        const nameInput = document.getElementById('profile-name-input');
+        const phoneInput = document.getElementById('profile-phone-input');
+        const phoneCode = document.getElementById('profile-phone-code');
+        const saveBtn = document.getElementById('profile-save-btn');
+        const errEl = document.getElementById('profile-modal-error');
+
+        const displayName = (nameInput?.value || '').trim();
+        const phone = (phoneInput?.value || '').trim();
+        const countryCode = (phoneCode?.value || '+91').trim();
+
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> Saving...';
+        }
+
+        try {
+            const resp = await fetch('/api/user/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    display_name: displayName,
+                    phone: phone,
+                    phone_country_code: countryCode,
+                }),
+            });
+            const data = await resp.json();
+            if (!data.ok) throw new Error(data.error || 'Failed to update profile');
+
+            if (me && me.user) {
+                me.user.display_name = data.user.display_name;
+                me.user.phone = data.user.phone;
+                me.user.phone_country_code = data.user.phone_country_code;
+                me.user.phone_prompted = true;
+            }
+
+            // Update UI
+            const sidebarTitle = document.getElementById('sidebar-title');
+            if (sidebarTitle && data.user.display_name) {
+                sidebarTitle.textContent = data.user.display_name;
+            }
+            const info = document.getElementById('sidebar-user-info');
+            if (info && data.user.display_name) {
+                info.textContent = data.user.display_name;
+            }
+            const avatarInitials = document.getElementById('my-avatar-initials');
+            if (avatarInitials && data.user.display_name) {
+                avatarInitials.textContent = data.user.display_name.charAt(0).toUpperCase();
+            }
+
+            if (window.kothaToast) {
+                window.kothaToast('✨ Profile updated successfully!');
+            }
+
+            window.closeProfileModal(false);
+        } catch (err) {
+            if (errEl) {
+                errEl.textContent = err.message || 'Error saving profile';
+                errEl.classList.remove('hidden');
+            }
+        } finally {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = currentProfileEditMode ? 'Save Changes' : 'Save & Continue';
+            }
+        }
+    };
+
     const initDOM = () => {
         if (window.__IS_GUEST__) {
             // Setup Guest Banner & Sign In Button
@@ -111,10 +247,23 @@
             avatarInitials?.classList.add('hidden');
         }
 
+        const avatarWrap = document.getElementById('my-avatar-wrap');
+        if (avatarWrap) {
+            avatarWrap.title = 'Click to edit profile & phone number';
+            avatarWrap.onclick = () => window.openProfileModal(true);
+        }
+
         // Show display name below avatar
         const sidebarTitle = document.getElementById('sidebar-title');
         if (sidebarTitle && me.user.display_name) {
             sidebarTitle.textContent = me.user.display_name;
+        }
+
+        // Auto-prompt if not prompted yet and no phone
+        if (!me.user.phone_prompted && !me.user.phone) {
+            setTimeout(() => {
+                window.openProfileModal(false);
+            }, 700);
         }
 
         if (me.user.is_admin) {

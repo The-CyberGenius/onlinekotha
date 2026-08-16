@@ -200,6 +200,9 @@ safeAddColumn('users', 'display_name', 'TEXT');
 safeAddColumn('users', 'global_alias', 'TEXT');
 safeAddColumn('users', 'ip_address', 'TEXT');
 safeAddColumn('users', 'country', 'TEXT');
+safeAddColumn('users', 'phone', 'TEXT');
+safeAddColumn('users', 'phone_country_code', 'TEXT');
+safeAddColumn('users', 'phone_prompted', 'INTEGER DEFAULT 0');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 
 // ── DM (user-to-user chat) tables ──

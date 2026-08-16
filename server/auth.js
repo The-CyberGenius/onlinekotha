@@ -80,7 +80,7 @@ function getSession(token) {
     if (!token) return null;
     const row = db.prepare(
         `SELECT s.token, s.expires_at, u.id, u.email, u.plan, u.trial_expires_at, u.is_admin,
-                u.display_name, u.avatar_url, u.last_active_at
+                u.display_name, u.avatar_url, u.last_active_at, u.phone, u.phone_country_code, u.phone_prompted
          FROM sessions s JOIN users u ON u.id = s.user_id
          WHERE s.token = ?`
     ).get(token);
@@ -100,6 +100,9 @@ function getSession(token) {
             display_name: row.display_name || null,
             avatar_url: row.avatar_url || null,
             last_active_at: row.last_active_at || null,
+            phone: row.phone || null,
+            phone_country_code: row.phone_country_code || null,
+            phone_prompted: !!row.phone_prompted,
         },
     };
 }
