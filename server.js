@@ -53,8 +53,8 @@ const http = require('http');
 const { Server: SocketIO } = require('socket.io');
 
 const app = express();
-const server = http.createServer(app);
-const io = new SocketIO(server, {
+const httpServer = http.createServer(app);
+const io = new SocketIO(httpServer, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST']
