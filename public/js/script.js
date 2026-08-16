@@ -1168,8 +1168,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('chat-container');
         if (!container) return;
         container.innerHTML = `
-            <div class="h-full flex flex-col items-center justify-center px-8 text-center" id="empty-state">
-                <div class="empty-state-float mb-8 relative">
+            <div class="min-h-full w-full flex flex-col items-center justify-center px-4 sm:px-8 py-10 sm:py-14 text-center my-auto" id="empty-state">
+                <div class="empty-state-float mb-8 mt-3 relative shrink-0">
                     <div class="absolute inset-0 bg-indigo-400 blur-3xl opacity-20 rounded-full dark:opacity-30"></div>
                     <div class="w-28 h-28 rounded-[2rem] bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/40 dark:to-gray-900 border border-indigo-100/50 dark:border-indigo-800/50 flex items-center justify-center shadow-2xl shadow-indigo-200/40 dark:shadow-indigo-900/40 relative z-10 backdrop-blur-sm">
                         <svg width="48" height="48" viewBox="-2 -2 28 28" fill="none" stroke="url(#chat-grad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1181,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </defs>
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
-                        <div class="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-300/30 empty-state-pulse border-2 border-white dark:border-gray-900">
+                        <div class="absolute -top-2.5 -right-2.5 w-10 h-10 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-300/30 empty-state-pulse border-2 border-white dark:border-gray-900">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
                             </svg>
