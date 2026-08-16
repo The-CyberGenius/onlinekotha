@@ -2,7 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const { db, getSetting } = require('./db');
-const { createSession } = require('./auth');
+const { createSession, checkIpAccountLimit } = require('./auth');
 const integ = require('./integrations');
 const geoip = require('geoip-lite');
 
@@ -66,13 +66,15 @@ function ensureStrategy(req) {
             }
 
             if (!user) {
+                const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.socket.remoteAddress;
+                checkIpAccountLimit(ip, email);
+
                 const now = Date.now();
                 const trialHours = Number(getSetting('trial_duration_hours', '24'));
                 const trialExpiresAt = now + trialHours * 60 * 60 * 1000;
                 const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
                 const isAdmin = adminEmail && email === adminEmail ? 1 : 0;
 
-                const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
                 let country = null;
                 if (ip) {
                     const geo = geoip.lookup(ip);
@@ -113,76 +115,71 @@ router.get('/status', (req, res) => {
 router.get('/google', (req, res, next) => {
     if (!ensureStrategy(req)) return res.status(503).send('Google OAuth not configured');
     const next_ = typeof req.query.next === 'string' && req.query.next.startsWith('/') ? req.query.next : '/app';
-    const state = Buffer.from(JSON.stringify({ next: next_ })).toString('base64url');
-    passport.authenticate('google', { session: false, state })(req, res, next);
+    passport.authenticate('google', {
+        scope: ['profile', 'email'],
+        state: next_,
+        session: false,
+    })(req, res, next);
 });
 
 router.get('/google/callback', (req, res, next) => {
-    if (!ensureStrategy(req)) return res.redirect('/login.html?error=oauth_disabled');
-    passport.authenticate('google', { session: false, failureRedirect: '/login.html?error=oauth_failed' },
-        (err, user) => {
-            if (err || !user) {
-                console.error('OAuth callback error:', err);
-                return res.redirect('/login.html?error=oauth_failed');
-            }
-            const { claimGuestData } = require('./guest');
-            const guestId = req.cookies && req.cookies.kotha_guest_id;
-            if (guestId) claimGuestData(guestId, user.id);
-
-            const { token, expiresAt } = createSession(user.id);
-            const IS_PROD = process.env.NODE_ENV === 'production';
-            res.cookie('session', token, {
-                httpOnly: true,
-                sameSite: 'lax',
-                path: '/',
-                ...(IS_PROD && { secure: true }),
-                expires: new Date(expiresAt),
-            });
-            let next_ = '/app';
-            try {
-                if (req.query.state) {
-                    const decoded = JSON.parse(Buffer.from(req.query.state, 'base64url').toString());
-                    if (typeof decoded.next === 'string' && decoded.next.startsWith('/')) next_ = decoded.next;
-                }
-            } catch {}
-            if (user.is_admin) next_ = '/admin.html';
-            res.redirect(next_);
+    if (!ensureStrategy(req)) return res.status(503).send('Google OAuth not configured');
+    passport.authenticate('google', { session: false }, (err, user) => {
+        if (err) {
+            console.error('OAuth callback error:', err);
+            return res.redirect(`/login.html?error=${encodeURIComponent(err.message || 'auth_failed')}`);
         }
-    )(req, res, next);
+        if (!user) return res.redirect('/login.html?error=no_user');
+
+        const { claimGuestData } = require('./guest');
+        const guestId = req.cookies && req.cookies.kotha_guest_id;
+        if (guestId) claimGuestData(guestId, user.id);
+
+        const { token, expiresAt } = createSession(user.id);
+        const IS_PROD = process.env.NODE_ENV === 'production';
+        res.cookie('session', token, {
+            httpOnly: true,
+            sameSite: 'lax',
+            path: '/',
+            ...(IS_PROD && { secure: true }),
+            expires: new Date(expiresAt),
+        });
+
+        const state = typeof req.query.state === 'string' && req.query.state.startsWith('/') ? req.query.state : (user.is_admin ? '/admin.html' : '/app');
+        res.redirect(state);
+    })(req, res, next);
 });
 
 router.get('/google/client-id', (req, res) => {
-    const clientId = integ.get('integ.oauth.google_client_id') || process.env.GOOGLE_CLIENT_ID || null;
-    res.json({ clientId });
+    res.json({ clientId: integ.get('integ.oauth.google_client_id') || '' });
 });
 
+// Google One-Tap (credential verification)
 router.post('/google/onetap', async (req, res) => {
-    const { credential } = req.body || {};
-    if (!credential) return res.status(400).json({ error: 'credential required' });
-
     try {
-        const resp = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
-        if (!resp.ok) {
-            const errText = await resp.text();
-            return res.status(401).json({ error: 'Invalid Google One-Tap token', details: errText });
-        }
-        const payload = await resp.json();
+        const { credential } = req.body || {};
+        if (!credential) return res.status(400).json({ error: 'credential required' });
+
+        const clientId = integ.get('integ.oauth.google_client_id');
+        if (!clientId) return res.status(503).json({ error: 'Google One-Tap not configured' });
+
+        const { OAuth2Client } = require('google-auth-library');
+        const client = new OAuth2Client(clientId);
+
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: clientId,
+        });
+        const payload = ticket.getPayload();
+        if (!payload) return res.status(400).json({ error: 'Invalid token' });
 
         const googleId = payload.sub;
         const email = (payload.email || '').toLowerCase().trim();
-        const displayName = payload.name || null;
+        const displayName = payload.name || email.split('@')[0];
         const avatarUrl = payload.picture || null;
 
-        if (!email) return res.status(400).json({ error: 'Google account has no email' });
-
         let user = db.prepare('SELECT * FROM users WHERE google_id = ?').get(googleId);
-        if (user) {
-            db.prepare(
-                `UPDATE users SET display_name = COALESCE(?, display_name), avatar_url = COALESCE(?, avatar_url) WHERE id = ?`
-            ).run(displayName, avatarUrl, user.id);
-            user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
-        }
-        if (!user) {
+        if (!user && email) {
             user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
             if (user) {
                 db.prepare(
@@ -194,13 +191,15 @@ router.post('/google/onetap', async (req, res) => {
             }
         }
         if (!user) {
+            const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.socket.remoteAddress;
+            checkIpAccountLimit(ip, email);
+
             const now = Date.now();
             const trialHours = Number(getSetting('trial_duration_hours', '24'));
             const trialExpiresAt = now + trialHours * 60 * 60 * 1000;
             const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
             const isAdmin = adminEmail && email === adminEmail ? 1 : 0;
 
-            const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
             let country = null;
             if (ip) {
                 const geo = geoip.lookup(ip);

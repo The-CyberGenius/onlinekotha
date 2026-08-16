@@ -17,12 +17,37 @@ function newToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+const MAX_ACCOUNTS_PER_IP = 3;
+
+function checkIpAccountLimit(ip, userEmail = '') {
+    if (!ip) return;
+    const cleanIp = String(ip).trim();
+    if (!cleanIp || cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost') return;
+
+    // Check if it's admin email
+    const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
+    if (adminEmail && userEmail && userEmail.toLowerCase().trim() === adminEmail) return;
+
+    const row = db.prepare('SELECT COUNT(*) as count FROM users WHERE ip_address = ?').get(cleanIp);
+    if (row && row.count >= MAX_ACCOUNTS_PER_IP) {
+        const err = new Error(`Security Wall: Maximum ${MAX_ACCOUNTS_PER_IP} accounts can be created from this IP address / device. Please sign in to an existing account.`);
+        err.code = 'IP_LIMIT_EXCEEDED';
+        throw err;
+    }
+}
+
 function createUser(email, password, options = {}) {
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
+    const cleanEmail = email.toLowerCase().trim();
+    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(cleanEmail);
     if (existing) {
         const err = new Error('Email is already registered. Please sign in with your PIN or Google.');
         err.code = 'EMAIL_EXISTS';
         throw err;
+    }
+
+    const ip = options.ip ? String(options.ip).split(',')[0].trim() : null;
+    if (ip) {
+        checkIpAccountLimit(ip, cleanEmail);
     }
 
     const now = Date.now();
@@ -30,13 +55,12 @@ function createUser(email, password, options = {}) {
     const trialExpiresAt = now + trialHours * 60 * 60 * 1000;
 
     const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
-    const isAdmin = adminEmail && email.toLowerCase().trim() === adminEmail ? 1 : 0;
+    const isAdmin = adminEmail && cleanEmail === adminEmail ? 1 : 0;
 
     const displayName = options.display_name ? options.display_name.trim() : null;
     const phone = options.phone ? options.phone.trim() : null;
     const phoneCountryCode = options.phone_country_code ? options.phone_country_code.trim() : '+91';
     const phonePrompted = phone ? 1 : 0;
-    const ip = options.ip || null;
     const country = options.country || null;
 
     const info = db
@@ -44,7 +68,7 @@ function createUser(email, password, options = {}) {
             `INSERT INTO users (email, password_hash, created_at, plan, trial_expires_at, is_admin, display_name, phone, phone_country_code, phone_prompted, ip_address, country, email_verified)
              VALUES (?, ?, ?, 'trial', ?, ?, ?, ?, ?, ?, ?, ?, 1)`
         )
-        .run(email.toLowerCase().trim(), hashPassword(password), now, trialExpiresAt, isAdmin, displayName, phone, phoneCountryCode, phonePrompted, ip, country);
+        .run(cleanEmail, hashPassword(password), now, trialExpiresAt, isAdmin, displayName, phone, phoneCountryCode, phonePrompted, ip, country);
 
     return getUserById(info.lastInsertRowid);
 }
@@ -195,4 +219,5 @@ module.exports = {
     requireUser,
     requireUserOrGuest,
     requireAdmin,
+    checkIpAccountLimit,
 };
