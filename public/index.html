@@ -780,17 +780,16 @@
                 class="hero-h1 word-reveal text-[3.2rem] sm:text-[3.8rem] md:text-[4.5rem] font-black tracking-[-0.03em] leading-[1.05] mb-6">
                 <span class="word" style="animation-delay:0.05s">Keep</span>
                 <span class="word" style="animation-delay:0.15s"> your</span>
-                <span class="word" style="animation-delay:0.25s"> loved</span>
-                <span class="word" style="animation-delay:0.35s"> ones</span><br>
-                <span class="gradient-text word" style="animation-delay:0.45s">always online.</span>
+                <span class="word" style="animation-delay:0.25s"> favorite</span>
+                <span class="word" style="animation-delay:0.35s"> people</span><br>
+                <span class="gradient-text word" style="animation-delay:0.45s">always with you.</span>
             </h1>
 
             <!-- Sub-headline -->
             <p
                 class="hero-sub anim-fade-up d2 text-lg md:text-xl text-zinc-400 max-w-[560px] mx-auto leading-relaxed mb-10">
-                Upload your WhatsApp chats. AI learns exactly how they talk —
-                their humor, their slang, their love. Then <span class="text-white font-medium">chat with them,
-                    anytime.</span>
+                Upload your WhatsApp chats. AI learns exactly how your partner, best friend, or lost loved ones talk. 
+                <span class="text-white font-medium">Relive the memories and chat with them again, anytime.</span>
             </p>
 
             <!-- CTA row -->
@@ -819,77 +818,106 @@
             <p class="anim-fade-up d4 text-[12px] text-zinc-600 font-medium tracking-wide mb-16">Free forever · No
                 credit card · Your data stays private</p>
 
-            <!-- ── Interactive Chat Demo ── -->
-            <div class="anim-scale d5 max-w-[420px] mx-auto">
-                <div class="mockup-frame p-5 text-left" id="demo-chat-frame">
-                    <!-- Chat header -->
-                    <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]">
-                        <div class="relative">
-                            <div class="online-ring"></div>
-                            <div
-                                class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                                M</div>
+        </div>
+    </section>
+
+    <!-- ═══════════ SCROLL DEMO ═══════════ -->
+    <section id="scroll-demo-section" class="relative w-full bg-[#0a0a0f]" style="height: 300vh;">
+        <!-- Sticky Container -->
+        <div class="sticky top-0 h-screen w-full flex flex-col md:flex-row items-center justify-center overflow-hidden px-5 py-20">
+            <div class="max-w-6xl w-full mx-auto flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 h-full">
+                
+                <!-- Left Text Steps -->
+                <div class="flex-1 relative h-[180px] md:h-[240px] flex items-center w-full z-20 mt-10 md:mt-0">
+                    <!-- Step 1 -->
+                    <div class="demo-step absolute left-0 w-full" id="step-1">
+                        <div class="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/15 rounded-full px-3 py-1 md:px-3.5 md:py-1.5 mb-3 md:mb-4">
+                            <span class="text-[10px] md:text-[11px] font-bold text-indigo-300 uppercase tracking-wider">Step 1</span>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-[13px] font-bold text-white">Mom</p>
-                            <p class="text-[10px] text-emerald-400/80 font-medium">Online · AI</p>
-                        </div>
-                        <div class="flex items-center gap-1.5 bg-white/[0.05] px-2.5 py-1 rounded-full"
-                            id="demo-counter">
-                            <span class="text-[9px] font-bold text-zinc-400" id="demo-remaining">10 msgs left</span>
-                        </div>
+                        <h2 class="text-[28px] md:text-[44px] font-black tracking-tight leading-tight text-white mb-2 md:mb-3">Upload their chat</h2>
+                        <p class="text-zinc-400 text-[14px] md:text-[18px] max-w-sm">Export any WhatsApp chat as a .zip file and drop it here. 100% private.</p>
                     </div>
-
-                    <!-- Messages area -->
-                    <div class="space-y-3 max-h-[280px] overflow-y-auto pr-1 scroll-smooth" id="hero-chat"
-                        style="scrollbar-width:thin;">
-                        <!-- Initial demo message (animated on load) -->
-                        <div class="flex justify-end chat-msg" style="opacity:0;">
-                            <div class="msg-user px-4 py-2.5 max-w-[85%]">
-                                <p class="text-[13px] text-white leading-relaxed">Maa wo recipe batao na, aloo ke
-                                    parathe wali</p>
-                                <p class="text-[9px] text-white/40 text-right mt-1.5">✓✓</p>
-                            </div>
+                    <!-- Step 2 -->
+                    <div class="demo-step absolute left-0 w-full opacity-0 translate-y-8" id="step-2">
+                        <div class="inline-flex items-center gap-2 bg-pink-500/10 border border-pink-500/15 rounded-full px-3 py-1 md:px-3.5 md:py-1.5 mb-3 md:mb-4">
+                            <span class="text-[10px] md:text-[11px] font-bold text-pink-300 uppercase tracking-wider">Step 2</span>
                         </div>
-                        <div class="flex items-end gap-2 chat-msg" style="opacity:0;">
-                            <div
-                                class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center text-white text-[9px] font-bold shrink-0">
-                                M</div>
-                            <div class="msg-ai px-4 py-2.5 max-w-[85%]">
-                                <p class="text-[13px] text-zinc-200 leading-relaxed" id="ai-typed-text"></p>
-                                <p class="text-[9px] text-zinc-500 text-right mt-1.5"><span
-                                        class="text-indigo-400">AI</span></p>
-                            </div>
-                        </div>
+                        <h2 class="text-[28px] md:text-[44px] font-black tracking-tight leading-tight text-white mb-2 md:mb-3">AI learns their voice</h2>
+                        <p class="text-zinc-400 text-[14px] md:text-[18px] max-w-sm">It reads their slang, their emojis, their 2 AM vibe. It becomes them.</p>
                     </div>
-
-                    <!-- Interactive input bar -->
-                    <form id="demo-form"
-                        class="mt-4 flex items-center gap-2 bg-white/[0.04] rounded-full px-4 py-1.5 border border-white/[0.06] focus-within:border-indigo-500/30 transition-colors">
-                        <input type="text" id="demo-input" maxlength="300" autocomplete="off"
-                            placeholder="Type a message to Maa..."
-                            class="bg-transparent text-[13px] text-white placeholder-zinc-600 flex-1 outline-none py-2 min-h-[48px]">
-                        <button type="submit" id="demo-send" aria-label="Send message"
-                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white transition shrink-0 disabled:opacity-30 disabled:cursor-not-allowed">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                            </svg>
-                        </button>
-                    </form>
-
-                    <!-- Limit reached CTA (hidden initially) -->
-                    <div id="demo-limit-cta" class="hidden mt-3 text-center">
-                        <p class="text-[11px] text-zinc-500 mb-2">Demo limit reached!</p>
-                        <a href="/login.html#signup"
-                            class="inline-flex items-center gap-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-[11px] px-4 py-2 rounded-full shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition">
-                            Sign up free for unlimited
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round">
-                                <path d="M5 12h14M13 5l7 7-7 7" />
-                            </svg>
-                        </a>
+                    <!-- Step 3 -->
+                    <div class="demo-step absolute left-0 w-full opacity-0 translate-y-8" id="step-3">
+                        <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/15 rounded-full px-3 py-1 md:px-3.5 md:py-1.5 mb-3 md:mb-4">
+                            <span class="text-[10px] md:text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Step 3</span>
+                        </div>
+                        <h2 class="text-[28px] md:text-[44px] font-black tracking-tight leading-tight text-white mb-2 md:mb-3">Talk to them again</h2>
+                        <p class="text-zinc-400 text-[14px] md:text-[18px] max-w-sm">Start typing. They reply exactly like they used to. Same tone, same love.</p>
                     </div>
                 </div>
+
+                <!-- Right Phone Mockup -->
+                <div class="flex-1 flex justify-center md:justify-end items-center w-full" style="perspective:1200px">
+                    <div id="demo-phone-mockup" class="mockup-frame w-[280px] md:w-[340px] h-[580px] md:h-[680px] bg-[#0f0f11] rounded-[40px] border-[6px] md:border-[8px] border-zinc-800 relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col transform md:rotate-y-[-12deg] md:rotate-x-[4deg]">
+                        
+                        <!-- Dynamic Phone Content Area -->
+                        <div class="flex-1 relative w-full h-full bg-[#0f0f11]">
+                            
+                            <!-- Screen 1: Upload View -->
+                            <div id="phone-screen-1" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#0f0f11] z-30">
+                                <div class="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center mb-6 border border-indigo-500/20">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                </div>
+                                <div class="w-4/5 h-2 bg-white/5 rounded-full mb-3"></div>
+                                <div class="w-3/5 h-2 bg-white/5 rounded-full mb-8"></div>
+                                <div class="w-full h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-sm font-bold">WhatsApp Chat.zip</div>
+                            </div>
+
+                            <!-- Screen 2: Processing View -->
+                            <div id="phone-screen-2" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-[#0f0f11] z-20 opacity-0 scale-95">
+                                <div class="relative w-20 h-20 mb-6 flex items-center justify-center">
+                                    <svg class="absolute inset-0 w-full h-full text-pink-500/20" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="6"/>
+                                    </svg>
+                                    <svg id="progress-circle" class="absolute inset-0 w-full h-full text-pink-500" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+                                        <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+                                    </svg>
+                                    <span class="font-bold text-pink-400 text-sm absolute">100%</span>
+                                </div>
+                                <p class="text-white font-bold text-[15px] mb-1">Cloning Personality...</p>
+                                <p class="text-zinc-500 text-[12px]">Analyzing 14,204 messages</p>
+                            </div>
+
+                            <!-- Screen 3: Chat View -->
+                            <div id="phone-screen-3" class="absolute inset-0 flex flex-col bg-[#0f0f11] z-10 opacity-0 translate-y-10">
+                                <!-- Header -->
+                                <div class="h-16 border-b border-white/[0.04] flex items-center px-4 gap-3 bg-[#111113]">
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold">S</div>
+                                    <div>
+                                        <p class="text-white font-bold text-[13px]">Sneha ❤️</p>
+                                        <p class="text-emerald-400 text-[10px] font-medium">Online · AI</p>
+                                    </div>
+                                </div>
+                                <!-- Messages -->
+                                <div class="flex-1 p-4 flex flex-col gap-4 justify-end pb-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiMwZmBmMTEiPjwvcmVjdD48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIj48L3JlY3Q+PC9zdmc+')]">
+                                    <div class="flex justify-end">
+                                        <div class="msg-user px-3.5 py-2.5 max-w-[85%] rounded-[18px] rounded-br-[4px]"><p class="text-[14px] text-white">I miss our late night talks...</p></div>
+                                    </div>
+                                    <div class="flex justify-start opacity-0 translate-y-4" id="ai-reply">
+                                        <div class="msg-ai px-3.5 py-2.5 max-w-[85%] rounded-[18px] rounded-bl-[4px] border border-white/5 bg-[#18181b] shadow-sm"><p class="text-[14px] text-zinc-200">Aww idiot 🥺 main yahi hoon na always! Rona band kar aur bata dinner kiya? ❤️</p></div>
+                                    </div>
+                                </div>
+                                <!-- Input -->
+                                <div class="p-3 border-t border-white/[0.04] bg-[#111113]">
+                                    <div class="w-full h-11 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center px-4">
+                                        <div class="w-1/2 h-2 bg-white/10 rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </section>
@@ -2581,6 +2609,11 @@
                     }).catch(()=>{});
             })();
         </script>
+    
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="/js/landing-animations.js"></script>
 </body>
 
 </html>

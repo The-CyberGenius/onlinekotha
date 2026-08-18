@@ -557,7 +557,20 @@ HARD RULES
             list.innerHTML = '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">No users match your query</div>';
             return;
         }
-        list.innerHTML = `<div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:10px;">${rows.length} total users</div>`;
+        
+        // Add header + counter
+        list.innerHTML = `
+            <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:12px;">${rows.length} total users</div>
+            <div class="user-list-header">
+                <div>User</div>
+                <div>Status</div>
+                <div>Contact / Usage</div>
+                <div>Spend</div>
+                <div>Location</div>
+                <div>Activity</div>
+                <div style="text-align:right;">Actions</div>
+            </div>
+        `;
         
         for (const u of rows) {
             const planBadge = u.is_admin
@@ -567,71 +580,94 @@ HARD RULES
                 : u.plan === 'trial' && u.trial_expires_at > Date.now()
                     ? '<span class="badge badge-trial">TRIAL</span>'
                 : u.plan === 'trial'
-                    ? '<span class="badge badge-expired">TRIAL EXPIRED</span>'
+                    ? '<span class="badge badge-expired">EXPIRED</span>'
                 : '<span class="badge">FREE</span>';
 
             const loginMethod = u.google_id
-                ? '<span class="badge">Google</span>'
-                : '<span class="badge">Email</span>';
+                ? '<span class="meta-text" style="color:#2563eb;">Google Auth</span>'
+                : '<span class="meta-text">Email Auth</span>';
 
             const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
             const avatarHtml = u.avatar_url
                 ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
                 : `<div class="user-avatar">${initials}</div>`;
 
-            const onlineDot = u.is_online
-                ? `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#16a34a;margin-left:4px;" title="Online"></span>`
-                : '';
+            const onlineDot = u.is_online ? `<span class="status-dot" title="Online"></span>` : '';
 
             const phoneStr = u.phone
-                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" style="color:#2563eb;text-decoration:none;font-weight:500;">${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a> &middot; `
-                : '';
+                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" style="color:#0f172a;text-decoration:none;">${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
+                : '<span style="color:#94a3b8;">No phone</span>';
 
             const ipCountry = u.ip_address
-                ? `IP: ${u.ip_address}${u.country ? ` (${u.country})` : ''} &middot; `
-                : '';
+                ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${u.country || 'Unknown Region'}</span>`
+                : '<span class="sub-text" style="color:#94a3b8;">No IP</span>';
 
             const lastActive = u.last_active_at
-                ? ` &middot; Active: ${formatDateTime(u.last_active_at)}`
-                : '';
+                ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>`
+                : '<span class="meta-text">No activity</span>';
 
-            const card = document.createElement('div');
-            card.className = 'user-row-card';
-
-            card.innerHTML = `
-                <div class="user-main-flex">
-                    <div class="user-left-info">
+            const wrapper = document.createElement('div');
+            
+            wrapper.innerHTML = `
+                <div class="user-row-card">
+                    <!-- 1. Profile -->
+                    <div class="user-col user-col-profile">
                         ${avatarHtml}
-                        <div class="user-details">
-                            <div class="user-line-top">
-                                <span class="user-name-text">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
-                                <span class="user-email-text">${u.email}</span>
-                                ${planBadge}
-                                ${loginMethod}
-                            </div>
-                            <div class="user-line-bottom">
-                                ${phoneStr}
-                                <span>${u.chat_count} chats</span> &middot;
-                                <span>$${u.total_cost.toFixed(3)} spend</span> &middot;
-                                ${ipCountry}
-                                <span>Joined: ${formatDateTime(u.created_at)}</span>
-                                ${lastActive}
-                            </div>
+                        <div class="user-profile-text">
+                            <span class="user-name-text">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
+                            <span class="user-email-text">${u.email}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile wrapper for remaining info -->
+                    <div class="mobile-grid-info">
+                        <!-- 2. Status -->
+                        <div class="user-col mobile-grid-item">
+                            <span class="mobile-label">Status</span>
+                            <div>${planBadge}</div>
+                            ${loginMethod}
+                        </div>
+
+                        <!-- 3. Contact & Usage -->
+                        <div class="user-col mobile-grid-item">
+                            <span class="mobile-label">Contact / Chats</span>
+                            <span class="sub-text">${phoneStr}</span>
+                            <span class="meta-text">${u.chat_count} chat${u.chat_count !== 1 ? 's' : ''}</span>
+                        </div>
+
+                        <!-- 4. Spend -->
+                        <div class="user-col mobile-grid-item">
+                            <span class="mobile-label">Spend</span>
+                            <span class="sub-text font-mono">$${u.total_cost.toFixed(3)}</span>
+                        </div>
+
+                        <!-- 5. Location -->
+                        <div class="user-col mobile-grid-item">
+                            <span class="mobile-label">Location</span>
+                            ${ipCountry}
+                        </div>
+
+                        <!-- 6. Activity -->
+                        <div class="user-col mobile-grid-item">
+                            <span class="mobile-label">Activity</span>
+                            <span class="sub-text">Joined: ${formatDateTime(u.created_at)}</span>
+                            ${lastActive}
                         </div>
                     </div>
 
-                    <div class="user-buttons-group ${u.is_admin ? 'is-admin-actions' : ''}">
+                    <!-- 7. Actions -->
+                    <div class="user-col user-buttons-group">
                         ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}
-                        <button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats (${u.chat_count})</button>
+                        <button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button>
                         <button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Delete</button>`}
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}
                     </div>
                 </div>
 
-                <div data-chats-for="${u.id}" class="hidden" style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;"></div>
-                <div data-ai-logs-for="${u.id}" class="hidden" style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;"></div>
+                <div data-chats-for="${u.id}" class="hidden" style="padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;margin-top:-9px;margin-bottom:12px;"></div>
+                <div data-ai-logs-for="${u.id}" class="hidden" style="padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;margin-top:-9px;margin-bottom:12px;"></div>
             `;
-            list.appendChild(card);
+            list.appendChild(wrapper);
         }
 
         // Manage plan modal
