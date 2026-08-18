@@ -102,6 +102,13 @@ const authLimiter = rateLimit({
     validate: false,
 });
 
+const contactLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Too many contact requests. Please try again later.' },
+    validate: false,
+});
+
 // Stripe webhook needs raw body — must come BEFORE express.json()
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
 
@@ -1009,7 +1016,7 @@ io.on('connection', (socket) => {
 });
 
 // Contact form (no auth required)
-app.post('/api/contact', (req, res) => {
+app.post('/api/contact', contactLimiter, (req, res) => {
     const { name, email, topic, message } = req.body || {};
     if (!email || !message) return res.status(400).json({ error: 'Missing fields' });
     // Log to console (admin can see in pm2 logs) — extend with email if needed

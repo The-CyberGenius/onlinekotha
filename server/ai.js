@@ -129,10 +129,21 @@ router.post('/chat', aiGate, async (req, res) => {
         return res.status(429).json({ error: burstCheck.error });
     }
 
+    function getSafeChatDir(dirKey, chatFolder) {
+        const baseDir = path.resolve(userDir(dirKey));
+        const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
+        const chatDir = path.resolve(baseDir, cleanFolder);
+        if (!chatDir.startsWith(baseDir)) {
+            throw new Error('Invalid chat path');
+        }
+        return chatDir;
+    }
+
     // Load chat messages for context
-    const chatDir = path.join(userDir(dirKey), chat);
+    let chatDir;
     let chatMessages;
     try {
+        chatDir = getSafeChatDir(dirKey, chat);
         const parsed = await getMessages(chatDir);
         chatMessages = parsed.messages;
     } catch (err) {
@@ -362,7 +373,12 @@ router.get('/memories', async (req, res) => {
     const chatFolder = req.query.chat;
     if (!chatFolder) return res.status(400).json({ error: 'chat required' });
 
-    const chatDir = path.join(userDir(req.user.id), chatFolder);
+    const { dirKey } = getOwner(req);
+    const baseDir = path.resolve(userDir(dirKey));
+    const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
+    const chatDir = path.resolve(baseDir, cleanFolder);
+    if (!chatDir.startsWith(baseDir)) return res.status(403).json({ error: 'Invalid path' });
+
     let chatMessages;
     try {
         const parsed = await getMessages(chatDir);
@@ -406,7 +422,12 @@ router.get('/summary', async (req, res) => {
     const chatFolder = req.query.chat;
     if (!chatFolder) return res.status(400).json({ error: 'chat required' });
 
-    const chatDir = path.join(userDir(req.user.id), chatFolder);
+    const { dirKey } = getOwner(req);
+    const baseDir = path.resolve(userDir(dirKey));
+    const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
+    const chatDir = path.resolve(baseDir, cleanFolder);
+    if (!chatDir.startsWith(baseDir)) return res.status(403).json({ error: 'Invalid path' });
+
     let chatMessages;
     try {
         const parsed = await getMessages(chatDir);

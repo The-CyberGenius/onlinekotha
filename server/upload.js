@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const unzipper = require('unzipper');
-const { findChatFile } = require('./parser');
+const { findChatFile, parseChatFile } = require('./parser');
 const { db } = require('./db');
 
 const SRC_DIR = path.join(__dirname, '..', 'src');
@@ -124,7 +124,7 @@ async function handleUpload(req, res) {
             const extractDir = path.join(sessionDir, 'extracted');
             ensureDir(extractDir);
             await extractZip(zipFile.path, extractDir);
-            fs.unlinkSync(zipFile.path);
+            try { fs.unlinkSync(zipFile.path); } catch {}
             flattenSingleSubfolder(extractDir);
 
             const chatFile = findChatFile(extractDir);
@@ -161,16 +161,19 @@ async function handleUpload(req, res) {
         // If baseName is generic (e.g. "Chat", "WhatsApp Chat"), try to parse the real contact name
         if (/^(chat|whatsapp|whatsappchat|unknown|group|user)$/i.test(baseName.replace(/[\s\-_]/g, ''))) {
             try {
-                const parsed = await parseChatFile(findChatFile(finalDir));
-                const senders = {};
-                (parsed.messages || []).forEach(m => {
-                    if (m.sender && m.type !== 'system') senders[m.sender] = (senders[m.sender] || 0) + 1;
-                });
-                const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
-                if (sorted.length > 2) {
-                    finalDisplayName = `Group Chat (${sorted.length} members)`;
-                } else if (sorted.length > 0) {
-                    finalDisplayName = sorted[1] || sorted[0];
+                const chatFilePath = findChatFile(finalDir);
+                if (chatFilePath) {
+                    const parsed = await parseChatFile(chatFilePath);
+                    const senders = {};
+                    (parsed.messages || []).forEach(m => {
+                        if (m.sender && m.type !== 'system') senders[m.sender] = (senders[m.sender] || 0) + 1;
+                    });
+                    const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
+                    if (sorted.length > 2) {
+                        finalDisplayName = `Group Chat (${sorted.length} members)`;
+                    } else if (sorted.length > 0) {
+                        finalDisplayName = sorted[1] || sorted[0];
+                    }
                 }
             } catch (e) {
                 console.warn('Could not parse contact name for generic upload:', e.message);
@@ -189,8 +192,6 @@ async function handleUpload(req, res) {
             ).run(guestId, folderName, finalDisplayName, Date.now());
             recordGuestChatImport(req, res);
         }
-
-        return res.json({ ok: true, chat: folderName });
 
         return res.json({ ok: true, chat: folderName });
     } catch (err) {
