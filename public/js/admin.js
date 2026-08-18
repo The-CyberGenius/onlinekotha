@@ -22,7 +22,7 @@
     }
     if (!me.user.is_admin) {
         document.getElementById('auth-gate').innerHTML =
-            '<div class="text-center"><p class="text-red-600 font-bold">Not authorized.</p><a href="/" class="text-indigo-600 underline">Go to app</a></div>';
+            '<div class="text-center p-6"><p class="text-red-600 font-bold mb-2">Not authorized.</p><a href="/" class="text-indigo-600 underline text-sm font-medium">Go to app</a></div>';
         return;
     }
     document.getElementById('auth-gate').classList.add('hidden');
@@ -100,23 +100,23 @@
         list.innerHTML = '';
         for (const p of rows) {
             const tested = p.last_tested_at
-                ? `<span class="text-[10px] ${p.last_test_ok ? 'text-green-600' : 'text-red-600'}">${p.last_test_ok ? '✓ working' : '✗ ' + (p.last_test_error || 'failed').slice(0, 60)}</span>`
+                ? `<span class="text-[10px] ${p.last_test_ok ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">${p.last_test_ok ? '✓ working' : '✗ ' + (p.last_test_error || 'failed').slice(0, 60)}</span>`
                 : '<span class="text-[10px] text-gray-400">not tested</span>';
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex items-center justify-between gap-3';
+            card.className = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3';
             card.innerHTML = `
                 <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2">
-                        <span class="font-extrabold text-gray-800">${p.label || p.name}</span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-extrabold text-gray-800 text-sm sm:text-base">${p.label || p.name}</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${p.enabled ? 'ON' : 'OFF'}</span>
                     </div>
-                    <div class="text-xs text-gray-500 mt-0.5 font-mono">${p.key_masked}</div>
+                    <div class="text-xs text-gray-500 mt-1 font-mono break-all">${p.key_masked}</div>
                     <div class="text-[10px] text-gray-400 mt-1">${p.base_url || ''} · ${tested}</div>
                 </div>
-                <div class="flex gap-2 shrink-0">
-                    <button data-act="test" data-id="${p.id}" class="text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5">Test</button>
-                    <button data-act="toggle" data-id="${p.id}" data-enabled="${p.enabled}" class="text-xs font-bold bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-lg px-3 py-1.5">${p.enabled ? 'Disable' : 'Enable'}</button>
-                    <button data-act="delete" data-id="${p.id}" class="text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg px-3 py-1.5">Delete</button>
+                <div class="flex items-center gap-1.5 shrink-0 pt-2 sm:pt-0 border-t border-gray-50 sm:border-0">
+                    <button data-act="test" data-id="${p.id}" class="flex-1 sm:flex-none text-center text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 rounded-xl px-3 py-1.5 transition">Test</button>
+                    <button data-act="toggle" data-id="${p.id}" data-enabled="${p.enabled}" class="flex-1 sm:flex-none text-center text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95 rounded-xl px-3 py-1.5 transition">${p.enabled ? 'Disable' : 'Enable'}</button>
+                    <button data-act="delete" data-id="${p.id}" class="text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 active:scale-95 rounded-xl px-3 py-1.5 transition">Delete</button>
                 </div>
             `;
             list.appendChild(card);
@@ -207,21 +207,21 @@
             if (m.provider_label !== lastProv) {
                 const h = document.createElement('div');
                 h.className = 'text-xs font-bold uppercase text-gray-500 tracking-wider mt-4 first:mt-0 flex items-center gap-2';
-                h.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-400"></span>${m.provider_label}`;
+                h.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500"></span>${m.provider_label}`;
                 list.appendChild(h);
                 lastProv = m.provider_label;
             }
             const row = document.createElement('div');
-            row.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition';
+            row.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 rounded-xl hover:bg-gray-100/80 transition';
             row.innerHTML = `
                 <div class="flex-1 min-w-0">
-                    <div class="font-bold text-gray-800">${m.display_name || m.model_id}</div>
-                    <div class="text-[10px] text-gray-500 font-mono truncate">${m.model_id}</div>
-                    <div class="text-[10px] text-gray-400 mt-0.5">in <span class="font-bold text-teal-600">$${m.input_price_per_1m}</span>/M tok · out <span class="font-bold text-purple-600">$${m.output_price_per_1m}</span>/M tok</div>
+                    <div class="font-bold text-gray-800 text-xs sm:text-sm">${m.display_name || m.model_id}</div>
+                    <div class="text-[10px] text-gray-500 font-mono truncate mt-0.5">${m.model_id}</div>
+                    <div class="text-[10px] text-gray-400 mt-1">in <span class="font-bold text-teal-600">$${m.input_price_per_1m}</span>/M · out <span class="font-bold text-purple-600">$${m.output_price_per_1m}</span>/M</div>
                 </div>
-                <div class="flex gap-2 items-center shrink-0 ml-3">
-                    <button data-mid="${m.id}" data-enabled="${m.enabled}" class="model-toggle text-xs font-bold rounded-lg px-3 py-1.5 ${m.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}">${m.enabled ? 'ON' : 'OFF'}</button>
-                    <button data-mid="${m.id}" class="model-delete text-xs font-bold bg-red-50 text-red-500 hover:bg-red-100 rounded-lg px-2 py-1.5">✕</button>
+                <div class="flex gap-2 items-center justify-end shrink-0 pt-1 sm:pt-0">
+                    <button data-mid="${m.id}" data-enabled="${m.enabled}" class="model-toggle text-xs font-bold rounded-xl px-3 py-1.5 active:scale-95 transition ${m.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}">${m.enabled ? 'ON' : 'OFF'}</button>
+                    <button data-mid="${m.id}" class="model-delete text-xs font-bold bg-red-50 text-red-500 hover:bg-red-100 active:scale-95 rounded-xl px-2.5 py-1.5 transition">✕</button>
                 </div>
             `;
             list.appendChild(row);
@@ -407,11 +407,11 @@ HARD RULES
                 promptHtml = `
                 <div class="mt-3">
                     <label class="text-[10px] uppercase font-bold text-gray-500">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="6" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="Default roleplay prompt will be used if left empty...">${r.system_prompt || ''}</textarea>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="6" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="Default roleplay prompt will be used if left empty...">${r.system_prompt || ''}</textarea>
                     <p class="text-[9px] text-gray-400 mt-1">Placeholders: {{contactName}}, {{userName}}, {{contextBlock}}, {{currentDate}}, {{currentTime}}, {{totalMessages}}, {{historyNote}}</p>
                     <details class="mt-2 text-[10px] text-gray-500 cursor-pointer">
                         <summary class="font-bold text-indigo-600 hover:underline">View default prompt template</summary>
-                        <pre class="bg-gray-100 p-2.5 rounded-lg mt-1 font-mono text-[9px] overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto">${DEFAULT_CHAT_PROMPT}</pre>
+                        <pre class="bg-gray-100 p-2.5 rounded-xl mt-1 font-mono text-[9px] overflow-x-auto whitespace-pre-wrap max-h-48 overflow-y-auto">${DEFAULT_CHAT_PROMPT}</pre>
                     </details>
                 </div>
                 `;
@@ -419,37 +419,37 @@ HARD RULES
                 promptHtml = `
                 <div class="mt-3">
                     <label class="text-[10px] uppercase font-bold text-gray-500">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="3" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="System prompt for this feature...">${r.system_prompt || ''}</textarea>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="3" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="System prompt for this feature...">${r.system_prompt || ''}</textarea>
                 </div>
                 `;
             }
 
             const div = document.createElement('div');
-            div.className = 'bg-gray-50 rounded-xl p-4';
+            div.className = 'bg-gray-50 rounded-2xl p-3.5 sm:p-4 border border-gray-100';
             div.innerHTML = `
-                <div class="font-bold text-gray-800 mb-3">${featureLabels[feature]}</div>
+                <div class="font-bold text-gray-800 text-sm mb-3">${featureLabels[feature]}</div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Primary model</label>
-                        <select data-feat="${feature}" data-kind="primary" class="route-sel w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
+                        <select data-feat="${feature}" data-kind="primary" class="route-sel w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
                         <p class="text-[9px] text-gray-400 mt-1">First-choice model for this feature</p>
                     </div>
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Fallback model</label>
-                        <select data-feat="${feature}" data-kind="fallback" class="route-sel w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
+                        <select data-feat="${feature}" data-kind="fallback" class="route-sel w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
                         <p class="text-[9px] text-gray-400 mt-1">Used if primary fails or rate-limits</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Max tokens</label>
-                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
+                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
                         <p class="text-[9px] text-gray-400 mt-1">Maximum length of the AI response</p>
                     </div>
                     <div>
                         <label class="text-[10px] uppercase font-bold text-gray-500">Temperature</label>
-                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" class="route-param w-full mt-1 border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
-                        <p class="text-[9px] text-gray-400 mt-1">0 = focused & deterministic · 1 = creative</p>
+                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
+                        <p class="text-[9px] text-gray-400 mt-1">0 = focused &middot; 1 = creative</p>
                     </div>
                 </div>
                 ${promptHtml}
@@ -569,10 +569,10 @@ HARD RULES
     function renderUserList(rows) {
         const list = document.getElementById('user-list');
         if (!rows.length) {
-            list.innerHTML = '<div class="text-center py-8 text-gray-400"><p class="text-4xl mb-2">👥</p><p class="font-bold">No users match query</p></div>';
+            list.innerHTML = '<div class="text-center py-8 text-gray-400"><p class="text-4xl mb-2">👥</p><p class="font-bold text-sm">No users match query</p></div>';
             return;
         }
-        list.innerHTML = `<p class="text-xs text-gray-500 mb-3">${rows.length} total users</p>`;
+        list.innerHTML = `<p class="text-xs font-bold text-gray-500 mb-3 flex items-center gap-1.5"><span>👥</span> <span>${rows.length} total user${rows.length === 1 ? '' : 's'}</span></p>`;
         for (const u of rows) {
             const planBadge = u.is_admin
                 ? '<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold">admin</span>'
@@ -580,59 +580,78 @@ HARD RULES
                 : u.plan === 'trial' && u.trial_expires_at > Date.now()
                     ? `<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">trial</span>`
                 : u.plan === 'trial' ? '<span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-[10px] font-bold">trial expired</span>'
-                : '<span class="bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[10px] font-bold">free</span>';
+                : '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">free</span>';
 
             const loginMethod = u.google_id
-                ? '<span class="text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">Google</span>'
-                : '<span class="text-[9px] font-bold bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded">Email</span>';
+                ? '<span class="text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">Google</span>'
+                : '<span class="text-[9px] font-bold bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100">Email</span>';
 
             const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
             const avatarHtml = u.avatar_url
-                ? `<img src="${u.avatar_url}" class="w-10 h-10 rounded-xl object-cover shadow-sm" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm\\'>${initials}</div>'">`
-                : `<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">${initials}</div>`;
+                ? `<img src="${u.avatar_url}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shadow-sm shrink-0" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0\\'>${initials}</div>'">`
+                : `<div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initials}</div>`;
 
             const onlineDot = u.is_online
                 ? `<span class="relative flex h-2.5 w-2.5 ml-1 flex-shrink-0" title="Online"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span></span>`
                 : '';
             
             const lastActive = u.last_active_at
-                ? `<span class="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded border border-gray-100" title="Last Active">⏱️ ${formatDateTime(u.last_active_at)}</span>`
+                ? `<span class="bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded-md border border-gray-100" title="Last Active">⏱️ ${formatDateTime(u.last_active_at)}</span>`
                 : '';
 
             const phoneBadge = u.phone
-                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" class="bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold px-1.5 py-0.5 rounded border border-purple-100 transition inline-flex items-center gap-1" title="User Phone Number">📱 ${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
+                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" class="bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold px-1.5 py-0.5 rounded-md border border-purple-100 transition inline-flex items-center gap-1" title="User Phone Number">📱 ${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
                 : '';
 
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-lg p-3 mb-2 border border-gray-100 shadow-sm hover:shadow-md transition';
+            card.className = 'bg-white rounded-2xl p-3.5 sm:p-4 mb-3 border border-gray-100 shadow-sm hover:shadow-md transition';
+            
+            const actionCols = u.is_admin ? 'grid grid-cols-2 sm:flex sm:justify-end gap-1.5' : 'grid grid-cols-4 sm:flex sm:justify-end gap-1.5';
+
             card.innerHTML = `
+                <!-- Top Row: Avatar + Name + Email + Status Badges -->
                 <div class="flex items-start gap-3">
-                    <div class="shrink-0">${avatarHtml.replace('w-10 h-10', 'w-8 h-8 text-xs rounded-lg').replace('rounded-xl', 'rounded-lg')}</div>
-                    <div class="min-w-0 flex-1 flex flex-col gap-1.5">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="font-bold text-gray-900 text-xs truncate flex items-center">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
-                            <span class="text-[10px] text-gray-500 truncate">${u.email}</span>
-                            ${planBadge} ${loginMethod}
+                    <div class="shrink-0 pt-0.5">${avatarHtml}</div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-1 flex-wrap">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="font-bold text-gray-900 text-xs sm:text-sm truncate">${u.display_name || u.email.split('@')[0]}</span>
+                                ${onlineDot}
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                ${planBadge} ${loginMethod}
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2 flex-wrap text-[10px] text-gray-500">
-                            ${phoneBadge}
-                            <span class="font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">💬 ${u.chat_count}</span>
-                            <span class="font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">💰 $${u.total_cost.toFixed(3)}</span>
-                            ${u.ip_address ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
-                            ${u.country ? `<span class="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-100" title="Country">📍 ${u.country}</span>` : ''}
-                            <span class="text-indigo-600 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100" title="Registration Date & Time">📅 Reg: ${formatDateTime(u.created_at)}</span>
-                            ${lastActive}
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1 shrink-0 ml-2">
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn text-[9px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 rounded px-1.5 py-0.5 transition">Manage</button>`}
-                        <button data-uid="${u.id}" class="user-chats-btn text-[9px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded px-1.5 py-0.5 transition">Chats</button>
-                        <button data-uid="${u.id}" class="user-ai-logs-btn text-[9px] font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 rounded px-1.5 py-0.5 transition">AI Logs</button>
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-[9px] font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded px-1.5 py-0.5 transition">Del</button>`}
+                        <p class="text-[11px] text-gray-500 truncate mt-0.5 font-medium">${u.email}</p>
                     </div>
                 </div>
-                <div data-chats-for="${u.id}" class="hidden mt-1.5 pt-1.5 border-t border-gray-50 space-y-1"></div>
-                <div data-ai-logs-for="${u.id}" class="hidden mt-1.5 pt-1.5 border-t border-gray-50 space-y-1"></div>
+
+                <!-- Metadata Badges Row (Full Width Wrapped) -->
+                <div class="mt-2.5 pt-2 border-t border-gray-50 flex items-center gap-1.5 flex-wrap text-[10px] text-gray-600">
+                    ${phoneBadge}
+                    <span class="font-semibold bg-gray-50 text-gray-700 px-2 py-0.5 rounded-md border border-gray-100 inline-flex items-center gap-1">💬 ${u.chat_count}</span>
+                    <span class="font-semibold bg-gray-50 text-gray-700 px-2 py-0.5 rounded-md border border-gray-100 inline-flex items-center gap-1">💰 $${u.total_cost.toFixed(3)}</span>
+                    ${u.ip_address ? `<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-100 font-mono text-[9px]" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
+                    ${u.country ? `<span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-100 font-medium text-[9px]" title="Country">📍 ${u.country}</span>` : ''}
+                    <span class="text-indigo-700 font-medium bg-indigo-50/70 px-2 py-0.5 rounded-md border border-indigo-100 text-[9px]" title="Registration Date">📅 Reg: ${formatDateTime(u.created_at)}</span>
+                    ${lastActive}
+                </div>
+
+                <!-- Action Buttons Toolbar -->
+                <div class="mt-2.5 pt-2 border-t border-gray-50 ${actionCols}">
+                    ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn text-xs font-bold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/70 rounded-xl py-1.5 sm:px-3 transition active:scale-95 text-center flex items-center justify-center gap-1">⚙️ Plan</button>`}
+                    <button data-uid="${u.id}" class="user-chats-btn text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/70 rounded-xl py-1.5 sm:px-3 transition active:scale-95 text-center flex items-center justify-center gap-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Chats
+                    </button>
+                    <button data-uid="${u.id}" class="user-ai-logs-btn text-xs font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200/70 rounded-xl py-1.5 sm:px-3 transition active:scale-95 text-center flex items-center justify-center gap-1">
+                        📜 Logs
+                    </button>
+                    ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200/70 rounded-xl py-1.5 sm:px-2.5 transition active:scale-95 text-center flex items-center justify-center gap-1">🗑️</button>`}
+                </div>
+
+                <!-- Expandable Containers -->
+                <div data-chats-for="${u.id}" class="hidden mt-2 pt-2 border-t border-gray-100 space-y-1"></div>
+                <div data-ai-logs-for="${u.id}" class="hidden mt-2 pt-2 border-t border-gray-100 space-y-1"></div>
             `;
             list.appendChild(card);
         }
@@ -652,17 +671,20 @@ HARD RULES
                     : 'Not set';
 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                 modal.innerHTML = `
-                    <div style="background:white;border-radius:20px;max-width:420px;width:100%;box-shadow:0 24px 48px rgba(0,0,0,0.2);overflow:hidden;">
-                        <div style="padding:20px 24px;border-bottom:1px solid #f1f5f9;">
-                            <h3 style="font-weight:800;font-size:16px;color:#1e293b;">Manage Plan</h3>
-                            <p style="font-size:12px;color:#64748b;margin-top:4px;">${email}</p>
+                    <div style="background:white;border-radius:20px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.25);">
+                        <div style="padding:18px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <h3 style="font-weight:800;font-size:16px;color:#1e293b;">Manage Plan</h3>
+                                <p style="font-size:12px;color:#64748b;margin-top:2px;">${email}</p>
+                            </div>
+                            <button id="plan-modal-x" style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:16px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;">×</button>
                         </div>
-                        <div style="padding:20px 24px;">
+                        <div style="padding:18px 20px;">
                             <div style="margin-bottom:16px;">
                                 <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Plan</label>
-                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:14px;outline:none;">
+                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:14px;outline:none;background:#fff;">
                                     <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free (limited msgs/day)</option>
                                     <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial (higher daily cap, time-limited)</option>
                                     <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid ✓ (truly unlimited)</option>
@@ -674,17 +696,19 @@ HARD RULES
                             </div>
                             <div style="margin-bottom:16px;">
                                 <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Extend Trial (hours from now)</label>
-                                <div style="display:flex;gap:8px;">
-                                    <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="flex:1;border:1px solid #e2e8f0;border-radius:12px;padding:10px 14px;font-size:14px;outline:none;">
-                                    <button id="plan-modal-quick-24" style="background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 12px;cursor:pointer;">+24h</button>
-                                    <button id="plan-modal-quick-72" style="background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 12px;cursor:pointer;">+72h</button>
-                                    <button id="plan-modal-quick-168" style="background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 12px;cursor:pointer;">+7d</button>
+                                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                                    <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="flex:1;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:14px;outline:none;">
+                                </div>
+                                <div style="display:flex;gap:6px;">
+                                    <button id="plan-modal-quick-24" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 6px;cursor:pointer;border:none;">+24h</button>
+                                    <button id="plan-modal-quick-72" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 6px;cursor:pointer;border:none;">+72h</button>
+                                    <button id="plan-modal-quick-168" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 6px;cursor:pointer;border:none;">+7d</button>
                                 </div>
                             </div>
-                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:8px 12px;border-radius:10px;margin-bottom:12px;"></div>
+                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:10px 12px;border-radius:10px;margin-bottom:12px;"></div>
                             <div style="display:flex;gap:10px;justify-content:flex-end;">
-                                <button id="plan-modal-cancel" style="font-size:13px;font-weight:700;color:#64748b;padding:10px 18px;border-radius:12px;cursor:pointer;background:#f1f5f9;">Cancel</button>
-                                <button id="plan-modal-save" style="font-size:13px;font-weight:700;color:white;padding:10px 18px;border-radius:12px;cursor:pointer;background:#1e293b;">Save Changes</button>
+                                <button id="plan-modal-cancel" style="font-size:13px;font-weight:700;color:#64748b;padding:10px 16px;border-radius:12px;cursor:pointer;background:#f1f5f9;border:none;">Cancel</button>
+                                <button id="plan-modal-save" style="font-size:13px;font-weight:700;color:white;padding:10px 18px;border-radius:12px;cursor:pointer;background:#1e293b;border:none;">Save Changes</button>
                             </div>
                         </div>
                     </div>
@@ -692,6 +716,7 @@ HARD RULES
                 document.body.appendChild(modal);
                 modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
                 modal.querySelector('#plan-modal-cancel').addEventListener('click', () => modal.remove());
+                modal.querySelector('#plan-modal-x')?.addEventListener('click', () => modal.remove());
 
                 // Quick extend buttons
                 modal.querySelector('#plan-modal-quick-24').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '24'; });
@@ -751,12 +776,12 @@ HARD RULES
                 const area = list.querySelector(`[data-chats-for="${uid}"]`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
-                    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Chats`;
+                    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Chats`;
                     return;
                 }
-                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-indigo-300 border-t-transparent rounded-full animate-spin"></div> Loading...</div>';
+                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div> Loading chats...</div>';
                 area.classList.remove('hidden');
-                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg> Hide`;
+                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg> Hide`;
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
                     if (!chats.length) {
@@ -764,36 +789,37 @@ HARD RULES
                         return;
                     }
                     area.innerHTML = `
-                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
-                            <div class="flex items-center gap-2 px-3 py-2 text-[9px] font-bold uppercase text-gray-400 tracking-wider border-b border-gray-100">
-                                <div class="flex-1 min-w-0">Chat Name</div>
-                                <div class="w-16 text-center shrink-0 hidden sm:block">Messages</div>
-                                <div class="w-32 shrink-0 hidden md:block">Imported Date & Time</div>
-                                <div class="w-36 text-right shrink-0">Actions</div>
+                        <div class="bg-gray-50/80 rounded-xl overflow-hidden border border-gray-100">
+                            <div class="flex items-center justify-between px-3 py-2 text-[9px] font-bold uppercase text-gray-400 tracking-wider border-b border-gray-100">
+                                <span>User Chats (${chats.length})</span>
                             </div>
                             ${chats.map(c => `
-                                <div class="flex items-center gap-2 px-3 py-2.5 hover:bg-white transition text-sm border-b border-gray-50 last:border-0" data-admin-chat-row="${c.id}">
-                                    <div class="flex-1 min-w-0 font-bold text-gray-800 truncate text-xs">
-                                        ${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}
-                                        ${c.deleted_by_user ? '<span class="ml-1 text-[9px] font-bold bg-red-100 text-red-500 px-1.5 py-0.5 rounded-full">user deleted</span>' : ''}
+                                <div class="p-2.5 sm:px-3 sm:py-2.5 hover:bg-white transition text-xs border-b border-gray-100 last:border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2" data-admin-chat-row="${c.id}">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="font-bold text-gray-800 truncate">
+                                            ${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}
+                                            ${c.deleted_by_user ? '<span class="ml-1 text-[9px] font-bold bg-red-100 text-red-500 px-1.5 py-0.5 rounded-full">deleted</span>' : ''}
+                                        </div>
+                                        <div class="flex items-center gap-2 mt-0.5 text-[10px] text-gray-400">
+                                            <span>💬 ${c.message_count || 0} msgs</span>
+                                            <span>&middot;</span>
+                                            <span>📅 ${formatDateTime(c.created_at)}</span>
+                                        </div>
                                     </div>
-                                    <div class="w-16 text-center text-xs text-gray-500 font-medium shrink-0 hidden sm:block">${c.message_count || 0}</div>
-                                    <div class="w-32 text-[10px] font-semibold text-gray-600 shrink-0 truncate hidden md:block">${formatDateTime(c.created_at)}</div>
-                                    <div class="w-36 text-right flex items-center justify-end gap-1 shrink-0">
-                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="inline-flex items-center gap-1 text-[10px] font-bold bg-teal-500 text-white hover:bg-teal-600 rounded-md px-1.5 py-1 transition no-underline shadow-sm">
+                                    <div class="flex items-center gap-1 shrink-0 pt-1 sm:pt-0 border-t border-gray-100 sm:border-0 justify-end">
+                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="inline-flex items-center gap-1 text-[10px] font-bold bg-teal-500 text-white hover:bg-teal-600 rounded-lg px-2 py-1 transition no-underline shadow-sm">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                             .zip
                                         </a>
-                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-md px-1.5 py-1 transition" title="Translate chat with AI">
+                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg px-2 py-1 transition" title="Translate chat with AI">
                                             🌐
                                         </button>
-                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-md px-1.5 py-1 transition">
+                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg px-2 py-1 transition">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                             Open
                                         </button>
-                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-red-50 text-red-500 hover:bg-red-100 rounded-md px-1.5 py-1 transition">
+                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[10px] font-bold bg-red-50 text-red-500 hover:bg-red-100 rounded-lg px-2 py-1 transition">
                                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                            Del
                                         </button>
                                     </div>
                                 </div>
@@ -860,7 +886,7 @@ HARD RULES
                     area.classList.add('hidden');
                     return;
                 }
-                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div> Loading AI logs...</div>';
+                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div> Loading AI logs...</div>';
                 area.classList.remove('hidden');
                 try {
                     const convs = await (await fetch(`/api/admin/users/${uid}/conversations`)).json();
@@ -869,27 +895,25 @@ HARD RULES
                         return;
                     }
                     area.innerHTML = `
-                        <div class="bg-purple-50/50 rounded-xl overflow-hidden border border-purple-100">
+                        <div class="bg-purple-50/60 rounded-xl overflow-hidden border border-purple-100">
                             <div class="px-3 py-2 border-b border-purple-100 flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase text-purple-500 tracking-wider">AI Conversations (${convs.length})</span>
-                                <button class="ai-logs-close-btn w-5 h-5 rounded-md hover:bg-purple-200 flex items-center justify-center text-purple-400 hover:text-purple-700 transition" title="Close">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                <span class="text-[10px] font-bold uppercase text-purple-600 tracking-wider">AI Conversations (${convs.length})</span>
+                                <button class="ai-logs-close-btn w-6 h-6 rounded-md hover:bg-purple-200 flex items-center justify-center text-purple-400 hover:text-purple-700 transition" title="Close">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                                 </button>
                             </div>
                             ${convs.map(c => `
-                                <div class="px-3 py-2.5 hover:bg-white transition border-b border-purple-50 last:border-0">
-                                    <div class="flex items-center justify-between gap-2">
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-xs font-bold text-gray-800 truncate">${c.title || 'Untitled'}</p>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
-                                        </div>
-                                        <div class="flex gap-1 shrink-0">
-                                            <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg px-2 py-1 transition">View</button>
-                                            <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="text-[10px] font-bold bg-teal-100 text-teal-700 hover:bg-teal-200 rounded-lg px-2 py-1 transition no-underline inline-flex items-center gap-0.5">
-                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                                .txt
-                                            </a>
-                                        </div>
+                                <div class="p-2.5 sm:px-3 sm:py-2.5 hover:bg-white transition border-b border-purple-100/60 last:border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-xs font-bold text-gray-800 truncate">${c.title || 'Untitled'}</p>
+                                        <p class="text-[10px] text-gray-400 mt-0.5">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
+                                    </div>
+                                    <div class="flex gap-1.5 shrink-0 justify-end pt-1 sm:pt-0">
+                                        <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg px-2.5 py-1 transition">View</button>
+                                        <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="text-[10px] font-bold bg-teal-100 text-teal-700 hover:bg-teal-200 rounded-lg px-2.5 py-1 transition no-underline inline-flex items-center gap-0.5">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            .txt
+                                        </a>
                                     </div>
                                 </div>
                             `).join('')}
@@ -909,20 +933,20 @@ HARD RULES
                             try {
                                 const data = await (await fetch(`/api/admin/users/${convUid}/conversations/${convId}`)).json();
                                 const modal = document.createElement('div');
-                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;';
+                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                                 modal.innerHTML = `
-                                    <div style="background:white;border-radius:20px;max-width:600px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,0.2);">
+                                    <div style="background:white;border-radius:20px;max-width:600px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,0.25);overflow:hidden;">
                                         <div style="padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-                                            <div>
-                                                <h4 style="font-weight:700;font-size:14px;color:#1e293b;">${data.title || 'AI Conversation'}</h4>
+                                            <div style="min-width:0;flex:1;">
+                                                <h4 style="font-weight:700;font-size:14px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${data.title || 'AI Conversation'}</h4>
                                                 <p style="font-size:11px;color:#94a3b8;margin-top:2px;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
                                             </div>
-                                            <button class="ai-log-popup-close" style="width:28px;height:28px;border-radius:8px;background:#f1f5f9;color:#64748b;font-size:14px;cursor:pointer;">x</button>
+                                            <button class="ai-log-popup-close" style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:16px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;margin-left:12px;">×</button>
                                         </div>
                                         <div style="padding:16px 20px;overflow-y:auto;flex:1;">
                                             ${(data.messages || []).map(m => `
                                                 <div style="margin-bottom:12px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
-                                                    <div style="max-width:80%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;${m.role === 'user'
+                                                    <div style="max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;${m.role === 'user'
                                                         ? 'background:#1e293b;color:white;border-bottom-right-radius:4px;'
                                                         : 'background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;border-bottom-left-radius:4px;'}">
                                                         ${m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}
@@ -953,7 +977,7 @@ HARD RULES
                 const uid = btn.dataset.uid;
                 const email = btn.dataset.email;
                 if (!confirm(`DELETE user "${email}"?\n\nThis will permanently remove:\n- Account\n- All uploaded chats & files\n- All AI conversations\n\nThis cannot be undone!`)) return;
-                btn.textContent = 'Deleting...';
+                btn.textContent = '...';
                 btn.disabled = true;
                 try {
                     const r = await fetch(`/api/admin/users/${uid}`, { method: 'DELETE' });
@@ -963,7 +987,7 @@ HARD RULES
                     await loadStats();
                 } catch (err) {
                     alert('Error: ' + err.message);
-                    btn.textContent = 'Delete';
+                    btn.textContent = 'Del';
                     btn.disabled = false;
                 }
             });
@@ -992,7 +1016,7 @@ HARD RULES
                 { k: 'smtp_pass', label: 'Password / API key', placeholder: 're_xxx', type: 'password', secret: true },
                 { k: 'email_from', label: 'From address', placeholder: 'Kotha <noreply@yourdomain.com>', type: 'text' },
             ],
-            extraButtons: `<button data-action="test-email" class="text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg px-3 py-1.5">Send test email</button>`,
+            extraButtons: `<button data-action="test-email" class="text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 rounded-xl px-3 py-2 transition">Send test email</button>`,
         }));
 
         // Razorpay card
@@ -1025,7 +1049,7 @@ HARD RULES
 
     function integCard({ title, subtitle, section, status, data, fields, extraButtons = '' }) {
         const card = document.createElement('div');
-        card.className = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-5';
+        card.className = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5';
         const statusBadge = status
             ? '<span class="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2.5 py-1 rounded-full">Active</span>'
             : '<span class="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">Off</span>';
@@ -1041,11 +1065,11 @@ HARD RULES
                 ? '<span class="text-[9px] font-bold text-green-600 ml-1">saved</span>'
                 : '';
             return `
-                <div class="${f.half ? 'col-span-1' : 'col-span-2'}">
+                <div class="${f.half ? 'col-span-1' : 'col-span-1 sm:col-span-2'}">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-gray-500">${f.label}${sourceTag}</label>
                     <input data-section="${section}" data-field="${f.k}" type="${f.type}"
                         placeholder="${placeholder.replace(/"/g, '&quot;')}"
-                        class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400"
+                        class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400"
                         autocomplete="off">
                 </div>
             `;
@@ -1054,14 +1078,14 @@ HARD RULES
         card.innerHTML = `
             <div class="flex items-start justify-between gap-3 mb-4">
                 <div>
-                    <h3 class="font-extrabold text-gray-900 text-base">${title} ${statusBadge}</h3>
+                    <h3 class="font-extrabold text-gray-900 text-sm sm:text-base flex items-center gap-2 flex-wrap">${title} ${statusBadge}</h3>
                     <p class="text-xs text-gray-500 mt-0.5">${subtitle}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">${fieldHtml}</div>
-            <div class="flex items-center gap-2 mt-5">
-                <button data-action="save" data-section="${section}" class="bg-gray-900 hover:bg-black text-white font-bold text-sm rounded-xl px-5 py-2 transition">Save</button>
-                <button data-action="clear" data-section="${section}" class="text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-lg px-3 py-1.5">Clear</button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${fieldHtml}</div>
+            <div class="flex flex-wrap items-center gap-2 mt-5 pt-3 border-t border-gray-50">
+                <button data-action="save" data-section="${section}" class="bg-gray-900 hover:bg-black active:scale-98 text-white font-bold text-xs sm:text-sm rounded-xl px-5 py-2 transition shadow-sm">Save</button>
+                <button data-action="clear" data-section="${section}" class="text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 active:scale-98 rounded-xl px-3.5 py-2 transition">Clear</button>
                 ${extraButtons}
                 <span data-msg-section="${section}" class="text-xs font-semibold ml-2"></span>
             </div>
@@ -1148,20 +1172,20 @@ function showAdminTranslateModal(chatId, uid, chatName) {
 
     const modal = document.createElement('div');
     modal.id = 'admin-translate-modal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);padding:16px;';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);padding:12px;';
     modal.innerHTML = `
         <div style="background:#fff;border-radius:20px;width:100%;max-width:700px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.3);overflow:hidden;">
             <!-- Header -->
-            <div style="padding:18px 22px 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
-                <div>
+            <div style="padding:16px 20px 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+                <div style="min-width:0;flex:1;">
                     <div style="font-size:15px;font-weight:700;color:#1a1a1a;">🌐 AI Chat Translator</div>
-                    <div style="font-size:11px;color:#6b7280;margin-top:2px;max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${chatName}</div>
+                    <div style="font-size:11px;color:#6b7280;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${chatName}</div>
                 </div>
-                <button id="atm-close" style="width:32px;height:32px;border-radius:50%;border:none;background:#f3f4f6;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#6b7280;">×</button>
+                <button id="atm-close" style="width:30px;height:30px;border-radius:50%;border:none;background:#f3f4f6;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#6b7280;margin-left:10px;">×</button>
             </div>
 
             <!-- Language picker + translate button -->
-            <div style="padding:14px 22px;border-bottom:1px solid #f9fafb;display:flex;align-items:center;gap:10px;background:#fafafa;">
+            <div style="padding:12px 20px;border-bottom:1px solid #f9fafb;display:flex;align-items:center;gap:10px;background:#fafafa;flex-wrap:wrap;">
                 <span style="font-size:12px;font-weight:600;color:#374151;">Translate to:</span>
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#d97706;">
                     <input type="radio" name="atm-lang" value="hinglish" checked style="accent-color:#d97706;"> 🇮🇳 Hinglish
@@ -1169,13 +1193,13 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#2563eb;">
                     <input type="radio" name="atm-lang" value="english" style="accent-color:#2563eb;"> 🇬🇧 English
                 </label>
-                <button id="atm-go-btn" style="margin-left:auto;padding:8px 18px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(217,119,6,0.3);">
+                <button id="atm-go-btn" style="margin-left:auto;padding:8px 16px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(217,119,6,0.3);">
                     <span id="atm-btn-icon">✨</span> Translate Now
                 </button>
             </div>
 
             <!-- Progress bar (hidden initially) -->
-            <div id="atm-progress-wrap" style="display:none;padding:10px 22px;background:#fffbeb;border-bottom:1px solid #fde68a;">
+            <div id="atm-progress-wrap" style="display:none;padding:10px 20px;background:#fffbeb;border-bottom:1px solid #fde68a;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
                     <span id="atm-progress-label" style="font-size:11px;font-weight:600;color:#92400e;">Starting translation…</span>
                     <span id="atm-progress-pct" style="font-size:11px;font-weight:700;color:#d97706;">0%</span>
@@ -1186,8 +1210,8 @@ function showAdminTranslateModal(chatId, uid, chatName) {
             </div>
 
             <!-- Translated content area -->
-            <div id="atm-body" style="flex:1;overflow-y:auto;padding:16px 22px;">
-                <div style="text-align:center;padding:40px 20px;color:#9ca3af;">
+            <div id="atm-body" style="flex:1;overflow-y:auto;padding:16px 20px;">
+                <div style="text-align:center;padding:36px 16px;color:#9ca3af;">
                     <div style="font-size:32px;margin-bottom:10px;">🌍</div>
                     <div style="font-size:13px;font-weight:500;">Select a language and click <strong>Translate Now</strong></div>
                     <div style="font-size:11px;margin-top:6px;">Works on any chat size — no token limits. Powered by Google Translate.</div>
@@ -1195,7 +1219,7 @@ function showAdminTranslateModal(chatId, uid, chatName) {
             </div>
 
             <!-- Footer -->
-            <div style="padding:10px 22px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
+            <div style="padding:10px 20px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
                 Powered by Google Translate (free) &bull; Zero token cost &bull; Works on any chat size
             </div>
         </div>
@@ -1383,4 +1407,3 @@ function showAdminTranslateModalWithOffset(chatId, uid, chatName, offset, lang) 
         }
     }, 50);
 }
-

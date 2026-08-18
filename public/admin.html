@@ -2,76 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#f8fafc">
     <title>Kotha — Admin</title>
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/css/tailwind.min.css?v=1">
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        body, body * { user-select: text !important; -webkit-user-select: text !important; -moz-user-select: text !important; }
-        .tab-active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        body, body * {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            box-sizing: border-box;
+        }
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+        body {
+            padding-top: var(--sat);
+            padding-bottom: var(--sab);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tab-btn {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.15s ease;
+        }
+        .tab-active {
+            background: #ffffff !important;
+            color: #4f46e5 !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06) !important;
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Prevent iOS auto-zoom on focus by keeping inputs 16px on mobile */
+        @media screen and (max-width: 640px) {
+            input, select, textarea {
+                font-size: 15px !important;
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
-    <div id="auth-gate" class="flex items-center justify-center h-screen text-gray-500">Checking access...</div>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen text-slate-900 antialiased">
+    <div id="auth-gate" class="flex items-center justify-center h-screen text-gray-500 font-medium text-sm">Checking access...</div>
 
-    <div id="app" class="hidden max-w-6xl mx-auto p-6">
+    <div id="app" class="hidden max-w-6xl mx-auto px-3 py-3 sm:px-5 sm:py-5 md:px-6 md:py-6 pb-20 sm:pb-10">
         <!-- Header -->
-        <header class="flex items-center justify-between mb-3">
-            <div>
-                <h1 class="text-xl font-extrabold text-gray-900">Kotha Admin</h1>
-                <p class="text-[10px] text-gray-500" id="admin-email-info"></p>
+        <header class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-gray-200/60 sm:border-0 sm:pb-0">
+            <div class="min-w-0">
+                <h1 class="text-lg sm:text-xl font-extrabold text-gray-900 tracking-tight flex items-center gap-1.5">
+                    <span>Kotha Admin</span>
+                    <span class="text-[9px] font-bold bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase tracking-wider hidden sm:inline-block">Panel</span>
+                </h1>
+                <p class="text-[11px] text-gray-500 truncate mt-0.5 font-medium" id="admin-email-info"></p>
             </div>
-            <div class="flex gap-1.5">
-                <a href="/app.html" class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">← Open App</a>
-                <button id="logout-btn" class="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 transition">Logout</button>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <a href="/app.html" class="bg-white border border-gray-200 shadow-sm rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 active:scale-95 transition inline-flex items-center gap-1">
+                    <span>←</span> <span>App</span>
+                </a>
+                <button id="logout-btn" class="bg-white border border-gray-200 shadow-sm rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 active:scale-95 transition">Logout</button>
             </div>
         </header>
 
         <!-- Stats strip -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
-                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider flex justify-between">Today's spend <span class="normal-case text-gray-400 font-medium">cap: $<span id="stat-cap">0</span></span></p>
-                <p class="text-lg font-extrabold text-indigo-700 leading-tight mt-0.5">$<span id="stat-today-cost">0</span></p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 sm:mb-4">
+            <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider flex justify-between items-center">
+                    <span>Today's spend</span>
+                    <span class="normal-case text-gray-400 font-medium text-[9px]">cap: $<span id="stat-cap">0</span></span>
+                </p>
+                <p class="text-base sm:text-xl font-extrabold text-indigo-700 leading-tight mt-1">$<span id="stat-today-cost">0</span></p>
             </div>
-            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
-                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Total spend</p>
-                <p class="text-lg font-extrabold text-purple-700 leading-tight mt-0.5">$<span id="stat-total-cost">0</span></p>
+            <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total spend</p>
+                <p class="text-base sm:text-xl font-extrabold text-purple-700 leading-tight mt-1">$<span id="stat-total-cost">0</span></p>
             </div>
-            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
-                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Total AI calls</p>
-                <p class="text-lg font-extrabold text-teal-700 leading-tight mt-0.5" id="stat-total-calls">0</p>
+            <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Total AI calls</p>
+                <p class="text-base sm:text-xl font-extrabold text-teal-700 leading-tight mt-1" id="stat-total-calls">0</p>
             </div>
-            <div class="bg-white rounded-lg p-2.5 border border-gray-100 shadow-sm flex flex-col justify-center">
-                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-wider">Users</p>
-                <p class="text-lg font-extrabold text-amber-700 leading-tight mt-0.5" id="stat-users">0</p>
+            <div class="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-3.5 border border-gray-100 shadow-sm flex flex-col justify-center">
+                <p class="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wider">Users</p>
+                <p class="text-base sm:text-xl font-extrabold text-amber-700 leading-tight mt-1" id="stat-users">0</p>
             </div>
         </div>
 
         <!-- Tabs -->
-        <div class="flex gap-1 bg-gray-200/60 p-1 rounded-lg mb-4 overflow-x-auto no-scrollbar">
-            <button data-tab="providers" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition tab-active whitespace-nowrap">Providers</button>
-            <button data-tab="models" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Models</button>
-            <button data-tab="routes" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Routing</button>
-            <button data-tab="integrations" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Integrations</button>
-            <button data-tab="settings" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Limits</button>
-            <button data-tab="users" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">Users</button>
-            <button data-tab="dm-logs" class="tab-btn flex-none md:flex-1 py-1 px-3 rounded-md font-bold text-[11px] transition text-gray-600 whitespace-nowrap">DM Logs</button>
+        <div class="flex gap-1 bg-gray-200/70 p-1 rounded-xl mb-3 sm:mb-4 overflow-x-auto no-scrollbar scroll-smooth">
+            <button data-tab="providers" class="tab-btn flex-none sm:flex-1 py-1.5 px-3 rounded-lg font-bold text-[11px] sm:text-xs transition tab-active whitespace-nowrap">Providers</button>
+            <button data-tab="models" class="tab-btn flex-none sm:flex-1 py-1.5 px-3 rounded-lg font-bold text-[11px] sm:text-xs transition text-gray-600 whitespace-nowrap">Models</button>
+            <button data-tab="routes" class="tab-btn flex-none sm:flex-1 py-1.5 px-3 rounded-lg font-bold text-[11px] sm:text-xs transition text-gray-600 whitespace-nowrap">Routing</button>
+            <button data-tab="integrations" class="tab-btn flex-none sm:flex-1 py-1.5 px-3 rounded-lg font-bold text-[11px] sm:text-xs transition text-gray-600 whitespace-nowrap">Integrations</button>
+            <button data-tab="settings" class="tab-btn flex-none sm:flex-1 py-1.5 px-3 rounded-lg font-bold text-[11px] sm:text-xs transition text-gray-600 whitespace-nowrap">Limits</button>
+            <button data-tab="users" class="tab-btn flex-none sm:flex-1 py-1.5 px-3 rounded-lg font-bold text-[11px] sm:text-xs transition text-gray-600 whitespace-nowrap">Users</button>
+            <button data-tab="dm-logs" class="tab-btn flex-none sm:flex-1 py-1.5 px-3 rounded-lg font-bold text-[11px] sm:text-xs transition text-gray-600 whitespace-nowrap">DM Logs</button>
         </div>
 
         <!-- Providers Tab -->
         <section id="tab-providers" class="tab-content">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
-                <h2 class="font-extrabold text-gray-800 mb-1">Add AI Provider</h2>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
+                <h2 class="font-extrabold text-gray-800 text-sm sm:text-base mb-1">Add AI Provider</h2>
                 <p class="text-xs text-gray-500 mb-4">Connect an LLM provider by pasting your API key. Keys are encrypted at rest with AES-256.</p>
 
                 <form id="add-provider-form" class="space-y-3">
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Provider</label>
-                        <select id="prov-name" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <select id="prov-name" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
                             <option value="">Select a provider…</option>
                         </select>
                     </div>
@@ -85,62 +125,62 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">API Key</label>
-                            <input id="prov-key" type="password" placeholder="sk-… / paste your secret key" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 font-mono">
+                            <input id="prov-key" type="password" placeholder="sk-… / paste your secret key" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400 font-mono">
                             <p class="text-[10px] text-gray-400 mt-1">Stored encrypted — never shown back in plain text.</p>
                         </div>
                         <div>
                             <label class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Base URL (optional)</label>
-                            <input id="prov-baseurl" type="text" placeholder="https://… (auto-filled for known providers)" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 font-mono">
+                            <input id="prov-baseurl" type="text" placeholder="https://… (auto-filled for known providers)" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400 font-mono">
                             <p class="text-[10px] text-gray-400 mt-1">Override only if using a proxy or custom endpoint.</p>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 text-sm transition">+ Add Provider & Auto-Seed Models</button>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 text-xs sm:text-sm transition active:scale-98 shadow-sm">+ Add Provider & Auto-Seed Models</button>
                 </form>
                 <p id="prov-add-msg" class="text-xs text-red-600 font-semibold mt-2 hidden"></p>
             </div>
 
             <div class="mb-2 flex items-center justify-between px-1">
                 <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Connected Providers</h3>
-                <span class="text-[10px] text-gray-400">Click <b>Test</b> to validate the API key</span>
+                <span class="text-[10px] text-gray-400">Click <b>Test</b> to validate</span>
             </div>
             <div id="provider-list" class="space-y-3"></div>
         </section>
 
         <!-- Models Tab -->
         <section id="tab-models" class="tab-content hidden">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-4">
-                <h2 class="font-extrabold text-gray-800 mb-1">Available Models</h2>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 mb-4">
+                <h2 class="font-extrabold text-gray-800 text-sm sm:text-base mb-1">Available Models</h2>
                 <p class="text-xs text-gray-500 mb-4">Popular models from each provider are auto-seeded when you add a provider. Use the form below to add custom or new models that aren't on the default list.</p>
                 <div id="model-list" class="space-y-2 text-sm"></div>
             </div>
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h2 class="font-extrabold text-gray-800 mb-1">Add Custom Model</h2>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
+                <h2 class="font-extrabold text-gray-800 text-sm sm:text-base mb-1">Add Custom Model</h2>
                 <p class="text-xs text-gray-500 mb-4">Add any model ID supported by one of your connected providers. Pricing is per million tokens — leave at 0 for local/free models.</p>
-                <form id="add-model-form" class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
-                    <div class="md:col-span-2">
+                <form id="add-model-form" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-3 items-end">
+                    <div class="sm:col-span-2 md:col-span-2">
                         <label class="text-[10px] font-bold text-gray-500 uppercase">Provider</label>
-                        <select id="model-provider-id" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400"></select>
+                        <select id="model-provider-id" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400 bg-white"></select>
                         <p class="text-[9px] text-gray-400 mt-1">Which connected provider hosts this model</p>
                     </div>
-                    <div class="md:col-span-2">
+                    <div class="sm:col-span-2 md:col-span-2">
                         <label class="text-[10px] font-bold text-gray-500 uppercase">Model ID</label>
-                        <input id="model-id-input" type="text" placeholder="e.g. gpt-4-turbo" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400 font-mono">
+                        <input id="model-id-input" type="text" placeholder="e.g. gpt-4-turbo" required class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400 font-mono">
                         <p class="text-[9px] text-gray-400 mt-1">Exact identifier sent to the API</p>
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase">Input $/M</label>
-                        <input id="model-in-price" type="number" step="0.01" placeholder="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <input id="model-in-price" type="number" step="0.01" placeholder="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400">
                         <p class="text-[9px] text-gray-400 mt-1">Cost per 1M input tokens</p>
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-gray-500 uppercase">Output $/M</label>
-                        <input id="model-out-price" type="number" step="0.01" placeholder="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <input id="model-out-price" type="number" step="0.01" placeholder="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400">
                         <p class="text-[9px] text-gray-400 mt-1">Cost per 1M output tokens</p>
                     </div>
-                    <div class="md:col-span-6 flex items-center gap-3">
-                        <input id="model-display-name" type="text" placeholder="Display name shown in dropdowns (optional)" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
-                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-5 py-2 text-sm transition whitespace-nowrap">+ Add Model</button>
+                    <div class="sm:col-span-2 md:col-span-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mt-1">
+                        <input id="model-display-name" type="text" placeholder="Display name shown in dropdowns (optional)" class="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-5 py-2 text-xs sm:text-sm transition whitespace-nowrap active:scale-98 shadow-sm">+ Add Model</button>
                     </div>
                 </form>
                 <p id="model-add-msg" class="text-xs text-red-600 font-semibold mt-2 hidden"></p>
@@ -149,8 +189,8 @@
 
         <!-- Routes Tab -->
         <section id="tab-routes" class="tab-content hidden">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h2 class="font-extrabold text-gray-800 mb-1">Feature Routing & System Prompts</h2>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
+                <h2 class="font-extrabold text-gray-800 text-sm sm:text-base mb-1">Feature Routing & System Prompts</h2>
                 <p class="text-xs text-gray-500 mb-4 leading-relaxed">
                     Each app feature (chat reply, summarisation, etc.) routes to a <b>Primary</b> model with an optional <b>Fallback</b>.
                     If the primary fails or rate-limits, the fallback runs automatically.
@@ -160,7 +200,7 @@
                 <form id="routes-form-wrapper" class="space-y-4">
                     <div id="routes-form" class="space-y-4"></div>
                     <div class="flex items-center gap-3 pt-2">
-                        <button type="submit" id="routes-save-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-5 py-2 text-sm transition">Save Routing</button>
+                        <button type="submit" id="routes-save-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-5 py-2 text-xs sm:text-sm transition active:scale-98 shadow-sm">Save Routing</button>
                         <p id="routes-global-msg" class="text-xs text-green-600 font-semibold hidden">✓ Saved successfully</p>
                     </div>
                 </form>
@@ -169,38 +209,38 @@
 
         <!-- Integrations Tab -->
         <section id="tab-integrations" class="tab-content hidden">
-            <div id="integrations-root" class="space-y-5"></div>
+            <div id="integrations-root" class="space-y-4 sm:space-y-5"></div>
         </section>
 
         <!-- Settings Tab -->
         <section id="tab-settings" class="tab-content hidden">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <h2 class="font-extrabold text-gray-800 mb-4">Global limits</h2>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5">
+                <h2 class="font-extrabold text-gray-800 text-sm sm:text-base mb-4">Global limits</h2>
                 <form id="settings-form" class="space-y-4 max-w-md">
                     <div>
                         <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Daily AI spend cap ($)</label>
-                        <input id="s-daily-cap" type="number" step="0.1" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                        <input id="s-daily-cap" type="number" step="0.1" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400">
                         <p class="text-[10px] text-gray-400 mt-1">Pauses AI calls when daily spend hits this amount</p>
                     </div>
-                    <div class="border border-dashed border-gray-200 rounded-xl p-4 space-y-4">
+                    <div class="border border-dashed border-gray-200 rounded-xl p-3.5 sm:p-4 space-y-3.5">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Plan limits</p>
                         <div>
                             <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Free plan — daily AI messages</label>
-                            <input id="s-free-msgs" type="number" min="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                            <input id="s-free-msgs" type="number" min="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400">
                             <p class="text-[10px] text-gray-400 mt-1">Free users get this many AI messages per day. Resets at midnight. (0 = block all)</p>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial plan — daily AI messages <span class="text-gray-400 font-normal normal-case">(Paid = unlimited)</span></label>
-                            <input id="s-paid-msgs" type="number" min="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                            <input id="s-paid-msgs" type="number" min="0" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400">
                             <p class="text-[10px] text-gray-400 mt-1">Trial users daily cap. Resets at midnight. Paid plan is always unlimited.</p>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-gray-600 uppercase tracking-wider">Trial duration (hours)</label>
-                            <input id="s-trial-hours" type="number" min="1" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-400">
+                            <input id="s-trial-hours" type="number" min="1" class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400">
                             <p class="text-[10px] text-gray-400 mt-1">Trial length for NEW sign-ups only. Existing users' trials don't change.</p>
                         </div>
                     </div>
-                    <button type="submit" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl px-5 py-2 text-sm transition">Save Settings</button>
+                    <button type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-6 py-2.5 text-xs sm:text-sm transition active:scale-98 shadow-sm">Save Settings</button>
                     <p id="settings-msg" class="text-xs text-green-600 font-semibold hidden">✓ Saved successfully</p>
                 </form>
             </div>
@@ -208,12 +248,15 @@
 
         <!-- Users Tab -->
         <section id="tab-users" class="tab-content hidden">
-            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-3">
-                <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
-                    <h2 class="font-extrabold text-gray-800 text-sm">Users</h2>
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="admin-user-search" placeholder="Search users (email, name, ID)..." class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs outline-none focus:ring-1 focus:ring-indigo-500 w-64">
-                        <button id="purge-spam-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-1.5 rounded-lg transition">🧹 Purge spam</button>
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-4">
+                <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2 mb-3">
+                    <h2 class="font-extrabold text-gray-800 text-sm sm:text-base">Users</h2>
+                    <div class="flex items-center gap-2 flex-1 sm:flex-initial">
+                        <div class="relative flex-1 sm:w-72">
+                            <input type="text" id="admin-user-search" placeholder="Search users (email, name, ID)..." class="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition">
+                            <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">🔍</span>
+                        </div>
+                        <button id="purge-spam-btn" class="shrink-0 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-3 py-2 rounded-xl transition active:scale-95">🧹 Purge spam</button>
                     </div>
                 </div>
                 <div id="user-list" class="text-sm"></div>
@@ -222,38 +265,41 @@
 
         <!-- DM Logs Tab (government compliance) -->
         <section id="tab-dm-logs" class="tab-content hidden">
-            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-                <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-3.5 sm:p-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 mb-3">
                     <div>
-                        <h2 class="font-extrabold text-gray-800 text-sm">DM Conversation Logs</h2>
+                        <h2 class="font-extrabold text-gray-800 text-sm sm:text-base">DM Conversation Logs</h2>
                         <p class="text-[10px] text-gray-400 mt-0.5">Admin access for legal &amp; government compliance. All logs stored server-side.</p>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <a href="/api/api/admin/dm/export-all" download class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm border border-green-700 flex items-center gap-1">
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        <a href="/api/admin/dm/export-all" download class="flex-1 sm:flex-none justify-center bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm border border-green-700 flex items-center gap-1 active:scale-95">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                             Export All (ZIP)
                         </a>
-                        <div class="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
-                        <input id="dm-log-search" type="text" placeholder="Search by email or name…"
-                            class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 w-52 outline-none focus:ring-2 focus:ring-indigo-300">
-                        <button id="dm-log-search-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Search</button>
+                        <div class="flex items-center gap-1.5 flex-1 sm:flex-initial">
+                            <input id="dm-log-search" type="text" placeholder="Search by email or name…"
+                                class="text-xs sm:text-sm border border-gray-200 rounded-xl px-3 py-2 flex-1 sm:w-52 outline-none focus:ring-2 focus:ring-indigo-300">
+                            <button id="dm-log-search-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition active:scale-95">Search</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Conversations list -->
-                <div id="dm-log-list" class="text-sm">
-                    <p class="text-gray-400 text-xs py-4 text-center">Loading…</p>
+                <div class="overflow-x-auto -mx-1 sm:mx-0 rounded-xl border border-gray-100">
+                    <div id="dm-log-list" class="text-sm min-w-[550px] sm:min-w-0">
+                        <p class="text-gray-400 text-xs py-4 text-center">Loading…</p>
+                    </div>
                 </div>
                 <div id="dm-log-pagination" class="flex gap-2 justify-end mt-3 text-xs"></div>
 
                 <!-- Message view (shown when a conversation is selected) -->
                 <div id="dm-log-viewer" class="hidden mt-4 border-t pt-4">
-                    <div class="flex items-center justify-between mb-3">
-                        <div>
-                            <button id="dm-log-back" class="text-xs text-indigo-600 hover:underline mr-3">← Back</button>
-                            <span id="dm-log-viewer-title" class="text-sm font-bold text-gray-800"></span>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="min-w-0">
+                            <button id="dm-log-back" class="text-xs font-bold text-indigo-600 hover:underline mr-2">← Back</button>
+                            <span id="dm-log-viewer-title" class="text-xs sm:text-sm font-bold text-gray-800 truncate"></span>
                         </div>
-                        <a id="dm-log-download-btn" href="#" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">⬇ Download .txt</a>
+                        <a id="dm-log-download-btn" href="#" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition shrink-0">⬇ Download .txt</a>
                     </div>
                     <div id="dm-log-messages" class="max-h-[500px] overflow-y-auto flex flex-col gap-2 bg-gray-50 rounded-xl p-3"></div>
                 </div>
@@ -261,7 +307,7 @@
         </section>
     </div>
 
-    <script src="/js/admin.js?v=6"></script>
+    <script src="/js/admin.js?v=7"></script>
     <script>
     // ── DM Logs Tab ──────────────────────────────────────────────────────────
     (function() {
@@ -296,32 +342,32 @@
             el.innerHTML = `
                 <table class="w-full text-xs border-collapse">
                     <thead>
-                        <tr class="bg-gray-50 text-gray-500 uppercase text-[9px] tracking-wider">
-                            <th class="text-left py-2 px-2 border-b">ID</th>
-                            <th class="text-left py-2 px-2 border-b">User A</th>
-                            <th class="text-left py-2 px-2 border-b">User B</th>
-                            <th class="text-left py-2 px-2 border-b">Messages</th>
-                            <th class="text-left py-2 px-2 border-b">Last Activity</th>
-                            <th class="text-left py-2 px-2 border-b">Actions</th>
+                        <tr class="bg-gray-50/80 text-gray-500 uppercase text-[9px] tracking-wider">
+                            <th class="text-left py-2 px-2.5 border-b">ID</th>
+                            <th class="text-left py-2 px-2.5 border-b">User A</th>
+                            <th class="text-left py-2 px-2.5 border-b">User B</th>
+                            <th class="text-center py-2 px-2.5 border-b">Messages</th>
+                            <th class="text-left py-2 px-2.5 border-b">Last Activity</th>
+                            <th class="text-right py-2 px-2.5 border-b">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${data.rows.map(r => `
-                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
-                            <td class="py-2 px-2 text-gray-400">#${r.id}</td>
-                            <td class="py-2 px-2">
-                                <div class="font-semibold text-gray-700">${r.user_a_name || ''}</div>
-                                <div class="text-gray-400">${r.user_a_email}</div>
+                        <tr class="border-b border-gray-50 hover:bg-gray-50/80 transition">
+                            <td class="py-2.5 px-2.5 text-gray-400 font-mono">#${r.id}</td>
+                            <td class="py-2.5 px-2.5">
+                                <div class="font-semibold text-gray-800">${r.user_a_name || ''}</div>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[140px]">${r.user_a_email}</div>
                             </td>
-                            <td class="py-2 px-2">
-                                <div class="font-semibold text-gray-700">${r.user_b_name || ''}</div>
-                                <div class="text-gray-400">${r.user_b_email}</div>
+                            <td class="py-2.5 px-2.5">
+                                <div class="font-semibold text-gray-800">${r.user_b_name || ''}</div>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[140px]">${r.user_b_email}</div>
                             </td>
-                            <td class="py-2 px-2 text-center font-bold text-gray-700">${r.msg_count}</td>
-                            <td class="py-2 px-2 text-gray-400">${timeStr(r.last_at)}</td>
-                            <td class="py-2 px-2">
-                                <button class="dm-view-btn text-indigo-600 hover:underline font-bold mr-2" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
-                                <a href="/api/admin/dm/conversations/${r.id}/download" class="text-green-600 hover:underline font-bold">Download</a>
+                            <td class="py-2.5 px-2.5 text-center font-bold text-gray-700">${r.msg_count}</td>
+                            <td class="py-2.5 px-2.5 text-gray-400 text-[10px]">${timeStr(r.last_at)}</td>
+                            <td class="py-2.5 px-2.5 text-right">
+                                <button class="dm-view-btn text-indigo-600 hover:text-indigo-800 font-bold mr-2 text-[11px]" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
+                                <a href="/api/admin/dm/conversations/${r.id}/download" class="text-green-600 hover:text-green-800 font-bold text-[11px]">Download</a>
                             </td>
                         </tr>`).join('')}
                     </tbody>
@@ -331,8 +377,8 @@
             const pages = Math.ceil(data.total / data.limit);
             pg.innerHTML = `
                 <span class="text-gray-400 mr-2">Page ${dmPage} of ${pages} (${data.total} total)</span>
-                ${dmPage > 1 ? `<button id="dm-pg-prev" class="bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded font-bold transition">← Prev</button>` : ''}
-                ${dmPage < pages ? `<button id="dm-pg-next" class="bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded font-bold transition">Next →</button>` : ''}`;
+                ${dmPage > 1 ? `<button id="dm-pg-prev" class="bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-lg font-bold transition">← Prev</button>` : ''}
+                ${dmPage < pages ? `<button id="dm-pg-next" class="bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded-lg font-bold transition">Next →</button>` : ''}`;
 
             document.getElementById('dm-pg-prev')?.addEventListener('click', () => loadDmLogs(dmPage - 1));
             document.getElementById('dm-pg-next')?.addEventListener('click', () => loadDmLogs(dmPage + 1));
@@ -365,9 +411,9 @@
 
             msgsEl.innerHTML = data.messages.map(m => `
                 <div class="flex gap-2 text-xs">
-                    <span class="shrink-0 font-semibold text-gray-500 w-28 truncate" title="${m.sender_email}">${m.sender_name || m.sender_email}</span>
-                    <span class="text-gray-300 shrink-0">${timeStr(m.created_at)}</span>
-                    <span class="text-gray-700 flex-1">${m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+                    <span class="shrink-0 font-semibold text-gray-600 w-24 sm:w-28 truncate" title="${m.sender_email}">${m.sender_name || m.sender_email}</span>
+                    <span class="text-gray-400 shrink-0 text-[10px]">${timeStr(m.created_at)}</span>
+                    <span class="text-gray-800 flex-1 break-words">${m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
                 </div>
             `).join('');
         }
@@ -399,7 +445,7 @@
                 const d = await r.json();
                 alert(d.ok ? `Deleted ${d.deleted} spam accounts.` : (d.error || 'Failed'));
                 location.reload();
-            } catch { alert('Network error'); this.disabled = false; this.textContent = '🧹 Purge spam (@example.com)'; }
+            } catch { alert('Network error'); this.disabled = false; this.textContent = '🧹 Purge spam'; }
         });
     })();
     </script>
