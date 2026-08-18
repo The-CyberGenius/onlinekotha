@@ -42,10 +42,8 @@
             const tab = btn.dataset.tab;
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.remove('tab-active');
-                b.classList.add('text-gray-600');
             });
             btn.classList.add('tab-active');
-            btn.classList.remove('text-gray-600');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
         });
@@ -94,29 +92,29 @@
         const rows = await (await fetch('/api/admin/providers')).json();
         const list = document.getElementById('provider-list');
         if (!rows.length) {
-            list.innerHTML = '<div class="bg-white rounded-2xl border border-gray-100 p-6 text-center text-gray-500 text-sm">No providers added yet. Add one above to start.</div>';
+            list.innerHTML = '<div class="bg-white rounded-2xl border border-gray-200 p-6 text-center text-gray-500 text-sm">No providers added yet. Add one above to start.</div>';
             return;
         }
         list.innerHTML = '';
         for (const p of rows) {
             const tested = p.last_tested_at
-                ? `<span class="text-[10px] sm:text-xs ${p.last_test_ok ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">${p.last_test_ok ? '✓ working' : '✗ ' + (p.last_test_error || 'failed').slice(0, 60)}</span>`
-                : '<span class="text-[10px] sm:text-xs text-gray-400">not tested</span>';
+                ? `<span class="text-[11px] ${p.last_test_ok ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">${p.last_test_ok ? '✓ working' : '✗ ' + (p.last_test_error || 'failed').slice(0, 60)}</span>`
+                : '<span class="text-[11px] text-gray-400">not tested</span>';
             const card = document.createElement('div');
-            card.className = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:shadow-md transition';
+            card.className = 'bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:shadow-md transition';
             card.innerHTML = `
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="font-extrabold text-gray-900 text-sm sm:text-base">${p.label || p.name}</span>
+                        <span class="font-bold text-gray-900 text-sm sm:text-base">${p.label || p.name}</span>
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${p.enabled ? 'ON' : 'OFF'}</span>
                     </div>
                     <div class="text-xs text-gray-500 mt-1 font-mono break-all">${p.key_masked}</div>
                     <div class="text-[11px] text-gray-400 mt-1">${p.base_url || ''} &middot; ${tested}</div>
                 </div>
-                <div class="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t border-gray-50 sm:border-0">
-                    <button data-act="test" data-id="${p.id}" class="flex-1 sm:flex-none text-center text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 rounded-xl px-3.5 py-2 transition shadow-sm">Test</button>
-                    <button data-act="toggle" data-id="${p.id}" data-enabled="${p.enabled}" class="flex-1 sm:flex-none text-center text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95 rounded-xl px-3.5 py-2 transition">${p.enabled ? 'Disable' : 'Enable'}</button>
-                    <button data-act="delete" data-id="${p.id}" class="text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 active:scale-95 rounded-xl px-3.5 py-2 transition">Delete</button>
+                <div class="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t border-gray-100 sm:border-0">
+                    <button data-act="test" data-id="${p.id}" class="text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 rounded-lg px-3 py-1.5 transition">Test</button>
+                    <button data-act="toggle" data-id="${p.id}" data-enabled="${p.enabled}" class="text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-95 rounded-lg px-3 py-1.5 transition">${p.enabled ? 'Disable' : 'Enable'}</button>
+                    <button data-act="delete" data-id="${p.id}" class="text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 active:scale-95 rounded-lg px-3 py-1.5 transition">Delete</button>
                 </div>
             `;
             list.appendChild(card);
@@ -206,22 +204,22 @@
         for (const m of rows) {
             if (m.provider_label !== lastProv) {
                 const h = document.createElement('div');
-                h.className = 'text-xs font-bold uppercase text-gray-500 tracking-wider mt-5 first:mt-0 flex items-center gap-2';
+                h.className = 'text-xs font-bold uppercase text-gray-500 tracking-wider mt-4 first:mt-0 flex items-center gap-2';
                 h.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500"></span>${m.provider_label}`;
                 list.appendChild(h);
                 lastProv = m.provider_label;
             }
             const row = document.createElement('div');
-            row.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3.5 bg-gray-50 rounded-2xl hover:bg-gray-100/80 transition border border-gray-100';
+            row.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition border border-gray-100';
             row.innerHTML = `
                 <div class="flex-1 min-w-0">
                     <div class="font-bold text-gray-900 text-xs sm:text-sm">${m.display_name || m.model_id}</div>
                     <div class="text-[11px] text-gray-500 font-mono truncate mt-0.5">${m.model_id}</div>
-                    <div class="text-[11px] text-gray-400 mt-1">in <span class="font-bold text-teal-600">$${m.input_price_per_1m}</span>/M &middot; out <span class="font-bold text-purple-600">$${m.output_price_per_1m}</span>/M</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">in <span class="font-bold text-teal-600">$${m.input_price_per_1m}</span>/M &middot; out <span class="font-bold text-purple-600">$${m.output_price_per_1m}</span>/M</div>
                 </div>
                 <div class="flex gap-2 items-center justify-end shrink-0 pt-1 sm:pt-0">
-                    <button data-mid="${m.id}" data-enabled="${m.enabled}" class="model-toggle text-xs font-bold rounded-xl px-3.5 py-2 active:scale-95 transition ${m.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}">${m.enabled ? 'ON' : 'OFF'}</button>
-                    <button data-mid="${m.id}" class="model-delete text-xs font-bold bg-red-50 text-red-500 hover:bg-red-100 active:scale-95 rounded-xl px-3 py-2 transition">✕</button>
+                    <button data-mid="${m.id}" data-enabled="${m.enabled}" class="model-toggle text-xs font-bold rounded-lg px-3 py-1.5 active:scale-95 transition ${m.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}">${m.enabled ? 'ON' : 'OFF'}</button>
+                    <button data-mid="${m.id}" class="model-delete text-xs font-bold bg-red-50 text-red-500 hover:bg-red-100 active:scale-95 rounded-lg px-2.5 py-1.5 transition">✕</button>
                 </div>
             `;
             list.appendChild(row);
@@ -405,9 +403,9 @@ HARD RULES
             let promptHtml = '';
             if (feature === 'chat') {
                 promptHtml = `
-                <div class="mt-3.5">
-                    <label class="text-[10px] sm:text-xs uppercase font-bold text-gray-500">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="6" class="route-param w-full mt-1.5 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="Default roleplay prompt will be used if left empty...">${r.system_prompt || ''}</textarea>
+                <div class="mt-3">
+                    <label class="text-xs uppercase font-bold text-gray-500">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="5" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="Default roleplay prompt will be used if left empty...">${r.system_prompt || ''}</textarea>
                     <p class="text-[10px] text-gray-400 mt-1">Placeholders: {{contactName}}, {{userName}}, {{contextBlock}}, {{currentDate}}, {{currentTime}}, {{totalMessages}}, {{historyNote}}</p>
                     <details class="mt-2 text-xs text-gray-500 cursor-pointer">
                         <summary class="font-bold text-indigo-600 hover:underline">View default prompt template</summary>
@@ -417,39 +415,35 @@ HARD RULES
                 `;
             } else {
                 promptHtml = `
-                <div class="mt-3.5">
-                    <label class="text-[10px] sm:text-xs uppercase font-bold text-gray-500">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="3" class="route-param w-full mt-1.5 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="System prompt for this feature...">${r.system_prompt || ''}</textarea>
+                <div class="mt-3">
+                    <label class="text-xs uppercase font-bold text-gray-500">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="3" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white outline-none focus:ring-2 focus:ring-indigo-400 font-mono" placeholder="System prompt for this feature...">${r.system_prompt || ''}</textarea>
                 </div>
                 `;
             }
 
             const div = document.createElement('div');
-            div.className = 'bg-gray-50 rounded-2xl p-4 sm:p-5 border border-gray-100';
+            div.className = 'bg-gray-50 rounded-xl p-4 border border-gray-100';
             div.innerHTML = `
-                <div class="font-bold text-gray-900 text-sm sm:text-base mb-3">${featureLabels[feature]}</div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div class="font-bold text-gray-900 text-sm mb-3">${featureLabels[feature]}</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                     <div>
-                        <label class="text-[10px] sm:text-xs uppercase font-bold text-gray-500">Primary model</label>
-                        <select data-feat="${feature}" data-kind="primary" class="route-sel w-full mt-1 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
-                        <p class="text-[10px] text-gray-400 mt-1">First-choice model for this feature</p>
+                        <label class="text-xs uppercase font-bold text-gray-500">Primary model</label>
+                        <select data-feat="${feature}" data-kind="primary" class="route-sel w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
                     </div>
                     <div>
-                        <label class="text-[10px] sm:text-xs uppercase font-bold text-gray-500">Fallback model</label>
-                        <select data-feat="${feature}" data-kind="fallback" class="route-sel w-full mt-1 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
-                        <p class="text-[10px] text-gray-400 mt-1">Used if primary fails or rate-limits</p>
+                        <label class="text-xs uppercase font-bold text-gray-500">Fallback model</label>
+                        <select data-feat="${feature}" data-kind="fallback" class="route-sel w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">${opts}</select>
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-[10px] sm:text-xs uppercase font-bold text-gray-500">Max tokens</label>
-                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
-                        <p class="text-[10px] text-gray-400 mt-1">Maximum response length</p>
+                        <label class="text-xs uppercase font-bold text-gray-500">Max tokens</label>
+                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
                     </div>
                     <div>
-                        <label class="text-[10px] sm:text-xs uppercase font-bold text-gray-500">Temperature</label>
-                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
-                        <p class="text-[10px] text-gray-400 mt-1">0 = focused &middot; 1 = creative</p>
+                        <label class="text-xs uppercase font-bold text-gray-500">Temperature</label>
+                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" class="route-param w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-400">
                     </div>
                 </div>
                 ${promptHtml}
@@ -569,18 +563,18 @@ HARD RULES
     function renderUserList(rows) {
         const list = document.getElementById('user-list');
         if (!rows.length) {
-            list.innerHTML = '<div class="text-center py-10 text-gray-400"><p class="text-4xl mb-2">👥</p><p class="font-bold text-sm">No users match query</p></div>';
+            list.innerHTML = '<div class="text-center py-8 text-gray-400"><p class="text-3xl mb-1">👥</p><p class="font-bold text-xs">No users match query</p></div>';
             return;
         }
-        list.innerHTML = `<p class="text-xs font-bold text-gray-500 mb-3 flex items-center gap-1.5"><span>👥</span> <span>${rows.length} total user${rows.length === 1 ? '' : 's'}</span></p>`;
+        list.innerHTML = `<p class="text-xs font-bold text-gray-400 mb-2.5 flex items-center gap-1.5"><span>👥</span> <span>${rows.length} total users</span></p>`;
         for (const u of rows) {
             const planBadge = u.is_admin
-                ? '<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">admin</span>'
-                : u.plan === 'paid'  ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">✓ paid</span>'
+                ? '<span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-bold">admin</span>'
+                : u.plan === 'paid'  ? '<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-bold">✓ paid</span>'
                 : u.plan === 'trial' && u.trial_expires_at > Date.now()
-                    ? `<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">trial</span>`
-                : u.plan === 'trial' ? '<span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">trial expired</span>'
-                : '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">free</span>';
+                    ? `<span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold">trial</span>`
+                : u.plan === 'trial' ? '<span class="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-[10px] font-bold">trial expired</span>'
+                : '<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px] font-bold">free</span>';
 
             const loginMethod = u.google_id
                 ? '<span class="text-[9px] font-bold bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100">Google</span>'
@@ -588,73 +582,61 @@ HARD RULES
 
             const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
             const avatarHtml = u.avatar_url
-                ? `<img src="${u.avatar_url}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl object-cover shadow-sm shrink-0" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0\\'>${initials}</div>'">`
-                : `<div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initials}</div>`;
+                ? `<img src="${u.avatar_url}" class="w-8 h-8 rounded-lg object-cover shadow-sm shrink-0" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0\\'>${initials}</div>'">`
+                : `<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">${initials}</div>`;
 
             const onlineDot = u.is_online
-                ? `<span class="relative flex h-2.5 w-2.5 ml-1 flex-shrink-0" title="Online"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span></span>`
+                ? `<span class="relative flex h-2 w-2 ml-1 flex-shrink-0" title="Online"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>`
                 : '';
             
             const lastActive = u.last_active_at
-                ? `<span class="bg-gray-50 text-gray-500 px-2 py-0.5 rounded-lg border border-gray-100" title="Last Active">⏱️ ${formatDateTime(u.last_active_at)}</span>`
+                ? `<span class="meta-tag meta-active" title="Last Active">⏱️ ${formatDateTime(u.last_active_at)}</span>`
                 : '';
 
             const phoneBadge = u.phone
-                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" class="bg-purple-50 text-purple-700 hover:bg-purple-100 font-bold px-2 py-0.5 rounded-lg border border-purple-100 transition inline-flex items-center gap-1" title="User Phone Number">📱 ${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
+                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" class="user-phone-link" title="User Phone Number">📱 ${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
                 : '';
 
             const card = document.createElement('div');
-            card.className = 'user-card bg-white rounded-2xl p-3.5 sm:p-4 mb-3 border border-gray-100 shadow-sm hover:shadow-md transition';
-            
-            const actionCols = u.is_admin 
-                ? 'grid grid-cols-2 lg:flex lg:items-center lg:justify-end gap-1.5' 
-                : 'grid grid-cols-4 lg:flex lg:items-center lg:justify-end gap-1.5';
+            card.className = 'user-item-card';
 
             card.innerHTML = `
-                <!-- Responsive Layout: Desktop Wide Horizontal Row / Mobile 3-tier Stack -->
-                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                    <!-- User Identity (Left on Desktop) -->
-                    <div class="flex items-center gap-3 min-w-0 lg:w-72 xl:w-80 shrink-0">
-                        <div class="shrink-0">${avatarHtml}</div>
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-1.5">
-                                <span class="font-bold text-gray-900 text-xs sm:text-sm truncate">${u.display_name || u.email.split('@')[0]}</span>
-                                ${onlineDot}
+                <div class="user-row-main">
+                    <!-- Left Identity & Info Group -->
+                    <div class="user-left-group">
+                        <div class="user-avatar-wrap">${avatarHtml}</div>
+                        <div class="user-meta-lines">
+                            <!-- Line 1: Name + Email + Badges -->
+                            <div class="user-primary-line">
+                                <span class="user-name flex items-center">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
+                                <span class="user-email truncate">${u.email}</span>
+                                <span class="inline-flex items-center gap-1">${planBadge} ${loginMethod}</span>
                             </div>
-                            <div class="text-[11px] text-gray-500 truncate font-medium mt-0.5">${u.email}</div>
-                            <div class="flex items-center gap-1 mt-1">
-                                ${planBadge} ${loginMethod}
+                            <!-- Line 2: All Info Badges Inline -->
+                            <div class="user-secondary-line">
+                                ${phoneBadge}
+                                <span class="meta-tag meta-chat" title="Uploaded Chats">💬 <b>${u.chat_count}</b></span>
+                                <span class="meta-tag meta-cost" title="Total AI Spend">💰 <b>$${u.total_cost.toFixed(3)}</b></span>
+                                ${u.ip_address ? `<span class="meta-tag meta-ip" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
+                                ${u.country ? `<span class="meta-tag meta-country" title="Country">📍 ${u.country}</span>` : ''}
+                                <span class="meta-tag meta-reg" title="Registration Date">📅 Reg: ${formatDateTime(u.created_at)}</span>
+                                ${lastActive}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Metadata Badges (Middle on Desktop, Full-Width Wrapped on Mobile) -->
-                    <div class="flex-1 min-w-0 pt-2 lg:pt-0 border-t border-gray-50 lg:border-0 flex items-center gap-1.5 flex-wrap text-[10px] text-gray-600">
-                        ${phoneBadge}
-                        <span class="font-semibold bg-gray-50 text-gray-700 px-2 py-0.5 rounded-lg border border-gray-100 inline-flex items-center gap-1">💬 ${u.chat_count}</span>
-                        <span class="font-semibold bg-gray-50 text-gray-700 px-2 py-0.5 rounded-lg border border-gray-100 inline-flex items-center gap-1">💰 $${u.total_cost.toFixed(3)}</span>
-                        ${u.ip_address ? `<span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-lg border border-blue-100 font-mono text-[9px]" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
-                        ${u.country ? `<span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-lg border border-emerald-100 font-medium text-[9px]" title="Country">📍 ${u.country}</span>` : ''}
-                        <span class="text-indigo-700 font-medium bg-indigo-50/70 px-2 py-0.5 rounded-lg border border-indigo-100 text-[9px]" title="Registration Date">📅 Reg: ${formatDateTime(u.created_at)}</span>
-                        ${lastActive}
-                    </div>
-
-                    <!-- Action Buttons (Right on Desktop, 4-col Grid on Mobile) -->
-                    <div class="shrink-0 pt-2 lg:pt-0 border-t border-gray-50 lg:border-0 ${actionCols}">
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn text-xs font-bold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200/70 rounded-xl py-1.5 px-3 transition active:scale-95 text-center flex items-center justify-center gap-1 whitespace-nowrap shadow-sm">⚙️ Plan</button>`}
-                        <button data-uid="${u.id}" class="user-chats-btn text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/70 rounded-xl py-1.5 px-3 transition active:scale-95 text-center flex items-center justify-center gap-1 whitespace-nowrap shadow-sm">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Chats
-                        </button>
-                        <button data-uid="${u.id}" class="user-ai-logs-btn text-xs font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200/70 rounded-xl py-1.5 px-3 transition active:scale-95 text-center flex items-center justify-center gap-1 whitespace-nowrap shadow-sm">
-                            📜 Logs
-                        </button>
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200/70 rounded-xl py-1.5 px-3 transition active:scale-95 text-center flex items-center justify-center gap-1 whitespace-nowrap shadow-sm">🗑️</button>`}
+                    <!-- Right Action Buttons Group -->
+                    <div class="user-actions-group ${u.is_admin ? 'is-admin-actions' : ''}">
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-action btn-plan">Manage</button>`}
+                        <button data-uid="${u.id}" class="user-chats-btn btn-action btn-chats">Chats</button>
+                        <button data-uid="${u.id}" class="user-ai-logs-btn btn-action btn-logs">AI Logs</button>
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-action btn-del" title="Delete User">Del</button>`}
                     </div>
                 </div>
 
                 <!-- Expandable Containers -->
-                <div data-chats-for="${u.id}" class="hidden mt-3 pt-3 border-t border-gray-100 space-y-1"></div>
-                <div data-ai-logs-for="${u.id}" class="hidden mt-3 pt-3 border-t border-gray-100 space-y-1"></div>
+                <div data-chats-for="${u.id}" class="hidden mt-2 pt-2 border-t border-gray-100 space-y-1"></div>
+                <div data-ai-logs-for="${u.id}" class="hidden mt-2 pt-2 border-t border-gray-100 space-y-1"></div>
             `;
             list.appendChild(card);
         }
@@ -674,44 +656,42 @@ HARD RULES
                     : 'Not set';
 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                 modal.innerHTML = `
-                    <div style="background:white;border-radius:20px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.25);">
-                        <div style="padding:18px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+                    <div style="background:white;border-radius:16px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+                        <div style="padding:16px 18px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
                             <div>
-                                <h3 style="font-weight:800;font-size:16px;color:#1e293b;">Manage Plan</h3>
-                                <p style="font-size:12px;color:#64748b;margin-top:2px;">${email}</p>
+                                <h3 style="font-weight:700;font-size:15px;color:#0f172a;">Manage Plan</h3>
+                                <p style="font-size:11px;color:#64748b;margin-top:1px;">${email}</p>
                             </div>
-                            <button id="plan-modal-x" style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:16px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;">×</button>
+                            <button id="plan-modal-x" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:15px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;">×</button>
                         </div>
-                        <div style="padding:18px 20px;">
-                            <div style="margin-bottom:16px;">
-                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Plan</label>
-                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:14px;outline:none;background:#fff;">
+                        <div style="padding:16px 18px;">
+                            <div style="margin-bottom:14px;">
+                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:5px;">Plan</label>
+                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:9px 12px;font-size:13px;outline:none;background:#fff;">
                                     <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free (limited msgs/day)</option>
                                     <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial (higher daily cap, time-limited)</option>
                                     <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid ✓ (truly unlimited)</option>
                                 </select>
                             </div>
-                            <div style="margin-bottom:16px;padding:12px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
-                                <p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Current Trial Status</p>
-                                <p style="font-size:13px;color:#1e293b;margin-top:4px;font-weight:600;">${trialInfo}</p>
+                            <div style="margin-bottom:14px;padding:10px 12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                                <p style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Current Trial Status</p>
+                                <p style="font-size:12px;color:#0f172a;margin-top:2px;font-weight:600;">${trialInfo}</p>
                             </div>
-                            <div style="margin-bottom:16px;">
-                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Extend Trial (hours from now)</label>
-                                <div style="display:flex;gap:8px;margin-bottom:8px;">
-                                    <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="flex:1;border:1px solid #e2e8f0;border-radius:12px;padding:10px 12px;font-size:14px;outline:none;">
-                                </div>
+                            <div style="margin-bottom:14px;">
+                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:5px;">Extend Trial (hours from now)</label>
+                                <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:9px 12px;font-size:13px;outline:none;margin-bottom:6px;">
                                 <div style="display:flex;gap:6px;">
-                                    <button id="plan-modal-quick-24" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 6px;cursor:pointer;border:none;">+24h</button>
-                                    <button id="plan-modal-quick-72" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 6px;cursor:pointer;border:none;">+72h</button>
-                                    <button id="plan-modal-quick-168" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:10px;padding:8px 6px;cursor:pointer;border:none;">+7d</button>
+                                    <button id="plan-modal-quick-24" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:8px;padding:7px 4px;cursor:pointer;border:none;">+24h</button>
+                                    <button id="plan-modal-quick-72" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:8px;padding:7px 4px;cursor:pointer;border:none;">+72h</button>
+                                    <button id="plan-modal-quick-168" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:8px;padding:7px 4px;cursor:pointer;border:none;">+7d</button>
                                 </div>
                             </div>
-                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:10px 12px;border-radius:10px;margin-bottom:12px;"></div>
-                            <div style="display:flex;gap:10px;justify-content:flex-end;">
-                                <button id="plan-modal-cancel" style="font-size:13px;font-weight:700;color:#64748b;padding:10px 16px;border-radius:12px;cursor:pointer;background:#f1f5f9;border:none;">Cancel</button>
-                                <button id="plan-modal-save" style="font-size:13px;font-weight:700;color:white;padding:10px 18px;border-radius:12px;cursor:pointer;background:#1e293b;border:none;">Save Changes</button>
+                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:8px 12px;border-radius:8px;margin-bottom:10px;"></div>
+                            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                                <button id="plan-modal-cancel" style="font-size:12px;font-weight:700;color:#64748b;padding:8px 14px;border-radius:10px;cursor:pointer;background:#f1f5f9;border:none;">Cancel</button>
+                                <button id="plan-modal-save" style="font-size:12px;font-weight:700;color:white;padding:8px 16px;border-radius:10px;cursor:pointer;background:#0f172a;border:none;">Save</button>
                             </div>
                         </div>
                     </div>
@@ -736,7 +716,6 @@ HARD RULES
                     if (newPlan !== currentPlan) body.plan = newPlan;
                     if (hours && Number(hours) > 0) body.trial_extends_hours = Number(hours);
 
-                    // If switching to trial but no hours, give default 72h
                     if (newPlan === 'trial' && !hours && currentPlan !== 'trial') {
                         body.trial_extends_hours = 72;
                     }
@@ -760,8 +739,8 @@ HARD RULES
                         msgEl.style.display = 'block';
                         msgEl.style.background = '#f0fdf4';
                         msgEl.style.color = '#16a34a';
-                        msgEl.textContent = `Updated! Plan: ${data.user.plan}${data.user.trial_expires_at ? ' · Trial until ' + new Date(data.user.trial_expires_at).toLocaleString() : ''}`;
-                        setTimeout(async () => { modal.remove(); await loadUsers(); }, 1500);
+                        msgEl.textContent = `Updated! Plan: ${data.user.plan}`;
+                        setTimeout(async () => { modal.remove(); await loadUsers(); }, 1200);
                     } catch (err) {
                         msgEl.style.display = 'block';
                         msgEl.style.background = '#fef2f2';
@@ -779,56 +758,46 @@ HARD RULES
                 const area = list.querySelector(`[data-chats-for="${uid}"]`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
-                    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Chats`;
+                    btn.textContent = 'Chats';
                     return;
                 }
-                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></div> Loading chats...</div>';
+                area.innerHTML = '<div class="p-2 text-xs text-gray-400">Loading chats...</div>';
                 area.classList.remove('hidden');
-                btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg> Hide`;
+                btn.textContent = 'Hide';
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
                     if (!chats.length) {
-                        area.innerHTML = '<div class="bg-gray-50 rounded-xl p-3 text-center text-xs text-gray-400">No chats uploaded yet</div>';
+                        area.innerHTML = '<div class="bg-gray-50 rounded-lg p-2.5 text-center text-xs text-gray-400">No chats uploaded yet</div>';
                         return;
                     }
                     area.innerHTML = `
-                        <div class="bg-gray-50/90 rounded-2xl overflow-hidden border border-gray-200/80">
-                            <div class="hidden sm:flex items-center gap-2 px-4 py-2.5 text-[10px] font-bold uppercase text-gray-500 tracking-wider border-b border-gray-200/60 bg-gray-100/70">
+                        <div class="bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
+                            <div class="hidden sm:flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase text-gray-400 tracking-wider border-b border-gray-200 bg-gray-100/60">
                                 <div class="flex-1 min-w-0">Chat Name</div>
                                 <div class="w-20 text-center shrink-0">Messages</div>
-                                <div class="w-40 shrink-0">Imported Date & Time</div>
-                                <div class="w-48 text-right shrink-0">Actions</div>
+                                <div class="w-36 shrink-0">Imported Date</div>
+                                <div class="w-44 text-right shrink-0">Actions</div>
                             </div>
                             ${chats.map(c => `
-                                <div class="p-3 sm:px-4 sm:py-3 hover:bg-white transition text-xs border-b border-gray-100 last:border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2" data-admin-chat-row="${c.id}">
+                                <div class="p-2.5 sm:px-3 sm:py-2 hover:bg-white transition text-xs border-b border-gray-100 last:border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2" data-admin-chat-row="${c.id}">
                                     <div class="flex-1 min-w-0">
-                                        <div class="font-bold text-gray-800 text-xs sm:text-sm truncate flex items-center gap-1.5">
+                                        <div class="font-bold text-gray-800 text-xs truncate flex items-center gap-1.5">
                                             <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
-                                            ${c.deleted_by_user ? '<span class="text-[9px] font-bold bg-red-100 text-red-600 px-2 py-0.5 rounded-full">deleted by user</span>' : ''}
+                                            ${c.deleted_by_user ? '<span class="text-[9px] font-bold bg-red-100 text-red-600 px-1.5 py-0.2 rounded">deleted</span>' : ''}
                                         </div>
-                                        <div class="flex sm:hidden items-center gap-2 mt-1 text-[10px] text-gray-400">
+                                        <div class="flex sm:hidden items-center gap-2 mt-0.5 text-[10px] text-gray-400">
                                             <span>💬 ${c.message_count || 0} msgs</span>
                                             <span>&middot;</span>
                                             <span>📅 ${formatDateTime(c.created_at)}</span>
                                         </div>
                                     </div>
-                                    <div class="w-20 text-center font-bold text-gray-700 hidden sm:block shrink-0">${c.message_count || 0}</div>
-                                    <div class="w-40 text-gray-500 text-[11px] font-medium hidden sm:block shrink-0">${formatDateTime(c.created_at)}</div>
-                                    <div class="w-full sm:w-48 flex items-center justify-end gap-1.5 shrink-0 pt-2 sm:pt-0 border-t border-gray-100 sm:border-0">
-                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="inline-flex items-center gap-1 text-[11px] font-bold bg-teal-600 text-white hover:bg-teal-700 rounded-lg px-2.5 py-1.5 transition no-underline shadow-sm">
-                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            .zip
-                                        </a>
-                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[11px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/70 rounded-lg px-2.5 py-1.5 transition" title="Translate chat with AI">
-                                            🌐
-                                        </button>
-                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[11px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/70 rounded-lg px-2.5 py-1.5 transition">
-                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                            Open
-                                        </button>
-                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="inline-flex items-center gap-1 text-[11px] font-bold bg-red-50 text-red-600 hover:bg-red-100 border border-red-200/70 rounded-lg px-2 py-1.5 transition">
-                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                        </button>
+                                    <div class="w-20 text-center font-bold text-gray-600 hidden sm:block shrink-0">${c.message_count || 0}</div>
+                                    <div class="w-36 text-gray-400 text-[10px] hidden sm:block shrink-0">${formatDateTime(c.created_at)}</div>
+                                    <div class="flex items-center justify-end gap-1.5 shrink-0 pt-1 sm:pt-0">
+                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="text-[10px] font-bold bg-teal-600 text-white hover:bg-teal-700 rounded-md px-2 py-1 transition no-underline">.zip</a>
+                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="text-[10px] font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-md px-2 py-1 transition" title="Translate chat with AI">🌐</button>
+                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="text-[10px] font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-md px-2 py-1 transition">Open</button>
+                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="text-[10px] font-bold bg-red-50 text-red-600 hover:bg-red-100 rounded-md px-2 py-1 transition">Del</button>
                                     </div>
                                 </div>
                             `).join('')}
@@ -837,13 +806,10 @@ HARD RULES
                     // Admin chat open handlers
                     area.querySelectorAll('[data-admin-open-chat]').forEach(openBtn => {
                         openBtn.addEventListener('click', () => {
-                            const chatId = openBtn.dataset.adminOpenChat;
                             const uid = openBtn.dataset.uid;
-                            const cname = openBtn.dataset.cname;
                             const folder = openBtn.dataset.folder;
                             openBtn.textContent = '...';
                             openBtn.disabled = true;
-                            // Redirect to impersonation endpoint which will set cookie and redirect to /app
                             window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`;
                         });
                     });
@@ -851,10 +817,7 @@ HARD RULES
                     // Admin chat translate handlers
                     area.querySelectorAll('[data-admin-translate-chat]').forEach(tBtn => {
                         tBtn.addEventListener('click', () => {
-                            const chatId = tBtn.dataset.adminTranslateChat;
-                            const tUid = tBtn.dataset.uid;
-                            const cname = tBtn.dataset.cname;
-                            showAdminTranslateModal(chatId, tUid, cname);
+                            showAdminTranslateModal(tBtn.dataset.adminTranslateChat, tBtn.dataset.uid, tBtn.dataset.cname);
                         });
                     });
 
@@ -880,7 +843,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div class="bg-red-50 rounded-xl p-3 text-center text-xs text-red-500 font-bold">${err.message}</div>`;
+                    area.innerHTML = `<div class="bg-red-50 rounded-lg p-2.5 text-center text-xs text-red-500 font-bold">${err.message}</div>`;
                 }
             });
         });
@@ -892,36 +855,33 @@ HARD RULES
                 const area = list.querySelector(`[data-ai-logs-for="${uid}"]`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
+                    btn.textContent = 'AI Logs';
                     return;
                 }
-                area.innerHTML = '<div class="flex items-center gap-2 p-3 text-xs text-gray-400"><div class="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div> Loading AI logs...</div>';
+                area.innerHTML = '<div class="p-2 text-xs text-gray-400">Loading AI logs...</div>';
                 area.classList.remove('hidden');
+                btn.textContent = 'Hide';
                 try {
                     const convs = await (await fetch(`/api/admin/users/${uid}/conversations`)).json();
                     if (!convs.length) {
-                        area.innerHTML = '<div class="bg-gray-50 rounded-xl p-3 text-center text-xs text-gray-400">No AI conversations yet</div>';
+                        area.innerHTML = '<div class="bg-gray-50 rounded-lg p-2.5 text-center text-xs text-gray-400">No AI conversations yet</div>';
                         return;
                     }
                     area.innerHTML = `
-                        <div class="bg-purple-50/70 rounded-2xl overflow-hidden border border-purple-200/70">
-                            <div class="px-4 py-2.5 border-b border-purple-200/60 bg-purple-100/50 flex items-center justify-between">
+                        <div class="bg-purple-50/70 rounded-xl overflow-hidden border border-purple-200/70">
+                            <div class="px-3 py-2 border-b border-purple-200/60 bg-purple-100/50 flex items-center justify-between">
                                 <span class="text-xs font-bold uppercase text-purple-700 tracking-wider">AI Conversations (${convs.length})</span>
-                                <button class="ai-logs-close-btn w-6 h-6 rounded-md hover:bg-purple-200 flex items-center justify-center text-purple-600 transition" title="Close">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                                </button>
+                                <button class="ai-logs-close-btn w-5 h-5 rounded hover:bg-purple-200 flex items-center justify-center text-purple-600 transition" title="Close">×</button>
                             </div>
                             ${convs.map(c => `
-                                <div class="p-3 sm:px-4 sm:py-3 hover:bg-white transition border-b border-purple-100/60 last:border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div class="p-2.5 sm:px-3 sm:py-2 hover:bg-white transition border-b border-purple-100/60 last:border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-xs sm:text-sm font-bold text-gray-800 truncate">${c.title || 'Untitled'}</p>
-                                        <p class="text-[11px] text-gray-500 mt-0.5">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
+                                        <p class="text-xs font-bold text-gray-800 truncate">${c.title || 'Untitled'}</p>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
                                     </div>
-                                    <div class="flex gap-2 shrink-0 justify-end pt-1 sm:pt-0">
-                                        <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn text-xs font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-xl px-3 py-1.5 transition">View Conversation</button>
-                                        <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="text-xs font-bold bg-teal-100 text-teal-800 hover:bg-teal-200 rounded-xl px-3 py-1.5 transition no-underline inline-flex items-center gap-1">
-                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                            .txt
-                                        </a>
+                                    <div class="flex gap-1.5 shrink-0 justify-end pt-1 sm:pt-0">
+                                        <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn text-[11px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 rounded-lg px-2.5 py-1 transition">View</button>
+                                        <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="text-[11px] font-bold bg-teal-100 text-teal-800 hover:bg-teal-200 rounded-lg px-2.5 py-1 transition no-underline inline-flex items-center gap-1">.txt</a>
                                     </div>
                                 </div>
                             `).join('')}
@@ -931,6 +891,7 @@ HARD RULES
                     area.querySelector('.ai-logs-close-btn')?.addEventListener('click', () => {
                         area.classList.add('hidden');
                         area.innerHTML = '';
+                        btn.textContent = 'AI Logs';
                     });
 
                     // View button handlers
@@ -941,24 +902,24 @@ HARD RULES
                             try {
                                 const data = await (await fetch(`/api/admin/users/${convUid}/conversations/${convId}`)).json();
                                 const modal = document.createElement('div');
-                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
+                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                                 modal.innerHTML = `
-                                    <div style="background:white;border-radius:20px;max-width:600px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,0.25);overflow:hidden;">
-                                        <div style="padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+                                    <div style="background:white;border-radius:16px;max-width:560px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 40px rgba(0,0,0,0.25);overflow:hidden;">
+                                        <div style="padding:14px 18px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
                                             <div style="min-width:0;flex:1;">
-                                                <h4 style="font-weight:700;font-size:14px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${data.title || 'AI Conversation'}</h4>
-                                                <p style="font-size:11px;color:#94a3b8;margin-top:2px;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
+                                                <h4 style="font-weight:700;font-size:14px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${data.title || 'AI Conversation'}</h4>
+                                                <p style="font-size:10px;color:#94a3b8;margin-top:1px;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
                                             </div>
-                                            <button class="ai-log-popup-close" style="width:30px;height:30px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:16px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;margin-left:12px;">×</button>
+                                            <button class="ai-log-popup-close" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:15px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;margin-left:10px;">×</button>
                                         </div>
-                                        <div style="padding:16px 20px;overflow-y:auto;flex:1;">
+                                        <div style="padding:14px 18px;overflow-y:auto;flex:1;">
                                             ${(data.messages || []).map(m => `
-                                                <div style="margin-bottom:12px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
-                                                    <div style="max-width:85%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;${m.role === 'user'
-                                                        ? 'background:#1e293b;color:white;border-bottom-right-radius:4px;'
-                                                        : 'background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;border-bottom-left-radius:4px;'}">
+                                                <div style="margin-bottom:10px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
+                                                    <div style="max-width:85%;padding:8px 12px;border-radius:12px;font-size:12px;line-height:1.4;${m.role === 'user'
+                                                        ? 'background:#0f172a;color:white;border-bottom-right-radius:2px;'
+                                                        : 'background:#f1f5f9;color:#0f172a;border:1px solid #e2e8f0;border-bottom-left-radius:2px;'}">
                                                         ${m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}
-                                                        <div style="font-size:10px;color:${m.role === 'user' ? 'rgba(255,255,255,0.5)' : '#94a3b8'};margin-top:4px;text-align:right;">${new Date(m.created_at).toLocaleString()}</div>
+                                                        <div style="font-size:9px;color:${m.role === 'user' ? 'rgba(255,255,255,0.5)' : '#94a3b8'};margin-top:3px;text-align:right;">${new Date(m.created_at).toLocaleString()}</div>
                                                     </div>
                                                 </div>
                                             `).join('')}
@@ -974,7 +935,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div class="bg-red-50 rounded-xl p-3 text-center text-xs text-red-500 font-bold">${err.message}</div>`;
+                    area.innerHTML = `<div class="bg-red-50 rounded-lg p-2.5 text-center text-xs text-red-500 font-bold">${err.message}</div>`;
                 }
             });
         });
@@ -1024,7 +985,7 @@ HARD RULES
                 { k: 'smtp_pass', label: 'Password / API key', placeholder: 're_xxx', type: 'password', secret: true },
                 { k: 'email_from', label: 'From address', placeholder: 'Kotha <noreply@yourdomain.com>', type: 'text' },
             ],
-            extraButtons: `<button data-action="test-email" class="text-xs sm:text-sm font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 rounded-xl px-4 py-2 transition">Send test email</button>`,
+            extraButtons: `<button data-action="test-email" class="text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:scale-95 rounded-lg px-3 py-2 transition">Send test email</button>`,
         }));
 
         // Razorpay card
@@ -1057,10 +1018,10 @@ HARD RULES
 
     function integCard({ title, subtitle, section, status, data, fields, extraButtons = '' }) {
         const card = document.createElement('div');
-        card.className = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6';
+        card.className = 'bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-5';
         const statusBadge = status
-            ? '<span class="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2.5 py-1 rounded-full">Active</span>'
-            : '<span class="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">Off</span>';
+            ? '<span class="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Active</span>'
+            : '<span class="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Off</span>';
 
         const fieldHtml = fields.map(f => {
             const meta = data[f.k] || { set: false };
@@ -1077,23 +1038,23 @@ HARD RULES
                     <label class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500">${f.label}${sourceTag}</label>
                     <input data-section="${section}" data-field="${f.k}" type="${f.type}"
                         placeholder="${placeholder.replace(/"/g, '&quot;')}"
-                        class="w-full mt-1 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400"
+                        class="w-full mt-1 border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm outline-none focus:ring-2 focus:ring-indigo-400"
                         autocomplete="off">
                 </div>
             `;
         }).join('');
 
         card.innerHTML = `
-            <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex items-start justify-between gap-3 mb-3">
                 <div>
-                    <h3 class="font-extrabold text-gray-900 text-sm sm:text-base flex items-center gap-2 flex-wrap">${title} ${statusBadge}</h3>
+                    <h3 class="font-bold text-gray-900 text-sm sm:text-base flex items-center gap-2 flex-wrap">${title} ${statusBadge}</h3>
                     <p class="text-xs text-gray-500 mt-0.5">${subtitle}</p>
                 </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">${fieldHtml}</div>
-            <div class="flex flex-wrap items-center gap-2 mt-5 pt-3 border-t border-gray-50">
-                <button data-action="save" data-section="${section}" class="bg-gray-900 hover:bg-black active:scale-98 text-white font-bold text-xs sm:text-sm rounded-xl px-5 py-2.5 transition shadow-sm">Save</button>
-                <button data-action="clear" data-section="${section}" class="text-xs sm:text-sm font-bold bg-red-50 text-red-600 hover:bg-red-100 active:scale-98 rounded-xl px-4 py-2.5 transition">Clear</button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${fieldHtml}</div>
+            <div class="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-gray-100">
+                <button data-action="save" data-section="${section}" class="bg-gray-900 hover:bg-black active:scale-98 text-white font-bold text-xs sm:text-sm rounded-xl px-4 py-2 transition shadow-sm">Save</button>
+                <button data-action="clear" data-section="${section}" class="text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 active:scale-98 rounded-xl px-3 py-2 transition">Clear</button>
                 ${extraButtons}
                 <span data-msg-section="${section}" class="text-xs font-semibold ml-2"></span>
             </div>
@@ -1180,55 +1141,55 @@ function showAdminTranslateModal(chatId, uid, chatName) {
 
     const modal = document.createElement('div');
     modal.id = 'admin-translate-modal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);padding:12px;';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);padding:12px;';
     modal.innerHTML = `
-        <div style="background:#fff;border-radius:20px;width:100%;max-width:700px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 25px 60px rgba(0,0,0,0.3);overflow:hidden;">
+        <div style="background:#fff;border-radius:16px;width:100%;max-width:680px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,0.3);overflow:hidden;">
             <!-- Header -->
-            <div style="padding:16px 20px 14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
+            <div style="padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
                 <div style="min-width:0;flex:1;">
-                    <div style="font-size:15px;font-weight:700;color:#1a1a1a;">🌐 AI Chat Translator</div>
-                    <div style="font-size:11px;color:#6b7280;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${chatName}</div>
+                    <div style="font-size:14px;font-weight:700;color:#1a1a1a;">🌐 AI Chat Translator</div>
+                    <div style="font-size:11px;color:#6b7280;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${chatName}</div>
                 </div>
-                <button id="atm-close" style="width:30px;height:30px;border-radius:50%;border:none;background:#f3f4f6;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:#6b7280;margin-left:10px;">×</button>
+                <button id="atm-close" style="width:28px;height:28px;border-radius:50%;border:none;background:#f3f4f6;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#6b7280;margin-left:10px;">×</button>
             </div>
 
             <!-- Language picker + translate button -->
-            <div style="padding:12px 20px;border-bottom:1px solid #f9fafb;display:flex;align-items:center;gap:10px;background:#fafafa;flex-wrap:wrap;">
-                <span style="font-size:12px;font-weight:600;color:#374151;">Translate to:</span>
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#d97706;">
+            <div style="padding:10px 18px;border-bottom:1px solid #f9fafb;display:flex;align-items:center;gap:10px;background:#fafafa;flex-wrap:wrap;">
+                <span style="font-size:11px;font-weight:600;color:#374151;">Translate to:</span>
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:600;color:#d97706;">
                     <input type="radio" name="atm-lang" value="hinglish" checked style="accent-color:#d97706;"> 🇮🇳 Hinglish
                 </label>
-                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:#2563eb;">
+                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:600;color:#2563eb;">
                     <input type="radio" name="atm-lang" value="english" style="accent-color:#2563eb;"> 🇬🇧 English
                 </label>
-                <button id="atm-go-btn" style="margin-left:auto;padding:8px 16px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(217,119,6,0.3);">
+                <button id="atm-go-btn" style="margin-left:auto;padding:6px 14px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
                     <span id="atm-btn-icon">✨</span> Translate Now
                 </button>
             </div>
 
-            <!-- Progress bar (hidden initially) -->
-            <div id="atm-progress-wrap" style="display:none;padding:10px 20px;background:#fffbeb;border-bottom:1px solid #fde68a;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-                    <span id="atm-progress-label" style="font-size:11px;font-weight:600;color:#92400e;">Starting translation…</span>
-                    <span id="atm-progress-pct" style="font-size:11px;font-weight:700;color:#d97706;">0%</span>
+            <!-- Progress bar -->
+            <div id="atm-progress-wrap" style="display:none;padding:8px 18px;background:#fffbeb;border-bottom:1px solid #fde68a;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <span id="atm-progress-label" style="font-size:10px;font-weight:600;color:#92400e;">Starting translation…</span>
+                    <span id="atm-progress-pct" style="font-size:10px;font-weight:700;color:#d97706;">0%</span>
                 </div>
-                <div style="background:#fde68a;border-radius:99px;height:6px;overflow:hidden;">
+                <div style="background:#fde68a;border-radius:99px;height:5px;overflow:hidden;">
                     <div id="atm-progress-bar" style="background:linear-gradient(90deg,#f59e0b,#d97706);height:100%;width:0%;transition:width 0.3s ease;border-radius:99px;"></div>
                 </div>
             </div>
 
             <!-- Translated content area -->
-            <div id="atm-body" style="flex:1;overflow-y:auto;padding:16px 20px;">
-                <div style="text-align:center;padding:36px 16px;color:#9ca3af;">
-                    <div style="font-size:32px;margin-bottom:10px;">🌍</div>
-                    <div style="font-size:13px;font-weight:500;">Select a language and click <strong>Translate Now</strong></div>
-                    <div style="font-size:11px;margin-top:6px;">Works on any chat size — no token limits. Powered by Google Translate.</div>
+            <div id="atm-body" style="flex:1;overflow-y:auto;padding:14px 18px;">
+                <div style="text-align:center;padding:30px 16px;color:#9ca3af;">
+                    <div style="font-size:28px;margin-bottom:8px;">🌍</div>
+                    <div style="font-size:12px;font-weight:500;">Select a language and click <strong>Translate Now</strong></div>
+                    <div style="font-size:10px;margin-top:4px;">Powered by Google Translate (free)</div>
                 </div>
             </div>
 
             <!-- Footer -->
-            <div style="padding:10px 20px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
-                Powered by Google Translate (free) &bull; Zero token cost &bull; Works on any chat size
+            <div style="padding:8px 18px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
+                Zero token cost &bull; Free &bull; Works on any chat size
             </div>
         </div>
     `;
@@ -1250,7 +1211,7 @@ function showAdminTranslateModal(chatId, uid, chatName) {
         const progressPct = document.getElementById('atm-progress-pct');
 
         btn.disabled = true;
-        icon.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;"></span>';
+        icon.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;"></span>';
         btn.style.opacity = '0.75';
 
         const langLabel = lang === 'hinglish' ? '🇮🇳 Hinglish' : '🇬🇧 English';
@@ -1281,14 +1242,13 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                 allTranslated.push(m);
                 const color = getSenderColor(m.sender || 'Unknown');
                 const div = document.createElement('div');
-                div.style.cssText = `background:#f9fafb;border-radius:10px;padding:8px 12px;border-left:3px solid ${color};`;
+                div.style.cssText = `background:#f9fafb;border-radius:8px;padding:6px 10px;border-left:3px solid ${color};`;
                 div.innerHTML = `
-                    <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:3px;">${m.sender || 'Unknown'} <span style="font-weight:400;color:#9ca3af;">${m.timestamp || ''}</span></div>
-                    <div style="font-size:12px;color:#1f2937;line-height:1.5;">${m.translated}</div>
-                    ${m.translated !== m.original ? `<div style="font-size:10px;color:#d1d5db;margin-top:3px;font-style:italic;">Original: ${m.original}</div>` : ''}
+                    <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:2px;">${m.sender || 'Unknown'} <span style="font-weight:400;color:#9ca3af;">${m.timestamp || ''}</span></div>
+                    <div style="font-size:12px;color:#1f2937;line-height:1.4;">${m.translated}</div>
+                    ${m.translated !== m.original ? `<div style="font-size:10px;color:#9ca3af;margin-top:2px;font-style:italic;">Original: ${m.original}</div>` : ''}
                 `;
                 container.appendChild(div);
-                // Auto-scroll to latest
                 container.scrollIntoView({ block: 'end', behavior: 'smooth' });
             });
         }
@@ -1315,7 +1275,7 @@ function showAdminTranslateModal(chatId, uid, chatName) {
 
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
-                buffer = lines.pop(); // keep incomplete line
+                buffer = lines.pop();
 
                 let event = '';
                 for (const line of lines) {
@@ -1330,13 +1290,13 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                                 const showing = data.total;
                                 const batchCount = data.batches || Math.ceil(showing / 100);
                                 progressLabel.textContent = totalInChat > showing
-                                    ? `Translating latest ${showing.toLocaleString()} of ${totalInChat.toLocaleString()} messages (${batchCount} batch API calls)…`
+                                    ? `Translating latest ${showing.toLocaleString()} of ${totalInChat.toLocaleString()} messages…`
                                     : `Translating ${showing.toLocaleString()} messages in ${batchCount} batch calls…`;
                                 progressPct.textContent = '0%';
                             } else if (event === 'progress') {
                                 const pct = Math.round((data.done / data.total) * 100);
                                 progressBar.style.width = pct + '%';
-                                progressLabel.textContent = `Batch translating… ${data.done.toLocaleString()} / ${data.total.toLocaleString()} done`;
+                                progressLabel.textContent = `Translating… ${data.done.toLocaleString()} / ${data.total.toLocaleString()} done`;
                                 progressPct.textContent = pct + '%';
                             } else if (event === 'done') {
                                 progressBar.style.width = '100%';
@@ -1345,17 +1305,16 @@ function showAdminTranslateModal(chatId, uid, chatName) {
 
                                 appendMessages(data.translated);
 
-                                // Header + copy button + "load more" if hasMore
                                 const msgs = document.getElementById('atm-msgs');
                                 if (msgs) {
                                     const header = document.createElement('div');
-                                    header.style.cssText = 'margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;';
+                                    header.style.cssText = 'margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;';
                                     const totalInChat = data.totalInChat || data.translated.length;
                                     header.innerHTML = `
-                                        <span style="font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;padding:4px 10px;border-radius:20px;">${langLabel} · ${data.translated.length.toLocaleString()} messages${totalInChat > data.translated.length ? ` of ${totalInChat.toLocaleString()} total` : ''}</span>
+                                        <span style="font-size:10px;font-weight:700;color:#d97706;background:#fef3c7;padding:3px 8px;border-radius:12px;">${langLabel} · ${data.translated.length.toLocaleString()} messages${totalInChat > data.translated.length ? ` of ${totalInChat.toLocaleString()} total` : ''}</span>
                                         <div style="display:flex;gap:6px;">
-                                            ${data.hasMore ? `<button id="atm-load-more-btn" style="font-size:11px;font-weight:600;color:#6366f1;background:#eef2ff;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">⬆️ Load Older</button>` : ''}
-                                            <button id="atm-copy-btn" style="font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;">📋 Copy All</button>
+                                            ${data.hasMore ? `<button id="atm-load-more-btn" style="font-size:10px;font-weight:600;color:#6366f1;background:#eef2ff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;">⬆️ Load Older</button>` : ''}
+                                            <button id="atm-copy-btn" style="font-size:10px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;">📋 Copy All</button>
                                         </div>
                                     `;
                                     body.insertBefore(header, msgs);
@@ -1368,10 +1327,8 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                                         });
                                     });
 
-                                    // Load older messages
                                     document.getElementById('atm-load-more-btn')?.addEventListener('click', () => {
                                         modal.remove();
-                                        // Re-open with offset to load older chunk
                                         showAdminTranslateModalWithOffset(chatId, uid, chatName, (data.offset || 0) + data.translated.length, lang);
                                     });
                                 }
@@ -1383,7 +1340,7 @@ function showAdminTranslateModal(chatId, uid, chatName) {
             }
 
         } catch (err) {
-            body.innerHTML = `<div style="text-align:center;padding:30px;color:#ef4444;font-size:13px;font-weight:600;">❌ ${err.message}</div>`;
+            body.innerHTML = `<div style="text-align:center;padding:24px;color:#ef4444;font-size:12px;font-weight:600;">❌ ${err.message}</div>`;
             progressWrap.style.display = 'none';
         } finally {
             btn.disabled = false;
@@ -1400,14 +1357,11 @@ function showAdminTranslateModal(chatId, uid, chatName) {
     }
 }
 
-// Opens translate modal with a specific offset (for "Load Older" pagination)
 function showAdminTranslateModalWithOffset(chatId, uid, chatName, offset, lang) {
     showAdminTranslateModal(chatId, uid, chatName);
-    // After modal opens, auto-trigger translate with offset + the chosen lang
     setTimeout(() => {
         const radio = document.querySelector(`input[name="atm-lang"][value="${lang}"]`);
         if (radio) radio.checked = true;
-        // Store offset on the button so the click handler can read it
         const btn = document.getElementById('atm-go-btn');
         if (btn) {
             btn.dataset.offset = String(offset);
