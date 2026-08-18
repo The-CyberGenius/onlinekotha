@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#f8fafc">
+    <meta name="theme-color" content="#ffffff">
     <title>Kotha — Admin Dashboard</title>
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="stylesheet" href="/css/tailwind.min.css?v=1">
-    <link rel="stylesheet" href="/css/style.css">
 
     <style>
         * {
@@ -18,34 +16,39 @@
         :root {
             --sat: env(safe-area-inset-top, 0px);
             --sab: env(safe-area-inset-bottom, 0px);
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-main: #f8fafc;
+            --bg-page: #f8fafc;
             --card-bg: #ffffff;
-            --border-color: #e2e8f0;
+            --border: #e2e8f0;
             --border-hover: #cbd5e1;
-            --text-main: #0f172a;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
             --text-muted: #64748b;
+            --accent: #2563eb;
         }
         body, body * {
             user-select: text !important;
             -webkit-user-select: text !important;
         }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg-page) !important;
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
         body {
             padding-top: var(--sat);
             padding-bottom: var(--sab);
-            overflow-x: hidden;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            -webkit-font-smoothing: antialiased;
         }
 
         #app {
-            max-width: 1200px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 24px 20px 80px;
+            padding: 24px 16px 60px;
         }
 
         /* ── Header ────────────────────────────────────────── */
@@ -54,488 +57,417 @@
             align-items: center;
             justify-content: space-between;
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
         }
-        .admin-brand {
+        .admin-brand-wrap {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .admin-title {
-            font-size: 20px;
-            font-weight: 900;
-            letter-spacing: -0.02em;
-            color: #0f172a;
-            margin: 0;
-            line-height: 1.2;
-        }
-        .admin-badge {
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            background: #e0e7ff;
-            color: #4338ca;
-            padding: 3px 8px;
+        .admin-brand-wrap img {
+            width: 28px;
+            height: 28px;
             border-radius: 6px;
         }
-        .admin-user-pill {
+        .admin-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+        }
+        .admin-subtitle {
             font-size: 12px;
-            color: #64748b;
-            font-weight: 500;
-            margin-top: 2px;
+            color: var(--text-muted);
+            margin: 2px 0 0;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .header-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+        .header-btn-danger {
+            color: #dc2626;
+            border-color: #fee2e2;
+        }
+        .header-btn-danger:hover {
+            background: #fef2f2;
+            color: #b91c1c;
+            border-color: #fca5a5;
         }
 
-        /* ── Stat Cards ────────────────────────────────────── */
+        /* ── Metric Cards ──────────────────────────────────── */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
-            margin-bottom: 24px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
         .stat-card {
             background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 16px 18px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            transition: border-color 0.15s ease;
         }
         .stat-card:hover {
             border-color: var(--border-hover);
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
-            transform: translateY(-1px);
-        }
-        .stat-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
         }
         .stat-label {
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-        }
-        .stat-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            margin-bottom: 6px;
         }
         .stat-value {
-            font-size: 24px;
-            font-weight: 900;
-            letter-spacing: -0.03em;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-primary);
             line-height: 1.1;
+            letter-spacing: -0.02em;
         }
         .stat-sub {
             font-size: 11px;
-            color: #94a3b8;
-            font-weight: 500;
+            color: var(--text-muted);
             margin-top: 6px;
         }
 
-        /* ── Tabs Navigation ───────────────────────────────── */
-        .tabs-nav {
+        /* ── Tab Navigation ────────────────────────────────── */
+        .tabs-bar {
             display: flex;
+            align-items: center;
             gap: 4px;
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: 12px;
-            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
-        .tabs-nav::-webkit-scrollbar { display: none; }
-        .tab-btn {
-            flex: 1;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: 9px;
-            font-size: 12px;
+        .tabs-bar::-webkit-scrollbar { display: none; }
+        .tab-item {
+            padding: 10px 14px;
+            font-size: 13px;
             font-weight: 600;
-            color: #475569;
+            color: var(--text-muted);
             background: transparent;
             border: none;
+            border-bottom: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.15s ease;
             white-space: nowrap;
-            text-align: center;
+            transition: all 0.15s ease;
+            margin-bottom: -1px;
         }
-        .tab-btn:hover {
-            color: #0f172a;
+        .tab-item:hover {
+            color: var(--text-primary);
         }
-        .tab-btn.tab-active {
-            background: #ffffff !important;
-            color: #4f46e5 !important;
-            font-weight: 700 !important;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04) !important;
+        .tab-item.tab-active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+            font-weight: 700;
         }
 
         /* ── Section Card Container ────────────────────────── */
-        .admin-section-card {
+        .admin-card {
             background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
         }
 
-        /* ── Users Header & Search Bar ─────────────────────── */
-        .users-header {
+        /* ── Users Header & Controls ───────────────────────── */
+        .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
+            gap: 12px;
             margin-bottom: 16px;
             flex-wrap: wrap;
         }
-        .users-title-area h2 {
-            font-size: 17px;
-            font-weight: 800;
-            color: #0f172a;
+        .section-header-title h2 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
             margin: 0;
-            letter-spacing: -0.01em;
         }
-        .users-title-area p {
+        .section-header-title p {
             font-size: 12px;
-            color: #64748b;
+            color: var(--text-muted);
             margin: 2px 0 0;
         }
-        .users-controls {
+        .controls-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-grow: 1;
+            gap: 8px;
+            flex: 1;
+            max-width: 440px;
             justify-content: flex-end;
-            max-width: 450px;
         }
-
-        /* Fixed Search Input Wrapper */
-        .search-box-wrap {
+        .search-container {
             position: relative;
             flex: 1;
-            min-width: 220px;
+            min-width: 200px;
         }
-        .search-box-wrap .search-icon {
+        .search-icon {
             position: absolute;
-            left: 12px;
+            left: 10px;
             top: 50%;
             transform: translateY(-50%);
             width: 14px;
             height: 14px;
-            color: #94a3b8;
+            color: var(--text-muted);
             pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        .search-input {
+        .search-input-field {
             width: 100%;
-            height: 38px;
-            padding: 0 12px 0 36px;
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 13px;
-            color: #0f172a;
-            outline: none;
-            transition: all 0.15s ease;
-        }
-        .search-input:focus {
+            height: 34px;
+            padding: 0 10px 0 32px;
             background: #ffffff;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
-        }
-
-        .btn-purge {
-            height: 38px;
-            padding: 0 14px;
-            background: #fff1f2;
-            color: #e11d48;
-            border: 1px solid #ffe4e6;
-            border-radius: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             font-size: 12px;
-            font-weight: 700;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s ease;
+        }
+        .search-input-field:focus {
+            border-color: var(--accent);
+        }
+        .btn-outline-danger {
+            height: 34px;
+            padding: 0 12px;
+            background: #ffffff;
+            color: #dc2626;
+            border: 1px solid #fee2e2;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.15s ease;
             white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
         }
-        .btn-purge:hover {
-            background: #ffe4e6;
-            border-color: #fecdd3;
-        }
-        .btn-purge:active {
-            transform: scale(0.97);
+        .btn-outline-danger:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
         }
 
-        /* ── User Item Card (High Density Linear / Supabase Style) ── */
-        .user-item-card {
+        /* ── Clean User Row / Card ─────────────────────────── */
+        .user-row-card {
             background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
             margin-bottom: 8px;
-            transition: all 0.15s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.015);
+            transition: border-color 0.15s ease;
         }
-        .user-item-card:hover {
+        .user-row-card:hover {
             border-color: var(--border-hover);
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
         }
-
-        .user-row-main {
+        .user-main-flex {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 14px;
+            gap: 12px;
         }
-        .user-left-group {
+        .user-left-info {
             display: flex;
             align-items: center;
             gap: 12px;
             min-width: 0;
             flex: 1;
         }
-        .user-avatar-wrap {
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #e2e8f0;
+            color: #334155;
+            font-weight: 700;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
+            object-fit: cover;
         }
-        .user-meta-lines {
+        .user-details {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             min-width: 0;
             flex: 1;
         }
-        .user-primary-line {
+        .user-line-top {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
-        .user-name {
+        .user-name-text {
             font-size: 13px;
-            font-weight: 700;
-            color: #0f172a;
-            letter-spacing: -0.01em;
+            font-weight: 600;
+            color: var(--text-primary);
         }
-        .user-email {
-            font-size: 11px;
-            font-weight: 500;
-            color: #64748b;
+        .user-email-text {
+            font-size: 12px;
+            color: var(--text-muted);
         }
-        .user-secondary-line {
+        .user-line-bottom {
             display: flex;
             align-items: center;
             gap: 6px;
             flex-wrap: wrap;
+            font-size: 11px;
+            color: var(--text-secondary);
         }
 
-        /* Modern Metadata Tags */
-        .meta-tag {
+        /* Clean Neutral Badges */
+        .badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            font-size: 11px;
-            font-weight: 500;
-            padding: 2px 7px;
-            border-radius: 6px;
-            border: 1px solid #f1f5f9;
-            background: #f8fafc;
-            color: #475569;
-            line-height: 1.4;
-            white-space: nowrap;
-        }
-        .meta-tag b {
-            color: #0f172a;
-            font-weight: 600;
-        }
-        .meta-tag.meta-cost {
-            background: #f0fdf4;
-            border-color: #dcfce7;
-            color: #15803d;
-        }
-        .meta-tag.meta-ip {
-            background: #eff6ff;
-            border-color: #dbeafe;
-            color: #1d4ed8;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            padding: 1px 6px;
+            border-radius: 4px;
             font-size: 10px;
-        }
-        .meta-tag.meta-country {
-            background: #ecfdf5;
-            border-color: #d1fae5;
-            color: #047857;
-        }
-        .meta-tag.meta-reg {
-            background: #eef2ff;
-            border-color: #e0e7ff;
-            color: #4338ca;
-        }
-        .meta-tag.meta-active {
-            background: #f8fafc;
-            border-color: #f1f5f9;
-            color: #64748b;
-        }
-        .user-phone-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
             font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 6px;
-            border: 1px solid #fae8ff;
-            background: #faf5ff;
-            color: #7e22ce;
-            text-decoration: none;
-            transition: all 0.15s ease;
+            letter-spacing: 0.02em;
+            line-height: 1.4;
+            border: 1px solid var(--border);
+            background: #f1f5f9;
+            color: var(--text-secondary);
         }
-        .user-phone-link:hover {
-            background: #f3e8ff;
-            border-color: #d8b4fe;
-        }
-
-        /* Action Buttons */
-        .user-actions-group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        .btn-action {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            padding: 6px 11px;
-            border-radius: 8px;
-            border: 1px solid transparent;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            white-space: nowrap;
-            text-decoration: none;
-            line-height: 1.3;
-        }
-        .btn-action:active {
-            transform: scale(0.96);
-        }
-        .btn-plan {
-            background: #fffbeb;
-            border-color: #fde68a;
-            color: #b45309;
-        }
-        .btn-plan:hover {
-            background: #fef3c7;
-            border-color: #fcd34d;
-        }
-        .btn-chats {
-            background: #eef2ff;
-            border-color: #e0e7ff;
-            color: #4338ca;
-        }
-        .btn-chats:hover {
-            background: #e0e7ff;
-            border-color: #c7d2fe;
-        }
-        .btn-logs {
+        .badge-admin {
             background: #faf5ff;
             border-color: #f3e8ff;
             color: #7e22ce;
         }
-        .btn-logs:hover {
-            background: #f3e8ff;
-            border-color: #e9d5ff;
+        .badge-paid {
+            background: #f0fdf4;
+            border-color: #dcfce7;
+            color: #15803d;
         }
-        .btn-del {
-            background: #fff1f2;
-            border-color: #ffe4e6;
-            color: #e11d48;
-            padding: 6px 8px;
+        .badge-trial {
+            background: #eff6ff;
+            border-color: #dbeafe;
+            color: #1d4ed8;
         }
-        .btn-del:hover {
-            background: #ffe4e6;
-            border-color: #fecdd3;
+        .badge-expired {
+            background: #fff7ed;
+            border-color: #ffedd5;
+            color: #c2410c;
         }
 
-        /* ── Mobile Responsive Overhaul (< 768px) ──────────── */
+        /* Clean Action Buttons */
+        .user-buttons-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .btn-subtle {
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .btn-subtle:hover {
+            background: #f8fafc;
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+        .btn-subtle-danger {
+            color: #dc2626;
+            border-color: #fee2e2;
+        }
+        .btn-subtle-danger:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ── Mobile Layout (< 768px) ───────────────────────── */
         @media screen and (max-width: 768px) {
             #app {
-                padding: 12px 12px 80px;
+                padding: 12px 10px 60px;
             }
             .admin-header {
-                margin-bottom: 16px;
+                margin-bottom: 14px;
                 padding-bottom: 12px;
             }
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
-                margin-bottom: 16px;
+                margin-bottom: 14px;
             }
             .stat-card {
-                padding: 12px 14px;
+                padding: 10px 12px;
             }
             .stat-value {
-                font-size: 20px;
+                font-size: 18px;
             }
-            .tabs-nav {
-                margin-bottom: 16px;
-                padding: 3px;
+            .tabs-bar {
+                margin-bottom: 14px;
             }
-            .tab-btn {
-                padding: 7px 10px;
-                font-size: 11px;
+            .tab-item {
+                padding: 8px 10px;
+                font-size: 12px;
             }
-            .admin-section-card {
-                padding: 14px 14px;
-                border-radius: 14px;
+            .admin-card {
+                padding: 14px 12px;
             }
-            .users-header {
+            .section-header {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 10px;
             }
-            .users-controls {
+            .controls-row {
                 max-width: 100%;
-                justify-content: stretch;
             }
-            .search-box-wrap {
+            .search-container {
                 min-width: 0;
             }
-            .user-item-card {
-                padding: 12px;
-                border-radius: 12px;
-                margin-bottom: 8px;
-            }
-            .user-row-main {
+            .user-main-flex {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 10px;
             }
-            .user-left-group {
-                gap: 10px;
+            .user-left-info {
                 align-items: flex-start;
             }
-            .user-actions-group {
+            .user-buttons-group {
                 width: 100%;
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
@@ -543,15 +475,12 @@
                 padding-top: 8px;
                 border-top: 1px solid #f1f5f9;
             }
-            .user-actions-group.is-admin-actions {
+            .user-buttons-group.is-admin-actions {
                 grid-template-columns: repeat(2, 1fr);
             }
-            .user-actions-group .btn-action {
-                justify-content: center;
-                padding: 7px 4px;
-                font-size: 11px;
-                border-radius: 8px;
+            .btn-subtle {
                 text-align: center;
+                padding: 6px 4px;
             }
             input, select, textarea {
                 font-size: 16px !important;
@@ -560,97 +489,78 @@
     </style>
 </head>
 <body>
-    <div id="auth-gate" class="flex items-center justify-center h-screen text-gray-500 font-medium text-sm">Checking access...</div>
+    <div id="auth-gate" style="display:flex;align-items:center;justify-content:center;height:100vh;color:#64748b;font-size:13px;font-weight:500;">Checking access...</div>
 
     <div id="app" class="hidden">
         <!-- Header -->
         <header class="admin-header">
-            <div class="min-w-0">
-                <div class="admin-brand">
-                    <img src="/logo.svg" alt="Kotha Logo" style="width: 28px; height: 28px; border-radius: 8px;" />
+            <div class="admin-brand-wrap">
+                <img src="/logo.svg" alt="Kotha Logo">
+                <div>
                     <h1 class="admin-title">Kotha Admin</h1>
-                    <span class="admin-badge">V2 Console</span>
+                    <p class="admin-subtitle" id="admin-email-info"></p>
                 </div>
-                <div class="admin-user-pill" id="admin-email-info"></div>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                <a href="/app.html" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: #334155; text-decoration: none; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: all 0.15s ease;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <div class="header-actions">
+                <a href="/app.html" class="header-btn">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     <span>Open App</span>
                 </a>
-                <button id="logout-btn" style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 1px solid #fee2e2; border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: #dc2626; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.02); transition: all 0.15s ease;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <button id="logout-btn" class="header-btn header-btn-danger">
                     <span>Logout</span>
                 </button>
             </div>
         </header>
 
-        <!-- Stats Grid (4 Cards) -->
+        <!-- Stats Grid (4 Metric Cards) -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-label">Today's Spend</span>
-                    <span class="stat-icon" style="background: #eef2ff; color: #4f46e5;">💳</span>
-                </div>
-                <div class="stat-value" style="color: #4f46e5;">$<span id="stat-today-cost">0.000</span></div>
-                <div class="stat-sub">Cap: $<span id="stat-cap">5.00</span> / day</div>
+                <span class="stat-label">Today's Spend</span>
+                <div class="stat-value">$<span id="stat-today-cost">0.000</span></div>
+                <div class="stat-sub">Cap: $<span id="stat-cap">5.00</span>/day</div>
             </div>
             <div class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-label">Total Spend</span>
-                    <span class="stat-icon" style="background: #faf5ff; color: #9333ea;">💎</span>
-                </div>
-                <div class="stat-value" style="color: #9333ea;">$<span id="stat-total-cost">0.000</span></div>
-                <div class="stat-sub">All-time LLM billing</div>
+                <span class="stat-label">Total Spend</span>
+                <div class="stat-value">$<span id="stat-total-cost">0.000</span></div>
+                <div class="stat-sub">All-time LLM cost</div>
             </div>
             <div class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-label">Total AI Calls</span>
-                    <span class="stat-icon" style="background: #ecfdf5; color: #059669;">⚡</span>
-                </div>
-                <div class="stat-value" style="color: #059669;" id="stat-total-calls">0</div>
-                <div class="stat-sub">Model inferences</div>
+                <span class="stat-label">AI Invocations</span>
+                <div class="stat-value" id="stat-total-calls">0</div>
+                <div class="stat-sub">Total model queries</div>
             </div>
             <div class="stat-card">
-                <div class="stat-top">
-                    <span class="stat-label">Total Users</span>
-                    <span class="stat-icon" style="background: #fffbeb; color: #d97706;">👥</span>
-                </div>
-                <div class="stat-value" style="color: #d97706;" id="stat-users">0</div>
+                <span class="stat-label">Total Users</span>
+                <div class="stat-value" id="stat-users">0</div>
                 <div class="stat-sub">Registered accounts</div>
             </div>
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="tabs-nav">
-            <button data-tab="users" class="tab-btn tab-active">👥 Users</button>
-            <button data-tab="providers" class="tab-btn">🔌 Providers</button>
-            <button data-tab="models" class="tab-btn">🧠 Models</button>
-            <button data-tab="routes" class="tab-btn">🔀 Routing</button>
-            <button data-tab="integrations" class="tab-btn">🧩 Integrations</button>
-            <button data-tab="settings" class="tab-btn">⚙️ Limits</button>
-            <button data-tab="dm-logs" class="tab-btn">📜 DM Logs</button>
-        </div>
+        <nav class="tabs-bar">
+            <button data-tab="users" class="tab-item tab-active">Users</button>
+            <button data-tab="providers" class="tab-item">Providers</button>
+            <button data-tab="models" class="tab-item">Models</button>
+            <button data-tab="routes" class="tab-item">Routing</button>
+            <button data-tab="integrations" class="tab-item">Integrations</button>
+            <button data-tab="settings" class="tab-item">Limits</button>
+            <button data-tab="dm-logs" class="tab-item">DM Logs</button>
+        </nav>
 
-        <!-- Tab 1: Users (Default / Main Tab) -->
+        <!-- Tab 1: Users -->
         <section id="tab-users" class="tab-content">
-            <div class="admin-section-card">
-                <div class="users-header">
-                    <div class="users-title-area">
+            <div class="admin-card">
+                <div class="section-header">
+                    <div class="section-header-title">
                         <h2>Users Management</h2>
-                        <p>Manage registered accounts, plan tiers, usage costs, and chat archives.</p>
+                        <p>Manage user accounts, plans, usage metrics, and chat archives.</p>
                     </div>
-                    <div class="users-controls">
-                        <!-- Embedded Search Input -->
-                        <div class="search-box-wrap">
-                            <span class="search-icon">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                            </span>
-                            <input type="text" id="admin-user-search" placeholder="Search email, name, phone, ID..." class="search-input" autocomplete="off">
+                    <div class="controls-row">
+                        <div class="search-container">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="admin-user-search" placeholder="Search email, name, phone, ID..." class="search-input-field" autocomplete="off">
                         </div>
-                        <button id="purge-spam-btn" class="btn-purge" title="Purge empty spam / bot accounts">
-                            <span>🧹</span> <span>Purge spam</span>
-                        </button>
+                        <button id="purge-spam-btn" class="btn-outline-danger">Purge spam</button>
                     </div>
                 </div>
 
@@ -660,95 +570,97 @@
 
         <!-- Tab 2: Providers -->
         <section id="tab-providers" class="tab-content hidden">
-            <div class="admin-section-card">
-                <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 4px;">Add AI Provider</h2>
-                <p style="font-size: 12px; color: #64748b; margin: 0 0 16px;">Connect an LLM provider by pasting your API key. Keys are encrypted at rest with AES-256.</p>
+            <div class="admin-card">
+                <div class="section-header-title" style="margin-bottom:14px;">
+                    <h2>Add AI Provider</h2>
+                    <p>Connect an LLM provider by pasting your API key. Keys are encrypted at rest with AES-256.</p>
+                </div>
 
-                <form id="add-provider-form" style="display: flex; flex-direction: column; gap: 14px;">
+                <form id="add-provider-form" style="display:flex;flex-direction:column;gap:12px;">
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Provider</label>
-                        <select id="prov-name" required style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; font-size: 13px; outline: none; background: #fff;">
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Provider</label>
+                        <select id="prov-name" required style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;">
                             <option value="">Select a provider…</option>
                         </select>
                     </div>
 
-                    <!-- Live provider info panel -->
-                    <div id="prov-info" class="hidden" style="background: #eef2ff; border: 1px solid #e0e7ff; border-radius: 10px; padding: 12px; font-size: 12px;">
-                        <p id="prov-info-desc" style="color: #334155; margin: 0; line-height: 1.4;"></p>
-                        <p id="prov-info-hint" style="color: #4338ca; font-weight: 600; margin: 6px 0 0;"></p>
+                    <div id="prov-info" class="hidden" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;font-size:12px;">
+                        <p id="prov-info-desc" style="color:#334155;margin:0;line-height:1.4;"></p>
+                        <p id="prov-info-hint" style="color:#2563eb;font-weight:600;margin:4px 0 0;"></p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px;">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;">
                         <div>
-                            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">API Key</label>
-                            <input id="prov-key" type="password" placeholder="sk-… / paste secret key" required style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; font-size: 13px; outline: none; font-family: monospace;">
-                            <p style="font-size: 10px; color: #94a3b8; margin: 4px 0 0;">Stored encrypted — never shown back in plain text.</p>
+                            <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">API Key</label>
+                            <input id="prov-key" type="password" placeholder="sk-… / paste key" required style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;font-family:monospace;">
                         </div>
                         <div>
-                            <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Base URL (optional)</label>
-                            <input id="prov-baseurl" type="text" placeholder="https://… (auto-filled for known providers)" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; font-size: 13px; outline: none; font-family: monospace;">
-                            <p style="font-size: 10px; color: #94a3b8; margin: 4px 0 0;">Override only if using a proxy or custom endpoint.</p>
+                            <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Base URL (optional)</label>
+                            <input id="prov-baseurl" type="text" placeholder="https://…" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;font-family:monospace;">
                         </div>
                     </div>
 
-                    <button type="submit" style="background: #4f46e5; color: #ffffff; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 12px 18px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(79,70,229,0.2);">+ Add Provider &amp; Auto-Seed Models</button>
+                    <button type="submit" style="background:#0f172a;color:#ffffff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;align-self:flex-start;">+ Add Provider</button>
                 </form>
-                <p id="prov-add-msg" class="hidden" style="font-size: 12px; color: #dc2626; font-weight: 600; margin-top: 8px;"></p>
+                <p id="prov-add-msg" class="hidden" style="font-size:12px;color:#dc2626;font-weight:600;margin-top:8px;"></p>
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 0 4px;">
-                <h3 style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0;">Connected Providers</h3>
-                <span style="font-size: 11px; color: #94a3b8;">Click <b>Test</b> to validate connection</span>
-            </div>
-            <div id="provider-list" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;">Connected Providers</div>
+            <div id="provider-list" style="display:flex;flex-direction:column;gap:8px;"></div>
         </section>
 
         <!-- Tab 3: Models -->
         <section id="tab-models" class="tab-content hidden">
-            <div class="admin-section-card">
-                <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 4px;">Available Models</h2>
-                <p style="font-size: 12px; color: #64748b; margin: 0 0 16px;">Popular models from each provider are auto-seeded. Toggle ON/OFF or add custom ones below.</p>
-                <div id="model-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            <div class="admin-card">
+                <div class="section-header-title" style="margin-bottom:14px;">
+                    <h2>Available Models</h2>
+                    <p>Toggle ON/OFF or add custom models below.</p>
+                </div>
+                <div id="model-list" style="display:flex;flex-direction:column;gap:6px;"></div>
             </div>
-            <div class="admin-section-card">
-                <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 4px;">Add Custom Model</h2>
-                <p style="font-size: 12px; color: #64748b; margin: 0 0 16px;">Pricing is per million tokens — leave at 0 for free/local models.</p>
-                <form id="add-model-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: flex-end;">
+            <div class="admin-card">
+                <div class="section-header-title" style="margin-bottom:14px;">
+                    <h2>Add Custom Model</h2>
+                    <p>Pricing is per million tokens — leave 0 for free/local models.</p>
+                </div>
+                <form id="add-model-form" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:10px;align-items:flex-end;">
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px;">Provider</label>
-                        <select id="model-provider-id" required style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; background: #fff;"></select>
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Provider</label>
+                        <select id="model-provider-id" required style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:#fff;"></select>
                     </div>
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px;">Model ID</label>
-                        <input id="model-id-input" type="text" placeholder="e.g. gpt-4-turbo" required style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; font-family: monospace;">
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Model ID</label>
+                        <input id="model-id-input" type="text" placeholder="e.g. gpt-4o-mini" required style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;font-family:monospace;">
                     </div>
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px;">Input $/M</label>
-                        <input id="model-in-price" type="number" step="0.01" placeholder="0" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none;">
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Input $/M</label>
+                        <input id="model-in-price" type="number" step="0.01" placeholder="0" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;">
                     </div>
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px;">Output $/M</label>
-                        <input id="model-out-price" type="number" step="0.01" placeholder="0" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none;">
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Output $/M</label>
+                        <input id="model-out-price" type="number" step="0.01" placeholder="0" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;">
                     </div>
-                    <div style="grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <input id="model-display-name" type="text" placeholder="Display name shown in dropdowns (optional)" style="flex: 1; min-width: 200px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none;">
-                        <button type="submit" style="background: #4f46e5; color: #fff; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 10px 18px; cursor: pointer; white-space: nowrap;">+ Add Model</button>
+                    <div style="grid-column:1 / -1;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <input id="model-display-name" type="text" placeholder="Display name (optional)" style="flex:1;min-width:180px;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;">
+                        <button type="submit" style="background:#0f172a;color:#fff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;">+ Add Model</button>
                     </div>
                 </form>
-                <p id="model-add-msg" class="hidden" style="font-size: 12px; color: #dc2626; font-weight: 600; margin-top: 8px;"></p>
+                <p id="model-add-msg" class="hidden" style="font-size:12px;color:#dc2626;font-weight:600;margin-top:8px;"></p>
             </div>
         </section>
 
         <!-- Tab 4: Routes -->
         <section id="tab-routes" class="tab-content hidden">
-            <div class="admin-section-card">
-                <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 4px;">Feature Routing &amp; System Prompts</h2>
-                <p style="font-size: 12px; color: #64748b; margin: 0 0 16px;">Route features to a <b>Primary</b> model with automatic <b>Fallback</b> if primary rate-limits or errors.</p>
-                <form id="routes-form-wrapper" style="display: flex; flex-direction: column; gap: 16px;">
-                    <div id="routes-form" style="display: flex; flex-direction: column; gap: 16px;"></div>
-                    <div style="display: flex; align-items: center; gap: 12px; padding-top: 8px;">
-                        <button type="submit" id="routes-save-btn" style="background: #4f46e5; color: #fff; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer;">Save Routing</button>
-                        <p id="routes-global-msg" class="hidden" style="font-size: 12px; color: #16a34a; font-weight: 600;">✓ Saved successfully</p>
+            <div class="admin-card">
+                <div class="section-header-title" style="margin-bottom:14px;">
+                    <h2>Feature Routing &amp; System Prompts</h2>
+                    <p>Route features to primary and fallback models.</p>
+                </div>
+                <form id="routes-form-wrapper" style="display:flex;flex-direction:column;gap:14px;">
+                    <div id="routes-form" style="display:flex;flex-direction:column;gap:14px;"></div>
+                    <div style="display:flex;align-items:center;gap:10px;padding-top:6px;">
+                        <button type="submit" id="routes-save-btn" style="background:#0f172a;color:#fff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 18px;cursor:pointer;">Save Routing</button>
+                        <p id="routes-global-msg" class="hidden" style="font-size:12px;color:#16a34a;font-weight:600;">Saved</p>
                     </div>
                 </form>
             </div>
@@ -756,82 +668,82 @@
 
         <!-- Tab 5: Integrations -->
         <section id="tab-integrations" class="tab-content hidden">
-            <div id="integrations-root" style="display: flex; flex-direction: column; gap: 16px;"></div>
+            <div id="integrations-root" style="display:flex;flex-direction:column;gap:14px;"></div>
         </section>
 
-        <!-- Tab 6: Settings -->
+        <!-- Tab 6: Limits -->
         <section id="tab-settings" class="tab-content hidden">
-            <div class="admin-section-card">
-                <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 16px;">Global Limits &amp; Quotas</h2>
-                <form id="settings-form" style="display: flex; flex-direction: column; gap: 16px; max-width: 500px;">
+            <div class="admin-card">
+                <div class="section-header-title" style="margin-bottom:14px;">
+                    <h2>Global Limits &amp; Quotas</h2>
+                    <p>Configure spend caps and message thresholds.</p>
+                </div>
+                <form id="settings-form" style="display:flex;flex-direction:column;gap:14px;max-width:480px;">
                     <div>
-                        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; display: block; margin-bottom: 4px;">Daily AI Spend Cap ($)</label>
-                        <input id="s-daily-cap" type="number" step="0.1" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none;">
-                        <p style="font-size: 10px; color: #94a3b8; margin: 4px 0 0;">Pauses AI calls when daily spend hits this amount</p>
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Daily AI Spend Cap ($)</label>
+                        <input id="s-daily-cap" type="number" step="0.1" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;">
                     </div>
-                    <div style="border: 1px dashed #cbd5e1; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 14px; background: #f8fafc;">
-                        <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin: 0;">Plan Limits</p>
+                    <div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px;background:#f8fafc;">
+                        <p style="font-size:11px;font-weight:700;color:#334155;margin:0;text-transform:uppercase;">Plan Limits</p>
                         <div>
-                            <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Free Plan — Daily AI Messages</label>
-                            <input id="s-free-msgs" type="number" min="0" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; background: #fff;">
+                            <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;">Free Plan — Daily AI Messages</label>
+                            <input id="s-free-msgs" type="number" min="0" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:#fff;">
                         </div>
                         <div>
-                            <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Trial Plan — Daily AI Messages <span style="font-weight: 400; color: #94a3b8;">(Paid = unlimited)</span></label>
-                            <input id="s-paid-msgs" type="number" min="0" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; background: #fff;">
+                            <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;">Trial Plan — Daily AI Messages</label>
+                            <input id="s-paid-msgs" type="number" min="0" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:#fff;">
                         </div>
                         <div>
-                            <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px;">Trial Duration (Hours)</label>
-                            <input id="s-trial-hours" type="number" min="1" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; outline: none; background: #fff;">
+                            <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;">Trial Duration (Hours)</label>
+                            <input id="s-trial-hours" type="number" min="1" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:#fff;">
                         </div>
                     </div>
-                    <button type="submit" style="background: #4f46e5; color: #fff; font-weight: 700; font-size: 13px; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; align-self: flex-start;">Save Settings</button>
-                    <p id="settings-msg" class="hidden" style="font-size: 12px; color: #16a34a; font-weight: 600;">✓ Saved successfully</p>
+                    <button type="submit" style="background:#0f172a;color:#fff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;align-self:flex-start;">Save Settings</button>
+                    <p id="settings-msg" class="hidden" style="font-size:12px;color:#16a34a;font-weight:600;">Saved</p>
                 </form>
             </div>
         </section>
 
         <!-- Tab 7: DM Logs -->
         <section id="tab-dm-logs" class="tab-content hidden">
-            <div class="admin-section-card">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
-                    <div>
-                        <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0;">DM Conversation Logs</h2>
-                        <p style="font-size: 12px; color: #64748b; margin: 2px 0 0;">Admin compliance archive. All messages stored server-side.</p>
+            <div class="admin-card">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <h2>DM Conversation Logs</h2>
+                        <p>Admin compliance archive.</p>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                        <a href="/api/admin/dm/export-all" download style="display: inline-flex; align-items: center; gap: 6px; background: #16a34a; color: #fff; font-size: 12px; font-weight: 700; padding: 8px 14px; border-radius: 10px; text-decoration: none;">
-                            ⬇ Export All (ZIP)
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <a href="/api/admin/dm/export-all" download style="display:inline-flex;align-items:center;background:#16a34a;color:#fff;font-size:11px;font-weight:600;padding:7px 12px;border-radius:8px;text-decoration:none;">
+                            Export All (ZIP)
                         </a>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <input id="dm-log-search" type="text" placeholder="Search email…" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 7px 10px; font-size: 12px; outline: none; width: 160px;">
-                            <button id="dm-log-search-btn" style="background: #4f46e5; color: #fff; font-size: 12px; font-weight: 700; border: none; border-radius: 10px; padding: 8px 12px; cursor: pointer;">Search</button>
-                        </div>
+                        <input id="dm-log-search" type="text" placeholder="Search email…" style="border:1px solid #e2e8f0;border-radius:8px;padding:6px 8px;font-size:12px;outline:none;width:150px;">
+                        <button id="dm-log-search-btn" style="background:#0f172a;color:#fff;font-size:11px;font-weight:600;border:none;border-radius:8px;padding:7px 12px;cursor:pointer;">Search</button>
                     </div>
                 </div>
 
-                <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 12px;">
-                    <div id="dm-log-list" style="min-width: 600px; font-size: 12px;">
-                        <p style="color: #94a3b8; text-align: center; padding: 24px;">Loading…</p>
+                <div style="overflow-x:auto;border:1px solid #e2e8f0;border-radius:8px;">
+                    <div id="dm-log-list" style="min-width:560px;font-size:12px;">
+                        <p style="color:#94a3b8;text-align:center;padding:20px;">Loading…</p>
                     </div>
                 </div>
-                <div id="dm-log-pagination" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; font-size: 12px;"></div>
+                <div id="dm-log-pagination" style="display:flex;justify-content:flex-end;gap:6px;margin-top:10px;font-size:12px;"></div>
 
                 <!-- Message Viewer -->
-                <div id="dm-log-viewer" class="hidden" style="margin-top: 16px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div id="dm-log-viewer" class="hidden" style="margin-top:14px;border-top:1px solid #e2e8f0;padding-top:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                         <div>
-                            <button id="dm-log-back" style="font-size: 12px; font-weight: 700; color: #4f46e5; background: none; border: none; cursor: pointer; margin-right: 8px;">← Back</button>
-                            <span id="dm-log-viewer-title" style="font-weight: 700; font-size: 13px; color: #0f172a;"></span>
+                            <button id="dm-log-back" style="font-size:12px;font-weight:600;color:#2563eb;background:none;border:none;cursor:pointer;margin-right:8px;">← Back</button>
+                            <span id="dm-log-viewer-title" style="font-weight:600;font-size:13px;color:#0f172a;"></span>
                         </div>
-                        <a id="dm-log-download-btn" href="#" style="background: #16a34a; color: #fff; font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 8px; text-decoration: none;">⬇ Download .txt</a>
+                        <a id="dm-log-download-btn" href="#" style="background:#16a34a;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;text-decoration:none;">Download .txt</a>
                     </div>
-                    <div id="dm-log-messages" style="max-height: 480px; overflow-y: auto; background: #f8fafc; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px;"></div>
+                    <div id="dm-log-messages" style="max-height:440px;overflow-y:auto;background:#f8fafc;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;"></div>
                 </div>
             </div>
         </section>
     </div>
 
-    <script src="/js/admin.js?v=10"></script>
+    <script src="/js/admin.js?v=11"></script>
     <script>
     // ── DM Logs Tab Handler ──────────────────────────────────────────────────
     (function() {
@@ -858,7 +770,7 @@
             if (!el) return;
 
             if (!data.rows || data.rows.length === 0) {
-                el.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:24px;">No DM conversations found.</p>';
+                el.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:20px;">No DM conversations found.</p>';
                 pg.innerHTML = '';
                 return;
             }
@@ -866,32 +778,32 @@
             el.innerHTML = `
                 <table style="width:100%;border-collapse:collapse;font-size:12px;">
                     <thead>
-                        <tr style="background:#f8fafc;color:#64748b;text-transform:uppercase;font-size:10px;letter-spacing:0.05em;border-bottom:1px solid #e2e8f0;">
-                            <th style="text-align:left;padding:10px 12px;">ID</th>
-                            <th style="text-align:left;padding:10px 12px;">User A</th>
-                            <th style="text-align:left;padding:10px 12px;">User B</th>
-                            <th style="text-align:center;padding:10px 12px;">Messages</th>
-                            <th style="text-align:left;padding:10px 12px;">Last Activity</th>
-                            <th style="text-align:right;padding:10px 12px;">Actions</th>
+                        <tr style="background:#f8fafc;color:#64748b;text-transform:uppercase;font-size:10px;letter-spacing:0.04em;border-bottom:1px solid #e2e8f0;">
+                            <th style="text-align:left;padding:8px 10px;">ID</th>
+                            <th style="text-align:left;padding:8px 10px;">User A</th>
+                            <th style="text-align:left;padding:8px 10px;">User B</th>
+                            <th style="text-align:center;padding:8px 10px;">Messages</th>
+                            <th style="text-align:left;padding:8px 10px;">Last Activity</th>
+                            <th style="text-align:right;padding:8px 10px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${data.rows.map(r => `
-                        <tr style="border-bottom:1px solid #f1f5f9;transition:background 0.1s ease;">
-                            <td style="padding:10px 12px;color:#94a3b8;font-family:monospace;">#${r.id}</td>
-                            <td style="padding:10px 12px;">
-                                <div style="font-weight:700;color:#0f172a;">${r.user_a_name || ''}</div>
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:8px 10px;color:#94a3b8;font-family:monospace;">#${r.id}</td>
+                            <td style="padding:8px 10px;">
+                                <div style="font-weight:600;color:#0f172a;">${r.user_a_name || ''}</div>
                                 <div style="font-size:10px;color:#64748b;">${r.user_a_email}</div>
                             </td>
-                            <td style="padding:10px 12px;">
-                                <div style="font-weight:700;color:#0f172a;">${r.user_b_name || ''}</div>
+                            <td style="padding:8px 10px;">
+                                <div style="font-weight:600;color:#0f172a;">${r.user_b_name || ''}</div>
                                 <div style="font-size:10px;color:#64748b;">${r.user_b_email}</div>
                             </td>
-                            <td style="padding:10px 12px;text-align:center;font-weight:700;color:#0f172a;">${r.msg_count}</td>
-                            <td style="padding:10px 12px;color:#64748b;font-size:11px;">${timeStr(r.last_at)}</td>
-                            <td style="padding:10px 12px;text-align:right;">
-                                <button class="dm-view-btn" style="color:#4f46e5;font-weight:700;background:none;border:none;cursor:pointer;margin-right:8px;" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
-                                <a href="/api/admin/dm/conversations/${r.id}/download" style="color:#16a34a;font-weight:700;text-decoration:none;">Download</a>
+                            <td style="padding:8px 10px;text-align:center;font-weight:600;color:#0f172a;">${r.msg_count}</td>
+                            <td style="padding:8px 10px;color:#64748b;font-size:11px;">${timeStr(r.last_at)}</td>
+                            <td style="padding:8px 10px;text-align:right;">
+                                <button class="dm-view-btn" style="color:#2563eb;font-weight:600;background:none;border:none;cursor:pointer;margin-right:6px;" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
+                                <a href="/api/admin/dm/conversations/${r.id}/download" style="color:#16a34a;font-weight:600;text-decoration:none;">Download</a>
                             </td>
                         </tr>`).join('')}
                     </tbody>
@@ -900,9 +812,9 @@
             // Pagination
             const pages = Math.ceil(data.total / data.limit);
             pg.innerHTML = `
-                <span style="color:#94a3b8;margin-right:8px;">Page ${dmPage} of ${pages} (${data.total} total)</span>
-                ${dmPage > 1 ? `<button id="dm-pg-prev" style="background:#f1f5f9;border:none;border-radius:6px;padding:4px 8px;font-weight:700;cursor:pointer;">← Prev</button>` : ''}
-                ${dmPage < pages ? `<button id="dm-pg-next" style="background:#f1f5f9;border:none;border-radius:6px;padding:4px 8px;font-weight:700;cursor:pointer;">Next →</button>` : ''}`;
+                <span style="color:#94a3b8;margin-right:6px;">Page ${dmPage} of ${pages} (${data.total} total)</span>
+                ${dmPage > 1 ? `<button id="dm-pg-prev" style="background:#f1f5f9;border:none;border-radius:4px;padding:3px 6px;font-weight:600;cursor:pointer;">Prev</button>` : ''}
+                ${dmPage < pages ? `<button id="dm-pg-next" style="background:#f1f5f9;border:none;border-radius:4px;padding:3px 6px;font-weight:600;cursor:pointer;">Next</button>` : ''}`;
 
             document.getElementById('dm-pg-prev')?.addEventListener('click', () => loadDmLogs(dmPage - 1));
             document.getElementById('dm-pg-next')?.addEventListener('click', () => loadDmLogs(dmPage + 1));
@@ -922,20 +834,20 @@
             document.getElementById('dm-log-download-btn').href = `/api/admin/dm/conversations/${convId}/download`;
 
             const msgsEl = document.getElementById('dm-log-messages');
-            msgsEl.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:16px;">Loading…</p>';
+            msgsEl.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:14px;">Loading…</p>';
 
             const res  = await fetch(`/api/admin/dm/conversations/${convId}/messages`);
             const data = await res.json();
             if (!res.ok) { msgsEl.innerHTML = '<p style="color:#dc2626;font-size:12px;">Error loading messages.</p>'; return; }
 
             if (data.messages.length === 0) {
-                msgsEl.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:16px;">No messages yet.</p>';
+                msgsEl.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:14px;">No messages yet.</p>';
                 return;
             }
 
             msgsEl.innerHTML = data.messages.map(m => `
-                <div style="display:flex;gap:8px;font-size:12px;padding:4px 0;">
-                    <span style="font-weight:700;color:#0f172a;width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;">${m.sender_name || m.sender_email}</span>
+                <div style="display:flex;gap:6px;font-size:12px;padding:3px 0;">
+                    <span style="font-weight:600;color:#0f172a;width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;">${m.sender_name || m.sender_email}</span>
                     <span style="color:#94a3b8;font-size:10px;flex-shrink:0;">${timeStr(m.created_at)}</span>
                     <span style="color:#334155;flex:1;word-break:break-word;">${m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
                 </div>
@@ -969,7 +881,7 @@
                 const d = await r.json();
                 alert(d.ok ? `Deleted ${d.deleted} spam accounts.` : (d.error || 'Failed'));
                 location.reload();
-            } catch { alert('Network error'); this.disabled = false; this.textContent = '🧹 Purge spam'; }
+            } catch { alert('Network error'); this.disabled = false; this.textContent = 'Purge spam'; }
         });
     })();
     </script>

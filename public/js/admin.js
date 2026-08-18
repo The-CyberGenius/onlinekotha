@@ -22,7 +22,7 @@
     }
     if (!me.user.is_admin) {
         document.getElementById('auth-gate').innerHTML =
-            '<div style="text-align:center;padding:24px;"><p style="color:#dc2626;font-weight:700;margin-bottom:8px;">Not authorized.</p><a href="/" style="color:#4f46e5;text-decoration:underline;font-size:14px;font-weight:600;">Go to app</a></div>';
+            '<div style="text-align:center;padding:24px;"><p style="color:#dc2626;font-weight:600;margin-bottom:8px;">Not authorized.</p><a href="/" style="color:#2563eb;text-decoration:underline;font-size:13px;">Go to app</a></div>';
         return;
     }
     document.getElementById('auth-gate').classList.add('hidden');
@@ -37,10 +37,10 @@
     });
 
     // Tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.tab-item').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
-            document.querySelectorAll('.tab-btn').forEach(b => {
+            document.querySelectorAll('.tab-item').forEach(b => {
                 b.classList.remove('tab-active');
             });
             btn.classList.add('tab-active');
@@ -72,7 +72,6 @@
             sel.appendChild(opt);
         }
 
-        // Live update info panel + auto-fill base URL on selection
         sel.addEventListener('change', () => {
             const info = knownProviders[sel.value];
             const panel = document.getElementById('prov-info');
@@ -92,29 +91,29 @@
         const rows = await (await fetch('/api/admin/providers')).json();
         const list = document.getElementById('provider-list');
         if (!rows.length) {
-            list.innerHTML = '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:24px;text-align:center;color:#64748b;font-size:13px;">No providers added yet. Add one above to start.</div>';
+            list.innerHTML = '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:20px;text-align:center;color:#64748b;font-size:13px;">No providers added yet.</div>';
             return;
         }
         list.innerHTML = '';
         for (const p of rows) {
             const tested = p.last_tested_at
-                ? `<span style="font-size:11px;font-weight:600;color:${p.last_test_ok ? '#16a34a' : '#dc2626'};">${p.last_test_ok ? '✓ working' : '✗ ' + (p.last_test_error || 'failed').slice(0, 60)}</span>`
-                : '<span style="font-size:11px;color:#94a3b8;">not tested</span>';
+                ? `<span style="font-size:11px;font-weight:600;color:${p.last_test_ok ? '#16a34a' : '#dc2626'};">${p.last_test_ok ? 'Working' : 'Failed'}</span>`
+                : '<span style="font-size:11px;color:#94a3b8;">Not tested</span>';
             const card = document.createElement('div');
-            card.style.cssText = 'background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 2px rgba(0,0,0,0.015);flex-wrap:wrap;';
+            card.style.cssText = 'background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;';
             card.innerHTML = `
-                <div style="flex:1;min-width:200px;">
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <span style="font-weight:800;color:#0f172a;font-size:14px;">${p.label || p.name}</span>
-                        <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:99px;background:${p.enabled ? '#ecfdf5' : '#f1f5f9'};color:${p.enabled ? '#059669' : '#64748b'};">${p.enabled ? 'ON' : 'OFF'}</span>
+                <div style="flex:1;min-width:180px;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span style="font-weight:700;color:#0f172a;font-size:13px;">${p.label || p.name}</span>
+                        <span class="badge ${p.enabled ? 'badge-paid' : ''}">${p.enabled ? 'Enabled' : 'Disabled'}</span>
                     </div>
-                    <div style="font-size:11px;color:#64748b;margin-top:3px;font-family:monospace;">${p.key_masked}</div>
+                    <div style="font-size:11px;color:#64748b;margin-top:2px;font-family:monospace;">${p.key_masked}</div>
                     <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${p.base_url || ''} &middot; ${tested}</div>
                 </div>
-                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-                    <button data-act="test" data-id="${p.id}" style="font-size:11px;font-weight:700;background:#eef2ff;color:#4f46e5;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;">Test</button>
-                    <button data-act="toggle" data-id="${p.id}" data-enabled="${p.enabled}" style="font-size:11px;font-weight:700;background:#f1f5f9;color:#334155;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;">${p.enabled ? 'Disable' : 'Enable'}</button>
-                    <button data-act="delete" data-id="${p.id}" style="font-size:11px;font-weight:700;background:#fff1f2;color:#e11d48;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;">Delete</button>
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <button data-act="test" data-id="${p.id}" class="btn-subtle">Test</button>
+                    <button data-act="toggle" data-id="${p.id}" data-enabled="${p.enabled}" class="btn-subtle">${p.enabled ? 'Disable' : 'Enable'}</button>
+                    <button data-act="delete" data-id="${p.id}" class="btn-subtle btn-subtle-danger">Delete</button>
                 </div>
             `;
             list.appendChild(card);
@@ -182,7 +181,6 @@
         const rows = await (await fetch('/api/admin/models')).json();
         const list = document.getElementById('model-list');
 
-        // Populate provider dropdown
         const provSel = document.getElementById('model-provider-id');
         if (provSel) {
             const providers = await (await fetch('/api/admin/providers')).json();
@@ -196,7 +194,7 @@
         }
 
         if (!rows.length) {
-            list.innerHTML = '<p style="color:#64748b;font-size:13px;">No models yet. Add a provider first — common models auto-seed.</p>';
+            list.innerHTML = '<p style="color:#64748b;font-size:12px;">No models yet. Add a provider to auto-seed.</p>';
             return;
         }
         let lastProv = null;
@@ -204,22 +202,22 @@
         for (const m of rows) {
             if (m.provider_label !== lastProv) {
                 const h = document.createElement('div');
-                h.style.cssText = 'font-size:11px;font-weight:800;text-transform:uppercase;color:#64748b;letter-spacing:0.05em;margin-top:12px;display:flex;align-items:center;gap:6px;';
-                h.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#4f46e5;"></span>${m.provider_label}`;
+                h.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.04em;margin-top:10px;padding-bottom:4px;';
+                h.textContent = m.provider_label;
                 list.appendChild(h);
                 lastProv = m.provider_label;
             }
             const row = document.createElement('div');
-            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;gap:8px;flex-wrap:wrap;';
+            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;gap:8px;';
             row.innerHTML = `
-                <div style="flex:1;min-width:180px;">
-                    <div style="font-weight:700;color:#0f172a;font-size:13px;">${m.display_name || m.model_id}</div>
+                <div style="flex:1;min-width:160px;">
+                    <div style="font-weight:600;color:#0f172a;font-size:12px;">${m.display_name || m.model_id}</div>
                     <div style="font-size:10px;color:#64748b;font-family:monospace;">${m.model_id}</div>
-                    <div style="font-size:10px;color:#94a3b8;margin-top:2px;">in <b style="color:#059669;">$${m.input_price_per_1m}</b>/M &middot; out <b style="color:#9333ea;">$${m.output_price_per_1m}</b>/M</div>
+                    <div style="font-size:10px;color:#94a3b8;margin-top:1px;">in $${m.input_price_per_1m}/M &middot; out $${m.output_price_per_1m}/M</div>
                 </div>
-                <div style="display:flex;gap:6px;align-items:center;">
-                    <button data-mid="${m.id}" data-enabled="${m.enabled}" class="model-toggle" style="font-size:11px;font-weight:700;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;background:${m.enabled ? '#ecfdf5' : '#f1f5f9'};color:${m.enabled ? '#059669' : '#64748b'};">${m.enabled ? 'ON' : 'OFF'}</button>
-                    <button data-mid="${m.id}" class="model-delete" style="font-size:11px;font-weight:700;border:none;border-radius:6px;padding:5px 8px;cursor:pointer;background:#fff1f2;color:#e11d48;">✕</button>
+                <div style="display:flex;gap:4px;align-items:center;">
+                    <button data-mid="${m.id}" data-enabled="${m.enabled}" class="model-toggle btn-subtle" style="padding:3px 8px;font-size:10px;">${m.enabled ? 'ON' : 'OFF'}</button>
+                    <button data-mid="${m.id}" class="model-delete btn-subtle btn-subtle-danger" style="padding:3px 6px;font-size:10px;">✕</button>
                 </div>
             `;
             list.appendChild(row);
@@ -245,7 +243,6 @@
         });
     }
 
-    // Add Custom Model form handler
     const addModelForm = document.getElementById('add-model-form');
     if (addModelForm) {
         addModelForm.addEventListener('submit', async (e) => {
@@ -389,7 +386,7 @@ HARD RULES
         const featureLabels = {
             chat: 'AI Chat (talk to history)',
             embedding: 'Embeddings (semantic search)',
-            wrapped: 'Year in Wrapped (one-shot summary)',
+            wrapped: 'Year in Wrapped (summary)',
         };
         const wrap = document.getElementById('routes-form');
         wrap.innerHTML = '';
@@ -402,47 +399,47 @@ HARD RULES
             let promptHtml = '';
             if (feature === 'chat') {
                 promptHtml = `
-                <div style="margin-top:12px;">
-                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;display:block;margin-bottom:4px;">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="5" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:12px;outline:none;font-family:monospace;background:#fff;" placeholder="Default roleplay prompt will be used if left empty...">${r.system_prompt || ''}</textarea>
-                    <p style="font-size:10px;color:#94a3b8;margin-top:4px;">Placeholders: {{contactName}}, {{userName}}, {{contextBlock}}, {{currentDate}}, {{currentTime}}, {{totalMessages}}, {{historyNote}}</p>
-                    <details style="margin-top:8px;font-size:12px;color:#64748b;cursor:pointer;">
-                        <summary style="font-weight:700;color:#4f46e5;">View default prompt template</summary>
-                        <pre style="background:#f1f5f9;padding:12px;border-radius:10px;margin-top:6px;font-family:monospace;font-size:10px;overflow-x:auto;white-space:pre-wrap;max-height:220px;overflow-y:auto;">${DEFAULT_CHAT_PROMPT}</pre>
+                <div style="margin-top:10px;">
+                    <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="4" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:12px;outline:none;font-family:monospace;background:#fff;" placeholder="Default roleplay prompt used if empty...">${r.system_prompt || ''}</textarea>
+                    <p style="font-size:10px;color:#94a3b8;margin-top:2px;">Variables: {{contactName}}, {{userName}}, {{contextBlock}}, {{currentDate}}, {{currentTime}}</p>
+                    <details style="margin-top:6px;font-size:11px;color:#64748b;cursor:pointer;">
+                        <summary style="font-weight:600;color:#2563eb;">View default prompt template</summary>
+                        <pre style="background:#f1f5f9;padding:10px;border-radius:8px;margin-top:4px;font-family:monospace;font-size:10px;overflow-x:auto;white-space:pre-wrap;max-height:180px;overflow-y:auto;">${DEFAULT_CHAT_PROMPT}</pre>
                     </details>
                 </div>
                 `;
             } else {
                 promptHtml = `
-                <div style="margin-top:12px;">
-                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;display:block;margin-bottom:4px;">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="3" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:12px;outline:none;font-family:monospace;background:#fff;" placeholder="System prompt for this feature...">${r.system_prompt || ''}</textarea>
+                <div style="margin-top:10px;">
+                    <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="2" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:12px;outline:none;font-family:monospace;background:#fff;">${r.system_prompt || ''}</textarea>
                 </div>
                 `;
             }
 
             const div = document.createElement('div');
-            div.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;';
+            div.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;';
             div.innerHTML = `
-                <div style="font-weight:800;color:#0f172a;font-size:14px;margin-bottom:12px;">${featureLabels[feature]}</div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:12px;">
+                <div style="font-weight:700;color:#0f172a;font-size:13px;margin-bottom:10px;">${featureLabels[feature]}</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-bottom:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;display:block;margin-bottom:4px;">Primary Model</label>
-                        <select data-feat="${feature}" data-kind="primary" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:12px;outline:none;background:#fff;">${opts}</select>
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Primary Model</label>
+                        <select data-feat="${feature}" data-kind="primary" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">${opts}</select>
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;display:block;margin-bottom:4px;">Fallback Model</label>
-                        <select data-feat="${feature}" data-kind="fallback" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:12px;outline:none;background:#fff;">${opts}</select>
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Fallback Model</label>
+                        <select data-feat="${feature}" data-kind="fallback" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">${opts}</select>
                     </div>
                 </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;display:block;margin-bottom:4px;">Max Tokens</label>
-                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:12px;outline:none;background:#fff;">
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Max Tokens</label>
+                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;display:block;margin-bottom:4px;">Temperature</label>
-                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:8px 10px;font-size:12px;outline:none;background:#fff;">
+                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Temperature</label>
+                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">
                     </div>
                 </div>
                 ${promptHtml}
@@ -557,81 +554,80 @@ HARD RULES
     function renderUserList(rows) {
         const list = document.getElementById('user-list');
         if (!rows.length) {
-            list.innerHTML = '<div style="text-align:center;padding:36px;color:#94a3b8;"><p style="font-size:32px;margin-bottom:6px;">👥</p><p style="font-weight:700;font-size:13px;">No users match your query</p></div>';
+            list.innerHTML = '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">No users match your query</div>';
             return;
         }
-        list.innerHTML = `<div style="font-size:11px;font-weight:700;color:#94a3b8;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span>👥</span> <span>${rows.length} total users</span></div>`;
+        list.innerHTML = `<div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:10px;">${rows.length} total users</div>`;
         
         for (const u of rows) {
             const planBadge = u.is_admin
-                ? '<span style="background:#faf5ff;color:#7e22ce;border:1px solid #f3e8ff;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:0.03em;">ADMIN</span>'
+                ? '<span class="badge badge-admin">ADMIN</span>'
                 : u.plan === 'paid'
-                    ? '<span style="background:#ecfdf5;color:#059669;border:1px solid #d1fae5;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:0.03em;">✓ PAID</span>'
+                    ? '<span class="badge badge-paid">PAID</span>'
                 : u.plan === 'trial' && u.trial_expires_at > Date.now()
-                    ? `<span style="background:#eef2ff;color:#4338ca;border:1px solid #e0e7ff;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:0.03em;">TRIAL</span>`
+                    ? '<span class="badge badge-trial">TRIAL</span>'
                 : u.plan === 'trial'
-                    ? '<span style="background:#fff7ed;color:#ea580c;border:1px solid #ffedd5;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:0.03em;">TRIAL EXPIRED</span>'
-                : '<span style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:0.03em;">FREE</span>';
+                    ? '<span class="badge badge-expired">TRIAL EXPIRED</span>'
+                : '<span class="badge">FREE</span>';
 
             const loginMethod = u.google_id
-                ? '<span style="font-size:9px;font-weight:800;background:#eff6ff;color:#2563eb;padding:2px 6px;border-radius:5px;border:1px solid #dbeafe;">Google</span>'
-                : '<span style="font-size:9px;font-weight:800;background:#f8fafc;color:#64748b;padding:2px 6px;border-radius:5px;border:1px solid #e2e8f0;">Email</span>';
+                ? '<span class="badge">Google</span>'
+                : '<span class="badge">Email</span>';
 
             const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
             const avatarHtml = u.avatar_url
-                ? `<img src="${u.avatar_url}" style="width:34px;height:34px;border-radius:10px;object-fit:cover;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.06);" referrerpolicy="no-referrer" onerror="this.outerHTML='<div style=\\'width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px;flex-shrink:0;\\'>${initials}</div>'">`
-                : `<div style="width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:12px;flex-shrink:0;">${initials}</div>`;
+                ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
+                : `<div class="user-avatar">${initials}</div>`;
 
             const onlineDot = u.is_online
-                ? `<span style="position:relative;display:inline-flex;width:7px;height:7px;margin-left:4px;flex-shrink:0;" title="Online"><span style="position:absolute;width:100%;height:100%;border-radius:50%;background:#4ade80;opacity:0.75;animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></span><span style="position:relative;width:7px;height:7px;border-radius:50%;background:#22c55e;"></span></span>`
-                : '';
-            
-            const lastActive = u.last_active_at
-                ? `<span class="meta-tag meta-active" title="Last Active">⏱️ ${formatDateTime(u.last_active_at)}</span>`
+                ? `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#16a34a;margin-left:4px;" title="Online"></span>`
                 : '';
 
-            const phoneBadge = u.phone
-                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" class="user-phone-link" title="Call User">📱 ${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
+            const phoneStr = u.phone
+                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" style="color:#2563eb;text-decoration:none;font-weight:500;">${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a> &middot; `
+                : '';
+
+            const ipCountry = u.ip_address
+                ? `IP: ${u.ip_address}${u.country ? ` (${u.country})` : ''} &middot; `
+                : '';
+
+            const lastActive = u.last_active_at
+                ? ` &middot; Active: ${formatDateTime(u.last_active_at)}`
                 : '';
 
             const card = document.createElement('div');
-            card.className = 'user-item-card';
+            card.className = 'user-row-card';
 
             card.innerHTML = `
-                <div class="user-row-main">
-                    <!-- Left Identity & Info Group -->
-                    <div class="user-left-group">
-                        <div class="user-avatar-wrap">${avatarHtml}</div>
-                        <div class="user-meta-lines">
-                            <!-- Line 1: Name + Email + Badges -->
-                            <div class="user-primary-line">
-                                <span class="user-name" style="display:inline-flex;align-items:center;">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
-                                <span class="user-email">${u.email}</span>
-                                <span style="display:inline-flex;align-items:center;gap:4px;">${planBadge} ${loginMethod}</span>
+                <div class="user-main-flex">
+                    <div class="user-left-info">
+                        ${avatarHtml}
+                        <div class="user-details">
+                            <div class="user-line-top">
+                                <span class="user-name-text">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
+                                <span class="user-email-text">${u.email}</span>
+                                ${planBadge}
+                                ${loginMethod}
                             </div>
-                            <!-- Line 2: All Info Badges Inline -->
-                            <div class="user-secondary-line">
-                                ${phoneBadge}
-                                <span class="meta-tag" title="Uploaded Chats">💬 <b>${u.chat_count}</b></span>
-                                <span class="meta-tag meta-cost" title="Total AI Spend">💰 <b>$${u.total_cost.toFixed(3)}</b></span>
-                                ${u.ip_address ? `<span class="meta-tag meta-ip" title="IP Address">🌐 ${u.ip_address}</span>` : ''}
-                                ${u.country ? `<span class="meta-tag meta-country" title="Country">📍 ${u.country}</span>` : ''}
-                                <span class="meta-tag meta-reg" title="Registration Date">📅 Reg: ${formatDateTime(u.created_at)}</span>
+                            <div class="user-line-bottom">
+                                ${phoneStr}
+                                <span>${u.chat_count} chats</span> &middot;
+                                <span>$${u.total_cost.toFixed(3)} spend</span> &middot;
+                                ${ipCountry}
+                                <span>Joined: ${formatDateTime(u.created_at)}</span>
                                 ${lastActive}
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right Action Buttons Group -->
-                    <div class="user-actions-group ${u.is_admin ? 'is-admin-actions' : ''}">
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-action btn-plan">⚙️ Plan</button>`}
-                        <button data-uid="${u.id}" class="user-chats-btn btn-action btn-chats">💬 Chats</button>
-                        <button data-uid="${u.id}" class="user-ai-logs-btn btn-action btn-logs">📜 Logs</button>
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-action btn-del" title="Delete User">🗑️</button>`}
+                    <div class="user-buttons-group ${u.is_admin ? 'is-admin-actions' : ''}">
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}
+                        <button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats (${u.chat_count})</button>
+                        <button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>
+                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Delete</button>`}
                     </div>
                 </div>
 
-                <!-- Expandable Drawer Containers -->
                 <div data-chats-for="${u.id}" class="hidden" style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;"></div>
                 <div data-ai-logs-for="${u.id}" class="hidden" style="margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;"></div>
             `;
@@ -653,42 +649,42 @@ HARD RULES
                     : 'Not set';
 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                 modal.innerHTML = `
-                    <div style="background:white;border-radius:18px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 48px rgba(0,0,0,0.25);">
-                        <div style="padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+                    <div style="background:white;border-radius:12px;max-width:420px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
+                        <div style="padding:14px 16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
                             <div>
-                                <h3 style="font-weight:800;font-size:16px;color:#0f172a;margin:0;">Manage Plan</h3>
+                                <h3 style="font-weight:700;font-size:15px;color:#0f172a;margin:0;">Manage Plan</h3>
                                 <p style="font-size:12px;color:#64748b;margin:2px 0 0;">${email}</p>
                             </div>
-                            <button id="plan-modal-x" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:15px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;">×</button>
+                            <button id="plan-modal-x" style="border:none;background:transparent;font-size:18px;color:#64748b;cursor:pointer;">×</button>
                         </div>
-                        <div style="padding:18px 20px;">
-                            <div style="margin-bottom:14px;">
-                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Plan Tier</label>
-                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;outline:none;background:#fff;">
-                                    <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free (limited msgs/day)</option>
-                                    <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial (higher daily cap, time-limited)</option>
-                                    <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid ✓ (truly unlimited)</option>
+                        <div style="padding:16px;">
+                            <div style="margin-bottom:12px;">
+                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px;">Plan Tier</label>
+                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;">
+                                    <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free</option>
+                                    <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial</option>
+                                    <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid</option>
                                 </select>
                             </div>
-                            <div style="margin-bottom:14px;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
-                                <p style="font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin:0;">Current Trial Status</p>
-                                <p style="font-size:13px;color:#0f172a;margin:4px 0 0;font-weight:600;">${trialInfo}</p>
+                            <div style="margin-bottom:12px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+                                <p style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin:0;">Trial Status</p>
+                                <p style="font-size:12px;color:#0f172a;margin:3px 0 0;font-weight:600;">${trialInfo}</p>
                             </div>
                             <div style="margin-bottom:14px;">
-                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.5px;margin-bottom:6px;">Extend Trial (hours from now)</label>
-                                <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;outline:none;margin-bottom:6px;">
+                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px;">Extend Trial (hours)</label>
+                                <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;margin-bottom:6px;">
                                 <div style="display:flex;gap:6px;">
-                                    <button id="plan-modal-quick-24" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:8px;padding:8px 4px;cursor:pointer;border:none;">+24h</button>
-                                    <button id="plan-modal-quick-72" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:8px;padding:8px 4px;cursor:pointer;border:none;">+72h</button>
-                                    <button id="plan-modal-quick-168" style="flex:1;background:#eef2ff;color:#4f46e5;font-weight:700;font-size:11px;border-radius:8px;padding:8px 4px;cursor:pointer;border:none;">+7d</button>
+                                    <button id="plan-modal-quick-24" class="btn-subtle" style="flex:1;">+24h</button>
+                                    <button id="plan-modal-quick-72" class="btn-subtle" style="flex:1;">+72h</button>
+                                    <button id="plan-modal-quick-168" class="btn-subtle" style="flex:1;">+7d</button>
                                 </div>
                             </div>
-                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:10px 12px;border-radius:8px;margin-bottom:12px;"></div>
-                            <div style="display:flex;gap:8px;justify-content:flex-end;">
-                                <button id="plan-modal-cancel" style="font-size:12px;font-weight:700;color:#64748b;padding:9px 16px;border-radius:10px;cursor:pointer;background:#f1f5f9;border:none;">Cancel</button>
-                                <button id="plan-modal-save" style="font-size:12px;font-weight:700;color:white;padding:9px 18px;border-radius:10px;cursor:pointer;background:#0f172a;border:none;">Save</button>
+                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:8px;border-radius:6px;margin-bottom:10px;"></div>
+                            <div style="display:flex;gap:6px;justify-content:flex-end;">
+                                <button id="plan-modal-cancel" class="btn-subtle">Cancel</button>
+                                <button id="plan-modal-save" style="font-size:12px;font-weight:600;color:white;padding:7px 14px;border-radius:8px;cursor:pointer;background:#0f172a;border:none;">Save</button>
                             </div>
                         </div>
                     </div>
@@ -698,12 +694,10 @@ HARD RULES
                 modal.querySelector('#plan-modal-cancel').addEventListener('click', () => modal.remove());
                 modal.querySelector('#plan-modal-x')?.addEventListener('click', () => modal.remove());
 
-                // Quick buttons
                 modal.querySelector('#plan-modal-quick-24').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '24'; });
                 modal.querySelector('#plan-modal-quick-72').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '72'; });
                 modal.querySelector('#plan-modal-quick-168').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '168'; });
 
-                // Save
                 modal.querySelector('#plan-modal-save').addEventListener('click', async () => {
                     const newPlan = modal.querySelector('#plan-modal-plan').value;
                     const hours = modal.querySelector('#plan-modal-hours').value;
@@ -712,10 +706,7 @@ HARD RULES
                     const body = {};
                     if (newPlan !== currentPlan) body.plan = newPlan;
                     if (hours && Number(hours) > 0) body.trial_extends_hours = Number(hours);
-
-                    if (newPlan === 'trial' && !hours && currentPlan !== 'trial') {
-                        body.trial_extends_hours = 72;
-                    }
+                    if (newPlan === 'trial' && !hours && currentPlan !== 'trial') body.trial_extends_hours = 72;
 
                     if (Object.keys(body).length === 0) {
                         msgEl.style.display = 'block';
@@ -736,8 +727,8 @@ HARD RULES
                         msgEl.style.display = 'block';
                         msgEl.style.background = '#f0fdf4';
                         msgEl.style.color = '#16a34a';
-                        msgEl.textContent = `Updated! Plan: ${data.user.plan}`;
-                        setTimeout(async () => { modal.remove(); await loadUsers(); }, 1200);
+                        msgEl.textContent = `Updated to ${data.user.plan}`;
+                        setTimeout(async () => { modal.remove(); await loadUsers(); }, 1000);
                     } catch (err) {
                         msgEl.style.display = 'block';
                         msgEl.style.background = '#fff1f2';
@@ -755,78 +746,71 @@ HARD RULES
                 const area = list.querySelector(`[data-chats-for="${uid}"]`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
-                    btn.textContent = '💬 Chats';
+                    btn.textContent = `Chats (${btn.dataset.uid})`;
                     return;
                 }
-                area.innerHTML = '<div style="padding:10px;font-size:12px;color:#94a3b8;">Loading chats...</div>';
+                area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading chats...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
                     if (!chats.length) {
-                        area.innerHTML = '<div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;font-size:12px;color:#94a3b8;">No chats uploaded yet</div>';
+                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#94a3b8;">No chats uploaded yet</div>';
                         return;
                     }
                     area.innerHTML = `
-                        <div style="background:#f8fafc;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
-                            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.05em;border-bottom:1px solid #e2e8f0;background:#f1f5f9;">
+                        <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+                            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0;background:#f1f5f9;">
                                 <div style="flex:1;min-width:0;">Chat Name</div>
                                 <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
-                                <div style="width:140px;flex-shrink:0;">Imported Date</div>
-                                <div style="width:160px;text-align:right;flex-shrink:0;">Actions</div>
+                                <div style="width:130px;flex-shrink:0;">Imported</div>
+                                <div style="width:150px;text-align:right;flex-shrink:0;">Actions</div>
                             </div>
                             ${chats.map(c => `
-                                <div style="padding:10px 12px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
+                                <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
                                     <div style="flex:1;min-width:0;">
-                                        <div style="font-weight:700;color:#0f172a;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                        <div style="font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                             <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
-                                            ${c.deleted_by_user ? '<span style="font-size:9px;font-weight:800;background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:4px;">deleted</span>' : ''}
+                                            ${c.deleted_by_user ? '<span class="badge badge-expired" style="margin-left:4px;">deleted</span>' : ''}
                                         </div>
                                     </div>
-                                    <div style="width:70px;text-align:center;font-weight:700;color:#475569;flex-shrink:0;">${c.message_count || 0}</div>
-                                    <div style="width:140px;color:#64748b;font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
-                                    <div style="width:160px;display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-shrink:0;">
-                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" style="font-size:10px;font-weight:700;background:#16a34a;color:#fff;border-radius:6px;padding:4px 8px;text-decoration:none;">.zip</a>
-                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" style="font-size:10px;font-weight:700;background:#fef3c7;color:#b45309;border:1px solid #fde68a;border-radius:6px;padding:4px 7px;cursor:pointer;" title="Translate chat">🌐</button>
-                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" style="font-size:10px;font-weight:700;background:#eef2ff;color:#4f46e5;border:1px solid #e0e7ff;border-radius:6px;padding:4px 8px;cursor:pointer;">Open</button>
-                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" style="font-size:10px;font-weight:700;background:#fff1f2;color:#e11d48;border:1px solid #ffe4e6;border-radius:6px;padding:4px 7px;cursor:pointer;">Del</button>
+                                    <div style="width:70px;text-align:center;color:#475569;flex-shrink:0;">${c.message_count || 0}</div>
+                                    <div style="width:130px;color:#64748b;font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
+                                    <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
+                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
+                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle" style="font-size:10px;padding:2px 6px;">Translate</button>
+                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#2563eb;">Open</button>
+                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
                     `;
-                    // Admin chat open handlers
+
                     area.querySelectorAll('[data-admin-open-chat]').forEach(openBtn => {
                         openBtn.addEventListener('click', () => {
-                            const uid = openBtn.dataset.uid;
                             const folder = openBtn.dataset.folder;
-                            openBtn.textContent = '...';
-                            openBtn.disabled = true;
                             window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`;
                         });
                     });
 
-                    // Admin chat translate handlers
                     area.querySelectorAll('[data-admin-translate-chat]').forEach(tBtn => {
                         tBtn.addEventListener('click', () => {
                             showAdminTranslateModal(tBtn.dataset.adminTranslateChat, tBtn.dataset.uid, tBtn.dataset.cname);
                         });
                     });
 
-                    // Admin chat delete handlers
                     area.querySelectorAll('[data-admin-del-chat]').forEach(delBtn => {
                         delBtn.addEventListener('click', async () => {
                             const chatId = delBtn.dataset.adminDelChat;
-                            const delUid = delBtn.dataset.uid;
                             const cname = delBtn.dataset.cname;
-                            if (!confirm(`Permanently delete "${cname}"?\n\nThis removes files + AI logs. Cannot be undone!`)) return;
+                            if (!confirm(`Permanently delete "${cname}"?`)) return;
                             delBtn.textContent = '...';
                             delBtn.disabled = true;
                             try {
-                                const r = await fetch(`/api/admin/users/${delUid}/chats/${chatId}`, { method: 'DELETE' });
+                                const r = await fetch(`/api/admin/users/${uid}/chats/${chatId}`, { method: 'DELETE' });
                                 if (!r.ok) throw new Error((await r.json()).error || 'Failed');
-                                const row = area.querySelector(`[data-admin-chat-row="${chatId}"]`);
-                                if (row) row.remove();
+                                area.querySelector(`[data-admin-chat-row="${chatId}"]`)?.remove();
                             } catch (err) {
                                 alert('Error: ' + err.message);
                                 delBtn.textContent = 'Del';
@@ -835,7 +819,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div style="background:#fee2e2;border-radius:10px;padding:12px;text-align:center;font-size:12px;color:#dc2626;font-weight:700;">${err.message}</div>`;
+                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#dc2626;">${err.message}</div>`;
                 }
             });
         });
@@ -847,46 +831,45 @@ HARD RULES
                 const area = list.querySelector(`[data-ai-logs-for="${uid}"]`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
-                    btn.textContent = '📜 Logs';
+                    btn.textContent = 'Logs';
                     return;
                 }
-                area.innerHTML = '<div style="padding:10px;font-size:12px;color:#94a3b8;">Loading AI logs...</div>';
+                area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading AI logs...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
                 try {
                     const convs = await (await fetch(`/api/admin/users/${uid}/conversations`)).json();
                     if (!convs.length) {
-                        area.innerHTML = '<div style="background:#faf5ff;border-radius:10px;padding:12px;text-align:center;font-size:12px;color:#94a3b8;">No AI conversations yet</div>';
+                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#94a3b8;">No AI conversations yet</div>';
                         return;
                     }
                     area.innerHTML = `
-                        <div style="background:#faf5ff;border-radius:12px;overflow:hidden;border:1px solid #f3e8ff;">
-                            <div style="padding:8px 12px;border-bottom:1px solid #f3e8ff;background:#f5f3ff;display:flex;align-items:center;justify-content:space-between;">
-                                <span style="font-size:11px;font-weight:800;text-transform:uppercase;color:#7e22ce;letter-spacing:0.05em;">AI Conversations (${convs.length})</span>
-                                <button class="ai-logs-close-btn" style="width:22px;height:22px;border-radius:50%;background:#ede9fe;border:none;cursor:pointer;color:#7e22ce;font-size:14px;display:flex;align-items:center;justify-content:center;">×</button>
+                        <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+                            <div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;align-items:center;justify-content:space-between;">
+                                <span style="font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;">AI Conversations (${convs.length})</span>
+                                <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:#64748b;font-size:14px;">×</button>
                             </div>
                             ${convs.map(c => `
-                                <div style="padding:10px 12px;border-bottom:1px solid #f3e8ff;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
+                                <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
                                     <div style="flex:1;min-width:0;">
-                                        <p style="font-weight:700;color:#0f172a;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
-                                        <p style="font-size:10px;color:#7e22ce;margin:2px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
+                                        <p style="font-weight:600;color:#0f172a;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
+                                        <p style="font-size:10px;color:#64748b;margin:1px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
                                     </div>
-                                    <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-                                        <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn" style="font-size:10px;font-weight:700;background:#f3e8ff;color:#7e22ce;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;">View</button>
-                                        <a href="/api/admin/users/${uid}/conversations/${c.id}/download" style="font-size:10px;font-weight:700;background:#ccfbf1;color:#0f766e;border-radius:6px;padding:4px 8px;text-decoration:none;">.txt</a>
+                                    <div style="display:flex;gap:4px;align-items:center;">
+                                        <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 6px;">View</button>
+                                        <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="btn-subtle" style="font-size:10px;padding:2px 6px;text-decoration:none;">TXT</a>
                                     </div>
                                 </div>
                             `).join('')}
                         </div>
                     `;
-                    // Close logs card
+
                     area.querySelector('.ai-logs-close-btn')?.addEventListener('click', () => {
                         area.classList.add('hidden');
                         area.innerHTML = '';
-                        btn.textContent = '📜 Logs';
+                        btn.textContent = 'Logs';
                     });
 
-                    // View button handlers
                     area.querySelectorAll('.ai-log-view-btn').forEach(vBtn => {
                         vBtn.addEventListener('click', async () => {
                             const convId = vBtn.dataset.convid;
@@ -894,24 +877,24 @@ HARD RULES
                             try {
                                 const data = await (await fetch(`/api/admin/users/${convUid}/conversations/${convId}`)).json();
                                 const modal = document.createElement('div');
-                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
+                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                                 modal.innerHTML = `
-                                    <div style="background:white;border-radius:18px;max-width:580px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 48px rgba(0,0,0,0.25);overflow:hidden;">
-                                        <div style="padding:14px 18px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-                                            <div style="min-width:0;flex:1;">
-                                                <h4 style="font-weight:800;font-size:14px;color:#0f172a;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${data.title || 'AI Conversation'}</h4>
-                                                <p style="font-size:10px;color:#94a3b8;margin:2px 0 0;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
+                                    <div style="background:white;border-radius:12px;max-width:540px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
+                                        <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+                                            <div>
+                                                <h4 style="font-weight:700;font-size:13px;color:#0f172a;margin:0;">${data.title || 'AI Conversation'}</h4>
+                                                <p style="font-size:10px;color:#64748b;margin:1px 0 0;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
                                             </div>
-                                            <button class="ai-log-popup-close" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;color:#64748b;font-size:15px;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;margin-left:10px;">×</button>
+                                            <button class="ai-log-popup-close" style="border:none;background:transparent;color:#64748b;font-size:18px;cursor:pointer;">×</button>
                                         </div>
-                                        <div style="padding:16px 18px;overflow-y:auto;flex:1;">
+                                        <div style="padding:14px;overflow-y:auto;flex:1;">
                                             ${(data.messages || []).map(m => `
-                                                <div style="margin-bottom:10px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
-                                                    <div style="max-width:85%;padding:9px 13px;border-radius:14px;font-size:12px;line-height:1.45;${m.role === 'user'
-                                                        ? 'background:#0f172a;color:white;border-bottom-right-radius:2px;'
-                                                        : 'background:#f8fafc;color:#0f172a;border:1px solid #e2e8f0;border-bottom-left-radius:2px;'}">
+                                                <div style="margin-bottom:8px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
+                                                    <div style="max-width:85%;padding:8px 12px;border-radius:10px;font-size:12px;line-height:1.4;${m.role === 'user'
+                                                        ? 'background:#0f172a;color:white;'
+                                                        : 'background:#f1f5f9;color:#0f172a;'}">
                                                         ${m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}
-                                                        <div style="font-size:9px;color:${m.role === 'user' ? 'rgba(255,255,255,0.5)' : '#94a3b8'};margin-top:4px;text-align:right;">${new Date(m.created_at).toLocaleString()}</div>
+                                                        <div style="font-size:9px;color:${m.role === 'user' ? 'rgba(255,255,255,0.6)' : '#64748b'};margin-top:2px;text-align:right;">${new Date(m.created_at).toLocaleString()}</div>
                                                     </div>
                                                 </div>
                                             `).join('')}
@@ -927,7 +910,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div style="background:#fee2e2;border-radius:10px;padding:12px;text-align:center;font-size:12px;color:#dc2626;font-weight:700;">${err.message}</div>`;
+                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#dc2626;">${err.message}</div>`;
                 }
             });
         });
@@ -937,7 +920,7 @@ HARD RULES
             btn.addEventListener('click', async () => {
                 const uid = btn.dataset.uid;
                 const email = btn.dataset.email;
-                if (!confirm(`DELETE user "${email}"?\n\nThis will permanently remove:\n- Account\n- All uploaded chats & files\n- All AI conversations\n\nThis cannot be undone!`)) return;
+                if (!confirm(`DELETE user "${email}"?\n\nThis permanently removes account, files, and AI conversations.`)) return;
                 btn.textContent = '...';
                 btn.disabled = true;
                 try {
@@ -948,7 +931,7 @@ HARD RULES
                     await loadStats();
                 } catch (err) {
                     alert('Error: ' + err.message);
-                    btn.textContent = 'Del';
+                    btn.textContent = 'Delete';
                     btn.disabled = false;
                 }
             });
@@ -977,7 +960,7 @@ HARD RULES
                 { k: 'smtp_pass', label: 'Password / API key', placeholder: 're_xxx', type: 'password', secret: true },
                 { k: 'email_from', label: 'From address', placeholder: 'Kotha <noreply@yourdomain.com>', type: 'text' },
             ],
-            extraButtons: `<button data-action="test-email" style="font-size:12px;font-weight:700;background:#eef2ff;color:#4f46e5;border:none;border-radius:10px;padding:8px 14px;cursor:pointer;">Send test email</button>`,
+            extraButtons: `<button data-action="test-email" class="btn-subtle">Send test email</button>`,
         }));
 
         // Razorpay card
@@ -990,7 +973,7 @@ HARD RULES
             fields: [
                 { k: 'key_id',        label: 'Key ID (public)',    placeholder: 'rzp_live_xxx',  type: 'text' },
                 { k: 'key_secret',    label: 'Key Secret',         placeholder: 'xxxxxxxx',      type: 'password', secret: true },
-                { k: 'webhook_secret',label: 'Webhook Secret',     placeholder: 'Set in Razorpay Dashboard → Webhooks', type: 'password', secret: true },
+                { k: 'webhook_secret',label: 'Webhook Secret',     placeholder: 'Set in Razorpay Dashboard', type: 'password', secret: true },
             ],
         }));
 
@@ -1010,45 +993,40 @@ HARD RULES
 
     function integCard({ title, subtitle, section, status, data, fields, extraButtons = '' }) {
         const card = document.createElement('div');
-        card.className = 'admin-section-card';
+        card.className = 'admin-card';
         const statusBadge = status
-            ? '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;background:#ecfdf5;color:#059669;padding:3px 8px;border-radius:99px;">Active</span>'
-            : '<span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;background:#f1f5f9;color:#64748b;padding:3px 8px;border-radius:99px;">Off</span>';
+            ? '<span class="badge badge-paid">Active</span>'
+            : '<span class="badge">Off</span>';
 
         const fieldHtml = fields.map(f => {
             const meta = data[f.k] || { set: false };
             const placeholder = meta.set && f.secret
                 ? `${meta.masked} (set — leave blank to keep)`
                 : (meta.set && meta.value ? meta.value : f.placeholder);
-            const sourceTag = meta.source === 'env'
-                ? '<span style="font-size:9px;font-weight:700;color:#d97706;margin-left:4px;">from .env</span>'
-                : meta.source === 'db'
-                ? '<span style="font-size:9px;font-weight:700;color:#059669;margin-left:4px;">saved</span>'
-                : '';
             return `
                 <div style="grid-column:${f.half ? 'span 1' : '1 / -1'};">
-                    <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;display:block;margin-bottom:4px;">${f.label}${sourceTag}</label>
+                    <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">${f.label}</label>
                     <input data-section="${section}" data-field="${f.k}" type="${f.type}"
                         placeholder="${placeholder.replace(/"/g, '&quot;')}"
-                        style="width:100%;border:1px solid #e2e8f0;border-radius:10px;padding:9px 12px;font-size:13px;outline:none;"
+                        style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;"
                         autocomplete="off">
                 </div>
             `;
         }).join('');
 
         card.innerHTML = `
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;">
                 <div>
-                    <h3 style="font-weight:800;color:#0f172a;font-size:15px;display:flex;align-items:center;gap:8px;margin:0;">${title} ${statusBadge}</h3>
+                    <h3 style="font-weight:700;color:#0f172a;font-size:14px;margin:0;display:flex;align-items:center;gap:6px;">${title} ${statusBadge}</h3>
                     <p style="font-size:12px;color:#64748b;margin:2px 0 0;">${subtitle}</p>
                 </div>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;">${fieldHtml}</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid #f1f5f9;flex-wrap:wrap;">
-                <button data-action="save" data-section="${section}" style="background:#0f172a;color:#fff;font-weight:700;font-size:12px;border:none;border-radius:10px;padding:8px 16px;cursor:pointer;">Save</button>
-                <button data-action="clear" data-section="${section}" style="font-size:12px;font-weight:700;background:#fff1f2;color:#e11d48;border:none;border-radius:10px;padding:8px 14px;cursor:pointer;">Clear</button>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;">${fieldHtml}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;flex-wrap:wrap;">
+                <button data-action="save" data-section="${section}" style="background:#0f172a;color:#fff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;">Save</button>
+                <button data-action="clear" data-section="${section}" class="btn-subtle btn-subtle-danger">Clear</button>
                 ${extraButtons}
-                <span data-msg-section="${section}" style="font-size:12px;font-weight:700;margin-left:8px;"></span>
+                <span data-msg-section="${section}" style="font-size:12px;font-weight:600;margin-left:6px;"></span>
             </div>
         `;
 
@@ -1085,7 +1063,7 @@ HARD RULES
             });
             if (!r.ok) throw new Error('Save failed');
             inputs.forEach(i => i.value = '');
-            setIntegMsg(card, section, 'Saved ✓', 'ok');
+            setIntegMsg(card, section, 'Saved', 'ok');
             await loadIntegrations();
         } catch (err) {
             setIntegMsg(card, section, err.message, 'error');
@@ -1114,7 +1092,7 @@ HARD RULES
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ to }),
         })).json();
-        setIntegMsg(card, 'email', r.ok ? 'Sent ✓' : (r.error || 'Failed'), r.ok ? 'ok' : 'error');
+        setIntegMsg(card, 'email', r.ok ? 'Sent' : (r.error || 'Failed'), r.ok ? 'ok' : 'error');
     }
 
     await loadKnown();
@@ -1133,55 +1111,44 @@ function showAdminTranslateModal(chatId, uid, chatName) {
 
     const modal = document.createElement('div');
     modal.id = 'admin-translate-modal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);padding:12px;';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.5);padding:12px;';
     modal.innerHTML = `
-        <div style="background:#fff;border-radius:18px;width:100%;max-width:680px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,0.3);overflow:hidden;">
-            <!-- Header -->
-            <div style="padding:14px 18px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#fffbeb,#fef3c7);">
-                <div style="min-width:0;flex:1;">
-                    <div style="font-size:14px;font-weight:800;color:#1a1a1a;">🌐 AI Chat Translator</div>
-                    <div style="font-size:11px;color:#6b7280;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${chatName}</div>
+        <div style="background:#fff;border-radius:12px;width:100%;max-width:640px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
+            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;background:#f8fafc;">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:#0f172a;">Chat Translator</div>
+                    <div style="font-size:11px;color:#64748b;">${chatName}</div>
                 </div>
-                <button id="atm-close" style="width:28px;height:28px;border-radius:50%;border:none;background:#f3f4f6;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:#6b7280;margin-left:10px;">×</button>
+                <button id="atm-close" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:#64748b;">×</button>
             </div>
 
-            <!-- Language picker + translate button -->
-            <div style="padding:10px 18px;border-bottom:1px solid #f9fafb;display:flex;align-items:center;gap:10px;background:#fafafa;flex-wrap:wrap;">
-                <span style="font-size:11px;font-weight:700;color:#374151;">Translate to:</span>
-                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:700;color:#d97706;">
-                    <input type="radio" name="atm-lang" value="hinglish" checked style="accent-color:#d97706;"> 🇮🇳 Hinglish
+            <div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;background:#fff;flex-wrap:wrap;">
+                <span style="font-size:11px;font-weight:600;color:#475569;">Translate to:</span>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#0f172a;">
+                    <input type="radio" name="atm-lang" value="hinglish" checked> Hinglish
                 </label>
-                <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;font-weight:700;color:#2563eb;">
-                    <input type="radio" name="atm-lang" value="english" style="accent-color:#2563eb;"> 🇬🇧 English
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#0f172a;">
+                    <input type="radio" name="atm-lang" value="english"> English
                 </label>
-                <button id="atm-go-btn" style="margin-left:auto;padding:7px 16px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(217,119,6,0.25);">
-                    <span id="atm-btn-icon">✨</span> Translate Now
+                <button id="atm-go-btn" style="margin-left:auto;padding:6px 14px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">
+                    Translate
                 </button>
             </div>
 
-            <!-- Progress bar -->
-            <div id="atm-progress-wrap" style="display:none;padding:8px 18px;background:#fffbeb;border-bottom:1px solid #fde68a;">
+            <div id="atm-progress-wrap" style="display:none;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                    <span id="atm-progress-label" style="font-size:10px;font-weight:600;color:#92400e;">Starting translation…</span>
-                    <span id="atm-progress-pct" style="font-size:10px;font-weight:700;color:#d97706;">0%</span>
+                    <span id="atm-progress-label" style="font-size:10px;font-weight:600;color:#475569;">Translating…</span>
+                    <span id="atm-progress-pct" style="font-size:10px;font-weight:600;color:#0f172a;">0%</span>
                 </div>
-                <div style="background:#fde68a;border-radius:99px;height:5px;overflow:hidden;">
-                    <div id="atm-progress-bar" style="background:linear-gradient(90deg,#f59e0b,#d97706);height:100%;width:0%;transition:width 0.3s ease;border-radius:99px;"></div>
-                </div>
-            </div>
-
-            <!-- Translated content area -->
-            <div id="atm-body" style="flex:1;overflow-y:auto;padding:14px 18px;">
-                <div style="text-align:center;padding:32px 16px;color:#9ca3af;">
-                    <div style="font-size:28px;margin-bottom:8px;">🌍</div>
-                    <div style="font-size:12px;font-weight:600;">Select a language and click <strong>Translate Now</strong></div>
-                    <div style="font-size:10px;margin-top:4px;">Powered by Google Translate &bull; Zero token cost</div>
+                <div style="background:#e2e8f0;border-radius:4px;height:4px;overflow:hidden;">
+                    <div id="atm-progress-bar" style="background:#2563eb;height:100%;width:0%;transition:width 0.2s ease;"></div>
                 </div>
             </div>
 
-            <!-- Footer -->
-            <div style="padding:8px 18px;border-top:1px solid #f0f0f0;background:#fafafa;font-size:10px;color:#9ca3af;text-align:center;">
-                Zero token cost &bull; Free &bull; Works on any chat size
+            <div id="atm-body" style="flex:1;overflow-y:auto;padding:14px 16px;">
+                <div style="text-align:center;padding:24px;color:#94a3b8;font-size:12px;">
+                    Select a language and click <strong>Translate</strong>
+                </div>
             </div>
         </div>
     `;
@@ -1195,7 +1162,6 @@ function showAdminTranslateModal(chatId, uid, chatName) {
     document.getElementById('atm-go-btn').addEventListener('click', async () => {
         const lang = document.querySelector('input[name="atm-lang"]:checked')?.value || 'hinglish';
         const btn = document.getElementById('atm-go-btn');
-        const icon = document.getElementById('atm-btn-icon');
         const body = document.getElementById('atm-body');
         const progressWrap = document.getElementById('atm-progress-wrap');
         const progressBar = document.getElementById('atm-progress-bar');
@@ -1203,47 +1169,12 @@ function showAdminTranslateModal(chatId, uid, chatName) {
         const progressPct = document.getElementById('atm-progress-pct');
 
         btn.disabled = true;
-        icon.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;"></span>';
-        btn.style.opacity = '0.75';
-
-        const langLabel = lang === 'hinglish' ? '🇮🇳 Hinglish' : '🇬🇧 English';
         progressWrap.style.display = 'block';
         progressBar.style.width = '0%';
-        progressLabel.textContent = 'Starting translation…';
+        progressLabel.textContent = 'Translating…';
         progressPct.textContent = '0%';
 
         body.innerHTML = `<div id="atm-msgs" style="display:flex;flex-direction:column;gap:6px;"></div>`;
-
-        const allTranslated = [];
-        const senderColors = {};
-        const palette = ['#f59e0b','#6366f1','#10b981','#ef4444','#8b5cf6','#0ea5e9'];
-        let colorIdx = 0;
-
-        function getSenderColor(sender) {
-            if (!senderColors[sender]) {
-                senderColors[sender] = palette[colorIdx % palette.length];
-                colorIdx++;
-            }
-            return senderColors[sender];
-        }
-
-        function appendMessages(items) {
-            const container = document.getElementById('atm-msgs');
-            if (!container) return;
-            items.forEach(m => {
-                allTranslated.push(m);
-                const color = getSenderColor(m.sender || 'Unknown');
-                const div = document.createElement('div');
-                div.style.cssText = `background:#f9fafb;border-radius:8px;padding:6px 10px;border-left:3px solid ${color};`;
-                div.innerHTML = `
-                    <div style="font-size:10px;font-weight:700;color:${color};margin-bottom:2px;">${m.sender || 'Unknown'} <span style="font-weight:400;color:#9ca3af;">${m.timestamp || ''}</span></div>
-                    <div style="font-size:12px;color:#1f2937;line-height:1.4;">${m.translated}</div>
-                    ${m.translated !== m.original ? `<div style="font-size:10px;color:#9ca3af;margin-top:2px;font-style:italic;">Original: ${m.original}</div>` : ''}
-                `;
-                container.appendChild(div);
-                container.scrollIntoView({ block: 'end', behavior: 'smooth' });
-            });
-        }
 
         try {
             const response = await fetch(`/api/admin/users/${uid}/chats/${chatId}/translate`, {
@@ -1277,51 +1208,26 @@ function showAdminTranslateModal(chatId, uid, chatName) {
                         try {
                             const data = JSON.parse(line.slice(6));
 
-                            if (event === 'start') {
-                                const totalInChat = data.totalInChat || data.total;
-                                const showing = data.total;
-                                const batchCount = data.batches || Math.ceil(showing / 100);
-                                progressLabel.textContent = totalInChat > showing
-                                    ? `Translating latest ${showing.toLocaleString()} of ${totalInChat.toLocaleString()} messages…`
-                                    : `Translating ${showing.toLocaleString()} messages in ${batchCount} batch calls…`;
-                                progressPct.textContent = '0%';
-                            } else if (event === 'progress') {
+                            if (event === 'progress') {
                                 const pct = Math.round((data.done / data.total) * 100);
                                 progressBar.style.width = pct + '%';
-                                progressLabel.textContent = `Translating… ${data.done.toLocaleString()} / ${data.total.toLocaleString()} done`;
+                                progressLabel.textContent = `Translating… ${data.done} / ${data.total}`;
                                 progressPct.textContent = pct + '%';
                             } else if (event === 'done') {
                                 progressBar.style.width = '100%';
                                 progressPct.textContent = '100%';
-                                progressLabel.textContent = `✅ Done! ${data.translated.length.toLocaleString()} messages translated`;
+                                progressLabel.textContent = 'Done!';
 
-                                appendMessages(data.translated);
-
-                                const msgs = document.getElementById('atm-msgs');
-                                if (msgs) {
-                                    const header = document.createElement('div');
-                                    header.style.cssText = 'margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;';
-                                    const totalInChat = data.totalInChat || data.translated.length;
-                                    header.innerHTML = `
-                                        <span style="font-size:10px;font-weight:700;color:#d97706;background:#fef3c7;padding:3px 8px;border-radius:12px;">${langLabel} · ${data.translated.length.toLocaleString()} messages${totalInChat > data.translated.length ? ` of ${totalInChat.toLocaleString()} total` : ''}</span>
-                                        <div style="display:flex;gap:6px;">
-                                            ${data.hasMore ? `<button id="atm-load-more-btn" style="font-size:10px;font-weight:600;color:#6366f1;background:#eef2ff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;">⬆️ Load Older</button>` : ''}
-                                            <button id="atm-copy-btn" style="font-size:10px;font-weight:600;color:#6b7280;background:#f3f4f6;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;">📋 Copy All</button>
-                                        </div>
-                                    `;
-                                    body.insertBefore(header, msgs);
-
-                                    document.getElementById('atm-copy-btn')?.addEventListener('click', () => {
-                                        const text = data.translated.map(m => `[${m.sender}] ${m.translated}`).join('\n');
-                                        navigator.clipboard.writeText(text).then(() => {
-                                            const cb = document.getElementById('atm-copy-btn');
-                                            if (cb) { cb.textContent = '✅ Copied!'; setTimeout(() => { if(cb) cb.textContent = '📋 Copy All'; }, 2000); }
-                                        });
-                                    });
-
-                                    document.getElementById('atm-load-more-btn')?.addEventListener('click', () => {
-                                        modal.remove();
-                                        showAdminTranslateModalWithOffset(chatId, uid, chatName, (data.offset || 0) + data.translated.length, lang);
+                                const container = document.getElementById('atm-msgs');
+                                if (container) {
+                                    data.translated.forEach(m => {
+                                        const div = document.createElement('div');
+                                        div.style.cssText = `background:#f8fafc;border-radius:6px;padding:6px 10px;border-left:3px solid #2563eb;`;
+                                        div.innerHTML = `
+                                            <div style="font-size:10px;font-weight:600;color:#2563eb;margin-bottom:1px;">${m.sender || 'Unknown'} <span style="color:#94a3b8;font-weight:400;">${m.timestamp || ''}</span></div>
+                                            <div style="font-size:12px;color:#0f172a;line-height:1.4;">${m.translated}</div>
+                                        `;
+                                        container.appendChild(div);
                                     });
                                 }
                             }
@@ -1332,32 +1238,10 @@ function showAdminTranslateModal(chatId, uid, chatName) {
             }
 
         } catch (err) {
-            body.innerHTML = `<div style="text-align:center;padding:24px;color:#ef4444;font-size:12px;font-weight:600;">❌ ${err.message}</div>`;
+            body.innerHTML = `<div style="text-align:center;padding:20px;color:#dc2626;font-size:12px;">${err.message}</div>`;
             progressWrap.style.display = 'none';
         } finally {
             btn.disabled = false;
-            icon.textContent = '✨';
-            btn.style.opacity = '1';
         }
     });
-
-    if (!document.getElementById('atm-spin-style')) {
-        const style = document.createElement('style');
-        style.id = 'atm-spin-style';
-        style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-        document.head.appendChild(style);
-    }
-}
-
-function showAdminTranslateModalWithOffset(chatId, uid, chatName, offset, lang) {
-    showAdminTranslateModal(chatId, uid, chatName);
-    setTimeout(() => {
-        const radio = document.querySelector(`input[name="atm-lang"][value="${lang}"]`);
-        if (radio) radio.checked = true;
-        const btn = document.getElementById('atm-go-btn');
-        if (btn) {
-            btn.dataset.offset = String(offset);
-            btn.click();
-        }
-    }, 50);
 }
