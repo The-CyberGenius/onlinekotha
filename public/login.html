@@ -4,7 +4,8 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-GKQ286KWDG');</script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sign In to Kotha — Relive & Chat With Your Loved Ones Again</title>
     <meta name="description" content="Sign in to Kotha to view your WhatsApp chat backups, chat with AI personality clones of your loved ones, and relive your conversations securely.">
     <meta name="robots" content="index, follow">
@@ -13,79 +14,171 @@
     <meta property="og:description" content="Access your WhatsApp chat exports and AI personality conversations on Kotha.">
     <meta property="og:url" content="https://www.onlinekotha.com/login.html">
     <meta property="og:image" content="https://www.onlinekotha.com/og-image.svg">
+    <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="stylesheet" href="/css/tailwind.min.css?v=1">
 
     <style>
-        .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
         .auth-bg-mesh {
-            background-color: #0b0f19;
+            background-color: #090d16;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.25) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.25) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.25) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        /* Prevent iOS Safari auto-zoom by enforcing 16px font size on inputs */
+        @media screen and (max-width: 640px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .tab-btn-active {
+            background: #ffffff !important;
+            color: #4f46e5 !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04) !important;
+        }
+        .tab-btn-inactive {
+            color: #64748b !important;
+            background: transparent !important;
+        }
+        .tab-btn-inactive:hover {
+            color: #0f172a !important;
         }
     </style>
 </head>
-<body class="flex min-h-[100dvh] w-screen overflow-hidden bg-gray-50 text-gray-800 font-sans">
+<body class="min-h-[100dvh] flex flex-col lg:flex-row text-slate-900 antialiased">
     
-    <!-- LEFT SIDE: Dynamic Brand Visual (Hidden on mobile) -->
-    <div class="hidden lg:flex w-1/2 auth-bg-mesh relative items-center justify-center overflow-hidden">
-        <!-- Floating animated blobs -->
-        <div class="absolute top-1/4 left-1/4 w-72 h-72 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-blob"></div>
-        <div class="absolute top-1/3 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div class="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
+    <!-- LEFT SIDE: Dynamic Brand Visual (Visible on Desktop / Tablets) -->
+    <div class="hidden lg:flex lg:w-1/2 auth-bg-mesh relative flex-col justify-between p-12 text-white overflow-hidden select-none">
+        <!-- Background glowing accents -->
+        <div class="absolute -top-20 -left-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
         
-        <div class="relative z-10 flex flex-col items-center text-center p-12 max-w-lg">
-            <img src="/logo.svg" alt="Kotha Logo" class="w-32 h-32 mb-8 drop-shadow-2xl hover:scale-105 transition-transform duration-500" />
-            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-4">Your chats, beautifully preserved.</h1>
-            <p class="text-lg text-indigo-200 font-medium">Experience the next generation of memory preservation. Analyze, search, and relive your WhatsApp conversations with AI.</p>
+        <!-- Header -->
+        <div class="relative z-10">
+            <a href="/" class="inline-flex items-center gap-2.5 group">
+                <img src="/logo.svg" alt="Kotha Logo" class="w-10 h-10 drop-shadow-md group-hover:scale-105 transition-transform" />
+                <span class="text-2xl font-black tracking-tight text-white">Kotha</span>
+            </a>
+        </div>
+
+        <!-- Center Feature Preview -->
+        <div class="relative z-10 max-w-md my-auto space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold tracking-wide uppercase">
+                <span>✨ AI WhatsApp Memory Viewer</span>
+            </div>
+            <h1 class="text-3xl xl:text-4xl font-black leading-tight tracking-tight text-white">
+                Your chats, beautifully preserved forever.
+            </h1>
+            <p class="text-slate-300 text-sm xl:text-base leading-relaxed">
+                Relive your most precious WhatsApp memories, search across years of messages, and chat with empathetic AI personality clones of loved ones.
+            </p>
+
+            <!-- Mock Chat Bubble -->
+            <div class="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-400 to-pink-500 flex items-center justify-center text-white font-bold text-xs shadow-inner">
+                        ❤️
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                            <span>Maa</span>
+                            <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+                        </div>
+                        <div class="text-[10px] text-slate-400">AI Clone &middot; Active Memory</div>
+                    </div>
+                </div>
+                <div class="bg-indigo-600/30 border border-indigo-500/30 rounded-2xl rounded-tl-sm p-3 text-xs text-indigo-100 leading-relaxed">
+                    "Beta, time pe khana khaya na? Yaad hai jab hum shimla gaye the... ❤️"
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="relative z-10 flex items-center justify-between text-xs text-slate-400">
+            <span>&copy; 2026 Kotha &middot; 100% Private & Encrypted</span>
+            <div class="flex items-center gap-4">
+                <a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a>
+                <a href="/terms.html" class="hover:text-white transition-colors">Terms</a>
+            </div>
         </div>
     </div>
 
-    <!-- RIGHT SIDE: Auth Form -->
-    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 bg-white relative overflow-y-auto max-h-[100dvh]">
-        <!-- Go to Homepage Button -->
-        <a href="https://www.onlinekotha.com/" class="absolute top-6 left-6 z-20 flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-wider" title="Go to Homepage">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            Back to Home
-        </a>
-
-        <!-- Subtle background shapes -->
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full blur-3xl opacity-70 z-0"></div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-gradient-to-tr from-pink-50 to-indigo-50 rounded-full blur-3xl opacity-70 z-0"></div>
-
-        <div class="w-full max-w-md my-auto relative z-10 py-8">
-            <!-- Mobile Logo -->
-            <div class="lg:hidden text-center mb-6">
-                <img src="/logo.svg" alt="Kotha Logo" class="w-14 h-14 mx-auto mb-2 drop-shadow-xl" />
-                <h2 class="text-2xl font-extrabold text-gray-900">Kotha</h2>
-            </div>
-            
-            <div class="mb-5 text-center lg:text-left">
-                <h2 id="form-title" class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-1">Welcome to Kotha</h2>
-                <p id="form-subtitle" class="text-xs sm:text-sm text-gray-500">Sign in with Google or your 6-digit PIN.</p>
-            </div>
-
-            <!-- Google OAuth (1-Click) -->
-            <a id="google-btn" href="#" class="hidden group relative flex items-center justify-center gap-3 w-full bg-white border-2 border-gray-200 hover:border-indigo-400 hover:shadow-[0_8px_25px_rgba(99,102,241,0.12)] rounded-2xl py-3.5 mb-4 font-bold text-sm text-gray-800 transition-all duration-200">
-                <svg width="20" height="20" viewBox="0 0 48 48" class="group-hover:scale-110 transition-transform"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
-                Continue with Google
+    <!-- RIGHT SIDE: Auth Form Container -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-between min-h-[100dvh] bg-white relative px-4 py-6 sm:px-8 sm:py-10 md:px-12">
+        <!-- Top Nav Link -->
+        <div class="flex items-center justify-between w-full max-w-md mx-auto mb-4">
+            <a href="/" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors py-1.5 px-2.5 -ml-2.5 rounded-lg hover:bg-slate-50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                <span>Back to Home</span>
             </a>
+            <a href="/app" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 py-1.5 px-3 rounded-xl transition">
+                Guest Demo →
+            </a>
+        </div>
+
+        <!-- Auth Form Box -->
+        <div class="auth-card my-auto py-2">
+            <!-- Mobile Brand Logo -->
+            <div class="lg:hidden text-center mb-6">
+                <a href="/" class="inline-block">
+                    <img src="/logo.svg" alt="Kotha Logo" class="w-12 h-12 mx-auto mb-2 drop-shadow-md" />
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Kotha</h2>
+                </a>
+            </div>
+
+            <!-- Header Titles -->
+            <div class="text-center lg:text-left mb-6">
+                <h2 id="form-title" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-1">
+                    Welcome to Kotha
+                </h2>
+                <p id="form-subtitle" class="text-xs sm:text-sm text-slate-500 font-medium">
+                    Sign in with Google or your quick 6-digit PIN.
+                </p>
+            </div>
+
+            <!-- Google OAuth Button (1-Click) -->
+            <div class="mb-4">
+                <a id="google-btn" href="#" class="hidden group relative items-center justify-center gap-3 w-full bg-white border border-slate-200 hover:border-indigo-400 hover:bg-slate-50/80 hover:shadow-sm rounded-xl py-3 px-4 font-bold text-xs sm:text-sm text-slate-800 transition-all active:scale-[0.98]">
+                    <svg width="18" height="18" viewBox="0 0 48 48" class="shrink-0"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+                    <span>Continue with Google</span>
+                </a>
+            </div>
 
             <!-- Divider -->
             <div class="flex items-center gap-3 my-4">
-                <div class="flex-1 h-px bg-gray-200"></div>
-                <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">or with email & PIN</span>
-                <div class="flex-1 h-px bg-gray-200"></div>
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">or with email &amp; PIN</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
             </div>
 
-            <!-- Segmented Tabs: Sign In / Sign Up -->
-            <div class="flex rounded-xl bg-gray-100 p-1 mb-4 border border-gray-200">
-                <button type="button" id="tab-btn-signin" onclick="switchAuthTab('signin')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white text-indigo-600 shadow-sm cursor-pointer">
+            <!-- Segmented Switcher: Sign In / Create Account -->
+            <div class="flex rounded-xl bg-slate-100 p-1 mb-5 border border-slate-200/80">
+                <button type="button" id="tab-btn-signin" onclick="switchAuthTab('signin')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all tab-btn-active cursor-pointer">
                     Sign In
                 </button>
-                <button type="button" id="tab-btn-signup" onclick="switchAuthTab('signup')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 cursor-pointer">
+                <button type="button" id="tab-btn-signup" onclick="switchAuthTab('signup')" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all tab-btn-inactive cursor-pointer">
                     Create Account
                 </button>
             </div>
@@ -94,21 +187,22 @@
             <div id="auth-error-banner" class="hidden mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-xs font-semibold"></div>
 
             <!-- FORM 1: SIGN IN -->
-            <form id="signin-form" onsubmit="handleEmailLogin(event)" class="space-y-3.5">
+            <form id="signin-form" onsubmit="handleEmailLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Email Address</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
                     <input type="email" id="signin-email" required placeholder="you@example.com"
-                        class="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-indigo-500/20">
+                        class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 outline-none transition focus:ring-4 focus:ring-indigo-500/10">
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider">6-Digit PIN</label>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">6-Digit PIN</label>
+                        <a href="/forgot.html" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700">Forgot PIN?</a>
                     </div>
-                    <input type="password" id="signin-pin" maxlength="6" inputmode="numeric" required placeholder="••••••"
-                        class="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-indigo-500/20 font-mono tracking-widest text-center text-base">
+                    <input type="password" id="signin-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" required placeholder="••••••"
+                        class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 outline-none transition focus:ring-4 focus:ring-indigo-500/10 font-mono tracking-widest text-center">
                 </div>
                 <button type="submit" id="signin-submit-btn"
-                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-sm py-3 rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer">
+                    class="w-full bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform active:scale-[0.98] cursor-pointer">
                     Sign In
                 </button>
             </form>
@@ -116,26 +210,26 @@
             <!-- FORM 2: SIGN UP -->
             <form id="signup-form" onsubmit="handleEmailSignup(event)" class="space-y-3.5 hidden">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Your Name (Optional)</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Your Name (Optional)</label>
                     <input type="text" id="signup-name" placeholder="e.g. Rahul Sharma"
-                        class="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-indigo-500/20">
+                        class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 outline-none transition focus:ring-4 focus:ring-indigo-500/10">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Email Address</label>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Email Address</label>
                     <input type="email" id="signup-email" required placeholder="you@example.com"
-                        class="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-indigo-500/20">
+                        class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 outline-none transition focus:ring-4 focus:ring-indigo-500/10">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Set 6-Digit PIN</label>
-                    <input type="password" id="signup-pin" maxlength="6" inputmode="numeric" required placeholder="Create 6-digit PIN"
-                        class="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-indigo-500/20 font-mono tracking-widest text-center text-base">
-                    <p class="text-[10px] text-gray-400 mt-1">Easy to remember numeric PIN (e.g. 123456).</p>
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Create 6-Digit PIN</label>
+                    <input type="password" id="signup-pin" maxlength="6" inputmode="numeric" pattern="[0-9]*" required placeholder="Create 6-digit PIN"
+                        class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3.5 py-2.5 text-slate-900 placeholder-slate-400 outline-none transition focus:ring-4 focus:ring-indigo-500/10 font-mono tracking-widest text-center">
+                    <p class="text-[10px] text-slate-400 mt-1">Easy to remember numeric PIN (e.g. 123456).</p>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Mobile Number (Optional)</label>
-                    <div class="flex gap-2">
+                    <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Mobile Number (Optional)</label>
+                    <div class="flex gap-2 w-full">
                         <select id="signup-phone-code"
-                            class="w-28 bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl px-2 py-2 text-xs text-gray-800 outline-none transition cursor-pointer">
+                            class="w-24 shrink-0 bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-2 py-2.5 text-xs text-slate-800 outline-none transition cursor-pointer">
                             <option value="+91" selected>🇮🇳 +91</option>
                             <option value="+1">🇺🇸 +1</option>
                             <option value="+44">🇬🇧 +44</option>
@@ -151,21 +245,30 @@
                             <option value="+81">🇯🇵 +81</option>
                         </select>
                         <input type="tel" id="signup-phone" placeholder="98765 43210"
-                            class="flex-1 bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:ring-2 focus:ring-indigo-500/20 font-mono">
+                            class="flex-1 min-w-0 bg-slate-50 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl px-3 py-2.5 text-slate-900 placeholder-slate-400 outline-none transition focus:ring-4 focus:ring-indigo-500/10 font-mono">
                     </div>
                 </div>
                 <button type="submit" id="signup-submit-btn"
-                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-sm py-3 rounded-xl shadow-md hover:shadow-lg transition-all transform active:scale-95 cursor-pointer">
-                    Create Account & Sign In
+                    class="w-full bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-600 hover:opacity-95 text-white font-extrabold text-xs sm:text-sm py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 transition-all transform active:scale-[0.98] cursor-pointer">
+                    Create Account &amp; Sign In
                 </button>
             </form>
 
-            <div class="pt-4 mt-4 border-t border-gray-100 text-center">
-                <a href="/app" class="inline-flex items-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 px-4 py-2 rounded-xl transition">
-                    ✨ Or Try Guest Preview (1 Free Chat & 10 AI Msgs) →
+            <!-- Bottom Guest Callout -->
+            <div class="pt-4 mt-5 border-t border-slate-100 text-center">
+                <a href="/app" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100 py-2 px-3.5 rounded-xl transition">
+                    <span>✨ Try Guest Preview (1 Free Chat &amp; 10 AI Msgs)</span>
+                    <span>→</span>
                 </a>
             </div>
+        </div>
 
+        <!-- Mobile Bottom Links -->
+        <div class="lg:hidden text-center text-xs text-slate-400 pt-6 pb-2">
+            <span>&copy; 2026 Kotha &middot; </span>
+            <a href="/privacy.html" class="hover:underline">Privacy</a>
+            <span> &middot; </span>
+            <a href="/terms.html" class="hover:underline">Terms</a>
         </div>
     </div>
 
@@ -196,19 +299,39 @@
             const signupBtn = document.getElementById('tab-btn-signup');
             const signinForm = document.getElementById('signin-form');
             const signupForm = document.getElementById('signup-form');
+            const titleEl = document.getElementById('form-title');
+            const subtitleEl = document.getElementById('form-subtitle');
 
             if (tab === 'signin') {
-                signinBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white text-indigo-600 shadow-sm cursor-pointer';
-                signupBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 cursor-pointer';
+                signinBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all tab-btn-active cursor-pointer';
+                signupBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all tab-btn-inactive cursor-pointer';
                 signinForm.classList.remove('hidden');
                 signupForm.classList.add('hidden');
+                if (titleEl) titleEl.textContent = 'Welcome to Kotha';
+                if (subtitleEl) subtitleEl.textContent = 'Sign in with Google or your quick 6-digit PIN.';
             } else {
-                signupBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all bg-white text-indigo-600 shadow-sm cursor-pointer';
-                signinBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all text-gray-600 hover:text-gray-900 cursor-pointer';
+                signupBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all tab-btn-active cursor-pointer';
+                signinBtn.className = 'flex-1 py-2 text-xs font-bold rounded-lg transition-all tab-btn-inactive cursor-pointer';
                 signupForm.classList.remove('hidden');
                 signinForm.classList.add('hidden');
+                if (titleEl) titleEl.textContent = 'Create your account';
+                if (subtitleEl) subtitleEl.textContent = 'Preserve your chats & explore AI memories in seconds.';
             }
         }
+
+        // Check URL hash (#signup or #signin) or query errors
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.location.hash === '#signup') {
+                switchAuthTab('signup');
+            }
+            const params = new URLSearchParams(window.location.search);
+            const err = params.get('error');
+            if (err) {
+                if (err === 'auth_failed') showAuthError('Google sign in failed. Please try again.');
+                else if (err === 'no_user') showAuthError('User not found. Please create an account.');
+                else showAuthError(decodeURIComponent(err));
+            }
+        });
 
         async function handleEmailLogin(e) {
             e.preventDefault();
