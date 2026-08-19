@@ -1268,14 +1268,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Filters popup toggle
     const filtersToggle = document.getElementById('btn-filters-toggle');
     const filtersContainer = document.getElementById('smart-filters-container');
+    const filtersBackdrop = document.getElementById('filters-backdrop');
     const closeFiltersBtn = document.getElementById('close-filters-btn');
     if (filtersToggle && filtersContainer) {
         function openFilters() {
             filtersContainer.classList.remove('hidden');
+            if (filtersBackdrop) filtersBackdrop.classList.remove('hidden');
             filtersToggle.classList.add('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
         }
         function closeFilters() {
             filtersContainer.classList.add('hidden');
+            if (filtersBackdrop) filtersBackdrop.classList.add('hidden');
             filtersToggle.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
         }
         filtersToggle.addEventListener('click', (e) => {
@@ -1283,6 +1286,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (filtersContainer.classList.contains('hidden')) { openFilters(); } else { closeFilters(); }
         });
         if (closeFiltersBtn) closeFiltersBtn.addEventListener('click', closeFilters);
+        if (filtersBackdrop) filtersBackdrop.addEventListener('click', closeFilters);
         // Close on outside click
         document.addEventListener('click', (e) => {
             if (!filtersContainer.classList.contains('hidden') &&

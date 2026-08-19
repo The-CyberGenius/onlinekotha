@@ -252,78 +252,7 @@
                 <!-- Buttons injected by JS -->
             </div>
 
-            <!-- Smart Filters Popup (anchored cleanly above bottom toolbar with high z-index) -->
-            <div class="absolute bottom-[60px] left-2 right-2 z-[120] pb-1 hidden"
-                id="smart-filters-container">
-                <div class="bg-white dark:bg-[#1f2c34] border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-black/5">
-                    <!-- Header -->
-                    <div class="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/50">
-                        <span class="text-[11px] font-extrabold text-gray-600 dark:text-gray-300 uppercase tracking-widest flex items-center gap-1.5">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-                            Filters
-                        </span>
-                        <div class="flex items-center gap-2">
-                            <button id="reset-filters" class="hidden text-[10px] text-indigo-600 font-bold bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-1 rounded-lg hover:bg-indigo-100 transition">Reset</button>
-                            <button id="close-filters-btn" class="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- Date row -->
-                    <div class="flex gap-2 px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                        <div class="relative flex-1">
-                            <select id="filter-day" class="w-full text-[12px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-2.5 pr-5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none">
-                                <option value="">Day</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-400"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
-                        </div>
-                        <div class="relative flex-1">
-                            <select id="filter-month" class="w-full text-[12px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-2.5 pr-5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none">
-                                <option value="">Month</option>
-                                <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
-                                <option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option>
-                                <option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option>
-                                <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-400"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
-                        </div>
-                        <div class="relative flex-1">
-                            <select id="filter-year" class="w-full text-[12px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-2.5 pr-5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none">
-                                <option value="">Year</option>
-                            </select>
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-400"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
-                        </div>
-                    </div>
-                    <!-- Toggles -->
-                    <div class="px-4 py-2.5 flex flex-col gap-2">
-                        <label class="flex items-center justify-between cursor-pointer group">
-                            <span class="text-[13px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                <span class="text-base">🖼️</span> Show Media
-                            </span>
-                            <input type="checkbox" id="toggle-media" checked class="form-checkbox h-4 w-4 text-indigo-500 rounded border-gray-300 shadow-sm transition focus:ring-indigo-400">
-                        </label>
-                        <label class="flex items-center justify-between cursor-pointer group">
-                            <span class="text-[13px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                <span class="text-base">✨</span> Show Stickers
-                            </span>
-                            <input type="checkbox" id="toggle-stickers" checked class="form-checkbox h-4 w-4 text-purple-500 rounded border-gray-300 shadow-sm transition focus:ring-purple-400">
-                        </label>
-                        <label class="flex items-center justify-between cursor-pointer group">
-                            <span class="text-[13px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                                <span class="text-base">🔗</span> Links Only
-                            </span>
-                            <input type="checkbox" id="toggle-links" class="form-checkbox h-4 w-4 text-teal-500 rounded border-gray-300 shadow-sm transition focus:ring-teal-400">
-                        </label>
-                    </div>
-                    <!-- Apply -->
-                    <div class="px-4 pb-3">
-                        <button id="apply-filters-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[13px] rounded-xl py-2 transition shadow-sm active:scale-[0.98] flex items-center justify-center gap-2">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
-                            Apply Filters
-                        </button>
-                    </div>
-                </div>
-            </div>
+
 
 
             <!-- Stats/Info & Results -->
@@ -413,6 +342,80 @@
                     </svg>
                     <span class="text-[9px] font-bold leading-none">Filter</span>
                 </button>
+            <!-- Click Backdrop for Filters -->
+            <div id="filters-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-[9990] hidden rounded-2xl"></div>
+
+            <!-- Smart Filters Popup (anchored at sidebar level with z-9999) -->
+            <div class="absolute bottom-[66px] left-3 right-3 z-[9999] hidden"
+                id="smart-filters-container">
+                <div class="bg-white dark:bg-[#1f2c34] border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden ring-1 ring-black/10">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/80 dark:bg-gray-800/50">
+                        <span class="text-[11px] font-extrabold text-gray-600 dark:text-gray-300 uppercase tracking-widest flex items-center gap-1.5">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                            Filters
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <button id="reset-filters" class="hidden text-[10px] text-indigo-600 font-bold bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-1 rounded-lg hover:bg-indigo-100 transition">Reset</button>
+                            <button id="close-filters-btn" class="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition cursor-pointer">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Date row -->
+                    <div class="flex gap-2 px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                        <div class="relative flex-1">
+                            <select id="filter-day" class="w-full text-[12px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-2.5 pr-5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none">
+                                <option value="">Day</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-400"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+                        </div>
+                        <div class="relative flex-1">
+                            <select id="filter-month" class="w-full text-[12px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-2.5 pr-5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none">
+                                <option value="">Month</option>
+                                <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option>
+                                <option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option>
+                                <option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option>
+                                <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-400"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+                        </div>
+                        <div class="relative flex-1">
+                            <select id="filter-year" class="w-full text-[12px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-2.5 pr-5 py-1.5 font-medium text-gray-700 dark:text-gray-200 outline-none focus:ring-2 focus:ring-indigo-400/40 transition cursor-pointer appearance-none">
+                                <option value="">Year</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-gray-400"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div>
+                        </div>
+                    </div>
+                    <!-- Toggles -->
+                    <div class="px-4 py-2.5 flex flex-col gap-2">
+                        <label class="flex items-center justify-between cursor-pointer group">
+                            <span class="text-[13px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <span class="text-base">🖼️</span> Show Media
+                            </span>
+                            <input type="checkbox" id="toggle-media" checked class="form-checkbox h-4 w-4 text-indigo-500 rounded border-gray-300 shadow-sm transition focus:ring-indigo-400">
+                        </label>
+                        <label class="flex items-center justify-between cursor-pointer group">
+                            <span class="text-[13px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <span class="text-base">✨</span> Show Stickers
+                            </span>
+                            <input type="checkbox" id="toggle-stickers" checked class="form-checkbox h-4 w-4 text-purple-500 rounded border-gray-300 shadow-sm transition focus:ring-purple-400">
+                        </label>
+                        <label class="flex items-center justify-between cursor-pointer group">
+                            <span class="text-[13px] font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                <span class="text-base">🔗</span> Links Only
+                            </span>
+                            <input type="checkbox" id="toggle-links" class="form-checkbox h-4 w-4 text-teal-500 rounded border-gray-300 shadow-sm transition focus:ring-teal-400">
+                        </label>
+                    </div>
+                    <!-- Apply -->
+                    <div class="px-4 pb-3">
+                        <button id="apply-filters-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[13px] rounded-xl py-2 transition shadow-sm active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
             </div>
 
         </div><!-- /sidebar -->
