@@ -1265,16 +1265,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Filters drawer toggle
+    // Filters popup toggle
     const filtersToggle = document.getElementById('btn-filters-toggle');
     const filtersContainer = document.getElementById('smart-filters-container');
+    const closeFiltersBtn = document.getElementById('close-filters-btn');
     if (filtersToggle && filtersContainer) {
-        filtersToggle.addEventListener('click', () => {
-            filtersContainer.classList.toggle('hidden');
-            filtersToggle.classList.toggle('text-indigo-600');
-            filtersToggle.classList.toggle('bg-indigo-50');
+        function openFilters() {
+            filtersContainer.classList.remove('hidden');
+            filtersToggle.classList.add('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+        }
+        function closeFilters() {
+            filtersContainer.classList.add('hidden');
+            filtersToggle.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+        }
+        filtersToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (filtersContainer.classList.contains('hidden')) { openFilters(); } else { closeFilters(); }
+        });
+        if (closeFiltersBtn) closeFiltersBtn.addEventListener('click', closeFilters);
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!filtersContainer.classList.contains('hidden') &&
+                !filtersContainer.contains(e.target) &&
+                e.target !== filtersToggle && !filtersToggle.contains(e.target)) {
+                closeFilters();
+            }
         });
     }
+
 
     // Expose for ai-panel.js — keep window.currentChat in sync
     window.scrollToMessageId = (id) => {
