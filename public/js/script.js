@@ -1265,20 +1265,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Filters popup toggle
+    // Inline Filters toggle under search bar
     const filtersToggle = document.getElementById('btn-filters-toggle');
     const filtersContainer = document.getElementById('smart-filters-container');
-    const filtersBackdrop = document.getElementById('filters-backdrop');
     const closeFiltersBtn = document.getElementById('close-filters-btn');
     if (filtersToggle && filtersContainer) {
         function openFilters() {
             filtersContainer.classList.remove('hidden');
-            if (filtersBackdrop) filtersBackdrop.classList.remove('hidden');
             filtersToggle.classList.add('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+            // Scroll sidebar list to top so filters are in full view
+            const sidebarChatsTab = document.getElementById('sidebar-chats-tab');
+            if (sidebarChatsTab) sidebarChatsTab.scrollTop = 0;
         }
         function closeFilters() {
             filtersContainer.classList.add('hidden');
-            if (filtersBackdrop) filtersBackdrop.classList.add('hidden');
             filtersToggle.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
         }
         filtersToggle.addEventListener('click', (e) => {
@@ -1286,15 +1286,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (filtersContainer.classList.contains('hidden')) { openFilters(); } else { closeFilters(); }
         });
         if (closeFiltersBtn) closeFiltersBtn.addEventListener('click', closeFilters);
-        if (filtersBackdrop) filtersBackdrop.addEventListener('click', closeFilters);
-        // Close on outside click
-        document.addEventListener('click', (e) => {
-            if (!filtersContainer.classList.contains('hidden') &&
-                !filtersContainer.contains(e.target) &&
-                e.target !== filtersToggle && !filtersToggle.contains(e.target)) {
-                closeFilters();
-            }
-        });
     }
 
 
@@ -1977,8 +1968,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleSidebar(false);
     };
     if (btnMedia) btnMedia.addEventListener('click', openMediaGallery);
-    const btnHdrMedia = document.getElementById('btn-hdr-media');
-    if (btnHdrMedia) btnHdrMedia.addEventListener('click', openMediaGallery);
 
     const closeAnModal = () => {
         analyticsModal.classList.remove('opacity-100');
@@ -2102,8 +2091,6 @@ document.addEventListener('DOMContentLoaded', () => {
         analyticsModal.classList.add('opacity-100');
     };
     if (btnAnalytics) btnAnalytics.addEventListener('click', openAnalyticsModal);
-    const btnHdrStats = document.getElementById('btn-hdr-stats');
-    if (btnHdrStats) btnHdrStats.addEventListener('click', openAnalyticsModal);
 
     // Explicit Button-Triggered Search Logic
     const searchResultsContainer = document.getElementById('search-results');
