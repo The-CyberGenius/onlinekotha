@@ -611,7 +611,7 @@ HARD RULES
                 : '<span class="meta-text">No activity</span>';
 
             html += `
-                <tr>
+                <tr class="user-main-row">
                     <td>
                         <div class="user-profile-cell">
                             ${avatarHtml}
@@ -630,13 +630,13 @@ HARD RULES
                         <span class="meta-text">${u.chat_count} chat${u.chat_count !== 1 ? 's' : ''}</span>
                     </td>
                     <td>
-                        <span class="sub-text font-mono" style="font-weight:600;">$${u.total_cost.toFixed(3)}</span>
+                        <span class="sub-text font-mono" style="font-weight:700; color:#0f172a;">$${u.total_cost.toFixed(3)}</span>
                     </td>
                     <td>
                         ${ipCountry}
                     </td>
                     <td>
-                        <span class="sub-text" style="color:#64748b;">Joined: ${formatDateTime(u.created_at)}</span>
+                        <span class="sub-text" style="color:#0f172a; font-weight: 500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>
                         ${lastActive}
                     </td>
                     <td>
@@ -649,9 +649,9 @@ HARD RULES
                     </td>
                 </tr>
                 <tr id="expand-row-${u.id}" class="hidden">
-                    <td colspan="7" style="padding:0; border:none; background:#f8fafc;">
-                        <div data-chats-for="${u.id}" class="hidden" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
-                        <div data-ai-logs-for="${u.id}" class="hidden" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
+                    <td colspan="7" style="padding:0; border:none; background:transparent;">
+                        <div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
+                        <div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
                     </td>
                 </tr>
             `;
