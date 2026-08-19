@@ -1170,30 +1170,27 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = `
             <div class="min-h-full w-full flex flex-col items-center justify-center px-6 py-8 text-center my-auto" id="empty-state">
                 <div class="empty-state-float mb-6 relative shrink-0">
-                    <div class="absolute inset-0 bg-indigo-500 blur-2xl opacity-10 rounded-full dark:opacity-20 scale-150"></div>
-                    <div class="w-20 h-20 rounded-2xl bg-white/80 dark:bg-gray-900/80 border border-indigo-100/50 dark:border-indigo-800/50 flex items-center justify-center shadow-lg shadow-indigo-200/20 dark:shadow-indigo-900/20 relative z-10 backdrop-blur-sm overflow-hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-14 h-14">
-                          <defs>
-                            <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-                              <stop offset="0%" stop-color="#4F46E5"/>
-                              <stop offset="100%" stop-color="#9333EA"/>
-                            </linearGradient>
-                            <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
-                              <stop offset="0%" stop-color="#EC4899"/>
-                              <stop offset="100%" stop-color="#8B5CF6"/>
-                            </linearGradient>
-                            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                              <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#8b5cf6" flood-opacity="0.55"/>
-                            </filter>
-                            <filter id="orb" x="-80%" y="-80%" width="260%" height="260%">
-                              <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#ffffff" flood-opacity="0.9"/>
-                            </filter>
-                          </defs>
-                          <path d="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" fill="none" stroke="url(#g1)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
-                          <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="url(#g2)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
-                          <circle r="5" filter="url(#orb)"><animate attributeName="fill" values="#ffffff;#ec4899;#8b5cf6;#4f46e5;#ffffff" dur="4s" repeatCount="indefinite"/><animateMotion dur="4s" repeatCount="indefinite" path="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" calcMode="linear"/></circle>
-                        </svg>
-                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-16 h-16 drop-shadow-2xl">
+                      <defs>
+                        <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#4F46E5"/>
+                          <stop offset="100%" stop-color="#9333EA"/>
+                        </linearGradient>
+                        <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stop-color="#EC4899"/>
+                          <stop offset="100%" stop-color="#8B5CF6"/>
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#8b5cf6" flood-opacity="0.55"/>
+                        </filter>
+                        <filter id="orb" x="-80%" y="-80%" width="260%" height="260%">
+                          <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#ffffff" flood-opacity="0.9"/>
+                        </filter>
+                      </defs>
+                      <path d="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" fill="none" stroke="url(#g1)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+                      <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="url(#g2)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+                      <circle r="5" filter="url(#orb)"><animate attributeName="fill" values="#ffffff;#ec4899;#8b5cf6;#4f46e5;#ffffff" dur="4s" repeatCount="indefinite"/><animateMotion dur="4s" repeatCount="indefinite" path="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" calcMode="linear"/></circle>
+                    </svg>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Bring your chats to life</h2>
                 <p class="text-[14px] sm:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">Import your WhatsApp history to search, analyze, and relive memories with AI.</p>
