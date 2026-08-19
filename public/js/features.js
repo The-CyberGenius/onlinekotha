@@ -2468,6 +2468,8 @@
     function initWrapped() {
         const btn = document.getElementById('btn-wrapped');
         if (btn) btn.addEventListener('click', launchWrapped);
+        const btnHdr = document.getElementById('btn-hdr-wrapped');
+        if (btnHdr) btnHdr.addEventListener('click', launchWrapped);
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initWrapped);

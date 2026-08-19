@@ -1965,13 +1965,16 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleSidebar(false);
     });
 
-    btnMedia.addEventListener('click', () => {
+    const openMediaGallery = () => {
         displayedMessages = allMessages.filter(msg => msg.attachment && msg.type !== 'system');
         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
         statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length}</span> media attachments.`;
         setTimeout(() => scrollArea.scrollTop = 0, 10);
         toggleSidebar(false);
-    });
+    };
+    if (btnMedia) btnMedia.addEventListener('click', openMediaGallery);
+    const btnHdrMedia = document.getElementById('btn-hdr-media');
+    if (btnHdrMedia) btnHdrMedia.addEventListener('click', openMediaGallery);
 
     const closeAnModal = () => {
         analyticsModal.classList.remove('opacity-100');
@@ -1984,7 +1987,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === analyticsModal) closeAnModal();
     });
 
-    btnAnalytics.addEventListener('click', () => {
+    const openAnalyticsModal = () => {
         const totalMsgs = allMessages.filter(m => m.type !== 'system').length;
         const totalMedia = allMessages.filter(m => m.attachment && m.type !== 'system').length;
         const totalLinks = allMessages.filter(m => m.text && m.text.includes('http')).length;
@@ -2093,7 +2096,10 @@ document.addEventListener('DOMContentLoaded', () => {
         void analyticsModal.offsetWidth;
         analyticsModal.classList.remove('opacity-0');
         analyticsModal.classList.add('opacity-100');
-    });
+    };
+    if (btnAnalytics) btnAnalytics.addEventListener('click', openAnalyticsModal);
+    const btnHdrStats = document.getElementById('btn-hdr-stats');
+    if (btnHdrStats) btnHdrStats.addEventListener('click', openAnalyticsModal);
 
     // Explicit Button-Triggered Search Logic
     const searchResultsContainer = document.getElementById('search-results');
