@@ -1124,7 +1124,7 @@
                 try {
                     await navigator.share({
                         title: 'My Kotha Stats',
-                        text: 'Check out my WhatsApp wrapped from onlinekotha.com! ✨',
+                        text: 'Check out my Kotha Wrapped from onlinekotha.com! ✨',
                         files: [file]
                     });
                     showToast(`Shared to ${platform}!`);

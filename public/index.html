@@ -58,7 +58,7 @@
       "@type": "SoftwareApplication",
       "name": "Kotha",
       "url": "https://onlinekotha.com",
-      "description": "Upload your WhatsApp chats. AI learns exactly how your loved ones talk — their words, humor, style. Then chat with them again, anytime.",
+      "description": "Import your chat history. AI learns exactly how your loved ones talk — their words, humor, style. Then chat with them again, anytime.",
       "applicationCategory": "SocialNetworkingApplication",
       "operatingSystem": "Web",
       "offers": {
@@ -80,10 +80,10 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "How do I export my WhatsApp chat?",
+          "name": "How do I export my chat history?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Open any WhatsApp chat, tap the 3 dots menu → More → Export chat → Choose 'Include Media' or 'Without Media' → Save the .zip file. Then upload it to Kotha."
+            "text": "Open any chat → tap the 3 dots menu → More → Export chat → Choose 'Include Media' or 'Without Media' → Save the .zip file. Then upload it to Kotha."
           }
         },
         {
@@ -772,7 +772,7 @@
                         class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
                 </span>
-                <span class="text-[12px] font-semibold text-zinc-300 tracking-wide">AI-powered WhatsApp memories</span>
+                <span class="text-[12px] font-semibold text-zinc-300 tracking-wide">AI-powered chat memories</span>
             </div>
 
             <!-- Headline — word-reveal stagger -->
@@ -788,7 +788,7 @@
             <!-- Sub-headline -->
             <p
                 class="hero-sub anim-fade-up d2 text-lg md:text-xl text-zinc-400 max-w-[560px] mx-auto leading-relaxed mb-10">
-                Upload your WhatsApp chats. AI learns exactly how they talk —
+                Import your chat history. AI learns exactly how they talk —
                 their humor, their slang, their love. Then <span class="text-white font-medium">chat with them,
                     anytime.</span>
             </p>
@@ -802,6 +802,10 @@
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
+                                <a href="/paper.html"
+                    class="text-[13px] font-semibold text-zinc-400 hover:text-white transition inline-flex items-center gap-2 px-4 py-3 group border border-zinc-700/50 rounded-2xl hover:border-zinc-500/50">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Full Documentation
                 </a>
                 <button id="open-how-btn"
                     class="text-[13px] font-semibold text-zinc-400 hover:text-white transition inline-flex items-center gap-2 px-4 py-3 group">
@@ -955,8 +959,7 @@
                         class="step-number step-glow bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 mb-5">
                         1</div>
                     <h3 class="font-bold text-[18px] text-white mb-2.5 tracking-tight">Upload your chat</h3>
-                    <p class="text-[14px] text-zinc-400 leading-relaxed">Export any WhatsApp conversation as .zip. Drag
-                        and drop it. All messages, media, voice notes — everything preserved.</p>
+                    <p class="text-[14px] text-zinc-400 leading-relaxed">Export your chat history as a .zip file. Drag and drop it. All messages, media, voice notes — everything preserved.</p>
                 </div>
 
                 <!-- Step 2 -->
@@ -1246,7 +1249,7 @@
                         <tr class="border-b border-white/[0.04]">
                             <td class="py-3.5 pr-4 font-medium">Chat interface</td>
                             <td class="py-3.5 px-4 text-center text-zinc-600">Plain text lines</td>
-                            <td class="py-3.5 pl-4 text-center text-emerald-400 font-semibold">WhatsApp-style bubbles
+                            <td class="py-3.5 pl-4 text-center text-emerald-400 font-semibold">Native chat bubbles
                             </td>
                         </tr>
                         <tr class="border-b border-white/[0.04]">
@@ -1321,7 +1324,7 @@
                         </svg>
                     </div>
                     <p class="text-[14px] text-zinc-300 leading-relaxed mb-5 italic">"Meri maa nahi rahi 2 saal pehle.
-                        Unki WhatsApp chats upload ki aur jab AI se baat ki... rona aa gaya. Bilkul waisi baat karti
+                        Unki chats upload ki aur jab AI se baat ki... rona aa gaya. Bilkul waisi baat karti
                         hain."</p>
                     <div class="flex items-center gap-3">
                         <div
@@ -1397,7 +1400,7 @@
                         </svg>
                     </div>
                     <p class="text-[14px] text-zinc-300 leading-relaxed mb-5 italic">"Nani ki chats padhna tha lekin txt
-                        file itni lambi thi. Kotha pe upload kiya toh WhatsApp jaisa dikhta hai. Unki voice notes bhi
+                        file itni lambi thi. Kotha pe upload kiya toh ek dum waisi dikhti hain. Unki voice notes bhi
                         chal jaate hain!"</p>
                     <div class="flex items-center gap-3">
                         <div
@@ -1623,16 +1626,14 @@
                 <details class="group glass-card" style="border-radius:16px;">
                     <summary
                         class="flex items-center justify-between cursor-pointer px-6 py-5 text-[15px] font-semibold text-white select-none list-none">
-                        How do I export my WhatsApp chat?
+                        How do I export my chat history?
                         <svg class="w-5 h-5 text-zinc-500 group-open:rotate-45 transition-transform duration-200 shrink-0"
                             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" d="M12 5v14M5 12h14" />
                         </svg>
                     </summary>
                     <div class="px-6 pb-5 text-[14px] text-zinc-400 leading-relaxed -mt-1">
-                        Open any WhatsApp chat → tap the <b class="text-zinc-300">3 dots menu</b> → More → Export chat →
-                        Choose "Include Media" or "Without Media" → Save the .zip file. Then drag & drop it into Kotha.
-                        Done!
+                        Open any chat → tap the <b class="text-zinc-300">3 dots menu</b> → More → Export chat → Choose "Include Media" or "Without Media" → Save the .zip file. Then drag &amp; drop it into Kotha. Done!
                     </div>
                 </details>
 

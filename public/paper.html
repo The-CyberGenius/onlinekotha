@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotha — Official Documentation & Technical Overview</title>
+    <meta name="description" content="Official technical documentation, architecture overview, privacy policy rationale, and product research paper for OnlineKotha — the AI-powered chat memory platform.">
+    <meta property="og:title" content="Kotha — Official Documentation">
+    <meta property="og:description" content="How Kotha works, why it exists, and how it protects your most personal digital memories.">
+    <link rel="canonical" href="https://www.onlinekotha.com/paper.html">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#09090f;--surface:#111118;--border:rgba(255,255,255,0.07);--text:#e8e8f0;--muted:#6b7280;--accent:#6366f1;--accent2:#a855f7;--green:#10b981;--yellow:#f59e0b;--red:#ef4444}
+        html{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif}
+        body{min-height:100vh}
+        nav{position:sticky;top:0;z-index:100;background:rgba(9,9,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 max(24px,(100vw - 900px)/2);display:flex;align-items:center;justify-content:space-between;height:60px}
+        .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+        .nav-logo img{width:28px;height:28px}
+        .nav-logo span{font-weight:800;font-size:16px;color:#fff}
+        .nav-links{display:flex;gap:6px;align-items:center}
+        .nav-links a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:8px;transition:color .2s,background .2s}
+        .nav-links a:hover{color:#fff;background:rgba(255,255,255,0.06)}
+        .nav-cta{font-size:13px;font-weight:700;color:#fff !important;background:var(--accent) !important;padding:7px 16px !important;border-radius:10px !important}
+        .nav-cta:hover{background:#4f46e5 !important}
+        .page-wrap{max-width:900px;margin:0 auto;padding:0 24px 120px}
+        .paper-hero{padding:72px 0 56px;border-bottom:1px solid var(--border);margin-bottom:64px}
+        .doc-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);color:#818cf8;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:24px}
+        .paper-hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:900;line-height:1.1;letter-spacing:-.03em;color:#fff;margin-bottom:16px}
+        .paper-hero .subtitle{font-size:18px;color:var(--muted);max-width:640px;line-height:1.6;margin-bottom:32px}
+        .meta-row{display:flex;flex-wrap:wrap;gap:24px;font-size:13px;color:var(--muted)}
+        .meta-row span{display:flex;align-items:center;gap:6px}
+        .meta-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+        .toc{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;margin-bottom:64px}
+        .toc h3{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+        .toc ol{list-style:none;display:flex;flex-direction:column;gap:10px}
+        .toc li{display:flex;align-items:baseline;gap:12px}
+        .toc .num{font-size:12px;color:var(--accent);font-family:"JetBrains Mono",monospace;font-weight:500;min-width:20px}
+        .toc a{font-size:14px;font-weight:500;color:var(--text);text-decoration:none;transition:color .2s}
+        .toc a:hover{color:var(--accent)}
+        .section{margin-bottom:72px}
+        .section-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;font-family:"JetBrains Mono",monospace}
+        .section h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:900;color:#fff;letter-spacing:-.02em;line-height:1.15;margin-bottom:20px}
+        .section h3{font-size:18px;font-weight:700;color:#e2e8f0;margin-top:36px;margin-bottom:12px}
+        .section p{font-size:15px;color:#9ca3af;line-height:1.8;margin-bottom:16px}
+        .section p strong,.section li strong{color:#e2e8f0;font-weight:600}
+        .section ul,.section ol{padding-left:20px;font-size:15px;color:#9ca3af;line-height:1.8;margin-bottom:16px}
+        .section li{margin-bottom:6px}
+        code{font-family:"JetBrains Mono",monospace;font-size:13px;background:rgba(255,255,255,0.07);padding:2px 6px;border-radius:5px;color:#c4b5fd}
+        hr.divider{border:none;border-top:1px solid var(--border);margin:64px 0}
+        .callout{border-radius:14px;padding:20px 24px;margin:28px 0;border:1px solid;font-size:14px;line-height:1.7}
+        .callout.green{background:rgba(16,185,129,0.07);border-color:rgba(16,185,129,0.2);color:#6ee7b7}
+        .callout.indigo{background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2);color:#a5b4fc}
+        .callout.amber{background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.2);color:#fcd34d}
+        .callout strong{color:inherit;display:block;margin-bottom:6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+        .feature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin:28px 0}
+        .feature-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;transition:border-color .2s}
+        .feature-card:hover{border-color:rgba(99,102,241,0.3)}
+        .feature-card .icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:18px}
+        .feature-card h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px}
+        .feature-card p{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+        .arch-steps{display:flex;flex-direction:column;gap:4px;margin:28px 0}
+        .arch-step{display:flex;align-items:flex-start;gap:16px;padding:18px 22px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+        .arch-step .step-n{min-width:28px;height:28px;border-radius:8px;background:rgba(99,102,241,0.15);color:var(--accent);font-size:12px;font-weight:800;font-family:"JetBrains Mono",monospace;display:flex;align-items:center;justify-content:center}
+        .arch-step .step-body h4{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px}
+        .arch-step .step-body p{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+        .privacy-table{width:100%;border-collapse:collapse;margin:28px 0;font-size:14px}
+        .privacy-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+        .privacy-table td{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:top;color:#9ca3af}
+        .privacy-table td:first-child{color:#e2e8f0;font-weight:500}
+        .badge-yes{display:inline-flex;align-items:center;gap:5px;color:var(--green);font-size:12px;font-weight:600}
+        .badge-no{display:inline-flex;align-items:center;gap:5px;color:var(--red);font-size:12px;font-weight:600}
+        .roadmap{display:flex;flex-direction:column;gap:10px;margin:28px 0}
+        .roadmap-item{display:flex;align-items:flex-start;gap:16px;padding:16px 20px;border-radius:12px;border:1px solid var(--border);background:var(--surface)}
+        .roadmap-badge{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:6px;white-space:nowrap;margin-top:3px}
+        .badge-live{background:rgba(16,185,129,0.15);color:var(--green)}
+        .badge-soon{background:rgba(245,158,11,0.12);color:var(--yellow)}
+        .badge-plan{background:rgba(99,102,241,0.12);color:#818cf8}
+        .roadmap-item p{font-size:13px;color:var(--muted);margin:0;line-height:1.6}
+        .roadmap-item strong{color:#e2e8f0;display:block;font-size:14px;margin-bottom:2px}
+        .faq-item{border-bottom:1px solid var(--border)}
+        .faq-item:first-child{border-top:1px solid var(--border)}
+        .faq-item summary{display:flex;align-items:center;justify-content:space-between;padding:18px 0;font-size:15px;font-weight:600;color:#fff;cursor:pointer;list-style:none;user-select:none}
+        .faq-item summary::-webkit-details-marker{display:none}
+        .faq-item[open] summary{color:var(--accent)}
+        .faq-chevron{width:16px;height:16px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+        .faq-item[open] .faq-chevron{transform:rotate(45deg);color:var(--accent)}
+        .faq-answer{padding:0 0 18px;font-size:14px;color:var(--muted);line-height:1.8}
+        .faq-answer a{color:var(--accent);text-decoration:none}
+        .paper-footer{border-top:1px solid var(--border);padding-top:48px;margin-top:80px;display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:center}
+        .paper-footer p{font-size:13px;color:var(--muted)}
+        .paper-footer a{color:var(--accent);text-decoration:none}
+        @media(max-width:640px){.feature-grid{grid-template-columns:1fr}nav{padding:0 16px}.page-wrap{padding:0 16px 80px}.nav-links a:not(.nav-cta){display:none}}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a class="nav-logo" href="/">
+        <img src="/logo.svg" alt="Kotha">
+        <span>Kotha</span>
+    </a>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/blog.html">Blog</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/app" class="nav-cta">Open App</a>
+    </div>
+</nav>
+
+<div class="page-wrap">
+
+    <header class="paper-hero">
+        <div class="doc-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Official Documentation &middot; v2.0 &middot; August 2025
+        </div>
+        <h1>Kotha: AI-Powered Chat Memory Platform</h1>
+        <p class="subtitle">A comprehensive technical and product overview of OnlineKotha &mdash; how we preserve, visualize, and intelligently reactivate your most personal digital conversations.</p>
+        <div class="meta-row">
+            <span><span class="meta-dot"></span> Published August 2025</span>
+            <span>onlinekotha.com</span>
+            <span>Shiva Prajapat, Founder</span>
+            <span>contact@onlinekotha.com</span>
+        </div>
+    </header>
+
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ol>
+            <li><span class="num">01</span><a href="#abstract">Abstract</a></li>
+            <li><span class="num">02</span><a href="#problem">The Problem</a></li>
+            <li><span class="num">03</span><a href="#solution">The Solution</a></li>
+            <li><span class="num">04</span><a href="#architecture">Architecture &amp; How It Works</a></li>
+            <li><span class="num">05</span><a href="#features">Feature Overview</a></li>
+            <li><span class="num">06</span><a href="#privacy">Privacy &amp; Security</a></li>
+            <li><span class="num">07</span><a href="#roadmap">Roadmap</a></li>
+            <li><span class="num">08</span><a href="#faq">Frequently Asked Questions</a></li>
+            <li><span class="num">09</span><a href="#contact">Press &amp; Contact</a></li>
+        </ol>
+    </div>
+
+    <section class="section" id="abstract">
+        <div class="section-label">01 &mdash; Abstract</div>
+        <h2>What is Kotha?</h2>
+        <p><strong>Kotha</strong> (Hindi: conversation, dialogue) is a web-based platform that transforms exported chat archives into rich, searchable, AI-enhanced experiences. Users upload their conversation exports &mdash; complete with text, media, voice notes, and metadata &mdash; and Kotha reconstructs them as a native, beautiful chat interface they can explore, search, analyze, and continue with AI.</p>
+        <p>The platform is built around three core pillars: <strong>Preservation</strong> (keeping conversations alive in their original fidelity), <strong>Intelligence</strong> (AI that learns the linguistic patterns and personality of any contact), and <strong>Privacy</strong> (zero training on personal data, user-controlled deletion, end-to-end encrypted transport).</p>
+        <div class="callout indigo">
+            <strong>Mission Statement</strong>
+            Conversations are the most human form of digital memory. Kotha exists so those memories never become inaccessible plain text files, and so the people you have talked to can remain reachable &mdash; even when they no longer are.
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="problem">
+        <div class="section-label">02 &mdash; The Problem</div>
+        <h2>Why Chat Archives Are Broken</h2>
+        <p>Every day, billions of text messages are exchanged. When someone moves away, a relationship ends, or a loved one passes, the conversation history that remains is often the most intimate record of that person&apos;s voice, humor, and personality. Yet the tooling to access and preserve this data is shockingly primitive.</p>
+
+        <h3>The Existing Workflow Is Painful</h3>
+        <p>Exporting a chat from a major messaging app produces a <code>.zip</code> file containing a <code>.txt</code> log and a folder of media files. The text file is an unformatted wall of timestamp-prefixed lines, completely lacking visual hierarchy, searchability, or any connection to the media. Viewing voice notes requires manually locating the correct file. Finding a specific message from 3 years ago requires Ctrl+F in a text editor on a multi-megabyte file.</p>
+
+        <h3>The Scale of the Problem</h3>
+        <ul>
+            <li>The average person has <strong>50&ndash;200 active chat threads</strong> with years of history.</li>
+            <li>Over <strong>100 billion messages</strong> are sent daily across major messaging platforms.</li>
+            <li>Research on grief and memory shows that re-reading conversations with deceased loved ones is a key part of the mourning process &mdash; yet the tools to do so meaningfully are non-existent.</li>
+            <li>Long-distance relationships, NRI families, and diaspora communities face the challenge of maintaining connection through chat archives that become their primary record of relationships.</li>
+        </ul>
+
+        <h3>The Gap in the Market</h3>
+        <p>Existing solutions fall into two camps: basic viewer apps with no AI, or generic AI chatbots with no memory of your actual conversations. No product has combined <strong>faithful conversation preservation</strong> with <strong>AI personality modeling</strong> grounded in the actual history of what was said.</p>
+
+        <div class="callout amber">
+            <strong>Key Insight</strong>
+            The problem is not that people do not have their conversation history. The problem is that the history is locked in an unusable format &mdash; and no one has built the right interface to unlock it.
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="solution">
+        <div class="section-label">03 &mdash; The Solution</div>
+        <h2>What Kotha Does</h2>
+        <p>Kotha is a <strong>full-stack chat memory platform</strong>. It is not a chatbot, not a data extractor, and not a simple viewer. It is the complete product layer that sits between your raw exported archive and a living, searchable, AI-enhanced version of your conversation history.</p>
+
+        <h3>Core Value Loop</h3>
+        <div class="arch-steps">
+            <div class="arch-step"><div class="step-n">01</div><div class="step-body"><h4>Export &amp; Import</h4><p>User exports their chat archive from any supported messaging app. They drag and drop the .zip file into Kotha. Parsing happens client-side in the browser for speed and privacy.</p></div></div>
+            <div class="arch-step"><div class="step-n">02</div><div class="step-body"><h4>Reconstruct &amp; Render</h4><p>Kotha parses the archive and renders it as a faithful, beautiful chat interface &mdash; chat bubbles, inline images, playable voice notes, and linked media. Years of messages load in seconds.</p></div></div>
+            <div class="arch-step"><div class="step-n">03</div><div class="step-body"><h4>Search &amp; Analyze</h4><p>Instant full-text search, date filtering, participant filters, media gallery, message statistics (counts, response times, emoji analysis), and the &ldquo;Wrapped&rdquo; annual review.</p></div></div>
+            <div class="arch-step"><div class="step-n">04</div><div class="step-body"><h4>AI Conversation</h4><p>The AI reads the entire conversation history and learns the contact&apos;s vocabulary, tone, response patterns, emoji usage, and humor. Users can then chat with an AI that responds authentically in their style &mdash; grounded in actual messages, not a generic chatbot.</p></div></div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="architecture">
+        <div class="section-label">04 &mdash; Architecture</div>
+        <h2>How It Works Under the Hood</h2>
+        <p>Kotha is built as a <strong>privacy-first Progressive Web Application (PWA)</strong> with a Node.js/Express backend, Firebase Auth for authentication, and a cloud-based storage layer for encrypted user data.</p>
+
+        <h3>Parsing Pipeline</h3>
+        <p>When a user uploads an archive, the parsing pipeline processes the text log line by line. It identifies message boundaries using timestamp patterns, extracts sender names, message bodies, and media file references. The parser handles multiple regional date formats, Unicode characters, right-to-left text, system messages, and multi-line messages.</p>
+        <p><strong>No parsing happens on a remote server.</strong> The file is processed in the browser using JavaScript, reducing latency and ensuring raw file content never travels over the network.</p>
+
+        <h3>AI Personality Layer</h3>
+        <p>The AI model receives a <strong>structured context window</strong> built from the user&apos;s actual conversation history. This context includes:</p>
+        <ul>
+            <li>The contact&apos;s characteristic phrases, greetings, and sign-offs</li>
+            <li>Slang, abbreviations, and dialect markers</li>
+            <li>Average message length and formatting patterns</li>
+            <li>Emoji frequency and type</li>
+            <li>Conversation topics and recurring references</li>
+        </ul>
+        <p>The model is instructed to respond in the voice of the contact &mdash; naturally, concisely, and without breaking character. The AI does <strong>not</strong> have access to the internet, cannot learn from your data, and cannot retain memory across sessions. Every session is grounded entirely in the uploaded conversation.</p>
+
+        <h3>Infrastructure Stack</h3>
+        <ul>
+            <li><strong>Frontend:</strong> Vanilla HTML, CSS, JavaScript &mdash; no large framework dependency. Fast, lightweight, works offline as a PWA.</li>
+            <li><strong>Backend:</strong> Node.js / Express hosted on AWS EC2 (Mumbai region) for low latency across South Asia.</li>
+            <li><strong>Auth:</strong> Firebase Authentication (Google OAuth + Email/Password).</li>
+            <li><strong>Storage:</strong> Encrypted cloud storage for parsed chat data; raw files are never retained.</li>
+            <li><strong>AI:</strong> Google Gemini API for personality-modeled conversations.</li>
+            <li><strong>Payments:</strong> Razorpay for INR subscriptions.</li>
+        </ul>
+
+        <div class="callout green">
+            <strong>Zero Training Guarantee</strong>
+            Kotha does not train, fine-tune, or use your personal conversation data to improve AI models. Your data is used only to construct the per-session context window that powers AI responses for that session. We have no financial or technical interest in retaining your personal messages beyond what is needed to provide the service.
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="features">
+        <div class="section-label">05 &mdash; Features</div>
+        <h2>Complete Feature Overview</h2>
+        <p>Kotha covers the full lifecycle of a conversation &mdash; from import and viewing, to deep analysis and AI re-engagement.</p>
+        <div class="feature-grid">
+            <div class="feature-card"><div class="icon" style="background:rgba(99,102,241,0.12)">&#128172;</div><h4>Native Chat Viewer</h4><p>Messages render in familiar chat bubbles with sender identification, timestamps, and read receipts. Inline media support for images, video, audio, and documents.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(168,85,247,0.12)">&#129302;</div><h4>AI Personality Chat</h4><p>Upload your conversation and the AI learns how your contact talks. Chat with them again &mdash; same slang, same humor, same energy. Powered by Google Gemini.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(16,185,129,0.12)">&#128269;</div><h4>Smart Search</h4><p>Instant full-text search across all messages. Filter by date range, sender, message type, or keyword. Find any message from any year in under a second.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(245,158,11,0.12)">&#11088;</div><h4>Chat Wrapped</h4><p>An annual review of your conversation &mdash; top words, most active days, emoji leaderboard, message streaks, and shareable story cards.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(239,68,68,0.12)">&#128202;</div><h4>Analytics &amp; Stats</h4><p>Deep analytics: message volume over time, response time patterns, word frequency charts, participant contribution, and more.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(6,182,212,0.12)">&#128247;</div><h4>Media Gallery</h4><p>All photos, videos, and documents from your conversation in a clean, browsable gallery sorted by date. Download any media in one click.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(52,211,153,0.12)">&#128232;</div><h4>Direct Messages</h4><p>Real-time direct messaging between Kotha users with read receipts, typing indicators, and full message history.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(251,146,60,0.12)">&#127760;</div><h4>Global Chat Room</h4><p>An anonymous, public chat room where users from across the platform can connect, share memories, and talk.</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(167,139,250,0.12)">&#128242;</div><h4>Progressive Web App</h4><p>Installable on any device &mdash; Android, iOS, Mac, Windows. Works offline for already-loaded chats. Native-like experience without an app store.</p></div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="privacy">
+        <div class="section-label">06 &mdash; Privacy &amp; Security</div>
+        <h2>Your Data, Your Control</h2>
+        <p>Chat archives contain some of the most sensitive personal information that exists &mdash; intimate conversations, relationship dynamics, private thoughts shared in confidence. We take this responsibility with the highest seriousness.</p>
+
+        <table class="privacy-table">
+            <thead><tr><th>Practice</th><th>Status</th><th>Details</th></tr></thead>
+            <tbody>
+                <tr><td>Encrypted transport</td><td><span class="badge-yes">&#10003; Yes</span></td><td>All data travels over HTTPS/TLS 1.3. No unencrypted connections permitted.</td></tr>
+                <tr><td>Raw file retention</td><td><span class="badge-no">&#10007; Never</span></td><td>Raw .zip files are never stored on our servers. Only the parsed, structured representation is saved.</td></tr>
+                <tr><td>AI training on personal data</td><td><span class="badge-no">&#10007; Never</span></td><td>We do not use your conversations to train, fine-tune, or improve any AI model. Period.</td></tr>
+                <tr><td>Data selling / sharing</td><td><span class="badge-no">&#10007; Never</span></td><td>We do not sell, rent, or share personal data with advertisers or data brokers.</td></tr>
+                <tr><td>Account deletion</td><td><span class="badge-yes">&#10003; Instant</span></td><td>Delete your account and all data &mdash; chats, messages, profile &mdash; in one click. Permanent and immediate.</td></tr>
+                <tr><td>Individual chat deletion</td><td><span class="badge-yes">&#10003; Yes</span></td><td>Delete specific chat archives at any time without deleting your account.</td></tr>
+                <tr><td>Third-party analytics</td><td><span class="badge-yes">&#10003; Minimal</span></td><td>Google Analytics for aggregate usage stats only. No personal conversation data is shared.</td></tr>
+                <tr><td>Data portability</td><td><span class="badge-yes">&#10003; Yes</span></td><td>You already have your original export files. We create no proprietary lock-in.</td></tr>
+            </tbody>
+        </table>
+
+        <div class="callout green">
+            <strong>Our Privacy Promise</strong>
+            We built Kotha because we understand what these conversations mean. We will never compromise your trust by monetizing, sharing, or training on your personal memories. If that ever changes, we will notify users with 90 days notice and provide full data export.
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="roadmap">
+        <div class="section-label">07 &mdash; Roadmap</div>
+        <h2>What&apos;s Coming to Kotha</h2>
+        <p>We build in public, with user feedback driving every sprint. Here is the current product roadmap.</p>
+        <div class="roadmap">
+            <div class="roadmap-item"><span class="roadmap-badge badge-live">Live</span><div><strong>Chat Import &amp; Viewer</strong><p>Full archive parsing, rendering, and native-style viewer with inline media support.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-live">Live</span><div><strong>AI Personality Chat</strong><p>AI conversations grounded in the uploaded chat history, powered by Google Gemini.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-live">Live</span><div><strong>Chat Wrapped</strong><p>Annual conversation review with shareable story cards.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-live">Live</span><div><strong>Direct Messaging</strong><p>Real-time DM between Kotha users with full history and notifications.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-live">Live</span><div><strong>Global Chat Room</strong><p>Anonymous community chat room for Kotha users.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-soon">Coming Soon</span><div><strong>Multi-Platform Import</strong><p>Support for Telegram, Instagram DMs, Signal, and iMessage export formats.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-soon">Coming Soon</span><div><strong>Shared Memory Albums</strong><p>Collaboratively curate and share selected messages and media as a &ldquo;memory album.&rdquo;</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-plan">Planned</span><div><strong>Kotha Mobile App</strong><p>Native Android and iOS apps with offline-first architecture and push notifications.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-plan">Planned</span><div><strong>Family Memory Vault</strong><p>A shared, secure family space for multi-generational conversation archives.</p></div></div>
+            <div class="roadmap-item"><span class="roadmap-badge badge-plan">Planned</span><div><strong>Grief &amp; Memory API</strong><p>An API for therapists, memorial platforms, and digital legacy services.</p></div></div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="faq">
+        <div class="section-label">08 &mdash; FAQ</div>
+        <h2>Frequently Asked Questions</h2>
+        <p style="margin-bottom:32px">Everything you need to know before you start.</p>
+
+        <details class="faq-item"><summary>How do I export my chat history?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">Open any chat in your messaging app &rarr; tap the 3-dot menu &rarr; <strong>More &rarr; Export chat</strong> &rarr; choose &ldquo;Include Media&rdquo; or &ldquo;Without Media&rdquo; &rarr; save the resulting <code>.zip</code> file. Then drag and drop it into the Kotha app. The whole process takes under 60 seconds.</div></details>
+
+        <details class="faq-item"><summary>Is my data safe? Who can see my chats?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">Only you. Chat data is stored under your authenticated account and is never accessible to other users or to Kotha staff in routine operations. All data is transported over encrypted HTTPS connections. We never sell, share, or train AI on your personal conversation data. See our full <a href="/privacy.html">Privacy Policy</a>.</div></details>
+
+        <details class="faq-item"><summary>Does the AI actually sound like my contact?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">The quality scales with conversation length and uniqueness of the contact&apos;s language. With at least 500 messages (roughly 3&ndash;6 months of regular chatting), the AI captures tone, vocabulary, humor, and emoji patterns remarkably well. With years of history, it can be striking. The AI is grounded in the actual things your contact said &mdash; not a generic chatbot persona.</div></details>
+
+        <details class="faq-item"><summary>Can I use Kotha for group chats?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">Yes. Group chat exports are fully supported. The viewer shows all participant messages with their names. AI Chat for group chats currently models the dominant contributor in the group.</div></details>
+
+        <details class="faq-item"><summary>How much does Kotha cost?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">Kotha has a generous free tier that includes the full chat viewer, search, analytics, and limited AI chat. The <strong>Unlimited AI</strong> plan (&#8377;99/month) removes all AI message limits. We also offer a Lifetime plan for users who want permanent access. Pricing is intentionally affordable to ensure accessibility across India and South Asia.</div></details>
+
+        <details class="faq-item"><summary>How do I delete my data?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">You can delete individual chat archives from within the app at any time. To delete your entire account and all associated data, go to your account settings and choose &ldquo;Delete Account.&rdquo; Deletion is immediate and permanent.</div></details>
+
+        <details class="faq-item"><summary>Can I use Kotha to memorialize a deceased loved one?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">Yes &mdash; and this is one of the most deeply meaningful use cases for Kotha. Many of our users have uploaded conversations with parents, grandparents, partners, and friends who have passed away. The AI chat feature in this context is about connection, remembrance, and the comfort of familiar words. We approach this use case with the highest care and empathy.</div></details>
+
+        <details class="faq-item"><summary>Is Kotha available as an app I can install?<svg class="faq-chevron" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg></summary><div class="faq-answer">Yes. Kotha is a fully featured Progressive Web App. On Android, you will see an &ldquo;Add to Home Screen&rdquo; prompt automatically. On iOS, tap the Share button in Safari &rarr; &ldquo;Add to Home Screen.&rdquo; On desktop, look for the install icon in your browser&apos;s address bar. The installed version works offline for already-loaded chats.</div></details>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section" id="contact">
+        <div class="section-label">09 &mdash; Press &amp; Contact</div>
+        <h2>Get in Touch</h2>
+        <p>We are a small, independent team building Kotha out of a genuine belief in the value of preserved human connection. We welcome press inquiries, partnership proposals, and user feedback.</p>
+
+        <div class="feature-grid" style="margin-top:28px">
+            <div class="feature-card"><div class="icon" style="background:rgba(99,102,241,0.12)">&#9993;</div><h4>General &amp; Press</h4><p>contact@onlinekotha.com</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(16,185,129,0.12)">&#128737;</div><h4>Privacy &amp; Data</h4><p>privacy@onlinekotha.com</p></div>
+            <div class="feature-card"><div class="icon" style="background:rgba(245,158,11,0.12)">&#128030;</div><h4>Bug Reports</h4><p>Use the in-app feedback button or email bugs@onlinekotha.com</p></div>
+        </div>
+
+        <div class="callout indigo" style="margin-top:36px">
+            <strong>For Researchers &amp; Therapists</strong>
+            If you are a grief counselor, digital memorial researcher, or therapist interested in how Kotha can support your practice or research, please reach out at contact@onlinekotha.com. We offer custom plans and API access discussions for institutional partners.
+        </div>
+    </section>
+
+    <footer class="paper-footer">
+        <p>&copy; 2025 OnlineKotha &middot; <a href="/privacy.html">Privacy</a> &middot; <a href="/terms.html">Terms</a> &middot; <a href="/refund.html">Refunds</a></p>
+        <p><a href="/">&#8592; Back to onlinekotha.com</a></p>
+    </footer>
+
+</div>
+</body>
+</html>

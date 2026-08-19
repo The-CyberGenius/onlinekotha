@@ -1193,7 +1193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </svg>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Bring your chats to life</h2>
-                <p class="text-[14px] sm:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">Import your WhatsApp history to search, analyze, and relive memories with AI.</p>
+                <p class="text-[14px] sm:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">Import your chat history to search, analyze, and relive memories with AI.</p>
                 
                 <div class="flex items-center justify-center gap-4 sm:gap-6 text-[11px] sm:text-[12px] text-gray-400 dark:text-gray-500 font-medium mb-8 bg-gray-50 dark:bg-gray-800/50 px-4 py-2 rounded-full border border-gray-100 dark:border-gray-800">
                     <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
@@ -1290,12 +1290,12 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>',
                 title: 'Upload your chat',
-                desc: 'Export your WhatsApp chat as a .zip file and drop it here. We support Android, iPhone, individual and group chats.',
+                desc: 'Export your chat history as a .zip file and drop it here. We support Android, iPhone, individual and group chats.',
             },
             {
                 icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
                 title: 'See your chats beautifully',
-                desc: 'Messages appear in proper WhatsApp-style bubbles with photos, videos, and voice notes inline. Search through years instantly.',
+                desc: 'Messages appear in beautiful chat bubbles with photos, videos, and voice notes inline. Search through years instantly.',
             },
             {
                 icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>',
