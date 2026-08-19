@@ -2290,8 +2290,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const titlebar = document.getElementById('mac-titlebar');
         if (!frame || !titlebar || window.innerWidth < 768) return;
 
-        // --- Drag via titlebar ---
+        // --- Initialize square window position on desktop ---
         let inited = false;
+        if (window.innerWidth >= 768) {
+            const initialSize = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.8, 850);
+            frame.style.position = 'absolute';
+            frame.style.width = initialSize + 'px';
+            frame.style.height = initialSize + 'px';
+            frame.style.left = ((window.innerWidth - initialSize) / 2) + 'px';
+            // Position above dock (bottom padding ~80px)
+            frame.style.top = (window.innerHeight - initialSize - 80) + 'px'; 
+            frame.style.margin = '0';
+            document.body.style.position = 'relative';
+            inited = true;
+        }
+
         function initPosition() {
             if (inited) return;
             inited = true;
@@ -2371,23 +2384,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.addEventListener('mousemove', (e) => {
             if (!dragging) return;
-            let nx = sl + (e.clientX - sx);
-            let ny = st + (e.clientY - sy);
-
-            // Magnetic snap to center
-            const centerX = (window.innerWidth - frame.offsetWidth) / 2;
-            const centerY = (window.innerHeight - frame.offsetHeight) / 2;
-            if (Math.abs(nx - centerX) < 30) nx = centerX;
-            if (Math.abs(ny - centerY) < 30) ny = centerY;
-
-            // Magnetic snap to edges
-            if (nx < 20) nx = 0;
-            if (ny < 20) ny = 0;
-            if (window.innerWidth - (nx + frame.offsetWidth) < 20) nx = window.innerWidth - frame.offsetWidth;
-            if (window.innerHeight - (ny + frame.offsetHeight) < 20) ny = window.innerHeight - frame.offsetHeight;
-
-            frame.style.left = Math.max(0, Math.min(window.innerWidth - 100, nx)) + 'px';
-            frame.style.top = Math.max(0, Math.min(window.innerHeight - 60, ny)) + 'px';
+            frame.style.left = Math.max(0, Math.min(window.innerWidth - 100, sl + (e.clientX - sx))) + 'px';
+            frame.style.top = Math.max(0, Math.min(window.innerHeight - 60, st + (e.clientY - sy))) + 'px';
             syncOverlay();
         });
         document.addEventListener('mouseup', () => {
@@ -2401,27 +2399,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('mac-fullscreen').click();
         });
 
-        // --- Magnetic Dock Effect ---
-        const dockBar = document.getElementById('dock-glass-bar');
-        const dIcon = document.getElementById('dock-kotha-icon');
-        if (dockBar && dIcon) {
-            dockBar.addEventListener('mousemove', (e) => {
-                const rect = dIcon.getBoundingClientRect();
-                const iconCenter = rect.left + rect.width / 2;
-                const dist = Math.abs(e.clientX - iconCenter);
-                const maxDist = 150;
-                let scale = 1;
-                if (dist < maxDist) {
-                    scale = 1 + (0.4 * (1 - dist / maxDist));
-                }
-                // Override CSS hover scale using inline style for smooth math scaling
-                dIcon.style.transform = `scale(${scale})`;
-            });
-            dockBar.addEventListener('mouseleave', () => {
-                dIcon.style.transform = '';
-            });
-        }
-
         // --- Traffic light buttons ---
         const closeBtn = document.getElementById('mac-close');
         const minBtn = document.getElementById('mac-minimize');
@@ -2430,11 +2407,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const dockIcon = document.getElementById('dock-kotha-icon');
 
         let minimized = false;
+        let isAnimating = false;
 
         const dockDot = document.getElementById('dock-dot');
 
         function genieMinimize() {
-            if (minimized) return;
+            if (minimized || isAnimating) return;
+            isAnimating = true;
             minimized = true;
             rhOverlay.style.display = 'none';
             frame.classList.remove('genie-restore');
@@ -2444,11 +2423,13 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 frame.classList.add('mac-minimized');
                 frame.classList.remove('genie-minimize');
+                isAnimating = false;
             }, 500);
         }
 
         function genieRestore() {
-            if (!minimized) return;
+            if (!minimized || isAnimating) return;
+            isAnimating = true;
             minimized = false;
             frame.classList.remove('mac-minimized', 'genie-minimize');
             frame.classList.add('genie-restore');
@@ -2470,6 +2451,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 frame.classList.remove('genie-restore');
                 syncOverlay();
+                isAnimating = false;
             }, 450);
         }
 
