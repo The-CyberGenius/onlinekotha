@@ -2371,8 +2371,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.addEventListener('mousemove', (e) => {
             if (!dragging) return;
-            frame.style.left = Math.max(0, Math.min(window.innerWidth - 100, sl + (e.clientX - sx))) + 'px';
-            frame.style.top = Math.max(0, Math.min(window.innerHeight - 60, st + (e.clientY - sy))) + 'px';
+            let nx = sl + (e.clientX - sx);
+            let ny = st + (e.clientY - sy);
+
+            // Magnetic snap to center
+            const centerX = (window.innerWidth - frame.offsetWidth) / 2;
+            const centerY = (window.innerHeight - frame.offsetHeight) / 2;
+            if (Math.abs(nx - centerX) < 30) nx = centerX;
+            if (Math.abs(ny - centerY) < 30) ny = centerY;
+
+            // Magnetic snap to edges
+            if (nx < 20) nx = 0;
+            if (ny < 20) ny = 0;
+            if (window.innerWidth - (nx + frame.offsetWidth) < 20) nx = window.innerWidth - frame.offsetWidth;
+            if (window.innerHeight - (ny + frame.offsetHeight) < 20) ny = window.innerHeight - frame.offsetHeight;
+
+            frame.style.left = Math.max(0, Math.min(window.innerWidth - 100, nx)) + 'px';
+            frame.style.top = Math.max(0, Math.min(window.innerHeight - 60, ny)) + 'px';
             syncOverlay();
         });
         document.addEventListener('mouseup', () => {
@@ -2385,6 +2400,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target.closest('button')) return;
             document.getElementById('mac-fullscreen').click();
         });
+
+        // --- Magnetic Dock Effect ---
+        const dockBar = document.getElementById('dock-glass-bar');
+        const dIcon = document.getElementById('dock-kotha-icon');
+        if (dockBar && dIcon) {
+            dockBar.addEventListener('mousemove', (e) => {
+                const rect = dIcon.getBoundingClientRect();
+                const iconCenter = rect.left + rect.width / 2;
+                const dist = Math.abs(e.clientX - iconCenter);
+                const maxDist = 150;
+                let scale = 1;
+                if (dist < maxDist) {
+                    scale = 1 + (0.4 * (1 - dist / maxDist));
+                }
+                // Override CSS hover scale using inline style for smooth math scaling
+                dIcon.style.transform = `scale(${scale})`;
+            });
+            dockBar.addEventListener('mouseleave', () => {
+                dIcon.style.transform = '';
+            });
+        }
 
         // --- Traffic light buttons ---
         const closeBtn = document.getElementById('mac-close');

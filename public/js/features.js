@@ -103,8 +103,8 @@
         banner.id = 'pwa-install-banner';
         banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-gray-900 text-white rounded-2xl p-4 shadow-2xl z-[90] flex items-center gap-3 animate-message';
         banner.innerHTML = `
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0 p-2">
+                <img src="/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow-md">
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold">Install Kotha</p>
