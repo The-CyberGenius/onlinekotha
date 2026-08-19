@@ -2293,13 +2293,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Initialize square window position on desktop ---
         let inited = false;
         if (window.innerWidth >= 768) {
-            const initialSize = Math.min(window.innerWidth * 0.8, window.innerHeight * 0.8, 850);
+            const initialW = Math.max(850, Math.min(window.innerWidth * 0.85, 1000));
+            const initialH = Math.min(window.innerHeight * 0.85, Math.max(700, initialW - 100)); // slightly rectangular
             frame.style.position = 'absolute';
-            frame.style.width = initialSize + 'px';
-            frame.style.height = initialSize + 'px';
-            frame.style.left = ((window.innerWidth - initialSize) / 2) + 'px';
+            frame.style.width = initialW + 'px';
+            frame.style.height = initialH + 'px';
+            frame.style.left = ((window.innerWidth - initialW) / 2) + 'px';
             // Position above dock (bottom padding ~80px)
-            frame.style.top = (window.innerHeight - initialSize - 80) + 'px'; 
+            frame.style.top = (window.innerHeight - initialH - 80) + 'px'; 
             frame.style.margin = '0';
             document.body.style.position = 'relative';
             inited = true;
