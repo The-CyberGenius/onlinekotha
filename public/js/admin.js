@@ -558,18 +558,22 @@ HARD RULES
             return;
         }
         
-        // Add header + counter
-        list.innerHTML = `
+        let html = `
             <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:12px;">${rows.length} total users</div>
-            <div class="user-list-header">
-                <div>User</div>
-                <div>Status</div>
-                <div>Contact / Usage</div>
-                <div>Spend</div>
-                <div>Location</div>
-                <div>Activity</div>
-                <div style="text-align:right;">Actions</div>
-            </div>
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Contact / Usage</th>
+                            <th>Spend</th>
+                            <th>Location</th>
+                            <th>Activity</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
         
         for (const u of rows) {
@@ -606,69 +610,59 @@ HARD RULES
                 ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>`
                 : '<span class="meta-text">No activity</span>';
 
-            const wrapper = document.createElement('div');
-            
-            wrapper.innerHTML = `
-                <div class="user-row-card">
-                    <!-- 1. Profile -->
-                    <div class="user-col user-col-profile">
-                        ${avatarHtml}
-                        <div class="user-profile-text">
-                            <span class="user-name-text">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
-                            <span class="user-email-text">${u.email}</span>
+            html += `
+                <tr>
+                    <td>
+                        <div class="user-profile-cell">
+                            ${avatarHtml}
+                            <div class="user-profile-text">
+                                <span class="user-name-text">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
+                                <span class="user-email-text">${u.email}</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Mobile wrapper for remaining info -->
-                    <div class="mobile-grid-info">
-                        <!-- 2. Status -->
-                        <div class="user-col mobile-grid-item">
-                            <span class="mobile-label">Status</span>
-                            <div>${planBadge}</div>
-                            ${loginMethod}
+                    </td>
+                    <td>
+                        <div style="margin-bottom:4px;">${planBadge}</div>
+                        ${loginMethod}
+                    </td>
+                    <td>
+                        <span class="sub-text">${phoneStr}</span>
+                        <span class="meta-text">${u.chat_count} chat${u.chat_count !== 1 ? 's' : ''}</span>
+                    </td>
+                    <td>
+                        <span class="sub-text font-mono" style="font-weight:600;">$${u.total_cost.toFixed(3)}</span>
+                    </td>
+                    <td>
+                        ${ipCountry}
+                    </td>
+                    <td>
+                        <span class="sub-text" style="color:#64748b;">Joined: ${formatDateTime(u.created_at)}</span>
+                        ${lastActive}
+                    </td>
+                    <td>
+                        <div class="action-cell">
+                            ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}
+                            <button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button>
+                            <button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>
+                            ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}
                         </div>
-
-                        <!-- 3. Contact & Usage -->
-                        <div class="user-col mobile-grid-item">
-                            <span class="mobile-label">Contact / Chats</span>
-                            <span class="sub-text">${phoneStr}</span>
-                            <span class="meta-text">${u.chat_count} chat${u.chat_count !== 1 ? 's' : ''}</span>
-                        </div>
-
-                        <!-- 4. Spend -->
-                        <div class="user-col mobile-grid-item">
-                            <span class="mobile-label">Spend</span>
-                            <span class="sub-text font-mono">$${u.total_cost.toFixed(3)}</span>
-                        </div>
-
-                        <!-- 5. Location -->
-                        <div class="user-col mobile-grid-item">
-                            <span class="mobile-label">Location</span>
-                            ${ipCountry}
-                        </div>
-
-                        <!-- 6. Activity -->
-                        <div class="user-col mobile-grid-item">
-                            <span class="mobile-label">Activity</span>
-                            <span class="sub-text">Joined: ${formatDateTime(u.created_at)}</span>
-                            ${lastActive}
-                        </div>
-                    </div>
-
-                    <!-- 7. Actions -->
-                    <div class="user-col user-buttons-group">
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}
-                        <button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button>
-                        <button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>
-                        ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}
-                    </div>
-                </div>
-
-                <div data-chats-for="${u.id}" class="hidden" style="padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;margin-top:-9px;margin-bottom:12px;"></div>
-                <div data-ai-logs-for="${u.id}" class="hidden" style="padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;margin-top:-9px;margin-bottom:12px;"></div>
+                    </td>
+                </tr>
+                <tr id="expand-row-${u.id}" class="hidden">
+                    <td colspan="7" style="padding:0; border:none; background:#f8fafc;">
+                        <div data-chats-for="${u.id}" class="hidden" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
+                        <div data-ai-logs-for="${u.id}" class="hidden" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
+                    </td>
+                </tr>
             `;
-            list.appendChild(wrapper);
         }
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+        list.innerHTML = html;
 
         // Manage plan modal
         list.querySelectorAll('.user-plan-btn').forEach(btn => {
@@ -780,11 +774,16 @@ HARD RULES
             btn.addEventListener('click', async () => {
                 const uid = btn.dataset.uid;
                 const area = list.querySelector(`[data-chats-for="${uid}"]`);
+                const expandRow = document.getElementById(`expand-row-${uid}`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
-                    btn.textContent = `Chats (${btn.dataset.uid})`;
+                    if (list.querySelector(`[data-ai-logs-for="${uid}"]`).classList.contains('hidden')) {
+                        expandRow.classList.add('hidden');
+                    }
+                    btn.textContent = 'Chats';
                     return;
                 }
+                expandRow.classList.remove('hidden');
                 area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading chats...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
@@ -865,11 +864,16 @@ HARD RULES
             btn.addEventListener('click', async () => {
                 const uid = btn.dataset.uid;
                 const area = list.querySelector(`[data-ai-logs-for="${uid}"]`);
+                const expandRow = document.getElementById(`expand-row-${uid}`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
+                    if (list.querySelector(`[data-chats-for="${uid}"]`).classList.contains('hidden')) {
+                        expandRow.classList.add('hidden');
+                    }
                     btn.textContent = 'Logs';
                     return;
                 }
+                expandRow.classList.remove('hidden');
                 area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading AI logs...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
@@ -904,6 +908,10 @@ HARD RULES
                         area.classList.add('hidden');
                         area.innerHTML = '';
                         btn.textContent = 'Logs';
+                        const expandRow = document.getElementById(`expand-row-${uid}`);
+                        if (list.querySelector(`[data-chats-for="${uid}"]`).classList.contains('hidden')) {
+                            expandRow.classList.add('hidden');
+                        }
                     });
 
                     area.querySelectorAll('.ai-log-view-btn').forEach(vBtn => {
