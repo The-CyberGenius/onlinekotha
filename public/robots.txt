@@ -1,6 +1,24 @@
+# Robots.txt for OnlineKotha (https://www.onlinekotha.com)
 User-agent: *
 Allow: /
+Allow: /blog/
+Allow: /paper.html
+Allow: /app
+Allow: /blog.html
+Allow: /login.html
+Allow: /privacy.html
+Allow: /terms.html
+Allow: /contact.html
+Allow: /refund.html
+
+# Disallow admin & private transaction callback endpoints
 Disallow: /api/
 Disallow: /admin.html
+Disallow: /billing-success.html
+Disallow: /verify-failed.html
+Disallow: /verify-success.html
+Disallow: /reset.html
+Disallow: /forgot.html
 
+# Sitemap
 Sitemap: https://www.onlinekotha.com/sitemap.xml

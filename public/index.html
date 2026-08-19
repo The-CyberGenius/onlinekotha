@@ -55,22 +55,55 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Kotha",
-      "url": "https://onlinekotha.com",
-      "description": "Import your chat history. AI learns exactly how your loved ones talk — their words, humor, style. Then chat with them again, anytime.",
-      "applicationCategory": "SocialNetworkingApplication",
-      "operatingSystem": "Web",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "INR"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "ratingCount": "120"
-      }
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.onlinekotha.com/#organization",
+          "name": "OnlineKotha",
+          "url": "https://www.onlinekotha.com",
+          "logo": "https://www.onlinekotha.com/logo.svg",
+          "founder": {
+            "@type": "Person",
+            "name": "Shiva Prajapat"
+          },
+          "sameAs": [
+            "https://twitter.com/onlinekotha"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "contact@onlinekotha.com",
+            "contactType": "customer support"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.onlinekotha.com/#website",
+          "url": "https://www.onlinekotha.com",
+          "name": "OnlineKotha",
+          "description": "AI-Powered Chat Memory Platform & WhatsApp Chat Viewer",
+          "publisher": {
+            "@id": "https://www.onlinekotha.com/#organization"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Kotha",
+          "url": "https://www.onlinekotha.com",
+          "description": "Import your chat history. AI learns exactly how your loved ones talk — their words, humor, style. Then chat with them again, anytime.",
+          "applicationCategory": "SocialNetworkingApplication",
+          "operatingSystem": "Web, Android, iOS, Windows, macOS",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "INR"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "120"
+          }
+        }
+      ]
     }
     </script>
     <script type="application/ld+json">
