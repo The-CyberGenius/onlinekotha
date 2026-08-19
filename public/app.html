@@ -691,15 +691,12 @@
     <!-- end #mac-frame -->
     </div>
 
-    <!-- macOS Dock (fixed at bottom edge of screen, desktop only) -->
-    <div id="mac-dock" class="hidden md:flex fixed bottom-0.5 left-1/2 -translate-x-1/2 z-[9999] items-end justify-center pointer-events-auto select-none">
-        <div id="dock-glass-bar" class="flex items-center justify-center bg-white/40 dark:bg-[#1a1b26]/60 backdrop-blur-xl rounded-2xl p-1.5 border border-white/40 dark:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-all duration-300">
-            <!-- OnlineKotha (Single Hero App Icon) -->
-            <div id="dock-kotha-icon" class="w-12 h-12 rounded-[14px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:-translate-y-1 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer relative group border border-white/30 p-2" title="OnlineKotha">
-                <img src="/logo.svg" alt="Kotha" class="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
-                <!-- Active Indicator Dot -->
-                <div id="dock-dot" class="absolute -bottom-2 w-1.5 h-1.5 rounded-full bg-slate-800 dark:bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)] transition-colors duration-200"></div>
-                <span class="absolute -top-9 px-2 py-1 bg-slate-900/90 text-white text-[10px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">OnlineKotha</span>
+    <!-- macOS Dock (fixed at bottom of screen, desktop only) -->
+    <div id="mac-dock" style="bottom: 2px;" class="hidden md:flex fixed left-1/2 -translate-x-1/2 z-[9999] items-center justify-center">
+        <div id="dock-glass-bar" class="flex items-center gap-1 bg-white/70 dark:bg-[#1c1c1e]/75 backdrop-blur-xl rounded-2xl px-2 py-1.5 border border-black/10 dark:border-white/[0.12] shadow-[0_10px_35px_rgba(0,0,0,0.12)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] transition-all duration-300">
+            <div id="dock-kotha-icon" class="w-14 h-14 rounded-2xl bg-white/95 dark:bg-[#1c1c2e] flex items-center justify-center hover:scale-125 active:scale-95 transition-all duration-200 cursor-pointer relative group shadow-md dark:shadow-xl border border-gray-200/80 dark:border-white/10 p-2" title="Kotha">
+                <img src="/logo.svg" alt="Kotha" class="w-full h-full object-contain">
+                <div id="dock-dot" class="absolute -bottom-[6px] w-1 h-1 rounded-full bg-slate-800 dark:bg-white/90 transition-colors duration-200"></div>
             </div>
         </div>
     </div>
