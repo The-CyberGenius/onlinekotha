@@ -691,45 +691,15 @@
     <!-- end #mac-frame -->
     </div>
 
-    <!-- macOS Dock (fixed at bottom of screen, desktop only) -->
-    <div id="mac-dock" class="hidden md:flex fixed bottom-3 left-1/2 -translate-x-1/2 z-[9999] items-center justify-center pointer-events-auto select-none">
-        <div id="dock-glass-bar" class="flex items-center gap-2.5 bg-white/50 dark:bg-[#1a1b26]/70 backdrop-blur-2xl rounded-2xl px-3 py-2 border border-white/50 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300">
-            <!-- Finder -->
-            <div class="w-11 h-11 rounded-[13px] bg-gradient-to-tr from-sky-500 to-cyan-300 flex items-center justify-center shadow-md hover:-translate-y-2 hover:scale-110 transition-all duration-200 cursor-pointer relative group border border-white/30">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
-                <span class="absolute -top-9 px-2 py-1 bg-slate-900/90 text-white text-[10px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">Finder</span>
-            </div>
-
-            <!-- Safari -->
-            <div class="w-11 h-11 rounded-[13px] bg-gradient-to-tr from-blue-600 to-teal-400 flex items-center justify-center shadow-md hover:-translate-y-2 hover:scale-110 transition-all duration-200 cursor-pointer relative group border border-white/30">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-                <span class="absolute -top-9 px-2 py-1 bg-slate-900/90 text-white text-[10px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">Safari</span>
-            </div>
-
-            <!-- Separator -->
-            <div class="w-px h-7 bg-black/10 dark:bg-white/15 mx-0.5"></div>
-
-            <!-- OnlineKotha (Hero App) -->
-            <div id="dock-kotha-icon" class="w-12 h-12 rounded-[14px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/40 hover:-translate-y-2 hover:scale-110 active:scale-95 transition-all duration-200 cursor-pointer relative group border border-white/40 p-2" title="Kotha">
+    <!-- macOS Dock (fixed at bottom edge of screen, desktop only) -->
+    <div id="mac-dock" class="hidden md:flex fixed bottom-0.5 left-1/2 -translate-x-1/2 z-[9999] items-end justify-center pointer-events-auto select-none">
+        <div id="dock-glass-bar" class="flex items-center justify-center bg-white/40 dark:bg-[#1a1b26]/60 backdrop-blur-xl rounded-2xl p-1.5 border border-white/40 dark:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition-all duration-300">
+            <!-- OnlineKotha (Single Hero App Icon) -->
+            <div id="dock-kotha-icon" class="w-12 h-12 rounded-[14px] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:-translate-y-1 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer relative group border border-white/30 p-2" title="OnlineKotha">
                 <img src="/logo.svg" alt="Kotha" class="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
                 <!-- Active Indicator Dot -->
-                <div id="dock-dot" class="absolute -bottom-2.5 w-1.5 h-1.5 rounded-full bg-slate-800 dark:bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)] transition-colors duration-200"></div>
+                <div id="dock-dot" class="absolute -bottom-2 w-1.5 h-1.5 rounded-full bg-slate-800 dark:bg-white shadow-[0_0_6px_rgba(255,255,255,0.9)] transition-colors duration-200"></div>
                 <span class="absolute -top-9 px-2 py-1 bg-slate-900/90 text-white text-[10px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">OnlineKotha</span>
-            </div>
-
-            <!-- Separator -->
-            <div class="w-px h-7 bg-black/10 dark:bg-white/15 mx-0.5"></div>
-
-            <!-- Messages -->
-            <div class="w-11 h-11 rounded-[13px] bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-md hover:-translate-y-2 hover:scale-110 transition-all duration-200 cursor-pointer relative group border border-white/30">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span class="absolute -top-9 px-2 py-1 bg-slate-900/90 text-white text-[10px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">Messages</span>
-            </div>
-
-            <!-- Settings -->
-            <div class="w-11 h-11 rounded-[13px] bg-gradient-to-tr from-slate-600 to-slate-400 flex items-center justify-center shadow-md hover:-translate-y-2 hover:scale-110 transition-all duration-200 cursor-pointer relative group border border-white/30">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span class="absolute -top-9 px-2 py-1 bg-slate-900/90 text-white text-[10px] font-bold rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-md">Settings</span>
             </div>
         </div>
     </div>
