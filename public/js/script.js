@@ -2544,6 +2544,89 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     })();
+
+    // ── Live Translate (In-place) for Admin ──
+    window.runAdminLiveTranslate = async function(lang) {
+        if (!allMessages || allMessages.length === 0) return;
+        
+        const output = document.getElementById('admin-tools-output');
+        const status = document.getElementById('admin-tools-status');
+        
+        if (window.adminAnalyzeController) {
+            window.adminAnalyzeController.abort();
+        }
+        window.adminAnalyzeController = new AbortController();
+
+        output.innerHTML = '';
+        status.classList.remove('hidden');
+        status.textContent = `Translating ${allMessages.length} messages...`;
+
+        try {
+            const res = await fetch('/api/admin/impersonate/translate-live', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: allMessages, lang }),
+                signal: window.adminAnalyzeController.signal
+            });
+
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            
+            let translatedCount = 0;
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = JSON.parse(line.slice(6));
+                        if (data.error) throw new Error(data.error);
+                        
+                        if (data.translated && typeof data.start === 'number') {
+                            data.translated.forEach((tMsg, idx) => {
+                                const realIdx = data.start + idx;
+                                if (allMessages[realIdx]) {
+                                    if (!allMessages[realIdx].original_t) {
+                                        allMessages[realIdx].original_t = allMessages[realIdx].t;
+                                    }
+                                    if (tMsg && tMsg.translated) {
+                                        allMessages[realIdx].t = tMsg.translated;
+                                    }
+                                }
+                            });
+                            translatedCount += data.translated.length;
+                            const pct = Math.floor((translatedCount / allMessages.length) * 100);
+                            status.textContent = `Translating... ${pct}% (${translatedCount}/${allMessages.length})`;
+                            output.textContent = `Translated ${translatedCount} of ${allMessages.length} messages...\n\nSearch bar will work in ${lang} when finished.`;
+                        }
+                    }
+                }
+            }
+            
+            // Re-render UI
+            renderChats(-1, -1);
+            renderChats(Math.max(0, displayedMessages.length - CHUNK_SIZE), displayedMessages.length, 'reset');
+
+            status.textContent = 'Translation complete! You can now search in ' + lang + '.';
+            output.innerHTML = `<span class="text-green-600 font-bold">Live translation applied to all ${allMessages.length} messages!</span>\n\nThe chat search box on the left will now find keywords in English.`;
+
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                status.textContent = 'Translation cancelled.';
+            } else {
+                console.error(err);
+                output.innerHTML += `\n\n<span class="text-red-500">Error: ${err.message}</span>`;
+                status.textContent = 'Error occurred.';
+            }
+        } finally {
+            window.adminAnalyzeController = null;
+        }
+    };
 });
 
 // --- Admin Chat Tools Logic ---

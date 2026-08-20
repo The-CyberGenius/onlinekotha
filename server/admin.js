@@ -662,6 +662,57 @@ router.post('/impersonate/analyze', express.json({ limit: '10mb' }), async (req,
     }
 });
 
+router.post('/impersonate/translate-live', express.json({ limit: '10mb' }), async (req, res) => {
+    try {
+        const { messages, lang } = req.body;
+        if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: 'messages array required' });
+
+        const gtLang = lang === 'english' ? 'en' : 'hi';
+        
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        const BATCH_SIZE = 40; 
+        const CONCURRENCY = 5;
+
+        for (let i = 0; i < messages.length; i += BATCH_SIZE * CONCURRENCY) {
+            const promises = [];
+            for (let c = 0; c < CONCURRENCY; c++) {
+                const start = i + c * BATCH_SIZE;
+                if (start >= messages.length) break;
+                
+                const slice = messages.slice(start, start + BATCH_SIZE);
+                // Create an array of objects that googleTranslateBatch expects: {t: text, empty: bool}
+                const formatForGT = slice.map(m => {
+                    let txt = m.t || m.text || '';
+                    return { t: txt, empty: !txt.trim() };
+                });
+
+                promises.push(
+                    googleTranslateBatch(formatForGT, gtLang).then(results => {
+                        return { start, results };
+                    })
+                );
+            }
+
+            const batchResults = await Promise.all(promises);
+            for (const br of batchResults) {
+                // br.results is an array of objects { translated: '...' }
+                res.write(`data: ${JSON.stringify({ start: br.start, translated: br.results })}\n\n`);
+            }
+        }
+
+        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+        res.end();
+
+    } catch (err) {
+        console.error('Admin translate-live error:', err);
+        res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+        res.end();
+    }
+});
+
 // ---------- Manage user plan / trial ----------
 router.patch('/users/:id/plan', (req, res) => {
     const userId = Number(req.params.id);
