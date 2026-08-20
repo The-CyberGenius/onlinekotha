@@ -813,7 +813,6 @@ HARD RULES
                                     <div style="width:130px;color:#64748b;font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
                                     <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
                                         <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
-                                        <button data-admin-translate-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle" style="font-size:10px;padding:2px 6px;">Translate</button>
                                         <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#2563eb;">Open</button>
                                         <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
                                     </div>
@@ -826,12 +825,6 @@ HARD RULES
                         openBtn.addEventListener('click', () => {
                             const folder = openBtn.dataset.folder;
                             window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`;
-                        });
-                    });
-
-                    area.querySelectorAll('[data-admin-translate-chat]').forEach(tBtn => {
-                        tBtn.addEventListener('click', () => {
-                            showAdminTranslateModal(tBtn.dataset.adminTranslateChat, tBtn.dataset.uid, tBtn.dataset.cname);
                         });
                     });
 
@@ -1149,143 +1142,3 @@ HARD RULES
     await loadUsers();
 })();
 
-// ======= Admin Chat Translation Modal =======
-function showAdminTranslateModal(chatId, uid, chatName) {
-    document.getElementById('admin-translate-modal')?.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'admin-translate-modal';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,0.5);padding:12px;';
-    modal.innerHTML = `
-        <div style="background:#fff;border-radius:12px;width:100%;max-width:640px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
-            <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;background:#f8fafc;">
-                <div>
-                    <div style="font-size:13px;font-weight:700;color:#0f172a;">Chat Translator</div>
-                    <div style="font-size:11px;color:#64748b;">${chatName}</div>
-                </div>
-                <button id="atm-close" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:#64748b;">×</button>
-            </div>
-
-            <div style="padding:10px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;background:#fff;flex-wrap:wrap;">
-                <span style="font-size:11px;font-weight:600;color:#475569;">Translate to:</span>
-                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#0f172a;">
-                    <input type="radio" name="atm-lang" value="hinglish" checked> Hinglish
-                </label>
-                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:600;color:#0f172a;">
-                    <input type="radio" name="atm-lang" value="english"> English
-                </label>
-                <button id="atm-go-btn" style="margin-left:auto;padding:6px 14px;background:#0f172a;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">
-                    Translate
-                </button>
-            </div>
-
-            <div id="atm-progress-wrap" style="display:none;padding:8px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                    <span id="atm-progress-label" style="font-size:10px;font-weight:600;color:#475569;">Translating…</span>
-                    <span id="atm-progress-pct" style="font-size:10px;font-weight:600;color:#0f172a;">0%</span>
-                </div>
-                <div style="background:#e2e8f0;border-radius:4px;height:4px;overflow:hidden;">
-                    <div id="atm-progress-bar" style="background:#2563eb;height:100%;width:0%;transition:width 0.2s ease;"></div>
-                </div>
-            </div>
-
-            <div id="atm-body" style="flex:1;overflow-y:auto;padding:14px 16px;">
-                <div style="text-align:center;padding:24px;color:#94a3b8;font-size:12px;">
-                    Select a language and click <strong>Translate</strong>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    const closeModal = () => modal.remove();
-    document.getElementById('atm-close').addEventListener('click', closeModal);
-    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-
-    document.getElementById('atm-go-btn').addEventListener('click', async () => {
-        const lang = document.querySelector('input[name="atm-lang"]:checked')?.value || 'hinglish';
-        const btn = document.getElementById('atm-go-btn');
-        const body = document.getElementById('atm-body');
-        const progressWrap = document.getElementById('atm-progress-wrap');
-        const progressBar = document.getElementById('atm-progress-bar');
-        const progressLabel = document.getElementById('atm-progress-label');
-        const progressPct = document.getElementById('atm-progress-pct');
-
-        btn.disabled = true;
-        progressWrap.style.display = 'block';
-        progressBar.style.width = '0%';
-        progressLabel.textContent = 'Translating…';
-        progressPct.textContent = '0%';
-
-        body.innerHTML = `<div id="atm-msgs" style="display:flex;flex-direction:column;gap:6px;"></div>`;
-
-        try {
-            const response = await fetch(`/api/admin/users/${uid}/chats/${chatId}/translate`, {
-                method: 'POST',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ lang, offset: Number(btn.dataset.offset || 0) }),
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.error || 'Translation failed');
-            }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop();
-
-                let event = '';
-                for (const line of lines) {
-                    if (line.startsWith('event: ')) {
-                        event = line.slice(7).trim();
-                    } else if (line.startsWith('data: ')) {
-                        try {
-                            const data = JSON.parse(line.slice(6));
-
-                            if (event === 'progress') {
-                                const pct = Math.round((data.done / data.total) * 100);
-                                progressBar.style.width = pct + '%';
-                                progressLabel.textContent = `Translating… ${data.done} / ${data.total}`;
-                                progressPct.textContent = pct + '%';
-                            } else if (event === 'done') {
-                                progressBar.style.width = '100%';
-                                progressPct.textContent = '100%';
-                                progressLabel.textContent = 'Done!';
-
-                                const container = document.getElementById('atm-msgs');
-                                if (container) {
-                                    data.translated.forEach(m => {
-                                        const div = document.createElement('div');
-                                        div.style.cssText = `background:#f8fafc;border-radius:6px;padding:6px 10px;border-left:3px solid #2563eb;`;
-                                        div.innerHTML = `
-                                            <div style="font-size:10px;font-weight:600;color:#2563eb;margin-bottom:1px;">${m.sender || 'Unknown'} <span style="color:#94a3b8;font-weight:400;">${m.timestamp || ''}</span></div>
-                                            <div style="font-size:12px;color:#0f172a;line-height:1.4;">${m.translated}</div>
-                                        `;
-                                        container.appendChild(div);
-                                    });
-                                }
-                            }
-                        } catch {}
-                        event = '';
-                    }
-                }
-            }
-
-        } catch (err) {
-            body.innerHTML = `<div style="text-align:center;padding:20px;color:#dc2626;font-size:12px;">${err.message}</div>`;
-            progressWrap.style.display = 'none';
-        } finally {
-            btn.disabled = false;
-        }
-    });
-}
