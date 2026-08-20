@@ -2545,3 +2545,109 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 });
+
+// --- Admin Chat Tools Logic ---
+document.addEventListener('click', (e) => {
+    if (e.target.id === 'admin-chat-tools-btn') {
+        const modal = document.getElementById('admin-tools-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('scale-95');
+                modal.querySelector('div').classList.add('scale-100');
+            });
+        }
+    }
+});
+
+window.closeAdminToolsModal = function() {
+    const modal = document.getElementById('admin-tools-modal');
+    if (!modal) return;
+    modal.classList.add('opacity-0');
+    modal.querySelector('div').classList.remove('scale-100');
+    modal.querySelector('div').classList.add('scale-95');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+};
+
+let adminAnalyzeController = null;
+
+window.runAdminAnalyze = async function(prompt) {
+    if (!prompt) return;
+    const output = document.getElementById('admin-tools-output');
+    const status = document.getElementById('admin-tools-status');
+    
+    // We need the messages currently loaded on screen
+    // We can't access `displayedMessages` directly from outside the closure if it wasn't exported,
+    // so we'll grab it from the DOM directly!
+    const chatContainer = document.getElementById('chat-container');
+    const msgEls = chatContainer.querySelectorAll('.flex.w-full.flex-col');
+    let messages = [];
+    msgEls.forEach(el => {
+        // extract sender and text
+        let sender = el.querySelector('.text-[11px].font-bold')?.innerText || 'Unknown';
+        let text = el.querySelector('.text-[15px]')?.innerText || '';
+        if(text) {
+            messages.push({ sender, text });
+        }
+    });
+
+    if (messages.length === 0) {
+        output.innerHTML = '<span class="text-red-500">No messages found in the current view to analyze.</span>';
+        return;
+    }
+
+    if (adminAnalyzeController) {
+        adminAnalyzeController.abort();
+    }
+    adminAnalyzeController = new AbortController();
+
+    output.innerHTML = '';
+    status.classList.remove('hidden');
+    status.textContent = 'Connecting...';
+
+    try {
+        const res = await fetch('/api/admin/impersonate/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages, prompt }),
+            signal: adminAnalyzeController.signal
+        });
+
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        status.textContent = 'Streaming analysis...';
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const data = JSON.parse(line.slice(6));
+                    if (data.error) throw new Error(data.error);
+                    if (data.chunk) {
+                        output.textContent += data.chunk;
+                        output.scrollTop = output.scrollHeight;
+                    }
+                }
+            }
+        }
+        status.textContent = 'Analysis complete.';
+    } catch (err) {
+        if (err.name === 'AbortError') {
+            status.textContent = 'Analysis cancelled.';
+        } else {
+            console.error(err);
+            output.innerHTML += `\n\n<span class="text-red-500">Error: ${err.message}</span>`;
+            status.textContent = 'Error occurred.';
+        }
+    } finally {
+        adminAnalyzeController = null;
+        setTimeout(() => { if (!adminAnalyzeController) status.classList.add('hidden'); }, 3000);
+    }
+};

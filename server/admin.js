@@ -631,6 +631,37 @@ router.get('/impersonate/stop', (req, res) => {
     res.redirect('/admin.html');
 });
 
+router.post('/impersonate/analyze', express.json({ limit: '10mb' }), async (req, res) => {
+    try {
+        const { messages, prompt } = req.body;
+        if (!messages || !Array.isArray(messages)) return res.status(400).json({ error: 'messages array required' });
+
+        let textBlock = messages.map(m => `${m.sender || 'User'}: ${m.t || m.text || ''}`).join('\n');
+        if (textBlock.length > 80000) textBlock = textBlock.substring(textBlock.length - 80000); // Take last ~20k tokens
+
+        const sysMsg = prompt || 'You are an admin assistant. Summarize or translate the chat.';
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+
+        await callLLM({
+            feature: 'chat',
+            messages: [{ role: 'user', content: `Chat:\n${textBlock}` }],
+            systemPrompt: sysMsg,
+            userId: req.user.id, // The admin's ID
+            onToken: (chunk) => res.write(`data: ${JSON.stringify({ chunk })}\n\n`)
+        });
+        
+        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+        res.end();
+    } catch (err) {
+        console.error('Admin Analyze error:', err);
+        res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+        res.end();
+    }
+});
+
 // ---------- Manage user plan / trial ----------
 router.patch('/users/:id/plan', (req, res) => {
     const userId = Number(req.params.id);
