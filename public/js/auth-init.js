@@ -487,26 +487,65 @@
                 }
 
                 upgradeUsd.addEventListener('click', async () => {
-                    const orig = upgradeUsd.textContent;
-                    upgradeUsd.disabled = true;
-                    upgradeUsd.textContent = 'Redirecting…';
-                    try {
-                        const r = await fetch('/api/polar/create-checkout', {
-                            method: 'POST',
-                            headers: { 'content-type': 'application/json' },
-                            body: JSON.stringify({ plan: 'pro_monthly' }),
-                        });
-                        const d = await r.json();
-                        if (r.ok && d.url) { window.location.href = d.url; return; }
-                        throw new Error(d.error || 'Could not start checkout');
-                    } catch (err) {
-                        console.error('Polar checkout error:', err);
-                        alert(err.message || 'Something went wrong starting checkout. Please try again.');
-                        upgradeUsd.disabled = false;
-                        upgradeUsd.textContent = orig;
-                    }
+                    if (window.openUpgradeModal) window.openUpgradeModal();
                 });
             }
         }
     }
+
+    // Modal Control Logic
+    window.openUpgradeModal = function() {
+        const modal = document.getElementById('upgrade-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            // small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                const card = modal.querySelector('.custom-modal-card');
+                if (card) {
+                    card.classList.remove('scale-95');
+                    card.classList.add('scale-100');
+                }
+            }, 10);
+        }
+    };
+
+    window.closeUpgradeModal = function() {
+        const modal = document.getElementById('upgrade-modal');
+        if (modal) {
+            modal.classList.add('opacity-0');
+            const card = modal.querySelector('.custom-modal-card');
+            if (card) {
+                card.classList.remove('scale-100');
+                card.classList.add('scale-95');
+            }
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+    };
+
+    // Attach click to the actual pay button inside the modal
+    const modalPayBtn = document.getElementById('modal-pay-btn');
+    if (modalPayBtn && !modalPayBtn._polarBound) {
+        modalPayBtn._polarBound = true;
+        modalPayBtn.addEventListener('click', async () => {
+            modalPayBtn.disabled = true;
+            const originalText = modalPayBtn.innerHTML;
+            modalPayBtn.innerHTML = '<span>Redirecting…</span>';
+            try {
+                const r = await fetch('/api/polar/create-checkout', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    body: JSON.stringify({ plan: 'pro_monthly' }),
+                });
+                const d = await r.json();
+                if (r.ok && d.url) { window.location.href = d.url; return; }
+                if (window.kothaToast) window.kothaToast('Error: ' + (d.error || 'Checkout failed'));
+            } catch (err) {
+                if (window.kothaToast) window.kothaToast('Network error');
+            }
+            modalPayBtn.disabled = false;
+            modalPayBtn.innerHTML = originalText;
+        });
+    }
+
 })();

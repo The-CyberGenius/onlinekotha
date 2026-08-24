@@ -1115,5 +1115,45 @@
 
 
 
+    <!-- ── Subscription Paywall / Upgrade Modal ── -->
+    <div id="upgrade-modal" class="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-md flex items-center justify-center hidden opacity-0 transition-all duration-300 px-4">
+        <div class="custom-modal-card w-full max-w-md rounded-3xl p-6 sm:p-7 text-center relative overflow-hidden transform scale-95 transition-transform duration-300">
+            <button onclick="closeUpgradeModal()" class="modal-close absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer" title="Close">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center p-3 shadow-lg shadow-indigo-500/30">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h3 class="text-2xl font-extrabold tracking-tight modal-title mb-2">Upgrade to Pro</h3>
+            <p class="text-sm modal-sub max-w-sm mx-auto leading-relaxed mb-6">
+                You've reached your free limit or are choosing to upgrade. Unlock the full power of Kotha!
+            </p>
+            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 mb-6 border border-gray-100 dark:border-gray-700 text-left">
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-2.5">
+                        <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Unlimited AI Chats</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Save Unlimited Chats permanently</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Advanced deep analytics</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Priority Support</span>
+                    </li>
+                </ul>
+            </div>
+            <button id="modal-pay-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2">
+                <span>Proceed to Payment ($5/mo)</span>
+            </button>
+            <p class="text-[10px] text-gray-400 mt-4">Secure international billing provided by Polar.sh.</p>
+        </div>
+    </div>
+
 </body>
 </html>
