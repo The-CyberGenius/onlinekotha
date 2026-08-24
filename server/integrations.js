@@ -11,8 +11,7 @@ const SECRET_KEYS = new Set([
     'integ.stripe.secret_key',
     'integ.stripe.webhook_secret',
     'integ.oauth.google_client_secret',
-    'integ.razorpay.key_secret',
-    'integ.razorpay.webhook_secret',
+
     'integ.polar.access_token',
     'integ.polar.webhook_secret',
 ]);
@@ -31,9 +30,7 @@ const ENV_FALLBACK = {
     'integ.stripe.lifetime_price_id': 'STRIPE_LIFETIME_PRICE_ID',
     'integ.oauth.google_client_id': 'GOOGLE_CLIENT_ID',
     'integ.oauth.google_client_secret': 'GOOGLE_CLIENT_SECRET',
-    'integ.razorpay.key_id':        'RAZORPAY_KEY_ID',
-    'integ.razorpay.key_secret':    'RAZORPAY_KEY_SECRET',
-    'integ.razorpay.webhook_secret':'RAZORPAY_WEBHOOK_SECRET',
+
     'integ.polar.access_token':     'POLAR_ACCESS_TOKEN',
     'integ.polar.webhook_secret':   'POLAR_WEBHOOK_SECRET',
     'integ.polar.product_id':       'POLAR_PRODUCT_ID',
@@ -94,7 +91,7 @@ function isSecret(key) {
 
 // Read all integration config (with secrets masked for display)
 function snapshot() {
-    const out = { email: {}, stripe: {}, oauth: {}, razorpay: {}, polar: {} };
+    const out = { email: {}, stripe: {}, oauth: {}, polar: {} };
     for (const key of Object.keys(ENV_FALLBACK)) {
         const [, section, field] = key.split('.');
         const r = getRaw(key);

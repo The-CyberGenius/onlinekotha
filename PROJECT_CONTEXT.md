@@ -16,7 +16,7 @@
 3. **On This Day & Memory Search**: Quick search through thousands of historical messages and instant memory surface on anniversaries or specific dates.
 4. **Admin Chat Translator (Massive Scale)**: Allows administrators to translate user chats (e.g., Russian, Portuguese, Hindi, Spanish) to **Hinglish** or **English** in real-time using a custom **Delimiter-Batch Google Translate Engine** with zero AI token cost. Now features offset-based pagination to handle **1 Lakh+ message chats** smoothly.
 5. **Real-time Community & Direct Messaging**: Public Global Chat room and private 1-on-1 Direct Messaging (DM) powered by `Socket.IO`, complete with typing indicators, presence, and unread receipts.
-6. **Guest & Subscription Modes**: Free instant guest preview mode, user accounts, and Razorpay billing integration for Pro plans.
+6. **Guest & Subscription Modes**: Free instant guest preview mode, user accounts, and Polar.sh billing integration for Pro plans.
 7. **SEO & Performance Optimized**: Achieving near-perfect Lighthouse scores (Performance: 100/90+, Accessibility: 100, SEO: 100). Fully dynamic meta tags, automated sitemaps, JSON-LD schema, and heavily compressed assets.
 
 ---
@@ -39,8 +39,7 @@
 * **File Uploads & Archives**: `multer`, `unzipper`, `archiver` for handling multi-MB ZIP archives containing thousands of chat text logs & media files.
 * **Geo Location**: `geoip-lite` for IP-to-country resolution on registration/login.
 * **Payments (dual provider)**:
-  * **Razorpay** (`razorpay` v2.9) — INR subscriptions for India (UPI/cards), Standard Checkout modal (`server/billing.js`).
-  * **Polar.sh** — international/USD billing as a **Merchant of Record** (Polar handles global card processing + sales tax/VAT). Zero-dependency integration using the REST API + native `crypto` for Standard Webhooks signature verification (`server/polar.js`). Runs **alongside** Razorpay, distinguished by the `payments.provider` column.
+  * **Polar.sh** — international/USD billing as a **Merchant of Record** (Polar handles global card processing + sales tax/VAT). Zero-dependency integration using the REST API + native `crypto` for Standard Webhooks signature verification (`server/polar.js`).
 
 ### Frontend Architecture
 * **Core Technology**: Vanilla JavaScript (Modular ES6+ architecture), HTML5 Semantic markup.
@@ -170,15 +169,14 @@ erDiagram
 
 ### 4.5. Billing & Payments (Dual Provider)
 
-Kotha Pro (`users.plan = 'paid'`) can be purchased through **two independent gateways** that run side by side. The `payments` table records every transaction with a `provider` column (`'razorpay'` | `'polar'`) and a `UNIQUE(order_id)` constraint that makes all webhook handlers idempotent against duplicate deliveries.
+Kotha Pro (`users.plan = 'paid'`) can be purchased through **Polar.sh**. The `payments` table records every transaction with a `provider` column (`'polar'`) and a `UNIQUE(order_id)` constraint that makes all webhook handlers idempotent against duplicate deliveries.
 
-| | **Razorpay** (`server/billing.js`) | **Polar.sh** (`server/polar.js`) |
-|---|---|---|
-| **Audience** | India | International |
-| **Currency** | INR (₹99/mo) | USD (Merchant of Record — Polar remits sales tax/VAT) |
-| **Flow** | In-page Standard Checkout modal | Redirect to Polar-hosted checkout |
-| **Verify** | HMAC-SHA256 (`x-razorpay-signature`) | Standard Webhooks (`webhook-signature`, native `crypto`) |
-| **SDK** | `razorpay` npm pkg | **none** — REST via native `fetch` |
+| **Polar.sh** (`server/polar.js`) |
+|---|
+| **Mode** | Redirect Checkout |
+| **MoR** | **Yes** (handles global tax) |
+| **Verify** | Standard Webhooks (`webhook-signature`, native `crypto`) |
+| **SDK** | **none** — REST via native `fetch` |
 
 **Polar endpoints** (mounted at `/api/polar`):
 * `GET  /api/polar/plans` — public; returns `{ available, currency, server, plans[] }` (frontend reveals the "Card" button only when configured).
@@ -203,7 +201,7 @@ Kotha Pro (`users.plan = 'paid'`) can be purchased through **two independent gat
 │   ├── admin.js            # Admin endpoints, user management, streaming SSE translation (Offset paginated)
 │   ├── ai.js               # AI chat personality cloning logic & prompt generation
 │   ├── auth.js             # User authentication, registration, session management
-│   ├── billing.js          # Razorpay subscription & payment webhooks (INR / India)
+
 │   ├── polar.js            # Polar.sh checkout + Standard Webhooks (international / USD, Merchant of Record)
 │   ├── cache.js            # In-memory caching layer for large chat JSONs
 │   ├── context.js          # Chat context retrieval & vector/token window slicing
@@ -265,7 +263,7 @@ git add -A && git commit -m "update" && git push origin main && ssh -o StrictHos
 
 ### v0.2 — Polar.sh International Billing (August 25, 2026)
 
-Added **Polar.sh** as a second payment provider **alongside** Razorpay, giving international customers a USD checkout where Polar acts as Merchant of Record (handling global card processing and sales tax/VAT).
+Added **Polar.sh** as the primary payment provider, giving international customers a USD checkout where Polar acts as Merchant of Record (handling global card processing and sales tax/VAT).
 
 #### ✨ What was added
 | Area | Change |
@@ -276,7 +274,7 @@ Added **Polar.sh** as a second payment provider **alongside** Razorpay, giving i
 | **`server/db.js`** | `safeAddColumn` migrations: `users.polar_customer_id`, `users.polar_subscription_id`. (`payments.provider` already supported multiple gateways.) |
 | **Admin panel** (`server/admin.js`, `public/js/admin.js`) | New **"Polar (international billing)"** integrations card to store token / product ID / webhook secret / environment. |
 | **Frontend** (`public/app.html`, `public/js/auth-init.js`) | Secondary **"Card"** upgrade button (shown only when Polar is configured) → redirect checkout; post-redirect handler polls `/api/auth/me` and flips the plan badge to Pro. |
-| **`.env.example`** | Documented `POLAR_*` (and previously-undocumented `RAZORPAY_*`) variables. |
+| **`.env.example`** | Documented `POLAR_*` variables. |
 
 #### 🔒 Security notes
 - Webhook signatures verified per the [Standard Webhooks](https://www.standardwebhooks.com) spec: `whsec_`-prefixed base64 secret → HMAC-SHA256 → base64, matched constant-time against each `v1,<sig>` token, with a ±5-minute replay window. Verified with a sign→verify roundtrip test (valid accepted; tampered/forged/replayed/missing rejected; key rotation supported).

@@ -40,8 +40,7 @@
             background-color: transparent;
         }
     </style>
-    <!-- Razorpay — lazy loaded when payment modal is needed -->
-    <script>window._loadRazorpay = function () { return new Promise(function (r) { if (window.Razorpay) return r(); var s = document.createElement('script'); s.src = 'https://checkout.razorpay.com/v1/checkout.js'; s.onload = r; document.head.appendChild(s) }) }</script>
+
     <script src="/js/auth-init.js?v=2"></script>
     <script>if (localStorage.getItem('kotha_dark') === '1') document.documentElement.classList.add('dark');</script>
     <!-- Google Analytics — async, non-blocking -->
@@ -171,11 +170,8 @@
                 <div id="plan-badge"
                     class="rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2">
                     <span id="plan-text"></span>
-                    <span class="flex items-center gap-1.5 shrink-0">
-                        <button id="upgrade-btn"
-                            class="hidden bg-white/80 text-indigo-700 px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider hover:bg-white transition">Upgrade</button>
                         <button id="upgrade-usd-btn"
-                            class="hidden bg-white/60 text-indigo-700 px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider hover:bg-white transition">Card</button>
+                            class="hidden bg-white/80 text-indigo-700 px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider hover:bg-white transition">Upgrade</button>
                     </span>
                 </div>
             </div>

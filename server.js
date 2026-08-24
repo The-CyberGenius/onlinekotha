@@ -36,7 +36,7 @@ const aiRouter = require('./server/ai');
 const globalChatRouter = require('./server/globalChat');
 const emailModule = require('./server/email');
 const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = emailModule;
-const { router: billingRouter, webhookHandler } = require('./server/billing');
+
 const { router: polarRouter, webhookHandler: polarWebhookHandler } = require('./server/polar');
 const { router: oauthRouter } = require('./server/oauth');
 const bcrypt = require('bcryptjs');
@@ -111,7 +111,7 @@ const contactLimiter = rateLimit({
 });
 
 // Payment webhooks need the raw body for signature verification — must come BEFORE express.json()
-app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
+
 app.post('/api/polar/webhook',   express.raw({ type: 'application/json' }), polarWebhookHandler);
 
 app.use('/api', (req, res, next) => {
@@ -507,7 +507,7 @@ app.put('/api/chats/:name/rename', requireUser, (req, res) => {
 });
 
 app.use('/api/ai', aiRouter);
-app.use('/api/billing', billingRouter);
+
 app.use('/api/polar', polarRouter);
 app.use('/api/global-chat', globalChatRouter);
 

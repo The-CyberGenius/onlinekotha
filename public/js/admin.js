@@ -1000,19 +1000,6 @@ HARD RULES
             extraButtons: `<button data-action="test-email" class="btn-subtle">Send test email</button>`,
         }));
 
-        // Razorpay card
-        root.appendChild(integCard({
-            title: 'Razorpay (billing)',
-            subtitle: 'Indian payment gateway — Standard Checkout',
-            section: 'razorpay',
-            status: data.status.razorpay,
-            data: data.razorpay || {},
-            fields: [
-                { k: 'key_id',        label: 'Key ID (public)',    placeholder: 'rzp_live_xxx',  type: 'text' },
-                { k: 'key_secret',    label: 'Key Secret',         placeholder: 'xxxxxxxx',      type: 'password', secret: true },
-                { k: 'webhook_secret',label: 'Webhook Secret',     placeholder: 'Set in Razorpay Dashboard', type: 'password', secret: true },
-            ],
-        }));
 
         // Polar card — international billing (Merchant of Record, USD)
         root.appendChild(integCard({
