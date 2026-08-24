@@ -507,6 +507,31 @@
                     card.classList.add('scale-100');
                 }
             }, 10);
+
+            // Attach click to the actual pay button inside the modal if not already bound
+            const modalPayBtn = document.getElementById('modal-pay-btn');
+            if (modalPayBtn && !modalPayBtn._polarBound) {
+                modalPayBtn._polarBound = true;
+                modalPayBtn.addEventListener('click', async () => {
+                    modalPayBtn.disabled = true;
+                    const originalText = modalPayBtn.innerHTML;
+                    modalPayBtn.innerHTML = '<span>Redirecting…</span>';
+                    try {
+                        const r = await fetch('/api/polar/create-checkout', {
+                            method: 'POST',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ plan: 'pro_monthly' }),
+                        });
+                        const d = await r.json();
+                        if (r.ok && d.url) { window.location.href = d.url; return; }
+                        if (window.kothaToast) window.kothaToast('Error: ' + (d.error || 'Checkout failed'));
+                    } catch (err) {
+                        if (window.kothaToast) window.kothaToast('Network error');
+                    }
+                    modalPayBtn.disabled = false;
+                    modalPayBtn.innerHTML = originalText;
+                });
+            }
         }
     };
 
@@ -522,30 +547,5 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
     };
-
-    // Attach click to the actual pay button inside the modal
-    const modalPayBtn = document.getElementById('modal-pay-btn');
-    if (modalPayBtn && !modalPayBtn._polarBound) {
-        modalPayBtn._polarBound = true;
-        modalPayBtn.addEventListener('click', async () => {
-            modalPayBtn.disabled = true;
-            const originalText = modalPayBtn.innerHTML;
-            modalPayBtn.innerHTML = '<span>Redirecting…</span>';
-            try {
-                const r = await fetch('/api/polar/create-checkout', {
-                    method: 'POST',
-                    headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ plan: 'pro_monthly' }),
-                });
-                const d = await r.json();
-                if (r.ok && d.url) { window.location.href = d.url; return; }
-                if (window.kothaToast) window.kothaToast('Error: ' + (d.error || 'Checkout failed'));
-            } catch (err) {
-                if (window.kothaToast) window.kothaToast('Network error');
-            }
-            modalPayBtn.disabled = false;
-            modalPayBtn.innerHTML = originalText;
-        });
-    }
 
 })();
