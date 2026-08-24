@@ -459,9 +459,24 @@
 
                 if (!resp.ok) {
                     let errMsg = `Error ${resp.status}`;
-                    try { errMsg = (await resp.json()).error || errMsg; } catch { }
+                    let isLimit = false;
+                    try { 
+                        const data = await resp.json();
+                        errMsg = data.error || errMsg; 
+                        if (resp.status === 429 && errMsg.toLowerCase().includes('limit')) isLimit = true;
+                    } catch { }
                     typingEl.remove();
-                    appendErrorBubble(errMsg);
+                    if (isLimit) {
+                        if (errMsg.toLowerCase().includes('guest') && typeof window.openAuthModal === 'function') {
+                            window.openAuthModal(errMsg);
+                        } else if (typeof window.openUpgradeModal === 'function') {
+                            window.openUpgradeModal();
+                        } else {
+                            appendErrorBubble(errMsg);
+                        }
+                    } else {
+                        appendErrorBubble(errMsg);
+                    }
                     return resolve();
                 }
 
