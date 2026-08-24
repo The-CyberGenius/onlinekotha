@@ -13,6 +13,8 @@ const SECRET_KEYS = new Set([
     'integ.oauth.google_client_secret',
     'integ.razorpay.key_secret',
     'integ.razorpay.webhook_secret',
+    'integ.polar.access_token',
+    'integ.polar.webhook_secret',
 ]);
 
 // Map of integration field → env var fallback
@@ -32,6 +34,10 @@ const ENV_FALLBACK = {
     'integ.razorpay.key_id':        'RAZORPAY_KEY_ID',
     'integ.razorpay.key_secret':    'RAZORPAY_KEY_SECRET',
     'integ.razorpay.webhook_secret':'RAZORPAY_WEBHOOK_SECRET',
+    'integ.polar.access_token':     'POLAR_ACCESS_TOKEN',
+    'integ.polar.webhook_secret':   'POLAR_WEBHOOK_SECRET',
+    'integ.polar.product_id':       'POLAR_PRODUCT_ID',
+    'integ.polar.server':           'POLAR_SERVER',
 };
 
 // In-memory cache invalidated on write
@@ -88,7 +94,7 @@ function isSecret(key) {
 
 // Read all integration config (with secrets masked for display)
 function snapshot() {
-    const out = { email: {}, stripe: {}, oauth: {}, razorpay: {} };
+    const out = { email: {}, stripe: {}, oauth: {}, razorpay: {}, polar: {} };
     for (const key of Object.keys(ENV_FALLBACK)) {
         const [, section, field] = key.split('.');
         const r = getRaw(key);

@@ -394,6 +394,32 @@
 
         renderPlanBadge(me.user);
 
+        // Returning from a Polar checkout? The webhook grants Pro server-side; poll
+        // briefly so the badge flips without a manual refresh, then clean the URL.
+        try {
+            const _params = new URLSearchParams(window.location.search);
+            if (_params.get('upgraded') === 'polar') {
+                if (window.kothaToast) window.kothaToast('🎉 Payment received! Activating Pro…');
+                _params.delete('upgraded'); _params.delete('checkout_id');
+                const _qs = _params.toString();
+                window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
+                let _tries = 0;
+                const _poll = setInterval(async () => {
+                    _tries++;
+                    try {
+                        const fresh = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
+                        if (fresh && fresh.user && fresh.user.effective_plan === 'paid') {
+                            window.__USER__ = fresh.user;
+                            renderPlanBadge(fresh.user);
+                            if (window.kothaToast) window.kothaToast('✓ Pro plan active — unlimited AI unlocked!');
+                            clearInterval(_poll);
+                        }
+                    } catch {}
+                    if (_tries >= 6) clearInterval(_poll);
+                }, 1500);
+            }
+        } catch {}
+
         // Impersonation Banner
         if (me.user.is_impersonating) {
             const banner = document.createElement('div');
@@ -542,6 +568,52 @@
                     upgrade.textContent = 'Upgrade ₹99/mo';
                 }
             });
+        }
+
+        // ── Polar international checkout (redirect-based) ──────────────────
+        const upgradeUsd = document.getElementById('upgrade-usd-btn');
+        if (upgradeUsd) {
+            // Keep visibility in sync on every render (e.g. after an in-session upgrade)
+            if (plan === 'paid') upgradeUsd.classList.add('hidden');
+
+            if (!upgradeUsd._polarBound) {
+                upgradeUsd._polarBound = true;
+
+                // Reveal the "Card" option only for non-paid users when Polar is configured
+                if (plan !== 'paid') {
+                    fetch('/api/polar/plans')
+                        .then(r => r.json())
+                        .then(pd => {
+                            if (pd && pd.available) {
+                                const p = pd.plans && pd.plans[0];
+                                upgradeUsd.textContent = p ? `Card · ${p.display}` : 'Pay with card';
+                                upgradeUsd.classList.remove('hidden');
+                            }
+                        })
+                        .catch(() => {});
+                }
+
+                upgradeUsd.addEventListener('click', async () => {
+                    const orig = upgradeUsd.textContent;
+                    upgradeUsd.disabled = true;
+                    upgradeUsd.textContent = 'Redirecting…';
+                    try {
+                        const r = await fetch('/api/polar/create-checkout', {
+                            method: 'POST',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ plan: 'pro_monthly' }),
+                        });
+                        const d = await r.json();
+                        if (r.ok && d.url) { window.location.href = d.url; return; }
+                        throw new Error(d.error || 'Could not start checkout');
+                    } catch (err) {
+                        console.error('Polar checkout error:', err);
+                        alert(err.message || 'Something went wrong starting checkout. Please try again.');
+                        upgradeUsd.disabled = false;
+                        upgradeUsd.textContent = orig;
+                    }
+                });
+            }
         }
     }
 })();

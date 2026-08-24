@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.onlinekotha.app",
+    "sha256_cert_fingerprints": [
+      "A4:7A:3F:7D:94:B3:5F:A9:53:84:50:AE:E4:32:67:AB:FE:DF:BC:8E:1D:A9:D5:05:59:AF:6A:DF:F1:97:86:D9"
+    ]
+  }
+}]

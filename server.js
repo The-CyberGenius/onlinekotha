@@ -37,6 +37,7 @@ const globalChatRouter = require('./server/globalChat');
 const emailModule = require('./server/email');
 const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = emailModule;
 const { router: billingRouter, webhookHandler } = require('./server/billing');
+const { router: polarRouter, webhookHandler: polarWebhookHandler } = require('./server/polar');
 const { router: oauthRouter } = require('./server/oauth');
 const bcrypt = require('bcryptjs');
 const helmet = require('helmet');
@@ -109,8 +110,9 @@ const contactLimiter = rateLimit({
     validate: false,
 });
 
-// Stripe webhook needs raw body — must come BEFORE express.json()
+// Payment webhooks need the raw body for signature verification — must come BEFORE express.json()
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), webhookHandler);
+app.post('/api/polar/webhook',   express.raw({ type: 'application/json' }), polarWebhookHandler);
 
 app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
@@ -311,9 +313,21 @@ app.get('/share-target', (req, res) => res.redirect('/app'));
 app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 
 // Static frontend (landing /, login, admin, css, js, etc.) with caching
+app.get('/', (req, res, next) => {
+    const ua = req.headers['user-agent'] || '';
+    if (ua.includes('OnlineKothaApp')) {
+        if (req.user) {
+            return res.redirect('/app');
+        }
+        return res.redirect('/login');
+    }
+    next();
+});
+
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '365d',
     etag: true,
+    dotfiles: 'allow',
     setHeaders: (res, filePath) => {
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, must-revalidate');
@@ -494,6 +508,7 @@ app.put('/api/chats/:name/rename', requireUser, (req, res) => {
 
 app.use('/api/ai', aiRouter);
 app.use('/api/billing', billingRouter);
+app.use('/api/polar', polarRouter);
 app.use('/api/global-chat', globalChatRouter);
 
 // ── Demo chat (landing page — no auth, IP-limited) ──

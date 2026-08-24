@@ -1014,6 +1014,21 @@ HARD RULES
             ],
         }));
 
+        // Polar card — international billing (Merchant of Record, USD)
+        root.appendChild(integCard({
+            title: 'Polar (international billing)',
+            subtitle: 'Merchant of Record — global cards, USD, tax handled automatically',
+            section: 'polar',
+            status: data.status.polar,
+            data: data.polar || {},
+            fields: [
+                { k: 'access_token',  label: 'Access Token',   placeholder: 'polar_oat_xxx', type: 'password', secret: true },
+                { k: 'product_id',    label: 'Product ID',     placeholder: 'Product UUID (Polar → Products)', type: 'text' },
+                { k: 'webhook_secret',label: 'Webhook Secret', placeholder: 'whsec_xxx (Polar → Webhooks)', type: 'password', secret: true },
+                { k: 'server',        label: 'Environment',    placeholder: 'production (or sandbox)', type: 'text' },
+            ],
+        }));
+
         // Google OAuth card
         root.appendChild(integCard({
             title: 'Google Sign-in',

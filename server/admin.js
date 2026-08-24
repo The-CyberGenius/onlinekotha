@@ -10,6 +10,7 @@ const { getMessages } = require('./cache');
 const integ = require('./integrations');
 const email = require('./email');
 const billing = require('./billing');
+const polar = require('./polar');
 const oauth = require('./oauth');
 const { callLLM } = require('./llm');
 
@@ -845,6 +846,7 @@ router.get('/integrations', (req, res) => {
         status: {
             email:    email.configured(),
             razorpay: billing.configured(),
+            polar:    polar.configured(),
             google:   oauth.configured(),
         },
     });
@@ -855,7 +857,7 @@ router.put('/integrations', (req, res) => {
     const updates = {};
     const nulls = [];
 
-    for (const section of ['email', 'stripe', 'oauth', 'razorpay']) {
+    for (const section of ['email', 'stripe', 'oauth', 'razorpay', 'polar']) {
         if (!body[section]) continue;
         for (const [field, val] of Object.entries(body[section])) {
             const key = `integ.${section}.${field}`;
@@ -868,6 +870,7 @@ router.put('/integrations', (req, res) => {
     // Invalidate caches so next request picks up new config
     email.resetTransporter();
     billing.reset();
+    polar.reset();
     oauth.resetStrategy();
 
     res.json({ ok: true });

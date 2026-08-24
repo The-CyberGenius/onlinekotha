@@ -11,4 +11,12 @@ newReadme.md
 test_*.js
 schema.js
 *.pages
-
+# Android App Development
+android/
+*.apk
+*.aab
+# Claude Code local settings
+.claude/settings.local.json
+25aug.md
+# Gradle large zip files
+*.zip

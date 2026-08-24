@@ -1,6 +1,6 @@
 # 🌐 Kotha (onlinekotha.com) — Project Architecture & Complete Context
 
-> **Last Updated**: August 2026  
+> **Last Updated**: August 2026 (v0.2 — Polar international billing)  
 > **Repository**: [The-CyberGenius/onlinekotha](https://github.com/The-CyberGenius/onlinekotha)  
 > **Production URL**: [https://www.onlinekotha.com](https://www.onlinekotha.com)
 
@@ -38,7 +38,9 @@
   * `compression` middleware (Gzip) reducing JSON payload sizes (e.g., 50MB chat payload compressed to ~7MB). SSE (Server-Sent Events) and binary files are automatically bypassed.
 * **File Uploads & Archives**: `multer`, `unzipper`, `archiver` for handling multi-MB ZIP archives containing thousands of chat text logs & media files.
 * **Geo Location**: `geoip-lite` for IP-to-country resolution on registration/login.
-* **Payments**: Razorpay API (`razorpay` v2.9) for subscription management in INR.
+* **Payments (dual provider)**:
+  * **Razorpay** (`razorpay` v2.9) — INR subscriptions for India (UPI/cards), Standard Checkout modal (`server/billing.js`).
+  * **Polar.sh** — international/USD billing as a **Merchant of Record** (Polar handles global card processing + sales tax/VAT). Zero-dependency integration using the REST API + native `crypto` for Standard Webhooks signature verification (`server/polar.js`). Runs **alongside** Razorpay, distinguished by the `payments.provider` column.
 
 ### Frontend Architecture
 * **Core Technology**: Vanilla JavaScript (Modular ES6+ architecture), HTML5 Semantic markup.
@@ -166,6 +168,28 @@ erDiagram
 * **DM Privacy**: User emails are completely hidden from API responses when searching or initiating DMs. Only `display_name` and `avatar_url` are exposed. Users can also set local nicknames for contacts (`dm_contact_nicknames`).
 * **Global Chat Spam Protection**: 300-word limit per message. Burst protection (Max 10 messages per 30 seconds per IP/User).
 
+### 4.5. Billing & Payments (Dual Provider)
+
+Kotha Pro (`users.plan = 'paid'`) can be purchased through **two independent gateways** that run side by side. The `payments` table records every transaction with a `provider` column (`'razorpay'` | `'polar'`) and a `UNIQUE(order_id)` constraint that makes all webhook handlers idempotent against duplicate deliveries.
+
+| | **Razorpay** (`server/billing.js`) | **Polar.sh** (`server/polar.js`) |
+|---|---|---|
+| **Audience** | India | International |
+| **Currency** | INR (₹99/mo) | USD (Merchant of Record — Polar remits sales tax/VAT) |
+| **Flow** | In-page Standard Checkout modal | Redirect to Polar-hosted checkout |
+| **Verify** | HMAC-SHA256 (`x-razorpay-signature`) | Standard Webhooks (`webhook-signature`, native `crypto`) |
+| **SDK** | `razorpay` npm pkg | **none** — REST via native `fetch` |
+
+**Polar endpoints** (mounted at `/api/polar`):
+* `GET  /api/polar/plans` — public; returns `{ available, currency, server, plans[] }` (frontend reveals the "Card" button only when configured).
+* `POST /api/polar/create-checkout` (auth) — calls `POST {api}/v1/checkouts/` with the configured product ID, `external_customer_id = user.id`, and `metadata.user_id`; returns the hosted `url` to redirect to. **This route never grants Pro** — the webhook is the source of truth.
+* `POST /api/polar/webhook` — raw-body route (mounted before `express.json()` in `server.js`). Verifies the Standard Webhooks signature (whsec-prefixed base64 secret → HMAC-SHA256 → base64, `v1,<sig>` tokens, ±5-min replay window, constant-time compare), then:
+  * `order.paid` / `subscription.active` → record payment + `UPDATE users SET plan='paid'` (stores `polar_subscription_id`, `polar_customer_id`).
+  * `subscription.revoked` / `order.refunded` → downgrade the user out of the paid bucket.
+
+**Configuration** — set from the **Admin → Integrations** panel (encrypted in the `settings` table) *or* via env vars (`POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER`). Secrets are **never** committed — `integrations.js` marks `access_token` and `webhook_secret` as encrypted-at-rest keys. Register the webhook endpoint in Polar as `<PUBLIC_BASE_URL>/api/polar/webhook`.
+
+
 ---
 
 ## 5. Repository File Structure Map
@@ -179,7 +203,8 @@ erDiagram
 │   ├── admin.js            # Admin endpoints, user management, streaming SSE translation (Offset paginated)
 │   ├── ai.js               # AI chat personality cloning logic & prompt generation
 │   ├── auth.js             # User authentication, registration, session management
-│   ├── billing.js          # Razorpay subscription & payment webhooks
+│   ├── billing.js          # Razorpay subscription & payment webhooks (INR / India)
+│   ├── polar.js            # Polar.sh checkout + Standard Webhooks (international / USD, Merchant of Record)
 │   ├── cache.js            # In-memory caching layer for large chat JSONs
 │   ├── context.js          # Chat context retrieval & vector/token window slicing
 │   ├── crypto.js           # Encryption helpers for stored API keys
@@ -237,6 +262,26 @@ git add -A && git commit -m "update" && git push origin main && ssh -o StrictHos
 ---
 
 ## 8. Changelog
+
+### v0.2 — Polar.sh International Billing (August 25, 2026)
+
+Added **Polar.sh** as a second payment provider **alongside** Razorpay, giving international customers a USD checkout where Polar acts as Merchant of Record (handling global card processing and sales tax/VAT).
+
+#### ✨ What was added
+| Area | Change |
+|------|--------|
+| **`server/polar.js`** (new) | Checkout creation (Polar REST `POST /v1/checkouts/` via native `fetch`) + Standard Webhooks handler with native-`crypto` signature verification. **Zero new npm dependencies.** |
+| **`server.js`** | Mounted raw-body `POST /api/polar/webhook` (before `express.json()`) and `app.use('/api/polar', polarRouter)`. |
+| **`server/integrations.js`** | Added `polar` section — `access_token` & `webhook_secret` encrypted at rest; `product_id` & `server` with env-var fallback. |
+| **`server/db.js`** | `safeAddColumn` migrations: `users.polar_customer_id`, `users.polar_subscription_id`. (`payments.provider` already supported multiple gateways.) |
+| **Admin panel** (`server/admin.js`, `public/js/admin.js`) | New **"Polar (international billing)"** integrations card to store token / product ID / webhook secret / environment. |
+| **Frontend** (`public/app.html`, `public/js/auth-init.js`) | Secondary **"Card"** upgrade button (shown only when Polar is configured) → redirect checkout; post-redirect handler polls `/api/auth/me` and flips the plan badge to Pro. |
+| **`.env.example`** | Documented `POLAR_*` (and previously-undocumented `RAZORPAY_*`) variables. |
+
+#### 🔒 Security notes
+- Webhook signatures verified per the [Standard Webhooks](https://www.standardwebhooks.com) spec: `whsec_`-prefixed base64 secret → HMAC-SHA256 → base64, matched constant-time against each `v1,<sig>` token, with a ±5-minute replay window. Verified with a sign→verify roundtrip test (valid accepted; tampered/forged/replayed/missing rejected; key rotation supported).
+- The checkout route never grants Pro; the signed webhook is the sole source of truth. Idempotent via `payments.order_id UNIQUE`.
+- Access token & webhook secret live only in `.env` or the encrypted `settings` table — never in source or committed docs.
 
 ### v0.1 — Comprehensive UI/UX Audit & Polish (August 14, 2026)
 

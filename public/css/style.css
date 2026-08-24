@@ -23,6 +23,8 @@ body {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
     -webkit-user-select: none;
     user-select: none;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* DM Row Typography & Optimization */

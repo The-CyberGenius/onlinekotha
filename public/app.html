@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Kotha — App</title>
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -171,8 +171,12 @@
                 <div id="plan-badge"
                     class="rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2">
                     <span id="plan-text"></span>
-                    <button id="upgrade-btn"
-                        class="hidden bg-white/80 text-indigo-700 px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider hover:bg-white transition">Upgrade</button>
+                    <span class="flex items-center gap-1.5 shrink-0">
+                        <button id="upgrade-btn"
+                            class="hidden bg-white/80 text-indigo-700 px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider hover:bg-white transition">Upgrade</button>
+                        <button id="upgrade-usd-btn"
+                            class="hidden bg-white/60 text-indigo-700 px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider hover:bg-white transition">Card</button>
+                    </span>
                 </div>
             </div>
 

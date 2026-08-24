@@ -190,6 +190,8 @@ function safeAddColumn(table, column, def) {
 safeAddColumn('users', 'email_verified', 'INTEGER NOT NULL DEFAULT 0');
 safeAddColumn('users', 'stripe_customer_id', 'TEXT');
 safeAddColumn('users', 'stripe_subscription_id', 'TEXT');
+safeAddColumn('users', 'polar_customer_id', 'TEXT');
+safeAddColumn('users', 'polar_subscription_id', 'TEXT');
 safeAddColumn('users', 'plan_renews_at', 'INTEGER');
 safeAddColumn('users', 'google_id', 'TEXT');
 safeAddColumn('chats', 'deleted_by_user', 'INTEGER NOT NULL DEFAULT 0');
