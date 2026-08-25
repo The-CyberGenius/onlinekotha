@@ -93,6 +93,10 @@ app.use(compression({
     }
 }));
 app.use(cookieParser());
+
+// Payment webhooks need the raw body for signature verification — must come BEFORE express.json()
+app.post('/api/polar/webhook', express.raw({ type: 'application/json' }), polarWebhookHandler);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
@@ -110,9 +114,6 @@ const contactLimiter = rateLimit({
     validate: false,
 });
 
-// Payment webhooks need the raw body for signature verification — must come BEFORE express.json()
-
-app.post('/api/polar/webhook',   express.raw({ type: 'application/json' }), polarWebhookHandler);
 
 app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');

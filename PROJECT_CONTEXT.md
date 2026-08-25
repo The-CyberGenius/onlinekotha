@@ -309,3 +309,39 @@ Added **Polar.sh** as the primary payment provider, giving international custome
 - `public/app.html` — Fixed `theme-color` meta, added dark Tailwind classes to logout button
 - `public/js/script.js` — Updated `toggleTheme()` light mode meta-color
 - `PROJECT_CONTEXT.md` — Added this changelog
+
+---
+
+## 9. Business Model & Growth Strategy
+
+**Model:** Freemium with Hard Limits + Affordable Global Pro Subscription.
+- **Guest / Free Tier:** Users get a taste of the platform. They can view chats, use the global room, and get a strict hard limit of 3 AI messages per day (rate limited via HTTP 429).
+- **Pro Tier ($5/month):** Unlimited AI chats, deep memory extraction, saved chats forever, priority support.
+- **Why it works:** The $5 price point is highly affordable for Western and international users (less than a cup of coffee) but generates significant volume when scaled. Polar.sh handles all VAT, Sales Tax, and currency conversions effortlessly.
+
+---
+
+## 10. Environment Variables & Sensitive Secrets
+
+**WARNING: NEVER commit `.env` or this file to GitHub.** (This file is added to `.gitignore`).
+The EC2 server requires the following environment variables to run:
+
+```env
+# SERVER
+PORT=8000
+NODE_ENV=production
+
+# POLAR.SH CONFIG (PAYMENTS)
+POLAR_ACCESS_TOKEN=polar_pat_...
+POLAR_WEBHOOK_SECRET=whsec_...
+POLAR_PRODUCT_ID=c9299c33-...
+POLAR_SERVER=production
+
+# GOOGLE GEMINI (AI CLONING)
+GEMINI_API_KEY=AIza...
+
+# AUTH SECRETS
+SESSION_SECRET=super_secret_cookie_string
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+```
