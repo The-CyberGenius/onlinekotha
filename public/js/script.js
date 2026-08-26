@@ -1193,7 +1193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </svg>
                 </div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Bring your chats to life</h2>
-                <p class="text-[14px] sm:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">Import your chat history to search, analyze, and relive memories with AI.</p>
+                <p class="text-[14px] sm:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">Import your chat history to search, analyze, and relive memories with an AI-generated simulation.</p>
                 
                 <div class="flex items-center justify-center gap-4 sm:gap-6 text-[11px] sm:text-[12px] text-gray-400 dark:text-gray-500 font-medium mb-8 bg-gray-50 dark:bg-gray-800/50 px-4 py-2 rounded-full border border-gray-100 dark:border-gray-800">
                     <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
