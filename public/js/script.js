@@ -1203,12 +1203,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
                 </div>
 
-                <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs sm:max-w-md">
-                    <button id="empty-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[14px] rounded-xl px-6 py-3 transition-all shadow-md flex items-center justify-center gap-2.5">
+                <div class="flex flex-wrap items-center gap-3 w-full max-w-sm mx-auto">
+                    <button id="empty-upload-btn" class="flex-1 min-w-[160px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[14px] rounded-xl px-6 py-3 transition-all shadow-md flex items-center justify-center gap-2.5">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                         Import Chat
                     </button>
-                    <button id="empty-dm-btn" class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[14px] rounded-xl px-6 py-3 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center justify-center gap-2.5 shadow-sm">
+                    <button id="empty-dm-btn" class="flex-1 min-w-[160px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[14px] rounded-xl px-6 py-3 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center justify-center gap-2.5 shadow-sm">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         Message Someone
                     </button>
