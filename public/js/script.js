@@ -1168,9 +1168,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('chat-container');
         if (!container) return;
         container.innerHTML = `
-            <div class="w-full flex flex-col items-center pt-[8vh] pb-32 px-6 text-center" id="empty-state">
-                <div class="empty-state-float mb-6 relative shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-16 h-16 drop-shadow-2xl">
+            <div class="w-full flex flex-col items-center pt-[3vh] min-[800px]:pt-[8vh] pb-8 px-6 text-center" id="empty-state">
+                <div class="empty-state-float mb-3 sm:mb-6 relative shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-2xl">
                       <defs>
                         <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
                           <stop offset="0%" stop-color="#4F46E5"/>
@@ -1192,23 +1192,23 @@ document.addEventListener('DOMContentLoaded', () => {
                       <circle r="5" filter="url(#orb)"><animate attributeName="fill" values="#ffffff;#ec4899;#8b5cf6;#4f46e5;#ffffff" dur="4s" repeatCount="indefinite"/><animateMotion dur="4s" repeatCount="indefinite" path="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" calcMode="linear"/></circle>
                     </svg>
                 </div>
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Bring your chats to life</h2>
-                <p class="text-[14px] sm:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-6">Import your chat history to search, analyze, and relive memories with an AI-generated simulation.</p>
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Bring your chats to life</h2>
+                <p class="text-[13px] sm:text-[14px] md:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-4 sm:mb-6">Import your chat history to search, analyze, and relive memories with an AI-generated simulation.</p>
                 
-                <div class="flex items-center justify-center gap-4 sm:gap-6 text-[11px] sm:text-[12px] text-gray-400 dark:text-gray-500 font-medium mb-8 bg-gray-50 dark:bg-gray-800/50 px-4 py-2 rounded-full border border-gray-100 dark:border-gray-800">
-                    <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
+                <div class="flex items-center justify-center gap-2 sm:gap-4 md:gap-6 text-[10px] sm:text-[11px] md:text-[12px] text-gray-400 dark:text-gray-500 font-medium mb-5 sm:mb-8 bg-gray-50 dark:bg-gray-800/50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-100 dark:border-gray-800 scale-90 sm:scale-100">
+                    <span class="flex items-center gap-1 sm:gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-[14px] sm:h-[14px]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
+                    <span class="flex items-center gap-1 sm:gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-[14px] sm:h-[14px]"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1.5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
+                    <span class="flex items-center gap-1 sm:gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-[14px] sm:h-[14px]"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3 w-full max-w-sm mx-auto">
-                    <button id="empty-upload-btn" class="flex-1 min-w-[160px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[14px] rounded-xl px-6 py-3 transition-all shadow-md flex items-center justify-center gap-2.5">
+                <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full max-w-sm mx-auto">
+                    <button id="empty-upload-btn" class="flex-1 min-w-[140px] sm:min-w-[160px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[13px] sm:text-[14px] rounded-xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all shadow-md flex items-center justify-center gap-2 sm:gap-2.5">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                         Import Chat
                     </button>
-                    <button id="empty-dm-btn" class="flex-1 min-w-[160px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[14px] rounded-xl px-6 py-3 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center justify-center gap-2.5 shadow-sm">
+                    <button id="empty-dm-btn" class="flex-1 min-w-[140px] sm:min-w-[160px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[13px] sm:text-[14px] rounded-xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center justify-center gap-2 sm:gap-2.5 shadow-sm">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         Message Someone
                     </button>
