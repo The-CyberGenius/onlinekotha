@@ -28,16 +28,16 @@ function getUserInfo(userId) {
 }
 
 router.get('/plans', requireDodoConfig, (req, res) => {
-    // Hardcoded plan logic based on the previous implementation
-    res.json([
-        {
-            id: 'monthly',
-            name: 'Kotha Pro (Monthly)',
-            price: 5,
-            currency: 'USD',
-            interval: 'month'
-        }
-    ]);
+    // Return expected format for the frontend
+    res.json({
+        available: true,
+        plans: [
+            {
+                id: 'pro_monthly',
+                display: '$5/mo'
+            }
+        ]
+    });
 });
 
 router.post('/create-checkout', requireDodoConfig, async (req, res) => {
