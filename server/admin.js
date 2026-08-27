@@ -10,7 +10,6 @@ const { getMessages } = require('./cache');
 const integ = require('./integrations');
 const email = require('./email');
 
-const polar = require('./polar');
 const oauth = require('./oauth');
 const { callLLM } = require('./llm');
 
@@ -846,7 +845,7 @@ router.get('/integrations', (req, res) => {
         status: {
             email:    email.configured(),
 
-            polar:    polar.configured(),
+            dodo:     !!integ.get('integ.dodo.api_key'),
             google:   oauth.configured(),
         },
     });
@@ -857,7 +856,7 @@ router.put('/integrations', (req, res) => {
     const updates = {};
     const nulls = [];
 
-    for (const section of ['email', 'stripe', 'oauth', 'polar']) {
+    for (const section of ['email', 'stripe', 'oauth', 'dodo']) {
         if (!body[section]) continue;
         for (const [field, val] of Object.entries(body[section])) {
             const key = `integ.${section}.${field}`;
@@ -870,7 +869,6 @@ router.put('/integrations', (req, res) => {
     // Invalidate caches so next request picks up new config
     email.resetTransporter();
 
-    polar.reset();
     oauth.resetStrategy();
 
     res.json({ ok: true });

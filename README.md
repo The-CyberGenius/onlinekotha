@@ -29,36 +29,36 @@ ChatImporterApp/
 
 Kotha Pro can be sold through **two independent gateways that run side by side** — the active one is chosen per customer, and every transaction is stored in the `payments` table with a `provider` column.
 
-| | **Polar.sh** |
+| | **Dodo.sh** |
 |---|---|
 | Audience | 🌍 International |
-| Currency | USD (Merchant of Record — Polar handles tax/VAT) |
-| Flow | Redirect to Polar-hosted checkout |
+| Currency | USD (Merchant of Record — Dodo handles tax/VAT) |
+| Flow | Redirect to Dodo-hosted checkout |
 | Verify | Standard Webhooks (`webhook-signature`, native `crypto`) |
-| Module | `server/polar.js` |
+| Module | `server/dodo.js` |
 | Dependencies | none (native `fetch` + `crypto`) |
 
 Both are **optional** — if the keys aren't set, that gateway's upgrade button simply doesn't appear.
 
-### Polar.sh setup (international / USD)
+### Dodo.sh setup (international / USD)
 
-Polar acts as the **Merchant of Record**, so it processes global cards and remits sales tax/VAT for you.
+Dodo acts as the **Merchant of Record**, so it processes global cards and remits sales tax/VAT for you.
 
-1. In the [Polar dashboard](https://polar.sh) create a **Product** for "Kotha Pro" and copy its **Product ID** (a UUID).
+1. In the [Dodo dashboard](https://dodo.sh) create a **Product** for "Kotha Pro" and copy its **Product ID** (a UUID).
 2. Create an **Organization Access Token** (Settings → Developers). Keep it secret.
-3. Add a **Webhook** endpoint pointing at `<PUBLIC_BASE_URL>/api/polar/webhook`, subscribe to `order.paid`, `subscription.active`, `subscription.revoked`, `order.refunded`, and copy the **webhook secret** (`whsec_…`).
-4. Provide the credentials **either** via the in-app **Admin → Integrations → Polar** panel (encrypted at rest) **or** via environment variables:
+3. Add a **Webhook** endpoint pointing at `<PUBLIC_BASE_URL>/api/dodo/webhook`, subscribe to `order.paid`, `subscription.active`, `subscription.revoked`, `order.refunded`, and copy the **webhook secret** (`whsec_…`).
+4. Provide the credentials **either** via the in-app **Admin → Integrations → Dodo** panel (encrypted at rest) **or** via environment variables:
 
    ```bash
-   POLAR_ACCESS_TOKEN=polar_oat_xxx
+   POLAR_ACCESS_TOKEN=dodo_oat_xxx
    POLAR_PRODUCT_ID=00000000-0000-0000-0000-000000000000
    POLAR_WEBHOOK_SECRET=whsec_xxx
    POLAR_SERVER=production        # or "sandbox" while testing
    ```
 
-> **Security:** access tokens and webhook secrets live **only** in `.env` (gitignored) or the encrypted `settings` table — never commit them. The public repo must never contain a real token. If a token is ever exposed, **revoke it in Polar immediately** and issue a new one.
+> **Security:** access tokens and webhook secrets live **only** in `.env` (gitignored) or the encrypted `settings` table — never commit them. The public repo must never contain a real token. If a token is ever exposed, **revoke it in Dodo immediately** and issue a new one.
 
-**How the flow works:** `POST /api/polar/create-checkout` (auth) creates a hosted checkout and returns its `url`; the browser redirects there. After payment, Polar calls the signed webhook, which is the **sole source of truth** for granting Pro — the signature is verified against the [Standard Webhooks](https://www.standardwebhooks.com) spec and the upgrade is idempotent, so duplicate deliveries are safe.
+**How the flow works:** `POST /api/dodo/create-checkout` (auth) creates a hosted checkout and returns its `url`; the browser redirects there. After payment, Dodo calls the signed webhook, which is the **sole source of truth** for granting Pro — the signature is verified against the [Standard Webhooks](https://www.standardwebhooks.com) spec and the upgrade is idempotent, so duplicate deliveries are safe.
 
 > The full architecture, database schema, and subsystem details live in [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md).
 

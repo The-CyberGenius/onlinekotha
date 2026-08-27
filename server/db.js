@@ -149,7 +149,7 @@ CREATE INDEX IF NOT EXISTS idx_convmsg_conv ON conv_messages(conversation_id);
 CREATE TABLE IF NOT EXISTS payments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
-  provider TEXT NOT NULL DEFAULT 'razorpay',
+  provider TEXT NOT NULL DEFAULT 'dodo',
   order_id TEXT UNIQUE NOT NULL,
   payment_id TEXT,
   amount INTEGER NOT NULL,

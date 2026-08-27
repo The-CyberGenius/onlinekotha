@@ -37,7 +37,7 @@ const globalChatRouter = require('./server/globalChat');
 const emailModule = require('./server/email');
 const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = emailModule;
 
-const { router: polarRouter, webhookHandler: polarWebhookHandler } = require('./server/polar');
+const { router: dodoRouter, webhookHandler: dodoWebhookHandler } = require('./server/dodo');
 const { router: oauthRouter } = require('./server/oauth');
 const bcrypt = require('bcryptjs');
 const helmet = require('helmet');
@@ -95,7 +95,7 @@ app.use(compression({
 app.use(cookieParser());
 
 // Payment webhooks need the raw body for signature verification — must come BEFORE express.json()
-app.post('/api/polar/webhook', express.raw({ type: 'application/json' }), polarWebhookHandler);
+app.post('/api/webhooks/dodo', express.raw({ type: 'application/json' }), dodoWebhookHandler);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -509,7 +509,7 @@ app.put('/api/chats/:name/rename', requireUser, (req, res) => {
 
 app.use('/api/ai', aiRouter);
 
-app.use('/api/polar', polarRouter);
+app.use('/api/dodo', dodoRouter);
 app.use('/api/global-chat', globalChatRouter);
 
 // ── Demo chat (landing page — no auth, IP-limited) ──

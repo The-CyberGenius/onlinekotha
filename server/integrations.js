@@ -12,8 +12,8 @@ const SECRET_KEYS = new Set([
     'integ.stripe.webhook_secret',
     'integ.oauth.google_client_secret',
 
-    'integ.polar.access_token',
-    'integ.polar.webhook_secret',
+    'integ.dodo.api_key',
+    'integ.dodo.webhook_secret',
 ]);
 
 // Map of integration field → env var fallback
@@ -31,10 +31,9 @@ const ENV_FALLBACK = {
     'integ.oauth.google_client_id': 'GOOGLE_CLIENT_ID',
     'integ.oauth.google_client_secret': 'GOOGLE_CLIENT_SECRET',
 
-    'integ.polar.access_token':     'POLAR_ACCESS_TOKEN',
-    'integ.polar.webhook_secret':   'POLAR_WEBHOOK_SECRET',
-    'integ.polar.product_id':       'POLAR_PRODUCT_ID',
-    'integ.polar.server':           'POLAR_SERVER',
+    'integ.dodo.api_key':           'DODO_API_KEY',
+    'integ.dodo.webhook_secret':    'DODO_WEBHOOK_SECRET',
+    'integ.dodo.product_id':        'DODO_PRODUCT_ID',
 };
 
 // In-memory cache invalidated on write
@@ -91,7 +90,7 @@ function isSecret(key) {
 
 // Read all integration config (with secrets masked for display)
 function snapshot() {
-    const out = { email: {}, stripe: {}, oauth: {}, polar: {} };
+    const out = { email: {}, stripe: {}, oauth: {}, dodo: {} };
     for (const key of Object.keys(ENV_FALLBACK)) {
         const [, section, field] = key.split('.');
         const r = getRaw(key);

@@ -394,11 +394,11 @@
 
         renderPlanBadge(me.user);
 
-        // Returning from a Polar checkout? The webhook grants Pro server-side; poll
+        // Returning from a Dodo checkout? The webhook grants Pro server-side; poll
         // briefly so the badge flips without a manual refresh, then clean the URL.
         try {
             const _params = new URLSearchParams(window.location.search);
-            if (_params.get('upgraded') === 'polar') {
+            if (_params.get('upgraded') === 'dodo') {
                 if (window.kothaToast) window.kothaToast('🎉 Payment received! Activating Pro…');
                 _params.delete('upgraded'); _params.delete('checkout_id');
                 const _qs = _params.toString();
@@ -464,17 +464,17 @@
             text.innerHTML  = `Free tier · 3 AI chats/day`;
         }
 
-        // ── Polar international checkout (redirect-based) ──────────────────
+        // ── Dodo global checkout (redirect-based) ──────────────────
         if (upgradeUsd) {
             // Keep visibility in sync on every render (e.g. after an in-session upgrade)
             if (plan === 'paid') upgradeUsd.classList.add('hidden');
 
-            if (!upgradeUsd._polarBound) {
-                upgradeUsd._polarBound = true;
+            if (!upgradeUsd._dodoBound) {
+                upgradeUsd._dodoBound = true;
 
-                // Reveal the "Upgrade" option only for non-paid users when Polar is configured
+                // Reveal the "Upgrade" option only for non-paid users when Dodo is configured
                 if (plan !== 'paid') {
-                    fetch('/api/polar/plans')
+                    fetch('/api/dodo/plans')
                         .then(r => r.json())
                         .then(pd => {
                             if (pd && pd.available) {
@@ -510,14 +510,14 @@
 
             // Attach click to the actual pay button inside the modal if not already bound
             const modalPayBtn = document.getElementById('modal-pay-btn');
-            if (modalPayBtn && !modalPayBtn._polarBound) {
-                modalPayBtn._polarBound = true;
+            if (modalPayBtn && !modalPayBtn._dodoBound) {
+                modalPayBtn._dodoBound = true;
                 modalPayBtn.addEventListener('click', async () => {
                     modalPayBtn.disabled = true;
                     const originalText = modalPayBtn.innerHTML;
                     modalPayBtn.innerHTML = '<span>Redirecting…</span>';
                     try {
-                        const r = await fetch('/api/polar/create-checkout', {
+                        const r = await fetch('/api/dodo/create-checkout', {
                             method: 'POST',
                             headers: { 'content-type': 'application/json' },
                             body: JSON.stringify({ plan: 'pro_monthly' }),

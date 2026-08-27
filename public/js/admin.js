@@ -1000,19 +1000,17 @@ HARD RULES
             extraButtons: `<button data-action="test-email" class="btn-subtle">Send test email</button>`,
         }));
 
-
-        // Polar card — international billing (Merchant of Record, USD)
+        // Dodo card — global payments
         root.appendChild(integCard({
-            title: 'Polar (international billing)',
+            title: 'Dodo Payments',
             subtitle: 'Merchant of Record — global cards, USD, tax handled automatically',
-            section: 'polar',
-            status: data.status.polar,
-            data: data.polar || {},
+            section: 'dodo',
+            status: data.status.dodo,
+            data: data.dodo || {},
             fields: [
-                { k: 'access_token',  label: 'Access Token',   placeholder: 'polar_oat_xxx', type: 'password', secret: true },
-                { k: 'product_id',    label: 'Product ID',     placeholder: 'Product UUID (Polar → Products)', type: 'text' },
-                { k: 'webhook_secret',label: 'Webhook Secret', placeholder: 'whsec_xxx (Polar → Webhooks)', type: 'password', secret: true },
-                { k: 'server',        label: 'Environment',    placeholder: 'production (or sandbox)', type: 'text' },
+                { k: 'api_key',       label: 'API Key',       placeholder: 'test_...', type: 'password', secret: true },
+                { k: 'product_id',    label: 'Product ID',    placeholder: 'pdt_...', type: 'text' },
+                { k: 'webhook_secret',label: 'Webhook Secret',placeholder: 'whsec_...', type: 'password', secret: true },
             ],
         }));
 
