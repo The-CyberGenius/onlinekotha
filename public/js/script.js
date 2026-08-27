@@ -1168,7 +1168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('chat-container');
         if (!container) return;
         container.innerHTML = `
-            <div class="w-full flex flex-col items-center pt-[8vh] pb-12 px-6 text-center" id="empty-state">
+            <div class="w-full flex flex-col items-center pt-[8vh] pb-32 px-6 text-center" id="empty-state">
                 <div class="empty-state-float mb-6 relative shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-16 h-16 drop-shadow-2xl">
                       <defs>
