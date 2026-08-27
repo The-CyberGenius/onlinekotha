@@ -1,6 +1,6 @@
 # 🌐 Kotha (onlinekotha.com) — Project Architecture & Complete Context
 
-> **Last Updated**: August 2026 (v0.2 — Polar international billing)  
+> **Last Updated**: August 2026 (v0.2 — Dodo international billing)  
 > **Repository**: [The-CyberGenius/onlinekotha](https://github.com/The-CyberGenius/onlinekotha)  
 > **Production URL**: [https://www.onlinekotha.com](https://www.onlinekotha.com)
 
@@ -16,7 +16,7 @@
 3. **On This Day & Memory Search**: Quick search through thousands of historical messages and instant memory surface on anniversaries or specific dates.
 4. **Admin Chat Translator (Massive Scale)**: Allows administrators to translate user chats (e.g., Russian, Portuguese, Hindi, Spanish) to **Hinglish** or **English** in real-time using a custom **Delimiter-Batch Google Translate Engine** with zero AI token cost. Now features offset-based pagination to handle **1 Lakh+ message chats** smoothly.
 5. **Real-time Community & Direct Messaging**: Public Global Chat room and private 1-on-1 Direct Messaging (DM) powered by `Socket.IO`, complete with typing indicators, presence, and unread receipts.
-6. **Guest & Subscription Modes**: Free instant guest preview mode, user accounts, and Polar.sh billing integration for Pro plans.
+6. **Guest & Subscription Modes**: Free instant guest preview mode, user accounts, and Dodo.sh billing integration for Pro plans.
 7. **SEO & Performance Optimized**: Achieving near-perfect Lighthouse scores (Performance: 100/90+, Accessibility: 100, SEO: 100). Fully dynamic meta tags, automated sitemaps, JSON-LD schema, and heavily compressed assets.
 
 ---
@@ -39,7 +39,7 @@
 * **File Uploads & Archives**: `multer`, `unzipper`, `archiver` for handling multi-MB ZIP archives containing thousands of chat text logs & media files.
 * **Geo Location**: `geoip-lite` for IP-to-country resolution on registration/login.
 * **Payments (dual provider)**:
-  * **Polar.sh** — international/USD billing as a **Merchant of Record** (Polar handles global card processing + sales tax/VAT). Zero-dependency integration using the REST API + native `crypto` for Standard Webhooks signature verification (`server/polar.js`).
+  * **Dodo.sh** — international/USD billing as a **Merchant of Record** (Dodo handles global card processing + sales tax/VAT). Zero-dependency integration using the REST API + native `crypto` for Standard Webhooks signature verification (`server/dodo.js`).
 
 ### Frontend Architecture
 * **Core Technology**: Vanilla JavaScript (Modular ES6+ architecture), HTML5 Semantic markup.
@@ -169,23 +169,23 @@ erDiagram
 
 ### 4.5. Billing & Payments (Dual Provider)
 
-Kotha Pro (`users.plan = 'paid'`) can be purchased through **Polar.sh**. The `payments` table records every transaction with a `provider` column (`'polar'`) and a `UNIQUE(order_id)` constraint that makes all webhook handlers idempotent against duplicate deliveries.
+Kotha Pro (`users.plan = 'paid'`) can be purchased through **Dodo.sh**. The `payments` table records every transaction with a `provider` column (`'dodo'`) and a `UNIQUE(order_id)` constraint that makes all webhook handlers idempotent against duplicate deliveries.
 
-| **Polar.sh** (`server/polar.js`) |
+| **Dodo.sh** (`server/dodo.js`) |
 |---|
 | **Mode** | Redirect Checkout |
 | **MoR** | **Yes** (handles global tax) |
 | **Verify** | Standard Webhooks (`webhook-signature`, native `crypto`) |
 | **SDK** | **none** — REST via native `fetch` |
 
-**Polar endpoints** (mounted at `/api/polar`):
-* `GET  /api/polar/plans` — public; returns `{ available, currency, server, plans[] }` (frontend reveals the "Card" button only when configured).
-* `POST /api/polar/create-checkout` (auth) — calls `POST {api}/v1/checkouts/` with the configured product ID, `external_customer_id = user.id`, and `metadata.user_id`; returns the hosted `url` to redirect to. **This route never grants Pro** — the webhook is the source of truth.
-* `POST /api/polar/webhook` — raw-body route (mounted before `express.json()` in `server.js`). Verifies the Standard Webhooks signature (whsec-prefixed base64 secret → HMAC-SHA256 → base64, `v1,<sig>` tokens, ±5-min replay window, constant-time compare), then:
-  * `order.paid` / `subscription.active` → record payment + `UPDATE users SET plan='paid'` (stores `polar_subscription_id`, `polar_customer_id`).
+**Dodo endpoints** (mounted at `/api/dodo`):
+* `GET  /api/dodo/plans` — public; returns `{ available, currency, server, plans[] }` (frontend reveals the "Card" button only when configured).
+* `POST /api/dodo/create-checkout` (auth) — calls `POST {api}/v1/checkouts/` with the configured product ID, `external_customer_id = user.id`, and `metadata.user_id`; returns the hosted `url` to redirect to. **This route never grants Pro** — the webhook is the source of truth.
+* `POST /api/dodo/webhook` — raw-body route (mounted before `express.json()` in `server.js`). Verifies the Standard Webhooks signature (whsec-prefixed base64 secret → HMAC-SHA256 → base64, `v1,<sig>` tokens, ±5-min replay window, constant-time compare), then:
+  * `order.paid` / `subscription.active` → record payment + `UPDATE users SET plan='paid'` (stores `dodo_subscription_id`, `dodo_customer_id`).
   * `subscription.revoked` / `order.refunded` → downgrade the user out of the paid bucket.
 
-**Configuration** — set from the **Admin → Integrations** panel (encrypted in the `settings` table) *or* via env vars (`POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER`). Secrets are **never** committed — `integrations.js` marks `access_token` and `webhook_secret` as encrypted-at-rest keys. Register the webhook endpoint in Polar as `<PUBLIC_BASE_URL>/api/polar/webhook`.
+**Configuration** — set from the **Admin → Integrations** panel (encrypted in the `settings` table) *or* via env vars (`POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER`). Secrets are **never** committed — `integrations.js` marks `access_token` and `webhook_secret` as encrypted-at-rest keys. Register the webhook endpoint in Dodo as `<PUBLIC_BASE_URL>/api/dodo/webhook`.
 
 
 ---
@@ -202,7 +202,7 @@ Kotha Pro (`users.plan = 'paid'`) can be purchased through **Polar.sh**. The `pa
 │   ├── ai.js               # AI chat personality cloning logic & prompt generation
 │   ├── auth.js             # User authentication, registration, session management
 
-│   ├── polar.js            # Polar.sh checkout + Standard Webhooks (international / USD, Merchant of Record)
+│   ├── dodo.js            # Dodo.sh checkout + Standard Webhooks (international / USD, Merchant of Record)
 │   ├── cache.js            # In-memory caching layer for large chat JSONs
 │   ├── context.js          # Chat context retrieval & vector/token window slicing
 │   ├── crypto.js           # Encryption helpers for stored API keys
@@ -261,19 +261,19 @@ git add -A && git commit -m "update" && git push origin main && ssh -o StrictHos
 
 ## 8. Changelog
 
-### v0.2 — Polar.sh International Billing (August 25, 2026)
+### v0.2 — Dodo.sh International Billing (August 25, 2026)
 
-Added **Polar.sh** as the primary payment provider, giving international customers a USD checkout where Polar acts as Merchant of Record (handling global card processing and sales tax/VAT).
+Added **Dodo.sh** as the primary payment provider, giving international customers a USD checkout where Dodo acts as Merchant of Record (handling global card processing and sales tax/VAT).
 
 #### ✨ What was added
 | Area | Change |
 |------|--------|
-| **`server/polar.js`** (new) | Checkout creation (Polar REST `POST /v1/checkouts/` via native `fetch`) + Standard Webhooks handler with native-`crypto` signature verification. **Zero new npm dependencies.** |
-| **`server.js`** | Mounted raw-body `POST /api/polar/webhook` (before `express.json()`) and `app.use('/api/polar', polarRouter)`. |
-| **`server/integrations.js`** | Added `polar` section — `access_token` & `webhook_secret` encrypted at rest; `product_id` & `server` with env-var fallback. |
-| **`server/db.js`** | `safeAddColumn` migrations: `users.polar_customer_id`, `users.polar_subscription_id`. (`payments.provider` already supported multiple gateways.) |
-| **Admin panel** (`server/admin.js`, `public/js/admin.js`) | New **"Polar (international billing)"** integrations card to store token / product ID / webhook secret / environment. |
-| **Frontend** (`public/app.html`, `public/js/auth-init.js`) | Secondary **"Card"** upgrade button (shown only when Polar is configured) → redirect checkout; post-redirect handler polls `/api/auth/me` and flips the plan badge to Pro. |
+| **`server/dodo.js`** (new) | Checkout creation (Dodo REST `POST /v1/checkouts/` via native `fetch`) + Standard Webhooks handler with native-`crypto` signature verification. **Zero new npm dependencies.** |
+| **`server.js`** | Mounted raw-body `POST /api/dodo/webhook` (before `express.json()`) and `app.use('/api/dodo', dodoRouter)`. |
+| **`server/integrations.js`** | Added `dodo` section — `access_token` & `webhook_secret` encrypted at rest; `product_id` & `server` with env-var fallback. |
+| **`server/db.js`** | `safeAddColumn` migrations: `users.dodo_customer_id`, `users.dodo_subscription_id`. (`payments.provider` already supported multiple gateways.) |
+| **Admin panel** (`server/admin.js`, `public/js/admin.js`) | New **"Dodo (international billing)"** integrations card to store token / product ID / webhook secret / environment. |
+| **Frontend** (`public/app.html`, `public/js/auth-init.js`) | Secondary **"Card"** upgrade button (shown only when Dodo is configured) → redirect checkout; post-redirect handler polls `/api/auth/me` and flips the plan badge to Pro. |
 | **`.env.example`** | Documented `POLAR_*` variables. |
 
 #### 🔒 Security notes
@@ -317,7 +317,7 @@ Added **Polar.sh** as the primary payment provider, giving international custome
 **Model:** Freemium with Hard Limits + Affordable Global Pro Subscription.
 - **Guest / Free Tier:** Users get a taste of the platform. They can view chats, use the global room, and get a strict hard limit of 3 AI messages per day (rate limited via HTTP 429).
 - **Pro Tier ($5/month):** Unlimited AI chats, deep memory extraction, saved chats forever, priority support.
-- **Why it works:** The $5 price point is highly affordable for Western and international users (less than a cup of coffee) but generates significant volume when scaled. Polar.sh handles all VAT, Sales Tax, and currency conversions effortlessly.
+- **Why it works:** The $5 price point is highly affordable for Western and international users (less than a cup of coffee) but generates significant volume when scaled. Dodo.sh handles all VAT, Sales Tax, and currency conversions effortlessly.
 
 ---
 
@@ -332,7 +332,7 @@ PORT=8000
 NODE_ENV=production
 
 # POLAR.SH CONFIG (PAYMENTS)
-POLAR_ACCESS_TOKEN=polar_pat_...
+POLAR_ACCESS_TOKEN=dodo_pat_...
 POLAR_WEBHOOK_SECRET=whsec_...
 POLAR_PRODUCT_ID=c9299c33-...
 POLAR_SERVER=production

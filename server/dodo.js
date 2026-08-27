@@ -117,7 +117,9 @@ async function webhookHandler(req, res) {
                 const amount = payload.total_amount || 0;
                 
                 // Grant Pro
-                db.prepare('UPDATE users SET is_pro = 1 WHERE id = ?').run(userId);
+                const customerId = payload.customer_id || null;
+                const subId = payload.subscription_id || null;
+                db.prepare('UPDATE users SET plan = \'paid\', dodo_customer_id = ?, dodo_subscription_id = ? WHERE id = ?').run(customerId, subId, userId);
                 
                 // Record the payment/subscription
                 db.prepare(`
@@ -136,7 +138,7 @@ async function webhookHandler(req, res) {
             
             if (userId) {
                 // Revoke Pro
-                db.prepare('UPDATE users SET is_pro = 0 WHERE id = ?').run(userId);
+                db.prepare('UPDATE users SET plan = \'trial\' WHERE id = ?').run(userId);
             }
         }
 
