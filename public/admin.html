@@ -512,11 +512,36 @@
                 font-size: 18px;
             }
             .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: x mandatory;
+                padding-bottom: 8px; /* Room for scrollbar */
+                margin-left: -12px;
+                margin-right: -12px;
+                padding-left: 12px;
+                padding-right: 12px;
                 gap: 12px;
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none; /* IE/Edge */
+            }
+            .stats-grid::-webkit-scrollbar {
+                display: none; /* Chrome/Safari */
             }
             .stat-card {
+                flex: 0 0 calc(45% - 6px); /* Shows ~2.2 cards so the user knows they can scroll */
+                min-width: 140px;
+                scroll-snap-align: start;
                 padding: 12px;
+            }
+            .stat-label {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+            .stat-sub {
+                font-size: 10px;
+                margin-top: 4px;
             }
             .stat-value {
                 font-size: 20px;
@@ -712,7 +737,7 @@
         </header>
 
         <!-- Stats Grid (5 Metric Cards) -->
-        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-label">Total Revenue</span>
                 <div class="stat-value">$<span id="stat-revenue">0.00</span></div>
