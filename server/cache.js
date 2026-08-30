@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { parseChatFile, findChatFile } = require('./parser');
 
-const CACHE_VERSION = 3;
+const CACHE_VERSION = 4;
 const CACHE_NAME = '_chat.cache.json';
 
 async function getMessages(chatDir) {

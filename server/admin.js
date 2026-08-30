@@ -833,8 +833,12 @@ router.get('/usage/summary', (req, res) => {
     const totalCost = db.prepare('SELECT COALESCE(SUM(cost_usd), 0) AS c FROM usage_log').get().c;
     const totalCalls = db.prepare('SELECT COUNT(*) AS n FROM usage_log').get().n;
     const dailyCap = Number(getSetting('daily_spend_cap_usd', '5'));
+    
+    // Revenue from successful Dodo payments (assuming amount is in cents)
+    const rawRevenue = db.prepare("SELECT COALESCE(SUM(amount), 0) AS r FROM payments WHERE status IN ('success', 'captured', 'succeeded')").get().r;
+    const totalRevenue = rawRevenue / 100;
 
-    res.json({ todayCost, totalCost, totalCalls, dailyCap });
+    res.json({ todayCost, totalCost, totalCalls, dailyCap, totalRevenue });
 });
 
 // ---------- Integrations (email / stripe / oauth) ----------

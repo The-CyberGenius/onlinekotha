@@ -192,6 +192,11 @@ safeAddColumn('users', 'stripe_customer_id', 'TEXT');
 safeAddColumn('users', 'stripe_subscription_id', 'TEXT');
 safeAddColumn('users', 'dodo_customer_id', 'TEXT');
 safeAddColumn('users', 'dodo_subscription_id', 'TEXT');
+safeAddColumn('users', 'dodo_product_id', 'TEXT');
+safeAddColumn('users', 'subscription_status', "TEXT DEFAULT 'none'");
+safeAddColumn('users', 'current_period_start', 'INTEGER');
+safeAddColumn('users', 'current_period_end', 'INTEGER');
+safeAddColumn('users', 'cancel_at_period_end', 'INTEGER DEFAULT 0');
 safeAddColumn('users', 'plan_renews_at', 'INTEGER');
 safeAddColumn('users', 'google_id', 'TEXT');
 safeAddColumn('chats', 'deleted_by_user', 'INTEGER NOT NULL DEFAULT 0');
@@ -206,6 +211,15 @@ safeAddColumn('users', 'phone', 'TEXT');
 safeAddColumn('users', 'phone_country_code', 'TEXT');
 safeAddColumn('users', 'phone_prompted', 'INTEGER DEFAULT 0');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
+
+// ── Webhook idempotency table ──
+db.exec(`
+CREATE TABLE IF NOT EXISTS webhook_events (
+  event_id TEXT PRIMARY KEY,
+  event_type TEXT NOT NULL,
+  processed_at INTEGER NOT NULL
+);
+`);
 
 // ── DM (user-to-user chat) tables ──
 db.exec(`

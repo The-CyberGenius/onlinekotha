@@ -382,54 +382,74 @@
         }
 
         const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', async () => {
-                try {
-                    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
-                } catch {}
-                document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-                window.location.replace('/login.html');
-            });
-        }
+        const logoutBtnMob = document.getElementById('logout-btn-mobile');
+        const doLogout = async () => {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+            } catch {}
+            document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+            window.location.replace('/login.html');
+        };
+        if (logoutBtn) logoutBtn.addEventListener('click', doLogout);
+        if (logoutBtnMob) logoutBtnMob.addEventListener('click', doLogout);
 
         renderPlanBadge(me.user);
 
         // Returning from a Dodo checkout? The webhook grants Pro server-side; poll
-        // briefly so the badge flips without a manual refresh, then clean the URL.
+        // the payment status API so the badge flips without a manual refresh.
         try {
             const _params = new URLSearchParams(window.location.search);
-            if (_params.get('upgraded') === 'dodo') {
-                if (window.kothaToast) window.kothaToast('🎉 Payment received! Activating Pro…');
-                _params.delete('upgraded'); _params.delete('checkout_id');
+            
+            // Check if user clicked Upgrade on the landing page while logged in
+            if (_params.get('checkout') === '1') {
+                _params.delete('checkout');
+                const _qs = _params.toString();
+                window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
+                setTimeout(() => {
+                    if (typeof window.openUpgradeModal === 'function') {
+                        window.openUpgradeModal();
+                    }
+                }, 800); // slight delay to ensure UI is ready
+            }
+            
+            if (_params.get('payment_return') === '1' || _params.get('upgraded') === 'dodo') {
+                if (window.kothaToast) window.kothaToast('🎉 Payment received! Verifying subscription…');
+                _params.delete('payment_return'); _params.delete('upgraded'); _params.delete('checkout_id');
                 const _qs = _params.toString();
                 window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
                 let _tries = 0;
                 const _poll = setInterval(async () => {
                     _tries++;
                     try {
-                        const fresh = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
-                        if (fresh && fresh.user && fresh.user.effective_plan === 'paid') {
-                            window.__USER__ = fresh.user;
-                            renderPlanBadge(fresh.user);
-                            if (window.kothaToast) window.kothaToast('✓ Pro plan active — unlimited AI unlocked!');
+                        const statusRes = await fetch('/api/dodo/status?_t=' + Date.now());
+                        const statusData = await statusRes.json();
+                        if (statusData && (statusData.plan === 'kotha_pro' || statusData.status === 'active')) {
+                            // Verified by server — refresh user state
+                            const fresh = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
+                            if (fresh && fresh.user) {
+                                window.__USER__ = fresh.user;
+                                renderPlanBadge(fresh.user);
+                            }
+                            if (window.kothaToast) window.kothaToast('✓ Kotha Pro active — unlimited AI unlocked!');
                             clearInterval(_poll);
                         }
                     } catch {}
-                    if (_tries >= 6) clearInterval(_poll);
-                }, 1500);
+                    if (_tries >= 10) {
+                        clearInterval(_poll);
+                        if (window.kothaToast) window.kothaToast('Payment is processing. Pro will activate shortly.');
+                    }
+                }, 2000);
             }
         } catch {}
 
-        // Impersonation Banner
+        // Impersonation Indicator
         if (me.user.is_impersonating) {
-            const banner = document.createElement('div');
-            banner.className = 'fixed top-0 left-0 w-full bg-red-600 text-white text-xs font-bold text-center py-1.5 z-[9999] shadow-md flex items-center justify-center gap-4';
-            banner.innerHTML = `
-                <span>⚠️ Admin Impersonation Mode Active. Viewing as ${me.user.email}</span>
-                <a href="/api/admin/impersonate/stop" class="bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded text-white no-underline transition">Exit Mode</a>
-            `;
-            document.body.appendChild(banner);
-            document.body.style.paddingTop = '28px';
+            // Show exit button in header
+            const exitBtn = document.getElementById('exit-impersonation-btn');
+            if (exitBtn) exitBtn.classList.remove('hidden');
+
+            // Add thin red line at the top of the body
+            document.body.classList.add('border-t-4', 'border-red-500');
         }
     };
 

@@ -552,8 +552,133 @@
             .mobile-grid-info {
                 grid-template-columns: 1fr;
             }
+            /* Card-based layout for Users Table on Mobile */
+            .table-responsive {
+                border: none;
+                background: transparent;
+                box-shadow: none;
+                overflow: visible;
+            }
+            .admin-table {
+                min-width: 100%;
+                display: block;
+            }
+            .admin-table thead {
+                display: none;
+            }
+            .admin-table tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .admin-table tbody tr.user-main-row {
+                display: flex;
+                flex-direction: column;
+                background: #ffffff !important;
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+                position: relative;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                margin-bottom: 12px;
+            }
+            .admin-table tbody tr.user-main-row:active {
+                transform: scale(0.98);
+            }
+            /* Hidden rows by default */
+            .admin-table tbody tr.user-main-row td:not(:first-child) {
+                display: none;
+            }
+            /* Expanded state */
+            .admin-table tbody tr.user-main-row.mobile-expanded td:not(:first-child) {
+                display: flex;
+                animation: slideDown 0.2s ease forwards;
+            }
+            @keyframes slideDown {
+                from { opacity: 0; transform: translateY(-5px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .admin-table tbody tr.user-main-row td {
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+                border-bottom: 1px dashed #e2e8f0;
+                position: static !important;
+                white-space: normal;
+                text-align: right;
+                background: transparent !important;
+            }
+            .admin-table tbody tr.user-main-row td:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+                padding-top: 14px;
+                justify-content: flex-end;
+            }
+            .admin-table tbody tr.user-main-row td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--text-muted);
+                font-size: 11px;
+                text-transform: uppercase;
+                margin-right: 16px;
+                text-align: left;
+                flex-shrink: 0;
+            }
+            
+            /* First cell (always visible) */
+            .admin-table tbody tr.user-main-row td:first-child {
+                position: relative !important;
+                justify-content: flex-start;
+                border-bottom: none;
+                padding-top: 0;
+                padding-bottom: 0;
+                margin-bottom: 0;
+                text-align: left;
+                padding-right: 44px; /* Space for chevron */
+            }
+            .admin-table tbody tr.user-main-row.mobile-expanded td:first-child {
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 14px;
+                margin-bottom: 4px;
+            }
+            .admin-table tbody tr.user-main-row td:first-child::before {
+                display: none;
+            }
+
+            /* Real Chevron Button */
+            .mobile-chevron {
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f1f5f9;
+                border-radius: 50%;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
+                cursor: pointer;
+                -webkit-tap-highlight-color: rgba(99, 102, 241, 0.15);
+                touch-action: manipulation;
+                z-index: 2;
+            }
+            .admin-table tbody tr.user-main-row.mobile-expanded .mobile-chevron {
+                transform: translateY(-50%) rotate(180deg);
+                background: #e2e8f0;
+            }
         }
         
+        /* Hide mobile chevron on desktop */
+        @media screen and (min-width: 641px) {
+            .mobile-chevron {
+                display: none !important;
+            }
+        }
+
         .action-cell {
             display: flex;
             align-items: center;
@@ -586,8 +711,13 @@
             </div>
         </header>
 
-        <!-- Stats Grid (4 Metric Cards) -->
-        <div class="stats-grid">
+        <!-- Stats Grid (5 Metric Cards) -->
+        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="stat-card">
+                <span class="stat-label">Total Revenue</span>
+                <div class="stat-value">$<span id="stat-revenue">0.00</span></div>
+                <div class="stat-sub">From subscriptions</div>
+            </div>
             <div class="stat-card">
                 <span class="stat-label">Today's Spend</span>
                 <div class="stat-value">$<span id="stat-today-cost">0.000</span></div>
@@ -817,7 +947,7 @@
         </section>
     </div>
 
-    <script src="/js/admin.js?v=11"></script>
+    <script src="/js/admin.js?v=1780860012"></script>
     <script>
     // ── DM Logs Tab Handler ──────────────────────────────────────────────────
     (function() {

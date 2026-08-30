@@ -15,6 +15,10 @@ const WEB_REGEX = new RegExp(`^\\[(${TIME_PAT})[,\\s]+(${DATE_PAT})\\]\\s*(.*?):
 // Android: 3/22/23, 4:51 PM - Sender Name: Message
 const ANDROID_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})\\s*-\\s*(.*?):\\s*(.*)$`);
 
+// Desktop/Alternative: 2024-08-07 18:59 Sender Name: Message
+// Also supports: 2024-08-07 18:59 - Sender Name: Message
+const DESKTOP_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})[\\s\\-]*([^:]+):\\s*(.*)$`);
+
 // iOS attachment: <attached: filename.ext>
 // Android attachment: filename.ext (file attached)
 const IOS_ATTACH_REGEX = /<attached:\s*(.+?)>/;
@@ -38,6 +42,7 @@ function detectFormat(line) {
     if (IOS_REGEX.test(line)) return 'ios';
     if (ANDROID_REGEX.test(line)) return 'android';
     if (WEB_REGEX.test(line)) return 'web';
+    if (DESKTOP_REGEX.test(line)) return 'desktop';
     return null;
 }
 
@@ -45,6 +50,7 @@ function parseLine(line, format) {
     let regex = IOS_REGEX;
     if (format === 'android') regex = ANDROID_REGEX;
     else if (format === 'web') regex = WEB_REGEX;
+    else if (format === 'desktop') regex = DESKTOP_REGEX;
 
     const match = line.match(regex);
     if (!match) return null;

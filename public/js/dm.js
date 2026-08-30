@@ -571,7 +571,7 @@
 
     // ── Open conversation ─────────────────────────────────────
     async function openConv(convId) {
-        if (Notification.permission === 'default') Notification.requestPermission();
+        if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
         if (window.location.hash !== `#chat-${convId}`) {
             history.pushState(null, '', `#chat-${convId}`);
         }

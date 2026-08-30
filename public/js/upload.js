@@ -156,7 +156,7 @@
         });
     }
 
-    function uploadFiles(files) {
+    async function uploadFiles(files) {
         if (window.__IS_GUEST__) {
             const guestStatus = window.__GUEST_STATUS__ || {};
             if ((guestStatus.chatsRemaining ?? 1) <= 0) {
@@ -168,13 +168,47 @@
             }
         }
 
+        let totalSize = 0;
+        for (const f of files) {
+            totalSize += f.size;
+        }
+        if (totalSize > 650 * 1024 * 1024) {
+            showError("Chat file is too large (over 650MB). Please export your chat 'Without Media' in WhatsApp and try again.");
+            return;
+        }
+
         resetUI();
         progressWrap.classList.remove('hidden');
+        progressStatus.textContent = 'Preparing file...';
 
         const form = new FormData();
         for (const f of files) {
-            const relPath = f.webkitRelativePath || f.name;
-            form.append('files', f, relPath);
+            let relPath = f.webkitRelativePath || f.name;
+            // Fix iOS Safari / Busboy bug: emojis or non-ASCII in filenames can break multipart parsing
+            if (files.length === 1 && f.name.toLowerCase().endsWith('.zip')) {
+                relPath = 'whatsapp_chat.zip';
+            } else {
+                relPath = relPath.replace(/[^\x20-\x7E]/g, ''); // strip non-ASCII
+            }
+            
+            // CRITICAL iOS WebKit FIX: 
+            // - If we use f.slice(), it doesn't strip the corrupted emoji filename metadata in WebKit, causing 400 errors.
+            // - If we use FileReader for a 600MB file, WebKit crashes due to Out of Memory.
+            // SOLUTION: Buffer into memory for normal-sized chats to strip emojis safely, 
+            // but use f.slice() for massive chats (which likely don't have emoji names anyway or user exported with media).
+            let safeBlob;
+            if (f.size <= 100 * 1024 * 1024) {
+                const arrayBuffer = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(f);
+                });
+                safeBlob = new Blob([arrayBuffer], { type: f.type });
+            } else {
+                safeBlob = f.slice(0, f.size, f.type);
+            }
+            form.append('files', safeBlob, relPath);
         }
 
         const xhr = new XMLHttpRequest();
@@ -191,7 +225,7 @@
 
         xhr.onload = () => {
             if (xhr.status === 413) {
-                showError('File too large — max 500 MB');
+                showError('File too large — max 650 MB');
                 return;
             }
             try {

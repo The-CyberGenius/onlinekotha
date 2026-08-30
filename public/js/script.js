@@ -153,7 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cleanedFolder && !isGarbageName(cleanedFolder)) {
                 detectedOtherName = cleanedFolder;
             } else if (senderNames.length > 2) {
-                detectedOtherName = `Group Chat (${senderNames.length} members)`;
+                detectedOtherName = (cleanedFolder && !isGarbageName(cleanedFolder)) 
+                    ? `${cleanedFolder} (Group)` 
+                    : `Group Chat (${senderNames.length} members)`;
             } else {
                 detectedOtherName = senderNames[1] || senderNames[0] || "User";
             }
@@ -228,6 +230,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const deltaX = e.changedTouches[0].clientX - sidebarTouchStartX;
         if (deltaX < -50) { // Swiped left by 50px
             toggleSidebar(false);
+        }
+    });
+
+    // Swipe right from left edge to open sidebar
+    let edgeTouchStartX = 0;
+    let edgeTouchStartY = 0;
+    document.addEventListener('touchstart', e => {
+        if (e.touches.length > 1) return;
+        edgeTouchStartX = e.touches[0].clientX;
+        edgeTouchStartY = e.touches[0].clientY;
+    }, {passive: true});
+    document.addEventListener('touchend', e => {
+        const deltaX = e.changedTouches[0].clientX - edgeTouchStartX;
+        const deltaY = Math.abs(e.changedTouches[0].clientY - edgeTouchStartY);
+        if (edgeTouchStartX < 30 && deltaX > 50 && deltaY < 50) {
+            toggleSidebar(true);
         }
     });
 
@@ -700,11 +718,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 const senders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
+                const senderNames = senders.map(s => s[0]);
                 const chatContactName = chatName.replace('WhatsApp Chat - ', '');
-                // Smart name cleaning — strip WhatsApp junk, underscores, dates
-                const resolved = resolveChatNames(chatContactName, senders);
-                otherPersonName = resolved.otherName;
-                myName = resolved.myName;
+                
+                // Group Roles UI
+                const groupRolesBtn = document.getElementById('group-roles-btn');
+                if (groupRolesBtn) {
+                    if (senderNames.length > 2) {
+                        groupRolesBtn.classList.remove('hidden');
+                        groupRolesBtn.onclick = () => window.openRolesModal(senderNames, chatName);
+                    } else {
+                        groupRolesBtn.classList.add('hidden');
+                    }
+                }
+
+                // Check for user-defined roles for this group chat
+                const customRoles = JSON.parse(localStorage.getItem('roles_' + chatName) || 'null');
+                if (customRoles && customRoles.myName && customRoles.aiName) {
+                    myName = customRoles.myName;
+                    otherPersonName = customRoles.aiName;
+                } else {
+                    const resolved = resolveChatNames(chatContactName, senders);
+                    otherPersonName = resolved.otherName;
+                    myName = resolved.myName;
+                }
 
                 headerName.innerText = otherPersonName;
                 sidebarTitle.innerText = "All Chats";
@@ -973,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         chats.forEach((chat, idx) => {
             const chatMeta = window._chatMetaCache?.[chat];
-            let displayName = chatMeta?.contactName || cleanDisplayName(chat.replace('WhatsApp Chat - ', ''));
+            let displayName = chatMeta?.contactName ? cleanDisplayName(chatMeta.contactName) : cleanDisplayName(chat);
             const initial = displayName.charAt(0).toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
             const isActive = chat === activeChat;
@@ -1059,7 +1096,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Open chat on click
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.chat-del-btn')) return;
-                if (chat === currentChat) return;
+                if (chat === currentChat) {
+                    if (window.innerWidth < 768 || window.kothaCompact) toggleSidebar(false);
+                    return;
+                }
                 if (currentChat === '__global__') {
                     deactivateGlobalUI();
                 }
@@ -1861,7 +1901,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (globalChatItem) {
         globalChatItem.addEventListener('click', () => {
-            if (currentChat === '__global__') return;
+            if (currentChat === '__global__') {
+                if (window.innerWidth < 768 || window.kothaCompact) toggleSidebar(false);
+                return;
+            }
 
             disconnectGlobalChat();
 
@@ -2545,5 +2588,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 
+
+    // --- Group Roles Logic ---
+    window.openRolesModal = (senders, chatName) => {
+        const modal = document.getElementById('group-roles-modal');
+        const mySelect = document.getElementById('roles-my-name');
+        const aiSelect = document.getElementById('roles-ai-name');
+        
+        mySelect.innerHTML = '';
+        aiSelect.innerHTML = '';
+        
+        senders.forEach(sender => {
+            const opt1 = document.createElement('option');
+            opt1.value = sender; opt1.textContent = sender;
+            const opt2 = document.createElement('option');
+            opt2.value = sender; opt2.textContent = sender;
+            mySelect.appendChild(opt1);
+            aiSelect.appendChild(opt2);
+        });
+
+        // Set defaults from current logic
+        mySelect.value = myName;
+        aiSelect.value = otherPersonName;
+
+        modal.classList.remove('hidden');
+        setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+        document.getElementById('close-roles-modal').onclick = () => {
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        document.getElementById('save-roles-btn').onclick = () => {
+            const selectedMyName = mySelect.value;
+            const selectedAiName = aiSelect.value;
+            
+            localStorage.setItem('roles_' + chatName, JSON.stringify({
+                myName: selectedMyName,
+                aiName: selectedAiName
+            }));
+            
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+            
+            // Reload the chat to apply new roles immediately
+            if (typeof window.refreshChats === 'function') {
+                window.refreshChats(chatName);
+            } else {
+                window.location.reload();
+            }
+        };
+    };
 
 });

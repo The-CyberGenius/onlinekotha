@@ -557,112 +557,121 @@ HARD RULES
             list.innerHTML = '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">No users match your query</div>';
             return;
         }
-        
-        let html = `
-            <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:12px;">${rows.length} total users</div>
-            <div class="table-responsive">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Status</th>
-                            <th>Contact / Usage</th>
-                            <th>Spend</th>
-                            <th>Location</th>
-                            <th>Activity</th>
-                            <th style="text-align:right;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-        
-        for (const u of rows) {
-            const planBadge = u.is_admin
-                ? '<span class="badge badge-admin">ADMIN</span>'
-                : u.plan === 'paid'
-                    ? '<span class="badge badge-paid">PAID</span>'
-                : u.plan === 'trial' && u.trial_expires_at > Date.now()
-                    ? '<span class="badge badge-trial">TRIAL</span>'
-                : u.plan === 'trial'
-                    ? '<span class="badge badge-expired">EXPIRED</span>'
-                : '<span class="badge">FREE</span>';
 
-            const loginMethod = u.google_id
-                ? '<span class="meta-text" style="color:#2563eb;">Google Auth</span>'
-                : '<span class="meta-text">Email Auth</span>';
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-            const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
-            const avatarHtml = u.avatar_url
-                ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
-                : `<div class="user-avatar">${initials}</div>`;
-
-            const onlineDot = u.is_online ? `<span class="status-dot" title="Online"></span>` : '';
-
-            const phoneStr = u.phone
-                ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" style="color:#0f172a;text-decoration:none;">${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>`
-                : '<span style="color:#94a3b8;">No phone</span>';
-
-            const ipCountry = u.ip_address
-                ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${u.country || 'Unknown Region'}</span>`
-                : '<span class="sub-text" style="color:#94a3b8;">No IP</span>';
-
-            const lastActive = u.last_active_at
-                ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>`
-                : '<span class="meta-text">No activity</span>';
-
-            html += `
-                <tr class="user-main-row">
-                    <td>
-                        <div class="user-profile-cell">
-                            ${avatarHtml}
-                            <div class="user-profile-text">
-                                <span class="user-name-text">${u.display_name || u.email.split('@')[0]}${onlineDot}</span>
-                                <span class="user-email-text">${u.email}</span>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div style="margin-bottom:4px;">${planBadge}</div>
-                        ${loginMethod}
-                    </td>
-                    <td>
-                        <span class="sub-text">${phoneStr}</span>
-                        <span class="meta-text">${u.chat_count} chat${u.chat_count !== 1 ? 's' : ''}</span>
-                    </td>
-                    <td>
-                        <span class="sub-text font-mono" style="font-weight:700; color:#0f172a;">$${u.total_cost.toFixed(3)}</span>
-                    </td>
-                    <td>
-                        ${ipCountry}
-                    </td>
-                    <td>
-                        <span class="sub-text" style="color:#0f172a; font-weight: 500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>
-                        ${lastActive}
-                    </td>
-                    <td>
-                        <div class="action-cell">
-                            ${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}
-                            <button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button>
-                            <button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>
-                            ${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}
-                        </div>
-                    </td>
-                </tr>
-                <tr id="expand-row-${u.id}" class="hidden">
-                    <td colspan="7" style="padding:0; border:none; background:transparent;">
-                        <div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
-                        <div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px; border-bottom:1px solid #e2e8f0; border-top:1px solid #e2e8f0;"></div>
-                    </td>
-                </tr>
-            `;
+        // Shared badge helper
+        function getBadge(u) {
+            if (u.is_admin) return '<span class="badge badge-admin">ADMIN</span>';
+            if (u.plan === 'paid') return '<span class="badge badge-paid">PAID</span>';
+            if (u.plan === 'trial' && u.trial_expires_at > Date.now()) return '<span class="badge badge-trial">TRIAL</span>';
+            if (u.plan === 'trial') return '<span class="badge badge-expired">EXPIRED</span>';
+            return '<span class="badge">FREE</span>';
         }
-        
-        html += `
-                    </tbody>
-                </table>
-            </div>
-        `;
-        list.innerHTML = html;
+
+        const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+        function getCountryName(code) {
+            if (!code || code.length > 3) return code || 'Unknown Region';
+            try { return regionNames.of(code.toUpperCase()) || code; } catch (e) { return code; }
+        }
+
+        if (isMobile) {
+            // ══════════════════════════════════════════════════════════
+            // MOBILE — pure <div> cards, inline styles, no CSS needed
+            // ══════════════════════════════════════════════════════════
+            let html = '<div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:12px;">' + rows.length + ' total users</div>';
+
+            for (const u of rows) {
+                const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
+                const av = u.avatar_url
+                    ? '<img src="' + u.avatar_url + '" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div style="display:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>'
+                    : '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>';
+                const dot = u.is_online ? '<span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;margin-left:5px;"></span>' : '';
+                const phone = u.phone ? (u.phone_country_code||'') + ' ' + u.phone : 'No phone';
+                const loc = u.ip_address ? u.ip_address + ' · ' + getCountryName(u.country) : 'No IP';
+
+                html += '<div data-uid="' + u.id + '" style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+                // ── Header row (always visible)
+                html += '<div class="mcard-hdr" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;-webkit-tap-highlight-color:rgba(99,102,241,0.12);touch-action:manipulation;user-select:none;">';
+                html += av;
+                html += '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#0f172a;display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">' + (u.display_name || u.email.split('@')[0]) + '</span>' + dot + ' ' + getBadge(u) + '</div>';
+                html += '<div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + u.email + '</div></div>';
+                html += '<div class="mcard-chev" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .25s;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>';
+                html += '</div>';
+
+                // ── Body (hidden by default)
+                html += '<div class="mcard-body" style="display:none;border-top:1px solid #f1f5f9;padding:0 14px 12px;">';
+                html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;">';
+                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Auth</div><div style="font-size:11px;color:' + (u.google_id ? '#2563eb' : '#64748b') + ';">' + (u.google_id ? 'Google' : 'Email') + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:#0f172a;font-family:monospace;">$' + u.total_cost.toFixed(3) + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Phone</div><div style="font-size:12px;color:#475569;">' + phone + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:#0f172a;">' + u.chat_count + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Location</div><div style="font-size:11px;color:#475569;">' + loc + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Joined</div><div style="font-size:11px;color:#475569;">' + formatDateTime(u.created_at).split(',')[0] + '</div></div>';
+                html += '</div>';
+                if (u.last_active_at) html += '<div style="font-size:10px;color:#94a3b8;margin-top:6px;">Active: ' + formatDateTime(u.last_active_at) + '</div>';
+                // Action buttons
+                html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">';
+                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">Plan</button>';
+                html += '<button data-uid="' + u.id + '" class="user-chats-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">Chats</button>';
+                html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">Logs</button>';
+                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Del</button>';
+                html += '</div>';
+                // Expand areas
+                html += '<div data-chats-for="' + u.id + '" class="hidden" style="margin-top:8px;"></div>';
+                html += '<div data-ai-logs-for="' + u.id + '" class="hidden" style="margin-top:8px;"></div>';
+                html += '</div>'; // end body
+                html += '</div>'; // end card
+            }
+            list.innerHTML = html;
+
+            // Attach toggle listeners (pure JS — no CSS dependency)
+            list.querySelectorAll('.mcard-hdr').forEach(function(hdr) {
+                hdr.addEventListener('click', function(e) {
+                    if (e.target.closest('button') || e.target.closest('a')) return;
+                    var card = hdr.parentElement;
+                    var body = card.querySelector('.mcard-body');
+                    var chev = card.querySelector('.mcard-chev');
+                    var open = body.style.display !== 'none';
+                    // Close others
+                    list.querySelectorAll('.mcard-body').forEach(function(b) { b.style.display = 'none'; });
+                    list.querySelectorAll('.mcard-chev').forEach(function(c) { c.style.transform = 'rotate(0deg)'; });
+                    if (!open) {
+                        body.style.display = 'block';
+                        chev.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+        } else {
+            // ══════════════════════════════════════════════════════════
+            // DESKTOP — original table layout (unchanged)
+            // ══════════════════════════════════════════════════════════
+            let html = '\n<div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:12px;">' + rows.length + ' total users</div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
+            for (const u of rows) {
+                const badge = getBadge(u);
+                const loginMethod = u.google_id ? '<span class="meta-text" style="color:#2563eb;">Google Auth</span>' : '<span class="meta-text">Email Auth</span>';
+                const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
+                const avatarHtml = u.avatar_url
+                    ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
+                    : `<div class="user-avatar">${initials}</div>`;
+                const onlineDot = u.is_online ? '<span class="status-dot" title="Online"></span>' : '';
+                const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code||''}${u.phone}" style="color:#0f172a;text-decoration:none;">${u.phone_country_code?u.phone_country_code+' ':''}${u.phone}</a>` : '<span style="color:#94a3b8;">No phone</span>';
+                const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:#94a3b8;">No IP</span>';
+                const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
+
+                html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name||u.email.split('@')[0]}${onlineDot}</span><span class="user-email-text">${u.email}</span></div></div></td>`;
+                html += `<td><div style="margin-bottom:4px;">${badge}</div>${loginMethod}</td>`;
+                html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">${u.chat_count} chat${u.chat_count!==1?'s':''}</span></td>`;
+                html += `<td><span class="sub-text font-mono" style="font-weight:700;color:#0f172a;">$${u.total_cost.toFixed(3)}</span></td>`;
+                html += `<td>${ipCountry}</td>`;
+                html += `<td><span class="sub-text" style="color:#0f172a;font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
+                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
+                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid #e2e8f0;border-top:1px solid #e2e8f0;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid #e2e8f0;border-top:1px solid #e2e8f0;"></div></td></tr>`;
+            }
+            html += '</tbody></table></div>';
+            list.innerHTML = html;
+        }
 
         // Manage plan modal
         list.querySelectorAll('.user-plan-btn').forEach(btn => {
@@ -777,13 +786,13 @@ HARD RULES
                 const expandRow = document.getElementById(`expand-row-${uid}`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
-                    if (list.querySelector(`[data-ai-logs-for="${uid}"]`).classList.contains('hidden')) {
+                    if (expandRow && list.querySelector(`[data-ai-logs-for="${uid}"]`).classList.contains('hidden')) {
                         expandRow.classList.add('hidden');
                     }
                     btn.textContent = 'Chats';
                     return;
                 }
-                expandRow.classList.remove('hidden');
+                if (expandRow) expandRow.classList.remove('hidden');
                 area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading chats...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
@@ -793,33 +802,57 @@ HARD RULES
                         area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#94a3b8;">No chats uploaded yet</div>';
                         return;
                     }
-                    area.innerHTML = `
-                        <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
-                            <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0;background:#f1f5f9;">
-                                <div style="flex:1;min-width:0;">Chat Name</div>
-                                <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
-                                <div style="width:130px;flex-shrink:0;">Imported</div>
-                                <div style="width:150px;text-align:right;flex-shrink:0;">Actions</div>
-                            </div>
-                            ${chats.map(c => `
-                                <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
-                                    <div style="flex:1;min-width:0;">
-                                        <div style="font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-                                            <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
-                                            ${c.deleted_by_user ? '<span class="badge badge-expired" style="margin-left:4px;">deleted</span>' : ''}
+                    const isMob = window.matchMedia('(max-width: 768px)').matches;
+                    if (isMob) {
+                        // Mobile: stacked chat cards
+                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">' +
+                            '<div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:#334155;text-transform:uppercase;">Chats (' + chats.length + ')</span></div>' +
+                            chats.map(c => {
+                                const name = (c.display_name || c.folder_name).replace('WhatsApp Chat - ', '');
+                                const del = c.deleted_by_user ? ' <span class="badge badge-expired" style="font-size:9px;">deleted</span>' : '';
+                                return '<div data-admin-chat-row="' + c.id + '" style="padding:10px;border-bottom:1px solid #f1f5f9;">' +
+                                    '<div style="font-weight:600;font-size:13px;color:#0f172a;margin-bottom:4px;">' + name + del + '</div>' +
+                                    '<div style="display:flex;gap:12px;font-size:11px;color:#64748b;margin-bottom:6px;">' +
+                                        '<span>' + (c.message_count || 0) + ' msgs</span>' +
+                                        '<span>' + formatDateTime(c.created_at) + '</span>' +
+                                    '</div>' +
+                                    '<div style="display:flex;gap:6px;">' +
+                                        '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;text-decoration:none;">ZIP</a>' +
+                                        '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#2563eb;cursor:pointer;">Open</button>' +
+                                        '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Del</button>' +
+                                    '</div></div>';
+                            }).join('') +
+                        '</div>';
+                    } else {
+                        // Desktop: table-like flex rows
+                        area.innerHTML = `
+                            <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+                                <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0;background:#f1f5f9;">
+                                    <div style="flex:1;min-width:0;">Chat Name</div>
+                                    <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
+                                    <div style="width:130px;flex-shrink:0;">Imported</div>
+                                    <div style="width:150px;text-align:right;flex-shrink:0;">Actions</div>
+                                </div>
+                                ${chats.map(c => `
+                                    <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                                <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
+                                                ${c.deleted_by_user ? '<span class="badge badge-expired" style="margin-left:4px;">deleted</span>' : ''}
+                                            </div>
+                                        </div>
+                                        <div style="width:70px;text-align:center;color:#475569;flex-shrink:0;">${c.message_count || 0}</div>
+                                        <div style="width:130px;color:#64748b;font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
+                                        <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
+                                            <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
+                                            <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#2563eb;">Open</button>
+                                            <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
                                         </div>
                                     </div>
-                                    <div style="width:70px;text-align:center;color:#475569;flex-shrink:0;">${c.message_count || 0}</div>
-                                    <div style="width:130px;color:#64748b;font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
-                                    <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
-                                        <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
-                                        <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#2563eb;">Open</button>
-                                        <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
+                                `).join('')}
+                            </div>
+                        `;
+                    }
 
                     area.querySelectorAll('[data-admin-open-chat]').forEach(openBtn => {
                         openBtn.addEventListener('click', () => {
@@ -860,13 +893,13 @@ HARD RULES
                 const expandRow = document.getElementById(`expand-row-${uid}`);
                 if (!area.classList.contains('hidden')) {
                     area.classList.add('hidden');
-                    if (list.querySelector(`[data-chats-for="${uid}"]`).classList.contains('hidden')) {
+                    if (expandRow && list.querySelector(`[data-chats-for="${uid}"]`).classList.contains('hidden')) {
                         expandRow.classList.add('hidden');
                     }
                     btn.textContent = 'Logs';
                     return;
                 }
-                expandRow.classList.remove('hidden');
+                if (expandRow) expandRow.classList.remove('hidden');
                 area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading AI logs...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
@@ -876,33 +909,50 @@ HARD RULES
                         area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#94a3b8;">No AI conversations yet</div>';
                         return;
                     }
-                    area.innerHTML = `
-                        <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
-                            <div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;align-items:center;justify-content:space-between;">
-                                <span style="font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;">AI Conversations (${convs.length})</span>
-                                <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:#64748b;font-size:14px;">×</button>
-                            </div>
-                            ${convs.map(c => `
-                                <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
-                                    <div style="flex:1;min-width:0;">
-                                        <p style="font-weight:600;color:#0f172a;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
-                                        <p style="font-size:10px;color:#64748b;margin:1px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
-                                    </div>
-                                    <div style="display:flex;gap:4px;align-items:center;">
-                                        <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 6px;">View</button>
-                                        <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="btn-subtle" style="font-size:10px;padding:2px 6px;text-decoration:none;">TXT</a>
-                                    </div>
+                    const isMobLogs = window.matchMedia('(max-width: 768px)').matches;
+                    if (isMobLogs) {
+                        // Mobile: stacked log cards
+                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">' +
+                            '<div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:#334155;text-transform:uppercase;">AI Conversations (' + convs.length + ')</span><button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:#64748b;font-size:16px;padding:2px 6px;">×</button></div>' +
+                            convs.map(c =>
+                                '<div style="padding:10px;border-bottom:1px solid #f1f5f9;">' +
+                                    '<div style="font-weight:600;font-size:13px;color:#0f172a;margin-bottom:2px;word-break:break-word;">' + (c.title || 'Untitled') + '</div>' +
+                                    '<div style="font-size:10px;color:#64748b;margin-bottom:6px;">' + c.chat_folder + ' · ' + c.msg_count + ' msgs · ' + formatDateTime(c.updated_at) + '</div>' +
+                                    '<div style="display:flex;gap:6px;">' +
+                                        '<button data-uid="' + uid + '" data-convid="' + c.id + '" class="ai-log-view-btn" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">View</button>' +
+                                        '<a href="/api/admin/users/' + uid + '/conversations/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;text-decoration:none;">TXT</a>' +
+                                    '</div></div>'
+                            ).join('') +
+                        '</div>';
+                    } else {
+                        area.innerHTML = `
+                            <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+                                <div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;align-items:center;justify-content:space-between;">
+                                    <span style="font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;">AI Conversations (${convs.length})</span>
+                                    <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:#64748b;font-size:14px;">×</button>
                                 </div>
-                            `).join('')}
-                        </div>
-                    `;
+                                ${convs.map(c => `
+                                    <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
+                                        <div style="flex:1;min-width:0;">
+                                            <p style="font-weight:600;color:#0f172a;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
+                                            <p style="font-size:10px;color:#64748b;margin:1px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
+                                        </div>
+                                        <div style="display:flex;gap:4px;align-items:center;">
+                                            <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 6px;">View</button>
+                                            <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="btn-subtle" style="font-size:10px;padding:2px 6px;text-decoration:none;">TXT</a>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
 
                     area.querySelector('.ai-logs-close-btn')?.addEventListener('click', () => {
                         area.classList.add('hidden');
                         area.innerHTML = '';
                         btn.textContent = 'Logs';
                         const expandRow = document.getElementById(`expand-row-${uid}`);
-                        if (list.querySelector(`[data-chats-for="${uid}"]`).classList.contains('hidden')) {
+                        if (expandRow && list.querySelector(`[data-chats-for="${uid}"]`).classList.contains('hidden')) {
                             expandRow.classList.add('hidden');
                         }
                     });

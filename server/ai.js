@@ -47,11 +47,23 @@ function aiGate(req, res, next) {
     if (plan === 'paid') return next();
 
     if (plan === 'free') {
-        // Free tier: small daily cap
+        // Calculate lifetime messages for the honeymoon phase
+        const lifetimeUsed = db.prepare(
+            `SELECT COUNT(*) AS n FROM conv_messages cm
+             JOIN conversations c ON c.id = cm.conversation_id
+             WHERE c.user_id = ? AND cm.role = 'user'`
+        ).get(req.user.id).n;
+
+        // If they are in their first 5 lifetime messages, let them pass without daily limits
+        if (lifetimeUsed < 5) {
+            return next();
+        }
+
+        // Free tier: small daily cap (defaults to 3)
         const freeMax = Number(getSetting('free_user_daily_messages', '3'));
         if (freeMax > 0 && usedToday >= freeMax) {
             return res.status(429).json({
-                error: `Free tier: ${freeMax} messages/day used. Resets at midnight.`,
+                error: `Free tier limit reached. You get ${freeMax} free messages per day. Upgrade to Pro for unlimited AI!`,
                 limit: freeMax,
                 used: usedToday,
             });

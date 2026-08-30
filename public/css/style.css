@@ -13,6 +13,7 @@ html.dark {
 
 * {
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;

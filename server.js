@@ -415,12 +415,17 @@ app.get('/api/chats', requireUserOrGuest, (req, res) => {
     if (!fs.existsSync(myDir)) return res.json([]);
     
     let deletedSet = new Set();
+    let dbChats = [];
     if (req.user) {
-        const deletedRows = db.prepare(
-            'SELECT folder_name FROM chats WHERE user_id = ? AND deleted_by_user = 1'
-        ).all(req.user.id);
+        dbChats = db.prepare('SELECT folder_name, created_at, deleted_by_user FROM chats WHERE user_id = ?').all(req.user.id);
+        const deletedRows = dbChats.filter(r => r.deleted_by_user === 1);
         deletedSet = new Set(deletedRows.map(r => r.folder_name));
+    } else {
+        dbChats = db.prepare('SELECT folder_name, created_at FROM chats WHERE guest_id = ?').all(ownerId);
     }
+    
+    const timeMap = {};
+    for (const r of dbChats) timeMap[r.folder_name] = r.created_at || 0;
 
     const folders = fs
         .readdirSync(myDir, { withFileTypes: true })
@@ -430,6 +435,11 @@ app.get('/api/chats', requireUserOrGuest, (req, res) => {
             if (req.user && !req.user.is_impersonating && deletedSet.has(name)) return false;
             const dir = path.join(myDir, name);
             return !!findChatFile(dir);
+        })
+        .sort((a, b) => {
+            const timeA = timeMap[a] || 0;
+            const timeB = timeMap[b] || 0;
+            return timeA - timeB; // Oldest first
         });
     res.json(folders);
 });

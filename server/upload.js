@@ -42,7 +42,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage,
-    limits: { fileSize: 500 * 1024 * 1024 },
+    limits: { fileSize: 650 * 1024 * 1024 },
 });
 
 function sanitizeChatName(name) {
@@ -158,26 +158,55 @@ async function handleUpload(req, res) {
         const folderName = path.basename(finalDir);
         let finalDisplayName = baseName;
 
-        // If baseName is generic (e.g. "Chat", "WhatsApp Chat"), try to parse the real contact name
-        if (/^(chat|whatsapp|whatsappchat|unknown|group|user)$/i.test(baseName.replace(/[\s\-_]/g, ''))) {
-            try {
-                const chatFilePath = findChatFile(finalDir);
-                if (chatFilePath) {
-                    const parsed = await parseChatFile(chatFilePath);
-                    const senders = {};
-                    (parsed.messages || []).forEach(m => {
-                        if (m.sender && m.type !== 'system') senders[m.sender] = (senders[m.sender] || 0) + 1;
-                    });
-                    const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
-                    if (sorted.length > 2) {
+        // Clean the display name from common WhatsApp export prefixes/suffixes
+        let cleaned = finalDisplayName.replace(/^whatsapp[\s_-]*chat[\s_-]*(with[\s_-]*)?[-–—]?\s*/i, '');
+        cleaned = cleaned.replace(/_/g, ' ');
+        cleaned = cleaned.replace(/[\s-]*\(?\d{4,}\)?[\s-]*$/g, '');
+        cleaned = cleaned.replace(/[\s-]*\d{1,2}[\s/-]\d{1,2}[\s/-]\d{2,4}\s*$/g, '');
+        cleaned = cleaned.replace(/[\s-]+\d+\s*$/g, '');
+        cleaned = cleaned.replace(/\.(txt|zip|csv|json)\s*$/i, '');
+        cleaned = cleaned.replace(/\s{2,}/g, ' ').trim();
+        let targetName = cleaned || finalDisplayName;
+
+        // ALWAYS try to parse the real contact name from the file content
+        try {
+            const chatFilePath = findChatFile(finalDir);
+            if (chatFilePath) {
+                const parsed = await parseChatFile(chatFilePath);
+                const senders = {};
+                (parsed.messages || []).forEach(m => {
+                    if (m.sender && m.type !== 'system') senders[m.sender] = (senders[m.sender] || 0) + 1;
+                });
+                const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
+                
+                if (sorted.length > 2) {
+                    // Preserve the actual group name if available
+                    if (targetName && targetName.toLowerCase() !== 'chat' && targetName !== 'whatsapp chat') {
+                        finalDisplayName = `${targetName} (Group, ${sorted.length} members)`;
+                    } else {
                         finalDisplayName = `Group Chat (${sorted.length} members)`;
-                    } else if (sorted.length > 0) {
+                    }
+                } else if (sorted.length > 0) {
+                    // Try to find the exact sender name that matches the filename
+                    const matchedSender = sorted.find(s => {
+                        const sLow = s.toLowerCase();
+                        const tLow = targetName.toLowerCase();
+                        return sLow.includes(tLow) || tLow.includes(sLow);
+                    });
+                    
+                    if (matchedSender) {
+                        finalDisplayName = matchedSender;
+                    } else {
+                        // Fallback: usually sorted[1] is the other person in a 1-on-1 chat
                         finalDisplayName = sorted[1] || sorted[0];
                     }
                 }
-            } catch (e) {
-                console.warn('Could not parse contact name for generic upload:', e.message);
+            } else {
+                finalDisplayName = targetName;
             }
+        } catch (e) {
+            console.warn('Could not parse contact name:', e.message);
+            finalDisplayName = targetName;
         }
 
         if (req.user) {
