@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.kothaLinkify = kothaLinkify;
 
-    const renderMessage = (msg, index) => {
+    const renderMessage = (msg, index, isConsecutive = false) => {
         const isMe = msg.sender === myName;
 
         let mediaHtml = '';
@@ -352,8 +352,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
-        const nameHtml = !isMe ? `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>` : '';
+        let msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
+        if (isConsecutive) {
+            msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-md rounded-br-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-md rounded-bl-sm';
+        }
+
+        let nameHtml = '';
+        if (!isMe && !isConsecutive) {
+            nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>`;
+        }
 
         let contentHtml = '';
         if (msg.text) {
@@ -371,9 +378,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
+        const topMargin = isConsecutive ? 'mt-0.5' : 'mt-2';
 
         return `
-            <div class="flex flex-col mb-1 w-full" id="msg-${msg.id}">
+            <div class="flex flex-col mb-1 w-full ${topMargin}" id="msg-${msg.id}">
                 <div class="max-w-[80%] md:max-w-[70%] lg:max-w-[65%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${msgClass} flex flex-col gap-0.5">
                     ${nameHtml}
                     ${mediaHtml}
@@ -396,16 +404,26 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ---------- Date formatting ----------
-    // Indian WhatsApp uses DD/MM/YY format
     function formatChatDate(raw) {
         if (!raw) return '';
-        const parts = raw.split('/');
-        if (parts.length !== 3) return raw;
-        const day = parseInt(parts[0]);
-        const month = parseInt(parts[1]);
-        let year = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
-        const d = new Date(year, month - 1, day);
-        if (isNaN(d.getTime())) return raw;
+        let d;
+        if (raw.includes('-')) {
+            // YYYY-MM-DD format (ISO style from desktop regex)
+            const parts = raw.split('-');
+            if (parts.length === 3) {
+                d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            }
+        } else if (raw.includes('/')) {
+            // DD/MM/YY format (Indian WhatsApp style)
+            const parts = raw.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                let year = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+                d = new Date(year, month - 1, day);
+            }
+        }
+        if (!d || isNaN(d.getTime())) return raw;
         return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
     }
 
@@ -422,8 +440,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 frag.appendChild(dateSep);
                 lastRenderedDate = msg.date;
             }
+            let isConsecutive = false;
+            if (idx > 0) {
+                const prevMsg = snippet[idx - 1];
+                if (prevMsg.sender === msg.sender && prevMsg.type !== 'system' && msg.type !== 'system' && prevMsg.date === msg.date) {
+                    isConsecutive = true;
+                }
+            }
             const wrapper = document.createElement('div');
-            wrapper.innerHTML = renderMessage(msg, idx);
+            wrapper.innerHTML = renderMessage(msg, idx, isConsecutive);
             while (wrapper.firstChild) frag.appendChild(wrapper.firstChild);
         });
         return frag;
@@ -743,23 +768,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     myName = resolved.myName;
                 }
 
-                headerName.innerText = otherPersonName;
+                const isGroupChat = data.isGroup || senderNames.length > 2;
+                const actualGroupName = window._chatMetaCache?.[chatName]?.contactName || chatContactName;
+
+                if (isGroupChat) {
+                    headerName.innerText = actualGroupName.replace(/\(Group, \d+ members\)/, '').trim();
+                    const participantCount = data.participants ? data.participants.length : senderNames.length;
+                    const subTitle = document.createElement('span');
+                    subTitle.className = 'text-[11px] font-normal text-gray-400 block -mt-1';
+                    subTitle.innerText = `${participantCount} members`;
+                    headerName.appendChild(subTitle);
+                    
+                    headerAvatar.innerHTML = `<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>`;
+                    if (sidebarAvatar) sidebarAvatar.innerText = 'G';
+                } else {
+                    headerName.innerText = otherPersonName;
+                    if (otherPersonName) {
+                        headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
+                        if (sidebarAvatar) sidebarAvatar.innerText = 'C';
+                    }
+                }
+                
                 sidebarTitle.innerText = "All Chats";
 
                 if (window._chatMetaCache[chatName]) {
-                    window._chatMetaCache[chatName].contactName = otherPersonName;
+                    window._chatMetaCache[chatName].contactName = isGroupChat ? actualGroupName : otherPersonName;
                 }
                 renderChatList(loadedChats, currentChat);
-
-                if (otherPersonName) {
-                    headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
-                    if (sidebarAvatar) sidebarAvatar.innerText = 'C';
-                }
 
                 // Animate bottom input placeholder typewriter effect
                 const bottomAiInput = document.getElementById('bottom-ai-input');
                 if (bottomAiInput) {
-                    animatePlaceholder(bottomAiInput, `Continue With virtual ${otherPersonName}…`);
+                    animatePlaceholder(bottomAiInput, isGroupChat ? `Continue With virtual Group Chat…` : `Continue With virtual ${otherPersonName}…`);
                 }
 
                 statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;

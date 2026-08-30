@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { parseChatFile, findChatFile } = require('./parser');
 
-const CACHE_VERSION = 4;
+const CACHE_VERSION = 6;
 const CACHE_NAME = '_chat.cache.json';
 
 async function getMessages(chatDir) {
@@ -25,7 +25,13 @@ async function getMessages(chatDir) {
                 cached.sourceSize === chatStat.size &&
                 Array.isArray(cached.messages)
             ) {
-                return { messages: cached.messages, cached: true, format: cached.format };
+                return { 
+                    messages: cached.messages, 
+                    cached: true, 
+                    format: cached.format,
+                    isGroup: cached.isGroup || false,
+                    participants: cached.participants || []
+                };
             }
         } catch {
             // fall through, will re-parse
@@ -33,6 +39,15 @@ async function getMessages(chatDir) {
     }
 
     const { messages, format } = await parseChatFile(chatFile);
+
+    const participantsSet = new Set();
+    for (const m of messages) {
+        if (m.type !== 'system' && m.sender) {
+            participantsSet.add(m.sender);
+        }
+    }
+    const participants = Array.from(participantsSet);
+    const isGroup = participants.length > 2;
 
     try {
         fs.writeFileSync(
@@ -42,6 +57,8 @@ async function getMessages(chatDir) {
                 sourceMtime: chatStat.mtimeMs,
                 sourceSize: chatStat.size,
                 format,
+                isGroup,
+                participants,
                 messages,
             })
         );
@@ -49,7 +66,7 @@ async function getMessages(chatDir) {
         console.warn('Cache write failed:', err.message);
     }
 
-    return { messages, cached: false, format };
+    return { messages, cached: false, format, isGroup, participants };
 }
 
 function invalidateCache(chatDir) {

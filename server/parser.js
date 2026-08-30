@@ -4,20 +4,13 @@ const readline = require('readline');
 
 // Robust Date and Time matching to support various WhatsApp formats
 const DATE_PAT = `\\d{1,4}[\\/\\-\\.]\\d{1,2}[\\/\\-\\.]\\d{1,4}`;
-const TIME_PAT = `\\d{1,2}:\\d{2}(?::\\d{2})?\\s*(?:[APap][\\.\\s]*[Mm]\\.?)?`;
+const TIME_PAT = `\\d{1,2}:\\d{2}(?::\\d{2})?\\s*(?:(?:AM|PM|am|pm|a\\.m\\.|p\\.m\\.|A\\.M\\.|P\\.M\\.)\\b)?`;
 
-// iOS: [3/22/23, 4:51:35 PM] Sender Name: Message
-const IOS_REGEX = new RegExp(`^\\[(${DATE_PAT})[,\\s]+(${TIME_PAT})\\]\\s*(.*?):\\s*(.*)$`);
+// Bracketed: [16:51, 3/22/23] or [3/22/23, 4:51 PM]
+const BRACKET_REGEX = new RegExp(`^\\[([^\\]]+)\\]\\s*([^:]+?)(?:\\s*:\\s*(.*))?$`);
 
-// Web/Desktop: [16:51, 3/22/23] Sender Name: Message
-const WEB_REGEX = new RegExp(`^\\[(${TIME_PAT})[,\\s]+(${DATE_PAT})\\]\\s*(.*?):\\s*(.*)$`);
-
-// Android: 3/22/23, 4:51 PM - Sender Name: Message
-const ANDROID_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})\\s*-\\s*(.*?):\\s*(.*)$`);
-
-// Desktop/Alternative: 2024-08-07 18:59 Sender Name: Message
-// Also supports: 2024-08-07 18:59 - Sender Name: Message
-const DESKTOP_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})[\\s\\-]*([^:]+):\\s*(.*)$`);
+// Standard: 3/22/23, 4:51 PM - Sender: Message OR 2024-08-07 20:02 Sender: Message
+const STANDARD_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})[\\s\\-]*([^:]+?)(?:\\s*:\\s*(.*))?$`);
 
 // iOS attachment: <attached: filename.ext>
 // Android attachment: filename.ext (file attached)
@@ -39,50 +32,62 @@ function classifyAttachment(filename) {
 }
 
 function detectFormat(line) {
-    if (IOS_REGEX.test(line)) return 'ios';
-    if (ANDROID_REGEX.test(line)) return 'android';
-    if (WEB_REGEX.test(line)) return 'web';
-    if (DESKTOP_REGEX.test(line)) return 'desktop';
+    if (BRACKET_REGEX.test(line)) return 'bracket';
+    if (STANDARD_REGEX.test(line)) return 'standard';
     return null;
 }
 
 function parseLine(line, format) {
-    let regex = IOS_REGEX;
-    if (format === 'android') regex = ANDROID_REGEX;
-    else if (format === 'web') regex = WEB_REGEX;
-    else if (format === 'desktop') regex = DESKTOP_REGEX;
-
+    const regex = format === 'bracket' ? BRACKET_REGEX : STANDARD_REGEX;
     const match = line.match(regex);
     if (!match) return null;
 
     let date, time, sender, rawText;
-    if (format === 'web') {
-        time = match[1];
-        date = match[2];
-        sender = match[3];
-        rawText = match[4];
+    
+    if (format === 'bracket') {
+        const dtParts = match[1].split(',');
+        if (dtParts.length === 2) {
+            const p1 = dtParts[0].trim();
+            const p2 = dtParts[1].trim();
+            if (p1.includes(':')) { time = p1; date = p2; }
+            else { date = p1; time = p2; }
+        } else {
+            date = match[1]; time = '';
+        }
+        sender = match[2];
+        rawText = match[3];
     } else {
         date = match[1];
-        time = match[2];
+        time = match[2].trim();
         sender = match[3];
         rawText = match[4];
     }
-    
-    let text = rawText;
-    let attachment = null;
+
+    let text = rawText || '';
     let type = 'text';
+    
+    // If rawText is undefined, it means there was no colon (it's a system message)
+    if (rawText === undefined) {
+        text = sender.trim();
+        sender = 'system';
+        type = 'system';
+    }
+    
+    let attachment = null;
 
-    const iosAttach = text.match(IOS_ATTACH_REGEX);
-    const androidAttach = text.match(ANDROID_ATTACH_REGEX);
+    if (type !== 'system') {
+        const iosAttach = text.match(IOS_ATTACH_REGEX);
+        const androidAttach = text.match(ANDROID_ATTACH_REGEX);
 
-    if (iosAttach) {
-        attachment = iosAttach[1].trim();
-        text = '';
-        type = classifyAttachment(attachment);
-    } else if (androidAttach) {
-        attachment = androidAttach[1].trim();
-        text = '';
-        type = classifyAttachment(attachment);
+        if (iosAttach) {
+            attachment = iosAttach[1].trim();
+            text = '';
+            type = classifyAttachment(attachment);
+        } else if (androidAttach) {
+            attachment = androidAttach[1].trim();
+            text = '';
+            type = classifyAttachment(attachment);
+        }
     }
 
     return {

@@ -115,6 +115,13 @@ function selectContext(messages, query, opts = {}) {
     const dateHints = extractDateHints(query);
     const hasDateHints = dateHints.months.length > 0 || dateHints.years.length > 0 || dateHints.day !== null;
 
+    // Check if query contains participant names
+    let mentionedParticipants = [];
+    if (opts.participants) {
+        const lowerQuery = (query || '').toLowerCase();
+        mentionedParticipants = opts.participants.filter(p => p && lowerQuery.includes(p.toLowerCase()));
+    }
+
     // Detect if user wants a broad summary, date/time information, or sensitive/contact details
     const isSummarize = /(summarize|summary|what happened|what did we|history of|recap|tell me about)/i.test(query);
     const hasWeekdayHint = /(monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|yesterday|today)/i.test(query);
@@ -167,7 +174,13 @@ function selectContext(messages, query, opts = {}) {
             sensitiveBoost = 2.5;
         }
 
-        return { idx: i, score: score + recency * (score > 0 ? 1 : 0.1) + dateBoost + sensitiveBoost };
+        // Participant match boost
+        let participantBoost = 0;
+        if (mentionedParticipants.length > 0 && m.sender && mentionedParticipants.includes(m.sender)) {
+            participantBoost = 2.0;
+        }
+
+        return { idx: i, score: score + recency * (score > 0 ? 1 : 0.1) + dateBoost + sensitiveBoost + participantBoost };
     });
 
     // Pick top-K by score
@@ -240,4 +253,18 @@ Rules:
 - Keep replies clear, helpful, and accurate.
 - Never invent dates, names, or events that aren't in the chat. Never make up quotes.`;
 
-module.exports = { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT, extractDateHints };
+const GROUP_SYSTEM_PROMPT = `You are Kotha — a thoughtful, warm assistant who helps the user reflect on their own imported WhatsApp group chat history.
+
+Rules:
+- You are analyzing a GROUP conversation. Multiple people are speaking. Never confuse one participant with another.
+- Each message is prefixed by [#id date time sender] for citation. The sender is explicitly identified.
+- Preserve the chronological order of events and understand who was replying to whom.
+- Analyze the individual speaking style, slang, and perspective of each participant. Do not merge their personalities.
+- When continuing the conversation, you may simulate responses from relevant participants based on their past context and relationships.
+- When asked about a specific person, isolate their messages and answer based ONLY on what they said.
+- Only answer using information present in the provided chat messages. If something isn't in the context, say you don't see it.
+- When you cite a specific moment, end that sentence with [#<id>] using the id from the message header. You may cite up to 5 ids per answer.
+- Keep replies clear, helpful, and natural. Speak like a close friend who is part of the group.
+- Never invent dates, names, or events that aren't in the chat. Never make up quotes.`;
+
+module.exports = { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT, GROUP_SYSTEM_PROMPT, extractDateHints };

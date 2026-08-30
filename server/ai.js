@@ -154,10 +154,14 @@ router.post('/chat', aiGate, async (req, res) => {
     // Load chat messages for context
     let chatDir;
     let chatMessages;
+    let isGroup = false;
+    let participants = [];
     try {
         chatDir = getSafeChatDir(dirKey, chat);
         const parsed = await getMessages(chatDir);
         chatMessages = parsed.messages;
+        isGroup = parsed.isGroup || false;
+        participants = parsed.participants || [];
     } catch (err) {
         return res.status(404).json({ error: 'Chat not found' });
     }
@@ -210,11 +214,13 @@ router.post('/chat', aiGate, async (req, res) => {
         }
         const sortedSenders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
         if (!userName) userName = sortedSenders[0]?.[0] || 'User';
-        if (!contactName) contactName = sortedSenders[1]?.[0] || sortedSenders[0]?.[0] || 'Friend';
+        if (!contactName) {
+            contactName = isGroup ? (participants.length ? `${participants.length} members` : 'Group') : (sortedSenders[1]?.[0] || sortedSenders[0]?.[0] || 'Friend');
+        }
     }
 
     // Build context from chat (larger window + date-aware boosting)
-    const { selected, stats } = selectContext(chatMessages, message, { topK: 50, includeRecent: 20 });
+    const { selected, stats } = selectContext(chatMessages, message, { topK: 50, includeRecent: 20, participants: isGroup ? participants : null });
     const contextBlock = formatContext(selected, chat);
 
     // SSE response setup
@@ -260,7 +266,7 @@ router.post('/chat', aiGate, async (req, res) => {
             .replace(/\$\{historyNote\}/g, historyNote);
     } else {
         // Build default roleplay prompt (pass stats so AI knows how much history exists)
-        systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats);
+        systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats, isGroup, participants);
     }
     const llmMessages = history.map(h => ({ role: h.role, content: h.content }));
 
@@ -309,9 +315,37 @@ router.post('/chat', aiGate, async (req, res) => {
     }
 });
 
-function buildRoleplayPrompt(contactName, userName, contextBlock, currentDate, currentTime, stats) {
+function buildRoleplayPrompt(contactName, userName, contextBlock, currentDate, currentTime, stats, isGroup, participants) {
     const totalMsgs = stats && stats.totalMessages ? stats.totalMessages : null;
     const historyNote = totalMsgs ? ` (${totalMsgs} messages in full history)` : '';
+
+    if (isGroup) {
+        const { GROUP_SYSTEM_PROMPT } = require('./context');
+        return `You are the Conversation Continuation Engine for OnlineKotha.
+
+Your purpose is to seamlessly continue an imported GROUP conversation.
+
+<context>
+Current date and time: ${currentDate} ${currentTime}
+User you are talking to: ${userName}
+Chat Type: GROUP
+Participants: ${participants.join(', ')}
+</context>
+
+<chat_history>
+${contextBlock}
+</chat_history>
+
+${GROUP_SYSTEM_PROMPT}
+
+### 🧠 PERSONALITY & STYLE MATCHING (CRITICAL)
+Analyze the <chat_history> and flawlessly replicate:
+- **Language & Dialect**: Mirror the exact usage of Hinglish, Hindi, English, slang, and local idioms.
+- **Message Structure**: Match how people type (short bursts vs long paragraphs, typical typos, casing).
+- **Vibe & Tone**: Match their humor, sarcasm, warmth, or dryness.
+
+Remember you are talking in a group setting. Answer naturally as the relevant participant(s).`;
+    }
 
     return `You are the Conversation Continuation Engine for OnlineKotha.
 

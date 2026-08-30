@@ -571,8 +571,14 @@ HARD RULES
 
         const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
         function getCountryName(code) {
-            if (!code || code.length > 3) return code || 'Unknown Region';
-            try { return regionNames.of(code.toUpperCase()) || code; } catch (e) { return code; }
+            if (!code) return 'UNKNOWN REGION';
+            if (code.length > 3) return code.toUpperCase();
+            try { 
+                const name = regionNames.of(code.toUpperCase()) || code;
+                return name.toUpperCase(); 
+            } catch (e) { 
+                return code.toUpperCase() === 'IN' ? 'INDIA' : code.toUpperCase(); 
+            }
         }
 
         if (isMobile) {
