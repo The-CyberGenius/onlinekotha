@@ -42,6 +42,7 @@ const { router: oauthRouter } = require('./server/oauth');
 const bcrypt = require('bcryptjs');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const geoip = require('geoip-lite');
 
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception:', err);
@@ -57,8 +58,11 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = new SocketIO(httpServer, {
     cors: {
-        origin: '*',
-        methods: ['GET', 'POST']
+        origin: IS_PROD
+            ? ['https://onlinekotha.com', 'https://www.onlinekotha.com']
+            : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        methods: ['GET', 'POST'],
+        credentials: true
     }
 });
 app.set('io', io);
@@ -141,7 +145,6 @@ app.post('/api/auth/signup', authLimiter, async (req, res) => {
         let country = null;
         if (ip) {
             try {
-                const geoip = require('geoip-lite');
                 const geo = geoip.lookup(ip);
                 if (geo) country = geo.country;
             } catch {}

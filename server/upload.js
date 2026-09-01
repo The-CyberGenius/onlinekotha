@@ -108,6 +108,21 @@ async function handleUpload(req, res) {
             }
             guestId = guestStatus.guestId;
             ownerId = guestId;
+        } else {
+            // Free-tier registered users: max 2 chat imports (paid/trial/admin = unlimited)
+            const { effectivePlan } = require('./auth');
+            const plan = effectivePlan(req.user);
+            if (plan === 'free') {
+                const FREE_MAX_CHATS = 2;
+                const chatCount = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE user_id = ? AND deleted_by_user = 0').get(req.user.id)?.c || 0;
+                if (chatCount >= FREE_MAX_CHATS) {
+                    if (req.uploadSessionId) rmrf(path.join(TMP_DIR, req.uploadSessionId));
+                    return res.status(403).json({
+                        error: `Free plan allows up to ${FREE_MAX_CHATS} chats. Upgrade to Kotha Pro for unlimited chat imports!`,
+                        upgrade: true
+                    });
+                }
+            }
         }
 
         const files = req.files || [];
