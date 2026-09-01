@@ -375,7 +375,9 @@
         .modal-title { color: var(--text-primary); }
         .modal-desc { color: var(--text-secondary); }
         .modal-note { color: var(--text-secondary); background: var(--card-bg); border-color: var(--border) !important; }
-        .modal-demo-chat { background: var(--bg); border-color: var(--border) !important; }
+        .badge-light { display: none; }
+        html.light .badge-light { display: block; }
+        html.light .badge-dark { display: none; }
     </style>
 </head>
 
@@ -751,7 +753,11 @@
             <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;" class="foot-grid">
                 <div>
                     <a href="/" class="brand" style="margin-bottom:14px;"><img src="/logo.svg" alt="Kotha Logo" /><span>Kotha</span></a>
-                    <p class="muted" style="font-size:13px;line-height:1.7;max-width:260px;">Keep your loved ones always online. Chat with the people who matter — in their own words.</p>
+                    <p class="muted" style="font-size:13px;line-height:1.7;max-width:260px;margin-bottom:20px;">Keep your loved ones always online. Chat with the people who matter — in their own words.</p>
+                    <a href="https://nicklaunches.com/products/onlinekotha/?utm_source=onlinekotha.com&utm_medium=badge&utm_campaign=featured" target="_blank" rel="noopener" style="display:inline-block;">
+                        <img src="https://nicklaunches.com/badges/featured-dark.png" alt="OnlineKotha on Nick Launches" width="244" height="56" class="badge-dark" />
+                        <img src="https://nicklaunches.com/badges/featured.png" alt="OnlineKotha on Nick Launches" width="244" height="56" class="badge-light" />
+                    </a>
                 </div>
                 <div>
                     <p class="foot-head">Product</p>
