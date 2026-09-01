@@ -8,8 +8,6 @@ const { encrypt, decrypt, maskKey } = require('./crypto');
 // Which keys hold secrets and must be encrypted at rest
 const SECRET_KEYS = new Set([
     'integ.email.smtp_pass',
-    'integ.stripe.secret_key',
-    'integ.stripe.webhook_secret',
     'integ.oauth.google_client_secret',
 
     'integ.dodo.api_key',
@@ -24,10 +22,6 @@ const ENV_FALLBACK = {
     'integ.email.smtp_user': 'SMTP_USER',
     'integ.email.smtp_pass': 'SMTP_PASS',
     'integ.email.email_from': 'EMAIL_FROM',
-    'integ.stripe.secret_key': 'STRIPE_SECRET_KEY',
-    'integ.stripe.webhook_secret': 'STRIPE_WEBHOOK_SECRET',
-    'integ.stripe.pro_price_id': 'STRIPE_PRO_PRICE_ID',
-    'integ.stripe.lifetime_price_id': 'STRIPE_LIFETIME_PRICE_ID',
     'integ.oauth.google_client_id': 'GOOGLE_CLIENT_ID',
     'integ.oauth.google_client_secret': 'GOOGLE_CLIENT_SECRET',
 
@@ -90,7 +84,7 @@ function isSecret(key) {
 
 // Read all integration config (with secrets masked for display)
 function snapshot() {
-    const out = { email: {}, stripe: {}, oauth: {}, dodo: {} };
+    const out = { email: {}, oauth: {}, dodo: {} };
     for (const key of Object.keys(ENV_FALLBACK)) {
         const [, section, field] = key.split('.');
         const r = getRaw(key);

@@ -185,7 +185,7 @@ Kotha Pro (`users.plan = 'paid'`) can be purchased through **Dodo.sh**. The `pay
   * `order.paid` / `subscription.active` → record payment + `UPDATE users SET plan='paid'` (stores `dodo_subscription_id`, `dodo_customer_id`).
   * `subscription.revoked` / `order.refunded` → downgrade the user out of the paid bucket.
 
-**Configuration** — set from the **Admin → Integrations** panel (encrypted in the `settings` table) *or* via env vars (`POLAR_ACCESS_TOKEN`, `POLAR_PRODUCT_ID`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER`). Secrets are **never** committed — `integrations.js` marks `access_token` and `webhook_secret` as encrypted-at-rest keys. Register the webhook endpoint in Dodo as `<PUBLIC_BASE_URL>/api/dodo/webhook`.
+**Configuration** — set from the **Admin → Integrations** panel (encrypted in the `settings` table) *or* via env vars (`DODO_API_KEY`, `DODO_PRODUCT_ID`, `DODO_WEBHOOK_SECRET`). Secrets are **never** committed — `integrations.js` marks `api_key` and `webhook_secret` as encrypted-at-rest keys. Register the webhook endpoint in Dodo as `<PUBLIC_BASE_URL>/api/dodo/webhook`.
 
 
 ---
@@ -274,7 +274,7 @@ Added **Dodo.sh** as the primary payment provider, giving international customer
 | **`server/db.js`** | `safeAddColumn` migrations: `users.dodo_customer_id`, `users.dodo_subscription_id`. (`payments.provider` already supported multiple gateways.) |
 | **Admin panel** (`server/admin.js`, `public/js/admin.js`) | New **"Dodo (international billing)"** integrations card to store token / product ID / webhook secret / environment. |
 | **Frontend** (`public/app.html`, `public/js/auth-init.js`) | Secondary **"Card"** upgrade button (shown only when Dodo is configured) → redirect checkout; post-redirect handler polls `/api/auth/me` and flips the plan badge to Pro. |
-| **`.env.example`** | Documented `POLAR_*` variables. |
+| **`.env.example`** | Documented `DODO_*` variables. |
 
 #### 🔒 Security notes
 - Webhook signatures verified per the [Standard Webhooks](https://www.standardwebhooks.com) spec: `whsec_`-prefixed base64 secret → HMAC-SHA256 → base64, matched constant-time against each `v1,<sig>` token, with a ±5-minute replay window. Verified with a sign→verify roundtrip test (valid accepted; tampered/forged/replayed/missing rejected; key rotation supported).
@@ -331,11 +331,10 @@ The EC2 server requires the following environment variables to run:
 PORT=8000
 NODE_ENV=production
 
-# POLAR.SH CONFIG (PAYMENTS)
-POLAR_ACCESS_TOKEN=dodo_pat_...
-POLAR_WEBHOOK_SECRET=whsec_...
-POLAR_PRODUCT_ID=c9299c33-...
-POLAR_SERVER=production
+# DODO PAYMENTS CONFIG
+DODO_API_KEY=dodo_pat_...
+DODO_WEBHOOK_SECRET=whsec_...
+DODO_PRODUCT_ID=c9299c33-...
 
 # GOOGLE GEMINI (AI CLONING)
 GEMINI_API_KEY=AIza...

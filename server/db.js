@@ -188,8 +188,7 @@ function safeAddColumn(table, column, def) {
     try { db.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${def}`).run(); } catch {}
 }
 safeAddColumn('users', 'email_verified', 'INTEGER NOT NULL DEFAULT 0');
-safeAddColumn('users', 'stripe_customer_id', 'TEXT');
-safeAddColumn('users', 'stripe_subscription_id', 'TEXT');
+// Stripe columns removed from migrations as Dodo is the sole payment gateway
 safeAddColumn('users', 'dodo_customer_id', 'TEXT');
 safeAddColumn('users', 'dodo_subscription_id', 'TEXT');
 safeAddColumn('users', 'dodo_product_id', 'TEXT');

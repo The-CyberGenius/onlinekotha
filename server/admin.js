@@ -841,7 +841,7 @@ router.get('/usage/summary', (req, res) => {
     res.json({ todayCost, totalCost, totalCalls, dailyCap, totalRevenue });
 });
 
-// ---------- Integrations (email / stripe / oauth) ----------
+// ---------- Integrations (email / oauth) ----------
 router.get('/integrations', (req, res) => {
     const snap = integ.snapshot();
     res.json({
@@ -860,7 +860,7 @@ router.put('/integrations', (req, res) => {
     const updates = {};
     const nulls = [];
 
-    for (const section of ['email', 'stripe', 'oauth', 'dodo']) {
+    for (const section of ['email', 'oauth', 'dodo']) {
         if (!body[section]) continue;
         for (const [field, val] of Object.entries(body[section])) {
             const key = `integ.${section}.${field}`;

@@ -27,7 +27,7 @@ ChatImporterApp/
 
 ## 💳 Payments & Billing
 
-Kotha Pro can be sold through **two independent gateways that run side by side** — the active one is chosen per customer, and every transaction is stored in the `payments` table with a `provider` column.
+Kotha Pro can be sold through **Dodo Payments**, and every transaction is stored in the `payments` table with a `provider` column.
 
 | | **Dodo.sh** |
 |---|---|
@@ -38,7 +38,7 @@ Kotha Pro can be sold through **two independent gateways that run side by side**
 | Module | `server/dodo.js` |
 | Dependencies | none (native `fetch` + `crypto`) |
 
-Both are **optional** — if the keys aren't set, that gateway's upgrade button simply doesn't appear.
+This integration is **optional** — if the keys aren't set, the upgrade button simply doesn't appear.
 
 ### Dodo.sh setup (international / USD)
 
@@ -50,10 +50,9 @@ Dodo acts as the **Merchant of Record**, so it processes global cards and remits
 4. Provide the credentials **either** via the in-app **Admin → Integrations → Dodo** panel (encrypted at rest) **or** via environment variables:
 
    ```bash
-   POLAR_ACCESS_TOKEN=dodo_oat_xxx
-   POLAR_PRODUCT_ID=00000000-0000-0000-0000-000000000000
-   POLAR_WEBHOOK_SECRET=whsec_xxx
-   POLAR_SERVER=production        # or "sandbox" while testing
+   DODO_API_KEY=dodo_oat_xxx
+   DODO_PRODUCT_ID=00000000-0000-0000-0000-000000000000
+   DODO_WEBHOOK_SECRET=whsec_xxx
    ```
 
 > **Security:** access tokens and webhook secrets live **only** in `.env` (gitignored) or the encrypted `settings` table — never commit them. The public repo must never contain a real token. If a token is ever exposed, **revoke it in Dodo immediately** and issue a new one.
