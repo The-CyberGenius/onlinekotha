@@ -184,8 +184,9 @@ async function handleUpload(req, res) {
                 const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
                 
                 // Filter out ghost senders (parsing errors, misclassified system msgs, etc.)
-                // A real sender should have at least 5 messages, or > 2% of total messages.
-                const realSenders = sorted.filter(s => senders[s] >= 5 || (senders[s] / Math.max(totalMessages, 1)) > 0.02);
+                // A real sender should have a decent chunk of messages relative to the total.
+                const dynamicThreshold = Math.max(5, totalMessages * 0.01);
+                const realSenders = sorted.filter(s => senders[s] >= dynamicThreshold);
                 
                 if (realSenders.length === 0) realSenders.push(...sorted); // fallback if all were filtered
 
@@ -195,22 +196,41 @@ async function handleUpload(req, res) {
                     return sLow.includes(tLow) || tLow.includes(sLow);
                 });
 
-                if (realSenders.length > 2) {
-                    // It's likely a group chat. But if the filename perfectly matches a sender, 
-                    // it might just be a 1-on-1 where someone changed their name/number.
-                    if (matchedSender && targetName.toLowerCase() !== 'chat' && targetName.toLowerCase() !== 'whatsapp chat') {
+                // Concentration Check: Is it a 1-on-1 chat?
+                // If top 2 senders account for > 95% of messages, it's definitely a 1-on-1 chat.
+                let isGroup = realSenders.length > 2;
+                if (isGroup && sorted.length >= 2) {
+                    const top2Messages = senders[sorted[0]] + senders[sorted[1]];
+                    if (top2Messages / Math.max(totalMessages, 1) > 0.95) {
+                        isGroup = false;
+                        // Keep only the top 2 as real senders to discard noise
+                        realSenders.length = 2;
+                        // Update realSenders to just the top 2
+                        realSenders[0] = sorted[0];
+                        realSenders[1] = sorted[1];
+                    }
+                }
+
+                const isGenericName = targetName.toLowerCase() === 'chat' || targetName.toLowerCase() === 'whatsapp chat' || /^chat_\d+$/.test(targetName) || targetName.toLowerCase() === 'export';
+
+                if (isGroup) {
+                    if (matchedSender && !isGenericName) {
                         finalDisplayName = matchedSender;
-                    } else if (targetName && targetName.toLowerCase() !== 'chat' && targetName.toLowerCase() !== 'whatsapp chat') {
-                        finalDisplayName = `${targetName} (Group, ${realSenders.length} members)`;
+                    } else if (targetName && !isGenericName) {
+                        finalDisplayName = `${targetName} (Group)`;
                     } else {
                         finalDisplayName = `Group Chat (${realSenders.length} members)`;
                     }
                 } else if (realSenders.length > 0) {
-                    if (matchedSender) {
+                    if (matchedSender && !isGenericName) {
                         finalDisplayName = matchedSender;
                     } else {
-                        // Fallback: usually realSenders[1] is the other person in a 1-on-1 chat
-                        finalDisplayName = realSenders[1] || realSenders[0];
+                        // 1-on-1 chat fallback when we don't have a specific filename
+                        if (realSenders.length >= 2) {
+                            finalDisplayName = `${realSenders[0]} & ${realSenders[1]}`;
+                        } else {
+                            finalDisplayName = realSenders[0];
+                        }
                     }
                 } else {
                     finalDisplayName = targetName;
