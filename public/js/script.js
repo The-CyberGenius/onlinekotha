@@ -738,12 +738,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (allMessages.length > 0) {
                 const senderCounts = {};
+                let totalMessages = 0;
                 allMessages.forEach(msg => {
-                    if (msg.sender) senderCounts[msg.sender] = (senderCounts[msg.sender] || 0) + 1;
+                    if (msg.sender && msg.type !== 'system') {
+                        senderCounts[msg.sender] = (senderCounts[msg.sender] || 0) + 1;
+                        totalMessages++;
+                    }
                 });
 
-                const senders = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]);
-                const senderNames = senders.map(s => s[0]);
+                const sortedSenders = Object.keys(senderCounts).sort((a, b) => senderCounts[b] - senderCounts[a]);
+                const dynamicThreshold = Math.max(5, totalMessages * 0.01);
+                const realParticipants = sortedSenders.filter(s => senderCounts[s] >= dynamicThreshold);
+                if (realParticipants.length === 0) realParticipants.push(...sortedSenders);
+
+                let isGroupChatFrontend = realParticipants.length > 2;
+                if (isGroupChatFrontend && sortedSenders.length >= 2) {
+                    const top2Messages = senderCounts[sortedSenders[0]] + senderCounts[sortedSenders[1]];
+                    if (top2Messages / Math.max(totalMessages, 1) > 0.95) {
+                        isGroupChatFrontend = false;
+                        realParticipants.length = 2; // Trim to top 2
+                        realParticipants[0] = sortedSenders[0];
+                        realParticipants[1] = sortedSenders[1];
+                    }
+                }
+
+                // Override senders array format to match existing code `[[name, count], ...]`
+                const senders = realParticipants.map(s => [s, senderCounts[s]]);
+                const senderNames = realParticipants;
                 const chatContactName = chatName.replace('WhatsApp Chat - ', '');
                 
                 // Group Roles UI
@@ -768,7 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     myName = resolved.myName;
                 }
 
-                const isGroupChat = data.isGroup || senderNames.length > 2;
+                const isGroupChat = data.isGroup || isGroupChatFrontend;
                 const actualGroupName = window._chatMetaCache?.[chatName]?.contactName || chatContactName;
 
                 if (isGroupChat) {
@@ -1061,7 +1082,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgCount = chatMeta?.count || '';
 
             const item = document.createElement('div');
-            item.className = `flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
+            item.className = `flex items-center gap-3 px-3 py-1.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
