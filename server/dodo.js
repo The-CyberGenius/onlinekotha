@@ -23,8 +23,8 @@ function requireDodoConfig(req, res, next) {
 }
 
 // ── Constants ──────────────────────────────────────────────────
-const PLAN_PRICE_DISPLAY = '$6/mo';
-const PLAN_ID = 'pro_monthly';
+const PLAN_PRICE_DISPLAY = '$49/lifetime';
+const PLAN_ID = 'pro_lifetime';
 
 // ── Plans endpoint ─────────────────────────────────────────────
 router.get('/plans', requireDodoConfig, (req, res) => {
