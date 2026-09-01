@@ -73,7 +73,6 @@ app.set('io', io);
 app.set('trust proxy', 1);
 
 const PORT = process.env.PORT || 3000;
-const IS_PROD = process.env.NODE_ENV === 'production';
 
 // Shared cookie options — must be identical for set and clear
 const COOKIE_OPTS = {
