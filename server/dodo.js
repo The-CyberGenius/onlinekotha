@@ -23,14 +23,16 @@ function requireDodoConfig(req, res, next) {
 }
 
 // ── Constants ──────────────────────────────────────────────────
-const PLAN_PRICE_DISPLAY = '$49/lifetime';
-const PLAN_ID = 'pro_lifetime';
+const PLANS = [
+    { id: 'pro_monthly', display: '$6/mo', dbKey: 'integ.dodo.product_id_monthly' },
+    { id: 'pro_lifetime', display: '$49/lifetime', dbKey: 'integ.dodo.product_id_lifetime' }
+];
 
 // ── Plans endpoint ─────────────────────────────────────────────
 router.get('/plans', requireDodoConfig, (req, res) => {
     res.json({
         available: true,
-        plans: [{ id: PLAN_ID, display: PLAN_PRICE_DISPLAY }]
+        plans: PLANS.map(p => ({ id: p.id, display: p.display }))
     });
 });
 
@@ -42,9 +44,13 @@ router.post('/create-checkout', requireUser, requireDodoConfig, async (req, res)
         const user = db.prepare('SELECT id, email, display_name FROM users WHERE id = ?').get(req.user.id);
         if (!user) return res.status(400).json({ error: 'User not found' });
 
-        const productId = integrations.get('integ.dodo.product_id');
+        const requestedPlanId = req.body.planId || 'pro_monthly';
+        const plan = PLANS.find(p => p.id === requestedPlanId) || PLANS[0];
+        
+        // Fallback to legacy single product_id if the specific one is missing
+        const productId = integrations.get(plan.dbKey) || integrations.get('integ.dodo.product_id');
         if (!productId) {
-            return res.status(500).json({ error: 'Dodo Product ID not configured' });
+            return res.status(500).json({ error: `Dodo Product ID not configured for ${plan.id}` });
         }
 
         const baseUrl = process.env.PUBLIC_BASE_URL || (req.protocol + '://' + req.get('host'));

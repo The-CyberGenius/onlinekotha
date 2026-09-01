@@ -28,6 +28,8 @@ const ENV_FALLBACK = {
     'integ.dodo.api_key':           'DODO_API_KEY',
     'integ.dodo.webhook_secret':    'DODO_WEBHOOK_SECRET',
     'integ.dodo.product_id':        'DODO_PRODUCT_ID',
+    'integ.dodo.product_id_monthly':'DODO_PRODUCT_ID_MONTHLY',
+    'integ.dodo.product_id_lifetime':'DODO_PRODUCT_ID_LIFETIME',
 };
 
 // In-memory cache invalidated on write

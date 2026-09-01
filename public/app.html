@@ -1227,14 +1227,29 @@
                 </ul>
             </div>
             
-            <button id="modal-pay-btn" class="w-full relative overflow-hidden rounded-2xl group transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_30px_-10px_rgba(99,102,241,0.5)] border border-indigo-500/50">
-                <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
-                <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="relative flex items-center justify-center gap-2 px-6 py-4">
-                    <span class="text-white font-bold text-[15px] tracking-wide">Proceed to Payment</span>
-                    <span class="bg-black/20 text-white text-[12px] font-black px-2.5 py-1 rounded-md border border-white/10">$49/lifetime</span>
-                </div>
-            </button>
+            <div class="flex flex-col gap-3">
+                <button id="modal-pay-btn" data-plan="pro_lifetime" class="w-full relative overflow-hidden rounded-2xl group transition-all hover:scale-[1.02] active:scale-95 shadow-[0_10px_30px_-10px_rgba(99,102,241,0.5)] border border-indigo-500/50">
+                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"></div>
+                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="relative flex items-center justify-between gap-2 px-6 py-4">
+                        <div class="flex flex-col items-start">
+                            <span class="text-white font-bold text-[15px] tracking-wide">Lifetime Deal</span>
+                            <span class="text-white/70 text-[12px]">Pay once, yours forever</span>
+                        </div>
+                        <span class="bg-black/20 text-white text-[14px] font-black px-3 py-1.5 rounded-md border border-white/10">$49</span>
+                    </div>
+                </button>
+                
+                <button id="modal-pay-monthly-btn" data-plan="pro_monthly" class="w-full relative overflow-hidden rounded-2xl group transition-all hover:scale-[1.02] active:scale-95 border border-white/10 bg-white/5 hover:bg-white/10">
+                    <div class="relative flex items-center justify-between gap-2 px-6 py-4">
+                        <div class="flex flex-col items-start">
+                            <span class="text-white font-bold text-[15px] tracking-wide">Monthly Plan</span>
+                            <span class="text-white/50 text-[12px]">Cancel anytime</span>
+                        </div>
+                        <span class="bg-black/40 text-white text-[14px] font-black px-3 py-1.5 rounded-md border border-white/5">$6/mo</span>
+                    </div>
+                </button>
+            </div>
             
             <p class="text-[11px] font-medium text-gray-500 mt-5 flex items-center justify-center gap-1.5">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>

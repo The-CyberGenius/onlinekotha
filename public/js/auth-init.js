@@ -528,19 +528,21 @@
                 }
             }, 10);
 
-            // Attach click to the actual pay button inside the modal if not already bound
-            const modalPayBtn = document.getElementById('modal-pay-btn');
-            if (modalPayBtn && !modalPayBtn._dodoBound) {
-                modalPayBtn._dodoBound = true;
-                modalPayBtn.addEventListener('click', async () => {
-                    modalPayBtn.disabled = true;
-                    const originalText = modalPayBtn.innerHTML;
-                    modalPayBtn.innerHTML = '<span>Redirecting…</span>';
+            // Attach click to the actual pay buttons inside the modal
+            const handleCheckoutClick = async (btn, planId) => {
+                if (btn._dodoBound) return;
+                btn._dodoBound = true;
+                btn.addEventListener('click', async () => {
+                    const allBtns = [document.getElementById('modal-pay-btn'), document.getElementById('modal-pay-monthly-btn')].filter(Boolean);
+                    allBtns.forEach(b => b.disabled = true);
+                    
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<div class="flex items-center justify-center py-4 text-white font-bold tracking-wide">Redirecting...</div>';
                     try {
                         const r = await fetch('/api/dodo/create-checkout', {
                             method: 'POST',
                             headers: { 'content-type': 'application/json' },
-                            body: JSON.stringify({ plan: 'pro_monthly' }),
+                            body: JSON.stringify({ planId: planId }),
                         });
                         const d = await r.json();
                         if (r.ok && d.url) { window.location.href = d.url; return; }
@@ -548,10 +550,16 @@
                     } catch (err) {
                         if (window.kothaToast) window.kothaToast('Network error');
                     }
-                    modalPayBtn.disabled = false;
-                    modalPayBtn.innerHTML = originalText;
+                    allBtns.forEach(b => b.disabled = false);
+                    btn.innerHTML = originalText;
                 });
-            }
+            };
+
+            const lifetimeBtn = document.getElementById('modal-pay-btn');
+            if (lifetimeBtn) handleCheckoutClick(lifetimeBtn, 'pro_lifetime');
+            
+            const monthlyBtn = document.getElementById('modal-pay-monthly-btn');
+            if (monthlyBtn) handleCheckoutClick(monthlyBtn, 'pro_monthly');
         }
     };
 
