@@ -54,6 +54,8 @@ process.on('unhandledRejection', (reason, promise) => {
 const http = require('http');
 const { Server: SocketIO } = require('socket.io');
 
+const IS_PROD = process.env.NODE_ENV === 'production';
+
 const app = express();
 const httpServer = http.createServer(app);
 const io = new SocketIO(httpServer, {
