@@ -174,32 +174,46 @@ async function handleUpload(req, res) {
             if (chatFilePath) {
                 const parsed = await parseChatFile(chatFilePath);
                 const senders = {};
+                let totalMessages = 0;
                 (parsed.messages || []).forEach(m => {
-                    if (m.sender && m.type !== 'system') senders[m.sender] = (senders[m.sender] || 0) + 1;
+                    if (m.sender && m.type !== 'system') {
+                        senders[m.sender] = (senders[m.sender] || 0) + 1;
+                        totalMessages++;
+                    }
                 });
                 const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
                 
-                if (sorted.length > 2) {
-                    // Preserve the actual group name if available
-                    if (targetName && targetName.toLowerCase() !== 'chat' && targetName !== 'whatsapp chat') {
-                        finalDisplayName = `${targetName} (Group, ${sorted.length} members)`;
+                // Filter out ghost senders (parsing errors, misclassified system msgs, etc.)
+                // A real sender should have at least 5 messages, or > 2% of total messages.
+                const realSenders = sorted.filter(s => senders[s] >= 5 || (senders[s] / Math.max(totalMessages, 1)) > 0.02);
+                
+                if (realSenders.length === 0) realSenders.push(...sorted); // fallback if all were filtered
+
+                const matchedSender = realSenders.find(s => {
+                    const sLow = s.toLowerCase();
+                    const tLow = targetName.toLowerCase();
+                    return sLow.includes(tLow) || tLow.includes(sLow);
+                });
+
+                if (realSenders.length > 2) {
+                    // It's likely a group chat. But if the filename perfectly matches a sender, 
+                    // it might just be a 1-on-1 where someone changed their name/number.
+                    if (matchedSender && targetName.toLowerCase() !== 'chat' && targetName.toLowerCase() !== 'whatsapp chat') {
+                        finalDisplayName = matchedSender;
+                    } else if (targetName && targetName.toLowerCase() !== 'chat' && targetName.toLowerCase() !== 'whatsapp chat') {
+                        finalDisplayName = `${targetName} (Group, ${realSenders.length} members)`;
                     } else {
-                        finalDisplayName = `Group Chat (${sorted.length} members)`;
+                        finalDisplayName = `Group Chat (${realSenders.length} members)`;
                     }
-                } else if (sorted.length > 0) {
-                    // Try to find the exact sender name that matches the filename
-                    const matchedSender = sorted.find(s => {
-                        const sLow = s.toLowerCase();
-                        const tLow = targetName.toLowerCase();
-                        return sLow.includes(tLow) || tLow.includes(sLow);
-                    });
-                    
+                } else if (realSenders.length > 0) {
                     if (matchedSender) {
                         finalDisplayName = matchedSender;
                     } else {
-                        // Fallback: usually sorted[1] is the other person in a 1-on-1 chat
-                        finalDisplayName = sorted[1] || sorted[0];
+                        // Fallback: usually realSenders[1] is the other person in a 1-on-1 chat
+                        finalDisplayName = realSenders[1] || realSenders[0];
                     }
+                } else {
+                    finalDisplayName = targetName;
                 }
             } else {
                 finalDisplayName = targetName;
