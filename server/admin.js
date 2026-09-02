@@ -904,4 +904,14 @@ router.post('/contact-messages/:id/resolve', (req, res) => {
     }
 });
 
+router.delete('/contact-messages/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        db.prepare('DELETE FROM contact_messages WHERE id = ?').run(id);
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to delete message' });
+    }
+});
+
 module.exports = router;

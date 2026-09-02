@@ -1165,7 +1165,10 @@
                             <div style="font-size:13px;color:var(--text-primary);line-height:1.5;background:#fff;padding:10px;border-radius:8px;border:1px solid var(--border);flex-grow:1;white-space:pre-wrap;">${msg.message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
                             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
                                 <span style="font-size:11px;color:var(--text-muted);">${new Date(msg.created_at).toLocaleString()}</span>
-                                ${msg.status === 'pending' ? `<button onclick="resolveContactMessage(${msg.id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Resolve</button>` : ''}
+                                <div style="display:flex;gap:6px;">
+                                    ${msg.status === 'pending' ? `<button onclick="resolveContactMessage(${msg.id})" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Resolve</button>` : ''}
+                                    <button onclick="deleteContactMessage(${msg.id})" style="background:#fff;color:var(--danger);border:1px solid #fca5a5;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">Delete</button>
+                                </div>
                             </div>
                         </div>
                     `).join('');
@@ -1183,6 +1186,16 @@
                     if (data.ok) loadContactMessages();
                     else alert('Failed to resolve');
                 }).catch(err => alert('Error resolving message'));
+        };
+
+        window.deleteContactMessage = function(id) {
+            if (!confirm('Permanently delete this message? This cannot be undone.')) return;
+            fetch(`/api/admin/contact-messages/${id}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) loadContactMessages();
+                    else alert('Failed to delete');
+                }).catch(err => alert('Error deleting message'));
         };
 
         // Tab click integration
