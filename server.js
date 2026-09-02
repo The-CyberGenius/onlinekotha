@@ -34,6 +34,7 @@ const { countWords, checkBurstLimit } = require('./server/rateLimit');
 const adminRouter = require('./server/admin');
 const aiRouter = require('./server/ai');
 const globalChatRouter = require('./server/globalChat');
+const contactRouter = require('./server/contact');
 const emailModule = require('./server/email');
 const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = emailModule;
 
@@ -525,6 +526,7 @@ app.use('/api/ai', aiRouter);
 
 app.use('/api/dodo', dodoRouter);
 app.use('/api/global-chat', globalChatRouter);
+app.use('/api/contact', contactRouter);
 
 // ── Demo chat (landing page — no auth, IP-limited) ──
 const { callLLM } = require('./server/llm');

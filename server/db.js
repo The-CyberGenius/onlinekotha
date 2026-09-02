@@ -181,6 +181,17 @@ CREATE TABLE IF NOT EXISTS guest_sessions (
 );
 CREATE INDEX IF NOT EXISTS idx_guest_sessions_ip ON guest_sessions(ip);
 CREATE INDEX IF NOT EXISTS idx_guest_sessions_fp ON guest_sessions(fingerprint);
+
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  topic TEXT,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_contact_msg_status ON contact_messages(status);
 `);
 
 // Migrations: ALTER existing users table for new columns

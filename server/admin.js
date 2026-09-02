@@ -884,4 +884,24 @@ router.post('/integrations/test-email', async (req, res) => {
     res.json(result);
 });
 
+// ── Contact Messages ──
+router.get('/contact-messages', (req, res) => {
+    try {
+        const messages = db.prepare('SELECT * FROM contact_messages ORDER BY created_at DESC').all();
+        res.json({ ok: true, messages });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch contact messages' });
+    }
+});
+
+router.post('/contact-messages/:id/resolve', (req, res) => {
+    try {
+        const { id } = req.params;
+        db.prepare('UPDATE contact_messages SET status = ? WHERE id = ?').run('resolved', id);
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to resolve message' });
+    }
+});
+
 module.exports = router;
