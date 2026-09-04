@@ -421,10 +421,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 const month = parseInt(parts[1]);
                 let year = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
                 d = new Date(year, month - 1, day);
+                // Fallback to MM/DD/YY if the parsed date is in the future
+                if (d > new Date()) {
+                    const altD = new Date(year, day - 1, month);
+                    if (altD <= new Date()) {
+                        d = altD;
+                    }
+                }
             }
         }
         if (!d || isNaN(d.getTime())) return raw;
-        return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+        return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
     }
 
     let lastRenderedDate = '';
@@ -432,11 +439,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateChatsHtml = (snippet) => {
         const frag = document.createDocumentFragment();
         snippet.forEach((msg, idx) => {
-            if (msg.type !== 'system' && msg.date !== lastRenderedDate) {
+            if (msg.date && msg.date !== lastRenderedDate) {
                 const dateSep = document.createElement('div');
                 dateSep.className = 'flex justify-center mb-6 w-full date-separator';
                 dateSep.setAttribute('data-date', msg.date);
-                dateSep.innerHTML = `<span class="bg-gray-800/20 backdrop-blur-md text-gray-800 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 uppercase">${formatChatDate(msg.date)}</span>`;
+                dateSep.innerHTML = `<span class="bg-[#E1F2FB] dark:bg-[#182229] text-[#54656f] dark:text-[#8696a0] text-[12.5px] px-3 py-1 rounded-lg shadow-sm font-medium">${formatChatDate(msg.date)}</span>`;
                 frag.appendChild(dateSep);
                 lastRenderedDate = msg.date;
             }
@@ -532,11 +539,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function parseMsgDate(dateStr) {
         if (!dateStr) return null;
-        const parts = dateStr.split('/');
-        if (parts.length !== 3) return null;
-        const day = parseInt(parts[0]);
-        const mon = parseInt(parts[1]);
-        const y = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+        let day, mon, y;
+        if (dateStr.includes('-')) {
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return null;
+            y = parseInt(parts[0]);
+            mon = parseInt(parts[1]);
+            day = parseInt(parts[2]);
+        } else if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return null;
+            day = parseInt(parts[0]);
+            mon = parseInt(parts[1]);
+            y = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+            
+            // Fallback to MM/DD/YY if the parsed date is in the future
+            const d = new Date(y, mon - 1, day);
+            if (d > new Date()) {
+                const altD = new Date(y, day - 1, mon);
+                if (altD <= new Date()) {
+                    const temp = day;
+                    day = mon;
+                    mon = temp;
+                }
+            }
+        } else {
+            return null;
+        }
         return { day, mon, y };
     }
 
@@ -570,8 +599,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (closestDate) {
                         floatingDate.innerText = closestDate;
-                        floatingDate.classList.remove('opacity-0', 'translate-y-[-10px]');
-                        floatingDate.classList.add('opacity-100', 'translate-y-0');
+                        floatingDate.classList.remove('opacity-0');
+                        floatingDate.classList.add('opacity-100');
 
                         if (dynamicHeaderDate && closestDate !== _lastHeaderDateStr) {
                             _lastHeaderDateStr = closestDate;
@@ -1088,7 +1117,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
                 <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-2">
                     <div class="flex items-center justify-between gap-2 mt-1">
-                        <p class="text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${displayName}</p>
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <p class="text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${displayName}</p>
+                            ${chatMeta?.deletedByUser ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
+                        </div>
                         <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
                     </div>
                     <div class="flex items-center justify-between gap-2 mt-0.5">
@@ -1195,14 +1227,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
             const resp = await fetch('/api/chats');
+            if (resp.status === 401) {
+                // not logged in
+                return;
+            }
             const chats = await resp.json();
             loadedChats = chats;
-
+            
             fetch('/api/chats/meta').then(r => r.json()).then(metaMap => {
                 if (!window._chatMetaCache) window._chatMetaCache = {};
-                for (const [folder, dName] of Object.entries(metaMap)) {
+                for (const [folder, meta] of Object.entries(metaMap)) {
                     if (!window._chatMetaCache[folder]) window._chatMetaCache[folder] = {};
-                    window._chatMetaCache[folder].contactName = dName;
+                    if (typeof meta === 'object' && meta !== null) {
+                        window._chatMetaCache[folder].contactName = meta.display_name;
+                        window._chatMetaCache[folder].deletedByUser = meta.deleted_by_user;
+                    } else {
+                        window._chatMetaCache[folder].contactName = meta; // backwards compatibility
+                    }
                 }
                 renderChatList(loadedChats, currentChat);
             }).catch(() => {});
@@ -1743,7 +1784,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (msg.date !== lastDate) {
                         chatContainer.insertAdjacentHTML('beforeend', `
                             <div class="flex justify-center mb-6 w-full date-separator">
-                                <span class="bg-gray-200/50 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-xs px-5 py-1.5 font-bold tracking-widest rounded-full shadow-sm border border-gray-300/30 dark:border-white/10 uppercase">${formatChatDate(msg.date)}</span>
+                                <span class="bg-[#E1F2FB] dark:bg-[#182229] text-[#54656f] dark:text-[#8696a0] text-[12.5px] px-3 py-1 rounded-lg shadow-sm font-medium">${formatChatDate(msg.date)}</span>
                             </div>
                         `);
                         lastDate = msg.date;

@@ -128,6 +128,51 @@ async function parseChatFile(chatFilePath) {
 
     if (currentMessage) messages.push(currentMessage);
 
+    // Normalize dates across the entire chat to YYYY-MM-DD
+    let isUSFormat = false; // MM/DD/YY
+    for (const msg of messages) {
+        if (!msg.date) continue;
+        const parts = msg.date.split(/[\/\-\.]/);
+        if (parts.length === 3) {
+            if (parts[0].length === 4) continue; // Already YYYY-MM-DD
+            const p0 = parseInt(parts[0]);
+            const p1 = parseInt(parts[1]);
+            if (p0 > 12 && p1 <= 12) {
+                isUSFormat = false;
+                break;
+            } else if (p1 > 12 && p0 <= 12) {
+                isUSFormat = true;
+                break;
+            }
+        }
+    }
+
+    for (const msg of messages) {
+        if (!msg.date) continue;
+        const parts = msg.date.split(/[\/\-\.]/);
+        if (parts.length === 3) {
+            if (parts[0].length === 4) {
+                // It's already YYYY-MM-DD, just ensure dashes
+                msg.date = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                continue;
+            }
+            
+            let day, month;
+            if (isUSFormat) {
+                month = parseInt(parts[0]);
+                day = parseInt(parts[1]);
+            } else {
+                day = parseInt(parts[0]);
+                month = parseInt(parts[1]);
+            }
+            let yearStr = parts[2].replace(/\D/g, ''); // strip any non-digits
+            let year = yearStr.length === 2 ? 2000 + parseInt(yearStr) : parseInt(yearStr);
+            const dd = String(day).padStart(2, '0');
+            const mm = String(month).padStart(2, '0');
+            msg.date = `${year}-${mm}-${dd}`;
+        }
+    }
+
     return { messages, format: detectedFormat || 'unknown' };
 }
 
