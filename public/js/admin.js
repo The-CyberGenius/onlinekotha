@@ -606,7 +606,7 @@ HARD RULES
                 html += '</div>';
 
                 // ── Body (hidden by default)
-                html += '<div class="mcard-body" style="display:none;border-top:1px solid #f1f5f9;padding:0 14px 12px;">';
+                html += '<div class="mcard-body" style="display:none;border-top:1px solid var(--bg-alt);padding:0 14px 12px;">';
                 html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;">';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Auth</div><div style="font-size:11px;color:' + (u.google_id ? '#2563eb' : '#64748b') + ';">' + (u.google_id ? 'Google' : 'Email') + '</div></div>';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:monospace;">$' + u.total_cost.toFixed(3) + '</div></div>';
@@ -673,7 +673,7 @@ HARD RULES
                 html += `<td>${ipCountry}</td>`;
                 html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
                 html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
-                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid #e2e8f0;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid #e2e8f0;"></div></td></tr>`;
+                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div></td></tr>`;
             }
             html += '</tbody></table></div>';
             list.innerHTML = html;
@@ -816,7 +816,7 @@ HARD RULES
                             chats.map(c => {
                                 const name = (c.display_name || c.folder_name).replace('WhatsApp Chat - ', '');
                                 const del = c.deleted_by_user ? ' <span class="badge badge-expired" style="font-size:9px;">deleted</span>' : '';
-                                return '<div data-admin-chat-row="' + c.id + '" style="padding:10px;border-bottom:1px solid #f1f5f9;">' +
+                                return '<div data-admin-chat-row="' + c.id + '" style="padding:10px;border-bottom:1px solid var(--bg-alt);">' +
                                     '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:4px;">' + name + del + '</div>' +
                                     '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);margin-bottom:6px;">' +
                                         '<span>' + (c.message_count || 0) + ' msgs</span>' +
@@ -840,7 +840,7 @@ HARD RULES
                                     <div style="width:150px;text-align:right;flex-shrink:0;">Actions</div>
                                 </div>
                                 ${chats.map(c => `
-                                    <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
+                                    <div style="padding:8px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
                                         <div style="flex:1;min-width:0;">
                                             <div style="font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                                 <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
@@ -921,7 +921,7 @@ HARD RULES
                         area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
                             '<div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (' + convs.length + ')</span><button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;padding:2px 6px;">×</button></div>' +
                             convs.map(c =>
-                                '<div style="padding:10px;border-bottom:1px solid #f1f5f9;">' +
+                                '<div style="padding:10px;border-bottom:1px solid var(--bg-alt);">' +
                                     '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:2px;word-break:break-word;">' + (c.title || 'Untitled') + '</div>' +
                                     '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">' + c.chat_folder + ' · ' + c.msg_count + ' msgs · ' + formatDateTime(c.updated_at) + '</div>' +
                                     '<div style="display:flex;gap:6px;">' +
@@ -938,7 +938,7 @@ HARD RULES
                                     <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;">×</button>
                                 </div>
                                 ${convs.map(c => `
-                                    <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
+                                    <div style="padding:8px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
                                         <div style="flex:1;min-width:0;">
                                             <p style="font-weight:600;color:var(--text-primary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
                                             <p style="font-size:10px;color:var(--text-muted);margin:1px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
@@ -1115,7 +1115,7 @@ HARD RULES
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;">${fieldHtml}</div>
-            <div style="display:flex;align-items:center;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid var(--bg-alt);flex-wrap:wrap;">
                 <button data-action="save" data-section="${section}" style="background:var(--btn-dark);color:#fff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;">Save</button>
                 <button data-action="clear" data-section="${section}" class="btn-subtle btn-subtle-danger">Clear</button>
                 ${extraButtons}

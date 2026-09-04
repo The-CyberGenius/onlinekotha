@@ -458,7 +458,7 @@
 
         .expand-row-container {
             box-shadow: inset 0 3px 6px -3px rgba(0,0,0,0.05);
-            background: #fdfdfd;
+            background: var(--bg-alt);
         }
 
         /* Clean Action Buttons */
@@ -726,14 +726,56 @@
             --btn-dark: #f8fafc;
             --btn-dark-text: #0f172a;
         }
+
+        [data-theme="very-dark"] {
+            --bg-page: #000000;
+            --card-bg: #0a0a0a;
+            --border: #262626;
+            --border-hover: #404040;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a3a3a3;
+            --text-muted: #737373;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --success: #22c55e;
+            --bg-alt: #171717;
+            --bg-hover: #262626;
+            --table-header: #000000;
+            --input-bg: #000000;
+            --btn-dark: #f5f5f5;
+            --btn-dark-text: #000000;
+        }
+
+        [data-theme="neon-dark"] {
+            --bg-page: #09090b;
+            --card-bg: #111115;
+            --border: #272730;
+            --border-hover: #3f3f4e;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent: #c084fc;
+            --accent-hover: #d8b4fe;
+            --danger: #f43f5e;
+            --danger-bg: rgba(244, 63, 94, 0.15);
+            --success: #10b981;
+            --bg-alt: #18181b;
+            --bg-hover: #27272a;
+            --table-header: #09090b;
+            --input-bg: #09090b;
+            --btn-dark: #c084fc;
+            --btn-dark-text: #000000;
+        }
         
-        [data-theme="dark"] .stat-icon { background: rgba(59, 130, 246, 0.15); }
-        [data-theme="dark"] .admin-brand-wrap img { filter: invert(1); }
-        [data-theme="dark"] .sidebar-nav a:hover { background: var(--bg-hover); }
-        [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea { background: var(--input-bg) !important; color: var(--text-primary); border-color: var(--border); }
+        :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) .stat-icon { background: rgba(59, 130, 246, 0.15); }
+        :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) .admin-brand-wrap img { filter: invert(1); }
+        :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) .sidebar-nav a:hover { background: var(--bg-hover); }
+        :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) input, :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) select, :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) textarea { background: var(--input-bg) !important; color: var(--text-primary); border-color: var(--border); }
         
         /* Modal backgrounds in dark mode */
-        [data-theme="dark"] .modal-content { background: var(--card-bg); }
+        :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) .modal-content { background: var(--card-bg); }
 
     </style>
 </head>
@@ -752,10 +794,12 @@
             </div>
             <div class="header-actions">
                 
-                <button id="theme-toggle" class="header-btn" title="Toggle Dark Mode" style="cursor:pointer; display:flex; align-items:center; justify-content:center; padding:8px;">
-                    <svg id="theme-icon-sun" style="display:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                    <svg id="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                </button>
+                <select id="theme-select" class="header-btn" style="cursor:pointer; padding:8px; border-radius:8px; background:var(--card-bg); color:var(--text-primary); border:1px solid var(--border); font-size:12px; font-weight:600; outline:none;">
+                    <option value="light">Light Mode</option>
+                    <option value="dark">Dark</option>
+                    <option value="very-dark">Very Dark</option>
+                    <option value="neon-dark">Neon Dark</option>
+                </select>
                 <a href="/app.html" class="header-btn">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     <span>Open App</span>
