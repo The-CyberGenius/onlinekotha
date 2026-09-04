@@ -1108,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Get last message preview from cache if available
             const lastMsg = chatMeta?.lastMessage || '';
             const lastTime = chatMeta?.lastTime || '';
-            const msgCount = chatMeta?.count || '';
+            const msgCount = chatMeta?.messageCount || '';
 
             const item = document.createElement('div');
             item.className = `flex items-center gap-3 px-3 py-1.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
@@ -1241,6 +1241,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof meta === 'object' && meta !== null) {
                         window._chatMetaCache[folder].contactName = meta.display_name;
                         window._chatMetaCache[folder].deletedByUser = meta.deleted_by_user;
+                        window._chatMetaCache[folder].messageCount = meta.message_count;
+                        window._chatMetaCache[folder].isGroup = meta.is_group === 1;
+                        window._chatMetaCache[folder].participants = meta.participants;
                     } else {
                         window._chatMetaCache[folder].contactName = meta; // backwards compatibility
                     }

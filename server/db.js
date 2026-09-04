@@ -35,6 +35,9 @@ try {
     // Column might already exist, safe to ignore
 }
 
+try { db.exec(`ALTER TABLE chats ADD COLUMN is_group INTEGER DEFAULT 0;`); } catch(e) {}
+try { db.exec(`ALTER TABLE chats ADD COLUMN participants TEXT;`); } catch(e) {}
+
 db.exec(`
 CREATE TABLE IF NOT EXISTS email_tokens (
   token TEXT PRIMARY KEY,

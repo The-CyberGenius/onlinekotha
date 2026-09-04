@@ -3,6 +3,7 @@ const path = require('path');
 const multer = require('multer');
 const unzipper = require('unzipper');
 const { findChatFile, parseChatFile } = require('./parser');
+const { getMessages } = require('./cache');
 const { db } = require('./db');
 
 const SRC_DIR = path.join(__dirname, '..', 'src');
@@ -183,52 +184,30 @@ async function handleUpload(req, res) {
         cleaned = cleaned.replace(/\s{2,}/g, ' ').trim();
         let targetName = cleaned || finalDisplayName;
 
+        let message_count = 0;
+        let is_group = 0;
+        let participants = [];
+
         // ALWAYS try to parse the real contact name from the file content
         try {
             const chatFilePath = findChatFile(finalDir);
             if (chatFilePath) {
-                const parsed = await parseChatFile(chatFilePath);
-                const senders = {};
-                let totalMessages = 0;
-                (parsed.messages || []).forEach(m => {
-                    if (m.sender && m.type !== 'system') {
-                        senders[m.sender] = (senders[m.sender] || 0) + 1;
-                        totalMessages++;
-                    }
-                });
-                const sorted = Object.keys(senders).sort((a, b) => senders[b] - senders[a]);
-                
-                // Filter out ghost senders (parsing errors, misclassified system msgs, etc.)
-                // A real sender should have a decent chunk of messages relative to the total.
-                const dynamicThreshold = Math.max(5, totalMessages * 0.01);
-                const realSenders = sorted.filter(s => senders[s] >= dynamicThreshold);
-                
-                if (realSenders.length === 0) realSenders.push(...sorted); // fallback if all were filtered
+                // Call getMessages with the directory (not file) to ensure cache is generated and saved immediately
+                const parsedData = await getMessages(finalDir);
+                message_count = parsedData.messages ? parsedData.messages.length : 0;
+                is_group = parsedData.isGroup ? 1 : 0;
+                participants = parsedData.participants || [];
 
+                const realSenders = participants;
                 const matchedSender = realSenders.find(s => {
                     const sLow = s.toLowerCase();
                     const tLow = targetName.toLowerCase();
                     return sLow.includes(tLow) || tLow.includes(sLow);
                 });
 
-                // Concentration Check: Is it a 1-on-1 chat?
-                // If top 2 senders account for > 95% of messages, it's definitely a 1-on-1 chat.
-                let isGroup = realSenders.length > 2;
-                if (isGroup && sorted.length >= 2) {
-                    const top2Messages = senders[sorted[0]] + senders[sorted[1]];
-                    if (top2Messages / Math.max(totalMessages, 1) > 0.95) {
-                        isGroup = false;
-                        // Keep only the top 2 as real senders to discard noise
-                        realSenders.length = 2;
-                        // Update realSenders to just the top 2
-                        realSenders[0] = sorted[0];
-                        realSenders[1] = sorted[1];
-                    }
-                }
-
                 const isGenericName = targetName.toLowerCase() === 'chat' || targetName.toLowerCase() === 'whatsapp chat' || /^chat_\d+$/.test(targetName) || targetName.toLowerCase() === 'export';
 
-                if (isGroup) {
+                if (parsedData.isGroup) {
                     if (matchedSender && !isGenericName) {
                         finalDisplayName = matchedSender;
                     } else if (targetName && !isGenericName) {
@@ -260,14 +239,14 @@ async function handleUpload(req, res) {
 
         if (req.user) {
             db.prepare(
-                `INSERT OR IGNORE INTO chats (user_id, folder_name, display_name, created_at)
-                 VALUES (?, ?, ?, ?)`
-            ).run(req.user.id, folderName, finalDisplayName, Date.now());
+                `INSERT OR IGNORE INTO chats (user_id, folder_name, display_name, created_at, message_count, is_group, participants)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`
+            ).run(req.user.id, folderName, finalDisplayName, Date.now(), message_count, is_group, JSON.stringify(participants));
         } else {
             db.prepare(
-                `INSERT OR IGNORE INTO chats (user_id, guest_id, folder_name, display_name, created_at)
-                 VALUES (0, ?, ?, ?, ?)`
-            ).run(guestId, folderName, finalDisplayName, Date.now());
+                `INSERT OR IGNORE INTO chats (user_id, guest_id, folder_name, display_name, created_at, message_count, is_group, participants)
+                 VALUES (0, ?, ?, ?, ?, ?, ?, ?)`
+            ).run(guestId, folderName, finalDisplayName, Date.now(), message_count, is_group, JSON.stringify(participants));
             recordGuestChatImport(req, res);
         }
 

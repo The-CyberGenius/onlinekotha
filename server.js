@@ -453,15 +453,22 @@ app.get('/api/chats/meta', requireUserOrGuest, (req, res) => {
     const ownerId = getOwnerId(req, res);
     let rows = [];
     if (req.user) {
-        rows = db.prepare('SELECT folder_name, display_name, deleted_by_user FROM chats WHERE user_id = ?').all(req.user.id);
+        rows = db.prepare('SELECT folder_name, display_name, deleted_by_user, message_count, is_group, participants FROM chats WHERE user_id = ?').all(req.user.id);
     } else {
-        rows = db.prepare('SELECT folder_name, display_name FROM chats WHERE guest_id = ?').all(ownerId);
+        rows = db.prepare('SELECT folder_name, display_name, message_count, is_group, participants FROM chats WHERE guest_id = ?').all(ownerId);
     }
     const map = {};
     for (const r of rows) {
+        let parts = [];
+        if (r.participants) {
+            try { parts = JSON.parse(r.participants); } catch(e){}
+        }
         map[r.folder_name] = {
             display_name: r.display_name || '',
-            deleted_by_user: r.deleted_by_user || 0
+            deleted_by_user: r.deleted_by_user || 0,
+            message_count: r.message_count || 0,
+            is_group: r.is_group || 0,
+            participants: parts
         };
     }
     res.json(map);
