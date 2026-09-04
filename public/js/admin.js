@@ -22,7 +22,7 @@
     }
     if (!me.user.is_admin) {
         document.getElementById('auth-gate').innerHTML =
-            '<div style="text-align:center;padding:24px;"><p style="color:#dc2626;font-weight:600;margin-bottom:8px;">Not authorized.</p><a href="/" style="color:#2563eb;text-decoration:underline;font-size:13px;">Go to app</a></div>';
+            '<div style="text-align:center;padding:24px;"><p style="color:var(--danger);font-weight:600;margin-bottom:8px;">Not authorized.</p><a href="/" style="color:var(--accent);text-decoration:underline;font-size:13px;">Go to app</a></div>';
         return;
     }
     document.getElementById('auth-gate').classList.add('hidden');
@@ -91,24 +91,24 @@
         const rows = await (await fetch('/api/admin/providers')).json();
         const list = document.getElementById('provider-list');
         if (!rows.length) {
-            list.innerHTML = '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:20px;text-align:center;color:#64748b;font-size:13px;">No providers added yet.</div>';
+            list.innerHTML = '<div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No providers added yet.</div>';
             return;
         }
         list.innerHTML = '';
         for (const p of rows) {
             const tested = p.last_tested_at
                 ? `<span style="font-size:11px;font-weight:600;color:${p.last_test_ok ? '#16a34a' : '#dc2626'};">${p.last_test_ok ? 'Working' : 'Failed'}</span>`
-                : '<span style="font-size:11px;color:#94a3b8;">Not tested</span>';
+                : '<span style="font-size:11px;color:var(--text-muted);">Not tested</span>';
             const card = document.createElement('div');
-            card.style.cssText = 'background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;';
+            card.style.cssText = 'background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;';
             card.innerHTML = `
                 <div style="flex:1;min-width:180px;">
                     <div style="display:flex;align-items:center;gap:6px;">
-                        <span style="font-weight:700;color:#0f172a;font-size:13px;">${p.label || p.name}</span>
+                        <span style="font-weight:700;color:var(--text-primary);font-size:13px;">${p.label || p.name}</span>
                         <span class="badge ${p.enabled ? 'badge-paid' : ''}">${p.enabled ? 'Enabled' : 'Disabled'}</span>
                     </div>
-                    <div style="font-size:11px;color:#64748b;margin-top:2px;font-family:monospace;">${p.key_masked}</div>
-                    <div style="font-size:10px;color:#94a3b8;margin-top:2px;">${p.base_url || ''} &middot; ${tested}</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:monospace;">${p.key_masked}</div>
+                    <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${p.base_url || ''} &middot; ${tested}</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;">
                     <button data-act="test" data-id="${p.id}" class="btn-subtle">Test</button>
@@ -194,7 +194,7 @@
         }
 
         if (!rows.length) {
-            list.innerHTML = '<p style="color:#64748b;font-size:12px;">No models yet. Add a provider to auto-seed.</p>';
+            list.innerHTML = '<p style="color:var(--text-muted);font-size:12px;">No models yet. Add a provider to auto-seed.</p>';
             return;
         }
         let lastProv = null;
@@ -202,18 +202,18 @@
         for (const m of rows) {
             if (m.provider_label !== lastProv) {
                 const h = document.createElement('div');
-                h.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;letter-spacing:0.04em;margin-top:10px;padding-bottom:4px;';
+                h.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.04em;margin-top:10px;padding-bottom:4px;';
                 h.textContent = m.provider_label;
                 list.appendChild(h);
                 lastProv = m.provider_label;
             }
             const row = document.createElement('div');
-            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;gap:8px;';
+            row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-page);border:1px solid var(--border);border-radius:8px;gap:8px;';
             row.innerHTML = `
                 <div style="flex:1;min-width:160px;">
-                    <div style="font-weight:600;color:#0f172a;font-size:12px;">${m.display_name || m.model_id}</div>
-                    <div style="font-size:10px;color:#64748b;font-family:monospace;">${m.model_id}</div>
-                    <div style="font-size:10px;color:#94a3b8;margin-top:1px;">in $${m.input_price_per_1m}/M &middot; out $${m.output_price_per_1m}/M</div>
+                    <div style="font-weight:600;color:var(--text-primary);font-size:12px;">${m.display_name || m.model_id}</div>
+                    <div style="font-size:10px;color:var(--text-muted);font-family:monospace;">${m.model_id}</div>
+                    <div style="font-size:10px;color:var(--text-muted);margin-top:1px;">in $${m.input_price_per_1m}/M &middot; out $${m.output_price_per_1m}/M</div>
                 </div>
                 <div style="display:flex;gap:4px;align-items:center;">
                     <button data-mid="${m.id}" data-enabled="${m.enabled}" class="model-toggle btn-subtle" style="padding:3px 8px;font-size:10px;">${m.enabled ? 'ON' : 'OFF'}</button>
@@ -400,46 +400,46 @@ HARD RULES
             if (feature === 'chat') {
                 promptHtml = `
                 <div style="margin-top:10px;">
-                    <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="4" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:12px;outline:none;font-family:monospace;background:#fff;" placeholder="Default roleplay prompt used if empty...">${r.system_prompt || ''}</textarea>
-                    <p style="font-size:10px;color:#94a3b8;margin-top:2px;">Variables: {{contactName}}, {{userName}}, {{contextBlock}}, {{currentDate}}, {{currentTime}}</p>
-                    <details style="margin-top:6px;font-size:11px;color:#64748b;cursor:pointer;">
-                        <summary style="font-weight:600;color:#2563eb;">View default prompt template</summary>
-                        <pre style="background:#f1f5f9;padding:10px;border-radius:8px;margin-top:4px;font-family:monospace;font-size:10px;overflow-x:auto;white-space:pre-wrap;max-height:180px;overflow-y:auto;">${DEFAULT_CHAT_PROMPT}</pre>
+                    <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="4" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;outline:none;font-family:monospace;background:var(--card-bg);" placeholder="Default roleplay prompt used if empty...">${r.system_prompt || ''}</textarea>
+                    <p style="font-size:10px;color:var(--text-muted);margin-top:2px;">Variables: {{contactName}}, {{userName}}, {{contextBlock}}, {{currentDate}}, {{currentTime}}</p>
+                    <details style="margin-top:6px;font-size:11px;color:var(--text-muted);cursor:pointer;">
+                        <summary style="font-weight:600;color:var(--accent);">View default prompt template</summary>
+                        <pre style="background:var(--bg-page);padding:10px;border-radius:8px;margin-top:4px;font-family:monospace;font-size:10px;overflow-x:auto;white-space:pre-wrap;max-height:180px;overflow-y:auto;">${DEFAULT_CHAT_PROMPT}</pre>
                     </details>
                 </div>
                 `;
             } else {
                 promptHtml = `
                 <div style="margin-top:10px;">
-                    <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">System Prompt</label>
-                    <textarea data-feat="${feature}" data-param="system_prompt" rows="2" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px;font-size:12px;outline:none;font-family:monospace;background:#fff;">${r.system_prompt || ''}</textarea>
+                    <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">System Prompt</label>
+                    <textarea data-feat="${feature}" data-param="system_prompt" rows="2" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;outline:none;font-family:monospace;background:var(--card-bg);">${r.system_prompt || ''}</textarea>
                 </div>
                 `;
             }
 
             const div = document.createElement('div');
-            div.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;';
+            div.style.cssText = 'background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:14px;';
             div.innerHTML = `
-                <div style="font-weight:700;color:#0f172a;font-size:13px;margin-bottom:10px;">${featureLabels[feature]}</div>
+                <div style="font-weight:700;color:var(--text-primary);font-size:13px;margin-bottom:10px;">${featureLabels[feature]}</div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-bottom:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Primary Model</label>
-                        <select data-feat="${feature}" data-kind="primary" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">${opts}</select>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Primary Model</label>
+                        <select data-feat="${feature}" data-kind="primary" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">${opts}</select>
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Fallback Model</label>
-                        <select data-feat="${feature}" data-kind="fallback" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">${opts}</select>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Fallback Model</label>
+                        <select data-feat="${feature}" data-kind="fallback" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">${opts}</select>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
                     <div>
-                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Max Tokens</label>
-                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Max Tokens</label>
+                        <input data-feat="${feature}" data-param="max_tokens" type="number" value="${r.max_tokens || 1024}" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">Temperature</label>
-                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:#fff;">
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Temperature</label>
+                        <input data-feat="${feature}" data-param="temperature" type="number" step="0.1" min="0" max="2" value="${r.temperature ?? 0.7}" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">
                     </div>
                 </div>
                 ${promptHtml}
@@ -554,7 +554,7 @@ HARD RULES
     function renderUserList(rows) {
         const list = document.getElementById('user-list');
         if (!rows.length) {
-            list.innerHTML = '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">No users match your query</div>';
+            list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">No users match your query</div>';
             return;
         }
 
@@ -585,7 +585,7 @@ HARD RULES
             // ══════════════════════════════════════════════════════════
             // MOBILE — pure <div> cards, inline styles, no CSS needed
             // ══════════════════════════════════════════════════════════
-            let html = '<div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:12px;">' + rows.length + ' total users</div>';
+            let html = '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:12px;">' + rows.length + ' total users</div>';
 
             for (const u of rows) {
                 const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
@@ -596,32 +596,32 @@ HARD RULES
                 const phone = u.phone ? (u.phone_country_code||'') + ' ' + u.phone : 'No phone';
                 const loc = u.ip_address ? u.ip_address + ' · ' + getCountryName(u.country) : 'No IP';
 
-                html += '<div data-uid="' + u.id + '" style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+                html += '<div data-uid="' + u.id + '" style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
                 // ── Header row (always visible)
                 html += '<div class="mcard-hdr" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;-webkit-tap-highlight-color:rgba(99,102,241,0.12);touch-action:manipulation;user-select:none;">';
                 html += av;
-                html += '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#0f172a;display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">' + (u.display_name || u.email.split('@')[0]) + '</span>' + dot + ' ' + getBadge(u) + '</div>';
-                html += '<div style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + u.email + '</div></div>';
-                html += '<div class="mcard-chev" style="width:28px;height:28px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .25s;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>';
+                html += '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">' + (u.display_name || u.email.split('@')[0]) + '</span>' + dot + ' ' + getBadge(u) + '</div>';
+                html += '<div style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + u.email + '</div></div>';
+                html += '<div class="mcard-chev" style="width:28px;height:28px;border-radius:50%;background:var(--bg-page);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .25s;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>';
                 html += '</div>';
 
                 // ── Body (hidden by default)
                 html += '<div class="mcard-body" style="display:none;border-top:1px solid #f1f5f9;padding:0 14px 12px;">';
                 html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;">';
-                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Auth</div><div style="font-size:11px;color:' + (u.google_id ? '#2563eb' : '#64748b') + ';">' + (u.google_id ? 'Google' : 'Email') + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:#0f172a;font-family:monospace;">$' + u.total_cost.toFixed(3) + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Phone</div><div style="font-size:12px;color:#475569;">' + phone + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:#0f172a;">' + u.chat_count + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Location</div><div style="font-size:11px;color:#475569;">' + loc + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:2px;">Joined</div><div style="font-size:11px;color:#475569;">' + formatDateTime(u.created_at).split(',')[0] + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Auth</div><div style="font-size:11px;color:' + (u.google_id ? '#2563eb' : '#64748b') + ';">' + (u.google_id ? 'Google' : 'Email') + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:monospace;">$' + u.total_cost.toFixed(3) + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Phone</div><div style="font-size:12px;color:var(--text-secondary);">' + phone + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:var(--text-primary);">' + u.chat_count + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Location</div><div style="font-size:11px;color:var(--text-secondary);">' + loc + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Joined</div><div style="font-size:11px;color:var(--text-secondary);">' + formatDateTime(u.created_at).split(',')[0] + '</div></div>';
                 html += '</div>';
-                if (u.last_active_at) html += '<div style="font-size:10px;color:#94a3b8;margin-top:6px;">Active: ' + formatDateTime(u.last_active_at) + '</div>';
+                if (u.last_active_at) html += '<div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Active: ' + formatDateTime(u.last_active_at) + '</div>';
                 // Action buttons
                 html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">';
-                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">Plan</button>';
-                html += '<button data-uid="' + u.id + '" class="user-chats-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">Chats</button>';
-                html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">Logs</button>';
-                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Del</button>';
+                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
+                html += '<button data-uid="' + u.id + '" class="user-chats-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats</button>';
+                html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
+                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #fca5a5;background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>';
                 html += '</div>';
                 // Expand areas
                 html += '<div data-chats-for="' + u.id + '" class="hidden" style="margin-top:8px;"></div>';
@@ -653,27 +653,27 @@ HARD RULES
             // ══════════════════════════════════════════════════════════
             // DESKTOP — original table layout (unchanged)
             // ══════════════════════════════════════════════════════════
-            let html = '\n<div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:12px;">' + rows.length + ' total users</div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
+            let html = '\n<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:12px;">' + rows.length + ' total users</div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
             for (const u of rows) {
                 const badge = getBadge(u);
-                const loginMethod = u.google_id ? '<span class="meta-text" style="color:#2563eb;">Google Auth</span>' : '<span class="meta-text">Email Auth</span>';
+                const loginMethod = u.google_id ? '<span class="meta-text" style="color:var(--accent);">Google Auth</span>' : '<span class="meta-text">Email Auth</span>';
                 const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
                 const avatarHtml = u.avatar_url
                     ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
                     : `<div class="user-avatar">${initials}</div>`;
                 const onlineDot = u.is_online ? '<span class="status-dot" title="Online"></span>' : '';
-                const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code||''}${u.phone}" style="color:#0f172a;text-decoration:none;">${u.phone_country_code?u.phone_country_code+' ':''}${u.phone}</a>` : '<span style="color:#94a3b8;">No phone</span>';
-                const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:#94a3b8;">No IP</span>';
+                const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code||''}${u.phone}" style="color:var(--text-primary);text-decoration:none;">${u.phone_country_code?u.phone_country_code+' ':''}${u.phone}</a>` : '<span style="color:var(--text-muted);">No phone</span>';
+                const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
                 const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
 
                 html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name||u.email.split('@')[0]}${onlineDot}</span><span class="user-email-text">${u.email}</span></div></div></td>`;
                 html += `<td><div style="margin-bottom:4px;">${badge}</div>${loginMethod}</td>`;
                 html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">${u.chat_count} chat${u.chat_count!==1?'s':''}</span></td>`;
-                html += `<td><span class="sub-text font-mono" style="font-weight:700;color:#0f172a;">$${u.total_cost.toFixed(3)}</span></td>`;
+                html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${u.total_cost.toFixed(3)}</span></td>`;
                 html += `<td>${ipCountry}</td>`;
-                html += `<td><span class="sub-text" style="color:#0f172a;font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
+                html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
                 html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
-                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid #e2e8f0;border-top:1px solid #e2e8f0;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid #e2e8f0;border-top:1px solid #e2e8f0;"></div></td></tr>`;
+                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid #e2e8f0;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid #e2e8f0;"></div></td></tr>`;
             }
             html += '</tbody></table></div>';
             list.innerHTML = html;
@@ -697,29 +697,29 @@ HARD RULES
                 modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                 modal.innerHTML = `
                     <div style="background:white;border-radius:12px;max-width:420px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
-                        <div style="padding:14px 16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+                        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
                             <div>
-                                <h3 style="font-weight:700;font-size:15px;color:#0f172a;margin:0;">Manage Plan</h3>
-                                <p style="font-size:12px;color:#64748b;margin:2px 0 0;">${email}</p>
+                                <h3 style="font-weight:700;font-size:15px;color:var(--text-primary);margin:0;">Manage Plan</h3>
+                                <p style="font-size:12px;color:var(--text-muted);margin:2px 0 0;">${email}</p>
                             </div>
-                            <button id="plan-modal-x" style="border:none;background:transparent;font-size:18px;color:#64748b;cursor:pointer;">×</button>
+                            <button id="plan-modal-x" style="border:none;background:transparent;font-size:18px;color:var(--text-muted);cursor:pointer;">×</button>
                         </div>
                         <div style="padding:16px;">
                             <div style="margin-bottom:12px;">
-                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px;">Plan Tier</label>
-                                <select id="plan-modal-plan" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:#fff;">
+                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Plan Tier</label>
+                                <select id="plan-modal-plan" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:var(--card-bg);">
                                     <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free</option>
                                     <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial</option>
                                     <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid</option>
                                 </select>
                             </div>
-                            <div style="margin-bottom:12px;padding:10px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
-                                <p style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin:0;">Trial Status</p>
-                                <p style="font-size:12px;color:#0f172a;margin:3px 0 0;font-weight:600;">${trialInfo}</p>
+                            <div style="margin-bottom:12px;padding:10px;background:var(--bg-page);border-radius:8px;border:1px solid var(--border);">
+                                <p style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin:0;">Trial Status</p>
+                                <p style="font-size:12px;color:var(--text-primary);margin:3px 0 0;font-weight:600;">${trialInfo}</p>
                             </div>
                             <div style="margin-bottom:14px;">
-                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:#64748b;margin-bottom:4px;">Extend Trial (hours)</label>
-                                <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;margin-bottom:6px;">
+                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Extend Trial (hours)</label>
+                                <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;margin-bottom:6px;">
                                 <div style="display:flex;gap:6px;">
                                     <button id="plan-modal-quick-24" class="btn-subtle" style="flex:1;">+24h</button>
                                     <button id="plan-modal-quick-72" class="btn-subtle" style="flex:1;">+72h</button>
@@ -729,7 +729,7 @@ HARD RULES
                             <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:8px;border-radius:6px;margin-bottom:10px;"></div>
                             <div style="display:flex;gap:6px;justify-content:flex-end;">
                                 <button id="plan-modal-cancel" class="btn-subtle">Cancel</button>
-                                <button id="plan-modal-save" style="font-size:12px;font-weight:600;color:white;padding:7px 14px;border-radius:8px;cursor:pointer;background:#0f172a;border:none;">Save</button>
+                                <button id="plan-modal-save" style="font-size:12px;font-weight:600;color:var(--btn-dark-text);padding:7px 14px;border-radius:8px;cursor:pointer;background:var(--btn-dark);border:none;">Save</button>
                             </div>
                         </div>
                     </div>
@@ -799,41 +799,41 @@ HARD RULES
                     return;
                 }
                 if (expandRow) expandRow.classList.remove('hidden');
-                area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading chats...</div>';
+                area.innerHTML = '<div style="padding:8px;font-size:12px;color:var(--text-muted);">Loading chats...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
                     if (!chats.length) {
-                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#94a3b8;">No chats uploaded yet</div>';
+                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--text-muted);">No chats uploaded yet</div>';
                         return;
                     }
                     const isMob = window.matchMedia('(max-width: 768px)').matches;
                     if (isMob) {
                         // Mobile: stacked chat cards
-                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">' +
-                            '<div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:#334155;text-transform:uppercase;">Chats (' + chats.length + ')</span></div>' +
+                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
+                            '<div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">Chats (' + chats.length + ')</span></div>' +
                             chats.map(c => {
                                 const name = (c.display_name || c.folder_name).replace('WhatsApp Chat - ', '');
                                 const del = c.deleted_by_user ? ' <span class="badge badge-expired" style="font-size:9px;">deleted</span>' : '';
                                 return '<div data-admin-chat-row="' + c.id + '" style="padding:10px;border-bottom:1px solid #f1f5f9;">' +
-                                    '<div style="font-weight:600;font-size:13px;color:#0f172a;margin-bottom:4px;">' + name + del + '</div>' +
-                                    '<div style="display:flex;gap:12px;font-size:11px;color:#64748b;margin-bottom:6px;">' +
+                                    '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:4px;">' + name + del + '</div>' +
+                                    '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);margin-bottom:6px;">' +
                                         '<span>' + (c.message_count || 0) + ' msgs</span>' +
                                         '<span>' + formatDateTime(c.created_at) + '</span>' +
                                     '</div>' +
                                     '<div style="display:flex;gap:6px;">' +
-                                        '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;text-decoration:none;">ZIP</a>' +
-                                        '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#2563eb;cursor:pointer;">Open</button>' +
-                                        '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Del</button>' +
+                                        '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">ZIP</a>' +
+                                        '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--accent);cursor:pointer;">Open</button>' +
+                                        '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #fca5a5;background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
                                     '</div></div>';
                             }).join('') +
                         '</div>';
                     } else {
                         // Desktop: table-like flex rows
                         area.innerHTML = `
-                            <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
-                                <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0;background:#f1f5f9;">
+                            <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+                                <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg-page);">
                                     <div style="flex:1;min-width:0;">Chat Name</div>
                                     <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
                                     <div style="width:130px;flex-shrink:0;">Imported</div>
@@ -842,16 +842,16 @@ HARD RULES
                                 ${chats.map(c => `
                                     <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
                                         <div style="flex:1;min-width:0;">
-                                            <div style="font-weight:600;color:#0f172a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                            <div style="font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                                 <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
                                                 ${c.deleted_by_user ? '<span class="badge badge-expired" style="margin-left:4px;">deleted</span>' : ''}
                                             </div>
                                         </div>
-                                        <div style="width:70px;text-align:center;color:#475569;flex-shrink:0;">${c.message_count || 0}</div>
-                                        <div style="width:130px;color:#64748b;font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
+                                        <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.message_count || 0}</div>
+                                        <div style="width:130px;color:var(--text-muted);font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
                                         <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
                                             <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
-                                            <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#2563eb;">Open</button>
+                                            <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:var(--accent);">Open</button>
                                             <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
                                         </div>
                                     </div>
@@ -886,7 +886,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#dc2626;">${err.message}</div>`;
+                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--danger);">${err.message}</div>`;
                 }
             });
         });
@@ -906,42 +906,42 @@ HARD RULES
                     return;
                 }
                 if (expandRow) expandRow.classList.remove('hidden');
-                area.innerHTML = '<div style="padding:8px;font-size:12px;color:#94a3b8;">Loading AI logs...</div>';
+                area.innerHTML = '<div style="padding:8px;font-size:12px;color:var(--text-muted);">Loading AI logs...</div>';
                 area.classList.remove('hidden');
                 btn.textContent = 'Hide';
                 try {
                     const convs = await (await fetch(`/api/admin/users/${uid}/conversations`)).json();
                     if (!convs.length) {
-                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#94a3b8;">No AI conversations yet</div>';
+                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--text-muted);">No AI conversations yet</div>';
                         return;
                     }
                     const isMobLogs = window.matchMedia('(max-width: 768px)').matches;
                     if (isMobLogs) {
                         // Mobile: stacked log cards
-                        area.innerHTML = '<div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">' +
-                            '<div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:#334155;text-transform:uppercase;">AI Conversations (' + convs.length + ')</span><button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:#64748b;font-size:16px;padding:2px 6px;">×</button></div>' +
+                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
+                            '<div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (' + convs.length + ')</span><button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;padding:2px 6px;">×</button></div>' +
                             convs.map(c =>
                                 '<div style="padding:10px;border-bottom:1px solid #f1f5f9;">' +
-                                    '<div style="font-weight:600;font-size:13px;color:#0f172a;margin-bottom:2px;word-break:break-word;">' + (c.title || 'Untitled') + '</div>' +
-                                    '<div style="font-size:10px;color:#64748b;margin-bottom:6px;">' + c.chat_folder + ' · ' + c.msg_count + ' msgs · ' + formatDateTime(c.updated_at) + '</div>' +
+                                    '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:2px;word-break:break-word;">' + (c.title || 'Untitled') + '</div>' +
+                                    '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">' + c.chat_folder + ' · ' + c.msg_count + ' msgs · ' + formatDateTime(c.updated_at) + '</div>' +
                                     '<div style="display:flex;gap:6px;">' +
-                                        '<button data-uid="' + uid + '" data-convid="' + c.id + '" class="ai-log-view-btn" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;cursor:pointer;">View</button>' +
-                                        '<a href="/api/admin/users/' + uid + '/conversations/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;text-decoration:none;">TXT</a>' +
+                                        '<button data-uid="' + uid + '" data-convid="' + c.id + '" class="ai-log-view-btn" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">View</button>' +
+                                        '<a href="/api/admin/users/' + uid + '/conversations/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">TXT</a>' +
                                     '</div></div>'
                             ).join('') +
                         '</div>';
                     } else {
                         area.innerHTML = `
-                            <div style="background:#f8fafc;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
-                                <div style="padding:6px 10px;border-bottom:1px solid #e2e8f0;background:#f1f5f9;display:flex;align-items:center;justify-content:space-between;">
-                                    <span style="font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;">AI Conversations (${convs.length})</span>
-                                    <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:#64748b;font-size:14px;">×</button>
+                            <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+                                <div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;align-items:center;justify-content:space-between;">
+                                    <span style="font-size:11px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (${convs.length})</span>
+                                    <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;">×</button>
                                 </div>
                                 ${convs.map(c => `
                                     <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
                                         <div style="flex:1;min-width:0;">
-                                            <p style="font-weight:600;color:#0f172a;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
-                                            <p style="font-size:10px;color:#64748b;margin:1px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
+                                            <p style="font-weight:600;color:var(--text-primary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
+                                            <p style="font-size:10px;color:var(--text-muted);margin:1px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
                                         </div>
                                         <div style="display:flex;gap:4px;align-items:center;">
                                             <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 6px;">View</button>
@@ -973,19 +973,19 @@ HARD RULES
                                 modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
                                 modal.innerHTML = `
                                     <div style="background:white;border-radius:12px;max-width:540px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
-                                        <div style="padding:12px 16px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+                                        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
                                             <div>
-                                                <h4 style="font-weight:700;font-size:13px;color:#0f172a;margin:0;">${data.title || 'AI Conversation'}</h4>
-                                                <p style="font-size:10px;color:#64748b;margin:1px 0 0;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
+                                                <h4 style="font-weight:700;font-size:13px;color:var(--text-primary);margin:0;">${data.title || 'AI Conversation'}</h4>
+                                                <p style="font-size:10px;color:var(--text-muted);margin:1px 0 0;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
                                             </div>
-                                            <button class="ai-log-popup-close" style="border:none;background:transparent;color:#64748b;font-size:18px;cursor:pointer;">×</button>
+                                            <button class="ai-log-popup-close" style="border:none;background:transparent;color:var(--text-muted);font-size:18px;cursor:pointer;">×</button>
                                         </div>
                                         <div style="padding:14px;overflow-y:auto;flex:1;">
                                             ${(data.messages || []).map(m => `
                                                 <div style="margin-bottom:8px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
                                                     <div style="max-width:85%;padding:8px 12px;border-radius:10px;font-size:12px;line-height:1.4;${m.role === 'user'
-                                                        ? 'background:#0f172a;color:white;'
-                                                        : 'background:#f1f5f9;color:#0f172a;'}">
+                                                        ? 'background:var(--btn-dark);color:var(--btn-dark-text);'
+                                                        : 'background:var(--bg-page);color:var(--text-primary);'}">
                                                         ${m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}
                                                         <div style="font-size:9px;color:${m.role === 'user' ? 'rgba(255,255,255,0.6)' : '#64748b'};margin-top:2px;text-align:right;">${new Date(m.created_at).toLocaleString()}</div>
                                                     </div>
@@ -1003,7 +1003,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#dc2626;">${err.message}</div>`;
+                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--danger);">${err.message}</div>`;
                 }
             });
         });
@@ -1098,10 +1098,10 @@ HARD RULES
                 : (meta.set && meta.value ? meta.value : f.placeholder);
             return `
                 <div style="grid-column:${f.half ? 'span 1' : '1 / -1'};">
-                    <label style="font-size:11px;font-weight:600;color:#64748b;display:block;margin-bottom:4px;text-transform:uppercase;">${f.label}</label>
+                    <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">${f.label}</label>
                     <input data-section="${section}" data-field="${f.k}" type="${f.type}"
                         placeholder="${placeholder.replace(/"/g, '&quot;')}"
-                        style="width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-size:12px;outline:none;"
+                        style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;"
                         autocomplete="off">
                 </div>
             `;
@@ -1110,13 +1110,13 @@ HARD RULES
         card.innerHTML = `
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;">
                 <div>
-                    <h3 style="font-weight:700;color:#0f172a;font-size:14px;margin:0;display:flex;align-items:center;gap:6px;">${title} ${statusBadge}</h3>
-                    <p style="font-size:12px;color:#64748b;margin:2px 0 0;">${subtitle}</p>
+                    <h3 style="font-weight:700;color:var(--text-primary);font-size:14px;margin:0;display:flex;align-items:center;gap:6px;">${title} ${statusBadge}</h3>
+                    <p style="font-size:12px;color:var(--text-muted);margin:2px 0 0;">${subtitle}</p>
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;">${fieldHtml}</div>
             <div style="display:flex;align-items:center;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9;flex-wrap:wrap;">
-                <button data-action="save" data-section="${section}" style="background:#0f172a;color:#fff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;">Save</button>
+                <button data-action="save" data-section="${section}" style="background:var(--btn-dark);color:#fff;font-weight:600;font-size:12px;border:none;border-radius:8px;padding:7px 14px;cursor:pointer;">Save</button>
                 <button data-action="clear" data-section="${section}" class="btn-subtle btn-subtle-danger">Clear</button>
                 ${extraButtons}
                 <span data-msg-section="${section}" style="font-size:12px;font-weight:600;margin-left:6px;"></span>

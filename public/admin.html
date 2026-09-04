@@ -845,8 +845,8 @@
                     </div>
 
                     <div id="prov-info" class="hidden" style="background:var(--bg-page);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;">
-                        <p id="prov-info-desc" style="color:#334155;margin:0;line-height:1.4;"></p>
-                        <p id="prov-info-hint" style="color:#2563eb;font-weight:600;margin:4px 0 0;"></p>
+                        <p id="prov-info-desc" style="color:var(--text-primary);margin:0;line-height:1.4;"></p>
+                        <p id="prov-info-hint" style="color:var(--accent);font-weight:600;margin:4px 0 0;"></p>
                     </div>
 
                     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;">
@@ -862,7 +862,7 @@
 
                     <button type="submit" style="background:var(--text-primary);color:var(--card-bg);font-weight:600;font-size:12px;border:none;border-radius:8px;padding:9px 16px;cursor:pointer;align-self:flex-start;">+ Add Provider</button>
                 </form>
-                <p id="prov-add-msg" class="hidden" style="font-size:12px;color:#dc2626;font-weight:600;margin-top:8px;"></p>
+                <p id="prov-add-msg" class="hidden" style="font-size:12px;color:var(--danger);font-weight:600;margin-top:8px;"></p>
             </div>
 
             <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;">Connected Providers</div>
@@ -905,7 +905,7 @@
                         <button type="submit" style="background:var(--text-primary);color:var(--card-bg);font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;">+ Add Model</button>
                     </div>
                 </form>
-                <p id="model-add-msg" class="hidden" style="font-size:12px;color:#dc2626;font-weight:600;margin-top:8px;"></p>
+                <p id="model-add-msg" class="hidden" style="font-size:12px;color:var(--danger);font-weight:600;margin-top:8px;"></p>
             </div>
         </section>
 
@@ -920,7 +920,7 @@
                     <div id="routes-form" style="display:flex;flex-direction:column;gap:14px;"></div>
                     <div style="display:flex;align-items:center;gap:10px;padding-top:6px;">
                         <button type="submit" id="routes-save-btn" style="background:var(--text-primary);color:var(--card-bg);font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 18px;cursor:pointer;">Save Routing</button>
-                        <p id="routes-global-msg" class="hidden" style="font-size:12px;color:#16a34a;font-weight:600;">Saved</p>
+                        <p id="routes-global-msg" class="hidden" style="font-size:12px;color:var(--success);font-weight:600;">Saved</p>
                     </div>
                 </form>
             </div>
@@ -944,7 +944,7 @@
                         <input id="s-daily-cap" type="number" step="0.1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;">
                     </div>
                     <div style="border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--bg-page);">
-                        <p style="font-size:11px;font-weight:700;color:#334155;margin:0;text-transform:uppercase;">Plan Limits</p>
+                        <p style="font-size:11px;font-weight:700;color:var(--text-primary);margin:0;text-transform:uppercase;">Plan Limits</p>
                         <div>
                             <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Free Plan — Daily AI Messages</label>
                             <input id="s-free-msgs" type="number" min="0" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
@@ -959,7 +959,7 @@
                         </div>
                     </div>
                     <button type="submit" style="background:var(--text-primary);color:var(--card-bg);font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;align-self:flex-start;">Save Settings</button>
-                    <p id="settings-msg" class="hidden" style="font-size:12px;color:#16a34a;font-weight:600;">Saved</p>
+                    <p id="settings-msg" class="hidden" style="font-size:12px;color:var(--success);font-weight:600;">Saved</p>
                 </form>
             </div>
         </section>
@@ -973,7 +973,7 @@
                         <p>Admin compliance archive.</p>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                        <a href="/api/admin/dm/export-all" download style="display:inline-flex;align-items:center;background:#16a34a;color:var(--card-bg);font-size:11px;font-weight:600;padding:7px 12px;border-radius:8px;text-decoration:none;">
+                        <a href="/api/admin/dm/export-all" download style="display:inline-flex;align-items:center;background:var(--success);color:var(--card-bg);font-size:11px;font-weight:600;padding:7px 12px;border-radius:8px;text-decoration:none;">
                             Export All (ZIP)
                         </a>
                         <input id="dm-log-search" type="text" placeholder="Search email…" style="border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;outline:none;width:150px;">
@@ -983,7 +983,7 @@
 
                 <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px;">
                     <div id="dm-log-list" style="min-width:560px;font-size:12px;">
-                        <p style="color:#94a3b8;text-align:center;padding:20px;">Loading…</p>
+                        <p style="color:var(--text-muted);text-align:center;padding:20px;">Loading…</p>
                     </div>
                 </div>
                 <div id="dm-log-pagination" style="display:flex;justify-content:flex-end;gap:6px;margin-top:10px;font-size:12px;"></div>
@@ -992,10 +992,10 @@
                 <div id="dm-log-viewer" class="hidden" style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                         <div>
-                            <button id="dm-log-back" style="font-size:12px;font-weight:600;color:#2563eb;background:none;border:none;cursor:pointer;margin-right:8px;">← Back</button>
+                            <button id="dm-log-back" style="font-size:12px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;margin-right:8px;">← Back</button>
                             <span id="dm-log-viewer-title" style="font-weight:600;font-size:13px;color:var(--text-primary);"></span>
                         </div>
-                        <a id="dm-log-download-btn" href="#" style="background:#16a34a;color:var(--card-bg);font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;text-decoration:none;">Download .txt</a>
+                        <a id="dm-log-download-btn" href="#" style="background:var(--success);color:var(--card-bg);font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;text-decoration:none;">Download .txt</a>
                     </div>
                     <div id="dm-log-messages" style="max-height:440px;overflow-y:auto;background:var(--bg-page);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;"></div>
                 </div>
@@ -1027,6 +1027,35 @@
 
     <script src="/js/admin.js?v=1780860012"></script>
     <script>
+
+    // Dark Mode Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = document.getElementById('theme-icon-sun');
+    const moonIcon = document.getElementById('theme-icon-moon');
+    
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('admin-theme', theme);
+        if (theme === 'dark') {
+            if(sunIcon) sunIcon.style.display = 'block';
+            if(moonIcon) moonIcon.style.display = 'none';
+        } else {
+            if(sunIcon) sunIcon.style.display = 'none';
+            if(moonIcon) moonIcon.style.display = 'block';
+        }
+    }
+    
+    const savedTheme = localStorage.getItem('admin-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(savedTheme);
+    
+    if(themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+    }
+
+
     // ── DM Logs Tab Handler ──────────────────────────────────────────────────
     (function() {
         let dmPage = 1;
@@ -1052,7 +1081,7 @@
             if (!el) return;
 
             if (!data.rows || data.rows.length === 0) {
-                el.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:20px;">No DM conversations found.</p>';
+                el.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px;">No DM conversations found.</p>';
                 pg.innerHTML = '';
                 return;
             }
@@ -1072,7 +1101,7 @@
                     <tbody>
                         ${data.rows.map(r => `
                         <tr style="border-bottom:1px solid var(--bg-page);">
-                            <td style="padding:8px 10px;color:#94a3b8;font-family:monospace;">#${r.id}</td>
+                            <td style="padding:8px 10px;color:var(--text-muted);font-family:monospace;">#${r.id}</td>
                             <td style="padding:8px 10px;">
                                 <div style="font-weight:600;color:var(--text-primary);">${r.user_a_name || ''}</div>
                                 <div style="font-size:10px;color:var(--text-muted);">${r.user_a_email}</div>
@@ -1084,8 +1113,8 @@
                             <td style="padding:8px 10px;text-align:center;font-weight:600;color:var(--text-primary);">${r.msg_count}</td>
                             <td style="padding:8px 10px;color:var(--text-muted);font-size:11px;">${timeStr(r.last_at)}</td>
                             <td style="padding:8px 10px;text-align:right;">
-                                <button class="dm-view-btn" style="color:#2563eb;font-weight:600;background:none;border:none;cursor:pointer;margin-right:6px;" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
-                                <a href="/api/admin/dm/conversations/${r.id}/download" style="color:#16a34a;font-weight:600;text-decoration:none;">Download</a>
+                                <button class="dm-view-btn" style="color:var(--accent);font-weight:600;background:none;border:none;cursor:pointer;margin-right:6px;" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
+                                <a href="/api/admin/dm/conversations/${r.id}/download" style="color:var(--success);font-weight:600;text-decoration:none;">Download</a>
                             </td>
                         </tr>`).join('')}
                     </tbody>
@@ -1094,7 +1123,7 @@
             // Pagination
             const pages = Math.ceil(data.total / data.limit);
             pg.innerHTML = `
-                <span style="color:#94a3b8;margin-right:6px;">Page ${dmPage} of ${pages} (${data.total} total)</span>
+                <span style="color:var(--text-muted);margin-right:6px;">Page ${dmPage} of ${pages} (${data.total} total)</span>
                 ${dmPage > 1 ? `<button id="dm-pg-prev" style="background:var(--bg-page);border:none;border-radius:4px;padding:3px 6px;font-weight:600;cursor:pointer;">Prev</button>` : ''}
                 ${dmPage < pages ? `<button id="dm-pg-next" style="background:var(--bg-page);border:none;border-radius:4px;padding:3px 6px;font-weight:600;cursor:pointer;">Next</button>` : ''}`;
 
@@ -1116,22 +1145,22 @@
             document.getElementById('dm-log-download-btn').href = `/api/admin/dm/conversations/${convId}/download`;
 
             const msgsEl = document.getElementById('dm-log-messages');
-            msgsEl.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:14px;">Loading…</p>';
+            msgsEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:14px;">Loading…</p>';
 
             const res  = await fetch(`/api/admin/dm/conversations/${convId}/messages`);
             const data = await res.json();
-            if (!res.ok) { msgsEl.innerHTML = '<p style="color:#dc2626;font-size:12px;">Error loading messages.</p>'; return; }
+            if (!res.ok) { msgsEl.innerHTML = '<p style="color:var(--danger);font-size:12px;">Error loading messages.</p>'; return; }
 
             if (data.messages.length === 0) {
-                msgsEl.innerHTML = '<p style="color:#94a3b8;font-size:12px;text-align:center;padding:14px;">No messages yet.</p>';
+                msgsEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:14px;">No messages yet.</p>';
                 return;
             }
 
             msgsEl.innerHTML = data.messages.map(m => `
                 <div style="display:flex;gap:6px;font-size:12px;padding:3px 0;">
                     <span style="font-weight:600;color:var(--text-primary);width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;">${m.sender_name || m.sender_email}</span>
-                    <span style="color:#94a3b8;font-size:10px;flex-shrink:0;">${timeStr(m.created_at)}</span>
-                    <span style="color:#334155;flex:1;word-break:break-word;">${m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
+                    <span style="color:var(--text-muted);font-size:10px;flex-shrink:0;">${timeStr(m.created_at)}</span>
+                    <span style="color:var(--text-primary);flex:1;word-break:break-word;">${m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
                 </div>
             `).join('');
         }
