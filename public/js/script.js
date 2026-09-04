@@ -752,6 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 window._chatMetaCache[chatName] = {
+                    ...window._chatMetaCache[chatName],
                     lastMessage: lastTextMsg ? (lastTextMsg.text.length > 40 ? lastTextMsg.text.slice(0, 40) + '…' : lastTextMsg.text) : '',
                     lastTime: lastTextMsg?.time || '',
                     count: count,
@@ -1108,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Get last message preview from cache if available
             const lastMsg = chatMeta?.lastMessage || '';
             const lastTime = chatMeta?.lastTime || '';
-            const msgCount = chatMeta?.messageCount || '';
+            const msgCount = chatMeta?.messageCount || chatMeta?.count || '';
 
             const item = document.createElement('div');
             item.className = `flex items-center gap-3 px-3 py-1.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
