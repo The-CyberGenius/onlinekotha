@@ -1119,13 +1119,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-2">
                     <div class="flex items-center justify-between gap-2 mt-1">
                         <div class="flex items-center gap-2 overflow-hidden">
-                            <p class="text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${displayName}</p>
+                            <p class="text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${escapeHTML(displayName)}</p>
                             ${chatMeta?.deletedByUser ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
                         </div>
                         <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
                     </div>
                     <div class="flex items-center justify-between gap-2 mt-0.5">
-                        <p class="text-[11px] text-gray-400 font-medium truncate leading-tight">${lastMsg || (isActive ? '● Active' : 'Tap to open')}</p>
+                        <p class="text-[11px] text-gray-400 font-medium truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
                         ${msgCount ? `<span class="text-[9px] text-gray-400 font-medium shrink-0">${msgCount} msgs</span>` : ''}
                     </div>
                 </div>
@@ -1897,7 +1897,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             item.innerHTML = `
                 ${avatarHtml}
-                <span class="truncate font-semibold text-gray-700 dark:text-gray-300 flex-1">${displayName}</span>
+                <span class="truncate font-semibold text-gray-700 dark:text-gray-300 flex-1">${escapeHTML(displayName)}</span>
                 <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
             `;
             globalOnlineUsersList.appendChild(item);

@@ -70,7 +70,7 @@ function flattenSingleSubfolder(dir) {
         for (const f of fs.readdirSync(inner)) {
             fs.renameSync(path.join(inner, f), path.join(dir, f));
         }
-        fs.rmdirSync(inner);
+        rmrf(inner);
     }
 }
 

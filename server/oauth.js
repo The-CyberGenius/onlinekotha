@@ -66,7 +66,7 @@ function ensureStrategy(req) {
             }
 
             if (!user) {
-                const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.socket.remoteAddress;
+                const ip = req.ip || req.socket.remoteAddress;
                 checkIpAccountLimit(ip, email);
 
                 const now = Date.now();
@@ -191,7 +191,7 @@ router.post('/google/onetap', async (req, res) => {
             }
         }
         if (!user) {
-            const ip = req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : req.socket.remoteAddress;
+            const ip = req.ip || req.socket.remoteAddress;
             checkIpAccountLimit(ip, email);
 
             const now = Date.now();

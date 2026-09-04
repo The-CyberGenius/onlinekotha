@@ -70,18 +70,30 @@ async function getMessages(chatDir) {
     const participants = realParticipants;
 
     try {
-        fs.writeFileSync(
-            cachePath,
-            JSON.stringify({
-                version: CACHE_VERSION,
-                sourceMtime: chatStat.mtimeMs,
-                sourceSize: chatStat.size,
-                format,
-                isGroup,
-                participants,
-                messages,
-            })
-        );
+        const ws = fs.createWriteStream(cachePath);
+        const meta = {
+            version: CACHE_VERSION,
+            sourceMtime: chatStat.mtimeMs,
+            sourceSize: chatStat.size,
+            format,
+            isGroup,
+            participants
+        };
+        ws.write(JSON.stringify(meta).slice(0, -1)); // remove closing brace
+        ws.write(',"messages":[');
+        let first = true;
+        for (const m of messages) {
+            if (!first) ws.write(',');
+            ws.write(JSON.stringify(m));
+            first = false;
+        }
+        ws.write(']}');
+        ws.end();
+        
+        await new Promise((resolve, reject) => {
+            ws.on('finish', resolve);
+            ws.on('error', reject);
+        });
     } catch (err) {
         console.warn('Cache write failed:', err.message);
     }

@@ -5,10 +5,6 @@ const GUEST_MAX_CHATS = 1;
 const GUEST_MAX_AI_MSGS = 10;
 
 function getClientIp(req) {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) {
-        return forwarded.split(',')[0].trim();
-    }
     return req.ip || req.socket.remoteAddress || '127.0.0.1';
 }
 
