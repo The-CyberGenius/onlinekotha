@@ -1134,21 +1134,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgCount = chatMeta?.messageCount || chatMeta?.count || '';
 
             const item = document.createElement('div');
-            item.className = `flex items-center gap-3 px-3 py-1.5 rounded-xl cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
+            item.className = `flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
-                <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-2">
-                    <div class="flex items-center justify-between gap-2 mt-1">
-                        <div class="flex items-center gap-2 overflow-hidden">
-                            <p class="text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${escapeHTML(displayName)}</p>
-                            ${chatMeta?.deletedByUser ? '<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
+                <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-1">
+                    <div class="flex items-center justify-between gap-1 mt-0.5">
+                        <div class="flex items-center gap-1 overflow-hidden">
+                            <p class="text-[14px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${escapeHTML(displayName)}</p>
+                            ${chatMeta?.deletedByUser ? '<span class="px-1 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
                         </div>
                         <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
                     </div>
-                    <div class="flex items-center justify-between gap-2 mt-0.5">
+                    <div class="flex items-center justify-between gap-1 mt-0.5">
                         <p class="text-[11px] text-gray-400 font-medium truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
-                        ${msgCount ? `<span class="text-[9px] text-gray-400 font-medium shrink-0">${msgCount} msgs</span>` : ''}
+                        ${msgCount ? `<span class="bg-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm shrink-0">${msgCount}</span>` : ''}
                     </div>
                 </div>
                 <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
@@ -2312,12 +2312,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 limitRes.forEach(msg => {
                     const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
                     resultsHtml += `
-                        <div class="p-2.5 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-xl mb-1.5" onclick="jumpToMsg(${msg.id})">
+                        <div class="p-1.5 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-lg mb-1" onclick="jumpToMsg(${msg.id})">
                             <div class="flex justify-between items-center mb-0.5">
                                 <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender)}">${msg.sender || 'User'}</span> 
                                 <span class="text-[9px] text-gray-400 font-semibold">${msg.date || ''} ${msg.time || ''}</span>
                             </div>
-                            <p class="text-xs text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
+                            <p class="text-[11px] text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
                         </div>
                     `;
                 });
