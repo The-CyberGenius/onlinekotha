@@ -515,22 +515,34 @@
             }
             .header-actions {
                 width: 100%;
-                justify-content: space-between;
-                flex-wrap: wrap;
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 8px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .header-actions::-webkit-scrollbar {
+                display: none;
+            }
+            .header-btn {
+                flex-shrink: 0;
             }
             .admin-title {
                 font-size: 18px;
             }
             .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
+                display: flex;
+                flex-wrap: nowrap;
+                overflow-x: auto;
                 gap: 8px;
                 padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
             }
             .stats-grid::-webkit-scrollbar {
                 display: none;
             }
             .stat-card {
+                flex: 0 0 110px;
                 padding: 10px 6px;
                 aspect-ratio: 1 / 1;
                 align-items: center;
