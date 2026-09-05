@@ -885,18 +885,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     participantContainer.classList.remove('hidden');
                     
                     const label = document.createElement('div');
-                    label.className = 'w-full text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5';
+                    label.className = 'w-full text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5 mt-1';
                     label.innerText = 'Participants';
                     participantContainer.appendChild(label);
 
                     senders.slice(0, 4).forEach(([sName, count]) => {
                         if (!sName) return;
                         const btn = document.createElement('button');
-                        const defaultClass = 'text-[11px] bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm rounded-full px-2.5 py-1 font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5';
-                        const activeClass = 'text-[11px] bg-indigo-600 border border-indigo-600 shadow-sm rounded-full px-2.5 py-1 font-semibold text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5';
+                        const defaultClass = 'text-[10px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
+                        const activeClass = 'text-[10px] bg-indigo-600 border border-indigo-600 rounded-full px-2 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         
                         btn.className = defaultClass;
-                        btn.innerHTML = `<div class="w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px]">${sName.charAt(0).toUpperCase()}</div> <span>${sName}</span>`;
+                        btn.innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter">${sName.charAt(0).toUpperCase()}</div> <span>${sName}</span>`;
                         
                         btn.onclick = () => {
                             if (activeSenderFilter === sName) {
@@ -905,7 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 displayedMessages = [...allMessages];
                                 senderBtns.forEach(b => {
                                     b.className = defaultClass;
-                                    b.querySelector('div').className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px]';
+                                    b.querySelector('div').className = 'w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter';
                                 });
                                 statsInfo.innerHTML = `Showing all <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages.`;
                             } else {
@@ -914,10 +914,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 displayedMessages = allMessages.filter(msg => msg.sender === sName);
                                 senderBtns.forEach(b => {
                                     b.className = defaultClass + ' opacity-50';
-                                    b.querySelector('div').className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px]';
+                                    b.querySelector('div').className = 'w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter';
                                 });
                                 btn.className = activeClass;
-                                btn.querySelector('div').className = 'w-4 h-4 rounded-full bg-white text-indigo-600 flex items-center justify-center text-[8px]';
+                                btn.querySelector('div').className = 'w-3.5 h-3.5 rounded-full bg-white text-indigo-600 flex items-center justify-center text-[7.5px] font-bold tracking-tighter';
                                 statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
                             }
                             renderChats(-1, -1);
