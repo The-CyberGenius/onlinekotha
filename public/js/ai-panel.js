@@ -626,10 +626,29 @@
         return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
     }
 
+    let lastRenderedDate = null;
+
+    function appendDateSeparator(timestamp) {
+        const ts = timestamp || Date.now();
+        const d = new Date(typeof ts === 'number' ? ts : parseInt(ts));
+        if (isNaN(d.getTime())) return;
+        const monthName = d.toLocaleString('en-IN', { month: 'long' });
+        const dateStr = `${d.getDate()} ${monthName} ${d.getFullYear()}`;
+        if (dateStr !== lastRenderedDate) {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex justify-center mb-6 w-full date-separator ai-date-separator';
+            wrap.setAttribute('data-date', dateStr);
+            wrap.innerHTML = `<span class="bg-[#E1F2FB] dark:bg-[#182229] text-[#54656f] dark:text-[#8696a0] text-[12.5px] px-3 py-1 rounded-lg shadow-sm font-medium">${dateStr}</span>`;
+            chatContainer.appendChild(wrap);
+            lastRenderedDate = dateStr;
+        }
+    }
+
     // ─────────────────────────────────────────────
     //  Bubble helpers
     // ─────────────────────────────────────────────
     function appendUserBubble(text, timestamp) {
+        appendDateSeparator(timestamp);
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
         wrap.className = 'flex justify-end mb-1.5 animate-message select-text';
@@ -644,6 +663,7 @@
     }
 
     function appendContactBubble(name, timestamp) {
+        appendDateSeparator(timestamp);
         const time = formatTime(timestamp);
         const wrap = document.createElement('div');
         wrap.className = 'flex justify-start mb-1.5 animate-message-ai select-text';
@@ -816,6 +836,7 @@
         if (!chatFolder) return;
         activeChat = chatFolder;
         chatContainer.innerHTML = '';
+        lastRenderedDate = null;
         try {
             const resp = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
             if (!resp.ok) return;

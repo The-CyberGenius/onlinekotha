@@ -598,6 +598,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     if (closestDate) {
+                        // Check if AI section is visible and override closestDate
+                        const aiContainer = document.getElementById('ai-chat-container');
+                        if (aiContainer && aiContainer.innerHTML.trim() !== '') {
+                            const aiRect = aiContainer.getBoundingClientRect();
+                            const scrollRect = scrollArea.getBoundingClientRect();
+                            if (aiRect.top < scrollRect.bottom - 50) {
+                                const aiSeps = Array.from(aiContainer.querySelectorAll('.ai-date-separator'));
+                                if (aiSeps.length > 0) {
+                                    let closestSep = aiSeps[aiSeps.length - 1];
+                                    for (let i = 0; i < aiSeps.length; i++) {
+                                        if (aiSeps[i].getBoundingClientRect().top > scrollRect.top + 50) {
+                                            closestSep = i > 0 ? aiSeps[i - 1] : aiSeps[i];
+                                            break;
+                                        }
+                                    }
+                                    if (closestSep) {
+                                        closestDate = closestSep.getAttribute('data-date') || closestDate;
+                                    }
+                                }
+                            }
+                        }
+
                         floatingDate.innerText = closestDate;
                         floatingDate.classList.remove('opacity-0');
                         floatingDate.classList.add('opacity-100');
