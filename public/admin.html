@@ -804,12 +804,10 @@
             </div>
             <div class="header-actions">
                 
-                <select id="theme-select" class="header-btn" style="cursor:pointer; padding:8px; border-radius:8px; background:var(--card-bg); color:var(--text-primary); border:1px solid var(--border); font-size:12px; font-weight:600; outline:none;">
-                    <option value="light">Light Mode</option>
-                    <option value="dark">Dark</option>
-                    <option value="very-dark">Very Dark</option>
-                    <option value="neon-dark">Neon Dark</option>
-                </select>
+                <button id="theme-btn" class="header-btn" style="cursor:pointer; padding:8px 12px; border-radius:8px; background:var(--card-bg); color:var(--text-primary); border:1px solid var(--border); font-size:12px; font-weight:600; outline:none; display:flex; gap:6px; align-items:center;">
+                    <span id="theme-icon">☀️</span>
+                    <span id="theme-text">Light Mode</span>
+                </button>
                 <a href="/app.html" class="header-btn">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     <span>Open App</span>
@@ -1082,17 +1080,33 @@
     <script src="/js/admin.js?v=1780860012"></script>
     <script>
 
-    // Dark Mode Toggle
-    const themeSelect = document.getElementById('theme-select');
+    // ── Theme Manager ────────────────────────────────────────────────────────
+    const themes = ['light', 'dark', 'very-dark', 'neon-dark'];
+    const themeLabels = ['Light Mode', 'Dark Mode', 'Very Dark', 'Neon Dark'];
+    const themeIcons = ['☀️', '🌙', '🌌', '⚡'];
+    const themeBtn = document.getElementById('theme-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+
     function setTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('admin-theme', theme);
-        if(themeSelect) themeSelect.value = theme;
+        
+        if (themeBtn) {
+            const idx = themes.indexOf(theme) !== -1 ? themes.indexOf(theme) : 0;
+            themeIcon.textContent = themeIcons[idx];
+            themeText.textContent = themeLabels[idx];
+        }
     }
+
     const savedTheme = localStorage.getItem('admin-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     setTheme(savedTheme);
-    if(themeSelect) {
-        themeSelect.addEventListener('change', (e) => setTheme(e.target.value));
+    if(themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            let nextIdx = (themes.indexOf(current) + 1) % themes.length;
+            setTheme(themes[nextIdx]);
+        });
     }
 
     // ── DM Logs Tab Handler ──────────────────────────────────────────────────
