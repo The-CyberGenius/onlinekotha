@@ -533,30 +533,30 @@
             .stats-grid {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
+                gap: 6px;
                 padding-bottom: 8px;
+                justify-content: center;
             }
             .stat-card {
-                flex: 1 1 calc(33.333% - 8px);
-                padding: 10px 4px;
+                flex: 1 1 calc(33.333% - 6px);
+                min-width: 90px;
+                padding: 8px 4px;
                 align-items: center;
                 text-align: center;
                 justify-content: center;
-                border-radius: 10px;
+                border-radius: 8px;
             }
             .stat-label {
-                font-size: 9px;
-                margin-bottom: 3px;
-                line-height: 1.1;
-                letter-spacing: 0;
+                font-size: 8px;
+                margin-bottom: 2px;
+                line-height: 1;
+                letter-spacing: 0.5px;
             }
             .stat-sub {
-                font-size: 8px;
-                margin-top: 3px;
-                line-height: 1.1;
+                display: none; /* Hide subtitles on mobile to save space */
             }
             .stat-value {
-                font-size: 14px;
+                font-size: 13px;
                 font-weight: 800;
             }
             .tabs-bar {
