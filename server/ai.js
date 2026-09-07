@@ -54,18 +54,13 @@ function aiGate(req, res, next) {
              WHERE c.user_id = ? AND cm.role = 'user'`
         ).get(req.user.id).n;
 
-        // If they are in their first 5 lifetime messages, let them pass without daily limits
-        if (lifetimeUsed < 5) {
-            return next();
-        }
-
-        // Free tier: small daily cap (defaults to 3)
-        const freeMax = Number(getSetting('free_user_daily_messages', '3'));
-        if (freeMax > 0 && usedToday >= freeMax) {
+        // Free tier: strict lifetime cap of 10 messages
+        const freeLifetimeMax = 10;
+        if (lifetimeUsed >= freeLifetimeMax) {
             return res.status(429).json({
-                error: `Free tier limit reached. You get ${freeMax} free messages per day. Upgrade to Pro for unlimited AI!`,
-                limit: freeMax,
-                used: usedToday,
+                error: `Free tier limit reached. You have used your ${freeLifetimeMax} free messages. Upgrade to Pro to continue chatting with AI!`,
+                limit: freeLifetimeMax,
+                used: lifetimeUsed,
             });
         }
     } else {
