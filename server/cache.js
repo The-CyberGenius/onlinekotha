@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { parseChatFile, findChatFile } = require('./parser');
 
-const CACHE_VERSION = 8;
+const CACHE_VERSION = 9;
 const CACHE_NAME = '_chat.cache.json';
 
 async function getMessages(chatDir) {
@@ -30,7 +30,8 @@ async function getMessages(chatDir) {
                     cached: true, 
                     format: cached.format,
                     isGroup: cached.isGroup || false,
-                    participants: cached.participants || []
+                    participants: cached.participants || [],
+                    participantStats: cached.participantStats || {}
                 };
             }
         } catch {
@@ -69,6 +70,12 @@ async function getMessages(chatDir) {
     
     const participants = realParticipants;
 
+    // Build stats for the identified real participants
+    const participantStats = {};
+    for (const p of participants) {
+        participantStats[p] = sendersCount[p] || 0;
+    }
+
     try {
         const ws = fs.createWriteStream(cachePath);
         const meta = {
@@ -77,7 +84,8 @@ async function getMessages(chatDir) {
             sourceSize: chatStat.size,
             format,
             isGroup,
-            participants
+            participants,
+            participantStats
         };
         ws.write(JSON.stringify(meta).slice(0, -1)); // remove closing brace
         ws.write(',"messages":[');
@@ -98,7 +106,7 @@ async function getMessages(chatDir) {
         console.warn('Cache write failed:', err.message);
     }
 
-    return { messages, cached: false, format, isGroup, participants };
+    return { messages, cached: false, format, isGroup, participants, participantStats };
 }
 
 function invalidateCache(chatDir) {

@@ -355,12 +355,122 @@
     });
 
     // ─────────────────────────────────────────────
+    //  Identity check
+    // ─────────────────────────────────────────────
+    window.ensureIdentity = async function (chatFolder) {
+        if (chatFolder === '__global__') return true;
+        try {
+            const resp = await fetch(`/api/chat/${encodeURIComponent(chatFolder)}/identity`);
+            const data = await resp.json();
+            if (!data.requiresSelection) return true; // Already selected or not needed
+            
+            return new Promise((resolve) => {
+                const modal = document.getElementById('identity-modal');
+                const container = document.getElementById('identity-cards-container');
+                const contBtn = document.getElementById('identity-continue-btn');
+                const cancelBtn = document.getElementById('identity-cancel-btn');
+                
+                let selectedId = null;
+                
+                // Render cards
+                container.innerHTML = '';
+                Object.entries(data.participants).forEach(([name, count], index) => {
+                    const card = document.createElement('div');
+                    card.className = `identity-card p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group ${index === 0 ? 'border-gray-200 dark:border-gray-800 hover:border-indigo-500/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10' : 'border-gray-200 dark:border-gray-800 hover:border-indigo-500/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10'}`;
+                    
+                    const initial = name.charAt(0).toUpperCase();
+                    
+                    card.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shrink-0">
+                                ${initial}
+                            </div>
+                            <div>
+                                <p class="text-[15px] font-semibold text-gray-900 dark:text-gray-100">${escapeHTML(name)}</p>
+                                <p class="text-[12px] text-gray-500 dark:text-gray-400">${count.toLocaleString()} messages</p>
+                            </div>
+                        </div>
+                        <div class="radio-circle w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center transition-all group-hover:border-indigo-400">
+                            <div class="inner-dot w-2.5 h-2.5 rounded-full bg-indigo-600 scale-0 transition-transform"></div>
+                        </div>
+                    `;
+                    
+                    card.onclick = () => {
+                        container.querySelectorAll('.identity-card').forEach(c => {
+                            c.classList.remove('border-indigo-600', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
+                            c.classList.add('border-gray-200', 'dark:border-gray-800');
+                            c.querySelector('.radio-circle').classList.remove('border-indigo-600');
+                            c.querySelector('.inner-dot').classList.remove('scale-100');
+                            c.querySelector('.inner-dot').classList.add('scale-0');
+                        });
+                        card.classList.remove('border-gray-200', 'dark:border-gray-800');
+                        card.classList.add('border-indigo-600', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
+                        card.querySelector('.radio-circle').classList.add('border-indigo-600');
+                        card.querySelector('.inner-dot').classList.remove('scale-0');
+                        card.querySelector('.inner-dot').classList.add('scale-100');
+                        
+                        selectedId = name;
+                        contBtn.disabled = false;
+                    };
+                    container.appendChild(card);
+                });
+                
+                // Show modal
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.querySelector('.transform').classList.remove('scale-95', 'opacity-0');
+                    modal.querySelector('.transform').classList.add('scale-100', 'opacity-100');
+                }, 10);
+                
+                const close = (result) => {
+                    modal.querySelector('.transform').classList.remove('scale-100', 'opacity-100');
+                    modal.querySelector('.transform').classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        resolve(result);
+                    }, 300);
+                };
+                
+                contBtn.onclick = async () => {
+                    if (!selectedId) return;
+                    contBtn.disabled = true;
+                    contBtn.innerText = 'Saving...';
+                    try {
+                        const others = Object.keys(data.participants).filter(n => n !== selectedId);
+                        const aiParticipant = others.length > 0 ? others[0] : selectedId;
+                        
+                        await fetch(`/api/chat/${encodeURIComponent(chatFolder)}/identity`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userParticipant: selectedId, aiParticipant: aiParticipant })
+                        });
+                        close(true);
+                    } catch (e) {
+                        toast('Failed to save identity');
+                        close(false);
+                    } finally {
+                        contBtn.innerText = 'Continue';
+                    }
+                };
+                
+                cancelBtn.onclick = () => close(false);
+            });
+        } catch (e) {
+            console.error('ensureIdentity error', e);
+            return true;
+        }
+    };
+
+    // ─────────────────────────────────────────────
     //  Send handler
     // ─────────────────────────────────────────────
-    function handleSend() {
+    async function handleSend() {
         const text = bottomInput.value.trim();
         if (!text) return;
         if (!window.currentChat) { toast('Open a chat first'); return; }
+        
+        const hasIdentity = await window.ensureIdentity(window.currentChat);
+        if (!hasIdentity) return;
 
         if (window.currentChat === '__global__') {
             const payload = { text };
@@ -709,7 +819,10 @@
     // ─────────────────────────────────────────────
     const sparkleBtn = document.getElementById('ask-ai-btn');
     if (sparkleBtn) {
-        sparkleBtn.addEventListener('click', () => {
+        sparkleBtn.addEventListener('click', async () => {
+            if (!window.currentChat) return;
+            const hasIdentity = await window.ensureIdentity(window.currentChat);
+            if (!hasIdentity) return;
             bottomInput.focus();
             bottomInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
         });

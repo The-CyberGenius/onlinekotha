@@ -37,6 +37,8 @@ try {
 
 try { db.exec(`ALTER TABLE chats ADD COLUMN is_group INTEGER DEFAULT 0;`); } catch(e) {}
 try { db.exec(`ALTER TABLE chats ADD COLUMN participants TEXT;`); } catch(e) {}
+try { db.exec(`ALTER TABLE chats ADD COLUMN user_participant TEXT;`); } catch(e) {}
+try { db.exec(`ALTER TABLE conversations ADD COLUMN ai_participant TEXT;`); } catch(e) {}
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS email_tokens (

@@ -1224,7 +1224,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selector = document.getElementById('chat-selector');
                 if (selector) selector.value = chat;
                 renderChatList(chats, chat);
-                loadData(chat).then(() => {
+                loadData(chat).then(async () => {
+                    // Trigger identity check
+                    if (typeof window.ensureIdentity === 'function') {
+                        await window.ensureIdentity(chat);
+                    }
                     const inp = document.getElementById('bottom-ai-input');
                     if (inp) inp.focus();
                 });
@@ -1409,7 +1413,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 currentChat = e.target.value;
                 window.currentChat = currentChat;
-                loadData(currentChat);
+                loadData(currentChat).then(async () => {
+                    if (typeof window.ensureIdentity === 'function') {
+                        await window.ensureIdentity(currentChat);
+                    }
+                });
             }
         });
     }
@@ -1426,7 +1434,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 selector.value = selectName;
                 currentChat = selectName;
                 window.currentChat = selectName;
-                loadData(selectName);
+                loadData(selectName).then(async () => {
+                    if (typeof window.ensureIdentity === 'function') {
+                        await window.ensureIdentity(selectName);
+                    }
+                });
                 // Re-render chat list with new active
                 renderChatList(loadedChats, selectName);
             }

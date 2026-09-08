@@ -54,14 +54,18 @@ function aiGate(req, res, next) {
              WHERE c.user_id = ? AND cm.role = 'user'`
         ).get(req.user.id).n;
 
-        // Free tier: strict lifetime cap of 10 messages
+        // Free tier: strict lifetime cap of 10 messages, then 1 free message per day
         const freeLifetimeMax = 10;
+        const freeDailyMax = 1;
+        
         if (lifetimeUsed >= freeLifetimeMax) {
-            return res.status(429).json({
-                error: `Free tier limit reached. You have used your ${freeLifetimeMax} free messages. Upgrade to Pro to continue chatting with AI!`,
-                limit: freeLifetimeMax,
-                used: lifetimeUsed,
-            });
+            if (usedToday >= freeDailyMax) {
+                return res.status(429).json({
+                    error: `You've used your 10 free trial messages and your 1 free daily message. Upgrade to Pro to continue chatting!`,
+                    limit: freeLifetimeMax,
+                    used: lifetimeUsed,
+                });
+            }
         }
     } else {
         // Trial users: higher cap but still limited
@@ -120,9 +124,54 @@ router.delete('/conversations/:id', (req, res) => {
     res.json({ ok: true });
 });
 
+// ---------- Identity Onboarding ----------
+router.get('/chat/:folder/identity', async (req, res) => {
+    const { userId, guestId } = getOwner(req);
+    const sql = req.user
+        ? 'SELECT user_participant FROM chats WHERE folder_name = ? AND user_id = ?'
+        : 'SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?';
+    const params = req.user ? [req.params.folder, userId] : [req.params.folder, guestId];
+    const chatRow = db.prepare(sql).get(...params);
+    
+    if (!chatRow) return res.status(404).json({ error: 'Chat not found' });
+    
+    try {
+        const { getMessages } = require('./cache');
+        const { userDir, SRC_DIR } = require('./upload');
+        const dir = req.user ? path.join(userDir(userId), req.params.folder) : path.join(SRC_DIR, `g_${guestId}`, req.params.folder);
+        
+        const { participants, participantStats, isGroup } = await getMessages(dir);
+        
+        res.json({
+            userParticipant: chatRow.user_participant || null,
+            participants,
+            participantStats: participantStats || {},
+            isGroup
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/chat/:folder/identity', async (req, res) => {
+    const { userParticipant } = req.body;
+    if (!userParticipant) return res.status(400).json({ error: 'userParticipant is required' });
+    
+    const { userId, guestId } = getOwner(req);
+    const sql = req.user
+        ? 'UPDATE chats SET user_participant = ? WHERE folder_name = ? AND user_id = ?'
+        : 'UPDATE chats SET user_participant = ? WHERE folder_name = ? AND guest_id = ?';
+    const params = req.user ? [userParticipant, req.params.folder, userId] : [userParticipant, req.params.folder, guestId];
+    
+    const info = db.prepare(sql).run(...params);
+    if (info.changes === 0) return res.status(404).json({ error: 'Chat not found' });
+    
+    res.json({ ok: true });
+});
+
 // ---------- Main streaming chat ----------
 router.post('/chat', aiGate, async (req, res) => {
-    const { chat, message, conversationId } = req.body || {};
+    const { chat, message, conversationId, aiParticipant } = req.body || {};
     if (!chat || !message) return res.status(400).json({ error: 'chat + message required' });
 
     if (countWords(message) > 300) {
@@ -163,29 +212,44 @@ router.post('/chat', aiGate, async (req, res) => {
 
     // Find or create conversation
     let convId = conversationId;
+    let existingAiParticipant = null;
+    let userParticipant = null;
+
+    // Fetch user_participant from chats table
+    const chatSql = req.user
+        ? 'SELECT user_participant FROM chats WHERE folder_name = ? AND user_id = ?'
+        : 'SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?';
+    const chatParams = req.user ? [chat, userId] : [chat, guestId];
+    const chatRow = db.prepare(chatSql).get(...chatParams);
+    if (chatRow && chatRow.user_participant) {
+        userParticipant = chatRow.user_participant;
+    }
+
     if (!convId) {
         const now = Date.now();
         const title = message.slice(0, 60);
         if (req.user) {
             const info = db.prepare(
-                `INSERT INTO conversations (user_id, chat_folder, title, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?)`
-            ).run(userId, chat, title, now, now);
+                `INSERT INTO conversations (user_id, chat_folder, title, created_at, updated_at, ai_participant)
+                 VALUES (?, ?, ?, ?, ?, ?)`
+            ).run(userId, chat, title, now, now, aiParticipant || null);
             convId = info.lastInsertRowid;
         } else {
             const info = db.prepare(
-                `INSERT INTO conversations (user_id, guest_id, chat_folder, title, created_at, updated_at)
-                 VALUES (0, ?, ?, ?, ?, ?)`
-            ).run(guestId, chat, title, now, now);
+                `INSERT INTO conversations (user_id, guest_id, chat_folder, title, created_at, updated_at, ai_participant)
+                 VALUES (0, ?, ?, ?, ?, ?, ?)`
+            ).run(guestId, chat, title, now, now, aiParticipant || null);
             convId = info.lastInsertRowid;
         }
+        existingAiParticipant = aiParticipant || null;
     } else {
-        const sql = req.user
-            ? 'SELECT id FROM conversations WHERE id = ? AND user_id = ?'
-            : 'SELECT id FROM conversations WHERE id = ? AND guest_id = ?';
-        const params = req.user ? [convId, userId] : [convId, guestId];
-        const owned = db.prepare(sql).get(...params);
-        if (!owned) return res.status(404).json({ error: 'Conversation not found' });
+        const convSql = req.user
+            ? 'SELECT id, ai_participant FROM conversations WHERE id = ? AND user_id = ?'
+            : 'SELECT id, ai_participant FROM conversations WHERE id = ? AND guest_id = ?';
+        const convParams = req.user ? [convId, userId] : [convId, guestId];
+        const convRow = db.prepare(convSql).get(...convParams);
+        if (!convRow) return res.status(404).json({ error: 'Conversation not found' });
+        existingAiParticipant = convRow.ai_participant;
     }
 
     // Save user message
@@ -199,8 +263,11 @@ router.post('/chat', aiGate, async (req, res) => {
         `SELECT role, content FROM conv_messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 12`
     ).all(convId).reverse();
 
-    // Detect sender names: use frontend provided names, or fallback to message counts
+    // Detect sender names: prioritize explicit DB identity > frontend > fallback to message counts
     let { userName, contactName } = req.body || {};
+    
+    if (!userName) userName = userParticipant || null;
+    if (!contactName) contactName = existingAiParticipant || null;
     
     if (!userName || !contactName) {
         const senderCounts = {};
@@ -322,7 +389,11 @@ Your purpose is to seamlessly continue an imported GROUP conversation.
 
 <context>
 Current date and time: ${currentDate} ${currentTime}
-User you are talking to: ${userName}
+
+CONVERSATION IDENTITIES:
+User: ${userName}
+AI simulation: ${contactName || 'Group'}
+
 Chat Type: GROUP
 Participants: ${participants.join(', ')}
 </context>
@@ -348,7 +419,10 @@ Your purpose is to seamlessly continue an imported conversation by simulating th
 
 <context>
 Current date and time: ${currentDate} ${currentTime}
-User you are talking to: ${userName}
+
+CONVERSATION IDENTITIES:
+User: ${userName}
+AI simulation: ${contactName}
 </context>
 
 <chat_history>
