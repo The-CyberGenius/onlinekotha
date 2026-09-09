@@ -224,12 +224,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeChatBtn = document.getElementById('close-chat-btn');
     if (closeChatBtn) {
         closeChatBtn.addEventListener('click', () => {
+            // ── Fully reset all chat state ──
             currentChat = '';
             window.currentChat = '';
             allMessages = [];
             displayedMessages = [];
             renderStart = 0;
             renderEnd = 0;
+            lastRenderedDate = '';
+            isScrolling = false;
+            
+            // Clear the chat container content immediately
+            if (chatContainer) chatContainer.innerHTML = '';
+            const aiC = document.getElementById('ai-chat-container');
+            if (aiC) aiC.innerHTML = '';
             
             // Update URL to remove ?chat=
             const urlParams = new URLSearchParams(window.location.search);
@@ -533,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.loadOlder = () => {
-        if (renderStart <= 0) return;
+        if (!currentChat || renderStart <= 0 || displayedMessages.length === 0) return;
         const newStart = Math.max(0, renderStart - CHUNK_SIZE);
         renderChats(newStart, renderStart, 'older');
 
@@ -547,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.loadNewer = () => {
-        if (renderEnd >= displayedMessages.length) return;
+        if (!currentChat || renderEnd >= displayedMessages.length || displayedMessages.length === 0) return;
         const newEnd = Math.min(displayedMessages.length, renderEnd + CHUNK_SIZE);
         const oldScroll = scrollArea.scrollTop;
         renderChats(renderEnd, newEnd, 'newer');
@@ -603,7 +611,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     scrollArea.addEventListener('scroll', () => {
-        if (currentChat === '__global__') return;
+        // ── Guard: skip ALL scroll processing when no chat is open ──
+        if (!currentChat || currentChat === '__global__') return;
 
         // Use rAF to batch scroll work — prevents layout thrashing
         if (!_scrollRaf) {
@@ -1479,16 +1488,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hide header and bottom input robustly
         const header = document.getElementById('chat-header-bar');
         const footer = document.getElementById('bottom-ai-bar');
+        const filterBar = document.getElementById('filter-buttons-container');
         if (header) header.style.display = 'none';
         if (footer) footer.style.display = 'none';
         
-        // Hide participants and disable scroll on empty state
+        // Hide participants
         const partContainer = document.getElementById('participant-filters-container');
-        if (partContainer) partContainer.classList.add('hidden');
+        if (partContainer) { partContainer.innerHTML = ''; partContainer.classList.add('hidden'); }
+        
+        // Lock scroll area completely with inline style (more reliable than class)
         const scrollArea = document.getElementById('chat-scroll-area');
         if (scrollArea) {
-            scrollArea.classList.remove('overflow-y-auto');
-            scrollArea.classList.add('overflow-hidden');
+            scrollArea.style.overflow = 'hidden';
             scrollArea.scrollTop = 0;
         }
 
@@ -1591,11 +1602,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (header) header.style.display = 'flex';
         if (footer) footer.style.display = 'block';
         
-        // Re-enable scroll
+        // Re-enable scroll with inline style (matches how showEmptyState locks it)
         const scrollArea = document.getElementById('chat-scroll-area');
         if (scrollArea) {
-            scrollArea.classList.add('overflow-y-auto');
-            scrollArea.classList.remove('overflow-hidden');
+            scrollArea.style.overflow = '';
         }
     }
 
