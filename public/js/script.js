@@ -1351,7 +1351,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPro = window.__USER__ && window.__USER__.plan === 'pro';
 
         container.innerHTML = `
-            <div class="w-full min-h-full flex flex-col items-center justify-center px-4 py-6 text-center select-none" id="empty-state">
+            <div class="w-full min-h-full flex flex-col items-center px-4 pt-10 pb-8 text-center select-none" id="empty-state">
                 <!-- Logo / Icon -->
                 <div class="mb-4 relative inline-block">
                     <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl mx-auto" style="box-shadow: 0 8px 32px rgba(99,102,241,0.35);">
