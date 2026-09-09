@@ -1482,6 +1482,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (header) header.style.display = 'none';
         if (footer) footer.style.display = 'none';
         
+        // Hide participants and disable scroll on empty state
+        const partContainer = document.getElementById('participant-filters-container');
+        if (partContainer) partContainer.classList.add('hidden');
+        const scrollArea = document.getElementById('chat-scroll-area');
+        if (scrollArea) {
+            scrollArea.classList.remove('overflow-y-auto');
+            scrollArea.classList.add('overflow-hidden');
+            scrollArea.scrollTop = 0;
+        }
+
         // Also ensure any lingering AI chat content is cleared
         const aiContainer = document.getElementById('ai-chat-container');
         if (aiContainer) aiContainer.innerHTML = '';
@@ -1580,6 +1590,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const footer = document.getElementById('bottom-ai-bar');
         if (header) header.style.display = 'flex';
         if (footer) footer.style.display = 'block';
+        
+        // Re-enable scroll
+        const scrollArea = document.getElementById('chat-scroll-area');
+        if (scrollArea) {
+            scrollArea.classList.add('overflow-y-auto');
+            scrollArea.classList.remove('overflow-hidden');
+        }
     }
 
     const chatSelector = document.getElementById('chat-selector');
