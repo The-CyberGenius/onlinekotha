@@ -1351,11 +1351,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPro = window.__USER__ && window.__USER__.plan === 'pro';
 
         container.innerHTML = `
-            <div class="w-full h-full flex flex-col items-center justify-center px-6 py-10 text-center select-none" id="empty-state">
+            <div class="w-full min-h-full flex flex-col items-center justify-center px-4 py-6 text-center select-none" id="empty-state">
                 <!-- Logo / Icon -->
-                <div class="mb-5 relative">
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl mx-auto" style="box-shadow: 0 8px 32px rgba(99,102,241,0.35);">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-9 h-9 sm:w-11 sm:h-11">
+                <div class="mb-4 relative inline-block">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl mx-auto" style="box-shadow: 0 8px 32px rgba(99,102,241,0.35);">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 sm:w-9 sm:h-9">
                           <defs>
                             <linearGradient id="wg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/><stop offset="100%" stop-color="#e0e7ff" stop-opacity="0.8"/></linearGradient>
                           </defs>
@@ -1363,54 +1363,55 @@ document.addEventListener('DOMContentLoaded', () => {
                           <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
-                    <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center">
-                        <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center">
+                        <svg width="7" height="7" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </div>
                 </div>
 
                 <!-- Headline -->
-                <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
-                <p class="text-[13px] sm:text-[14px] text-gray-500 dark:text-gray-400 max-w-xs leading-relaxed mb-6">Select a chat from the sidebar, or import a new one to start talking with AI.</p>
+                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
+                <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 max-w-[260px] leading-relaxed mb-5">Select a chat from the sidebar, or import a new one to start talking with AI.</p>
 
                 <!-- Import + DM Buttons -->
-                <div class="flex flex-wrap items-center justify-center gap-3 w-full max-w-xs mx-auto mb-6">
-                    <button id="empty-upload-btn" class="flex-1 min-w-[140px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-[13px] rounded-xl px-5 py-2.5 transition-all shadow-md flex items-center justify-center gap-2">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <div class="flex flex-wrap items-center justify-center gap-2.5 w-full max-w-[280px] mx-auto mb-5">
+                    <button id="empty-upload-btn" class="flex-1 min-w-[120px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-[12px] rounded-xl px-4 py-2.5 transition-all shadow-md flex items-center justify-center gap-1.5">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                         Import Chat
                     </button>
-                    <button id="empty-dm-btn" class="flex-1 min-w-[140px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[13px] rounded-xl px-5 py-2.5 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 flex items-center justify-center gap-2 shadow-sm">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <button id="empty-dm-btn" class="flex-1 min-w-[120px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[12px] rounded-xl px-4 py-2.5 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         Message Someone
                     </button>
                 </div>
 
                 ${!isPro ? `
                 <!-- Pro CTA -->
-                <div class="w-full max-w-xs rounded-2xl border border-indigo-200 dark:border-indigo-800/60 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/30 p-4 text-left" style="box-shadow: 0 2px 16px rgba(99,102,241,0.08);">
-                    <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <div class="w-full max-w-[280px] rounded-2xl border border-indigo-200 dark:border-indigo-800/60 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/30 p-3.5 text-left" style="box-shadow: 0 2px 16px rgba(99,102,241,0.08);">
+                    <div class="flex items-start gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
                         </div>
                         <div class="flex-1">
-                            <p class="text-[12px] font-bold text-indigo-700 dark:text-indigo-300 mb-0.5">Unlock Pro — Unlimited AI</p>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">Unlimited messages, priority AI, advanced analytics & more.</p>
+                            <p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 mb-0.5">Unlock Pro — Unlimited AI</p>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">Unlimited messages, priority AI, advanced analytics & more.</p>
                         </div>
                     </div>
-                    <button id="empty-pro-btn" class="mt-3 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-95 text-white font-bold text-[12px] rounded-lg px-4 py-2 transition-all shadow-sm">
+                    <button id="empty-pro-btn" class="mt-2.5 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-95 text-white font-bold text-[11px] rounded-lg px-4 py-2 transition-all shadow-sm">
                         Upgrade to Pro →
                     </button>
                 </div>` : ''}
 
                 <!-- Trust badges -->
-                <div class="flex items-center justify-center gap-4 text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-5">
-                    <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
+                <div class="flex items-center justify-center gap-3 text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-4">
+                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
+                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
+                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
                 </div>
             </div>
         `;
+
 
         const btn = document.getElementById('empty-upload-btn');
         if (btn) btn.addEventListener('click', () => {
