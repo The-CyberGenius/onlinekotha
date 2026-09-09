@@ -1347,11 +1347,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('chat-container');
         if (!container) return;
 
+        // Hide header and bottom input so empty state looks full-screen
+        const header = document.getElementById('chat-header-bar');
+        const footer = document.getElementById('bottom-ai-bar');
+        if (header) header.classList.add('hidden');
+        if (footer) footer.classList.add('hidden');
+
         // Check if user is on free plan to show Pro CTA
         const isPro = window.__USER__ && window.__USER__.plan === 'pro';
 
         container.innerHTML = `
-            <div class="w-full min-h-full flex flex-col items-center px-4 pt-10 pb-8 text-center select-none" id="empty-state">
+            <div class="w-full my-auto flex flex-col items-center px-4 pt-10 pb-8 text-center select-none" id="empty-state">
                 <!-- Logo / Icon -->
                 <div class="mb-4 relative inline-block">
                     <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl mx-auto" style="box-shadow: 0 8px 32px rgba(99,102,241,0.35);">
@@ -1425,14 +1431,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const proBtn = document.getElementById('empty-pro-btn');
         if (proBtn) proBtn.addEventListener('click', () => {
-            // Navigate to pricing/upgrade page
-            window.location.href = '/pricing.html';
+            if (typeof openPricingModal === 'function') openPricingModal();
         });
     }
 
     function removeEmptyState() {
         const e = document.getElementById('empty-state');
         if (e) e.remove();
+        
+        // Show header and bottom input again
+        const header = document.getElementById('chat-header-bar');
+        const footer = document.getElementById('bottom-ai-bar');
+        if (header) header.classList.remove('hidden');
+        if (footer) footer.classList.remove('hidden');
     }
 
     const chatSelector = document.getElementById('chat-selector');
@@ -2823,4 +2834,32 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     };
 
+    // Pricing Modal logic
+    window.openPricingModal = function() {
+        const modal = document.getElementById('pricing-modal');
+        if (!modal) return;
+        const card = modal.querySelector('.custom-modal-card');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            if (card) {
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }
+        }, 10);
+    };
+
+    window.closePricingModal = function() {
+        const modal = document.getElementById('pricing-modal');
+        if (!modal) return;
+        const card = modal.querySelector('.custom-modal-card');
+        modal.classList.add('opacity-0');
+        if (card) {
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+        }
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    };
+
 });
+

@@ -695,6 +695,80 @@
             </div>
     </div>
 
+    <!-- Pricing Modal -->
+    <div id="pricing-modal" class="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-md flex items-center justify-center hidden opacity-0 transition-all duration-300 px-4">
+        <div class="custom-modal-card w-full max-w-[800px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-gray-900 shadow-2xl relative overflow-hidden transform scale-95 transition-transform duration-300 p-6 sm:p-10">
+            <button onclick="closePricingModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white transition z-10">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            
+            <div class="text-center mb-10 mt-2">
+                <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-gray-900 dark:text-white mb-3">Upgrade to <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">Kotha Pro</span></h2>
+                <p class="text-gray-500 dark:text-gray-400 max-w-lg mx-auto font-medium">Unlock unlimited messages, advanced AI reasoning, and exclusive features.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <!-- Monthly Plan -->
+                <div class="relative flex flex-col p-6 rounded-3xl border-2 border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/20 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Monthly</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Perfect for short-term projects</p>
+                    <div class="mb-6 flex items-baseline gap-1">
+                        <span class="text-4xl font-black text-gray-900 dark:text-white">$6</span>
+                        <span class="text-gray-500 font-medium">/month</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            <svg class="w-5 h-5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Unlimited AI Messages
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            <svg class="w-5 h-5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Priority processing speed
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            <svg class="w-5 h-5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Group chat AI simulation
+                        </li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_12345monthly" target="_blank" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-center text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition border border-indigo-200 dark:border-indigo-800/50 block">
+                        Get Monthly
+                    </a>
+                </div>
+
+                <!-- Annual Plan -->
+                <div class="relative flex flex-col p-6 rounded-3xl border-2 border-indigo-500 bg-indigo-50/30 dark:bg-indigo-900/10 shadow-lg shadow-indigo-500/10 scale-[1.02]">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-[10px] font-black uppercase tracking-widest py-1 px-3 rounded-full shadow-sm">
+                        Best Value (Save 32%)
+                    </div>
+                    <h3 class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mb-1">Annual</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">For power users</p>
+                    <div class="mb-6 flex items-baseline gap-1">
+                        <span class="text-4xl font-black text-gray-900 dark:text-white">$49</span>
+                        <span class="text-gray-500 font-medium">/year</span>
+                    </div>
+                    <ul class="space-y-3 mb-8 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            <svg class="w-5 h-5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Everything in Monthly
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            <svg class="w-5 h-5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Early access to new features
+                        </li>
+                        <li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300 font-medium">
+                            <svg class="w-5 h-5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            Premium support
+                        </li>
+                    </ul>
+                    <a href="https://buy.stripe.com/test_12345annual" target="_blank" class="w-full py-3.5 px-4 rounded-xl font-bold text-sm text-center text-white bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 transition shadow-md block">
+                        Get Annual
+                    </a>
+                </div>
+            </div>
+            
+            <p class="text-center text-xs text-gray-400 dark:text-gray-500 mt-6 font-medium">Secure payments via Stripe. Cancel anytime.</p>
+        </div>
+    </div>
 
     <!-- end #app -->
 
