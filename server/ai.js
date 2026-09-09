@@ -146,7 +146,8 @@ router.get('/chat/:folder/identity', async (req, res) => {
             userParticipant: chatRow.user_participant || null,
             participants,
             participantStats: participantStats || {},
-            isGroup
+            isGroup,
+            requiresSelection: !chatRow.user_participant && Object.keys(participants).length > 1
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

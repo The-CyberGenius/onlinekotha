@@ -643,13 +643,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (scrollArea.scrollTop <= 400 && renderStart > 0) {
                         isScrolling = true;
                         window.loadOlder();
-                        setTimeout(() => { isScrolling = false; }, 80);
+                        setTimeout(() => { isScrolling = false; }, 250);
                     }
 
                     if (Math.abs((scrollArea.scrollHeight - scrollArea.scrollTop) - scrollArea.clientHeight) <= 400 && renderEnd < displayedMessages.length) {
                         isScrolling = true;
                         window.loadNewer();
-                        setTimeout(() => { isScrolling = false; }, 80);
+                        setTimeout(() => { isScrolling = false; }, 250);
                     }
                 }
             });
@@ -1293,19 +1293,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     const urlParams = new URLSearchParams(window.location.search);
                     const targetChat = urlParams.get('chat');
-                    let startChat = chats[0];
+
+                    // Only auto-load if a specific chat is requested via URL param.
+                    // On fresh startup, show the welcome screen — don't auto-load first chat.
                     if (targetChat) {
                         const match = chats.find(c => c === targetChat || c.toLowerCase() === targetChat.toLowerCase());
-                        if (match) startChat = match;
+                        if (match) {
+                            selector.value = match;
+                            currentChat = match;
+                            window.currentChat = match;
+                            loadData(match);
+                            removeEmptyState();
+                        } else {
+                            showEmptyState();
+                        }
+                    } else {
+                        // Fresh startup: just show the list, no auto-open
+                        showEmptyState();
                     }
-
-                    selector.value = startChat;
-                    currentChat = startChat;
-                    window.currentChat = startChat;
-                    loadData(startChat);
-                    removeEmptyState();
-                    // Render visual chat list
-                    renderChatList(chats, startChat);
+                    // Render visual chat list (always)
+                    renderChatList(chats, currentChat !== '__global__' && targetChat ? currentChat : '');
                 }
             } else {
                 if (currentChat !== '__global__') {
@@ -1339,54 +1346,72 @@ document.addEventListener('DOMContentLoaded', () => {
     function showEmptyState() {
         const container = document.getElementById('chat-container');
         if (!container) return;
+
+        // Check if user is on free plan to show Pro CTA
+        const isPro = window.__USER__ && window.__USER__.plan === 'pro';
+
         container.innerHTML = `
-            <div class="w-full my-auto flex flex-col items-center pt-[3vh] min-[800px]:pt-[8vh] pb-8 px-6 text-center" id="empty-state">
-                <div class="empty-state-float mb-3 sm:mb-6 relative shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-2xl">
-                      <defs>
-                        <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" stop-color="#4F46E5"/>
-                          <stop offset="100%" stop-color="#9333EA"/>
-                        </linearGradient>
-                        <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stop-color="#EC4899"/>
-                          <stop offset="100%" stop-color="#8B5CF6"/>
-                        </linearGradient>
-                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                          <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#8b5cf6" flood-opacity="0.55"/>
-                        </filter>
-                        <filter id="orb" x="-80%" y="-80%" width="260%" height="260%">
-                          <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#ffffff" flood-opacity="0.9"/>
-                        </filter>
-                      </defs>
-                      <path d="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" fill="none" stroke="url(#g1)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
-                      <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="url(#g2)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
-                      <circle r="5" filter="url(#orb)"><animate attributeName="fill" values="#ffffff;#ec4899;#8b5cf6;#4f46e5;#ffffff" dur="4s" repeatCount="indefinite"/><animateMotion dur="4s" repeatCount="indefinite" path="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" calcMode="linear"/></circle>
-                    </svg>
-                </div>
-                <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-2">Bring your chats to life</h2>
-                <p class="text-[13px] sm:text-[14px] md:text-[15px] text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed mb-4 sm:mb-6">Import your chat history to search, analyze, and relive memories with an AI-generated simulation.</p>
-                
-                <div class="flex items-center justify-center gap-2 sm:gap-4 md:gap-6 text-[10px] sm:text-[11px] md:text-[12px] text-gray-400 dark:text-gray-500 font-medium mb-5 sm:mb-8 bg-gray-50 dark:bg-gray-800/50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-100 dark:border-gray-800 scale-90 sm:scale-100">
-                    <span class="flex items-center gap-1 sm:gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-[14px] sm:h-[14px]"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1 sm:gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-[14px] sm:h-[14px]"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1 sm:gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sm:w-[14px] sm:h-[14px]"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
+            <div class="w-full h-full flex flex-col items-center justify-center px-6 py-10 text-center select-none" id="empty-state">
+                <!-- Logo / Icon -->
+                <div class="mb-5 relative">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl mx-auto" style="box-shadow: 0 8px 32px rgba(99,102,241,0.35);">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-9 h-9 sm:w-11 sm:h-11">
+                          <defs>
+                            <linearGradient id="wg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/><stop offset="100%" stop-color="#e0e7ff" stop-opacity="0.8"/></linearGradient>
+                          </defs>
+                          <path d="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" fill="none" stroke="url(#wg1)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center">
+                        <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
                 </div>
 
-                <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 w-full max-w-sm mx-auto">
-                    <button id="empty-upload-btn" class="flex-1 min-w-[140px] sm:min-w-[160px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[13px] sm:text-[14px] rounded-xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all shadow-md flex items-center justify-center gap-2 sm:gap-2.5">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <!-- Headline -->
+                <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
+                <p class="text-[13px] sm:text-[14px] text-gray-500 dark:text-gray-400 max-w-xs leading-relaxed mb-6">Select a chat from the sidebar, or import a new one to start talking with AI.</p>
+
+                <!-- Import + DM Buttons -->
+                <div class="flex flex-wrap items-center justify-center gap-3 w-full max-w-xs mx-auto mb-6">
+                    <button id="empty-upload-btn" class="flex-1 min-w-[140px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-[13px] rounded-xl px-5 py-2.5 transition-all shadow-md flex items-center justify-center gap-2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                         Import Chat
                     </button>
-                    <button id="empty-dm-btn" class="flex-1 min-w-[140px] sm:min-w-[160px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[13px] sm:text-[14px] rounded-xl px-4 sm:px-6 py-2.5 sm:py-3 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 flex items-center justify-center gap-2 sm:gap-2.5 shadow-sm">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <button id="empty-dm-btn" class="flex-1 min-w-[140px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[13px] rounded-xl px-5 py-2.5 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 flex items-center justify-center gap-2 shadow-sm">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                         Message Someone
                     </button>
                 </div>
+
+                ${!isPro ? `
+                <!-- Pro CTA -->
+                <div class="w-full max-w-xs rounded-2xl border border-indigo-200 dark:border-indigo-800/60 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/30 p-4 text-left" style="box-shadow: 0 2px 16px rgba(99,102,241,0.08);">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[12px] font-bold text-indigo-700 dark:text-indigo-300 mb-0.5">Unlock Pro — Unlimited AI</p>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">Unlimited messages, priority AI, advanced analytics & more.</p>
+                        </div>
+                    </div>
+                    <button id="empty-pro-btn" class="mt-3 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-95 text-white font-bold text-[12px] rounded-lg px-4 py-2 transition-all shadow-sm">
+                        Upgrade to Pro →
+                    </button>
+                </div>` : ''}
+
+                <!-- Trust badges -->
+                <div class="flex items-center justify-center gap-4 text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-5">
+                    <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
+                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                    <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
+                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                    <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
+                </div>
             </div>
         `;
+
         const btn = document.getElementById('empty-upload-btn');
         if (btn) btn.addEventListener('click', () => {
             const openUploadBtn = document.getElementById('open-upload-btn');
@@ -1394,11 +1419,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const dmBtn = document.getElementById('empty-dm-btn');
         if (dmBtn) dmBtn.addEventListener('click', () => {
-            // Open DM sidebar via the btn-dm button
             const btnDm = document.getElementById('btn-dm');
             if (btnDm) btnDm.click();
         });
+        const proBtn = document.getElementById('empty-pro-btn');
+        if (proBtn) proBtn.addEventListener('click', () => {
+            // Navigate to pricing/upgrade page
+            window.location.href = '/pricing.html';
+        });
     }
+
     function removeEmptyState() {
         const e = document.getElementById('empty-state');
         if (e) e.remove();
@@ -2129,6 +2159,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Quick Action Listeners
     btnTop.addEventListener('click', () => {
+        if (!currentChat || currentChat === '__global__' || !allMessages.length) {
+            if (window.kothaToast) window.kothaToast('Open a chat first');
+            return;
+        }
         displayedMessages = allMessages; // Reset filter if active
         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
         setTimeout(() => scrollArea.scrollTop = 0, 10);
@@ -2136,6 +2170,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnBottom.addEventListener('click', () => {
+        if (!currentChat || currentChat === '__global__' || !allMessages.length) {
+            if (window.kothaToast) window.kothaToast('Open a chat first');
+            return;
+        }
         displayedMessages = allMessages;
         const end = displayedMessages.length;
         renderChats(Math.max(0, end - CHUNK_SIZE), end);
@@ -2144,6 +2182,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const openMediaGallery = () => {
+        if (!currentChat || currentChat === '__global__' || !allMessages.length) {
+            if (window.kothaToast) window.kothaToast('Open a chat first');
+            return;
+        }
         displayedMessages = allMessages.filter(msg => msg.attachment && msg.type !== 'system');
         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
         statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length}</span> media attachments.`;
