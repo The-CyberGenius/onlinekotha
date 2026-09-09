@@ -2827,5 +2827,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 window.location.reload();
             }
+        };
+    };
+
 });
 
