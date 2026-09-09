@@ -21,7 +21,6 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
     -webkit-user-select: none;
     user-select: none;
     padding-top: env(safe-area-inset-top, 0px);
@@ -1696,7 +1695,7 @@ select {
 .wrapped-overlay {
     position: fixed;
     inset: 0;
-    z-index: 150;
+    z-index: 9999;
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(16px);
     display: flex;
@@ -1710,9 +1709,9 @@ select {
 
 .wrapped-container {
     width: 100%;
-    max-width: 400px;
+    max-width: 360px;
     height: 100%;
-    max-height: 680px;
+    max-height: 610px;
     aspect-ratio: 9/16;
     background: #09090b;
     border-radius: 28px;

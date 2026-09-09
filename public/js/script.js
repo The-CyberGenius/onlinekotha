@@ -219,6 +219,39 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('close-sidebar-btn').addEventListener('click', () => toggleSidebar(false));
     const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
+    
+    // Close chat button logic
+    const closeChatBtn = document.getElementById('close-chat-btn');
+    if (closeChatBtn) {
+        closeChatBtn.addEventListener('click', () => {
+            currentChat = '';
+            window.currentChat = '';
+            allMessages = [];
+            displayedMessages = [];
+            renderStart = 0;
+            renderEnd = 0;
+            
+            // Update URL to remove ?chat=
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('chat')) {
+                window.history.pushState({}, '', window.location.pathname);
+            }
+            
+            // Unselect all chats in the sidebar visually
+            document.querySelectorAll('.chat-item').forEach(el => {
+                el.classList.remove('bg-indigo-50/80', 'dark:bg-indigo-500/10', 'border-indigo-100', 'dark:border-indigo-500/20', 'shadow-sm');
+                el.classList.add('hover:bg-slate-50', 'dark:hover:bg-white/5', 'border-transparent');
+            });
+            
+            // Show the empty state screen
+            showEmptyState();
+            
+            // On mobile, automatically re-open the sidebar since there's no chat to view
+            if (window.innerWidth < 768 || window.kothaCompact) {
+                toggleSidebar(true);
+            }
+        });
+    }
 
     // Swipe left to close sidebar
     let sidebarTouchStartX = 0;
@@ -738,16 +771,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!data) {
                 showSkeleton();
                 statsInfo.innerText = 'Loading...';
-                const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
-                data = await resp.json();
+                
+                if (chatName === 'kotha_assistant') {
+                    // Load assistant from local storage
+                    const stored = localStorage.getItem('kotha_assistant_history');
+                    let history = [];
+                    if (stored) {
+                        try { history = JSON.parse(stored); } catch(e){}
+                    }
+                    if (history.length === 0) {
+                        history = [
+                            {
+                                text: "Hi there! 👋 I'm Kotha's Support Assistant. Want to know how to export your WhatsApp chat, or how our platform works? Ask me anything in your language!",
+                                sender: "Kotha Assistant",
+                                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                            }
+                        ];
+                    }
+                    data = history;
+                    window._chatMsgCache[chatName] = data;
+                } else {
+                    const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
+                    data = await resp.json();
 
-                if (data.error) {
-                    statsInfo.innerText = "Error: " + data.error;
-                    window.kothaChatLoading = false;
-                    return;
+                    if (data.error) {
+                        statsInfo.innerText = "Error: " + data.error;
+                        window.kothaChatLoading = false;
+                        return;
+                    }
+                    // Stash in cache for instant re-open
+                    window._chatMsgCache[chatName] = data;
                 }
-                // Stash in cache for instant re-open
-                window._chatMsgCache[chatName] = data;
             }
 
             // Safety: if the user switched to a different chat while this was
@@ -884,10 +938,59 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (senders.length > 0 && participantContainer) {
                     participantContainer.classList.remove('hidden');
                     
-                    const label = document.createElement('div');
-                    label.className = 'w-full text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5 mt-1';
-                    label.innerText = 'Participants';
-                    participantContainer.appendChild(label);
+                    const headerRow = document.createElement('div');
+                    headerRow.className = 'flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                    
+                    const leftCol = document.createElement('div');
+                    leftCol.className = 'flex items-center gap-1.5';
+                    leftCol.innerHTML = `
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Participants</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400 transition-transform duration-200" id="participant-chevron">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    `;
+
+                    const rightCol = document.createElement('div');
+                    rightCol.className = 'flex items-center gap-1.5';
+                    
+                    const avatarsWrap = document.createElement('div');
+                    avatarsWrap.className = 'flex items-center -space-x-1.5 mr-0.5';
+                    
+                    const topSenders = senders.slice(0, 3);
+                    topSenders.forEach(([sName]) => {
+                        const av = document.createElement('div');
+                        av.className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px] font-bold border border-white dark:border-[#111b21] shadow-sm';
+                        av.innerText = sName.charAt(0).toUpperCase();
+                        avatarsWrap.appendChild(av);
+                    });
+
+                    rightCol.appendChild(avatarsWrap);
+                    
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'text-[10px] font-medium text-gray-500';
+                    countSpan.innerHTML = `${senders.length} participants &gt;`;
+                    rightCol.appendChild(countSpan);
+
+                    headerRow.appendChild(leftCol);
+                    headerRow.appendChild(rightCol);
+                    participantContainer.appendChild(headerRow);
+
+                    const expandedContent = document.createElement('div');
+                    expandedContent.className = 'hidden px-3 pb-3 flex flex-wrap gap-1.5 border-t border-gray-100 dark:border-gray-800 pt-2';
+                    participantContainer.appendChild(expandedContent);
+
+                    let isExpanded = false;
+                    headerRow.onclick = () => {
+                        isExpanded = !isExpanded;
+                        expandedContent.classList.toggle('hidden', !isExpanded);
+                        document.getElementById('participant-chevron').style.transform = isExpanded ? 'rotate(180deg)' : '';
+                    };
 
                     senders.slice(0, 4).forEach(([sName, count]) => {
                         if (!sName) return;
@@ -926,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             toggleSidebar(false);
                         };
                         senderBtns.push(btn);
-                        participantContainer.appendChild(btn);
+                        expandedContent.appendChild(btn);
                     });
                 }
 
@@ -1134,20 +1237,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgCount = chatMeta?.messageCount || chatMeta?.count || '';
 
             const item = document.createElement('div');
-            item.className = `flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
+            item.className = `flex items-center gap-2 px-2 py-0.5 rounded-lg cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">${initial}</div>
-                <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-1">
-                    <div class="flex items-center justify-between gap-1 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-[13px] shadow-sm shrink-0">${initial}</div>
+                <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-0.5">
+                    <div class="flex items-center justify-between gap-1 mt-0">
                         <div class="flex items-center gap-1 overflow-hidden">
-                            <p class="text-[14px] font-normal text-gray-900 dark:text-gray-100 truncate leading-tight">${escapeHTML(displayName)}</p>
+                            <p class="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">${escapeHTML(displayName)}</p>
                             ${chatMeta?.deletedByUser ? '<span class="px-1 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
                         </div>
-                        <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
+                        <span class="text-[9px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
                     </div>
-                    <div class="flex items-center justify-between gap-1 mt-0.5">
-                        <p class="text-[11px] text-gray-400 font-medium truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
+                    <div class="flex items-center justify-between gap-1 mt-0">
+                        <p class="text-[11px] text-gray-400 font-normal truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
                         ${msgCount ? `<span class="bg-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm shrink-0">${msgCount > 9999 ? (msgCount/1000).toFixed(1) + 'k' : (msgCount > 999 ? '999+' : msgCount)}</span>` : ''}
                     </div>
                 </div>
@@ -1223,6 +1326,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.currentChat = chat;
                 const selector = document.getElementById('chat-selector');
                 if (selector) selector.value = chat;
+                removeEmptyState();
                 renderChatList(chats, chat);
                 loadData(chat).then(async () => {
                     // Trigger identity check
@@ -1258,7 +1362,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // not logged in
                 return;
             }
-            const chats = await resp.json();
+            let chats = await resp.json();
+            
+            // Kotha Assistant Onboarding Injection
+            if (chats.length === 0) {
+                chats = ['kotha_assistant'];
+            }
             loadedChats = chats;
             
             fetch('/api/chats/meta').then(r => r.json()).then(metaMap => {
@@ -1274,6 +1383,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         window._chatMetaCache[folder].contactName = meta; // backwards compatibility
                     }
+                }
+                if (chats.length === 1 && chats[0] === 'kotha_assistant') {
+                    window._chatMetaCache['kotha_assistant'] = {
+                        contactName: "Kotha Assistant",
+                        messageCount: 0,
+                        isGroup: false,
+                        lastMessage: "Hi there! 👋 I'm Kotha's Support Assistant...",
+                        lastTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                    };
                 }
                 renderChatList(loadedChats, currentChat);
             }).catch(() => {});
@@ -1294,8 +1412,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const urlParams = new URLSearchParams(window.location.search);
                     const targetChat = urlParams.get('chat');
 
-                    // Only auto-load if a specific chat is requested via URL param.
-                    // On fresh startup, show the welcome screen — don't auto-load first chat.
                     if (targetChat) {
                         const match = chats.find(c => c === targetChat || c.toLowerCase() === targetChat.toLowerCase());
                         if (match) {
@@ -1305,19 +1421,32 @@ document.addEventListener('DOMContentLoaded', () => {
                             loadData(match);
                             removeEmptyState();
                         } else {
-                            showEmptyState();
+                            // Target chat not found
+                            if (chats.length === 1 && chats[0] === 'kotha_assistant') {
+                                currentChat = 'kotha_assistant';
+                                window.currentChat = 'kotha_assistant';
+                                loadData('kotha_assistant');
+                                removeEmptyState();
+                            } else {
+                                showEmptyState(); // Restore empty state
+                            }
                         }
                     } else {
-                        // Fresh startup: just show the list, no auto-open
-                        showEmptyState();
+                        // Fresh startup: if only kotha assistant, auto open
+                        if (chats.length === 1 && chats[0] === 'kotha_assistant') {
+                            currentChat = 'kotha_assistant';
+                            window.currentChat = 'kotha_assistant';
+                            loadData('kotha_assistant');
+                            removeEmptyState();
+                        } else {
+                            showEmptyState(); // Restore empty state
+                        }
                     }
                     // Render visual chat list (always)
-                    renderChatList(chats, currentChat !== '__global__' && targetChat ? currentChat : '');
+                    renderChatList(chats, currentChat !== '__global__' && (targetChat || currentChat === 'kotha_assistant') ? currentChat : '');
                 }
             } else {
-                if (currentChat !== '__global__') {
-                    showEmptyState();
-                }
+                showEmptyState();
                 renderChatList([], '');
             }
         } catch (e) {
@@ -1347,28 +1476,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('chat-container');
         if (!container) return;
 
-        // Hide header and bottom input so empty state looks full-screen
+        // Hide header and bottom input robustly
         const header = document.getElementById('chat-header-bar');
         const footer = document.getElementById('bottom-ai-bar');
-        if (header) header.classList.add('hidden');
-        if (footer) footer.classList.add('hidden');
+        if (header) header.style.display = 'none';
+        if (footer) footer.style.display = 'none';
+        
+        // Also ensure any lingering AI chat content is cleared
+        const aiContainer = document.getElementById('ai-chat-container');
+        if (aiContainer) aiContainer.innerHTML = '';
 
         // Check if user is on free plan to show Pro CTA
         const isPro = window.__USER__ && window.__USER__.plan === 'pro';
 
         container.innerHTML = `
-            <div class="w-full my-auto flex flex-col items-center px-4 pt-10 pb-8 text-center select-none" id="empty-state">
+            <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b141a] overflow-hidden select-none" id="empty-state">
                 
-                <!-- Logo Emblem Container (Matched with OK Messages) -->
-                <div class="relative mb-6 group cursor-default mt-4">
-                    <!-- Ambient Glow -->
-                    <div class="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40 group-hover:opacity-75 transition duration-500"></div>
+                <!-- Ambient Background Blur Glows -->
+                <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-tr from-indigo-500/15 via-purple-500/10 to-pink-500/15 blur-3xl pointer-events-none"></div>
+                <div class="absolute bottom-10 right-10 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 text-center px-6 flex flex-col items-center">
                     
-                    <!-- Clean OK Emblem with animated logo (Light / Dark adaptive) -->
-                    <div class="relative w-24 h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
-                        <img src="/logo.svg" alt="OK Logo" class="w-full h-full object-contain" />
+                    <!-- Logo Emblem Container (Matched with OK Messages) -->
+                    <div class="relative mb-6 group cursor-default">
+                        <!-- Ambient Glow -->
+                        <div class="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40 group-hover:opacity-75 transition duration-500"></div>
+                        
+                        <!-- Clean OK Emblem with animated logo (Light / Dark adaptive) -->
+                        <div class="relative w-24 h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
+                            <img src="/logo.svg" alt="OK Logo" class="w-full h-full object-contain" />
+                        </div>
                     </div>
-                </div>
 
                 <!-- Headline -->
                 <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
@@ -1388,7 +1527,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 ${!isPro ? `
                 <!-- Pro CTA -->
-                <div class="w-full max-w-[280px] rounded-2xl border border-indigo-200 dark:border-indigo-800/60 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/30 p-3.5 text-left" style="box-shadow: 0 2px 16px rgba(99,102,241,0.08);">
+                <div class="w-full max-w-[280px] rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/30 p-3.5 text-left" style="box-shadow: 0 2px 16px rgba(99,102,241,0.08);">
                     <div class="flex items-start gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
@@ -1407,10 +1546,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="flex items-center justify-center gap-3 text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-4">
                     <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg> AI-powered</span>
+                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Free Demo</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Fast</span>
+                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> AI-Powered</span>
                 </div>
+                </div> <!-- End of relative z-10 wrapper -->
             </div>
         `;
 
@@ -1438,8 +1578,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show header and bottom input again
         const header = document.getElementById('chat-header-bar');
         const footer = document.getElementById('bottom-ai-bar');
-        if (header) header.classList.remove('hidden');
-        if (footer) footer.classList.remove('hidden');
+        if (header) header.style.display = 'flex';
+        if (footer) footer.style.display = 'block';
     }
 
     const chatSelector = document.getElementById('chat-selector');
@@ -1451,6 +1591,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 currentChat = e.target.value;
                 window.currentChat = currentChat;
+                removeEmptyState();
                 loadData(currentChat).then(async () => {
                     if (typeof window.ensureIdentity === 'function') {
                         await window.ensureIdentity(currentChat);

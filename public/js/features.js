@@ -1725,8 +1725,11 @@
         const overlay = document.createElement('div');
         overlay.id = 'wrapped-overlay';
         overlay.className = 'wrapped-overlay';
+        // Force absolute maximum z-index to beat Mac titlebar and any other elements
+        overlay.style.zIndex = '2147483647';
+        
         overlay.innerHTML = `
-            <div class="wrapped-container">
+            <div class="wrapped-container" style="max-width: 330px; max-height: 570px;">
                 <div class="wrapped-blob wrapped-blob-1"></div>
                 <div class="wrapped-blob wrapped-blob-2"></div>
                 <div class="wrapped-blob wrapped-blob-3"></div>

@@ -460,28 +460,25 @@
     }
 
     function renderPlanBadge(user) {
-        const banner  = document.getElementById('plan-banner');
-        const badge   = document.getElementById('plan-badge');
-        const text    = document.getElementById('plan-text');
+        const badge = document.getElementById('compact-plan-badge');
         const upgradeUsd = document.getElementById('upgrade-usd-btn');
-        if (!banner || !badge || !text) return;
+        if (!badge) return;
 
-        banner.classList.remove('hidden');
+        badge.classList.remove('hidden');
         const plan = user.effective_plan;
 
         if (plan === 'trial') {
             const remainingMs = user.trial_expires_at - Date.now();
-            const hours = Math.max(0, Math.floor(remainingMs / 3600000));
-            const mins  = Math.max(0, Math.floor((remainingMs % 3600000) / 60000));
-            badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 border border-indigo-200';
-            text.innerHTML  = `🎁 Trial: <b>${hours}h ${mins}m</b> · Unlimited AI`;
+            const days = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
+            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 border-indigo-200';
+            badge.innerHTML = `TRIAL · ${days}d left`;
         } else if (plan === 'paid') {
-            badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-green-100 text-green-800 border border-green-200';
-            text.innerHTML  = `✓ Pro plan · Unlimited AI`;
+            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border shadow-sm shrink-0 bg-green-100 text-green-800 border-green-200';
+            badge.innerHTML = `PRO ✦`;
             if (upgradeUsd) upgradeUsd.classList.add('hidden');
         } else {
-            badge.className = 'rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2 bg-gray-100 text-gray-700 border border-gray-200';
-            text.innerHTML  = `Free tier · 3 AI chats/day`;
+            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-gray-100 text-gray-700 border-gray-200';
+            badge.innerHTML = `FREE`;
         }
 
         // ── Dodo global checkout (redirect-based) ──────────────────

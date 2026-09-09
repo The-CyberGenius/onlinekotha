@@ -561,10 +561,25 @@
 
         return new Promise(async (resolve) => {
             try {
-                const resp = await fetch('/api/ai/chat', {
+                let endpoint = '/api/ai/chat';
+                let payload = { chat: chatFolder, message: text, conversationId: convId, contactName: cName, userName: uName };
+                
+                if (chatFolder === 'kotha_assistant') {
+                    endpoint = '/api/demo-chat';
+                    payload = { message: text, sessionId: 'app_onboarding_session', role: 'support' };
+                    
+                    // Save user message to history
+                    const stored = localStorage.getItem('kotha_assistant_history');
+                    let history = [];
+                    if (stored) { try { history = JSON.parse(stored); } catch(e){} }
+                    history.push({ text: text, sender: 'You', time: formatNow() });
+                    localStorage.setItem('kotha_assistant_history', JSON.stringify(history));
+                }
+
+                const resp = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'content-type': 'application/json' },
-                    body: JSON.stringify({ chat: chatFolder, message: text, conversationId: convId, contactName: cName, userName: uName }),
+                    body: JSON.stringify(payload),
                 });
 
                 if (!resp.ok) {
@@ -652,6 +667,14 @@
                                     }
                                 }
                                 _dotStop();
+                                
+                                if (chatFolder === 'kotha_assistant') {
+                                    const stored = localStorage.getItem('kotha_assistant_history');
+                                    let history = [];
+                                    if (stored) { try { history = JSON.parse(stored); } catch(e){} }
+                                    history.push({ text: cleanedText, sender: 'Kotha Assistant', time: formatNow() });
+                                    localStorage.setItem('kotha_assistant_history', JSON.stringify(history));
+                                }
                                 resolve();
                             };
                             finishStream();

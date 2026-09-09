@@ -21,7 +21,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
-    <link rel="stylesheet" href="/css/style.css?v=1780860002">
+    <link rel="stylesheet" href="/css/style.css?v=1780860013">
     <style>
         /* DM area theming - must override inline styles via !important for dark mode */
         #dm-chat-area {
@@ -90,7 +90,10 @@
                         <div id="my-avatar-initials" class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[13px] font-bold border-2 border-indigo-400/40">?</div>
                     </div>
                     <div>
-                        <h2 class="text-[14px] font-semibold text-gray-900 dark:text-gray-100 tracking-tight leading-tight" id="sidebar-title">Chats</h2>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-[14px] font-semibold text-gray-900 dark:text-gray-100 tracking-tight leading-tight" id="sidebar-title">Chats</h2>
+                            <span id="compact-plan-badge" class="hidden px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95" onclick="document.getElementById('upgrade-usd-btn')?.click()"></span>
+                        </div>
                         <p class="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[140px]" id="my-email-display"></p>
                     </div>
                 </div>
@@ -153,7 +156,7 @@
             </div>
 
             <!-- ── Chats / Messages tabs ── -->
-            <div class="flex shrink-0 px-3 pt-2 pb-0 gap-1">
+            <div class="flex shrink-0 px-3 pt-1.5 pb-0 gap-1">
                 <button id="tab-chats-btn"
                     class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition bg-indigo-600 text-white shadow-sm">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -171,7 +174,7 @@
             <div id="sidebar-chats-tab" class="flex-1 min-h-0 flex flex-col overflow-hidden">
 
             <!-- Trial / Plan badge -->
-            <div id="plan-banner" class="hidden px-4 pt-3 shrink-0">
+            <div id="plan-banner" class="hidden shrink-0" style="display: none !important;">
                 <div id="plan-badge"
                     class="rounded-xl px-3 py-2 text-xs font-bold flex items-center justify-between gap-2">
                     <span id="plan-text"></span>
@@ -180,13 +183,13 @@
                 </div>
             </div>
 
-            <!-- Hidden select (kept for script.js compatibility) -->
+            <!-- Hidden select (kept for script.js?v=2 compatibility) -->
             <select id="chat-selector" class="hidden">
                 <option value="">Select a chat...</option>
             </select>
 
             <!-- Search Bar -->
-            <div class="px-2 pt-2 pb-1 shrink-0 flex gap-1.5 relative border-b border-gray-200 dark:border-gray-800">
+            <div class="px-2 pt-1 pb-1 shrink-0 flex gap-1.5 relative border-b border-gray-200 dark:border-gray-800">
                 <div
                     class="bg-[#f0f2f5] dark:bg-[#202c33] rounded-lg flex items-center px-2 py-1 transition-all w-full h-8">
                     <svg class="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,14 +272,13 @@
             </div>
 
             <!-- Global Chat (Anonymous Community) -->
-            <div class="px-2 pt-1 pb-1 shrink-0">
+            <div class="px-2 py-0.5 shrink-0">
                 <div id="global-chat-item"
-                    class="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-all duration-150 group border border-transparent hover:bg-gray-100 dark:hover:bg-white/5">
+                    class="flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-all duration-150 group border border-transparent hover:bg-gray-100 dark:hover:bg-white/5">
                     <div
                         class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
                         </svg>
                     </div>
                     <div class="min-w-0 flex-1">
@@ -295,25 +297,28 @@
             </div>
 
             <!-- Chat List (WhatsApp-style) -->
-            <div class="px-3 pt-1 pb-1 flex-1 min-h-0 flex flex-col">
+            <div class="px-2 py-0 flex-1 min-h-0 flex flex-col">
                 <div class="flex items-center justify-between px-1 mb-1 shrink-0">
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Chats</p>
-                    <button id="open-upload-btn" title="Import new chat"
-                        class="w-7 h-7 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition flex items-center justify-center shadow-sm">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5" stroke-linecap="round">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-1.5 cursor-pointer group" onclick="document.getElementById('open-upload-btn').click()">
+                        <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 transition">Import Chat</span>
+                        <button id="open-upload-btn" title="Import new chat"
+                            class="w-6 h-6 rounded-md bg-indigo-600 text-white group-hover:bg-indigo-700 transition flex items-center justify-center shadow-sm pointer-events-none">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5" stroke-linecap="round">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="chat-list-ui" class="flex-1 overflow-y-auto no-scrollbar pr-1 flex flex-col gap-0.5">
                     <!-- Chat items rendered by JS -->
                 </div>
             </div>
 
-            <!-- Participant Filters (Dynamic) Sticky Bottom -->
-            <div id="participant-filters-container" class="hidden px-3 py-3 flex flex-wrap gap-1.5 shrink-0 bg-white dark:bg-[#111b21] border-t border-gray-100 dark:border-gray-800 z-10 sticky bottom-0">
-                <!-- Buttons injected by JS -->
+            <!-- Participant Filters (Dynamic) Sticky Bottom / Collapsible -->
+            <div id="participant-filters-container" class="hidden flex-col shrink-0 bg-white dark:bg-[#111b21] border-t border-gray-100 dark:border-gray-800 z-10 sticky bottom-0">
+                <!-- Header / collapsed view injected by JS -->
             </div>
 
             <!-- Stats/Info & Results -->
@@ -630,6 +635,13 @@
                         </svg>
                         <span class="dm-unread-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black rounded-full w-4 h-4 flex items-center justify-center leading-none border-2 border-white">0</span>
                     </button>
+                    <!-- Close chat button -->
+                    <button id="close-chat-btn" title="Close Chat" aria-label="Close Chat"
+                        class="p-2 ml-1 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition cursor-pointer shrink-0">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
@@ -852,10 +864,10 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/script.js?v=1780860011"></script>
-    <script src="js/upload.js?v=1780860010"></script>
-    <script src="js/ai-panel.js?v=1780860010"></script>
-    <script src="js/features.js?v=1780860010"></script>
+    <script src="/js/script.js?v=1780860013"></script>
+    <script src="js/upload.js?v=1780860013"></script>
+    <script src="js/ai-panel.js?v=1780860013"></script>
+    <script src="js/features.js?v=1780860013"></script>
     <script src="js/dm.js?v=1780860010"></script>
     <script>
         if ('serviceWorker' in navigator) {

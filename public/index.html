@@ -445,30 +445,22 @@
                 </p>
             </div>
 
-            <div class="rise d4" style="margin-bottom:30px;">
-                <p style="font-weight:700;margin-bottom:12px;color:var(--text-secondary);font-size:14px;">Who do you want to chat with?</p>
-                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;" id="role-selector">
-                    <button class="btn btn-ghost active-role" data-role="mom" style="border-radius:999px;padding:8px 16px;min-height:auto;">Mom ❤️</button>
-                    <button class="btn btn-ghost" data-role="best_friend" style="border-radius:999px;padding:8px 16px;min-height:auto;">Best Friend 🍻</button>
-                    <button class="btn btn-ghost" data-role="ex" style="border-radius:999px;padding:8px 16px;min-height:auto;">The Ex 🥺</button>
-                </div>
-                <style>
-                    .active-role { background: var(--text-primary) !important; color: var(--bg) !important; border-color: var(--text-primary) !important; }
-                </style>
-            </div>
 
-            <!-- ── Interactive Chat Demo (functional) ── -->
+
+            <!-- ── Interactive Support Chat (functional) ── -->
             <div class="rise d5" style="max-width:420px;margin:0 auto;">
                 <div class="mockup-frame p-5 text-left" id="demo-chat-frame" style="padding:20px;text-align:left;position:relative;transition:all 0.3s;">
                     <!-- Chat header -->
                     <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
                         <div class="relative" style="position:relative;">
                             <div class="online-ring"></div>
-                            <div id="demo-avatar" style="width:40px;height:40px;border-radius:999px;background:#1e293b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;transition:all 0.3s;">M</div>
+                            <div id="demo-avatar" style="width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;transition:all 0.3s;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg>
+                            </div>
                         </div>
                         <div style="flex:1;">
-                            <p id="demo-name" style="font-size:13px;font-weight:700;color:var(--text-primary);transition:all 0.3s;">Mom</p>
-                            <p style="font-size:10px;color:#34d399;font-weight:500;">Online · AI</p>
+                            <p id="demo-name" style="font-size:13px;font-weight:700;color:var(--text-primary);transition:all 0.3s;">Kotha Assistant</p>
+                            <p style="font-size:10px;color:#34d399;font-weight:500;">Online · Support</p>
                         </div>
                         <div id="demo-counter" style="display:flex;align-items:center;gap:6px;background:var(--msg-ai-bg);padding:4px 10px;border-radius:999px;">
                             <span class="text-[9px] font-bold text-zinc-400" id="demo-remaining" style="font-size:9px;font-weight:700;color:var(--text-muted);">10 msgs left</span>
@@ -477,27 +469,24 @@
 
                     <!-- Messages area -->
                     <div class="space-y-3" id="hero-chat" style="display:flex;flex-direction:column;gap:12px;max-height:280px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;">
-                        <div class="flex justify-end chat-msg" id="demo-msg-1" style="opacity:0;display:flex;justify-content:flex-end;">
-                            <div class="msg-user px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;">
-                                <p class="text-[13px] text-white leading-relaxed" id="demo-msg-user-text" style="font-size:13px;color:#fff;line-height:1.5;">Maa wo recipe batao na, aloo ke parathe wali</p>
-                                <p class="text-[9px] text-white/40 text-right mt-1.5" style="font-size:9px;color:rgba(255,255,255,.4);text-align:right;margin-top:6px;">✓✓</p>
+                        
+                        <div class="flex items-end gap-2 chat-msg" id="demo-msg-welcome" style="display:flex;align-items:flex-end;gap:8px;">
+                            <div style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg>
+                            </div>
+                            <div class="msg-ai px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;background:var(--msg-ai-bg);border-radius:12px;border-bottom-left-radius:2px;">
+                                <p class="text-[13px] text-zinc-200 leading-relaxed" style="font-size:13px;color:var(--text-primary);line-height:1.5;">Hi there! 👋 I'm Kotha's Support Assistant. Want to know how to export your WhatsApp chat, or how our platform works? Ask me anything in your language!</p>
                             </div>
                         </div>
-                        <div class="flex items-end gap-2 chat-msg" id="demo-msg-2" style="opacity:0;display:flex;align-items:flex-end;gap:8px;">
-                            <div id="demo-msg-avatar" style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg,#fb7185,#ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0;">M</div>
-                            <div class="msg-ai px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;">
-                                <p class="text-[13px] text-zinc-200 leading-relaxed" id="ai-typed-text" style="font-size:13px;color:var(--text-primary);line-height:1.5;"></p>
-                                <p class="text-[9px] text-zinc-500 text-right mt-1.5" style="font-size:9px;text-align:right;margin-top:6px;"><span class="text-indigo-400" style="color:var(--accent);">AI</span></p>
-                            </div>
-                        </div>
+
                     </div>
 
                     <!-- Interactive input bar -->
                     <form id="demo-form" style="margin-top:16px;display:flex;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);">
-                        <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Type a message to Mom..."
+                        <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Ask me a question..."
                             style="background:transparent;font-size:13px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
                         <button type="submit" id="demo-send" aria-label="Send message"
-                            style="width:38px;height:38px;border-radius:999px;background:#1e293b;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:0;cursor:pointer;">
+                            style="width:38px;height:38px;border-radius:999px;background:var(--accent-strong);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:0;cursor:pointer;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
                         </button>
                     </form>
@@ -909,104 +898,16 @@
             }
 
             // ── Role Management ──
-            const roleButtons = document.querySelectorAll('#role-selector .btn');
-            const demoName = document.getElementById('demo-name');
-            const demoAvatar = document.getElementById('demo-avatar');
-            const demoMsgAvatar = document.getElementById('demo-msg-avatar');
             const demoInput = document.getElementById('demo-input');
-            const demoMsgUserText = document.getElementById('demo-msg-user-text');
-            let currentRole = 'mom';
-
-            const roleData = {
-                'mom': {
-                    name: 'Mom', letter: 'M',
-                    gradient: 'linear-gradient(135deg,#fb7185,#ec4899)',
-                    avatarBg: '#1e293b',
-                    prompt: 'Maa wo recipe batao na, aloo ke parathe wali',
-                    aiReply: 'Beta aloo ubal ke mash kar lo, phir hara dhaniya, mirchi, namak aur ajwain daal do. Atte me thoda namak oil daalke gundhna. Bas! 😊',
-                    placeholder: 'Type a message to Mom...'
-                },
-                'best_friend': {
-                    name: 'Best Friend', letter: 'B',
-                    gradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
-                    avatarBg: '#d97706',
-                    prompt: 'Bhai sun, Goa ka plan banate hain next month pakka.',
-                    aiReply: 'Abe chup kar, pichli baar bhi tune hi cancel kiya tha. Paise transfer kar pehle phir baat karenge 😂🍻',
-                    placeholder: 'Type a message to Best Friend...'
-                },
-                'ex': {
-                    name: 'The Ex', letter: 'E',
-                    gradient: 'linear-gradient(135deg,#64748b,#334155)',
-                    avatarBg: '#334155',
-                    prompt: 'Hey, came across this old photo of us today...',
-                    aiReply: 'Oh wow... that feels like a lifetime ago. We looked really happy there. Hope you are doing well 😊',
-                    placeholder: 'Type a message to The Ex...'
-                }
-            };
-
-            let typeTimeout;
-
-            function playRoleAnimation(roleId) {
-                const data = roleData[roleId];
-                currentRole = roleId;
-
-                // Update UI visually
-                demoName.textContent = data.name;
-                demoAvatar.textContent = data.letter;
-                demoMsgAvatar.textContent = data.letter;
-                demoAvatar.style.background = data.avatarBg;
-                demoMsgAvatar.style.background = data.gradient;
-                demoInput.placeholder = data.placeholder;
-
-                // Reset chat
-                const dynamicBubbles = chatArea.querySelectorAll('.dynamic-bubble');
-                dynamicBubbles.forEach(el => el.remove());
-
-                document.getElementById('demo-msg-1').style.opacity = '0';
-                document.getElementById('demo-msg-2').style.opacity = '0';
-                demoMsgUserText.textContent = data.prompt;
-                aiText.textContent = '';
-                
-                clearTimeout(typeTimeout);
-
-                setTimeout(() => {
-                    document.getElementById('demo-msg-1').style.opacity = '1';
-                }, 100);
-                
-                setTimeout(() => {
-                    document.getElementById('demo-msg-2').style.opacity = '1';
-                    let i = 0;
-                    function typeChar() {
-                        if (i < data.aiReply.length) {
-                            aiText.textContent = data.aiReply.slice(0, i + 1);
-                            i++;
-                            typeTimeout = setTimeout(typeChar, 20 + Math.random() * 15);
-                        }
-                    }
-                    typeTimeout = setTimeout(typeChar, 400);
-                }, 1000);
-            }
-
-            roleButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    roleButtons.forEach(b => b.classList.remove('active-role'));
-                    btn.classList.add('active-role');
-                    playRoleAnimation(btn.getAttribute('data-role'));
-                });
-            });
-
-            // Initial animation for default 'mom'
-            playRoleAnimation('mom');
+            let currentRole = 'support';
 
             function addAiBubble() {
                 const div = document.createElement('div');
                 div.className = 'flex items-end gap-2 dynamic-bubble';
                 div.style.cssText = 'display:flex;align-items:flex-end;gap:8px;animation:fade-up 0.3s ease forwards;';
                 
-                const rd = roleData[currentRole];
-                div.innerHTML = `<div style="width:24px;height:24px;border-radius:999px;background:${rd.gradient};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0;">${rd.letter}</div>
-    <div class="msg-ai px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;">
+                div.innerHTML = `<div style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg></div>
+    <div class="msg-ai px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;background:var(--msg-ai-bg);border-radius:12px;border-bottom-left-radius:2px;">
         <p class="text-[13px] leading-relaxed ai-stream-text" style="font-size:13px;color:var(--text-primary);line-height:1.5;"><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.2s"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.4s"></span></p>
         <p class="text-[9px] text-right mt-1.5" style="font-size:9px;text-align:right;margin-top:6px;"><span style="color:var(--accent);">AI</span></p>
     </div>`;
@@ -1178,8 +1079,10 @@
 
                 if (newTheme === 'light') {
                     root.classList.add('light');
+                    root.classList.remove('dark');
                 } else {
                     root.classList.remove('light');
+                    root.classList.add('dark');
                 }
 
                 updateIcons(newTheme === 'light');
@@ -1322,7 +1225,7 @@
             steps.forEach((_, i) => {
                 const d = document.createElement('div');
                 d.className = 'how-dot rounded-full transition-all duration-300';
-                d.style.cssText = `height:6px;background:rgba(255,255,255,0.2);width:6px`;
+                d.style.css?v=2Text = `height:6px;background:rgba(255,255,255,0.2);width:6px`;
                 dots.appendChild(d);
             });
 
@@ -1364,7 +1267,7 @@
                             if (!chat) return;
                             const b = document.createElement('div');
                             b.className = 'how-bbl';
-                            b.style.cssText = `display:flex;justify-content:${m.me ? 'flex-end' : 'flex-start'}`;
+                            b.style.css?v=2Text = `display:flex;justify-content:${m.me ? 'flex-end' : 'flex-start'}`;
                             b.innerHTML = `<span class="${m.me ? '' : 'modal-demo-bubble-ai'}" style="background:${m.me ? 'linear-gradient(135deg,#6366f1,#818cf8)' : 'var(--msg-ai-bg)'};color:${m.me ? 'white' : 'var(--text-primary)'};border:${m.me ? 'none' : '1px solid var(--border)'};padding:7px 13px;border-radius:${m.me ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};font-size:13px;font-weight:500;max-width:70%">${m.text}</span>`;
                             chat.appendChild(b);
                             chat.scrollTop = chat.scrollHeight;
