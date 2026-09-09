@@ -1555,18 +1555,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 ${!isPro ? `
                 <!-- Pro CTA -->
-                <div class="w-full max-w-[280px] rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/30 p-3.5 text-left" style="box-shadow: 0 2px 16px rgba(99,102,241,0.08);">
-                    <div class="flex items-start gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <div class="w-full max-w-[280px] rounded-[14px] bg-white dark:bg-[#1c1c2e] p-2.5 text-left border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between gap-2 transition-all hover:border-indigo-500/30">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
                         </div>
-                        <div class="flex-1">
-                            <p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 mb-0.5">Unlock Pro — Unlimited AI</p>
-                            <p class="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed">Unlimited messages, priority AI, advanced analytics & more.</p>
+                        <div class="flex flex-col justify-center">
+                            <p class="text-[12px] font-bold text-gray-900 dark:text-white leading-tight mb-0.5">Kotha Pro</p>
+                            <p class="text-[9px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-none">Unlimited AI</p>
                         </div>
                     </div>
-                    <button id="empty-pro-btn" class="mt-2.5 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-95 text-white font-bold text-[11px] rounded-lg px-4 py-2 transition-all shadow-sm">
-                        Upgrade to Pro →
+                    <button id="empty-pro-btn" class="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-95 font-bold text-[11px] rounded-lg px-3 py-1.5 transition-all">
+                        Upgrade
                     </button>
                 </div>` : ''}
 
