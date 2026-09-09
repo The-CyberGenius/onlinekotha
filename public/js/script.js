@@ -1514,7 +1514,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b141a] overflow-hidden select-none" id="empty-state">
                 
                 <!-- Mobile sidebar open button (visible only on mobile when header is hidden) -->
-                <button id="empty-open-sidebar-btn" class="md:hidden absolute top-4 left-4 z-30 w-10 h-10 rounded-full bg-white dark:bg-[#202c33] shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center transition hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 cursor-pointer">
+                <button id="empty-open-sidebar-btn" class="md:hidden absolute z-30 w-10 h-10 rounded-full bg-white dark:bg-[#202c33] shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center transition hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 cursor-pointer" style="top: max(1rem, env(safe-area-inset-top)); left: 1rem;">
                     <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
                     </svg>
