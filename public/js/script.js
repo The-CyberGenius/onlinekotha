@@ -1358,19 +1358,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.innerHTML = `
             <div class="w-full my-auto flex flex-col items-center px-4 pt-10 pb-8 text-center select-none" id="empty-state">
-                <!-- Logo / Icon -->
-                <div class="mb-4 relative inline-block">
-                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-xl mx-auto" style="box-shadow: 0 8px 32px rgba(99,102,241,0.35);">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-8 h-8 sm:w-9 sm:h-9">
-                          <defs>
-                            <linearGradient id="wg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/><stop offset="100%" stop-color="#e0e7ff" stop-opacity="0.8"/></linearGradient>
-                          </defs>
-                          <path d="M35 30 C 15 30 15 70 35 70 C 50 70 50 30 65 30 C 85 30 85 70 65 70 C 50 70 50 30 35 30 Z" fill="none" stroke="url(#wg1)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
-                          <path d="M35 30 C 50 30 50 70 65 70" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </div>
-                    <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-white dark:border-gray-900 shadow-sm flex items-center justify-center">
-                        <svg width="7" height="7" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                
+                <!-- Logo Emblem Container (Matched with OK Messages) -->
+                <div class="relative mb-6 group cursor-default mt-4">
+                    <!-- Ambient Glow -->
+                    <div class="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40 group-hover:opacity-75 transition duration-500"></div>
+                    
+                    <!-- Clean OK Emblem with animated logo (Light / Dark adaptive) -->
+                    <div class="relative w-24 h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
+                        <img src="/logo.svg" alt="OK Logo" class="w-full h-full object-contain" />
                     </div>
                 </div>
 
@@ -1431,7 +1427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const proBtn = document.getElementById('empty-pro-btn');
         if (proBtn) proBtn.addEventListener('click', () => {
-            if (typeof openPricingModal === 'function') openPricingModal();
+            if (typeof openUpgradeModal === 'function') openUpgradeModal();
         });
     }
 
@@ -2831,35 +2827,5 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 window.location.reload();
             }
-        };
-    };
-
-    // Pricing Modal logic
-    window.openPricingModal = function() {
-        const modal = document.getElementById('pricing-modal');
-        if (!modal) return;
-        const card = modal.querySelector('.custom-modal-card');
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            if (card) {
-                card.classList.remove('scale-95');
-                card.classList.add('scale-100');
-            }
-        }, 10);
-    };
-
-    window.closePricingModal = function() {
-        const modal = document.getElementById('pricing-modal');
-        if (!modal) return;
-        const card = modal.querySelector('.custom-modal-card');
-        modal.classList.add('opacity-0');
-        if (card) {
-            card.classList.remove('scale-100');
-            card.classList.add('scale-95');
-        }
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    };
-
 });
 
