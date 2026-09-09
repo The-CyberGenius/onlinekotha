@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
+
 <head>
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        // Prevent Flash of Incorrect Theme
+        // Prevent Flash of Incorrect Theme (FOIT)
         (function () {
             const storedTheme = localStorage.getItem('kotha_theme');
             const systemTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
@@ -18,434 +20,1433 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kotha — Enterprise-Grade Chat Preservation AI</title>
-    <meta name="description" content="Upload your WhatsApp chat export and let AI create an AI conversation based on your uploaded chat history. 100% Private, Zero Data Retention.">
-    <meta name="keywords" content="whatsapp chat viewer online, whatsapp chat AI, AI chat simulation, whatsapp chat import">
+    <title>Kotha — WhatsApp Chat AI Viewer | Chat With Loved Ones Again</title>
+    <meta name="description"
+        content="Upload your WhatsApp chat export and let AI create an AI conversation based on your uploaded chat history — their words, humor, and style. Free WhatsApp chat viewer with AI Chat Simulation.">
+    <meta name="keywords"
+        content="whatsapp chat viewer online, whatsapp chat AI, AI chat simulation, whatsapp chat import, AI Chat Simulation, view old whatsapp chats, whatsapp chat export viewer">
     <meta name="author" content="Kotha">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Kotha — WhatsApp Chat AI Viewer | Chat With Loved Ones Again">
+    <meta property="og:description"
+        content="Upload WhatsApp chats. AI learns conversation patterns from your chat history. Interact with an AI simulation anytime — free.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Kotha">
+    <meta property="og:locale" content="en_IN">
+    <meta property="og:image" content="https://www.onlinekotha.com/og-image.png?v=2">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://www.onlinekotha.com/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@onlinekotha">
+    <meta name="twitter:title" content="Kotha — WhatsApp Chat AI Viewer">
+    <meta name="twitter:description"
+        content="Upload WhatsApp chats. AI learns conversation patterns from your chat history. Interact with an AI simulation anytime.">
+    <meta name="twitter:image" content="https://www.onlinekotha.com/og-image.png?v=2">
+    <link rel="canonical" href="https://www.onlinekotha.com/">
+    <meta name="theme-color" content="#0a0a0f">
+
+    <!-- Performance: preload critical font -->
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.onlinekotha.com/#organization",
+          "name": "OnlineKotha",
+          "url": "https://www.onlinekotha.com",
+          "logo": "https://www.onlinekotha.com/logo.svg",
+          "founder": {
+            "@type": "Person",
+            "name": "Shiva Prajapat"
+          },
+          "sameAs": [
+            "https://twitter.com/onlinekotha"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "contact@onlinekotha.com",
+            "contactType": "customer support"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.onlinekotha.com/#website",
+          "url": "https://www.onlinekotha.com",
+          "name": "OnlineKotha",
+          "description": "AI-Powered Chat Memory Platform & WhatsApp Chat Viewer",
+          "publisher": {
+            "@id": "https://www.onlinekotha.com/#organization"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Kotha",
+          "url": "https://www.onlinekotha.com",
+          "description": "Import your chat history. AI learns conversation patterns from your chat history — their words, humor, style. Then Interact with an AI simulation anytime.",
+          "applicationCategory": "SocialNetworkingApplication",
+          "operatingSystem": "Web, Android, iOS, Windows, macOS",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "INR"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "120"
+          }
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I export my chat history?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Open any chat → tap the 3 dots menu → More → Export chat → Choose 'Without Media' → Save the .zip file. Then upload it to Kotha."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my chat data safe and private?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. All data travels over secure encrypted connections (HTTPS/TLS), your chats stay private to your account, we never sell your data, never train AI on your personal conversations, and you can delete everything anytime with one click."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the AI learn to talk like my contact?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Kotha's AI reads all messages in your uploaded chat to understand your contact's writing style — their language, slang, emojis, humor, and tone. It then responds in their exact style during conversations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Kotha free to use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Kotha is free forever with unlimited chat imports, a beautiful chat viewer, On This Day memories, and 3 AI conversations per day. A Pro plan with unlimited AI chats is available for power users."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which languages does Kotha support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Kotha works with any language — Hindi, English, Hinglish, Tamil, Bengali, Marathi, and more. The AI automatically matches whatever language your contact uses in chats."
+          }
+        }
+      ]
+    }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon-96.png">
     <link rel="manifest" href="/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Performance: defer Tailwind (non-critical) -->
     <link rel="preload" href="/css/tailwind.min.css?v=1" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/css/tailwind.min.css?v=1"></noscript>
     <script>document.addEventListener('DOMContentLoaded', () => { if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => { }) });</script>
 
+    <!-- ═══════════ MINIMAL DESIGN SYSTEM ═══════════ -->
     <style>
         :root {
-            --bg: #030712; /* Deep slate/black */
-            --bg-soft: #0f172a;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --card-bg: #0b0f19;
+            --bg: #0a0a0a;
+            --bg-soft: #101012;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1aa;
+            --text-muted: #6b6b75;
+            --card-bg: #121214;
             --border: rgba(255, 255, 255, 0.08);
             --border-strong: rgba(255, 255, 255, 0.16);
-            --accent: #6366f1;
-            --accent-glow: rgba(99, 102, 241, 0.4);
+            --accent: #818cf8;
+            --accent-strong: #6366f1;
+            --msg-ai-bg: rgba(255, 255, 255, 0.05);
         }
 
         html.light {
             --bg: #ffffff;
-            --bg-soft: #f8fafc;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
+            --bg-soft: #f8f8fb;
+            --text-primary: #0b0b0f;
+            --text-secondary: #52525b;
+            --text-muted: #9a9aa3;
             --card-bg: #ffffff;
             --border: rgba(0, 0, 0, 0.08);
             --border-strong: rgba(0, 0, 0, 0.16);
             --accent: #4f46e5;
-            --accent-glow: rgba(79, 70, 229, 0.2);
+            --accent-strong: #4338ca;
+            --msg-ai-bg: #f1f5f9;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Self-contained so nav state never flashes during Tailwind preload */
+        .hidden { display: none !important; }
+
+        html { scroll-behavior: smooth; }
 
         body {
             background: var(--bg);
             color: var(--text-primary);
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
         }
 
-        /* Nav */
-        #nav { position: fixed; top: 0; width: 100%; z-index: 50; transition: all 0.3s; border-bottom: 1px solid transparent; }
-        #nav.scrolled { background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom-color: var(--border); }
-        .nav-inner { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
-        .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
-        .brand img { width: 32px; height: 32px; }
-
-        /* Buttons */
-        .btn-primary {
-            background: var(--text-primary); color: var(--bg);
-            padding: 12px 28px; border-radius: 99px; font-weight: 700; font-size: 14px;
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            transition: all 0.2s; border: 1px solid transparent;
-        }
-        .btn-primary:hover { transform: translateY(-2px); opacity: 0.95; box-shadow: 0 10px 25px -5px var(--accent-glow); }
-        
-        /* Hero */
-        .hero { position: relative; padding: 180px 24px 100px; text-align: center; overflow: hidden; }
-        .hero-bg {
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100vw; height: 100%;
-            background: radial-gradient(circle at 50% 0%, var(--accent-glow) 0%, transparent 60%); pointer-events: none; z-index: 0;
-        }
-        .hero-content { position: relative; z-index: 10; max-width: 900px; margin: 0 auto; }
-        
-        .badge {
-            display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 99px;
-            font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-            background: color-mix(in srgb, var(--card-bg) 50%, transparent); border: 1px solid var(--border);
-            color: var(--accent); backdrop-filter: blur(10px); margin-bottom: 24px;
+        html.theme-transition, html.theme-transition * {
+            transition: background-color .35s ease, color .35s ease, border-color .35s ease !important;
         }
 
-        /* Typography */
-        h1 { font-size: clamp(3rem, 7vw, 5rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 24px; }
-        .text-gradient { background: linear-gradient(135deg, #a5b4fc, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        html.light .text-gradient { background: linear-gradient(135deg, #4f46e5, #4338ca); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .lead { font-size: clamp(1.1rem, 2vw, 1.3rem); color: var(--text-secondary); max-width: 650px; margin: 0 auto 40px; line-height: 1.6; }
+        ::selection { background: var(--accent-strong); color: #fff; }
 
-        /* Trust Row */
-        .trust-row { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; margin-top: 40px; opacity: 0.8; }
-        .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
-        .trust-item svg { color: #10b981; } /* Emerald */
+        a { color: inherit; text-decoration: none; }
 
-        /* Premium Card */
-        .premium-card {
-            background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px;
-            padding: 40px; transition: all 0.3s; position: relative; overflow: hidden;
-        }
-        .premium-card::before {
-            content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom right, var(--accent-glow), transparent);
-            opacity: 0; transition: opacity 0.3s;
-        }
-        .premium-card:hover::before { opacity: 0.1; }
-        .premium-card:hover { border-color: var(--border-strong); transform: translateY(-4px); box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5); }
+        .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+        .narrow { max-width: 760px; margin: 0 auto; padding: 0 24px; }
 
-        .section-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 16px; }
-        .section-sub { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 60px; max-width: 600px; margin-inline: auto; }
+        .sec { padding: 104px 0; }
+        @media (max-width: 640px) { .sec { padding: 72px 0; } }
 
-        /* Mockup */
-        .mockup-container {
-            margin: 80px auto 0; max-width: 900px; position: relative; z-index: 10;
-            perspective: 1000px;
+        /* ── Type ── */
+        .eyebrow {
+            font-size: 12px; font-weight: 700; letter-spacing: 0.14em;
+            text-transform: uppercase; color: var(--accent);
         }
-        .mockup-window {
-            background: var(--card-bg); border: 1px solid var(--border-strong); border-radius: 24px;
-            overflow: hidden; box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
-            transform: rotateX(5deg) translateY(0); transition: transform 0.5s;
+        h1, h2, h3 { letter-spacing: -0.03em; font-weight: 800; line-height: 1.08; }
+        .display { font-size: clamp(2.6rem, 6.5vw, 4.4rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.04; }
+        .h2 { font-size: clamp(1.85rem, 4vw, 2.7rem); }
+        .lead { font-size: clamp(1.05rem, 2vw, 1.2rem); color: var(--text-secondary); line-height: 1.65; }
+        .muted { color: var(--text-secondary); }
+        .dim { color: var(--text-muted); }
+        .accent-text { color: var(--accent); }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+            font-weight: 700; font-size: 14px; line-height: 1;
+            padding: 0 22px; min-height: 50px; border-radius: 14px;
+            border: 1px solid transparent; cursor: pointer;
+            transition: transform .18s ease, opacity .18s ease, background-color .18s ease, border-color .18s ease;
+            white-space: nowrap;
         }
-        .mockup-container:hover .mockup-window { transform: rotateX(0deg) translateY(-10px); }
-        .mockup-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-        .mockup-dots { display: flex; gap: 6px; }
-        .mockup-dot { width: 12px; height: 12px; border-radius: 50%; background: #334155; }
-        .mockup-dot:nth-child(1) { background: #ef4444; }
-        .mockup-dot:nth-child(2) { background: #eab308; }
-        .mockup-dot:nth-child(3) { background: #22c55e; }
-        
+        .cta-primary {
+            background: var(--text-primary); color: var(--bg); border-color: var(--text-primary);
+        }
+        .cta-primary:hover { transform: translateY(-2px); opacity: .92; }
+        .btn-ghost {
+            background: transparent; color: var(--text-secondary); border-color: var(--border-strong);
+        }
+        .btn-ghost:hover { color: var(--text-primary); border-color: var(--text-primary); }
+        .btn-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
+            padding: 12px 8px; transition: color .18s;
+        }
+        .btn-link:hover { color: var(--text-primary); }
+
+        /* ── Nav ── */
+        #nav { position: fixed; top: 0; width: 100%; z-index: 50; transition: background-color .3s, border-color .3s, backdrop-filter .3s; border-bottom: 1px solid transparent; }
+        #nav.scrolled { background: color-mix(in srgb, var(--bg) 72%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom-color: var(--border); }
+        .nav-inner { max-width: 1080px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .brand { display: inline-flex; align-items: center; gap: 10px; }
+        .brand img { width: 30px; height: 30px; transition: transform .2s; }
+        .brand:hover img { transform: scale(1.06); }
+        .brand span { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; }
+        .icon-btn {
+            width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 12px; border: 1px solid var(--border); color: var(--text-secondary);
+            background: transparent; cursor: pointer; transition: .18s;
+        }
+        .icon-btn:hover { color: var(--text-primary); background: var(--card-bg); }
+
+        /* ── Pill ── */
+        .pill {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 8px 16px; border: 1px solid var(--border); border-radius: 999px;
+            font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--card-bg);
+        }
+        .dot { position: relative; display: inline-flex; width: 8px; height: 8px; }
+        .dot::before { content: ''; position: absolute; inset: 0; border-radius: 999px; background: #34d399; animation: ping 1.8s cubic-bezier(0,0,.2,1) infinite; }
+        .dot::after { content: ''; position: absolute; inset: 0; border-radius: 999px; background: #34d399; }
+        @keyframes ping { 75%, 100% { transform: scale(2.4); opacity: 0; } }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 20px; padding: 30px;
+            transition: border-color .25s, transform .25s;
+        }
+        .card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+        .card-icon {
+            width: 46px; height: 46px; border-radius: 13px; display: inline-flex;
+            align-items: center; justify-content: center; margin-bottom: 18px;
+            background: color-mix(in srgb, var(--accent) 14%, transparent);
+            color: var(--accent);
+        }
+
+        .grid { display: grid; gap: 18px; }
+        .g2 { grid-template-columns: repeat(2, 1fr); }
+        .g3 { grid-template-columns: repeat(3, 1fr); }
+        .g4 { grid-template-columns: repeat(4, 1fr); }
+        @media (max-width: 860px) { .g3, .g4 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 560px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } }
+
+        /* ── Hero ── */
+        .hero { position: relative; padding: 168px 0 96px; text-align: center; overflow: hidden; }
+        .hero-glow {
+            position: absolute; top: 4%; left: 50%; transform: translateX(-50%);
+            width: min(760px, 92vw); height: 520px; pointer-events: none; z-index: 0;
+            background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 62%);
+            filter: blur(46px); opacity: .55;
+        }
+        .hero > .wrap { position: relative; z-index: 1; }
+
+        /* ── Entrance ── */
+        @keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .rise { opacity: 0; animation: fade-up .75s cubic-bezier(.16,1,.3,1) forwards; }
+        .d1 { animation-delay: .05s; } .d2 { animation-delay: .14s; } .d3 { animation-delay: .23s; }
+        .d4 { animation-delay: .32s; } .d5 { animation-delay: .42s; }
+        @media (prefers-reduced-motion: reduce) { .rise { animation: none; opacity: 1; } }
+
+        /* ── Chat mockup (demo) ── */
+        .mockup-frame {
+            background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 24px; box-shadow: 0 30px 80px -30px rgba(0,0,0,.6);
+        }
+        .online-ring { position: absolute; inset: -3px; border-radius: 999px; border: 2px solid #34d399; opacity: .35; }
+        .msg-user { background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 16px 16px 4px 16px; }
+        .msg-ai { background: var(--msg-ai-bg); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; }
+
+        /* ── Steps ── */
+        .step-num { font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: 0.1em; }
+
+        /* ── FAQ ── */
+        .faq details { border-bottom: 1px solid var(--border); padding: 22px 4px; }
+        .faq summary {
+            list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            gap: 20px; font-weight: 600; font-size: 16px; color: var(--text-primary);
+        }
+        .faq summary::-webkit-details-marker { display: none; }
+        .faq summary .chev { transition: transform .25s; color: var(--text-muted); flex-shrink: 0; }
+        .faq details[open] summary .chev { transform: rotate(45deg); }
+        .faq p { color: var(--text-secondary); line-height: 1.7; margin-top: 14px; font-size: 15px; }
+
+        /* ── Pricing ── */
+        .price-card { position: relative; }
+        .price-card.featured { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+        .price-amt { font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; }
+        .tag {
+            font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+            padding: 5px 11px; border-radius: 999px; color: #fff;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        .tick { color: #34d399; flex-shrink: 0; margin-top: 2px; }
+        .feat-list { display: flex; flex-direction: column; gap: 14px; margin: 26px 0; }
+        .feat-list li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--text-secondary); list-style: none; }
+
+        /* ── Footer ── */
+        footer { border-top: 1px solid var(--border); background: var(--bg-soft); }
+        .foot-link { color: var(--text-secondary); font-size: 14px; transition: color .18s; display: inline-block; padding: 5px 0; }
+        .foot-link:hover { color: var(--text-primary); }
+        .foot-head { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; }
+
+        /* ── Modal theme hooks (used by How-it-works) ── */
+        .modal-title { color: var(--text-primary); }
+        .modal-desc { color: var(--text-secondary); }
+        .modal-note { color: var(--text-secondary); background: var(--card-bg); border-color: var(--border) !important; }
+        .badge-light { display: none; }
+        html.light .badge-light { display: block; }
+        html.light .badge-dark { display: none; }
     </style>
 </head>
-<body>
 
+<body>
+    <!-- ═══════════ NAV ═══════════ -->
     <nav id="nav">
         <div class="nav-inner">
-            <a href="/" class="brand">
-                <img src="/logo.svg" alt="Kotha Logo">
-                Kotha
+            <a href="/" class="brand" aria-label="Go to homepage">
+                <img src="/logo.svg" alt="Kotha Logo" />
+                <span>Kotha</span>
             </a>
-            <div style="display:flex;align-items:center;gap:20px;">
-                <button id="theme-toggle" aria-label="Toggle dark/light mode" style="background:transparent;border:none;cursor:pointer;color:var(--text-secondary);">
-                    <svg id="theme-toggle-sun" class="hidden" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
-                    <svg id="theme-toggle-moon" class="hidden" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark/light mode">
+                    <svg id="theme-toggle-sun" class="hidden" width="18" height="18" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                    </svg>
+                    <svg id="theme-toggle-moon" class="hidden" width="18" height="18" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                    </svg>
                 </button>
-                <a href="/login.html" style="font-weight:600;font-size:14px;color:var(--text-secondary);transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Sign In</a>
-                <a href="/login.html#signup" class="btn-primary">
-                    Start Preserving
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+                <a href="/login.html" id="nav-login" class="btn-link" style="display:none;">Log in</a>
+                <button id="nav-logout-btn" class="btn-link hidden" style="border:0;background:none;">Logout</button>
+                <a href="/login.html#signup" id="nav-cta" class="btn cta-primary" style="min-height:46px;padding:0 18px;">
+                    Get Started
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
                 </a>
             </div>
         </div>
     </nav>
-
     <script>
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('nav');
-            if (window.scrollY > 20) nav.classList.add('scrolled');
-            else nav.classList.remove('scrolled');
-        });
-
-        // Theme toggle logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('theme-toggle');
-            const sun = document.getElementById('theme-toggle-sun');
-            const moon = document.getElementById('theme-toggle-moon');
-            
-            function updateIcon() {
-                if(document.documentElement.classList.contains('light')) {
-                    sun.classList.add('hidden'); moon.classList.remove('hidden');
-                } else {
-                    moon.classList.add('hidden'); sun.classList.remove('hidden');
-                }
-            }
-            updateIcon();
-
-            btn.addEventListener('click', () => {
-                document.documentElement.classList.toggle('light');
-                localStorage.setItem('kotha_theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
-                updateIcon();
-            });
-        });
+        // nav-login uses inline-flex when shown; reveal it once styles are ready
+        document.getElementById('nav-login').style.display = 'inline-flex';
     </script>
 
-    <!-- HERO -->
+    <!-- ═══════════ HERO ═══════════ -->
     <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-content">
-            <div class="badge">
-                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#34d399;box-shadow:0 0 10px #34d399;"></span>
-                Enterprise-Grade Privacy
+        <div class="hero-glow"></div>
+        <div class="wrap">
+            <div class="rise d1" style="margin-bottom:30px;">
+                <span class="pill"><span class="dot"></span>AI-powered chat memories</span>
             </div>
-            
-            <h1>
-                Preserve Your Most Precious Memories with <span class="text-gradient">AI You Can Trust.</span>
+
+            <h1 class="display rise d2" style="margin-bottom:22px;">
+                Turn your WhatsApp chats<br><span class="accent-text">into AI conversations.</span>
             </h1>
-            
-            <p class="lead">
-                Import your WhatsApp chats. Our secure AI learns their exact language, humor, and style—allowing you to relive your memories through an incredibly lifelike simulation.
+
+            <p class="lead rise d3" style="max-width:600px;margin:0 auto 34px;">
+                Import your chat history and watch our AI learn their exact style, humor, and slang.
+                Relive your favorite memories by <span style="color:var(--text-primary);font-weight:600;">chatting with them anytime.</span>
             </p>
-            
-            <a href="/login.html#signup" class="btn-primary" style="padding: 16px 36px; font-size: 16px;">
-                Try it for free
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
-            </a>
 
-            <div class="trust-row">
-                <div class="trust-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    SOC-2 Ready Infrastructure
-                </div>
-                <div class="trust-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    Zero Data Retention
-                </div>
-                <div class="trust-item">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
-                    No Public AI Training
-                </div>
+            <div class="rise d4" style="display:flex;flex-direction:column;gap:14px;justify-content:center;align-items:center;margin-bottom:12px;">
+                <a href="/login.html#signup" id="hero-cta" class="btn cta-primary" style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);">
+                    Import Your Chat — It's Free
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+                </a>
+                
+                <p class="dim" style="font-size:13px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:12px;">
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Free forever</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> No credit card</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 100% Private</span>
+                </p>
             </div>
-        </div>
 
-        <!-- Sleek App Mockup -->
-        <div class="mockup-container">
-            <div class="mockup-window">
-                <div class="mockup-header">
-                    <div class="mockup-dots">
-                        <div class="mockup-dot"></div><div class="mockup-dot"></div><div class="mockup-dot"></div>
-                    </div>
-                    <div style="flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--text-secondary);letter-spacing:0.05em;">
-                        Kotha • AI Identity Engine
-                    </div>
+            <div class="rise d4" style="margin-bottom:30px;">
+                <p style="font-weight:700;margin-bottom:12px;color:var(--text-secondary);font-size:14px;">Who do you want to chat with?</p>
+                <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;" id="role-selector">
+                    <button class="btn btn-ghost active-role" data-role="mom" style="border-radius:999px;padding:8px 16px;min-height:auto;">Mom ❤️</button>
+                    <button class="btn btn-ghost" data-role="best_friend" style="border-radius:999px;padding:8px 16px;min-height:auto;">Best Friend 🍻</button>
+                    <button class="btn btn-ghost" data-role="ex" style="border-radius:999px;padding:8px 16px;min-height:auto;">The Ex 🥺</button>
                 </div>
-                <div style="display:flex;height:400px;background:var(--bg-soft);">
-                    <!-- Sidebar -->
-                    <div style="width:250px;border-right:1px solid var(--border);padding:20px;display:flex;flex-direction:column;gap:12px;text-align:left;">
-                        <div style="padding:12px;border-radius:12px;background:var(--card-bg);border:1px solid var(--border);display:flex;align-items:center;gap:12px;">
-                            <div style="width:36px;height:36px;border-radius:50%;background:#ef4444;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;">M</div>
-                            <div>
-                                <div style="font-size:14px;font-weight:bold;color:var(--text-primary);">Mom</div>
-                                <div style="font-size:11px;color:#10b981;">Simulation Active</div>
+                <style>
+                    .active-role { background: var(--text-primary) !important; color: var(--bg) !important; border-color: var(--text-primary) !important; }
+                </style>
+            </div>
+
+            <!-- ── Interactive Chat Demo (functional) ── -->
+            <div class="rise d5" style="max-width:420px;margin:0 auto;">
+                <div class="mockup-frame p-5 text-left" id="demo-chat-frame" style="padding:20px;text-align:left;position:relative;transition:all 0.3s;">
+                    <!-- Chat header -->
+                    <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                        <div class="relative" style="position:relative;">
+                            <div class="online-ring"></div>
+                            <div id="demo-avatar" style="width:40px;height:40px;border-radius:999px;background:#1e293b;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;transition:all 0.3s;">M</div>
+                        </div>
+                        <div style="flex:1;">
+                            <p id="demo-name" style="font-size:13px;font-weight:700;color:var(--text-primary);transition:all 0.3s;">Mom</p>
+                            <p style="font-size:10px;color:#34d399;font-weight:500;">Online · AI</p>
+                        </div>
+                        <div id="demo-counter" style="display:flex;align-items:center;gap:6px;background:var(--msg-ai-bg);padding:4px 10px;border-radius:999px;">
+                            <span class="text-[9px] font-bold text-zinc-400" id="demo-remaining" style="font-size:9px;font-weight:700;color:var(--text-muted);">10 msgs left</span>
+                        </div>
+                    </div>
+
+                    <!-- Messages area -->
+                    <div class="space-y-3" id="hero-chat" style="display:flex;flex-direction:column;gap:12px;max-height:280px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;">
+                        <div class="flex justify-end chat-msg" id="demo-msg-1" style="opacity:0;display:flex;justify-content:flex-end;">
+                            <div class="msg-user px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;">
+                                <p class="text-[13px] text-white leading-relaxed" id="demo-msg-user-text" style="font-size:13px;color:#fff;line-height:1.5;">Maa wo recipe batao na, aloo ke parathe wali</p>
+                                <p class="text-[9px] text-white/40 text-right mt-1.5" style="font-size:9px;color:rgba(255,255,255,.4);text-align:right;margin-top:6px;">✓✓</p>
                             </div>
                         </div>
-                        <div style="padding:12px;border-radius:12px;opacity:0.5;display:flex;align-items:center;gap:12px;">
-                            <div style="width:36px;height:36px;border-radius:50%;background:#3b82f6;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;">D</div>
-                            <div>
-                                <div style="font-size:14px;font-weight:bold;color:var(--text-primary);">Dad</div>
-                                <div style="font-size:11px;color:var(--text-secondary);">Last synced 2h ago</div>
+                        <div class="flex items-end gap-2 chat-msg" id="demo-msg-2" style="opacity:0;display:flex;align-items:flex-end;gap:8px;">
+                            <div id="demo-msg-avatar" style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg,#fb7185,#ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0;">M</div>
+                            <div class="msg-ai px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;">
+                                <p class="text-[13px] text-zinc-200 leading-relaxed" id="ai-typed-text" style="font-size:13px;color:var(--text-primary);line-height:1.5;"></p>
+                                <p class="text-[9px] text-zinc-500 text-right mt-1.5" style="font-size:9px;text-align:right;margin-top:6px;"><span class="text-indigo-400" style="color:var(--accent);">AI</span></p>
                             </div>
                         </div>
                     </div>
-                    <!-- Main Chat -->
-                    <div style="flex:1;padding:24px;position:relative;display:flex;flex-direction:column;gap:16px;">
-                        <div style="align-self:center;font-size:11px;font-weight:bold;color:var(--text-secondary);background:var(--border);padding:4px 12px;border-radius:99px;">Today</div>
-                        
-                        <div style="align-self:flex-end;max-width:70%;background:linear-gradient(135deg, var(--accent), #4f46e5);padding:14px 18px;border-radius:20px 20px 4px 20px;color:#fff;font-size:14px;box-shadow:0 10px 20px rgba(99,102,241,0.2);text-align:left;">
-                            Maa wo recipe batao na, aloo ke parathe wali
-                        </div>
-                        
-                        <div style="align-self:flex-start;max-width:70%;background:var(--card-bg);border:1px solid var(--border);padding:14px 18px;border-radius:20px 20px 20px 4px;font-size:14px;box-shadow:0 10px 20px rgba(0,0,0,0.1);text-align:left;color:var(--text-primary);">
-                            Are beta, tu waha thik se khata nahi hoga. Ubalte hue aloo me jeera aur hari mirch daalna mat bhulna. Yaad se! ❤️
-                        </div>
 
-                        <!-- Input -->
-                        <div style="position:absolute;bottom:24px;left:24px;right:24px;height:50px;border-radius:99px;background:var(--card-bg);border:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;">
-                            <div style="flex:1;color:var(--text-secondary);font-size:14px;text-align:left;">Type a message...</div>
-                            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
-                            </div>
-                        </div>
+                    <!-- Interactive input bar -->
+                    <form id="demo-form" style="margin-top:16px;display:flex;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);">
+                        <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Type a message to Mom..."
+                            style="background:transparent;font-size:13px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
+                        <button type="submit" id="demo-send" aria-label="Send message"
+                            style="width:38px;height:38px;border-radius:999px;background:#1e293b;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:0;cursor:pointer;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
+                        </button>
+                    </form>
+
+                    <!-- Limit reached CTA (hidden initially) -->
+                    <div id="demo-limit-cta" class="hidden" style="margin-top:12px;text-align:center;">
+                        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Demo limit reached!</p>
+                        <a href="/login.html#signup" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:700;font-size:11px;padding:8px 16px;border-radius:999px;">
+                            Sign up free for unlimited
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- FORT KNOX PRIVACY -->
-    <section style="padding:120px 24px;background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-        <div style="max-width:1200px;margin:0 auto;text-align:center;">
-            <p style="color:var(--accent);font-weight:800;letter-spacing:0.1em;text-transform:uppercase;font-size:13px;margin-bottom:16px;">Fort Knox Security</p>
-            <h2 class="section-title">Your data belongs to you. Period.</h2>
-            <p class="section-sub">We process highly sensitive, personal communication. That's why we engineered our architecture so that we literally cannot read, sell, or exploit your data.</p>
-            
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:32px;">
-                <div class="premium-card" style="text-align:left;">
-                    <div style="width:50px;height:50px;border-radius:14px;background:rgba(16, 185, 129, 0.1);color:#10b981;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+    <!-- ═══════════ HOW IT WORKS ═══════════ -->
+    <section class="sec" id="how">
+        <div class="wrap">
+            <div style="text-align:center;margin-bottom:56px;">
+                <p class="eyebrow" style="margin-bottom:14px;">How it works</p>
+                <h2 class="h2">Three steps. Under a minute.</h2>
+            </div>
+            <div class="grid g3">
+                <div class="card">
+                    <div class="step-num">01</div>
+                    <h3 style="font-size:1.2rem;margin:12px 0 10px;">Export your chat</h3>
+                    <p class="muted" style="font-size:14px;line-height:1.65;">Open any WhatsApp chat → menu → <b style="color:var(--text-primary);font-weight:600;">Export Chat</b> → save the .zip. Works on iPhone and Android.</p>
+                </div>
+                <div class="card">
+                    <div class="step-num">02</div>
+                    <h3 style="font-size:1.2rem;margin:12px 0 10px;">Upload to Kotha</h3>
+                    <p class="muted" style="font-size:14px;line-height:1.65;">Drop the file in. We process it privately in 1–2 minutes — only your account can ever see it.</p>
+                </div>
+                <div class="card">
+                    <div class="step-num">03</div>
+                    <h3 style="font-size:1.2rem;margin:12px 0 10px;">Chat again</h3>
+                    <p class="muted" style="font-size:14px;line-height:1.65;">AI learns their language, jokes, emojis and tone — then replies in their exact style. Anytime.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ FEATURES ═══════════ -->
+    <section class="sec" style="padding-top:0;">
+        <div class="wrap">
+            <div class="grid g2" style="gap:20px;">
+                <div class="card" style="padding:38px;">
+                    <div class="card-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </div>
-                    <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:12px;">Zero Training Guarantee</h3>
-                    <p style="color:var(--text-secondary);font-size:15px;">Your chats are used exclusively to build your private simulation. We categorically never use your personal data to train public LLM models.</p>
+                    <h3 style="font-size:1.4rem;margin-bottom:12px;">Feel connected. Exactly how they talk.</h3>
+                    <p class="muted" style="line-height:1.7;">Kotha reads every message to absorb their unique voice — the slang, the emojis, the way only they said things. Hinglish, Hindi, English, and more, matched automatically.</p>
+                </div>
+                <div class="card" style="padding:38px;">
+                    <div class="card-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    </div>
+                    <h3 style="font-size:1.4rem;margin-bottom:12px;">Beautiful memories find you, every day.</h3>
+                    <p class="muted" style="line-height:1.7;">“On This Day” resurfaces the exact conversations you had on this date — a quiet, beautiful way to relive the moments that mattered most.</p>
+                </div>
+            </div>
+
+            <!-- Built for -->
+            <div style="text-align:center;margin:72px 0 36px;">
+                <p class="eyebrow" style="margin-bottom:14px;">Built for</p>
+                <h2 class="h2">The people you don't want to forget.</h2>
+            </div>
+            <div class="grid g4">
+                <div class="card" style="padding:24px;">
+                    <h3 style="font-size:1rem;margin-bottom:8px;">Loved ones lost</h3>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">Hear their voice in their words again.</p>
+                </div>
+                <div class="card" style="padding:24px;">
+                    <h3 style="font-size:1rem;margin-bottom:8px;">Distant friends</h3>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">Keep old chats alive across the miles.</p>
+                </div>
+                <div class="card" style="padding:24px;">
+                    <h3 style="font-size:1rem;margin-bottom:8px;">A digital diary</h3>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">Your history, searchable and beautiful.</p>
+                </div>
+                <div class="card" style="padding:24px;">
+                    <h3 style="font-size:1rem;margin-bottom:8px;">Memory assistant</h3>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">Ask what was said, and when.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ PRIVACY / TRUST ═══════════ -->
+    <section class="sec" id="trust" style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+        <div class="wrap">
+            <div style="text-align:center;margin-bottom:52px;">
+                <p class="eyebrow" style="margin-bottom:14px;">Privacy</p>
+                <h2 class="h2">Your memories are sacred.</h2>
+                <p class="lead" style="max-width:560px;margin:16px auto 0;">Private by default. We never sell your data and never train AI on your personal conversations.</p>
+            </div>
+            <div class="grid g3">
+                <div class="card">
+                    <h3 style="font-size:1.1rem;margin-bottom:10px;">Encrypted storage</h3>
+                    <p class="muted" style="font-size:14px;line-height:1.65;">Everything travels over secure HTTPS/TLS and stays private to your account.</p>
+                </div>
+                <div class="card">
+                    <h3 style="font-size:1.1rem;margin-bottom:10px;">No data selling</h3>
+                    <p class="muted" style="font-size:14px;line-height:1.65;">Your chats are yours. We don't sell them, and we don't train models on them.</p>
+                </div>
+                <div class="card">
+                    <h3 style="font-size:1.1rem;margin-bottom:10px;">Delete anytime</h3>
+                    <p class="muted" style="font-size:14px;line-height:1.65;">One click removes everything, permanently. No questions asked.</p>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:28px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap;">
+                <a href="/privacy.html" class="btn-link">Privacy Policy</a>
+                <a href="/terms.html" class="btn-link">Terms</a>
+                <a href="/refund.html" class="btn-link">Refund Policy</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ PRICING ═══════════ -->
+    <section class="sec" id="pricing" style="padding: 100px 0; background: var(--bg); position: relative; overflow: hidden;">
+        <!-- Background Glow -->
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, rgba(0,0,0,0) 70%); pointer-events: none; z-index: 0;"></div>
+        
+        <div class="narrow" style="position: relative; z-index: 1; max-width: 1000px;">
+            <div style="text-align:center;margin-bottom:60px;">
+                <p class="eyebrow" style="margin-bottom:14px; color: var(--accent);">Simple pricing</p>
+                <h2 class="h2" style="font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em;">Start for free. Upgrade when you need to.</h2>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:30px;align-items:stretch;">
+                
+                <!-- Free Plan -->
+                <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--border-strong)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border)';">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Free</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">Everything you need to begin preserving memories.</p>
+                    <div style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
+                        ₹0
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0 0 40px 0; flex: 1;">
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Unlimited chat imports</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Beautiful chat viewer &amp; search</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>On This Day memories</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); flex-shrink: 0; margin-top: 2px;"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>3 AI conversations / day</span>
+                        </li>
+                    </ul>
+                    <a href="/login.html#signup" class="btn" style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;" onmouseover="this.style.background='var(--msg-ai-bg)'" onmouseout="this.style.background='transparent'">Get Started Free</a>
                 </div>
                 
-                <div class="premium-card" style="text-align:left;">
-                    <div style="width:50px;height:50px;border-radius:14px;background:rgba(99, 102, 241, 0.1);color:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <!-- Pro Plan (Monthly) -->
+                <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.05);" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--accent)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border)';">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Pro</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">For limitless AI conversations and deeper connections.</p>
+                    <div style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
+                        $6<span style="font-size: 1rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0; margin-left: 4px;">/mo</span>
                     </div>
-                    <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:12px;">AES-256 Encryption</h3>
-                    <p style="color:var(--text-secondary);font-size:15px;">Data is encrypted in transit and at rest using military-grade encryption protocols. Your memories are locked in a cryptographic vault.</p>
-                </div>
-
-                <div class="premium-card" style="text-align:left;">
-                    <div style="width:50px;height:50px;border-radius:14px;background:rgba(244, 63, 94, 0.1);color:#f43f5e;display:flex;align-items:center;justify-content:center;margin-bottom:24px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </div>
-                    <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:12px;">Instant Deletion</h3>
-                    <p style="color:var(--text-secondary);font-size:15px;">No customer service calls, no waiting. Delete your entire account, chats, and AI models instantly with a single click. Gone forever.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- HOW IT WORKS & IDENTITY -->
-    <section style="padding:120px 24px;">
-        <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:80px;">
-            <div style="text-align:center;">
-                <p style="color:var(--accent);font-weight:800;letter-spacing:0.1em;text-transform:uppercase;font-size:13px;margin-bottom:16px;">The Process</p>
-                <h2 class="section-title">Resurrect your memories in 3 steps.</h2>
-            </div>
-            
-            <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:center;">
-                <div style="flex:1;min-width:300px;">
-                    <div style="font-size:6rem;font-weight:900;color:var(--border-strong);line-height:1;margin-bottom:20px;">01</div>
-                    <h3 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;">Export Chat History</h3>
-                    <p style="color:var(--text-secondary);font-size:1.1rem;line-height:1.6;">Open WhatsApp, select the conversation, tap Export Chat, and save the .zip file. Upload it securely to our vault.</p>
-                </div>
-                <div style="flex:1;min-width:300px;">
-                    <div style="width:100%;height:300px;border-radius:16px;border:1px solid var(--border);background:var(--card-bg);display:flex;align-items:center;justify-content:center;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
-                        <div style="text-align:center;color:var(--text-secondary);">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                            <p>Upload WhatsApp .zip</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:center;flex-direction:row-reverse;">
-                <div style="flex:1;min-width:300px;">
-                    <div style="font-size:6rem;font-weight:900;color:var(--border-strong);line-height:1;margin-bottom:20px;">02</div>
-                    <h3 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;">Select Identity Roles <span style="font-size:12px;background:var(--accent);color:#fff;padding:4px 8px;border-radius:6px;vertical-align:middle;margin-left:8px;">NEW</span></h3>
-                    <p style="color:var(--text-secondary);font-size:1.1rem;line-height:1.6;">Our engine analyzes the chat participants. You select exactly who you are, and who the AI should simulate. The AI adopts their exact persona and relationship dynamics.</p>
-                </div>
-                <div style="flex:1;min-width:300px;background:var(--card-bg);border:1px solid var(--border);border-radius:24px;padding:32px;">
-                    <div style="border:1px solid var(--border-strong);border-radius:16px;padding:20px;background:var(--bg);">
-                        <div style="font-size:14px;font-weight:bold;margin-bottom:16px;">Select Roles</div>
-                        <div style="display:flex;justify-content:space-between;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-                            <span style="color:var(--text-secondary);font-size:14px;">You will be:</span>
-                            <span style="background:var(--accent-glow);color:#fff;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:bold;">Son</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;">
-                            <span style="color:var(--text-secondary);font-size:14px;">AI will simulate:</span>
-                            <span style="background:rgba(236,72,153,0.2);color:#ec4899;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:bold;">Mom</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:center;">
-                <div style="flex:1;min-width:300px;">
-                    <div style="font-size:6rem;font-weight:900;color:var(--border-strong);line-height:1;margin-bottom:20px;">03</div>
-                    <h3 style="font-size:1.8rem;font-weight:800;margin-bottom:16px;">Reconnect Instantly</h3>
-                    <p style="color:var(--text-secondary);font-size:1.1rem;line-height:1.6;">Start chatting immediately. The AI remembers inside jokes, vocabulary, and emotional undertones—giving you a profoundly accurate conversational experience.</p>
-                </div>
-                <div style="flex:1;min-width:300px;">
-                    <a href="/login.html#signup" class="btn-primary" style="padding:18px 40px;font-size:18px;width:100%;">
-                        Start Free Trial
+                    <ul style="list-style: none; padding: 0; margin: 0 0 40px 0; flex: 1;">
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <span>Everything in Free</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <span style="font-weight: 500; color: var(--text-primary);">Unlimited AI conversations</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <span>Save Unlimited Chats</span>
+                        </li>
+                    </ul>
+                    <a href="/login.html#signup" class="btn" style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;" onmouseover="this.style.background='var(--msg-ai-bg)'" onmouseout="this.style.background='transparent'">
+                        Start Monthly Plan
                     </a>
                 </div>
+
+                <!-- Pro Plan (Lifetime) -->
+                <div style="background: var(--card-bg); border: 2px solid var(--accent); border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); transform: scale(1.02); z-index: 2;">
+                    <!-- Animated gradient border top -->
+                    <div style="position: absolute; top: 0; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, rgba(99,102,241,1), transparent);"></div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">Lifetime Pro</h3>
+                        <span style="background: var(--msg-ai-bg); border: 1px solid rgba(99,102,241,0.3); color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 100px;">Pay Once</span>
+                    </div>
+                    
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">For limitless AI conversations and deeper connections. No subscriptions.</p>
+                    
+                    <div style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
+                        $49<span style="font-size: 1rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0; margin-left: 4px;">/lifetime</span>
+                    </div>
+                    
+                    <ul style="list-style: none; padding: 0; margin: 0 0 40px 0; flex: 1;">
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <span>Everything in Free</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <span style="font-weight: 500; color: var(--text-primary);">Unlimited AI conversations</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <span>Save Unlimited Chats</span>
+                        </li>
+                        <li style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <span>Priority Support</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="/login.html#signup" id="btn-get-pro" class="btn" style="width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(to right, #4f46e5, #9333ea); color: #fff; border: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(99,102,241,0.4); transition: all 0.2s; text-align: center;" onmouseover="this.style.boxShadow='0 6px 20px rgba(99,102,241,0.6)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.boxShadow='0 4px 15px rgba(99,102,241,0.4)'; this.style.transform='translateY(0)';">
+                        Get Lifetime Deal
+                    </a>
+                    <p style="text-align:center; margin-top: 16px;">
+                        <span style="font-size: 12px; color: var(--text-muted);">One-time payment, yours forever.</span>
+                    </p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- PRICING -->
-    <section id="pricing" style="padding:120px 24px;background:var(--bg-soft);border-top:1px solid var(--border);">
-        <div style="max-width:1000px;margin:0 auto;">
-            <div style="text-align:center;margin-bottom:60px;">
-                <h2 class="section-title">Transparent, honest pricing.</h2>
-                <p class="section-sub">Start preserving your memories for free. Upgrade for limitless interactions.</p>
+    <!-- ═══════════ FAQ ═══════════ -->
+    <section class="sec" id="faq" style="background:var(--bg-soft);border-top:1px solid var(--border);">
+        <div class="narrow">
+            <div style="text-align:center;margin-bottom:44px;">
+                <p class="eyebrow" style="margin-bottom:14px;">FAQ</p>
+                <h2 class="h2">Questions, answered.</h2>
             </div>
-            
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:32px;align-items:start;">
-                
-                <!-- Free -->
-                <div class="premium-card">
-                    <h3 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;">Basic Starter</h3>
-                    <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">Essential features to test the waters.</p>
-                    <div style="font-size:3rem;font-weight:900;margin-bottom:32px;">$0<span style="font-size:1rem;color:var(--text-muted);">/forever</span></div>
-                    
-                    <ul style="display:flex;flex-direction:column;gap:16px;margin-bottom:40px;">
-                        <li style="display:flex;align-items:start;gap:12px;font-size:15px;color:var(--text-secondary);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400" style="color:var(--accent);"><polyline points="20 6 9 17 4 12"/></svg> Unlimited Chat Imports</li>
-                        <li style="display:flex;align-items:start;gap:12px;font-size:15px;color:var(--text-secondary);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400" style="color:var(--accent);"><polyline points="20 6 9 17 4 12"/></svg> Read-only Chat Viewer</li>
-                        <li style="display:flex;align-items:start;gap:12px;font-size:15px;color:var(--text-secondary);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400" style="color:var(--accent);"><polyline points="20 6 9 17 4 12"/></svg> 10 AI messages per lifetime</li>
-                    </ul>
-                    <a href="/login.html#signup" style="display:block;width:100%;text-align:center;padding:14px;border:1px solid var(--border-strong);border-radius:12px;font-weight:bold;color:var(--text-primary);transition:background 0.2s;" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'">Start Free</a>
-                </div>
-
-                <!-- Pro -->
-                <div class="premium-card" style="border-color:var(--accent);transform:scale(1.05);box-shadow:0 30px 60px -15px var(--accent-glow);">
-                    <div style="position:absolute;top:0;left:50%;transform:translate(-50%, -50%);background:var(--accent);color:#fff;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;padding:4px 16px;border-radius:99px;">Most Popular</div>
-                    
-                    <h3 style="font-size:1.5rem;font-weight:700;margin-bottom:8px;color:var(--text-primary);">Kotha Pro</h3>
-                    <p style="color:var(--text-muted);font-size:14px;margin-bottom:24px;">Limitless connections, zero constraints.</p>
-                    <div style="font-size:3rem;font-weight:900;margin-bottom:32px;">$49<span style="font-size:1rem;color:var(--text-muted);">/year</span></div>
-                    
-                    <ul style="display:flex;flex-direction:column;gap:16px;margin-bottom:40px;">
-                        <li style="display:flex;align-items:start;gap:12px;font-size:15px;color:var(--text-primary);font-weight:600;"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400" style="color:var(--accent);"><polyline points="20 6 9 17 4 12"/></svg> Unlimited AI Conversations</li>
-                        <li style="display:flex;align-items:start;gap:12px;font-size:15px;color:var(--text-secondary);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400" style="color:var(--accent);"><polyline points="20 6 9 17 4 12"/></svg> Advanced Identity Recognition</li>
-                        <li style="display:flex;align-items:start;gap:12px;font-size:15px;color:var(--text-secondary);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400" style="color:var(--accent);"><polyline points="20 6 9 17 4 12"/></svg> Priority Inference Speed</li>
-                        <li style="display:flex;align-items:start;gap:12px;font-size:15px;color:var(--text-secondary);"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400" style="color:var(--accent);"><polyline points="20 6 9 17 4 12"/></svg> Premium Support</li>
-                    </ul>
-                    <a href="/login.html#signup" style="display:block;width:100%;text-align:center;padding:14px;background:var(--text-primary);color:var(--bg);border-radius:12px;font-weight:bold;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Upgrade to Pro</a>
-                    <div style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:16px;">Also available at $6/month. Cancel anytime.</div>
-                </div>
-
+            <div class="faq">
+                <details>
+                    <summary>How do I export my chat history?<span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+                    <p>Open any chat → tap the 3 dots menu → More → Export chat → Choose 'Without Media' → Save the .zip file. Then upload it to Kotha.</p>
+                </details>
+                <details>
+                    <summary>Is my chat data safe and private?<span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+                    <p>Yes. All data travels over secure encrypted connections (HTTPS/TLS), your chats stay private to your account, we never sell your data, never train AI on your personal conversations, and you can delete everything anytime with one click.</p>
+                </details>
+                <details>
+                    <summary>How does the AI learn to talk like my contact?<span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+                    <p>Kotha's AI reads all messages in your uploaded chat to understand your contact's writing style — their language, slang, emojis, humor, and tone. It then responds in their exact style during conversations.</p>
+                </details>
+                <details>
+                    <summary>Is Kotha free to use?<span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+                    <p>Yes! Kotha is free forever with unlimited chat imports, a beautiful chat viewer, On This Day memories, and 3 AI conversations per day. A Pro plan with unlimited AI chats is available for power users.</p>
+                </details>
+                <details>
+                    <summary>Which languages does Kotha support?<span class="chev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+                    <p>Kotha works with any language — Hindi, English, Hinglish, Tamil, Bengali, Marathi, and more. The AI automatically matches whatever language your contact uses in chats.</p>
+                </details>
             </div>
         </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer style="padding:60px 24px;border-top:1px solid var(--border);text-align:center;">
-        <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:24px;">
-            <img src="/logo.svg" alt="Logo" style="width:24px;height:24px;">
-            <span style="font-weight:800;font-size:18px;">Kotha</span>
+    <!-- ═══════════ FINAL CTA ═══════════ -->
+    <section class="sec" style="text-align:center;">
+        <div class="narrow">
+            <h2 class="display" style="font-size:clamp(2.1rem,5vw,3.2rem);margin-bottom:18px;">Don't let their words fade away.</h2>
+            <p class="lead" style="max-width:520px;margin:0 auto 34px;">Every conversation holds a piece of someone you love. Kotha keeps it — beautifully, privately, forever.</p>
+            <a href="/login.html#signup" id="final-cta" class="btn cta-primary" style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);">
+                Import Your Chat — It's Free
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+            </a>
         </div>
-        <div style="display:flex;justify-content:center;gap:24px;margin-bottom:32px;">
-            <a href="/privacy.html" style="color:var(--text-secondary);font-size:14px;">Privacy Policy</a>
-            <a href="/terms.html" style="color:var(--text-secondary);font-size:14px;">Terms of Service</a>
-            <a href="/refund.html" style="color:var(--text-secondary);font-size:14px;">Refund Policy</a>
-            <a href="/blog.html" style="color:var(--text-secondary);font-size:14px;">Blog</a>
+    </section>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer>
+        <div class="wrap" style="padding-top:64px;padding-bottom:40px;">
+            <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;" class="foot-grid">
+                <div>
+                    <a href="/" class="brand" style="margin-bottom:14px;"><img src="/logo.svg" alt="Kotha Logo" /><span>Kotha</span></a>
+                    <p class="muted" style="font-size:13px;line-height:1.7;max-width:260px;margin-bottom:20px;">Keep your loved ones always online. Chat with the people who matter — in their own words.</p>
+                    <a href="https://nicklaunches.com/products/onlinekotha/?utm_source=onlinekotha.com&utm_medium=badge&utm_campaign=featured" target="_blank" rel="noopener" style="display:inline-block;">
+                        <img src="https://nicklaunches.com/badges/featured-dark.png" alt="OnlineKotha on Nick Launches" width="244" height="56" class="badge-dark" />
+                        <img src="https://nicklaunches.com/badges/featured.png" alt="OnlineKotha on Nick Launches" width="244" height="56" class="badge-light" />
+                    </a>
+                    <div style="margin-top: 10px;">
+                        <a href="https://www.scrolllaunch.com/products/kotha?ref=badge" target="_blank" rel="noopener">
+                            <img src="https://www.scrolllaunch.com/api/badge/kotha" alt="Featured on ScrollLaunch" width="220" height="48" loading="lazy" />
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <p class="foot-head">Product</p>
+                    <a href="#how" class="foot-link">How it works</a><br>
+                    <a href="#pricing" class="foot-link">Pricing</a><br>
+                    <a href="/app.html" class="foot-link">Open App</a><br>
+                    <a href="/paper.html" class="foot-link">Documentation</a><br>
+                    <a href="/blog.html" class="foot-link">Blog</a>
+                </div>
+                <div>
+                    <p class="foot-head">Legal</p>
+                    <a href="/privacy.html" class="foot-link">Privacy Policy</a><br>
+                    <a href="/terms.html" class="foot-link">Terms of Service</a><br>
+                    <a href="/refund.html" class="foot-link">Refund Policy</a>
+                </div>
+                <div>
+                    <p class="foot-head">Support</p>
+                    <a href="/contact.html" class="foot-link">Contact Us</a><br>
+                    <a href="#faq" class="foot-link">FAQ</a><br>
+                    <a href="/login.html" class="foot-link">Login</a><br>
+                    <a href="/login.html#signup" class="foot-link">Sign up free</a>
+                </div>
+            </div>
+            <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                <p class="dim" style="font-size:13px;">© <span id="year"></span> OnlineKotha. Made with care in India.</p>
+                <p class="dim" style="font-size:12px;display:inline-flex;align-items:center;gap:8px;"><span class="dot"></span>All systems operational</p>
+            </div>
         </div>
-        <p style="color:var(--text-muted);font-size:13px;">&copy; 2026 OnlineKotha. All rights reserved. Secured by Dodo Payments & Stripe.</p>
     </footer>
 
+    <style>
+        @media (max-width: 720px) {
+            .foot-grid { grid-template-columns: 1fr 1fr !important; gap: 30px !important; }
+        }
+    </style>
+
+    <!-- ═══════════ FUNCTIONAL SCRIPTS (ported verbatim) ═══════════ -->
+    <script>
+        // ── Year ──
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // ── Nav glass on scroll ──
+        (function () {
+            const nav = document.getElementById('nav');
+            let navScrolled = false;
+            window.addEventListener('scroll', () => {
+                const scrolled = window.scrollY > 40;
+                if (scrolled === navScrolled) return;
+                navScrolled = scrolled;
+                nav.classList.toggle('scrolled', scrolled);
+            }, { passive: true });
+        })();
+
+        // ── Hero Interactive Demo Chat ──
+        (function heroChat() {
+            const chatArea = document.getElementById('hero-chat');
+            const form = document.getElementById('demo-form');
+            const input = document.getElementById('demo-input');
+            const sendBtn = document.getElementById('demo-send');
+            const remainingEl = document.getElementById('demo-remaining');
+            const limitCta = document.getElementById('demo-limit-cta');
+            const counterEl = document.getElementById('demo-counter');
+
+            // Session ID for tracking
+            let sessionId = localStorage.getItem('kotha_demo_sid');
+            if (!sessionId) {
+                sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+                localStorage.setItem('kotha_demo_sid', sessionId);
+            }
+
+            let remaining = 2; // Default fallback
+            let isSending = false;
+
+            function updateCounter(r) {
+                remaining = r;
+                remainingEl.textContent = r + ' msgs left';
+                if (r <= 3) remainingEl.classList.add('text-amber-400');
+                if (r <= 0) {
+                    form.classList.add('hidden');
+                    limitCta.classList.remove('hidden');
+                    counterEl.innerHTML = '<span class="text-[9px] font-bold text-red-400">0 left</span>';
+                } else {
+                    form.classList.remove('hidden');
+                    limitCta.classList.add('hidden');
+                    counterEl.innerHTML = '';
+                }
+            }
+
+            // Fetch true remaining count from server
+            fetch(`/api/demo-chat/status?sessionId=${sessionId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.remaining !== undefined) updateCounter(data.remaining);
+                }).catch(err => console.error(err));
+
+            function timeNow() {
+                return new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            }
+
+            function scrollChat() {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+
+            // ── Role Management ──
+            const roleButtons = document.querySelectorAll('#role-selector .btn');
+            const demoName = document.getElementById('demo-name');
+            const demoAvatar = document.getElementById('demo-avatar');
+            const demoMsgAvatar = document.getElementById('demo-msg-avatar');
+            const demoInput = document.getElementById('demo-input');
+            const demoMsgUserText = document.getElementById('demo-msg-user-text');
+            let currentRole = 'mom';
+
+            const roleData = {
+                'mom': {
+                    name: 'Mom', letter: 'M',
+                    gradient: 'linear-gradient(135deg,#fb7185,#ec4899)',
+                    avatarBg: '#1e293b',
+                    prompt: 'Maa wo recipe batao na, aloo ke parathe wali',
+                    aiReply: 'Beta aloo ubal ke mash kar lo, phir hara dhaniya, mirchi, namak aur ajwain daal do. Atte me thoda namak oil daalke gundhna. Bas! 😊',
+                    placeholder: 'Type a message to Mom...'
+                },
+                'best_friend': {
+                    name: 'Best Friend', letter: 'B',
+                    gradient: 'linear-gradient(135deg,#f59e0b,#d97706)',
+                    avatarBg: '#d97706',
+                    prompt: 'Bhai sun, Goa ka plan banate hain next month pakka.',
+                    aiReply: 'Abe chup kar, pichli baar bhi tune hi cancel kiya tha. Paise transfer kar pehle phir baat karenge 😂🍻',
+                    placeholder: 'Type a message to Best Friend...'
+                },
+                'ex': {
+                    name: 'The Ex', letter: 'E',
+                    gradient: 'linear-gradient(135deg,#64748b,#334155)',
+                    avatarBg: '#334155',
+                    prompt: 'Hey, came across this old photo of us today...',
+                    aiReply: 'Oh wow... that feels like a lifetime ago. We looked really happy there. Hope you are doing well 😊',
+                    placeholder: 'Type a message to The Ex...'
+                }
+            };
+
+            let typeTimeout;
+
+            function playRoleAnimation(roleId) {
+                const data = roleData[roleId];
+                currentRole = roleId;
+
+                // Update UI visually
+                demoName.textContent = data.name;
+                demoAvatar.textContent = data.letter;
+                demoMsgAvatar.textContent = data.letter;
+                demoAvatar.style.background = data.avatarBg;
+                demoMsgAvatar.style.background = data.gradient;
+                demoInput.placeholder = data.placeholder;
+
+                // Reset chat
+                const dynamicBubbles = chatArea.querySelectorAll('.dynamic-bubble');
+                dynamicBubbles.forEach(el => el.remove());
+
+                document.getElementById('demo-msg-1').style.opacity = '0';
+                document.getElementById('demo-msg-2').style.opacity = '0';
+                demoMsgUserText.textContent = data.prompt;
+                aiText.textContent = '';
+                
+                clearTimeout(typeTimeout);
+
+                setTimeout(() => {
+                    document.getElementById('demo-msg-1').style.opacity = '1';
+                }, 100);
+                
+                setTimeout(() => {
+                    document.getElementById('demo-msg-2').style.opacity = '1';
+                    let i = 0;
+                    function typeChar() {
+                        if (i < data.aiReply.length) {
+                            aiText.textContent = data.aiReply.slice(0, i + 1);
+                            i++;
+                            typeTimeout = setTimeout(typeChar, 20 + Math.random() * 15);
+                        }
+                    }
+                    typeTimeout = setTimeout(typeChar, 400);
+                }, 1000);
+            }
+
+            roleButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    roleButtons.forEach(b => b.classList.remove('active-role'));
+                    btn.classList.add('active-role');
+                    playRoleAnimation(btn.getAttribute('data-role'));
+                });
+            });
+
+            // Initial animation for default 'mom'
+            playRoleAnimation('mom');
+
+            function addAiBubble() {
+                const div = document.createElement('div');
+                div.className = 'flex items-end gap-2 dynamic-bubble';
+                div.style.cssText = 'display:flex;align-items:flex-end;gap:8px;animation:fade-up 0.3s ease forwards;';
+                
+                const rd = roleData[currentRole];
+                div.innerHTML = `<div style="width:24px;height:24px;border-radius:999px;background:${rd.gradient};display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;flex-shrink:0;">${rd.letter}</div>
+    <div class="msg-ai px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;">
+        <p class="text-[13px] leading-relaxed ai-stream-text" style="font-size:13px;color:var(--text-primary);line-height:1.5;"><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.2s"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.4s"></span></p>
+        <p class="text-[9px] text-right mt-1.5" style="font-size:9px;text-align:right;margin-top:6px;"><span style="color:var(--accent);">AI</span></p>
+    </div>`;
+                chatArea.appendChild(div);
+                scrollChat();
+                return div.querySelector('.ai-stream-text');
+            }
+
+            function escHtml(s) {
+                return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            function addUserMsg(text) {
+                const div = document.createElement('div');
+                div.className = 'flex justify-end dynamic-bubble';
+                div.style.cssText = 'display:flex;justify-content:flex-end;';
+                div.innerHTML = `<div class="msg-user px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;animation:fade-up 0.3s ease forwards;">
+        <p class="text-[13px] text-white leading-relaxed" style="font-size:13px;color:#fff;line-height:1.5;">${escHtml(text)}</p>
+        <p class="text-[9px] text-white/40 text-right mt-1.5" style="font-size:9px;color:rgba(255,255,255,.4);text-align:right;margin-top:6px;">${timeNow()} ✓✓</p>
+    </div>`;
+                chatArea.appendChild(div);
+                scrollChat();
+            }
+
+            // Send handler
+            async function sendDemo(text) {
+                if (isSending || remaining <= 0 || !text.trim()) return;
+                isSending = true;
+                sendBtn.disabled = true;
+                input.disabled = true;
+
+                addUserMsg(text.trim());
+                const streamEl = addAiBubble();
+
+                try {
+                    const resp = await fetch('/api/demo-chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text.trim(), sessionId, role: currentRole }),
+                    });
+
+                    if (!resp.ok) {
+                        const err = await resp.json();
+                        if (resp.status === 429 && err.remaining === 0) {
+                            updateCounter(0);
+                            streamEl.textContent = 'Beta sign up karo, phir aur baat karenge! 😊';
+                        } else {
+                            streamEl.textContent = err.error || 'Something went wrong...';
+                        }
+                        return;
+                    }
+
+                    const reader = resp.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    let started = false;
+                    let aiFullText = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+
+                        let idx;
+                        while ((idx = buffer.indexOf('\n\n')) !== -1) {
+                            const block = buffer.slice(0, idx);
+                            buffer = buffer.slice(idx + 2);
+
+                            let eventType = '', dataStr = '';
+                            for (const line of block.split('\n')) {
+                                if (line.startsWith('event:')) eventType = line.slice(6).trim();
+                                else if (line.startsWith('data:')) dataStr = line.slice(5).trim();
+                            }
+                            if (!dataStr) continue;
+                            try {
+                                const data = JSON.parse(dataStr);
+                                if (eventType === 'start') {
+                                    updateCounter(data.remaining);
+                                } else if (eventType === 'token') {
+                                    if (!started) { streamEl.textContent = ''; started = true; }
+                                    aiFullText += data.text;
+                                    streamEl.textContent = aiFullText;
+                                    scrollChat();
+                                } else if (eventType === 'done') {
+                                    updateCounter(data.remaining);
+                                } else if (eventType === 'error') {
+                                    if (!started) streamEl.textContent = data.message || 'Oops, try again!';
+                                }
+                            } catch { }
+                        }
+                    }
+                } catch (err) {
+                    streamEl.textContent = 'Network error. Try again!';
+                } finally {
+                    isSending = false;
+                    sendBtn.disabled = false;
+                    input.disabled = false;
+                    input.focus();
+                }
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = input.value;
+                input.value = '';
+                sendDemo(text);
+            });
+        })();
+
+        // ── Auth check — update CTAs for logged-in users ──
+        (async () => {
+            try {
+                const r = await fetch('/api/auth/me?_t=' + Date.now());
+                const d = await r.json();
+                if (d.user) {
+                    const dest = d.user.is_admin ? '/admin.html' : '/app';
+                    const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
+                    document.querySelectorAll('a[href="/login.html"], a[href="/login.html#signup"]').forEach(a => {
+                        if (a.id === 'btn-get-pro') {
+                            a.href = '/app?checkout=1';
+                            // Do not modify the text of the checkout button
+                        } else if (/get|start|bring|preserv|free|talking/i.test(a.textContent)) {
+                            a.href = dest;
+                            a.textContent = label;
+                        } else {
+                            a.href = dest;
+                        }
+                    });
+                    // Show logout button, hide login link
+                    const navLogin = document.getElementById('nav-login');
+                    const navLogout = document.getElementById('nav-logout-btn');
+                    if (navLogin) navLogin.style.display = 'none';
+                    if (navLogout) {
+                        navLogout.classList.remove('hidden');
+                        navLogout.style.display = 'inline-flex';
+                        navLogout.addEventListener('click', async () => {
+                            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch { }
+                            window.location.reload();
+                        });
+                    }
+                }
+            } catch { }
+        })();
+
+        // ── Theme Switcher Initialization ──
+        (function () {
+            const toggleBtn = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('theme-toggle-sun');
+            const moonIcon = document.getElementById('theme-toggle-moon');
+            const root = document.documentElement;
+
+            function updateIcons(isLight) {
+                if (isLight) {
+                    sunIcon.classList.add('hidden');
+                    moonIcon.classList.remove('hidden');
+                } else {
+                    sunIcon.classList.remove('hidden');
+                    moonIcon.classList.add('hidden');
+                }
+            }
+
+            // Set initial icon state
+            updateIcons(root.classList.contains('light'));
+
+            toggleBtn?.addEventListener('click', () => {
+                root.classList.add('theme-transition');
+                const isCurrentlyLight = root.classList.contains('light');
+                const newTheme = isCurrentlyLight ? 'dark' : 'light';
+
+                if (newTheme === 'light') {
+                    root.classList.add('light');
+                } else {
+                    root.classList.remove('light');
+                }
+
+                updateIcons(newTheme === 'light');
+                localStorage.setItem('kotha_theme', newTheme);
+
+                setTimeout(() => {
+                    root.classList.remove('theme-transition');
+                }, 350);
+            });
+        })();
+    </script>
+
+    <!-- ═══════════ HOW IT WORKS MODAL (ported verbatim) ═══════════ -->
+    <div id="how-modal"
+        class="fixed inset-0 z-[900] flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none"
+        aria-hidden="true" style="opacity:0;transition:opacity 280ms cubic-bezier(.16,1,.3,1)">
+        <div id="how-overlay" class="absolute inset-0 bg-black/65 backdrop-blur-md cursor-pointer"></div>
+        <div id="how-card"
+            class="relative w-full sm:max-w-[440px] overflow-hidden rounded-t-[32px] sm:rounded-[28px] border border-white/10 shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
+            style="background:linear-gradient(160deg,#0d0d1f 0%,#080810 100%);transform:translateY(40px) scale(0.97);transition:transform 300ms cubic-bezier(.34,1.4,.64,1)">
+
+            <!-- Top gradient bar -->
+            <div class="h-[3px] w-full" style="background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)"></div>
+
+            <!-- Drag handle (mobile) -->
+            <div class="flex justify-center pt-3 sm:hidden">
+                <div class="w-10 h-1 rounded-full bg-white/15"></div>
+            </div>
+
+            <!-- Step content -->
+            <div id="how-content" class="px-7 pt-5 pb-2 min-h-[300px]"></div>
+
+            <!-- Footer: dots + buttons -->
+            <div class="px-7 pb-7 pt-3 flex items-center justify-between">
+                <div id="how-dots" class="flex gap-1.5"></div>
+                <div class="flex items-center gap-2">
+                    <button id="how-prev"
+                        class="w-9 h-9 rounded-xl border border-white/10 hover:border-white/25 flex items-center justify-center text-zinc-500 hover:text-white transition"
+                        style="display:none">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+                    </button>
+                    <button id="how-next"
+                        class="h-9 px-5 rounded-xl font-bold text-[13px] text-white flex items-center gap-1.5 transition"
+                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
+                        Next
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><path d="M5 12h14M12 19l7-7-7-7" /></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Close btn -->
+            <button id="how-close"
+                class="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full flex items-center justify-center text-zinc-500 hover:text-white transition"
+                style="background:rgba(255,255,255,0.06)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes how-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+        @keyframes how-ping { 0% { transform: scale(1); opacity: .6 } 80%, 100% { transform: scale(2.2); opacity: 0 } }
+        @keyframes how-bubble-in { from { opacity: 0; transform: translateY(8px) scale(.95) } to { opacity: 1; transform: none } }
+        .how-float { animation: how-float 3s ease-in-out infinite; }
+        .how-ping { animation: how-ping 1.5s cubic-bezier(0, 0, .2, 1) infinite; }
+        .how-bbl { animation: how-bubble-in .35s cubic-bezier(.16, 1, .3, 1) both; }
+    </style>
+
+    <script>
+        (function () {
+            const steps = [
+                {
+                    badge: 'Step 1 · Export',
+                    color: '#22c55e',
+                    bg: 'rgba(34,197,94,0.1)',
+                    icon: `<svg viewBox="0 0 64 64" fill="none" width="64" height="64">
+            <rect x="10" y="4" width="44" height="56" rx="8" fill="rgba(34,197,94,.12)" stroke="rgba(34,197,94,.4)" stroke-width="1.5"/>
+            <rect x="18" y="14" width="28" height="4" rx="2" fill="rgba(34,197,94,.35)"/>
+            <rect x="18" y="22" width="20" height="3" rx="1.5" fill="rgba(34,197,94,.2)"/>
+            <rect x="18" y="29" width="24" height="3" rx="1.5" fill="rgba(34,197,94,.2)"/>
+            <circle cx="48" cy="50" r="10" fill="#22c55e"/>
+            <path d="M44 50l3 3 5-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`,
+                    title: 'WhatsApp se chat export karo',
+                    desc: 'Koi bhi chat open karo → ⋮ menu → <b>Export Chat</b> → .zip save karo. Bas itna.',
+                    note: 'iPhone aur Android dono pe kaam karta hai 📱'
+                },
+                {
+                    badge: 'Step 2 · Upload',
+                    color: '#6366f1',
+                    bg: 'rgba(99,102,241,0.1)',
+                    icon: `<svg viewBox="0 0 64 64" fill="none" width="64" height="64">
+            <rect x="8" y="20" width="48" height="36" rx="8" fill="rgba(99,102,241,.1)" stroke="rgba(99,102,241,.35)" stroke-width="1.5"/>
+            <path d="M32 8v28M24 16l8-8 8 8" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="16" y="40" width="32" height="4" rx="2" fill="rgba(99,102,241,.2)"/>
+        </svg>`,
+                    title: 'Kotha pe upload karo',
+                    desc: '.zip file drag & drop karo ya folder select karo. <b>1-2 minute</b> mein process ho jaata hai.',
+                    note: '🔒 Private &amp; secure — sirf tumhare account ka access'
+                },
+                {
+                    badge: 'Step 3 · AI Magic',
+                    color: '#a855f7',
+                    bg: 'rgba(168,85,247,0.1)',
+                    icon: `<svg viewBox="0 0 64 64" fill="none" width="64" height="64">
+            <circle cx="32" cy="32" r="18" fill="rgba(168,85,247,.12)" stroke="rgba(168,85,247,.4)" stroke-width="1.5"/>
+            <circle cx="32" cy="32" r="10" fill="rgba(168,85,247,.2)"/>
+            <path d="M32 22v4M32 38v4M22 32h4M38 32h4" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="32" cy="32" r="4" fill="#a855f7"/>
+            <circle cx="20" cy="20" r="2" fill="rgba(168,85,247,.5)"/>
+            <circle cx="44" cy="20" r="2" fill="rgba(168,85,247,.5)"/>
+            <circle cx="20" cy="44" r="2" fill="rgba(168,85,247,.5)"/>
+            <circle cx="44" cy="44" r="2" fill="rgba(168,85,247,.5)"/>
+        </svg>`,
+                    title: 'AI unka style deeply seekhta hai',
+                    desc: 'Har message padhta hai — unki <b>language, jokes, emojis, tone</b> — sab absorb karta hai.',
+                    note: '✨ Hinglish, Hindi, English — perfectly match karta hai'
+                },
+                {
+                    badge: 'Step 4 · Chat!',
+                    color: '#ec4899',
+                    bg: 'rgba(236,72,153,0.1)',
+                    icon: null, // live mini chat demo
+                    title: 'Ab baat karo — kabhi bhi',
+                    desc: 'Jo woh kehte the, unka andaaz — sab zinda hai. Pooch lo kuch bhi.',
+                    note: null,
+                    demo: true
+                }
+            ];
+
+            let cur = 0;
+            const modal = document.getElementById('how-modal');
+            const card = document.getElementById('how-card');
+            const content = document.getElementById('how-content');
+            const dots = document.getElementById('how-dots');
+            const prevBtn = document.getElementById('how-prev');
+            const nextBtn = document.getElementById('how-next');
+
+            // Build dots
+            steps.forEach((_, i) => {
+                const d = document.createElement('div');
+                d.className = 'how-dot rounded-full transition-all duration-300';
+                d.style.cssText = `height:6px;background:rgba(255,255,255,0.2);width:6px`;
+                dots.appendChild(d);
+            });
+
+            function updateDots() {
+                dots.querySelectorAll('.how-dot').forEach((d, i) => {
+                    if (i === cur) { d.style.width = '22px'; d.style.background = steps[cur].color; }
+                    else { d.style.width = '6px'; d.style.background = 'rgba(255,255,255,0.2)'; }
+                });
+            }
+
+            function render() {
+                const s = steps[cur];
+                updateDots();
+                prevBtn.style.display = cur > 0 ? 'flex' : 'none';
+                nextBtn.innerHTML = cur < steps.length - 1
+                    ? `Next <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><path d="M5 12h14M12 19l7-7-7-7"/></svg>`
+                    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 7l-11 11M9 7h11v11"/></svg> Start karo`;
+                nextBtn.style.background = cur < steps.length - 1
+                    ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
+                    : 'linear-gradient(135deg,#ec4899,#8b5cf6)';
+
+                if (s.demo) {
+                    content.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+                <span style="font-size:10px;font-weight:700;color:${s.color};background:${s.bg};padding:3px 10px;border-radius:20px">${s.badge}</span>
+            </div>
+            <h2 class="modal-title" style="font-size:1.35rem;font-weight:800;line-height:1.2;margin-bottom:8px">${s.title}</h2>
+            <p class="modal-desc" style="font-size:13px;line-height:1.6;margin-bottom:14px">${s.desc}</p>
+            <div id="how-demo-chat" class="modal-demo-chat" style="border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:120px;border:1px solid"></div>`;
+                    const demoMsgs = [
+                        { me: true, text: 'Kal milenge na?', delay: 300 },
+                        { me: false, text: 'haa yaar! 6 baje?', delay: 900 },
+                        { me: true, text: 'Perfect 👍', delay: 1500 },
+                        { me: false, text: 'leke aana wo wali book bhi', delay: 2100 },
+                    ];
+                    const chat = document.getElementById('how-demo-chat');
+                    demoMsgs.forEach(m => {
+                        setTimeout(() => {
+                            if (!chat) return;
+                            const b = document.createElement('div');
+                            b.className = 'how-bbl';
+                            b.style.cssText = `display:flex;justify-content:${m.me ? 'flex-end' : 'flex-start'}`;
+                            b.innerHTML = `<span class="${m.me ? '' : 'modal-demo-bubble-ai'}" style="background:${m.me ? 'linear-gradient(135deg,#6366f1,#818cf8)' : 'var(--msg-ai-bg)'};color:${m.me ? 'white' : 'var(--text-primary)'};border:${m.me ? 'none' : '1px solid var(--border)'};padding:7px 13px;border-radius:${m.me ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};font-size:13px;font-weight:500;max-width:70%">${m.text}</span>`;
+                            chat.appendChild(b);
+                            chat.scrollTop = chat.scrollHeight;
+                        }, m.delay);
+                    });
+                } else {
+                    content.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+                <span style="font-size:10px;font-weight:700;color:${s.color};background:${s.bg};padding:3px 10px;border-radius:20px">${s.badge}</span>
+            </div>
+            <div class="how-float" style="width:80px;height:80px;background:${s.bg};border:1px solid ${s.color}30;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:18px;position:relative">
+                ${s.icon}
+                <div class="how-ping" style="position:absolute;inset:-1px;border-radius:20px;border:1px solid ${s.color}"></div>
+            </div>
+            <h2 class="modal-title" style="font-size:1.35rem;font-weight:800;line-height:1.2;margin-bottom:10px">${s.title}</h2>
+            <p class="modal-desc" style="font-size:13.5px;line-height:1.65;margin-bottom:12px">${s.desc}</p>
+            ${s.note ? `<div class="modal-note" style="display:inline-flex;align-items:center;gap:6px;border:1px solid;border-radius:10px;padding:7px 12px;font-size:12px">${s.note}</div>` : ''}`;
+                }
+            }
+
+            function open() {
+                cur = 0; render();
+                modal.style.opacity = '1';
+                modal.style.pointerEvents = 'all';
+                modal.setAttribute('aria-hidden', 'false');
+                card.style.transform = 'translateY(0) scale(1)';
+                document.body.style.overflow = 'hidden';
+            }
+            function close() {
+                modal.style.opacity = '0';
+                modal.style.pointerEvents = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                card.style.transform = 'translateY(40px) scale(0.97)';
+                document.body.style.overflow = '';
+            }
+
+            document.getElementById('open-how-btn')?.addEventListener('click', open);
+            document.getElementById('how-close')?.addEventListener('click', close);
+            document.getElementById('how-overlay')?.addEventListener('click', close);
+            prevBtn?.addEventListener('click', () => { if (cur > 0) { cur--; render(); } });
+            nextBtn?.addEventListener('click', () => {
+                if (cur < steps.length - 1) { cur++; render(); }
+                else { close(); window.location.href = '/login.html#signup'; }
+            });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+        })();
+
+        // Google One-Tap auto-prompt for non-logged in visitors
+        (function() {
+            fetch('/api/auth/me')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.user) return; // User already logged in
+                    fetch('/api/auth/google/client-id')
+                        .then(res => res.json())
+                        .then(idData => {
+                            if (idData.clientId && window.google && window.google.accounts) {
+                                google.accounts.id.initialize({
+                                    client_id: idData.clientId,
+                                    callback: async function (response) {
+                                        if (!response.credential) return;
+                                        try {
+                                            const res = await fetch('/api/auth/google/onetap', {
+                                                method: 'POST',
+                                                headers: { 'content-type': 'application/json' },
+                                                body: JSON.stringify({ credential: response.credential }),
+                                            });
+                                            const resData = await res.json();
+                                            if (resData.ok && resData.redirect) {
+                                                window.location.href = resData.redirect;
+                                            }
+                                        } catch (e) {
+                                            console.error('One-Tap error', e);
+                                        }
+                                    }
+                                });
+                                google.accounts.id.prompt();
+                            }
+                        }).catch(()=>{});
+                }).catch(()=>{});
+        })();
+    </script>
 </body>
+
 </html>
