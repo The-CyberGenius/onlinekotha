@@ -1373,7 +1373,7 @@
         })();
 
         // ── Hero Interactive Demo Chat ──
-        (function heroChat() {
+        document.addEventListener('DOMContentLoaded', function heroChat() {
             const chatArea = document.getElementById('hero-chat');
             const form = document.getElementById('demo-form');
             const input = document.getElementById('demo-input');
@@ -1540,7 +1540,7 @@
                 input.value = '';
                 sendDemo(text);
             });
-        })();
+        });
 
         // ── Auth check — update CTAs for logged-in users ──
         (async () => {
