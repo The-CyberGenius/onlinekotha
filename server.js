@@ -560,10 +560,10 @@ function getDemoLimitAndUsage(req, sessionId) {
     if (session) {
         const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }).split(',')[0];
         key = `user_${session.id}_${dateStr}`;
-        limit = 3; // 3 per day for logged in
+        limit = 15; // 15 per day for logged in
     } else {
         key = `guest_${req.ip}_${sessionId || 'x'}`;
-        limit = 2; // 2 once for guests
+        limit = 15; // 15 once for guests
     }
 
     const usage = demoUsage.get(key) || { count: 0, history: [] };

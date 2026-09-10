@@ -873,116 +873,6 @@
 
 
 
-            <!-- ── Interactive Support Chat (functional - Floating Widget) ── -->
-            <div id="floating-assistant-widget" style="position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:16px;">
-                
-                <!-- Chat Window (Collapsed by default) -->
-                <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
-                    style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom right;box-shadow:0 12px 40px rgba(0,0,0,0.15);">
-                    <!-- Chat header -->
-                    <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
-                        style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-                        <div class="relative" style="position:relative;">
-                            <div class="online-ring"></div>
-                            <div id="demo-avatar"
-                                style="width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;transition:all 0.3s;">
-                                <img src="/logo.svg" alt="Logo" style="width:20px;height:20px;object-fit:contain;filter:brightness(0) invert(1);">
-                            </div>
-                        </div>
-                        <div style="flex:1;">
-                            <p id="demo-name"
-                                style="font-size:13px;font-weight:700;color:var(--text-primary);transition:all 0.3s;">
-                                Kotha Assistant</p>
-                            <p style="font-size:10px;color:#34d399;font-weight:500;">Online · Support</p>
-                        </div>
-                        <!-- Close button -->
-                        <button id="close-assistant-btn" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                        </button>
-                    </div>
-
-                    <!-- Messages area -->
-                    <div class="space-y-3" id="hero-chat"
-                        style="display:flex;flex-direction:column;gap:12px;max-height:300px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;">
-
-                        <div class="flex items-end gap-2 chat-msg" id="demo-msg-welcome"
-                            style="display:flex;align-items:flex-end;gap:8px;">
-                            <div
-                                style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
-                                <img src="/logo.svg" alt="Logo" style="width:12px;height:12px;object-fit:contain;filter:brightness(0) invert(1);">
-                            </div>
-                            <div class="msg-ai px-4 py-2.5 max-w-[85%]"
-                                style="padding:10px 16px;max-width:85%;background:var(--msg-ai-bg);border-radius:12px;border-bottom-left-radius:2px;">
-                                <p class="text-[13px] text-zinc-200 leading-relaxed"
-                                    style="font-size:13px;color:var(--text-primary);line-height:1.5;">Hi there! 👋 I'm
-                                    Kotha's Support Assistant. Want to know how to export your WhatsApp chat, or how our
-                                    platform works? Ask me anything in your language!</p>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- Interactive input bar -->
-                    <form id="demo-form"
-                        style="margin-top:16px;display:flex;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);">
-                        <input type="text" id="demo-input" maxlength="300" autocomplete="off"
-                            placeholder="Ask me a question..."
-                            style="background:transparent;font-size:13px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
-                        <button type="submit" id="demo-send" aria-label="Send message"
-                            style="width:38px;height:38px;border-radius:999px;background:var(--accent-strong);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:0;cursor:pointer;">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                            </svg>
-                        </button>
-                    </form>
-
-                    <!-- Limit reached CTA (hidden initially) -->
-                    <div id="demo-limit-cta" class="hidden" style="margin-top:12px;text-align:center;">
-                        <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Demo limit reached!</p>
-                        <a href="/login.html#signup"
-                            style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:700;font-size:11px;padding:8px 16px;border-radius:999px;">
-                            Sign up free for unlimited
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5" stroke-linecap="round">
-                                <path d="M5 12h14M13 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Floating Toggle Button -->
-                <button id="toggle-assistant-btn" style="width:64px;height:64px;border-radius:999px;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.15);transition:transform 0.2s;overflow:hidden;">
-                    <img src="/KothaPro.png" alt="Assistant" style="width:100%;height:100%;object-fit:cover;">
-                </button>
-            </div>
-
-            <!-- JavaScript for floating widget toggle -->
-            <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const toggleBtn = document.getElementById('toggle-assistant-btn');
-                    const closeBtn = document.getElementById('close-assistant-btn');
-                    const chatFrame = document.getElementById('demo-chat-frame');
-                    
-                    let isOpen = false;
-                    
-                    function toggleChat() {
-                        isOpen = !isOpen;
-                        if (isOpen) {
-                            chatFrame.style.opacity = '1';
-                            chatFrame.style.pointerEvents = 'auto';
-                            chatFrame.style.transform = 'translateY(0)';
-                            document.getElementById('demo-input').focus();
-                        } else {
-                            chatFrame.style.opacity = '0';
-                            chatFrame.style.pointerEvents = 'none';
-                            chatFrame.style.transform = 'translateY(10px)';
-                        }
-                    }
-                    
-                    toggleBtn.addEventListener('click', toggleChat);
-                    closeBtn.addEventListener('click', toggleChat);
-                });
-            </script>
         </div>
     </section>
 
@@ -2034,6 +1924,121 @@
                         }).catch(() => { });
                 }).catch(() => { });
         })();
+    </script>
+    <!-- ── Interactive Support Chat (functional - Floating Widget) ── -->
+    <div id="floating-assistant-widget" style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:16px;">
+        
+        <!-- Chat Window (Collapsed by default) -->
+        <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
+            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom right;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
+            <!-- Chat header -->
+            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
+                style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+                <div class="relative" style="position:relative;">
+                    <div class="online-ring"></div>
+                    <div id="demo-avatar"
+                        style="width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;transition:all 0.3s;">
+                        <img src="/logo.svg" alt="Logo" style="width:20px;height:20px;object-fit:contain;filter:brightness(0) invert(1);">
+                    </div>
+                </div>
+                <div style="flex:1;">
+                    <p id="demo-name"
+                        style="font-size:13px;font-weight:700;color:var(--text-primary);transition:all 0.3s;">
+                        Kotha Assistant</p>
+                    <p style="font-size:10px;color:#34d399;font-weight:500;">Online · Support</p>
+                </div>
+                <div id="demo-counter"
+                    style="display:flex;align-items:center;gap:6px;background:var(--msg-ai-bg);padding:4px 10px;border-radius:999px;">
+                    <span class="text-[9px] font-bold text-zinc-400" id="demo-remaining"
+                        style="font-size:9px;font-weight:700;color:var(--text-muted);">15 msgs left</span>
+                </div>
+                <!-- Close button -->
+                <button id="close-assistant-btn" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Messages area -->
+            <div class="space-y-3" id="hero-chat"
+                style="display:flex;flex-direction:column;gap:12px;max-height:300px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;">
+
+                <div class="flex items-end gap-2 chat-msg" id="demo-msg-welcome"
+                    style="display:flex;align-items:flex-end;gap:8px;">
+                    <div
+                        style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
+                        <img src="/logo.svg" alt="Logo" style="width:12px;height:12px;object-fit:contain;filter:brightness(0) invert(1);">
+                    </div>
+                    <div class="msg-ai px-4 py-2.5 max-w-[85%]"
+                        style="padding:10px 16px;max-width:85%;background:var(--msg-ai-bg);border-radius:12px;border-bottom-left-radius:2px;">
+                        <p class="text-[13px] text-zinc-200 leading-relaxed"
+                            style="font-size:13px;color:var(--text-primary);line-height:1.5;">Hi there! 👋 I'm
+                            Kotha's Support Assistant. Want to know how to export your WhatsApp chat, or how our
+                            platform works? Ask me anything in your language!</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Interactive input bar -->
+            <form id="demo-form"
+                style="margin-top:16px;display:flex;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);">
+                <input type="text" id="demo-input" maxlength="300" autocomplete="off"
+                    placeholder="Ask me a question..."
+                    style="background:transparent;font-size:13px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
+                <button type="submit" id="demo-send" aria-label="Send message"
+                    style="width:38px;height:38px;border-radius:999px;background:var(--accent-strong);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:0;cursor:pointer;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Limit reached CTA (hidden initially) -->
+            <div id="demo-limit-cta" class="hidden" style="margin-top:12px;text-align:center;">
+                <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Demo limit reached!</p>
+                <a href="/login.html#signup"
+                    style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:700;font-size:11px;padding:8px 16px;border-radius:999px;">
+                    Sign up free for unlimited
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round">
+                        <path d="M5 12h14M13 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Floating Toggle Button -->
+        <button id="toggle-assistant-btn" style="width:64px;height:64px;border-radius:999px;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:transform 0.2s;overflow:hidden;">
+            <img src="/KothaPro.png" alt="Assistant" style="width:100%;height:100%;object-fit:cover;">
+        </button>
+    </div>
+
+    <!-- JavaScript for floating widget toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('toggle-assistant-btn');
+            const closeBtn = document.getElementById('close-assistant-btn');
+            const chatFrame = document.getElementById('demo-chat-frame');
+            
+            let isOpen = false;
+            
+            function toggleChat() {
+                isOpen = !isOpen;
+                if (isOpen) {
+                    chatFrame.style.opacity = '1';
+                    chatFrame.style.pointerEvents = 'auto';
+                    chatFrame.style.transform = 'translateY(0)';
+                    document.getElementById('demo-input').focus();
+                } else {
+                    chatFrame.style.opacity = '0';
+                    chatFrame.style.pointerEvents = 'none';
+                    chatFrame.style.transform = 'translateY(10px)';
+                }
+            }
+            
+            toggleBtn.addEventListener('click', toggleChat);
+            closeBtn.addEventListener('click', toggleChat);
+        });
     </script>
 </body>
 
