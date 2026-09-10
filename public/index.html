@@ -1431,7 +1431,7 @@
                 div.className = 'flex items-end gap-2 dynamic-bubble';
                 div.style.cssText = 'display:flex;align-items:flex-end;gap:8px;animation:fade-up 0.3s ease forwards;';
 
-                div.innerHTML = `<div style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg></div>
+                div.innerHTML = `<div style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #8b5cf6, #ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></div>
     <div class="msg-ai px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;background:var(--msg-ai-bg);border-radius:12px;border-bottom-left-radius:2px;">
         <p class="text-[13px] leading-relaxed ai-stream-text" style="font-size:13px;color:var(--text-primary);line-height:1.5;"><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.2s"></span><span class="inline-block w-1.5 h-1.5 bg-zinc-500 rounded-full animate-pulse ml-1" style="animation-delay:0.4s"></span></p>
         <p class="text-[9px] text-right mt-1.5" style="font-size:9px;text-align:right;margin-top:6px;"><span style="color:var(--accent);">AI</span></p>
@@ -1490,6 +1490,23 @@
                     let buffer = '';
                     let started = false;
                     let aiFullText = '';
+                    
+                    // Typing effect state
+                    let charQueue = [];
+                    let isTyping = false;
+                    let typeTimer = null;
+
+                    function typeNext() {
+                        if (charQueue.length === 0) {
+                            isTyping = false;
+                            return;
+                        }
+                        isTyping = true;
+                        aiFullText += charQueue.shift();
+                        streamEl.textContent = aiFullText;
+                        scrollChat();
+                        typeTimer = setTimeout(typeNext, 15);
+                    }
 
                     while (true) {
                         const { done, value } = await reader.read();
@@ -1513,9 +1530,9 @@
                                     updateCounter(data.remaining);
                                 } else if (eventType === 'token') {
                                     if (!started) { streamEl.textContent = ''; started = true; }
-                                    aiFullText += data.text;
-                                    streamEl.textContent = aiFullText;
-                                    scrollChat();
+                                    const chars = data.text.split('');
+                                    charQueue.push(...chars);
+                                    if (!isTyping) typeNext();
                                 } else if (eventType === 'done') {
                                     updateCounter(data.remaining);
                                 } else if (eventType === 'error') {
@@ -1937,8 +1954,8 @@
                 <div class="relative" style="position:relative;">
                     <div class="online-ring"></div>
                     <div id="demo-avatar"
-                        style="width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;transition:all 0.3s;">
-                        <img src="/logo.svg" alt="Logo" style="width:20px;height:20px;object-fit:contain;filter:brightness(0) invert(1);">
+                        style="width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg, #8b5cf6, #ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;transition:all 0.3s;box-shadow:0 4px 14px rgba(168, 85, 247, 0.3);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
                     </div>
                 </div>
                 <div style="flex:1;">
@@ -1965,8 +1982,8 @@
                 <div class="flex items-end gap-2 chat-msg" id="demo-msg-welcome"
                     style="display:flex;align-items:flex-end;gap:8px;">
                     <div
-                        style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #4f46e5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
-                        <img src="/logo.svg" alt="Logo" style="width:12px;height:12px;object-fit:contain;filter:brightness(0) invert(1);">
+                        style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #8b5cf6, #ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
                     </div>
                     <div class="msg-ai px-4 py-2.5 max-w-[85%]"
                         style="padding:10px 16px;max-width:85%;background:var(--msg-ai-bg);border-radius:12px;border-bottom-left-radius:2px;">
