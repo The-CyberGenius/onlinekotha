@@ -130,6 +130,7 @@ async function parseChatFile(chatFilePath) {
 
     // Normalize dates across the entire chat to YYYY-MM-DD
     let isUSFormat = false; // MM/DD/YY
+    let ambiguous = true;
     for (const msg of messages) {
         if (!msg.date) continue;
         const parts = msg.date.split(/[\/\-\.]/);
@@ -139,10 +140,57 @@ async function parseChatFile(chatFilePath) {
             const p1 = parseInt(parts[1]);
             if (p0 > 12 && p1 <= 12) {
                 isUSFormat = false;
+                ambiguous = false;
                 break;
             } else if (p1 > 12 && p0 <= 12) {
                 isUSFormat = true;
+                ambiguous = false;
                 break;
+            }
+        }
+    }
+
+    if (ambiguous) {
+        let p0s = new Set();
+        let p1s = new Set();
+        let sampleParts = null;
+        
+        for (const msg of messages) {
+            if (!msg.date) continue;
+            const parts = msg.date.split(/[\/\-\.]/);
+            if (parts.length === 3 && parts[0].length !== 4) {
+                p0s.add(parts[0]);
+                p1s.add(parts[1]);
+                if (!sampleParts) sampleParts = parts;
+            }
+        }
+
+        if (p0s.size > p1s.size) {
+            isUSFormat = false; // p0 changes more, so p0 is day
+        } else if (p1s.size > p0s.size) {
+            isUSFormat = true; // p1 changes more, so p1 is day
+        } else if (sampleParts) {
+            // Check if one interpretation results in a future date
+            const p0 = parseInt(sampleParts[0]);
+            const p1 = parseInt(sampleParts[1]);
+            let yearStr = sampleParts[2].replace(/\D/g, '');
+            let year = yearStr.length === 2 ? 2000 + parseInt(yearStr) : parseInt(yearStr);
+            
+            const now = new Date();
+            const dateIfUS = new Date(year, p0 - 1, p1); // MM/DD
+            const dateIfNotUS = new Date(year, p1 - 1, p0); // DD/MM
+            
+            if (dateIfNotUS > now && dateIfUS <= now) {
+                isUSFormat = true; // DD/MM is impossible (future), so it must be MM/DD
+            } else if (dateIfUS > now && dateIfNotUS <= now) {
+                isUSFormat = false; // MM/DD is impossible (future), so it must be DD/MM
+            } else {
+                // Fallback heuristic: leading zeros (e.g. 9/10/26 vs 09/10/26)
+                if (sampleParts[0].length === 1 && sampleParts[1].length === 2) {
+                    isUSFormat = true; // M/DD/YY is typical for US
+                } else if (sampleParts[0].length === 2 && sampleParts[1].length === 1) {
+                    isUSFormat = false; // DD/M/YY
+                }
             }
         }
     }
