@@ -1600,8 +1600,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Pro CTA -->
                 <div class="w-full max-w-[280px] rounded-[14px] bg-white dark:bg-[#1c1c2e] p-2.5 text-left border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between gap-2 transition-all hover:border-indigo-500/30">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shrink-0 shadow-sm">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                        <div class="w-8 h-8 flex items-center justify-center shrink-0">
+                            <img src="/KothaPro.png" alt="Pro Logo" class="w-full h-full object-contain drop-shadow-sm rounded-lg">
                         </div>
                         <div class="flex flex-col justify-center">
                             <p class="text-[12px] font-bold text-gray-900 dark:text-white leading-tight mb-0.5">Kotha Pro</p>
