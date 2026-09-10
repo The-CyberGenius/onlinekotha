@@ -1304,6 +1304,19 @@ document.addEventListener('DOMContentLoaded', () => {
             item.querySelector('.chat-del-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (!confirm(`Delete "${displayName}"?\n\nYou won't see this chat anymore.`)) return;
+                
+                if (chat === 'kotha_assistant') {
+                    localStorage.setItem('hide_kotha_assistant', 'true');
+                    loadedChats = loadedChats.filter(c => c !== 'kotha_assistant');
+                    if (currentChat === 'kotha_assistant') {
+                        currentChat = loadedChats.length > 0 ? loadedChats[0] : '__global__';
+                        window.currentChat = currentChat;
+                        loadData(currentChat);
+                    }
+                    renderChatList(loadedChats, currentChat);
+                    return;
+                }
+
                 try {
                     const r = await fetch(`/api/chats/${encodeURIComponent(chat)}`, { method: 'DELETE' });
                     if (!r.ok) throw new Error('Failed');
@@ -1313,9 +1326,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.currentChat = loadedChats[0];
                         loadData(loadedChats[0]);
                     } else if (loadedChats.length === 0) {
-                        currentChat = '';
-                        window.currentChat = '';
-                        showEmptyState();
+                        currentChat = '__global__';
+                        window.currentChat = '__global__';
+                        loadData('__global__');
                     }
                     renderChatList(loadedChats, currentChat);
                 } catch (err) {
@@ -1352,6 +1365,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             chatListUI.appendChild(item);
         });
+
+        // Add Reactivate Assistant button if hidden
+        if (localStorage.getItem('hide_kotha_assistant') === 'true') {
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'mt-4 flex justify-center pb-4';
+            btnContainer.innerHTML = `
+                <button class="text-[11px] text-indigo-500 font-medium hover:underline flex items-center gap-1 opacity-80 hover:opacity-100 transition">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Reactivate Assistant
+                </button>
+            `;
+            btnContainer.querySelector('button').addEventListener('click', () => {
+                localStorage.removeItem('hide_kotha_assistant');
+                if (!loadedChats.includes('kotha_assistant')) {
+                    loadedChats.push('kotha_assistant');
+                }
+                renderChatList(loadedChats, currentChat);
+            });
+            chatListUI.appendChild(btnContainer);
+        }
     }
 
     // Keep reference to loaded chats for re-rendering
@@ -1374,9 +1407,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             let chats = await resp.json();
             
-            // Kotha Assistant Onboarding Injection
-            if (chats.length === 0) {
-                chats = ['kotha_assistant'];
+            // Kotha Assistant Injection
+            const assistantHidden = localStorage.getItem('hide_kotha_assistant') === 'true';
+            if (!assistantHidden && !chats.includes('kotha_assistant')) {
+                chats.push('kotha_assistant');
             }
             loadedChats = chats;
             
@@ -1394,14 +1428,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         window._chatMetaCache[folder].contactName = meta; // backwards compatibility
                     }
                 }
-                if (chats.length === 1 && chats[0] === 'kotha_assistant') {
-                    window._chatMetaCache['kotha_assistant'] = {
-                        contactName: "Kotha Assistant",
-                        messageCount: 0,
-                        isGroup: false,
-                        lastMessage: "Hi there! 👋 I'm Kotha's Support Assistant...",
-                        lastTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                    };
+                if (chats.includes('kotha_assistant')) {
+                    if (!window._chatMetaCache['kotha_assistant']) {
+                        window._chatMetaCache['kotha_assistant'] = {
+                            contactName: "Kotha Assistant",
+                            messageCount: 0,
+                            isGroup: false,
+                            lastMessage: "Hi there! 👋 I'm Kotha's Support Assistant...",
+                            lastTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        };
+                    }
                 }
                 renderChatList(loadedChats, currentChat);
             }).catch(() => {});
@@ -1447,10 +1483,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             currentChat = 'kotha_assistant';
                             window.currentChat = 'kotha_assistant';
                             loadData('kotha_assistant');
-                            removeEmptyState();
+                        } else if (chats.length === 0) {
+                            currentChat = '__global__';
+                            window.currentChat = '__global__';
+                            loadData('__global__');
                         } else {
-                            showEmptyState(); // Restore empty state
+                            currentChat = chats[0];
+                            window.currentChat = chats[0];
+                            loadData(chats[0]);
                         }
+                        removeEmptyState();
                     }
                     // Render visual chat list (always)
                     renderChatList(chats, currentChat !== '__global__' && (targetChat || currentChat === 'kotha_assistant') ? currentChat : '');
