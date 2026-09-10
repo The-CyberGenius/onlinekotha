@@ -983,7 +983,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const countSpan = document.createElement('span');
                     countSpan.className = 'text-[10px] font-medium text-gray-500 flex items-center gap-1.5';
-                    countSpan.innerHTML = `<span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded font-bold tracking-tight">${totalMessages.toLocaleString()} msgs</span> <span>${senders.length} participants &gt;</span>`;
+                    const formatNum = n => n > 9999 ? (n/1000).toFixed(1) + 'k' : n.toLocaleString();
+                    countSpan.innerHTML = `<span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded font-bold tracking-tight">${formatNum(totalMessages)} msgs</span> <span>${senders.length} participants &gt;</span>`;
                     rightCol.appendChild(countSpan);
 
                     headerRow.appendChild(leftCol);
@@ -1008,7 +1009,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const activeClass = 'text-[10px] bg-indigo-600 border border-indigo-600 rounded-full px-2 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         
                         btn.className = defaultClass;
-                        btn.innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter">${sName.charAt(0).toUpperCase()}</div> <span>${sName}</span>`;
+                        const formatCount = count > 9999 ? (count/1000).toFixed(1) + 'k' : count.toLocaleString();
+                        btn.innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter">${sName.charAt(0).toUpperCase()}</div> <span>${sName}</span> <span class="opacity-60 ml-0.5">${formatCount}</span>`;
                         
                         btn.onclick = () => {
                             if (activeSenderFilter === sName) {
