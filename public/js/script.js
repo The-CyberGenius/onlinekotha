@@ -982,8 +982,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     rightCol.appendChild(avatarsWrap);
                     
                     const countSpan = document.createElement('span');
-                    countSpan.className = 'text-[10px] font-medium text-gray-500';
-                    countSpan.innerHTML = `${senders.length} participants &gt;`;
+                    countSpan.className = 'text-[10px] font-medium text-gray-500 flex items-center gap-1.5';
+                    countSpan.innerHTML = `<span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded font-bold tracking-tight">${totalMessages.toLocaleString()} msgs</span> <span>${senders.length} participants &gt;</span>`;
                     rightCol.appendChild(countSpan);
 
                     headerRow.appendChild(leftCol);
@@ -1260,7 +1260,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="flex items-center justify-between gap-1 mt-0">
                         <p class="text-[11px] text-gray-400 font-normal truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
-                        ${msgCount ? `<span class="bg-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm shrink-0">${msgCount > 9999 ? (msgCount/1000).toFixed(1) + 'k' : (msgCount > 999 ? '999+' : msgCount)}</span>` : ''}
                     </div>
                 </div>
                 <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
