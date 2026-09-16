@@ -10,6 +10,9 @@
     let conversationMap = {};   // { chatFolder: conversationId }
     let contactNameMap = {};   // { chatFolder: contactName }
     let activeChat = null;
+    
+    // Expose active conv ID for auth-init.js
+    window.kothaGetActiveConvId = () => conversationMap[activeChat] || null;
 
     // Message queue — lets user send multiple messages while AI is still responding
     let msgQueue = [];     // { text, chat }[]
@@ -504,13 +507,24 @@
         removeAiActionBar();
         activeChat = getActiveChat();
 
-        appendUserBubble(text);
+        let sendAsAI = false;
+        if (window.__USER__ && window.__USER__.is_impersonating) {
+            const toggle = document.getElementById('admin-send-as-ai');
+            if (toggle && toggle.checked) sendAsAI = true;
+        }
+
+        if (!sendAsAI) {
+            appendUserBubble(text);
+        }
+        
         bottomInput.value = '';
         updateSendBtn();
 
-        _triggerTextBlast(text);
+        if (!sendAsAI) {
+            _triggerTextBlast(text);
+        }
 
-        msgQueue.push({ text, chat: activeChat });
+        msgQueue.push({ text, chat: activeChat, sendAsAI });
         if (!processing) processQueue();
     }
 
@@ -523,7 +537,7 @@
         const item = msgQueue.shift();
         activeChat = item.chat;
         try {
-            await sendToAI(item.text, item.chat);
+            await sendToAI(item.text, item.chat, item.sendAsAI);
         } catch (e) {
             console.error('processQueue error:', e);
         }
@@ -534,7 +548,7 @@
     // ─────────────────────────────────────────────
     //  Core AI request (streaming SSE)
     // ─────────────────────────────────────────────
-    async function sendToAI(text, chatFolder) {
+    async function sendToAI(text, chatFolder, sendAsAI = false) {
         const convId = conversationMap[chatFolder] || null;
         const cName = contactNameMap[chatFolder] ||
             (document.getElementById('chat-header-name')?.innerText) || 'AI';
@@ -563,6 +577,9 @@
             try {
                 let endpoint = '/api/ai/chat';
                 let payload = { chat: chatFolder, message: text, conversationId: convId, contactName: cName, userName: uName };
+                if (sendAsAI) {
+                    payload.sendAsAI = true;
+                }
                 
                 if (chatFolder === 'kotha_assistant') {
                     endpoint = '/api/demo-chat';
@@ -649,6 +666,12 @@
                             feedTypewriter(data.text);
 
                         } else if (event === 'done') {
+                            if (data.finishReason === 'STOP_PAUSED') {
+                                typingEl.remove();
+                                feedTypewriter('');
+                                finishTypewriter();
+                                return resolve();
+                            }
                             if (responseBubble) {
                                 const timeEl = responseBubble.querySelector('.ai-bubble-time');
                                 if (timeEl) timeEl.textContent = formatNow();

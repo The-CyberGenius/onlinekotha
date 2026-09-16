@@ -478,6 +478,17 @@ router.get('/impersonate/stop', (req, res) => {
     res.redirect('/admin.html');
 });
 
+router.post('/impersonate/toggle-ai', (req, res) => {
+    const { conversationId, paused } = req.body;
+    if (!conversationId) return res.status(400).json({ error: 'conversationId required' });
+    try {
+        db.prepare('UPDATE conversations SET ai_paused = ? WHERE id = ?').run(paused ? 1 : 0, conversationId);
+        res.json({ success: true, ai_paused: paused });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 
 // ---------- Manage user plan / trial ----------

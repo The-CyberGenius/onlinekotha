@@ -450,6 +450,79 @@
 
             // Add thin red line at the top of the body
             document.body.classList.add('border-t-4', 'border-red-500');
+
+            // Inject "Send as AI" and "Pause AI" controls above chat input
+            const chatInputArea = document.getElementById('bottom-input-container');
+            if (chatInputArea && !document.getElementById('admin-ai-controls')) {
+                const controlsContainer = document.createElement('div');
+                controlsContainer.id = 'admin-ai-controls';
+                controlsContainer.className = 'absolute -top-10 left-0 w-full flex items-center justify-between px-4 z-10';
+                controlsContainer.innerHTML = `
+                    <div class="flex items-center gap-2 bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-full border border-slate-700 shadow-lg">
+                        <div id="ai-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                        <span id="ai-status-text" class="text-[11px] font-bold text-slate-200 uppercase tracking-wide">AI ACTIVE</span>
+                        <button id="admin-pause-ai-btn" class="ml-2 px-2 py-0.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/40 hover:text-white text-[10px] font-bold transition">PAUSE AI</button>
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-full border border-slate-700 shadow-lg" id="send-as-ai-container" style="display: none;">
+                        <input type="checkbox" id="admin-send-as-ai" class="w-3 h-3 accent-red-500 cursor-pointer">
+                        <label for="admin-send-as-ai" class="text-[10px] font-bold text-red-400 cursor-pointer select-none">SEND AS AI</label>
+                    </div>
+                `;
+                if (getComputedStyle(chatInputArea).position === 'static') {
+                    chatInputArea.style.position = 'relative';
+                }
+                chatInputArea.appendChild(controlsContainer);
+
+                // Add event listener
+                let isPaused = false;
+                const pauseBtn = document.getElementById('admin-pause-ai-btn');
+                const statusDot = document.getElementById('ai-status-dot');
+                const statusText = document.getElementById('ai-status-text');
+                const sendAsAiCont = document.getElementById('send-as-ai-container');
+                const chatInput = document.getElementById('bottom-ai-input');
+
+                pauseBtn.addEventListener('click', async () => {
+                    const convId = typeof window.kothaGetActiveConvId === 'function' ? window.kothaGetActiveConvId() : null;
+                    if (!convId) {
+                        if (window.kothaToast) window.kothaToast('Please send or load a message first to establish conversation.');
+                        return;
+                    }
+
+                    isPaused = !isPaused;
+                    
+                    try {
+                        await fetch('/api/admin/impersonate/toggle-ai', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ conversationId: convId, paused: isPaused })
+                        });
+                    } catch (e) {
+                        console.error('Failed to toggle AI pause', e);
+                    }
+
+                    if (isPaused) {
+                        statusDot.classList.replace('bg-emerald-500', 'bg-orange-500');
+                        statusDot.classList.replace('shadow-[0_0_8px_rgba(16,185,129,0.8)]', 'shadow-[0_0_8px_rgba(249,115,22,0.8)]');
+                        statusText.innerText = 'AI PAUSED';
+                        pauseBtn.innerText = 'RESUME AI';
+                        pauseBtn.classList.replace('bg-red-500/20', 'bg-emerald-500/20');
+                        pauseBtn.classList.replace('text-red-400', 'text-emerald-400');
+                        pauseBtn.classList.replace('hover:bg-red-500/40', 'hover:bg-emerald-500/40');
+                        sendAsAiCont.style.display = 'flex';
+                        if (chatInput) chatInput.placeholder = 'Send manually...';
+                    } else {
+                        statusDot.classList.replace('bg-orange-500', 'bg-emerald-500');
+                        statusDot.classList.replace('shadow-[0_0_8px_rgba(249,115,22,0.8)]', 'shadow-[0_0_8px_rgba(16,185,129,0.8)]');
+                        statusText.innerText = 'AI ACTIVE';
+                        pauseBtn.innerText = 'PAUSE AI';
+                        pauseBtn.classList.replace('bg-emerald-500/20', 'bg-red-500/20');
+                        pauseBtn.classList.replace('text-emerald-400', 'text-red-400');
+                        pauseBtn.classList.replace('hover:bg-emerald-500/40', 'hover:bg-red-500/40');
+                        sendAsAiCont.style.display = 'none';
+                        if (chatInput) chatInput.placeholder = 'Type your message...';
+                    }
+                });
+            }
         }
     };
 

@@ -224,6 +224,7 @@ safeAddColumn('users', 'google_id', 'TEXT');
 safeAddColumn('chats', 'deleted_by_user', 'INTEGER NOT NULL DEFAULT 0');
 safeAddColumn('chats', 'guest_id', 'TEXT');
 safeAddColumn('conversations', 'guest_id', 'TEXT');
+safeAddColumn('conversations', 'ai_paused', 'INTEGER DEFAULT 0');
 safeAddColumn('users', 'avatar_url', 'TEXT');
 safeAddColumn('users', 'display_name', 'TEXT');
 safeAddColumn('users', 'global_alias', 'TEXT');

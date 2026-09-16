@@ -172,7 +172,7 @@ router.post('/chat/:folder/identity', async (req, res) => {
 
 // ---------- Main streaming chat ----------
 router.post('/chat', aiGate, async (req, res) => {
-    const { chat, message, conversationId, aiParticipant } = req.body || {};
+    const { chat, message, conversationId, aiParticipant, sendAsAI } = req.body || {};
     if (!chat || !message) return res.status(400).json({ error: 'chat + message required' });
 
     if (countWords(message) > 300) {
@@ -226,38 +226,80 @@ router.post('/chat', aiGate, async (req, res) => {
         userParticipant = chatRow.user_participant;
     }
 
+    let isPaused = false;
     if (!convId) {
         const now = Date.now();
         const title = message.slice(0, 60);
         if (req.user) {
             const info = db.prepare(
-                `INSERT INTO conversations (user_id, chat_folder, title, created_at, updated_at, ai_participant)
-                 VALUES (?, ?, ?, ?, ?, ?)`
+                `INSERT INTO conversations (user_id, chat_folder, title, created_at, updated_at, ai_participant, ai_paused)
+                 VALUES (?, ?, ?, ?, ?, ?, 0)`
             ).run(userId, chat, title, now, now, aiParticipant || null);
             convId = info.lastInsertRowid;
         } else {
             const info = db.prepare(
-                `INSERT INTO conversations (user_id, guest_id, chat_folder, title, created_at, updated_at, ai_participant)
-                 VALUES (0, ?, ?, ?, ?, ?, ?)`
+                `INSERT INTO conversations (user_id, guest_id, chat_folder, title, created_at, updated_at, ai_participant, ai_paused)
+                 VALUES (0, ?, ?, ?, ?, ?, ?, 0)`
             ).run(guestId, chat, title, now, now, aiParticipant || null);
             convId = info.lastInsertRowid;
         }
         existingAiParticipant = aiParticipant || null;
     } else {
         const convSql = req.user
-            ? 'SELECT id, ai_participant FROM conversations WHERE id = ? AND user_id = ?'
-            : 'SELECT id, ai_participant FROM conversations WHERE id = ? AND guest_id = ?';
+            ? 'SELECT id, ai_participant, ai_paused FROM conversations WHERE id = ? AND user_id = ?'
+            : 'SELECT id, ai_participant, ai_paused FROM conversations WHERE id = ? AND guest_id = ?';
         const convParams = req.user ? [convId, userId] : [convId, guestId];
         const convRow = db.prepare(convSql).get(...convParams);
         if (!convRow) return res.status(404).json({ error: 'Conversation not found' });
         existingAiParticipant = convRow.ai_participant;
+        isPaused = !!convRow.ai_paused;
+    }
+
+    const now = Date.now();
+
+    if (sendAsAI && req.user && req.user.is_admin && req.user.is_impersonating) {
+        db.prepare(
+            `INSERT INTO conv_messages (conversation_id, role, content, created_at) VALUES (?, 'assistant', ?, ?)`
+        ).run(convId, message, now);
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache, no-transform');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        const send = (event, data) => {
+            res.write(`event: ${event}\n`);
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        };
+
+        send('start', { conversationId: convId });
+        send('token', { text: message });
+        send('done', { finishReason: 'STOP' });
+        res.end();
+        return;
     }
 
     // Save user message
-    const now = Date.now();
     db.prepare(
         `INSERT INTO conv_messages (conversation_id, role, content, created_at) VALUES (?, 'user', ?, ?)`
     ).run(convId, message, now);
+
+    if (isPaused && !sendAsAI) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache, no-transform');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+        const send = (event, data) => {
+            res.write(`event: ${event}\n`);
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        };
+        send('start', { conversationId: convId });
+        send('done', { finishReason: 'STOP_PAUSED' });
+        res.end();
+        return;
+    }
 
     // Recent conversation history (last 6 turns = 12 messages)
     const history = db.prepare(
