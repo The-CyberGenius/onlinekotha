@@ -452,7 +452,7 @@
             document.body.classList.add('border-t-4', 'border-red-500');
 
             // Inject "Send as AI" and "Pause AI" controls above chat input
-            const chatInputArea = document.getElementById('bottom-input-container');
+            const chatInputArea = document.getElementById('ai-input-wrap');
             if (chatInputArea && !document.getElementById('admin-ai-controls')) {
                 const controlsContainer = document.createElement('div');
                 controlsContainer.id = 'admin-ai-controls';
