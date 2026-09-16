@@ -480,6 +480,9 @@
         socket.on('ai:manual_message', (data) => {
             document.dispatchEvent(new CustomEvent('ai:manual_message', { detail: data }));
         });
+        socket.on('ai:manual_message_token', (data) => {
+            document.dispatchEvent(new CustomEvent('ai:manual_message_token', { detail: data }));
+        });
 
         socket.on('presence:init', ({ online_user_ids }) => {
             onlineUserIds.clear();
