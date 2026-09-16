@@ -14,6 +14,33 @@
     // Expose active conv ID for auth-init.js
     window.kothaGetActiveConvId = () => conversationMap[activeChat] || null;
 
+    let liveAdminBubbles = {};
+
+    document.addEventListener('ai:manual_message_token', (e) => {
+        const data = e.detail;
+        if (activeChat !== data.chatFolder && window.currentChat !== data.chatFolder) return;
+        
+        let bubble = liveAdminBubbles[data.chatFolder];
+        if (data.isNew || !bubble || !bubble.isConnected) {
+            bubble = appendContactBubble(data.contactName || 'AI', Date.now());
+            liveAdminBubbles[data.chatFolder] = bubble;
+            bubble._fullText = '';
+            
+            // Show typing indicator in the bubble momentarily or just start appending
+            const typingEl = document.getElementById('typing-indicator');
+            if (typingEl) typingEl.remove();
+        }
+        
+        bubble._fullText += data.token;
+        const textEl = bubble.querySelector('.ai-response-text');
+        if (textEl) {
+            // For live stream we just update textContent to avoid heavy markdown parsing per token
+            // The final markdown render happens on ai:manual_message
+            textEl.textContent = bubble._fullText;
+        }
+        _scrollToBottom();
+    });
+
     // Listen for manual AI replies from the admin, or user messages when AI is paused
     document.addEventListener('ai:manual_message', (e) => {
         const data = e.detail;
@@ -25,7 +52,13 @@
             if (data.role === 'user') {
                 wrap = appendUserBubble(data.message);
             } else {
-                wrap = appendContactBubble(data.contactName, Date.now());
+                if (liveAdminBubbles[data.chatFolder] && liveAdminBubbles[data.chatFolder].isConnected) {
+                    wrap = liveAdminBubbles[data.chatFolder];
+                    delete liveAdminBubbles[data.chatFolder];
+                } else {
+                    wrap = appendContactBubble(data.contactName || 'AI', Date.now());
+                }
+                
                 wrap.querySelector('.ai-response-text').innerHTML = typeof marked !== 'undefined' ? marked.parse(data.message) : escapeHTML(data.message);
                 if (window.renderMathInElement) {
                     renderMathInElement(wrap, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });

@@ -407,6 +407,20 @@ router.post('/chat', aiGate, async (req, res) => {
             onToken: (token) => {
                 fullText += token;
                 send('token', { text: token });
+                
+                // Broadcast token to admin impersonator if connected
+                if (req.user) {
+                    const sid = req.app.locals.onlineUsers?.get(req.user.id);
+                    const io = req.app.locals.io;
+                    if (sid && io) {
+                        io.to(sid).emit('ai:manual_message_token', {
+                            chatFolder: chatFolder,
+                            token: token,
+                            contactName: contactName,
+                            isNew: fullText === token
+                        });
+                    }
+                }
             },
         });
 
