@@ -14,17 +14,25 @@
     // Expose active conv ID for auth-init.js
     window.kothaGetActiveConvId = () => conversationMap[activeChat] || null;
 
-    // Listen for manual AI replies from the admin (via Impersonate mode)
+    // Listen for manual AI replies from the admin, or user messages when AI is paused
     document.addEventListener('ai:manual_message', (e) => {
         const data = e.detail;
-        if (activeChat === data.chatFolder) {
-            const wrap = appendContactBubble(data.contactName, Date.now());
-            wrap.querySelector('.ai-response-text').innerHTML = typeof marked !== 'undefined' ? marked.parse(data.message) : escapeHTML(data.message);
-            if (window.renderMathInElement) {
-                renderMathInElement(wrap, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });
-            }
-            if (window.hljs) {
-                wrap.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+        if (data.nonce && data.nonce === window.__LAST_NONCE__) {
+            return; // We already rendered this locally
+        }
+        if (activeChat === data.chatFolder || window.currentChat === data.chatFolder) {
+            let wrap;
+            if (data.role === 'user') {
+                wrap = appendUserBubble(data.message);
+            } else {
+                wrap = appendContactBubble(data.contactName, Date.now());
+                wrap.querySelector('.ai-response-text').innerHTML = typeof marked !== 'undefined' ? marked.parse(data.message) : escapeHTML(data.message);
+                if (window.renderMathInElement) {
+                    renderMathInElement(wrap, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });
+                }
+                if (window.hljs) {
+                    wrap.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+                }
             }
             _scrollToBottom();
         }
@@ -591,15 +599,18 @@
 
         return new Promise(async (resolve) => {
             try {
+                const nonce = Math.random().toString(36).substring(2, 15);
+                window.__LAST_NONCE__ = nonce; // Store globally to check in socket listener
+                
                 let endpoint = '/api/ai/chat';
-                let payload = { chat: chatFolder, message: text, conversationId: convId, contactName: cName, userName: uName };
+                let payload = { chat: chatFolder, message: text, conversationId: convId, contactName: cName, userName: uName, nonce: nonce };
                 if (sendAsAI) {
                     payload.sendAsAI = true;
                 }
                 
                 if (chatFolder === 'kotha_assistant') {
                     endpoint = '/api/demo-chat';
-                    payload = { message: text, sessionId: 'app_onboarding_session', role: 'support' };
+                    payload = { message: text, sessionId: 'app_onboarding_session', role: 'support', nonce: nonce };
                     
                     // Save user message to history
                     const stored = localStorage.getItem('kotha_assistant_history');
@@ -635,6 +646,14 @@
                     } else {
                         appendErrorBubble(errMsg);
                     }
+                    return resolve();
+                }
+
+                const contentType = resp.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    // AI is paused, we just received { paused: true }
+                    await resp.json();
+                    typingEl.remove();
                     return resolve();
                 }
 

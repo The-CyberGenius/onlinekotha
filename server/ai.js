@@ -272,7 +272,9 @@ router.post('/chat', aiGate, async (req, res) => {
                     chatFolder: req.body.chat,
                     message: message,
                     contactName: existingAiParticipant,
-                    conversationId: convId
+                    conversationId: convId,
+                    role: 'ai',
+                    nonce: req.body.nonce
                 }));
             }
         }
@@ -295,19 +297,25 @@ router.post('/chat', aiGate, async (req, res) => {
         `INSERT INTO conv_messages (conversation_id, role, content, created_at) VALUES (?, 'user', ?, ?)`
     ).run(convId, message, now);
 
+    // Broadcast user's message live so the Admin (impersonating) can see it
+    const io = req.app.get('io');
+    const onlineUsers = req.app.locals.onlineUsers;
+    if (io && onlineUsers) {
+        const sockets = onlineUsers.get(userId);
+        if (sockets) {
+            sockets.forEach(sid => io.to(sid).emit('ai:manual_message', {
+                chatFolder: req.body.chat,
+                message: message,
+                conversationId: convId,
+                role: 'user',
+                nonce: req.body.nonce
+            }));
+        }
+    }
+
     if (isPaused && !sendAsAI) {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache, no-transform');
-        res.setHeader('X-Accel-Buffering', 'no');
-        res.setHeader('Connection', 'keep-alive');
-        res.flushHeaders();
-        const send = (event, data) => {
-            res.write(`event: ${event}\n`);
-            res.write(`data: ${JSON.stringify(data)}\n\n`);
-        };
-        send('start', { conversationId: convId });
-        send('done', { finishReason: 'STOP_PAUSED' });
-        setTimeout(() => res.end(), 50);
+        // Just return an empty response block, no stream needed for paused mode
+        res.status(200).json({ paused: true });
         return;
     }
 
