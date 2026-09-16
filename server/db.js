@@ -197,6 +197,13 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_contact_msg_status ON contact_messages(status);
+
+CREATE TABLE IF NOT EXISTS demo_usage (
+  key TEXT PRIMARY KEY,
+  count INTEGER DEFAULT 0,
+  history TEXT,
+  updated_at INTEGER NOT NULL
+);
 `);
 
 // Migrations: ALTER existing users table for new columns

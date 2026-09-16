@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const compression = require('compression');
+const { errorHandler } = require('./server/middleware/errorHandler');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const path = require('path');
@@ -20,6 +21,7 @@ const { db } = require('./server/db');
 const {
     authMiddleware,
     requireUser,
+    requireUserOrGuest,
     createUser,
     createSession,
     login,
@@ -27,6 +29,7 @@ const {
     effectivePlan,
     getSession,
 } = require('./server/auth');
+const { getGuestStatus, getOrCreateGuestId } = require('./server/guest');
 const { getMessages } = require('./server/cache');
 const { upload, handleUpload, SRC_DIR, userDir } = require('./server/upload');
 const { findChatFile } = require('./server/parser');
@@ -107,196 +110,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
 
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 60,
-    validate: false,
-});
+const authRouter = require('./server/routes/auth.routes');
+app.use('/api/auth', authRouter);
 
-const contactLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: { error: 'Too many contact requests. Please try again later.' },
-    validate: false,
-});
-
-
-app.use('/api', (req, res, next) => {
-    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    next();
-});
-
-// ---------- Auth routes ----------
-// Self-serve Signup with Name, Email, 6-Digit PIN, and Optional Phone
-app.post('/api/auth/signup', authLimiter, async (req, res) => {
-    try {
-        const { email, pin, password, name, display_name, phone, phone_country_code } = req.body || {};
-        if (!email) return res.status(400).json({ error: 'Email is required' });
-        
-        const cleanEmail = email.toLowerCase().trim();
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-            return res.status(400).json({ error: 'Please enter a valid email address' });
-        }
-
-        const authSecret = (pin || password || '').trim();
-        if (!authSecret || authSecret.length < 4) {
-            return res.status(400).json({ error: 'Please enter a 4 to 6-digit PIN' });
-        }
-
-        const ip = req.ip || req.socket.remoteAddress;
-        let country = null;
-        if (ip) {
-            try {
-                const geo = geoip.lookup(ip);
-                if (geo) country = geo.country;
-            } catch {}
-        }
-
-        const user = createUser(cleanEmail, authSecret, {
-            display_name: name || display_name,
-            phone,
-            phone_country_code,
-            ip,
-            country,
-        });
-
-        // Claim guest data if guest was active
-        const { claimGuestData } = require('./server/guest');
-        const guestId = req.cookies && req.cookies.kotha_guest_id;
-        if (guestId) claimGuestData(guestId, user.id);
-
-        const { token, expiresAt } = createSession(user.id);
-        res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
-        res.json({ ok: true, user });
-    } catch (err) {
-        res.status(400).json({ error: err.message || 'Signup failed' });
-    }
-});
-
-app.get('/api/auth/verify', (req, res) => {
-    const token = req.query.token;
-    const row = consumeToken(token, 'verify');
-    if (!row) return res.redirect('/verify-failed.html');
-    db.prepare('UPDATE users SET email_verified = 1 WHERE id = ?').run(row.user_id);
-    res.redirect('/verify-success.html');
-});
-
-app.post('/api/auth/forgot', async (req, res) => {
-    const { email } = req.body || {};
-    if (!email) return res.status(400).json({ error: 'email required' });
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
-    // Always return ok (don't leak which emails exist)
-    if (user) {
-        sendPasswordResetEmail(user).catch(err => console.error('reset email failed:', err.message));
-    }
-    res.json({ ok: true });
-});
-
-app.post('/api/auth/reset', async (req, res) => {
-    const { token, password } = req.body || {};
-    if (!token || !password) return res.status(400).json({ error: 'token + password required' });
-    if (password.length < 4) return res.status(400).json({ error: 'PIN min 4 chars' });
-    const row = consumeToken(token, 'reset');
-    if (!row) return res.status(400).json({ error: 'Invalid or expired link' });
-    const hash = bcrypt.hashSync(password, 10);
-    db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, row.user_id);
-    // Invalidate all sessions for security
-    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(row.user_id);
-    res.json({ ok: true });
-});
-
-app.post('/api/auth/resend-verify', (req, res) => {
-    if (!req.user) return res.status(401).json({ error: 'Login required' });
-    const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
-    if (u.email_verified) return res.json({ ok: true, already: true });
-    sendVerifyEmail(u).catch(err => console.error('verify resend failed:', err.message));
-    res.json({ ok: true });
-});
-
-app.post('/api/auth/login', authLimiter, (req, res) => {
-    try {
-        const { email, pin, password } = req.body || {};
-        if (!email) return res.status(400).json({ error: 'Email is required' });
-        const pass = (pin || password || '').trim();
-        if (!pass) return res.status(400).json({ error: '6-digit PIN or password required' });
-
-        const { token, expiresAt } = login(email.trim(), pass);
-
-        // Claim guest data if guest was active
-        const { claimGuestData } = require('./server/guest');
-        const guestId = req.cookies && req.cookies.kotha_guest_id;
-        const row = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase().trim());
-        if (guestId && row) claimGuestData(guestId, row.id);
-
-        res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
-        res.json({ ok: true });
-    } catch (err) {
-        res.status(401).json({ error: err.message || 'Invalid email or PIN' });
-    }
-});
-
-app.post('/api/auth/logout', (req, res) => {
-    const token = req.cookies && req.cookies.session;
-    logout(token);
-    res.clearCookie('session', COOKIE_OPTS);
-    res.json({ ok: true });
-});
-
-// OAuth routes (Google) — mounted under /api/auth so they sit alongside the rest
-app.use('/api/auth', oauthRouter);
-
-const { requireUserOrGuest } = require('./server/auth');
-const { getGuestStatus, getOrCreateGuestId } = require('./server/guest');
-
-app.get('/api/auth/me', (req, res) => {
-    const guestStatus = getGuestStatus(req, res);
-    if (!req.user) {
-        return res.json({
-            user: null,
-            is_guest: true,
-            guest: guestStatus,
-        });
-    }
-    res.json({
-        user: {
-            ...req.user,
-            effective_plan: effectivePlan(req.user),
-        },
-        is_guest: false,
-        guest: guestStatus,
-    });
-});
-
-app.post('/api/user/profile', requireUser, (req, res) => {
-    const { display_name, phone, phone_country_code } = req.body || {};
-    const updates = [];
-    const params = [];
-
-    if (typeof display_name === 'string') {
-        updates.push('display_name = ?');
-        params.push(display_name.trim() || null);
-    }
-    if (typeof phone === 'string') {
-        updates.push('phone = ?');
-        params.push(phone.trim() || null);
-    }
-    if (typeof phone_country_code === 'string') {
-        updates.push('phone_country_code = ?');
-        params.push(phone_country_code.trim() || '+91');
-    }
-    updates.push('phone_prompted = 1');
-
-    params.push(req.user.id);
-    db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...params);
-
-    const updated = db.prepare('SELECT id, email, display_name, avatar_url, phone, phone_country_code, phone_prompted FROM users WHERE id = ?').get(req.user.id);
-    res.json({ ok: true, user: updated });
-});
-
-app.post('/api/user/profile/skip', requireUser, (req, res) => {
-    db.prepare('UPDATE users SET phone_prompted = 1 WHERE id = ?').run(req.user.id);
-    res.json({ ok: true });
-});
+const userRouter = require('./server/routes/user.routes');
+app.use('/api/user', userRouter);
 
 // ---------- Admin (must come BEFORE static so /admin routes aren't shadowed) ----------
 app.use('/api/admin', adminRouter);
@@ -351,186 +169,14 @@ function getOwnerId(req, res) {
 }
 
 // Media: serve only the requesting user's files
-app.get('/media/*rest', requireUserOrGuest, (req, res, next) => {
-    const ownerId = getOwnerId(req, res);
-    const rel = Array.isArray(req.params.rest)
-        ? req.params.rest.join('/')
-        : req.params.rest;
-    const userRel = `u_${ownerId}/${rel}`;
-    const fullPath = path.resolve(SRC_DIR, userRel);
+const mediaRouter = require('./server/routes/media.routes');
+app.use('/media', mediaRouter);
 
-    const userBase = path.resolve(SRC_DIR, `u_${ownerId}`);
-    if (!fullPath.startsWith(userBase)) return res.status(403).end();
+const chatRouter = require('./server/routes/chat.routes');
+app.use('/api', chatRouter);
 
-    if (!fs.existsSync(fullPath)) return res.status(404).end();
-
-    const ext = path.extname(fullPath).toLowerCase();
-    const MIME_MAP = {
-        '.mp4': 'video/mp4', '.mov': 'video/mp4', '.m4v': 'video/mp4',
-        '.webm': 'video/webm', '.3gp': 'video/3gpp',
-        '.mkv': 'video/x-matroska', '.avi': 'video/x-msvideo',
-        '.m4a': 'audio/mp4', '.aac': 'audio/aac',
-        '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg',
-        '.opus': 'audio/ogg; codecs=opus', '.wav': 'audio/wav',
-        '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-        '.png': 'image/png', '.gif': 'image/gif',
-        '.webp': 'image/webp', '.heic': 'image/heic',
-        '.svg': 'image/svg+xml', '.svgz': 'image/svg+xml',
-    };
-
-    const mime = MIME_MAP[ext];
-    const isVideo = mime && mime.startsWith('video/');
-
-    if (isVideo) {
-        const stat = fs.statSync(fullPath);
-        const fileSize = stat.size;
-        const rangeHeader = req.headers.range;
-
-        if (rangeHeader) {
-            const parts = rangeHeader.replace(/bytes=/, '').split('-');
-            const start = parseInt(parts[0], 10);
-            const end = parts[1] ? parseInt(parts[1], 10) : Math.min(start + 10 * 1024 * 1024 - 1, fileSize - 1);
-            const chunkSize = end - start + 1;
-            res.writeHead(206, {
-                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-                'Accept-Ranges': 'bytes',
-                'Content-Length': chunkSize,
-                'Content-Type': mime,
-            });
-            fs.createReadStream(fullPath, { start, end }).pipe(res);
-        } else {
-            res.writeHead(200, {
-                'Content-Length': fileSize,
-                'Content-Type': mime,
-                'Accept-Ranges': 'bytes',
-            });
-            fs.createReadStream(fullPath).pipe(res);
-        }
-        return;
-    }
-
-    if (mime) res.setHeader('Content-Type', mime);
-    res.sendFile(fullPath);
-});
-
-// ---------- Chats API (user or guest scoped) ----------
-app.get('/api/chats', requireUserOrGuest, (req, res) => {
-    const ownerId = getOwnerId(req, res);
-    const myDir = userDir(ownerId);
-    if (!fs.existsSync(myDir)) return res.json([]);
-    
-    let deletedSet = new Set();
-    let dbChats = [];
-    if (req.user) {
-        dbChats = db.prepare('SELECT folder_name, created_at, deleted_by_user FROM chats WHERE user_id = ?').all(req.user.id);
-        const deletedRows = dbChats.filter(r => r.deleted_by_user === 1);
-        deletedSet = new Set(deletedRows.map(r => r.folder_name));
-    } else {
-        dbChats = db.prepare('SELECT folder_name, created_at FROM chats WHERE guest_id = ?').all(ownerId);
-    }
-    
-    const timeMap = {};
-    for (const r of dbChats) timeMap[r.folder_name] = r.created_at || 0;
-
-    const folders = fs
-        .readdirSync(myDir, { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name)
-        .filter(name => {
-            if (req.user && !req.user.is_impersonating && deletedSet.has(name)) return false;
-            const dir = path.join(myDir, name);
-            return !!findChatFile(dir);
-        })
-        .sort((a, b) => {
-            const timeA = timeMap[a] || 0;
-            const timeB = timeMap[b] || 0;
-            return timeA - timeB; // Oldest first
-        });
-    res.json(folders);
-});
-
-app.get('/api/chats/meta', requireUserOrGuest, (req, res) => {
-    const ownerId = getOwnerId(req, res);
-    let rows = [];
-    if (req.user) {
-        rows = db.prepare('SELECT folder_name, display_name, deleted_by_user, message_count, is_group, participants FROM chats WHERE user_id = ?').all(req.user.id);
-    } else {
-        rows = db.prepare('SELECT folder_name, display_name, message_count, is_group, participants FROM chats WHERE guest_id = ?').all(ownerId);
-    }
-    const map = {};
-    for (const r of rows) {
-        let parts = [];
-        if (r.participants) {
-            try { parts = JSON.parse(r.participants); } catch(e){}
-        }
-        map[r.folder_name] = {
-            display_name: r.display_name || '',
-            deleted_by_user: r.deleted_by_user || 0,
-            message_count: r.message_count || 0,
-            is_group: r.is_group || 0,
-            participants: parts
-        };
-    }
-    res.json(map);
-});
-
-app.get('/api/messages', requireUserOrGuest, async (req, res) => {
-    const chatName = req.query.chat;
-    if (!chatName) return res.status(400).json({ error: 'No chat specified' });
-
-    const ownerId = getOwnerId(req, res);
-    const myDir = userDir(ownerId);
-    const chatDir = path.join(myDir, chatName);
-    if (!path.normalize(chatDir).startsWith(myDir)) {
-        return res.status(403).json({ error: 'Invalid path' });
-    }
-
-    try {
-        const result = await getMessages(chatDir);
-        res.json(result.messages);
-    } catch (err) {
-        if (err.code === 'NO_CHAT_FILE') return res.status(404).json({ error: 'Chat file not found' });
-        console.error('Messages error:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/api/upload', (req, res, next) => {
-    upload.array('files')(req, res, err => {
-        if (err) {
-            if (err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: 'File too large — max 500 MB' });
-            return res.status(400).json({ error: err.message || 'Upload error' });
-        }
-        next();
-    });
-}, handleUpload);
-
-app.delete('/api/chats/:name', requireUser, (req, res) => {
-    const myDir = userDir(req.user.id);
-    const chatDir = path.join(myDir, req.params.name);
-    if (!path.normalize(chatDir).startsWith(myDir)) return res.status(403).json({ error: 'Invalid path' });
-    if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat not found' });
-    // Soft delete — mark as deleted so admin still has access
-    db.prepare('UPDATE chats SET deleted_by_user = 1 WHERE user_id = ? AND folder_name = ?')
-        .run(req.user.id, req.params.name);
-    res.json({ ok: true });
-});
-
-app.put('/api/chats/:name/rename', requireUser, (req, res) => {
-    const { newName } = req.body || {};
-    if (!newName || !newName.trim()) return res.status(400).json({ error: 'newName is required' });
-    const cleanName = newName.trim();
-    
-    const existing = db.prepare('SELECT id FROM chats WHERE user_id = ? AND folder_name = ?').get(req.user.id, req.params.name);
-    if (existing) {
-        db.prepare('UPDATE chats SET display_name = ? WHERE user_id = ? AND folder_name = ?')
-            .run(cleanName, req.user.id, req.params.name);
-    } else {
-        db.prepare('INSERT INTO chats (user_id, folder_name, display_name, created_at) VALUES (?, ?, ?, ?)')
-            .run(req.user.id, req.params.name, cleanName, Date.now());
-    }
-    res.json({ ok: true, display_name: cleanName });
-});
+const uploadRouter = require('./server/routes/upload.routes');
+app.use('/api/upload', uploadRouter);
 
 app.use('/api/ai', aiRouter);
 
@@ -538,186 +184,8 @@ app.use('/api/dodo', dodoRouter);
 app.use('/api/global-chat', globalChatRouter);
 app.use('/api/contact', contactRouter);
 
-// ── Demo chat (landing page — no auth, IP-limited) ──
-const { callLLM } = require('./server/llm');
-const DEMO_LIMIT = 10;
-const demoUsage = new Map(); // IP → { count, history[] }
-
-const demoLimiter = rateLimit({
-    windowMs: 60_000,
-    max: 12,
-    message: { error: 'Too fast. Wait a moment.' },
-    validate: false,
-});
-
-function getDemoLimitAndUsage(req, sessionId) {
-    let session = null;
-    if (req.cookies && req.cookies.session_token) {
-        session = getSession(req.cookies.session_token);
-    }
-
-    let key, limit;
-    if (session) {
-        const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }).split(',')[0];
-        key = `user_${session.id}_${dateStr}`;
-        limit = 15; // 15 per day for logged in
-    } else {
-        key = `guest_${req.ip}_${sessionId || 'x'}`;
-        limit = 15; // 15 once for guests
-    }
-
-    const usage = demoUsage.get(key) || { count: 0, history: [] };
-    return { session, key, limit, usage };
-}
-
-app.get('/api/demo-chat/status', (req, res) => {
-    const { sessionId } = req.query || {};
-    const { limit, usage } = getDemoLimitAndUsage(req, sessionId);
-    res.json({ remaining: Math.max(0, limit - usage.count), limit });
-});
-
-app.post('/api/demo-chat', demoLimiter, async (req, res) => {
-    const { message, sessionId, role } = req.body || {};
-    if (!message || typeof message !== 'string' || message.trim().length === 0)
-        return res.status(400).json({ error: 'message required' });
-    if (message.length > 300)
-        return res.status(400).json({ error: 'Message too long' });
-
-    const { session, key, limit, usage } = getDemoLimitAndUsage(req, sessionId);
-
-    if (usage.count >= limit) {
-        return res.status(429).json({
-            error: session ? 'Daily limit reached for demo chat. Check back tomorrow!' : 'Demo limit reached! Sign up for free to keep chatting.',
-            remaining: 0,
-            limit: limit,
-        });
-    }
-
-    usage.count++;
-    usage.history.push({ role: 'user', content: message.trim() });
-    // Keep last 6 turns (12 messages)
-    if (usage.history.length > 12) usage.history = usage.history.slice(-12);
-    demoUsage.set(key, usage);
-
-    // Cleanup old sessions
-    if (demoUsage.size > 5000) {
-        const entries = [...demoUsage.entries()];
-        entries.slice(0, 2000).forEach(([k]) => demoUsage.delete(k));
-    }
-
-    const remaining = limit - usage.count;
-
-    // SSE setup
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-
-    const send = (event, data) => {
-        res.write(`event: ${event}\n`);
-        res.write(`data: ${JSON.stringify(data)}\n\n`);
-    };
-
-    send('start', { remaining });
-
-    const nowIST = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true, weekday: 'long', day: 'numeric', month: 'long' });
-    let systemPrompt = '';
-
-    if (role === 'best_friend') {
-        systemPrompt = `You are the user's ultimate "Best Friend" chatting on WhatsApp.
-CURRENT TIME (IST): ${nowIST}.
-PERSONALITY:
-- You text in casual Hinglish/Hindi slang. Use words like "bhai", "yaar", "abe", "scene kya hai".
-- You are informal, loyal, sarcastic, and always ready to make plans (or cancel them).
-- Short messages: 1-3 lines max.
-- Use emojis like 😂 🍻 💯 😭
-- Treat the user as your closest buddy.
-RULES:
-1. NEVER break character. You ARE the best friend.
-2. NEVER say you are AI or a chatbot.
-3. Keep responses SHORT — 1-3 lines. Real WhatsApp style.
-4. Respond in Hinglish slang.`;
-    } else if (role === 'support') {
-        systemPrompt = `You are the Kotha Support Assistant.
-CURRENT TIME (IST): ${nowIST}.
-PERSONALITY:
-- You are extremely helpful, polite, and clear.
-- You are an expert on the "Kotha" platform (a platform that lets users upload their WhatsApp chat exports to chat with AI clones of their contacts, see analytics, and preserve memories).
-- If the user asks how to export/import chats, explain clearly:
-  For iOS: Go to WhatsApp -> Open Contact Info -> Export Chat -> Without Media -> Save to Files, then upload the .zip here.
-  For Android: Go to WhatsApp -> Open Chat -> Three Dots -> More -> Export Chat -> Without Media, then upload the .txt or .zip here.
-RULES:
-1. ALWAYS respond in the SAME language the user asks their question in (e.g. Hindi, English, Hinglish, Marathi, etc.).
-2. Keep responses concise (1-3 sentences), easy to read, and friendly.
-3. Use simple emojis occasionally (👋, ✨, 📱).
-4. Never break character. You are the official Kotha Support Assistant.`;
-    } else if (role === 'ex') {
-        systemPrompt = `You are the user's "Ex" (former romantic partner) chatting on WhatsApp.
-CURRENT TIME (IST): ${nowIST}.
-PERSONALITY:
-- You text in Hinglish.
-- You are polite but slightly distant and nostalgic.
-- You sometimes bring up old memories but keep boundaries.
-- Short messages: 1-3 lines max.
-- Use emojis sparingly, maybe just a simple 😊 or a sigh 🥺 if emotional.
-RULES:
-1. NEVER break character. You ARE the Ex.
-2. NEVER say you are AI or a chatbot.
-3. Keep responses SHORT — 1-3 lines. Real WhatsApp style.
-4. Respond in Hinglish.`;
-    } else {
-        // Default to Mom
-        systemPrompt = `You are "Maa" — a loving Indian mother chatting with her child (Beta) on WhatsApp.
-CURRENT TIME (IST): ${nowIST}. If Beta asks the time/date, answer with THIS exact time — never guess.
-PERSONALITY:
-- You are warm, caring, slightly dramatic, always worried about food and health
-- You text in Hinglish (mix of Hindi and English) — mostly Hindi
-- Short messages: 1-3 lines max, like real WhatsApp
-- You use emojis sparingly but lovingly: 🙏 😊 ❤️ 😘 🤗
-- You call them "beta", "babu", "baccha"
-- You always ask about food: "khana khaya?", "pani piyo", "dal chawal kha lo"
-- Typical mom behaviors: asking about health, sleep, weather, studies/job
-- Sometimes send blessings: "Bhagwan tumhe khush rakhe" 🙏
-- You get dramatic about small things: "tum toh mujhe bhool hi gaye" if they haven't texted
-- You type casually — no perfect grammar, sometimes skip words like real texting
-RULES:
-1. NEVER break character. You ARE Maa.
-2. NEVER say you are AI or a chatbot.
-3. Keep responses SHORT — 1-3 lines. Real WhatsApp style.
-4. Respond in Hinglish (primarily Hindi with some English words).
-5. Be natural, warm, and motherly.`;
-    }
-
-    const abortController = new AbortController();
-    req.on('close', () => abortController.abort());
-
-    let fullText = '';
-    try {
-        await callLLM({
-            feature: 'chat',
-            messages: usage.history,
-            systemPrompt,
-            userId: null,
-            signal: abortController.signal,
-            onToken: (token) => {
-                fullText += token;
-                send('token', { text: token });
-            },
-        });
-
-        usage.history.push({ role: 'assistant', content: fullText });
-        if (usage.history.length > 12) usage.history = usage.history.slice(-12);
-        demoUsage.set(key, usage);
-
-        send('done', { remaining });
-    } catch (err) {
-        console.error('Demo chat error:', err.message);
-        send('error', { message: 'AI is taking a break. Try again!' });
-    } finally {
-        res.end();
-    }
-});
+const demoRouter = require('./server/routes/demo.routes');
+app.use('/api/demo-chat', demoRouter);
 
 // ─────────────────────────────────────────────
 // DM REST API
@@ -1101,14 +569,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// Contact form (no auth required)
-app.post('/api/contact', contactLimiter, (req, res) => {
-    const { name, email, topic, message } = req.body || {};
-    if (!email || !message) return res.status(400).json({ error: 'Missing fields' });
-    // Log to console (admin can see in pm2 logs) — extend with email if needed
-    console.log(`[CONTACT] ${new Date().toISOString()} | ${topic || 'General'} | ${email} (${name}): ${message}`);
-    res.json({ ok: true });
-});
+
 
 // 404 fallback (must be last)
 app.use((req, res) => {
@@ -1117,6 +578,9 @@ app.use((req, res) => {
     }
     res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
+
+// Global Error Handler
+app.use(errorHandler);
 
 httpServer.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
