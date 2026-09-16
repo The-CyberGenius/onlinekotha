@@ -451,27 +451,37 @@
             // Add thin red line at the top of the body
             document.body.classList.add('border-t-4', 'border-red-500');
 
-            // Inject "Send as AI" and "Pause AI" controls above chat input
-            const chatInputArea = document.getElementById('ai-input-wrap');
-            if (chatInputArea && !document.getElementById('admin-ai-controls')) {
+            // Inject "Send as AI" and "Pause AI" controls into Mac Dock
+            const dockGlassBar = document.getElementById('dock-glass-bar');
+            const macDock = document.getElementById('mac-dock');
+            
+            if (dockGlassBar && !document.getElementById('admin-ai-controls')) {
+                // Ensure dock is visible for admins even on mobile
+                if (macDock) {
+                    macDock.classList.remove('hidden', 'md:flex');
+                    macDock.classList.add('flex');
+                }
+
+                // Add separator line in dock
+                const separator = document.createElement('div');
+                separator.className = 'w-px h-10 bg-black/10 dark:bg-white/10 mx-1';
+                dockGlassBar.appendChild(separator);
+
                 const controlsContainer = document.createElement('div');
                 controlsContainer.id = 'admin-ai-controls';
-                controlsContainer.className = 'absolute -top-10 left-0 w-full flex items-center justify-between px-4 z-10';
+                controlsContainer.className = 'flex items-center gap-2 pl-1';
                 controlsContainer.innerHTML = `
-                    <div class="flex items-center gap-2 bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-full border border-slate-700 shadow-lg">
+                    <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition cursor-default">
                         <div id="ai-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-                        <span id="ai-status-text" class="text-[11px] font-bold text-slate-200 uppercase tracking-wide">AI ACTIVE</span>
-                        <button id="admin-pause-ai-btn" class="ml-2 px-2 py-0.5 rounded bg-red-500/20 text-red-400 hover:bg-red-500/40 hover:text-white text-[10px] font-bold transition">PAUSE AI</button>
+                        <span id="ai-status-text" class="text-[10px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide hidden sm:block">AI ACTIVE</span>
+                        <button id="admin-pause-ai-btn" class="ml-1 px-2 py-1 rounded-lg bg-red-500/10 text-red-500 dark:text-red-400 hover:bg-red-500/20 text-[10px] font-bold transition">PAUSE AI</button>
                     </div>
-                    <div class="flex items-center gap-2 bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-full border border-slate-700 shadow-lg" id="send-as-ai-container" style="display: none;">
-                        <input type="checkbox" id="admin-send-as-ai" class="w-3 h-3 accent-red-500 cursor-pointer">
-                        <label for="admin-send-as-ai" class="text-[10px] font-bold text-red-400 cursor-pointer select-none">SEND AS AI</label>
+                    <div class="flex items-center gap-1.5 px-2 py-1.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition cursor-pointer" id="send-as-ai-container" style="display: none;">
+                        <input type="checkbox" id="admin-send-as-ai" class="w-3.5 h-3.5 accent-red-500 cursor-pointer">
+                        <label for="admin-send-as-ai" class="text-[10px] font-bold text-red-500 dark:text-red-400 cursor-pointer select-none hidden sm:block">SEND AS AI</label>
                     </div>
                 `;
-                if (getComputedStyle(chatInputArea).position === 'static') {
-                    chatInputArea.style.position = 'relative';
-                }
-                chatInputArea.appendChild(controlsContainer);
+                dockGlassBar.appendChild(controlsContainer);
 
                 // Add event listener
                 let isPaused = false;

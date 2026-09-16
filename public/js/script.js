@@ -2963,6 +2963,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const startL = rect.left, startT = rect.top, startW = rect.width, startH = rect.height;
 
                     const SNAP = 20; // px — magnetic catch distance to screen edges
+                    frame.classList.add('is-resizing');
+
                     function onMove(ev) {
                         const dx = ev.clientX - startX, dy = ev.clientY - startY;
                         let l = startL, t = startT, w = startW, h = startH;
@@ -2981,7 +2983,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (Math.abs((t + h) - vh) <= SNAP) h = vh - t; // snap bottom edge
                         }
                         if (dir.includes('n')) {
-                            h = Math.max(MIN_H, startH - dy); t = startT + startH - h;
+                            h = Math.max(MIN_H, startH - dy); 
+                            t = startT + startH - h;
+                            // Prevent dragging above top of screen
+                            if (t < 0) {
+                                t = 0;
+                                h = startT + startH; // Cap height to prevent jumping off screen
+                            }
                             if (Math.abs(t) <= SNAP) { h += t; t = 0; } // snap top edge
                         }
 
@@ -2992,6 +3000,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         syncOverlay();
                     }
                     function onUp() {
+                        frame.classList.remove('is-resizing');
                         document.removeEventListener('mousemove', onMove);
                         document.removeEventListener('mouseup', onUp);
                     }

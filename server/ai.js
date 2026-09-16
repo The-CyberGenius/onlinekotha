@@ -430,6 +430,20 @@ router.post('/chat', aiGate, async (req, res) => {
         }
 
         send('done', { citations, conversationId: convId });
+
+        // Broadcast to admin impersonator if connected
+        if (req.user) {
+            const sid = req.app.locals.onlineUsers?.get(req.user.id);
+            const io = req.app.locals.io;
+            if (sid && io) {
+                io.to(sid).emit('ai:manual_message', {
+                    role: 'ai',
+                    content: cleanText,
+                    chatFolder: chatFolder,
+                    nonce: 'ai_' + Date.now().toString()
+                });
+            }
+        }
     } catch (err) {
         console.error('AI chat error:', err);
         send('error', { message: err.message || 'AI request failed', code: err.code });
