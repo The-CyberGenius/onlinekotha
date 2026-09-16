@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
 html {
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -26,6 +28,11 @@ body {
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+}
+
 
 /* DM Row Typography & Optimization */
 .dm-row-title {

@@ -970,24 +970,26 @@ HARD RULES
                             try {
                                 const data = await (await fetch(`/api/admin/users/${convUid}/conversations/${convId}`)).json();
                                 const modal = document.createElement('div');
-                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
+                                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px;';
                                 modal.innerHTML = `
-                                    <div style="background:white;border-radius:12px;max-width:540px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
-                                        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                                    <div style="background:var(--card-bg);border-radius:16px;max-width:600px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 40px rgba(0,0,0,0.2);overflow:hidden;border:1px solid var(--border);">
+                                        <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg-page);">
                                             <div>
-                                                <h4 style="font-weight:700;font-size:13px;color:var(--text-primary);margin:0;">${data.title || 'AI Conversation'}</h4>
-                                                <p style="font-size:10px;color:var(--text-muted);margin:1px 0 0;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
+                                                <h4 style="font-weight:700;font-size:15px;color:var(--text-primary);margin:0;font-family:'Outfit',sans-serif;">${data.title || 'AI Conversation'}</h4>
+                                                <p style="font-size:11px;color:var(--text-muted);margin:2px 0 0;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
                                             </div>
-                                            <button class="ai-log-popup-close" style="border:none;background:transparent;color:var(--text-muted);font-size:18px;cursor:pointer;">×</button>
+                                            <button class="ai-log-popup-close" style="border:none;background:transparent;color:var(--text-muted);font-size:24px;line-height:1;cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">&times;</button>
                                         </div>
-                                        <div style="padding:14px;overflow-y:auto;flex:1;">
+                                        <div style="padding:20px;overflow-y:auto;flex:1;background:var(--bg-page);display:flex;flex-direction:column;gap:12px;">
                                             ${(data.messages || []).map(m => `
-                                                <div style="margin-bottom:8px;display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
-                                                    <div style="max-width:85%;padding:8px 12px;border-radius:10px;font-size:12px;line-height:1.4;${m.role === 'user'
-                                                        ? 'background:var(--btn-dark);color:var(--btn-dark-text);'
-                                                        : 'background:var(--bg-page);color:var(--text-primary);'}">
-                                                        ${m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}
-                                                        <div style="font-size:9px;color:${m.role === 'user' ? 'rgba(255,255,255,0.6)' : '#64748b'};margin-top:2px;text-align:right;">${new Date(m.created_at).toLocaleString()}</div>
+                                                <div style="display:flex;justify-content:${m.role === 'user' ? 'flex-end' : 'flex-start'};">
+                                                    <div dir="auto" style="max-width:85%;padding:10px 14px;border-radius:14px;font-size:13.5px;line-height:1.5;box-shadow:0 1px 2px rgba(0,0,0,0.05);${m.role === 'user'
+                                                        ? 'background:var(--accent);color:#ffffff;border-bottom-right-radius:4px;'
+                                                        : 'background:var(--card-bg);color:var(--text-primary);border-bottom-left-radius:4px;border:1px solid var(--border);'}">
+                                                        <div style="white-space:pre-wrap;word-wrap:break-word;">${m.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                                                        <div style="font-size:10px;color:${m.role === 'user' ? 'rgba(255,255,255,0.7)' : 'var(--text-muted)'};margin-top:4px;text-align:right;user-select:none;">
+                                                            ${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             `).join('')}

@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        heading: ['Outfit', 'sans-serif'],
+      },
       animation: {
         'blob': 'blob 7s infinite',
         'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
