@@ -14,6 +14,22 @@
     // Expose active conv ID for auth-init.js
     window.kothaGetActiveConvId = () => conversationMap[activeChat] || null;
 
+    // Listen for manual AI replies from the admin (via Impersonate mode)
+    document.addEventListener('ai:manual_message', (e) => {
+        const data = e.detail;
+        if (activeChat === data.chatFolder) {
+            const wrap = appendContactBubble(data.contactName, Date.now());
+            wrap.querySelector('.ai-response-text').innerHTML = typeof marked !== 'undefined' ? marked.parse(data.message) : escapeHTML(data.message);
+            if (window.renderMathInElement) {
+                renderMathInElement(wrap, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });
+            }
+            if (window.hljs) {
+                wrap.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+            }
+            _scrollToBottom();
+        }
+    });
+
     // Message queue — lets user send multiple messages while AI is still responding
     let msgQueue = [];     // { text, chat }[]
     let processing = false;  // true while one AI request is in-flight

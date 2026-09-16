@@ -476,6 +476,11 @@
             if (typingEl) typingEl.style.display = typing ? 'block' : 'none';
         });
 
+        // Broadcast to ai-panel.js for live manual AI impersonation
+        socket.on('ai:manual_message', (data) => {
+            document.dispatchEvent(new CustomEvent('ai:manual_message', { detail: data }));
+        });
+
         socket.on('presence:init', ({ online_user_ids }) => {
             onlineUserIds.clear();
             if (Array.isArray(online_user_ids)) {

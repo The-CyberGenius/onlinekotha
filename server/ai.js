@@ -262,21 +262,31 @@ router.post('/chat', aiGate, async (req, res) => {
             `INSERT INTO conv_messages (conversation_id, role, content, created_at) VALUES (?, 'assistant', ?, ?)`
         ).run(convId, message, now);
 
+        // Broadcast to the targeted user so they see the admin's reply live!
+        const io = req.app.get('io');
+        const onlineUsers = req.app.locals.onlineUsers;
+        if (io && onlineUsers) {
+            const sockets = onlineUsers.get(userId);
+            if (sockets) {
+                sockets.forEach(sid => io.to(sid).emit('ai:manual_message', {
+                    chatFolder: req.body.chat,
+                    message: message,
+                    contactName: existingAiParticipant,
+                    conversationId: convId
+                }));
+            }
+        }
+
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache, no-transform');
         res.setHeader('X-Accel-Buffering', 'no');
         res.setHeader('Connection', 'keep-alive');
         res.flushHeaders();
-
-        const send = (event, data) => {
-            res.write(`event: ${event}\n`);
-            res.write(`data: ${JSON.stringify(data)}\n\n`);
-        };
-
+        const send = (event, data) => { res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`); };
         send('start', { conversationId: convId });
         send('token', { text: message });
         send('done', { finishReason: 'STOP' });
-        res.end();
+        setTimeout(() => res.end(), 50);
         return;
     }
 
@@ -297,7 +307,7 @@ router.post('/chat', aiGate, async (req, res) => {
         };
         send('start', { conversationId: convId });
         send('done', { finishReason: 'STOP_PAUSED' });
-        res.end();
+        setTimeout(() => res.end(), 50);
         return;
     }
 
