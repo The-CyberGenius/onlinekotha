@@ -71,7 +71,7 @@ html.dark .dm-row-msg {
 }
 
 
-input, textarea, [contenteditable], .glass-chat-me, .glass-chat-them, .select-text, #chat-container, #chat-scroll-area, .ai-response-text, .msg-bubble-content, [id^="msg-"] {
+input, textarea, [contenteditable], .glass-chat-me, .glass-chat-them, .select-text, #chat-container, #chat-scroll-area, .ai-response-text, .msg-bubble-content, [id^="msg-"], .dm-bubble {
     -webkit-user-select: text !important;
     user-select: text !important;
 }
