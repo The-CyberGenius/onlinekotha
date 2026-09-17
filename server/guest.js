@@ -1,8 +1,5 @@
 const crypto = require('crypto');
-const { db } = require('./db');
-
-const GUEST_MAX_CHATS = 1;
-const GUEST_MAX_AI_MSGS = 10;
+const { db, getSetting } = require('./db');
 
 function getClientIp(req) {
     return req.ip || req.socket.remoteAddress || '127.0.0.1';
@@ -59,6 +56,9 @@ function getGuestStatus(req, res) {
     const actualChats = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ?').get(guestId)?.c || 0;
     const chatsImported = Math.max(record ? record.chats_imported : 0, actualChats);
     const aiMsgsUsed = record ? record.ai_messages_count : 0;
+    
+    const GUEST_MAX_CHATS = Number(getSetting('guest_max_chats', '1'));
+    const GUEST_MAX_AI_MSGS = Number(getSetting('guest_max_messages', '10'));
 
     return {
         guestId,
@@ -105,8 +105,6 @@ function claimGuestData(guestId, userId) {
 }
 
 module.exports = {
-    GUEST_MAX_CHATS,
-    GUEST_MAX_AI_MSGS,
     getOrCreateGuestId,
     getGuestStatus,
     recordGuestChatImport,

@@ -495,8 +495,17 @@ HARD RULES
         const s = await (await fetch('/api/admin/settings')).json();
         document.getElementById('s-daily-cap').value  = s.daily_spend_cap_usd         || '5';
         document.getElementById('s-free-msgs').value  = s.free_user_daily_messages    || '3';
+        document.getElementById('s-trial-msgs').value = s.trial_user_daily_messages   || '10';
         document.getElementById('s-paid-msgs').value  = s.paid_user_daily_messages    || '500';
         document.getElementById('s-trial-hours').value = s.trial_duration_hours       || '24';
+        
+        document.getElementById('s-free-lifetime').value = s.free_lifetime_messages || '10';
+        document.getElementById('s-free-chats').value = s.free_max_chats || '2';
+        document.getElementById('s-guest-msgs').value = s.guest_max_messages || '10';
+        document.getElementById('s-guest-chats').value = s.guest_max_chats || '1';
+        document.getElementById('s-max-words').value = s.max_words_per_message || '300';
+        document.getElementById('s-burst-msgs').value = s.burst_limit_messages || '10';
+        document.getElementById('s-burst-secs').value = s.burst_limit_seconds || '30';
     }
 
     document.getElementById('settings-form').addEventListener('submit', async (e) => {
@@ -510,8 +519,16 @@ HARD RULES
                 body: JSON.stringify({
                     daily_spend_cap_usd:      document.getElementById('s-daily-cap').value,
                     free_user_daily_messages: document.getElementById('s-free-msgs').value,
+                    trial_user_daily_messages: document.getElementById('s-trial-msgs').value,
                     paid_user_daily_messages: document.getElementById('s-paid-msgs').value,
                     trial_duration_hours:     document.getElementById('s-trial-hours').value,
+                    free_lifetime_messages: document.getElementById('s-free-lifetime').value,
+                    free_max_chats: document.getElementById('s-free-chats').value,
+                    guest_max_messages: document.getElementById('s-guest-msgs').value,
+                    guest_max_chats: document.getElementById('s-guest-chats').value,
+                    max_words_per_message: document.getElementById('s-max-words').value,
+                    burst_limit_messages: document.getElementById('s-burst-msgs').value,
+                    burst_limit_seconds: document.getElementById('s-burst-secs').value,
                 }),
             });
             if (!res.ok) throw new Error('Save failed');

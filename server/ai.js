@@ -24,8 +24,9 @@ function aiGate(req, res, next) {
     if (!req.user) {
         const guestStatus = getGuestStatus(req, res);
         if (!guestStatus.canUseAI) {
+            const maxGuestMsgs = getSetting('guest_max_messages', '10');
             return res.status(403).json({
-                error: 'Guest limit reached (10/10 free AI messages used). Sign in with Google to continue chatting!',
+                error: `Guest limit reached (${maxGuestMsgs}/${maxGuestMsgs} free AI messages used). Sign in with Google to continue chatting!`,
                 requireAuth: true,
                 guest: guestStatus,
             });
@@ -54,14 +55,14 @@ function aiGate(req, res, next) {
              WHERE c.user_id = ? AND cm.role = 'user'`
         ).get(req.user.id).n;
 
-        // Free tier: strict lifetime cap of 10 messages, then 1 free message per day
-        const freeLifetimeMax = 10;
-        const freeDailyMax = 1;
+        // Free tier: strict lifetime cap of X messages, then Y free messages per day
+        const freeLifetimeMax = Number(getSetting('free_lifetime_messages', '10'));
+        const freeDailyMax = Number(getSetting('free_user_daily_messages', '1'));
         
         if (lifetimeUsed >= freeLifetimeMax) {
             if (usedToday >= freeDailyMax) {
                 return res.status(429).json({
-                    error: `You've used your 10 free trial messages and your 1 free daily message. Upgrade to Pro to continue chatting!`,
+                    error: `You've used your ${freeLifetimeMax} free trial messages and your ${freeDailyMax} free daily message(s). Upgrade to Pro to continue chatting!`,
                     limit: freeLifetimeMax,
                     used: lifetimeUsed,
                 });
@@ -69,7 +70,7 @@ function aiGate(req, res, next) {
         }
     } else {
         // Trial users: higher cap but still limited
-        const trialMax = Number(getSetting('paid_user_daily_messages', '500'));
+        const trialMax = Number(getSetting('trial_user_daily_messages', '10'));
         if (trialMax > 0 && usedToday >= trialMax) {
             return res.status(429).json({ error: `Daily limit (${trialMax}) reached. Resets at midnight.` });
         }
@@ -175,8 +176,9 @@ router.post('/chat', aiGate, async (req, res) => {
     const { chat, message, conversationId, aiParticipant, sendAsAI } = req.body || {};
     if (!chat || !message) return res.status(400).json({ error: 'chat + message required' });
 
-    if (countWords(message) > 300) {
-        return res.status(400).json({ error: 'Message exceeds limit (max 300 words). Please shorten your message to prevent server slowdown.' });
+    const maxWords = Number(getSetting('max_words_per_message', '300'));
+    if (countWords(message) > maxWords) {
+        return res.status(400).json({ error: `Message exceeds limit (max ${maxWords} words). Please shorten your message to prevent server slowdown.` });
     }
 
     const { userId, guestId, dirKey } = getOwner(req);

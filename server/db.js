@@ -292,6 +292,14 @@ const defaults = {
     trial_duration_hours: '72',
     free_user_daily_messages: '5',
     paid_user_daily_messages: '500',
+    trial_user_daily_messages: '10',
+    free_lifetime_messages: '10',
+    free_max_chats: '2',
+    guest_max_messages: '10',
+    guest_max_chats: '1',
+    burst_limit_messages: '10',
+    burst_limit_seconds: '30',
+    max_words_per_message: '300',
 };
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 for (const [k, v] of Object.entries(defaults)) insertSetting.run(k, v);

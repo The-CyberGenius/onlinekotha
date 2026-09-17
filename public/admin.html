@@ -1012,11 +1012,45 @@
                         </div>
                         <div>
                             <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Trial Plan — Daily AI Messages</label>
+                            <input id="s-trial-msgs" type="number" min="0" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Paid Plan — Daily AI Messages</label>
                             <input id="s-paid-msgs" type="number" min="0" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
                         </div>
                         <div>
                             <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Trial Duration (Hours)</label>
                             <input id="s-trial-hours" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Free Plan — Lifetime Messages Cap</label>
+                            <input id="s-free-lifetime" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Free Plan — Max Chats Import</label>
+                            <input id="s-free-chats" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Guest — Max AI Messages</label>
+                            <input id="s-guest-msgs" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Guest — Max Chat Imports</label>
+                            <input id="s-guest-chats" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Max Words Per Message</label>
+                            <input id="s-max-words" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <div style="flex:1;">
+                                <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Burst Limit Messages</label>
+                                <input id="s-burst-msgs" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;">Burst Limit Seconds</label>
+                                <input id="s-burst-secs" type="number" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);">
+                            </div>
                         </div>
                     </div>
                     <button type="submit" style="background:var(--text-primary);color:var(--card-bg);font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;align-self:flex-start;">Save Settings</button>

@@ -66,9 +66,9 @@ function createUser(email, password, options = {}) {
     const info = db
         .prepare(
             `INSERT INTO users (email, password_hash, created_at, plan, trial_expires_at, is_admin, display_name, phone, phone_country_code, phone_prompted, ip_address, country, email_verified)
-             VALUES (?, ?, ?, 'trial', ?, ?, ?, ?, ?, ?, ?, ?, 1)`
+             VALUES (?, ?, ?, 'free', NULL, ?, ?, ?, ?, ?, ?, ?, 1)`
         )
-        .run(cleanEmail, hashPassword(password), now, trialExpiresAt, isAdmin, displayName, phone, phoneCountryCode, phonePrompted, ip, country);
+        .run(cleanEmail, hashPassword(password), now, isAdmin, displayName, phone, phoneCountryCode, phonePrompted, ip, country);
 
     return getUserById(info.lastInsertRowid);
 }

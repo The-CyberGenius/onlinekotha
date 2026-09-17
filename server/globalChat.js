@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { db } = require('./db');
+const { db, getSetting } = require('./db');
 const { requireUser } = require('./auth');
 const { countWords, checkBurstLimit } = require('./rateLimit');
 
@@ -155,8 +155,9 @@ router.post('/send', requireUser, (req, res) => {
     }
 
     // Word limit (same as AI chat + DM)
-    if (countWords(text) > 300) {
-        return res.status(400).json({ error: 'Message exceeds limit (max 300 words). Please shorten your message to prevent server slowdown.' });
+    const maxWords = Number(getSetting('max_words_per_message', '300'));
+    if (countWords(text) > maxWords) {
+        return res.status(400).json({ error: `Message exceeds limit (max ${maxWords} words). Please shorten your message to prevent server slowdown.` });
     }
 
     // Burst rate limit: 10 messages per 30 seconds

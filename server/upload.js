@@ -4,7 +4,7 @@ const multer = require('multer');
 const unzipper = require('unzipper');
 const { findChatFile, parseChatFile } = require('./parser');
 const { getMessages } = require('./cache');
-const { db } = require('./db');
+const { db, getSetting } = require('./db');
 
 const SRC_DIR = path.join(__dirname, '..', 'src');
 const TMP_DIR = path.join(__dirname, '..', '.tmp-uploads');
@@ -105,7 +105,8 @@ async function handleUpload(req, res) {
             const guestStatus = getGuestStatus(req, res);
             if (!guestStatus.canImportChat) {
                 if (req.uploadSessionId) rmrf(path.join(TMP_DIR, req.uploadSessionId));
-                return res.status(403).json({ error: 'Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!', requireAuth: true });
+                const maxGuestChats = getSetting('guest_max_chats', '1');
+                return res.status(403).json({ error: `Guest limit reached (${maxGuestChats}/${maxGuestChats} free chat imported). Please sign in with Google to import more chats!`, requireAuth: true });
             }
             guestId = guestStatus.guestId;
             ownerId = guestId;
@@ -114,7 +115,7 @@ async function handleUpload(req, res) {
             const { effectivePlan } = require('./auth');
             const plan = effectivePlan(req.user);
             if (plan === 'free') {
-                const FREE_MAX_CHATS = 2;
+                const FREE_MAX_CHATS = Number(getSetting('free_max_chats', '2'));
                 const chatCount = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE user_id = ? AND deleted_by_user = 0').get(req.user.id)?.c || 0;
                 if (chatCount >= FREE_MAX_CHATS) {
                     if (req.uploadSessionId) rmrf(path.join(TMP_DIR, req.uploadSessionId));
