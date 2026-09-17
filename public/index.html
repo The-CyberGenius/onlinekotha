@@ -1943,11 +1943,11 @@
         })();
     </script>
     <!-- ── Interactive Support Chat (functional - Floating Widget) ── -->
-    <div id="floating-assistant-widget" style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:16px;">
+    <div id="floating-assistant-widget" style="position:fixed;bottom:24px;left:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-start;gap:12px;">
         
         <!-- Chat Window (Collapsed by default) -->
         <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
-            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom right;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
+            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
             <!-- Chat header -->
             <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
                 style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
@@ -2024,10 +2024,16 @@
             </div>
         </div>
 
-        <!-- Floating Toggle Button -->
-        <button id="toggle-assistant-btn" style="width:64px;height:64px;border-radius:999px;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,0.4);transition:transform 0.2s;overflow:hidden;">
-            <img src="/KothaPro.png" alt="Assistant" style="width:100%;height:100%;object-fit:cover;">
-        </button>
+        <!-- Floating Toggle Button with Label Badge -->
+        <div style="display:flex;align-items:center;gap:10px;">
+            <button id="toggle-assistant-btn" style="width:60px;height:60px;border-radius:999px;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(99,102,241,0.35);transition:transform 0.2s, box-shadow 0.2s;overflow:hidden;position:relative;">
+                <img src="/KothaPro.png" alt="Assistant" style="width:100%;height:100%;object-fit:cover;">
+            </button>
+            <div id="assistant-badge" style="display:flex;align-items:center;gap:6px;background:rgba(18,18,28,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-primary);box-shadow:0 6px 20px rgba(0,0,0,0.3);pointer-events:none;transition:opacity 0.2s;">
+                <span style="display:inline-block;width:7px;height:7px;border-radius:999px;background:#34d399;box-shadow:0 0 8px #34d399;"></span>
+                <span>AI Support</span>
+            </div>
+        </div>
     </div>
 
     <!-- JavaScript for floating widget toggle -->
@@ -2036,6 +2042,7 @@
             const toggleBtn = document.getElementById('toggle-assistant-btn');
             const closeBtn = document.getElementById('close-assistant-btn');
             const chatFrame = document.getElementById('demo-chat-frame');
+            const badge = document.getElementById('assistant-badge');
             
             let isOpen = false;
             
@@ -2045,16 +2052,19 @@
                     chatFrame.style.opacity = '1';
                     chatFrame.style.pointerEvents = 'auto';
                     chatFrame.style.transform = 'translateY(0)';
-                    document.getElementById('demo-input').focus();
+                    if (badge) badge.style.opacity = '0';
+                    const demoInput = document.getElementById('demo-input');
+                    if (demoInput) demoInput.focus();
                 } else {
                     chatFrame.style.opacity = '0';
                     chatFrame.style.pointerEvents = 'none';
                     chatFrame.style.transform = 'translateY(10px)';
+                    if (badge) badge.style.opacity = '1';
                 }
             }
             
-            toggleBtn.addEventListener('click', toggleChat);
-            closeBtn.addEventListener('click', toggleChat);
+            if (toggleBtn) toggleBtn.addEventListener('click', toggleChat);
+            if (closeBtn) closeBtn.addEventListener('click', toggleChat);
         });
     </script>
     <div
