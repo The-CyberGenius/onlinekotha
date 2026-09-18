@@ -43,8 +43,8 @@ router.post('/signup', authLimiter, async (req, res) => {
         }
 
         const authSecret = (pin || password || '').trim();
-        if (!authSecret || authSecret.length < 4) {
-            return res.status(400).json({ error: 'Please enter a 4 to 6-digit PIN' });
+        if (!authSecret || !/^\d{4,6}$/.test(authSecret)) {
+            return res.status(400).json({ error: 'Please enter a 4 to 6-digit PIN (numbers only)' });
         }
 
         const ip = req.ip || req.socket.remoteAddress;
@@ -98,7 +98,7 @@ router.post('/forgot', async (req, res) => {
 router.post('/reset', async (req, res) => {
     const { token, password } = req.body || {};
     if (!token || !password) return res.status(400).json({ error: 'token + password required' });
-    if (password.length < 4) return res.status(400).json({ error: 'PIN min 4 chars' });
+    if (!/^\d{4,6}$/.test(password)) return res.status(400).json({ error: 'Please enter a 4 to 6-digit PIN (numbers only)' });
     const row = consumeToken(token, 'reset');
     if (!row) return res.status(400).json({ error: 'Invalid or expired link' });
     const hash = bcrypt.hashSync(password, 10);

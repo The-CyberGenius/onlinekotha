@@ -1,5 +1,5 @@
 // Service Worker for Kotha PWA
-const CACHE_NAME = 'kotha-v12';
+const CACHE_NAME = 'kotha-v14';
 const STATIC_ASSETS = [
     '/css/style.css',
     '/js/tailwind.js',
@@ -52,6 +52,10 @@ self.addEventListener('fetch', (e) => {
 
     // Network-first for API, navigation, and auth routes
     if (e.request.mode === 'navigate' || url.pathname.startsWith('/api/') || url.pathname === '/app' || url.pathname === '/login.html') {
+        // SSE route MUST bypass Service Worker completely
+        if (url.pathname === '/api/admin/playground') {
+            return;
+        }
         e.respondWith(
             fetch(e.request).catch(() => caches.match(e.request))
         );

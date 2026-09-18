@@ -35,14 +35,14 @@
             
             <div class="mb-8">
                 <h2 class="text-3xl font-extrabold text-gray-900 mb-2">Create New Password</h2>
-                <p class="text-gray-500">Your new password must be at least 6 characters long.</p>
+                <p class="text-gray-500">Your new PIN must be 4 to 6 digits long.</p>
             </div>
 
             <form id="reset-form" class="space-y-6">
-                <!-- Floating Label Input: Password -->
+                <!-- Floating Label Input: PIN -->
                 <div class="relative">
-                    <input type="password" id="password" minlength="6" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
-                    <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">New Password</label>
+                    <input type="password" id="password" minlength="4" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="block rounded-xl px-4 pb-2.5 pt-6 w-full text-sm text-gray-900 bg-gray-50 border-2 border-transparent focus:bg-white focus:outline-none focus:border-indigo-500 transition-colors peer shadow-sm" placeholder=" " required />
+                    <label for="password" class="absolute text-sm text-gray-500 duration-300 transform -translate-y-3 scale-75 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-indigo-600 font-bold uppercase tracking-wider cursor-text">New PIN</label>
                 </div>
                 
                 <button type="submit" id="submit-btn" class="relative overflow-hidden w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-500/50 mt-4">

@@ -341,4 +341,45 @@ function pickAdapter(providerName) {
     }
 }
 
-module.exports = { callLLM, LLMError, todaySpend };
+async function callModelDirectly({ modelId, messages, systemPrompt, userId, onToken, signal, maxTokens = 1024, temperature = 0.7 }) {
+    checkSpendCap();
+    const model = getModelWithProvider(modelId);
+    if (!model) throw new LLMError('Model not found or disabled', 'NO_MODEL');
+
+    const adapter = pickAdapter(model.provider_name);
+    if (!adapter) throw new LLMError(`No adapter for provider ${model.provider_name}`, 'NO_ADAPTER');
+
+    try {
+        const { inputTokens, outputTokens } = await adapter({
+            model,
+            messages,
+            systemPrompt,
+            maxTokens,
+            temperature,
+            onToken,
+            signal
+        });
+        const cost = calcCost(model, inputTokens, outputTokens);
+        logUsage({
+            userId,
+            feature: 'playground',
+            providerId: model.provider_id,
+            modelId: model.id,
+            inputTokens,
+            outputTokens,
+            costUsd: cost,
+        });
+        return { model: model.model_id, inputTokens, outputTokens, cost };
+    } catch (err) {
+        logUsage({
+            userId,
+            feature: 'playground',
+            providerId: model.provider_id,
+            modelId: model.id,
+            error: err.message,
+        });
+        throw err;
+    }
+}
+
+module.exports = { callLLM, callModelDirectly, LLMError, todaySpend };

@@ -1207,6 +1207,140 @@ HARD RULES
         setIntegMsg(card, 'email', r.ok ? 'Sent' : (r.error || 'Failed'), r.ok ? 'ok' : 'error');
     }
 
+    // ---------- Playground ----------
+    async function populatePlaygroundModels() {
+        const select = document.getElementById('pg-model-select');
+        select.innerHTML = '';
+        try {
+            const models = await (await fetch('/api/admin/models')).json();
+            const enabledModels = models.filter(m => m.enabled);
+            if (enabledModels.length === 0) {
+                select.innerHTML = '<option value="">No models available</option>';
+                return;
+            }
+            for (const m of enabledModels) {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = `${m.provider_label || 'Provider'} - ${m.display_name || m.model_id}`;
+                select.appendChild(opt);
+            }
+        } catch(e) {
+            select.innerHTML = '<option value="">Error loading models</option>';
+        }
+    }
+
+    // Intercept loadModels to also refresh the playground dropdown
+    const origLoadModels = loadModels;
+    loadModels = async () => {
+        await origLoadModels();
+        await populatePlaygroundModels();
+    };
+
+    window.submitPlayground = async function() {
+        const pgBtn = document.getElementById('pg-send-btn');
+        const model_id = document.getElementById('pg-model-select').value;
+        const system_prompt = document.getElementById('pg-system-prompt').value;
+        const message = document.getElementById('pg-message').value;
+        
+        const respBox = document.getElementById('pg-response-box');
+        const statsBox = document.getElementById('pg-stats');
+
+        if (!model_id) {
+            respBox.textContent = 'Please select a model.';
+            return;
+        }
+        if (!message) {
+            respBox.textContent = 'Please enter a message.';
+            return;
+        }
+
+        if (pgBtn) {
+            pgBtn.disabled = true;
+            pgBtn.textContent = 'Sending...';
+        }
+        respBox.textContent = 'Connecting...';
+        statsBox.textContent = '';
+        console.log('[DEBUG] Submitting playground', { model_id, system_prompt, message });
+
+        try {
+            const resp = await fetch('/api/admin/playground', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ model_id, system_prompt, message })
+            });
+
+            if (!resp.ok) {
+                const text = await resp.text();
+                respBox.textContent = `Error: ${resp.status} ${text}`;
+                return;
+            }
+
+            respBox.textContent = ''; // clear connecting msg
+            const reader = resp.body.getReader();
+            const decoder = new TextDecoder();
+            let done = false;
+            let currentText = '';
+            let currentEvent = 'message';
+            let buffer = '';
+
+            while (!done) {
+                const { value, done: readerDone } = await reader.read();
+                done = readerDone;
+                if (value) {
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // keep incomplete line
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('event: ')) {
+                            currentEvent = line.slice(7).trim();
+                        } else if (line.startsWith('data: ')) {
+                            const dataStr = line.slice(6).trim();
+                            if (dataStr === '[DONE]') {
+                                done = true;
+                                break;
+                            }
+                            try {
+                                const parsed = JSON.parse(dataStr);
+                                if (currentEvent === 'stats') {
+                                    if (statsBox) {
+                                        statsBox.textContent = `Tokens: In=${parsed.inputTokens}, Out=${parsed.outputTokens} | Cost: $${parsed.cost.toFixed(6)}`;
+                                    }
+                                } else if (currentEvent === 'error') {
+                                    if (respBox) {
+                                        respBox.textContent += `\n\n[Error: ${parsed.error || JSON.stringify(parsed)}]`;
+                                    }
+                                } else if (typeof parsed === 'string') {
+                                    currentText += parsed;
+                                    if (respBox) respBox.textContent = currentText;
+                                }
+                            } catch (e) {
+                                // Ignore parse errors for partial chunks
+                            }
+                            currentEvent = 'message';
+                        }
+                    }
+                }
+            }
+        } catch (err) {
+            respBox.textContent = `Request failed: ${err.message}`;
+        } finally {
+            if (pgBtn) {
+                pgBtn.disabled = false;
+                pgBtn.textContent = 'Send Message';
+            }
+        }
+    };
+
+    // Keep the click listener as fallback if onclick attribute somehow fails
+    const pgBtn = document.getElementById('pg-send-btn');
+    if (pgBtn) {
+        pgBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.submitPlayground();
+        });
+    }
+
     await loadKnown();
     await loadStats();
     await loadProviders();

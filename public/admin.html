@@ -862,6 +862,7 @@
             <button data-tab="providers" class="tab-item">Providers</button>
             <button data-tab="models" class="tab-item">Models</button>
             <button data-tab="routes" class="tab-item">Routing</button>
+            <button data-tab="playground" class="tab-item">Playground</button>
             <button data-tab="integrations" class="tab-item">Integrations</button>
             <button data-tab="settings" class="tab-item">Limits</button>
             <button data-tab="dm-logs" class="tab-item">DM Logs</button>
@@ -984,6 +985,39 @@
                         <p id="routes-global-msg" class="hidden" style="font-size:12px;color:var(--success);font-weight:600;">Saved</p>
                     </div>
                 </form>
+            </div>
+        </section>
+
+        <!-- Tab: Playground -->
+        <section id="tab-playground" class="tab-content hidden">
+            <div class="admin-card">
+                <div class="section-header-title" style="margin-bottom:14px;">
+                    <h2>Playground</h2>
+                    <p>Test models with custom messages and system prompts directly.</p>
+                </div>
+                <form id="playground-form" style="display:flex;flex-direction:column;gap:14px;" onsubmit="event.preventDefault(); window.submitPlayground();">
+                    <div>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Select Model</label>
+                        <select id="pg-model-select" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;background:var(--card-bg);"></select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">System Prompt (Optional)</label>
+                        <textarea id="pg-system-prompt" rows="2" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;resize:vertical;" placeholder="You are a helpful AI assistant."></textarea>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Message</label>
+                        <textarea id="pg-message" rows="4" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;outline:none;resize:vertical;" placeholder="Type your test message here..." required></textarea>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <button type="button" id="pg-send-btn" style="background:var(--text-primary);color:var(--card-bg);font-weight:600;font-size:12px;border:none;border-radius:8px;padding:8px 18px;cursor:pointer;">Send Message</button>
+                    </div>
+                </form>
+
+                <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;">
+                    <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Response</div>
+                    <div id="pg-response-box" style="background:var(--bg-page);border:1px solid var(--border);border-radius:8px;padding:12px;min-height:100px;font-size:13px;white-space:pre-wrap;color:var(--text-primary);"></div>
+                    <div id="pg-stats" style="font-size:11px;color:var(--text-muted);margin-top:8px;font-family:monospace;"></div>
+                </div>
             </div>
         </section>
 
@@ -1120,7 +1154,7 @@
         </section>
     </div>
 
-    <script src="/js/admin.js?v=1780860012"></script>
+    <script src="/js/admin.js?v=202609181536"></script>
     <script>
 
     // ── Theme Manager ────────────────────────────────────────────────────────

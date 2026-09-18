@@ -137,6 +137,10 @@ app.get('/share-target', (req, res) => res.redirect('/app'));
 app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 
 // Static frontend (landing /, login, admin, css, js, etc.) with caching
+app.get('/admin.html', (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 app.get('/', (req, res, next) => {
     const ua = req.headers['user-agent'] || '';
     if (ua.includes('OnlineKothaApp')) {
