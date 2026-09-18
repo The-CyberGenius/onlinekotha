@@ -1258,9 +1258,8 @@ HARD RULES
             pgBtn.disabled = true;
             pgBtn.textContent = 'Sending...';
         }
-        respBox.textContent = 'Connecting...';
+        respBox.textContent = 'Waiting for response...';
         statsBox.textContent = '';
-        console.log('[DEBUG] Submitting playground', { model_id, system_prompt, message });
 
         try {
             const resp = await fetch('/api/admin/playground', {
@@ -1269,58 +1268,16 @@ HARD RULES
                 body: JSON.stringify({ model_id, system_prompt, message })
             });
 
-            if (!resp.ok) {
-                const text = await resp.text();
-                respBox.textContent = `Error: ${resp.status} ${text}`;
+            const data = await resp.json();
+
+            if (!resp.ok || data.error) {
+                respBox.textContent = `Error: ${data.error || resp.statusText}`;
                 return;
             }
 
-            respBox.textContent = ''; // clear connecting msg
-            const reader = resp.body.getReader();
-            const decoder = new TextDecoder();
-            let done = false;
-            let currentText = '';
-            let currentEvent = 'message';
-            let buffer = '';
-
-            while (!done) {
-                const { value, done: readerDone } = await reader.read();
-                done = readerDone;
-                if (value) {
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop(); // keep incomplete line
-                    
-                    for (const line of lines) {
-                        if (line.startsWith('event: ')) {
-                            currentEvent = line.slice(7).trim();
-                        } else if (line.startsWith('data: ')) {
-                            const dataStr = line.slice(6).trim();
-                            if (dataStr === '[DONE]') {
-                                done = true;
-                                break;
-                            }
-                            try {
-                                const parsed = JSON.parse(dataStr);
-                                if (currentEvent === 'stats') {
-                                    if (statsBox) {
-                                        statsBox.textContent = `Tokens: In=${parsed.inputTokens}, Out=${parsed.outputTokens} | Cost: $${parsed.cost.toFixed(6)}`;
-                                    }
-                                } else if (currentEvent === 'error') {
-                                    if (respBox) {
-                                        respBox.textContent += `\n\n[Error: ${parsed.error || JSON.stringify(parsed)}]`;
-                                    }
-                                } else if (typeof parsed === 'string') {
-                                    currentText += parsed;
-                                    if (respBox) respBox.textContent = currentText;
-                                }
-                            } catch (e) {
-                                // Ignore parse errors for partial chunks
-                            }
-                            currentEvent = 'message';
-                        }
-                    }
-                }
+            respBox.textContent = data.response || '(empty response)';
+            if (data.stats && statsBox) {
+                statsBox.textContent = `Tokens: In=${data.stats.inputTokens}, Out=${data.stats.outputTokens} | Cost: $${(data.stats.cost || 0).toFixed(6)}`;
             }
         } catch (err) {
             respBox.textContent = `Request failed: ${err.message}`;
