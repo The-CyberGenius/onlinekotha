@@ -1,5 +1,5 @@
 // Service Worker for Kotha PWA
-const CACHE_NAME = 'kotha-v14';
+const CACHE_NAME = 'kotha-v15';
 const STATIC_ASSETS = [
     '/css/style.css',
     '/js/tailwind.js',
@@ -62,6 +62,14 @@ self.addEventListener('fetch', (e) => {
         return;
     }
     
+    // Always fetch admin files from network (never stale cache)
+    if (url.pathname.includes('admin')) {
+        e.respondWith(
+            fetch(e.request).catch(() => caches.match(e.request))
+        );
+        return;
+    }
+
     // Cache-first for static assets
     e.respondWith(
         caches.match(e.request).then(cached => cached || fetch(e.request))
