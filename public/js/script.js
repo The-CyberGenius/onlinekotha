@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let allMessages = [];
     let displayedMessages = [];
     let otherPersonName = "Contact";
+    
+    // Robust mobile check matching CSS exactly
+    const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
     let myName = null;
     let currentChat = '';
     let datePartsOrder = { monthIdx: 0, dayIdx: 1 }; // default MM/DD/YY
@@ -197,16 +200,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sidebar toggle — true = open, false = close, undefined = toggle
     const toggleSidebar = (open) => {
-        if (window.innerWidth >= 768 && !window.kothaCompact) return; // mobile OR compact desktop frame
+        if (!isMobile() && !window.kothaCompact) return; // desktop mode
         const backdrop = document.getElementById('sidebar-backdrop');
         if (open === true) {
             sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
             if (backdrop) backdrop.classList.remove('hidden');
         } else if (open === false) {
             sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('translate-x-0');
             if (backdrop) backdrop.classList.add('hidden');
         } else {
             sidebar.classList.toggle('-translate-x-full');
+            sidebar.classList.toggle('translate-x-0');
             if (backdrop) backdrop.classList.toggle('hidden');
         }
     };
@@ -255,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showEmptyState();
             
             // On mobile, automatically re-open the sidebar since there's no chat to view
-            if (window.innerWidth < 768 || window.kothaCompact) {
+            if (isMobile() || window.kothaCompact) {
                 toggleSidebar(true);
             }
         });
@@ -310,10 +316,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mobileFilterBtn) {
         mobileFilterBtn.addEventListener('click', () => {
             // Force open the sidebar
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('-translate-x-full');
-                const backdrop = document.getElementById('sidebar-backdrop');
-                if (backdrop) backdrop.classList.remove('hidden');
+            if (isMobile()) {
+                toggleSidebar(true);
             }
             const container = document.getElementById('smart-filters-container');
             container.classList.remove('hidden'); // Focus filters
@@ -1339,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.chat-del-btn')) return;
                 if (chat === currentChat) {
-                    if (window.innerWidth < 768 || window.kothaCompact) toggleSidebar(false);
+                    if (isMobile() || window.kothaCompact) toggleSidebar(false);
                     return;
                 }
                 if (currentChat === '__global__') {
@@ -2304,7 +2308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (globalChatItem) {
         globalChatItem.addEventListener('click', () => {
             if (currentChat === '__global__') {
-                if (window.innerWidth < 768 || window.kothaCompact) toggleSidebar(false);
+                if (isMobile() || window.kothaCompact) toggleSidebar(false);
                 return;
             }
 
@@ -2760,7 +2764,7 @@ document.addEventListener('DOMContentLoaded', () => {
     (function initMacFrame() {
         const frame = document.getElementById('mac-frame');
         const titlebar = document.getElementById('mac-titlebar');
-        if (!frame || !titlebar || window.innerWidth < 768) return;
+        if (!frame || !titlebar || isMobile()) return;
 
         // --- Initialize square window position on desktop ---
         let inited = false;
