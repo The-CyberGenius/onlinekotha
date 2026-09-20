@@ -668,13 +668,13 @@
                         if (resp.status === 429 && errMsg.toLowerCase().includes('limit')) isLimit = true;
                     } catch { }
                     typingEl.remove();
-                    if (isLimit) {
+                    if (isLimit || errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
                         if (errMsg.toLowerCase().includes('guest') && typeof window.openAuthModal === 'function') {
                             window.openAuthModal(errMsg);
                         } else if (typeof window.openUpgradeModal === 'function') {
                             window.openUpgradeModal();
                         } else {
-                            appendErrorBubble(errMsg);
+                            appendErrorBubble('Server busy. Please try again or upgrade to Pro.');
                         }
                     } else {
                         appendErrorBubble(errMsg);
@@ -772,7 +772,16 @@
 
                         } else if (event === 'error') {
                             typingEl.remove();
-                            appendErrorBubble(data.message || 'Something went wrong');
+                            const errMsg = data.message || 'Something went wrong';
+                            if (errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
+                                if (typeof window.openUpgradeModal === 'function') {
+                                    window.openUpgradeModal();
+                                } else {
+                                    appendErrorBubble('Server busy. Please try again or upgrade to Pro.');
+                                }
+                            } else {
+                                appendErrorBubble(errMsg);
+                            }
                             onTypewriterComplete = null;
                             stopTypewriterInstantly();
                             _dotStop();
@@ -782,7 +791,15 @@
                 }
             } catch (err) {
                 typingEl.remove();
-                appendErrorBubble('Network error. Try again?');
+                if (err.message && (err.message.includes('503') || err.message.includes('Google'))) {
+                    if (typeof window.openUpgradeModal === 'function') {
+                        window.openUpgradeModal();
+                    } else {
+                        appendErrorBubble('Server busy. Please try again or upgrade to Pro.');
+                    }
+                } else {
+                    appendErrorBubble('Network error. Try again?');
+                }
                 onTypewriterComplete = null;
                 stopTypewriterInstantly();
                 _dotStop();
