@@ -2633,7 +2633,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     resultsHtml += `
                         <div class="p-1.5 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-lg mb-1" onclick="jumpToMsg(${msg.id})">
                             <div class="flex justify-between items-center mb-0.5">
-                                <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender)}">${msg.sender || 'User'}</span> 
+                                <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender || 'System')}">${msg.sender || 'System'}</span> 
                                 <span class="text-[9px] text-gray-400 font-semibold">${msg.date || ''} ${msg.time || ''}</span>
                             </div>
                             <p class="text-[11px] text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
@@ -3357,7 +3357,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         resultsHtml += `
                             <div class="p-2 bg-gray-50 dark:bg-[#1a2329] hover:bg-indigo-50 dark:hover:bg-gray-700/50 shadow-sm cursor-pointer border border-gray-100 dark:border-gray-800 transition-all rounded-lg mb-1.5" onclick="jumpToMsg(${msg.id})">
                                 <div class="flex justify-between items-center mb-0.5">
-                                    <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender)}">${msg.sender || 'User'}</span> 
+                                    <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender || 'System')}">${msg.sender || 'System'}</span> 
                                     <span class="text-[9px] text-gray-400 font-semibold">${msg.date || ''} ${msg.time || ''}</span>
                                 </div>
                                 <p class="text-[11px] text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
