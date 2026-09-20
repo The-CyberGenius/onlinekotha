@@ -2285,11 +2285,15 @@
         <div style="display:flex;align-items:center;gap:10px;">
             <button id="toggle-assistant-btn" aria-label="Open AI Assistant" style="width:60px;height:60px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #8b5cf6);border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(99,102,241,0.4);transition:transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;position:relative;">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    <path d="M12 9v2m0 4h.01"></path>
+                    <path d="M12 8V4H8"/>
+                    <rect width="16" height="12" x="4" y="8" rx="2"/>
+                    <path d="M2 14h2"/>
+                    <path d="M20 14h2"/>
+                    <path d="M15 13v2"/>
+                    <path d="M9 13v2"/>
                 </svg>
             </button>
-            <div id="assistant-badge" style="display:flex;align-items:center;gap:6px;background:rgba(18,18,28,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-primary);box-shadow:0 6px 20px rgba(0,0,0,0.3);pointer-events:none;transition:opacity 0.2s;">
+            <div id="assistant-badge" style="display:flex;align-items:center;gap:6px;background:var(--bg-glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-primary);box-shadow:0 6px 20px rgba(0,0,0,0.15);pointer-events:none;transition:opacity 0.2s;">
                 <span style="display:inline-block;width:7px;height:7px;border-radius:999px;background:#34d399;box-shadow:0 0 8px #34d399;"></span>
                 <span>AI Support</span>
             </div>
