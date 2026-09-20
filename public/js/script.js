@@ -2703,6 +2703,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             toggleSidebar(false);
             if (typeof closeSearchModal === 'function') closeSearchModal();
+            
+            // Close mobile overlays if open
+            const mobOverlay = document.getElementById('mobile-popup-overlay');
+            const searchMod = document.getElementById('mobile-search-modal');
+            const filtMod = document.getElementById('mobile-filter-modal');
+            if (mobOverlay) { mobOverlay.classList.add('hidden'); mobOverlay.style.display = 'none'; }
+            if (searchMod) { searchMod.classList.add('hidden'); searchMod.style.display = 'none'; }
+            if (filtMod) { filtMod.classList.add('hidden'); filtMod.style.display = 'none'; }
 
             setTimeout(() => {
                 const el = document.getElementById(`msg-${id}`);
@@ -3301,15 +3309,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (mobileSearchSubmit) {
-        mobileSearchSubmit.addEventListener('click', () => {
-            const val = document.getElementById('mobile-search-input')?.value;
-            const mainSearch = document.getElementById('search-input');
-            if (mainSearch && val) {
-                mainSearch.value = val;
-                mainSearch.dispatchEvent(new Event('input'));
-                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                closeMobileOverlay();
+    const mobileSearchInput = document.getElementById('mobile-search-input');
+    const mobileSearchResults = document.getElementById('mobile-search-results');
+    const mobileSearchStats = document.getElementById('mobile-search-stats');
+
+    if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            const lowerVal = val.toLowerCase();
+
+            if (lowerVal.length < 2) {
+                if (mobileSearchResults) {
+                    mobileSearchResults.innerHTML = '';
+                    mobileSearchResults.classList.add('hidden');
+                }
+                if (mobileSearchStats) {
+                    mobileSearchStats.innerHTML = '';
+                    mobileSearchStats.classList.add('hidden');
+                }
+                return;
+            }
+
+            // Deep search in loaded messages
+            const filteredMsgs = [];
+            if (allMessages && allMessages.length > 0) {
+                for (let i = 0; i < allMessages.length; i++) {
+                    if (allMessages[i].text && allMessages[i].text.toLowerCase().includes(lowerVal)) {
+                        filteredMsgs.push(allMessages[i]);
+                    }
+                }
+            }
+
+            if (mobileSearchStats) {
+                mobileSearchStats.innerHTML = `Found <span class="font-bold text-indigo-600 dark:text-indigo-400">${filteredMsgs.length.toLocaleString()}</span> message matches.`;
+                mobileSearchStats.classList.remove('hidden');
+            }
+
+            if (mobileSearchResults) {
+                if (filteredMsgs.length === 0) {
+                    mobileSearchResults.innerHTML = `<div class="text-xs text-gray-400 py-2 text-center">No message matches found</div>`;
+                } else {
+                    let resultsHtml = '';
+                    const limitRes = filteredMsgs.slice(-50);
+                    const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    limitRes.forEach(msg => {
+                        const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
+                        resultsHtml += `
+                            <div class="p-2 bg-gray-50 dark:bg-[#1a2329] hover:bg-indigo-50 dark:hover:bg-gray-700/50 shadow-sm cursor-pointer border border-gray-100 dark:border-gray-800 transition-all rounded-lg mb-1.5" onclick="jumpToMsg(${msg.id})">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender)}">${msg.sender || 'User'}</span> 
+                                    <span class="text-[9px] text-gray-400 font-semibold">${msg.date || ''} ${msg.time || ''}</span>
+                                </div>
+                                <p class="text-[11px] text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
+                            </div>
+                        `;
+                    });
+                    mobileSearchResults.innerHTML = resultsHtml;
+                }
+                mobileSearchResults.classList.remove('hidden');
             }
         });
     }
