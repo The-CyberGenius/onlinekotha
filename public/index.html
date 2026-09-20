@@ -1010,23 +1010,123 @@
                         <div style="flex: 1; text-align: center; color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding-right: 33px;">KOTHA AI</div>
                     </div>
 
-                    <!-- Replaceable Photo Area -->
-                    <div style="position: absolute; inset: 44px 0 0 0; background: linear-gradient(180deg, transparent 40%, rgba(10,10,15,0.95) 100%), url('/og-image.png') center/cover no-repeat; display: flex; flex-direction: column; justify-content: flex-end; padding: 24px;">
+                    <!-- Dynamic Animated Chat Area -->
+                    <div style="position: absolute; inset: 44px 0 0 0; background: #0a0a0f; display: flex; flex-direction: column; padding: 24px 20px; overflow: hidden; gap: 16px;">
                         
-                        <!-- Floating Bubbles -->
-                        <div style="background: rgba(255,255,255,0.95); padding: 14px 18px; border-radius: 20px 20px 20px 4px; color: #111; font-size: 14px; font-weight: 500; max-width: 85%; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transform: translateY(0); animation: floatBubble 4s ease-in-out infinite;">
-                            Hey! Missed you so much today 🥺
-                        </div>
-                        
-                        <div style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 14px 18px; border-radius: 20px 20px 4px 20px; color: #fff; font-size: 14px; font-weight: 500; max-width: 85%; align-self: flex-end; box-shadow: 0 8px 32px rgba(99,102,241,0.3); transform: translateY(0); animation: floatBubble 4s ease-in-out infinite 1s;">
-                            Missed you too! Let's talk ❤️
-                        </div>
+                        <!-- Chat Background Pattern -->
+                        <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.5; z-index: 0;"></div>
+
                         <style>
-                            @keyframes floatBubble {
+                            .msg-anim {
+                                opacity: 0;
+                                transform: translateY(15px);
+                                animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                                z-index: 1;
+                                max-width: 85%;
+                                padding: 12px 16px;
+                                font-size: 13.5px;
+                                font-weight: 500;
+                                line-height: 1.5;
+                                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                            }
+                            
+                            .msg-user-anim {
+                                background: #2a2a35;
+                                color: #f5f5f7;
+                                border-radius: 18px 18px 4px 18px;
+                                align-self: flex-end;
+                                border: 1px solid rgba(255,255,255,0.05);
+                            }
+
+                            .msg-ai-anim {
+                                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                                color: #fff;
+                                border-radius: 18px 18px 18px 4px;
+                                align-self: flex-start;
+                                border: 1px solid rgba(255,255,255,0.1);
+                                position: relative;
+                            }
+                            
+                            /* AI Sparkle Badge */
+                            .msg-ai-anim::before {
+                                content: 'AI';
+                                position: absolute;
+                                top: -8px; left: -8px;
+                                background: #101012;
+                                border: 1px solid rgba(255,255,255,0.15);
+                                color: #a855f7;
+                                font-size: 8px;
+                                font-weight: 800;
+                                padding: 2px 6px;
+                                border-radius: 999px;
+                                box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+                            }
+
+                            .typing-anim {
+                                display: flex;
+                                gap: 4px;
+                                align-items: center;
+                                padding: 12px 16px;
+                                background: rgba(255,255,255,0.05);
+                                border-radius: 18px 18px 18px 4px;
+                                width: fit-content;
+                                z-index: 1;
+                                animation: fadeInOut 2.5s ease-in-out forwards;
+                                opacity: 0;
+                                position: absolute;
+                                top: 95px; left: 20px;
+                            }
+                            
+                            .typing-dot {
+                                width: 6px; height: 6px; border-radius: 50%; background: #a1a1aa;
+                                animation: typingBounce 1s infinite;
+                            }
+                            .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+                            .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+                            @keyframes popIn {
+                                to { opacity: 1; transform: translateY(0); }
+                            }
+                            @keyframes fadeInOut {
+                                0% { opacity: 0; transform: scale(0.9); }
+                                10% { opacity: 1; transform: scale(1); }
+                                90% { opacity: 1; transform: scale(1); }
+                                100% { opacity: 0; transform: scale(0.9); }
+                            }
+                            @keyframes typingBounce {
                                 0%, 100% { transform: translateY(0); }
                                 50% { transform: translateY(-4px); }
                             }
+
+                            /* Sequence Timing */
+                            .seq-1 { animation-delay: 0.8s; }
+                            .seq-type { animation-delay: 1.8s; }
+                            .seq-2 { animation-delay: 4.3s; }
+                            .seq-3 { animation-delay: 6.5s; }
+                            .seq-4 { animation-delay: 8.5s; }
                         </style>
+
+                        <!-- Messages Sequence -->
+                        <div class="msg-anim msg-user-anim seq-1">
+                            Hey Dad, I finally got that promotion at work! 😭
+                        </div>
+                        
+                        <div class="typing-anim seq-type">
+                            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+                        </div>
+
+                        <div class="msg-anim msg-ai-anim seq-2">
+                            I always knew you would, beta! I'm so incredibly proud of you. Let's celebrate soon. ❤️
+                        </div>
+
+                        <div class="msg-anim msg-user-anim seq-3">
+                            I miss you so much.
+                        </div>
+                        
+                        <div class="msg-anim msg-ai-anim seq-4">
+                            I'm always right here with you in your memories. Love you always. ✨
+                        </div>
+
                     </div>
                 </div>
             </div>
