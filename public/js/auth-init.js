@@ -395,52 +395,6 @@
 
         renderPlanBadge(me.user);
 
-        // Returning from a Dodo checkout? The webhook grants Pro server-side; poll
-        // the payment status API so the badge flips without a manual refresh.
-        try {
-            const _params = new URLSearchParams(window.location.search);
-            
-            // Check if user clicked Upgrade on the landing page while logged in
-            if (_params.get('checkout') === '1') {
-                _params.delete('checkout');
-                const _qs = _params.toString();
-                window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
-                setTimeout(() => {
-                    if (typeof window.openUpgradeModal === 'function') {
-                        window.openUpgradeModal();
-                    }
-                }, 800); // slight delay to ensure UI is ready
-            }
-            
-            if (_params.get('payment_return') === '1' || _params.get('upgraded') === 'dodo') {
-                if (window.kothaToast) window.kothaToast('🎉 Payment received! Verifying subscription…');
-                _params.delete('payment_return'); _params.delete('upgraded'); _params.delete('checkout_id');
-                const _qs = _params.toString();
-                window.history.replaceState({}, '', window.location.pathname + (_qs ? '?' + _qs : ''));
-                let _tries = 0;
-                const _poll = setInterval(async () => {
-                    _tries++;
-                    try {
-                        const statusRes = await fetch('/api/dodo/status?_t=' + Date.now());
-                        const statusData = await statusRes.json();
-                        if (statusData && (statusData.plan === 'kotha_pro' || statusData.status === 'active')) {
-                            // Verified by server — refresh user state
-                            const fresh = await (await fetch('/api/auth/me?_t=' + Date.now())).json();
-                            if (fresh && fresh.user) {
-                                window.__USER__ = fresh.user;
-                                renderPlanBadge(fresh.user);
-                            }
-                            if (window.kothaToast) window.kothaToast('✓ Kotha Pro active — unlimited AI unlocked!');
-                            clearInterval(_poll);
-                        }
-                    } catch {}
-                    if (_tries >= 10) {
-                        clearInterval(_poll);
-                        if (window.kothaToast) window.kothaToast('Payment is processing. Pro will activate shortly.');
-                    }
-                }, 2000);
-            }
-        } catch {}
 
         // Impersonation Indicator
         if (me.user.is_impersonating) {
@@ -558,104 +512,9 @@
         } else if (plan === 'paid') {
             badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-emerald-500/20';
             badge.innerHTML = `PRO ✦`;
-            if (upgradeUsd) upgradeUsd.classList.add('hidden');
         } else {
             badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900';
             badge.innerHTML = `FREE`;
         }
-
-        // ── Dodo global checkout (redirect-based) ──────────────────
-        if (upgradeUsd) {
-            // Keep visibility in sync on every render (e.g. after an in-session upgrade)
-            if (plan === 'paid') upgradeUsd.classList.add('hidden');
-
-            if (!upgradeUsd._dodoBound) {
-                upgradeUsd._dodoBound = true;
-
-                // Reveal the "Upgrade" option only for non-paid users when Dodo is configured
-                if (plan !== 'paid') {
-                    fetch('/api/dodo/plans')
-                        .then(r => r.json())
-                        .then(pd => {
-                            if (pd && pd.available) {
-                                const p = pd.plans && pd.plans[0];
-                                upgradeUsd.textContent = p ? `Upgrade ${p.display}` : 'Upgrade';
-                                upgradeUsd.classList.remove('hidden');
-                            }
-                        })
-                        .catch(() => {});
-                }
-
-                upgradeUsd.addEventListener('click', async () => {
-                    if (window.openUpgradeModal) window.openUpgradeModal();
-                });
-            }
-        }
     }
-
-    // Modal Control Logic
-    window.openUpgradeModal = function() {
-        const modal = document.getElementById('upgrade-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            // small delay to allow display:block to apply before animating opacity
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                const card = modal.querySelector('.glass-upgrade-card') || modal.querySelector('.custom-modal-card');
-                if (card) {
-                    card.classList.remove('scale-95');
-                    card.classList.add('scale-100');
-                }
-            }, 10);
-
-            // Attach click to the actual pay buttons inside the modal
-            const handleCheckoutClick = async (btn, planId) => {
-                if (btn._dodoBound) return;
-                btn._dodoBound = true;
-                btn.addEventListener('click', async () => {
-                    const allBtns = [document.getElementById('modal-pay-btn'), document.getElementById('modal-pay-monthly-btn')].filter(Boolean);
-                    allBtns.forEach(b => b.disabled = true);
-                    
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<div class="flex items-center justify-center py-4 text-white font-bold tracking-wide">Redirecting...</div>';
-                    try {
-                        const r = await fetch('/api/dodo/create-checkout', {
-                            method: 'POST',
-                            headers: { 'content-type': 'application/json' },
-                            body: JSON.stringify({ planId: planId }),
-                        });
-                        const d = await r.json();
-                        if (r.ok && d.url) { window.location.href = d.url; return; }
-                        if (window.kothaToast) window.kothaToast('Error: ' + (d.error || 'Checkout failed'));
-                    } catch (err) {
-                        if (window.kothaToast) window.kothaToast('Network error');
-                    }
-                    allBtns.forEach(b => b.disabled = false);
-                    btn.innerHTML = originalText;
-                });
-            };
-
-            const lifetimeBtn = document.getElementById('modal-pay-btn');
-            if (lifetimeBtn) handleCheckoutClick(lifetimeBtn, 'pro_lifetime');
-            
-            const monthlyBtn = document.getElementById('modal-pay-monthly-btn');
-            if (monthlyBtn) handleCheckoutClick(monthlyBtn, 'pro_monthly');
-        }
-    };
-
-    window.closeUpgradeModal = function() {
-        const modal = document.getElementById('upgrade-modal');
-        if (modal) {
-            modal.classList.add('opacity-0');
-            const card = modal.querySelector('.glass-upgrade-card') || modal.querySelector('.custom-modal-card');
-            if (card) {
-                card.classList.remove('scale-100');
-                card.classList.add('scale-95');
-            }
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-    };
-
 })();

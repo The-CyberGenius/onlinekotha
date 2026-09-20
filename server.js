@@ -41,7 +41,7 @@ const contactRouter = require('./server/contact');
 const emailModule = require('./server/email');
 const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = emailModule;
 
-const { router: dodoRouter, webhookHandler: dodoWebhookHandler } = require('./server/dodo');
+
 const { router: oauthRouter } = require('./server/oauth');
 const bcrypt = require('bcryptjs');
 const helmet = require('helmet');
@@ -104,7 +104,7 @@ app.use(compression({
 app.use(cookieParser());
 
 // Payment webhooks need the raw body for signature verification — must come BEFORE express.json()
-app.post('/api/webhooks/dodo', express.raw({ type: 'application/json' }), dodoWebhookHandler);
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -184,7 +184,7 @@ app.use('/api/upload', uploadRouter);
 
 app.use('/api/ai', aiRouter);
 
-app.use('/api/dodo', dodoRouter);
+
 app.use('/api/global-chat', globalChatRouter);
 app.use('/api/contact', contactRouter);
 

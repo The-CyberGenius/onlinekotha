@@ -154,7 +154,7 @@ CREATE INDEX IF NOT EXISTS idx_convmsg_conv ON conv_messages(conversation_id);
 CREATE TABLE IF NOT EXISTS payments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
-  provider TEXT NOT NULL DEFAULT 'dodo',
+  provider TEXT NOT NULL DEFAULT 'manual',
   order_id TEXT UNIQUE NOT NULL,
   payment_id TEXT,
   amount INTEGER NOT NULL,
@@ -212,9 +212,7 @@ function safeAddColumn(table, column, def) {
 }
 safeAddColumn('users', 'email_verified', 'INTEGER NOT NULL DEFAULT 0');
 // Stripe columns removed from migrations as Dodo is the sole payment gateway
-safeAddColumn('users', 'dodo_customer_id', 'TEXT');
-safeAddColumn('users', 'dodo_subscription_id', 'TEXT');
-safeAddColumn('users', 'dodo_product_id', 'TEXT');
+
 safeAddColumn('users', 'subscription_status', "TEXT DEFAULT 'none'");
 safeAddColumn('users', 'current_period_start', 'INTEGER');
 safeAddColumn('users', 'current_period_end', 'INTEGER');
