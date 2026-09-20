@@ -1173,13 +1173,41 @@
 
 
     <!-- ── Subscription Paywall / Upgrade Modal ── -->
+    <style>
+        .apple-glass-card { background-color: rgba(255, 255, 255, 0.85); border-color: rgba(0,0,0,0.05); }
+        .dark .apple-glass-card { background-color: rgba(20, 20, 20, 0.85) !important; border-color: rgba(255,255,255,0.1) !important; }
+        
+        .apple-list-bg { background-color: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.05); }
+        .dark .apple-list-bg { background-color: rgba(255,255,255,0.04) !important; border-color: rgba(255,255,255,0.05) !important; }
+        
+        .apple-text-primary { color: #111827; }
+        .dark .apple-text-primary { color: #ffffff !important; }
+        
+        .apple-text-secondary { color: #6b7280; }
+        .dark .apple-text-secondary { color: #9ca3af !important; }
+
+        .apple-lifetime-btn { background-color: #000000; color: #ffffff; }
+        .apple-lifetime-btn:hover { background-color: #1a1a1a; }
+        .dark .apple-lifetime-btn { background-color: #ffffff !important; color: #000000 !important; }
+        .dark .apple-lifetime-btn:hover { background-color: #f3f4f6 !important; }
+
+        .apple-monthly-btn { background-color: transparent; color: #111827; border-color: rgba(0,0,0,0.1); }
+        .apple-monthly-btn:hover { background-color: rgba(0,0,0,0.05); }
+        .dark .apple-monthly-btn { background-color: transparent !important; color: #ffffff !important; border-color: rgba(255,255,255,0.15) !important; }
+        .dark .apple-monthly-btn:hover { background-color: rgba(255,255,255,0.05) !important; }
+        
+        .apple-close-btn { background-color: rgba(0,0,0,0.05); color: #374151; }
+        .apple-close-btn:hover { background-color: rgba(0,0,0,0.1); }
+        .dark .apple-close-btn { background-color: rgba(255,255,255,0.1) !important; color: #d1d5db !important; }
+        .dark .apple-close-btn:hover { background-color: rgba(255,255,255,0.2) !important; }
+    </style>
     <div id="upgrade-modal" class="fixed inset-0 z-[10000] bg-black/70 backdrop-blur-md flex items-center justify-center hidden opacity-0 transition-all duration-400 px-4">
         <!-- Background Glow -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/30 rounded-full blur-[100px] pointer-events-none"></div>
 
-        <div class="glass-upgrade-card w-full mx-auto rounded-[32px] p-6 text-center relative overflow-hidden transform scale-95 transition-all duration-400 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border border-black/5 dark:border-white/10 bg-white/80 dark:bg-[#111111]/80 backdrop-blur-xl" style="max-width: 320px;">
+        <div class="glass-upgrade-card apple-glass-card w-full mx-auto rounded-[32px] p-6 text-center relative overflow-hidden transform scale-95 transition-all duration-400 shadow-[0_12px_40px_rgba(0,0,0,0.12)] border backdrop-blur-xl" style="max-width: 320px;">
             
-            <button onclick="closeUpgradeModal()" class="absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-gray-300 transition-all cursor-pointer z-10 backdrop-blur-md" title="Close">
+            <button onclick="closeUpgradeModal()" class="apple-close-btn absolute top-4 right-4 w-7 h-7 rounded-full flex items-center justify-center transition-all cursor-pointer z-10 backdrop-blur-md" title="Close">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
             
@@ -1187,37 +1215,37 @@
                 <img src="/KothaPro.png" alt="Kotha Pro" class="w-full h-full object-contain drop-shadow-sm">
             </div>
             
-            <h3 class="text-[22px] font-bold tracking-tight text-gray-900 dark:text-white mb-1.5">Upgrade to Pro</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 max-w-[240px] mx-auto leading-relaxed mb-5">
+            <h3 class="apple-text-primary text-[22px] font-bold tracking-tight mb-1.5">Upgrade to Pro</h3>
+            <p class="apple-text-secondary text-xs max-w-[240px] mx-auto leading-relaxed mb-5">
                 Unlock limitless possibilities and supercharge your Kotha experience.
             </p>
             
-            <div class="bg-black/5 dark:bg-white/5 rounded-2xl p-4 mb-5 border border-black/5 dark:border-white/5 text-left">
+            <div class="apple-list-bg rounded-2xl p-4 mb-5 border text-left">
                 <ul class="space-y-3">
                     <li class="flex items-start gap-2.5">
-                        <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                        <span class="text-[13px] font-medium text-gray-800 dark:text-gray-200 leading-tight">Unlimited AI Chats & Saves</span>
+                        <svg class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span class="apple-text-primary text-[13px] font-medium leading-tight">Unlimited AI Chats & Saves</span>
                     </li>
                     <li class="flex items-start gap-2.5">
-                        <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                        <span class="text-[13px] font-medium text-gray-800 dark:text-gray-200 leading-tight">Advanced deep analytics</span>
+                        <svg class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span class="apple-text-primary text-[13px] font-medium leading-tight">Advanced deep analytics</span>
                     </li>
                     <li class="flex items-start gap-2.5">
-                        <svg class="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                        <span class="text-[13px] font-medium text-gray-800 dark:text-gray-200 leading-tight">Priority Support</span>
+                        <svg class="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        <span class="apple-text-primary text-[13px] font-medium leading-tight">Priority Support</span>
                     </li>
                 </ul>
             </div>
             
             <div class="flex flex-col gap-3">
-                <button id="modal-pay-btn" data-plan="pro_lifetime" class="w-full bg-gray-900 dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-100 text-white dark:text-gray-900 rounded-[14px] transition-all active:scale-95 py-3.5 px-4 flex items-center justify-between shadow-sm cursor-pointer">
+                <button id="modal-pay-btn" data-plan="pro_lifetime" class="apple-lifetime-btn w-full rounded-[14px] transition-all active:scale-95 py-3.5 px-4 flex items-center justify-between shadow-sm cursor-pointer">
                     <div class="flex flex-col items-start">
                         <span class="font-bold text-[14px] leading-tight tracking-wide">Lifetime Deal</span>
                     </div>
                     <span class="text-[14px] font-black tracking-tight">$49</span>
                 </button>
                 
-                <button id="modal-pay-monthly-btn" data-plan="pro_monthly" class="w-full bg-transparent border border-gray-200 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 text-gray-900 dark:text-white rounded-[14px] transition-all active:scale-95 py-3.5 px-4 flex items-center justify-between cursor-pointer">
+                <button id="modal-pay-monthly-btn" data-plan="pro_monthly" class="apple-monthly-btn w-full border rounded-[14px] transition-all active:scale-95 py-3.5 px-4 flex items-center justify-between cursor-pointer">
                     <div class="flex flex-col items-start">
                         <span class="font-semibold text-[13px] leading-tight">Monthly Plan</span>
                     </div>
@@ -1225,7 +1253,7 @@
                 </button>
             </div>
             
-            <p class="text-[10px] font-medium text-gray-400 dark:text-gray-500 mt-5 flex items-center justify-center gap-1.5">
+            <p class="apple-text-secondary text-[10px] font-medium mt-5 flex items-center justify-center gap-1.5 opacity-80">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 Secure global billing by Dodo
             </p>
