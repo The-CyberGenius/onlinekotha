@@ -168,7 +168,20 @@
     <noscript>
         <link rel="stylesheet" href="/css/tailwind.min.css?v=1">
     </noscript>
-    <script>document.addEventListener('DOMContentLoaded', () => { if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => { }) });</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { 
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => { });
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        window.location.reload();
+                        refreshing = true;
+                    }
+                });
+            }
+        });
+    </script>
 
     <!-- ═══════════ MINIMAL DESIGN SYSTEM ═══════════ -->
     <style>
