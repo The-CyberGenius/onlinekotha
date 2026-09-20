@@ -3159,17 +3159,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 fab.click();
             }
         });
+    }
 
-        // Map QA buttons to their desktop counterparts
-        document.querySelectorAll('.qa-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const targetId = btn.getAttribute('data-target');
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) {
-                    targetEl.click();
-                }
-                fab.click(); // Close menu after clicking
-            });
+    // Map QA buttons to their desktop counterparts (works for both FAB menu and bottom nav)
+    document.querySelectorAll('.qa-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const targetId = btn.getAttribute('data-target');
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                targetEl.click();
+            }
+            // Close FAB menu if it's open
+            if (fab && isMenuOpen) fab.click();
+        });
+    });
+
+    // Header search button — opens sidebar and focuses search input
+    const headerSearchBtn = document.getElementById('header-search-btn');
+    if (headerSearchBtn) {
+        headerSearchBtn.addEventListener('click', () => {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+                setTimeout(() => searchInput.focus(), 150);
+            }
         });
     }
 });
