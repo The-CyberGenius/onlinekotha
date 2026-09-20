@@ -571,45 +571,45 @@
                 </div>
                 
                 <!-- Mobile In-Chat Toolbar (Mirrors sidebar actions) -->
-                <div class="flex md:hidden px-2 py-1.5 justify-between w-full shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#111b21]"
+                <div class="flex md:hidden px-1 py-1 justify-between w-full shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#111b21] shadow-[0_-2px_10px_rgba(0,0,0,0.02)]"
                     id="chat-view-toolbar" ontouchstart="event.stopPropagation()" ontouchend="event.stopPropagation()">
                     <button id="btn-top-2" title="Jump to top"
-                        class="action-pill text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl py-1 flex flex-1 flex-col items-center gap-1 transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6" /></svg>
-                        <span class="font-medium leading-none tracking-tight" style="font-size: 10px;">Top</span>
+                        class="action-pill text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl py-0.5 flex flex-1 flex-col items-center justify-center gap-[2px] transition active:scale-95">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6" /></svg>
+                        <span class="font-medium leading-none tracking-tight" style="font-size: 9px;">Top</span>
                     </button>
                     <button id="btn-bottom-2" title="Jump to bottom"
-                        class="action-pill text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl py-1 flex flex-1 flex-col items-center gap-1 transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-                        <span class="font-medium leading-none tracking-tight" style="font-size: 10px;">Bottom</span>
+                        class="action-pill text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl py-0.5 flex flex-1 flex-col items-center justify-center gap-[2px] transition active:scale-95">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                        <span class="font-medium leading-none tracking-tight" style="font-size: 9px;">Bottom</span>
                     </button>
                     <button id="btn-media-2" title="Media gallery"
-                        class="action-pill text-gray-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-xl py-1 flex flex-1 flex-col items-center gap-1 transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        class="action-pill text-gray-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-xl py-0.5 flex flex-1 flex-col items-center justify-center gap-[2px] transition active:scale-95">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="M21 15l-5-5L5 21" />
                         </svg>
-                        <span class="font-medium leading-none tracking-tight" style="font-size: 10px;">Media</span>
+                        <span class="font-medium leading-none tracking-tight" style="font-size: 9px;">Media</span>
                     </button>
                     <button id="btn-analytics-2" title="Analytics"
-                        class="action-pill text-gray-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-xl py-1 flex flex-1 flex-col items-center gap-1 transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        class="action-pill text-gray-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-xl py-0.5 flex flex-1 flex-col items-center justify-center gap-[2px] transition active:scale-95">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 3v18h18" /><path d="M18 17V9M13 17V5M8 17v-3" />
                         </svg>
-                        <span class="font-medium leading-none tracking-tight" style="font-size: 10px;">Stats</span>
+                        <span class="font-medium leading-none tracking-tight" style="font-size: 9px;">Stats</span>
                     </button>
                     <button id="btn-wrapped-2" title="Chat Wrapped"
-                        class="action-pill text-gray-500 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl py-1 flex flex-1 flex-col items-center gap-1 transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        class="action-pill text-gray-500 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl py-0.5 flex flex-1 flex-col items-center justify-center gap-[2px] transition active:scale-95">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                         </svg>
-                        <span class="font-medium leading-none tracking-tight" style="font-size: 10px;">Wrapped</span>
+                        <span class="font-medium leading-none tracking-tight" style="font-size: 9px;">Wrapped</span>
                     </button>
                     <button id="btn-filters-toggle-2" title="Filters"
-                        class="action-pill text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl py-1 flex flex-1 flex-col items-center gap-1 transition">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        class="action-pill text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl py-0.5 flex flex-1 flex-col items-center justify-center gap-[2px] transition active:scale-95">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
                         </svg>
-                        <span class="font-medium leading-none tracking-tight" style="font-size: 10px;">Filter</span>
+                        <span class="font-medium leading-none tracking-tight" style="font-size: 9px;">Filter</span>
                     </button>
                 </div>
             </div>
@@ -1343,6 +1343,19 @@
             fixViewport();
             // Fallback for orientation change / Safari glitches
             window.addEventListener('resize', fixViewport);
+        }
+
+        // Hide toolbar on mobile when input is focused to prevent overlapping and save screen space
+        const dmInputNode = document.getElementById('dm-input');
+        const chatViewToolbar = document.getElementById('chat-view-toolbar');
+        if (dmInputNode && chatViewToolbar) {
+            dmInputNode.addEventListener('focus', () => chatViewToolbar.style.display = 'none');
+            dmInputNode.addEventListener('blur', () => {
+                // Slight delay to allow clicks on toolbar immediately after blur to register
+                setTimeout(() => {
+                    chatViewToolbar.style.display = '';
+                }, 100);
+            });
         }
         
         // Extra lock to prevent body scroll
