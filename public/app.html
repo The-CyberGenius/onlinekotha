@@ -210,6 +210,8 @@
                 </button>
             </div>
 
+            <!-- Smart Filters Placeholder (for returning the element from mobile modal) -->
+            <div id="smart-filters-placeholder" class="hidden"></div>
             <!-- Inline Smart Filters Panel (collapsible, opens cleanly below Search Bar) -->
             <div id="smart-filters-container" class="hidden px-3.5 py-2.5 border-b border-gray-200 dark:border-gray-800 bg-gray-50/90 dark:bg-[#1a242b] shrink-0 transition-all duration-200">
                 <div class="flex items-center justify-between mb-2">
@@ -956,7 +958,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/script.js?v=9"></script>
+    <script src="js/script.js?v=10"></script>
     <script src="/js/ai-panel.js?v=9"></script>
     <script src="/js/upload.js?v=9"></script>
     <script src="/js/features.js?v=9"></script>
@@ -1377,6 +1379,33 @@
                     Cancel
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Mobile Inline Popup Overlay (Search & Filters) -->
+    <div id="mobile-popup-overlay" class="hidden fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <!-- Filter Modal -->
+        <div id="mobile-filter-modal" class="hidden w-full max-w-sm bg-white dark:bg-[#1a2329] rounded-2xl p-4 shadow-xl transform transition-all duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-800 dark:text-gray-100">Filters</h3>
+                <button id="close-mobile-filter" class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <!-- The smart-filters-container will be appended here on mobile -->
+            <div id="mobile-filter-content"></div>
+        </div>
+
+        <!-- Search Modal -->
+        <div id="mobile-search-modal" class="hidden w-full max-w-sm bg-white dark:bg-[#1a2329] rounded-2xl p-4 shadow-xl transform transition-all duration-300">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-gray-800 dark:text-gray-100">Search Chat</h3>
+                <button id="close-mobile-search" class="text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <input type="text" id="mobile-search-input" placeholder="Search keywords..." class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 text-gray-800 dark:text-gray-100 placeholder-gray-500 mb-4">
+            <button id="mobile-search-submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl py-2.5 transition shadow-sm">Search</button>
         </div>
     </div>
 

@@ -3188,9 +3188,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (targetId === 'btn-filters-toggle') {
-                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) targetEl.click();
+                const overlay = document.getElementById('mobile-popup-overlay');
+                const filterModal = document.getElementById('mobile-filter-modal');
+                const searchModal = document.getElementById('mobile-search-modal');
+                const filterContent = document.getElementById('mobile-filter-content');
+                const smartFilters = document.getElementById('smart-filters-container');
+                
+                if (overlay && filterModal && smartFilters) {
+                    if (searchModal) searchModal.classList.add('hidden');
+                    filterModal.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                    
+                    // Move filters into mobile modal
+                    filterContent.appendChild(smartFilters);
+                    smartFilters.classList.remove('hidden');
+                } else if (window.kothaSidebarOpen) {
+                    window.kothaSidebarOpen();
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) targetEl.click();
+                }
+                
                 if (fab && isMenuOpen) fab.click();
                 return;
             }
@@ -3204,39 +3221,74 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Header search button — opens sweetalert popup for search on mobile
+    // Header search button — opens custom mobile search popup
     const headerSearchBtn = document.getElementById('header-search-btn');
     if (headerSearchBtn) {
         headerSearchBtn.addEventListener('click', () => {
-            if (window.Swal) {
-                Swal.fire({
-                    title: 'Search Chat',
-                    input: 'text',
-                    inputPlaceholder: 'Enter keyword...',
-                    showCancelButton: true,
-                    confirmButtonText: 'Search',
-                    customClass: {
-                        popup: 'rounded-2xl dark:bg-[#202c33] dark:text-gray-100',
-                        input: 'rounded-xl border-gray-300 dark:border-gray-600 dark:bg-[#111b21] dark:text-gray-100 focus:ring-2 focus:ring-indigo-500',
-                        confirmButton: 'rounded-xl',
-                        cancelButton: 'rounded-xl'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed && result.value) {
-                        const searchInput = document.getElementById('search-input');
-                        if (searchInput) {
-                            searchInput.value = result.value;
-                            searchInput.dispatchEvent(new Event('input'));
-                            if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                        }
-                    }
-                });
+            const overlay = document.getElementById('mobile-popup-overlay');
+            const searchModal = document.getElementById('mobile-search-modal');
+            const filterModal = document.getElementById('mobile-filter-modal');
+            const searchInput = document.getElementById('mobile-search-input');
+            
+            if (overlay && searchModal) {
+                if (filterModal) filterModal.classList.add('hidden');
+                searchModal.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+                setTimeout(() => { if(searchInput) searchInput.focus(); }, 100);
             } else {
-                const searchInput = document.getElementById('search-input');
-                if (searchInput) {
+                const mainSearchInput = document.getElementById('search-input');
+                if (mainSearchInput) {
                     if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                    setTimeout(() => searchInput.focus(), 150);
+                    setTimeout(() => mainSearchInput.focus(), 150);
                 }
+            }
+        });
+    }
+
+    // Mobile Overlay Close Logic
+    const closeMobileOverlay = () => {
+        const overlay = document.getElementById('mobile-popup-overlay');
+        const filterModal = document.getElementById('mobile-filter-modal');
+        const searchModal = document.getElementById('mobile-search-modal');
+        const smartFilters = document.getElementById('smart-filters-container');
+        const placeholder = document.getElementById('smart-filters-placeholder');
+        
+        if (overlay) overlay.classList.add('hidden');
+        if (filterModal) filterModal.classList.add('hidden');
+        if (searchModal) searchModal.classList.add('hidden');
+        
+        // Return smart filters to original location
+        if (smartFilters && placeholder && placeholder.parentNode) {
+            placeholder.parentNode.insertBefore(smartFilters, placeholder.nextSibling);
+            smartFilters.classList.add('hidden');
+        }
+    };
+
+    const btnCloseFilter = document.getElementById('close-mobile-filter');
+    const btnCloseSearch = document.getElementById('close-mobile-search');
+    const mobileSearchSubmit = document.getElementById('mobile-search-submit');
+    const mobileOverlay = document.getElementById('mobile-popup-overlay');
+    const applyFiltersBtnMobile = document.getElementById('apply-filters-btn');
+
+    if (btnCloseFilter) btnCloseFilter.addEventListener('click', closeMobileOverlay);
+    if (btnCloseSearch) btnCloseSearch.addEventListener('click', closeMobileOverlay);
+    if (applyFiltersBtnMobile) applyFiltersBtnMobile.addEventListener('click', closeMobileOverlay);
+    
+    if (mobileOverlay) {
+        mobileOverlay.addEventListener('click', (e) => {
+            if (e.target === mobileOverlay) closeMobileOverlay();
+        });
+    }
+
+    if (mobileSearchSubmit) {
+        mobileSearchSubmit.addEventListener('click', () => {
+            const val = document.getElementById('mobile-search-input')?.value;
+            const mainSearch = document.getElementById('search-input');
+            if (mainSearch && val) {
+                mainSearch.value = val;
+                mainSearch.dispatchEvent(new Event('input'));
+                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+                closeMobileOverlay();
             }
         });
     }
