@@ -1099,6 +1099,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Respect active sender filter
                         if (activeSenderFilter && msg.sender !== activeSenderFilter) return false;
 
+                        // Media Toggle (Mobile)
+                        if (window.__showOnlyMedia) {
+                            const isMedia = msg.attachment || (msg.text && ['.jpg', '.jpeg', '.png', '.mp4', '.mov', 'image omitted', 'video omitted', 'audio omitted', 'document omitted'].some(ext => msg.text.toLowerCase().includes(ext)));
+                            if (!isMedia) return false;
+                        }
+
                         // Content check
                         if (!showMedia && msg.attachment) return false;
 
@@ -3165,6 +3171,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.qa-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const targetId = btn.getAttribute('data-target');
+
+            if (targetId === 'btn-media') {
+                window.__showOnlyMedia = !window.__showOnlyMedia;
+                if (window.__showOnlyMedia) {
+                    btn.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
+                    btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+                } else {
+                    btn.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
+                    btn.classList.add('text-gray-500', 'dark:text-gray-400');
+                }
+                const applyFiltersBtn = document.getElementById('apply-filters-btn');
+                if (applyFiltersBtn) applyFiltersBtn.click();
+                if (fab && isMenuOpen) fab.click();
+                return;
+            }
+
+            if (targetId === 'btn-filters-toggle') {
+                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) targetEl.click();
+                if (fab && isMenuOpen) fab.click();
+                return;
+            }
+
             const targetEl = document.getElementById(targetId);
             if (targetEl) {
                 targetEl.click();
@@ -3174,14 +3204,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Header search button — opens sidebar and focuses search input
+    // Header search button — opens sweetalert popup for search on mobile
     const headerSearchBtn = document.getElementById('header-search-btn');
     if (headerSearchBtn) {
         headerSearchBtn.addEventListener('click', () => {
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                setTimeout(() => searchInput.focus(), 150);
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Search Chat',
+                    input: 'text',
+                    inputPlaceholder: 'Enter keyword...',
+                    showCancelButton: true,
+                    confirmButtonText: 'Search',
+                    customClass: {
+                        popup: 'rounded-2xl dark:bg-[#202c33] dark:text-gray-100',
+                        input: 'rounded-xl border-gray-300 dark:border-gray-600 dark:bg-[#111b21] dark:text-gray-100 focus:ring-2 focus:ring-indigo-500',
+                        confirmButton: 'rounded-xl',
+                        cancelButton: 'rounded-xl'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                        const searchInput = document.getElementById('search-input');
+                        if (searchInput) {
+                            searchInput.value = result.value;
+                            searchInput.dispatchEvent(new Event('input'));
+                            if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+                        }
+                    }
+                });
+            } else {
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+                    setTimeout(() => searchInput.focus(), 150);
+                }
             }
         });
     }
