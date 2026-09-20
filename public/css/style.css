@@ -33,6 +33,87 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
 }
 
+/* =========================================================
+   Apple Liquid Glass & Ambient Background
+========================================================= */
+@keyframes orb-float {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes orb-float-reverse {
+    0% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-30px, 50px) scale(0.9); }
+    66% { transform: translate(20px, -20px) scale(1.1); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+.ambient-bg {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    overflow: hidden;
+    background-color: #fafafa;
+}
+html.dark .ambient-bg {
+    background-color: #050505;
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.5;
+}
+html.dark .orb {
+    opacity: 0.3;
+}
+
+.orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(147,197,253,1) 0%, rgba(59,130,246,0) 70%);
+    top: -100px; left: -100px;
+    animation: orb-float 15s ease-in-out infinite;
+}
+html.dark .orb-1 {
+    background: radial-gradient(circle, rgba(59,130,246,0.8) 0%, rgba(30,58,138,0) 70%);
+}
+
+.orb-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(196,181,253,1) 0%, rgba(139,92,246,0) 70%);
+    bottom: -50px; right: -50px;
+    animation: orb-float-reverse 18s ease-in-out infinite;
+}
+html.dark .orb-2 {
+    background: radial-gradient(circle, rgba(139,92,246,0.6) 0%, rgba(76,29,149,0) 70%);
+}
+
+.liquid-glass {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+}
+html.dark .liquid-glass {
+    background: rgba(20, 20, 25, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.liquid-glass-card {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.liquid-glass-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+html.dark .liquid-glass-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
 
 /* DM Row Typography & Optimization */
 .dm-row-title {
