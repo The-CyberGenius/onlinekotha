@@ -9,7 +9,7 @@ const STATIC_ASSETS = [
     '/js/ai-panel.js',
     '/js/upload.js',
     '/js/features.js',
-    './assets/favicon.svg',
+    './img/favicon.svg',
     '/manifest.json',
 ];
 

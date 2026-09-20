@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaHtml = `
                     <div class="relative group/media overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-indigo-400/50 w-[240px] sm:w-[260px] h-[220px] sm:h-[240px] flex flex-col justify-between mb-1" onclick="openImageModal('${fileUrl}')">
                         <div class="relative overflow-hidden rounded-xl bg-white/80 dark:bg-black/40 flex items-center justify-center flex-1 w-full p-2.5">
-                            <img src="${fileUrl}" loading="lazy" class="w-full h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-105" alt="Image" onerror="this.onerror=null;this.src='../assets/favicon.svg';">
+                            <img src="${fileUrl}" loading="lazy" class="w-full h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-105" alt="Image" onerror="this.onerror=null;this.src='../img/favicon.svg';">
                         </div>
                     </div>
                 `;
@@ -1618,7 +1618,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         <!-- Clean OK Emblem with animated logo (Light / Dark adaptive) -->
                         <div class="relative w-24 h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
-                            <img src="../assets/logo.svg" alt="OK Logo" class="w-full h-full object-contain" />
+                            <img src="../img/logo.svg" alt="OK Logo" class="w-full h-full object-contain" />
                         </div>
                     </div>
 
@@ -1643,7 +1643,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="w-full max-w-[280px] rounded-[14px] bg-white dark:bg-[#1c1c2e] p-2.5 text-left border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between gap-2 transition-all hover:border-indigo-500/30">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 flex items-center justify-center shrink-0">
-                            <img src="../assets/KothaPro.png" alt="Pro Logo" class="w-full h-full object-contain drop-shadow-sm rounded-lg">
+                            <img src="../img/KothaPro.png" alt="Pro Logo" class="w-full h-full object-contain drop-shadow-sm rounded-lg">
                         </div>
                         <div class="flex flex-col justify-center">
                             <p class="text-[12px] font-bold text-gray-900 dark:text-white leading-tight mb-0.5">Kotha Pro</p>
