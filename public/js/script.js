@@ -3174,18 +3174,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Hide mobile bottom nav when input is focused
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('bottom-ai-input');
-    const bottomNav = document.getElementById('mobile-bottom-nav');
-    if (input && bottomNav) {
-        input.addEventListener('focus', () => {
-            bottomNav.classList.add('hidden');
-            bottomNav.classList.remove('flex');
-        });
-        input.addEventListener('blur', () => {
-            bottomNav.classList.remove('hidden');
-            bottomNav.classList.add('flex');
-        });
-    }
-});
+
+
+// Fix for iOS Safari Keyboard overlap
+if (window.visualViewport) {
+    const adjustViewport = () => {
+        document.documentElement.style.setProperty('--vh', `${window.visualViewport.height}px`);
+        // If the input is focused, scroll it into view
+        const input = document.activeElement;
+        if (input && input.tagName === 'INPUT') {
+            setTimeout(() => {
+                input.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        }
+    };
+    window.visualViewport.addEventListener('resize', adjustViewport);
+    adjustViewport();
+}
