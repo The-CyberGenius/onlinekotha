@@ -1263,20 +1263,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgCount = chatMeta?.messageCount || chatMeta?.count || '';
 
             const item = document.createElement('div');
-            item.className = `flex items-center gap-2 px-2 py-0.5 rounded-lg cursor-pointer transition-all duration-150 group ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942]' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
+            item.className = `flex items-center gap-3 px-3 py-2.5 mx-1.5 mb-1.5 rounded-2xl cursor-pointer transition-all duration-200 group border border-transparent ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942] !border-gray-200 dark:!border-gray-700/50 shadow-sm' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-[13px] shadow-sm shrink-0">${initial}</div>
-                <div class="min-w-0 flex-1 border-b border-gray-100 dark:border-gray-800/50 pb-0.5">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-[14px] shadow-sm shrink-0">${initial}</div>
+                <div class="min-w-0 flex-1 pb-0.5">
                     <div class="flex items-center justify-between gap-1 mt-0">
                         <div class="flex items-center gap-1 overflow-hidden">
-                            <p class="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">${escapeHTML(displayName)}</p>
+                            <p class="text-[14px] font-semibold text-gray-900 dark:text-gray-100 truncate leading-tight tracking-tight">${escapeHTML(displayName)}</p>
                             ${chatMeta?.deletedByUser ? '<span class="px-1 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
                         </div>
-                        <span class="text-[9px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
+                        <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
                     </div>
-                    <div class="flex items-center justify-between gap-1 mt-0">
-                        <p class="text-[11px] text-gray-400 font-normal truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
+                    <div class="flex items-center justify-between gap-1 mt-0.5">
+                        <p class="text-[12px] text-gray-500 dark:text-gray-400 font-normal truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
@@ -1337,13 +1337,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!r.ok) throw new Error('Failed');
                     loadedChats = loadedChats.filter(c => c !== chat);
                     if (chat === currentChat && loadedChats.length > 0) {
-                        currentChat = loadedChats[0];
-                        window.currentChat = loadedChats[0];
-                        loadData(loadedChats[0]);
+                        currentChat = '';
+                        window.currentChat = '';
+                        showEmptyState();
                     } else if (loadedChats.length === 0) {
-                        currentChat = '__global__';
-                        window.currentChat = '__global__';
-                        loadData('__global__');
+                        currentChat = '';
+                        window.currentChat = '';
+                        showEmptyState();
                     }
                     renderChatList(loadedChats, currentChat);
                 } catch (err) {
@@ -1500,24 +1500,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     } else {
-                        // Fresh startup: if only kotha assistant, auto open
-                        if (chats.length === 1 && chats[0] === 'kotha_assistant') {
-                            currentChat = 'kotha_assistant';
-                            window.currentChat = 'kotha_assistant';
-                            loadData('kotha_assistant');
-                        } else if (chats.length === 0) {
-                            currentChat = '__global__';
-                            window.currentChat = '__global__';
-                            loadData('__global__');
-                        } else {
-                            currentChat = chats[0];
-                            window.currentChat = chats[0];
-                            loadData(chats[0]);
-                        }
-                        removeEmptyState();
+                        // Fresh startup: do not open any chat by default
+                        currentChat = '';
+                        window.currentChat = '';
+                        showEmptyState();
                     }
                     // Render visual chat list (always)
-                    renderChatList(chats, currentChat !== '__global__' && (targetChat || currentChat === 'kotha_assistant') ? currentChat : '');
+                    renderChatList(chats, currentChat);
                 }
             } else {
                 showEmptyState();
