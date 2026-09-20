@@ -2813,6 +2813,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (rhTpl) rhOverlay.appendChild(rhTpl.content.cloneNode(true));
         document.body.appendChild(rhOverlay);
         function syncOverlay() {
+            if (isMobile()) {
+                if (inited) resetPosition();
+                rhOverlay.style.display = 'none';
+                return;
+            } else if (!inited && !frame.classList.contains('mac-fullscreen')) {
+                // If resized back to desktop, re-initialize position so it doesn't break
+                if (window.innerWidth >= 768) {
+                    const initialW = Math.max(850, Math.min(window.innerWidth * 0.85, 1000));
+                    const initialH = Math.min(window.innerHeight * 0.85, Math.max(700, initialW - 100));
+                    frame.style.position = 'absolute';
+                    frame.style.width = initialW + 'px';
+                    frame.style.height = initialH + 'px';
+                    frame.style.left = ((window.innerWidth - initialW) / 2) + 'px';
+                    frame.style.top = (window.innerHeight - initialH - 80) + 'px'; 
+                    frame.style.margin = '0';
+                    document.body.style.position = 'relative';
+                    inited = true;
+                }
+            }
+
             if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-minimized')) {
                 rhOverlay.style.display = 'none';
                 return;
