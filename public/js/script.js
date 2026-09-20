@@ -2871,8 +2871,14 @@ document.addEventListener('DOMContentLoaded', () => {
             window.kothaCompact = compact;
             frame.classList.toggle('kompact', compact);
             if (compact) {
-                // collapse sidebar into slide-in overlay
-                if (sidebarEl) sidebarEl.classList.add('-translate-x-full');
+                // collapse sidebar into slide-in overlay, BUT open it automatically if no chat is active
+                if (!window.currentChat) {
+                    if (sidebarEl) sidebarEl.classList.remove('-translate-x-full');
+                    const bd = document.getElementById('sidebar-backdrop');
+                    if (bd) bd.classList.remove('hidden');
+                } else {
+                    if (sidebarEl) sidebarEl.classList.add('-translate-x-full');
+                }
             } else {
                 if (sidebarEl) sidebarEl.classList.remove('-translate-x-full');
                 const bd = document.getElementById('sidebar-backdrop');
@@ -3105,3 +3111,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+
+// Mobile Quick Actions FAB Logic
+document.addEventListener('DOMContentLoaded', () => {
+    const fab = document.getElementById('quick-actions-fab');
+    const menu = document.getElementById('quick-actions-menu');
+    const iconGrid = document.getElementById('fab-icon-grid');
+    const iconClose = document.getElementById('fab-icon-close');
+    let isMenuOpen = false;
+
+    if (fab && menu) {
+        fab.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                menu.classList.remove('hidden');
+                // Small delay to allow display block to apply before transition
+                setTimeout(() => {
+                    menu.classList.remove('scale-90', 'opacity-0');
+                    menu.classList.add('scale-100', 'opacity-100');
+                    iconGrid.classList.add('scale-50', 'opacity-0', 'rotate-90');
+                    iconClose.classList.remove('scale-50', 'opacity-0');
+                    iconClose.classList.add('scale-100', 'opacity-100', 'rotate-90');
+                }, 10);
+            } else {
+                menu.classList.remove('scale-100', 'opacity-100');
+                menu.classList.add('scale-90', 'opacity-0');
+                iconGrid.classList.remove('scale-50', 'opacity-0', 'rotate-90');
+                iconClose.classList.remove('scale-100', 'opacity-100', 'rotate-90');
+                iconClose.classList.add('scale-50', 'opacity-0');
+                setTimeout(() => {
+                    menu.classList.add('hidden');
+                }, 300);
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            if (isMenuOpen && !menu.contains(e.target) && !fab.contains(e.target)) {
+                fab.click();
+            }
+        });
+
+        // Map QA buttons to their desktop counterparts
+        document.querySelectorAll('.qa-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const targetId = btn.getAttribute('data-target');
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    targetEl.click();
+                }
+                fab.click(); // Close menu after clicking
+            });
+        });
+    }
+});
