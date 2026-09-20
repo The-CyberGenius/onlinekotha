@@ -1057,14 +1057,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const years = new Set();
                 allMessages.forEach(msg => {
                     if (!msg.date) return;
-                    const parts = msg.date.split('/');
-                    if (parts.length === 3) years.add(parts[2]);
+                    const parts = msg.date.split(/[\/\-.]/);
+                    if (parts.length === 3) years.add(parts[2].trim());
                 });
                 const yearSelect = document.getElementById('filter-year');
                 yearSelect.innerHTML = '<option value="">Year</option>';
                 [...years].sort().forEach(y => {
-                    const fullYear = y.length === 2 ? `20${y}` : y;
-                    yearSelect.innerHTML += `<option value="${y}">${fullYear}</option>`;
+                    const fullYear = y.length === 2 ? `20${y}` : (y.length === 4 ? y : null);
+                    if (fullYear) yearSelect.innerHTML += `<option value="${y}">${fullYear}</option>`;
                 });
                 const daySelect = document.getElementById('filter-day');
                 daySelect.innerHTML = '<option value="">Day</option>';
@@ -3313,9 +3313,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileSearchResults = document.getElementById('mobile-search-results');
     const mobileSearchStats = document.getElementById('mobile-search-stats');
 
-    if (mobileSearchInput) {
-        mobileSearchInput.addEventListener('input', (e) => {
-            const val = e.target.value.trim();
+    if (mobileSearchInput && mobileSearchSubmit) {
+        const performSearch = () => {
+            const val = mobileSearchInput.value.trim();
             const lowerVal = val.toLowerCase();
 
             if (lowerVal.length < 2) {
@@ -3368,6 +3368,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 mobileSearchResults.classList.remove('hidden');
             }
+        };
+
+        mobileSearchSubmit.addEventListener('click', performSearch);
+        mobileSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
         });
     }
 });

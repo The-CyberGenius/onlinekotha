@@ -1406,8 +1406,12 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
-            <input type="text" id="mobile-search-input" placeholder="Search keywords..." class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 text-gray-800 dark:text-gray-100 placeholder-gray-500 mb-4">
-            <button id="mobile-search-submit" class="hidden">Search</button>
+            <div class="relative mb-4">
+                <input type="text" id="mobile-search-input" placeholder="Search keywords..." class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 text-gray-800 dark:text-gray-100 placeholder-gray-500">
+                <button id="mobile-search-submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+            </div>
             <div id="mobile-search-stats" class="text-xs text-gray-500 dark:text-gray-400 mb-2 mt-1 empty:hidden"></div>
             <div id="mobile-search-results" class="max-h-[250px] overflow-y-auto no-scrollbar flex flex-col gap-1.5 empty:hidden border-t border-gray-100 dark:border-gray-800/50 pt-2"></div>
         </div>
