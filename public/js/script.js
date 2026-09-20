@@ -3239,27 +3239,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerSearchBtn = document.getElementById('header-search-btn');
     if (headerSearchBtn) {
         headerSearchBtn.addEventListener('click', () => {
-            const overlay = document.getElementById('mobile-popup-overlay');
-            const searchModal = document.getElementById('mobile-search-modal');
-            const filterModal = document.getElementById('mobile-filter-modal');
-            const searchInput = document.getElementById('mobile-search-input');
-            
-            if (overlay && searchModal) {
-                if (filterModal) {
-                    filterModal.classList.add('hidden');
-                    filterModal.style.display = 'none';
-                }
-                searchModal.classList.remove('hidden');
-                searchModal.style.display = 'block';
-                overlay.classList.remove('hidden');
-                overlay.style.setProperty('display', 'flex', 'important');
-                setTimeout(() => { if(searchInput) searchInput.focus(); }, 100);
-            } else {
-                const mainSearchInput = document.getElementById('search-input');
-                if (mainSearchInput) {
-                    if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                    setTimeout(() => mainSearchInput.focus(), 150);
-                }
+            const mainSearchInput = document.getElementById('search-box');
+            if (mainSearchInput) {
+                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+                setTimeout(() => mainSearchInput.focus(), 150);
             }
         });
     }
@@ -3268,7 +3251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeMobileOverlay = () => {
         const overlay = document.getElementById('mobile-popup-overlay');
         const filterModal = document.getElementById('mobile-filter-modal');
-        const searchModal = document.getElementById('mobile-search-modal');
         const smartFilters = document.getElementById('smart-filters-container');
         const placeholder = document.getElementById('smart-filters-placeholder');
         
@@ -3280,10 +3262,6 @@ document.addEventListener('DOMContentLoaded', () => {
             filterModal.classList.add('hidden');
             filterModal.style.display = 'none';
         }
-        if (searchModal) {
-            searchModal.classList.add('hidden');
-            searchModal.style.display = 'none';
-        }
         
         // Return smart filters to original location
         if (smartFilters && placeholder && placeholder.parentNode) {
@@ -3294,85 +3272,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const btnCloseFilter = document.getElementById('close-mobile-filter');
-    const btnCloseSearch = document.getElementById('close-mobile-search');
-    const mobileSearchSubmit = document.getElementById('mobile-search-submit');
     const mobileOverlay = document.getElementById('mobile-popup-overlay');
     const applyFiltersBtnMobile = document.getElementById('apply-filters-btn');
 
     if (btnCloseFilter) btnCloseFilter.addEventListener('click', closeMobileOverlay);
-    if (btnCloseSearch) btnCloseSearch.addEventListener('click', closeMobileOverlay);
     if (applyFiltersBtnMobile) applyFiltersBtnMobile.addEventListener('click', closeMobileOverlay);
     
     if (mobileOverlay) {
         mobileOverlay.addEventListener('click', (e) => {
             if (e.target === mobileOverlay) closeMobileOverlay();
-        });
-    }
-
-    const mobileSearchInput = document.getElementById('mobile-search-input');
-    const mobileSearchResults = document.getElementById('mobile-search-results');
-    const mobileSearchStats = document.getElementById('mobile-search-stats');
-
-    if (mobileSearchInput && mobileSearchSubmit) {
-        const performSearch = () => {
-            const val = mobileSearchInput.value.trim();
-            const lowerVal = val.toLowerCase();
-
-            if (lowerVal.length < 2) {
-                if (mobileSearchResults) {
-                    mobileSearchResults.innerHTML = '';
-                    mobileSearchResults.classList.add('hidden');
-                }
-                if (mobileSearchStats) {
-                    mobileSearchStats.innerHTML = '';
-                    mobileSearchStats.classList.add('hidden');
-                }
-                return;
-            }
-
-            // Deep search in loaded messages
-            const filteredMsgs = [];
-            if (allMessages && allMessages.length > 0) {
-                for (let i = 0; i < allMessages.length; i++) {
-                    if (allMessages[i].text && allMessages[i].text.toLowerCase().includes(lowerVal)) {
-                        filteredMsgs.push(allMessages[i]);
-                    }
-                }
-            }
-
-            if (mobileSearchStats) {
-                mobileSearchStats.innerHTML = `Found <span class="font-bold text-indigo-600 dark:text-indigo-400">${filteredMsgs.length.toLocaleString()}</span> message matches.`;
-                mobileSearchStats.classList.remove('hidden');
-            }
-
-            if (mobileSearchResults) {
-                if (filteredMsgs.length === 0) {
-                    mobileSearchResults.innerHTML = `<div class="text-xs text-gray-400 py-2 text-center">No message matches found</div>`;
-                } else {
-                    let resultsHtml = '';
-                    const limitRes = filteredMsgs.slice(-50);
-                    const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                    limitRes.forEach(msg => {
-                        const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
-                        resultsHtml += `
-                            <div class="p-2 bg-gray-50 dark:bg-[#1a2329] hover:bg-indigo-50 dark:hover:bg-gray-700/50 shadow-sm cursor-pointer border border-gray-100 dark:border-gray-800 transition-all rounded-lg mb-1.5" onclick="jumpToMsg(${msg.id})">
-                                <div class="flex justify-between items-center mb-0.5">
-                                    <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender || 'System')}">${msg.sender || 'System'}</span> 
-                                    <span class="text-[9px] text-gray-400 font-semibold">${msg.date || ''} ${msg.time || ''}</span>
-                                </div>
-                                <p class="text-[11px] text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
-                            </div>
-                        `;
-                    });
-                    mobileSearchResults.innerHTML = resultsHtml;
-                }
-                mobileSearchResults.classList.remove('hidden');
-            }
-        };
-
-        mobileSearchSubmit.addEventListener('click', performSearch);
-        mobileSearchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performSearch();
         });
     }
 });
