@@ -3195,13 +3195,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const smartFilters = document.getElementById('smart-filters-container');
                 
                 if (overlay && filterModal && smartFilters) {
-                    if (searchModal) searchModal.classList.add('hidden');
+                    if (searchModal) {
+                        searchModal.classList.add('hidden');
+                        searchModal.style.display = 'none';
+                    }
                     filterModal.classList.remove('hidden');
+                    filterModal.style.display = 'block';
                     overlay.classList.remove('hidden');
+                    overlay.style.setProperty('display', 'flex', 'important');
                     
                     // Move filters into mobile modal
                     filterContent.appendChild(smartFilters);
                     smartFilters.classList.remove('hidden');
+                    smartFilters.style.display = 'block';
                 } else if (window.kothaSidebarOpen) {
                     window.kothaSidebarOpen();
                     const targetEl = document.getElementById(targetId);
@@ -3231,9 +3237,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('mobile-search-input');
             
             if (overlay && searchModal) {
-                if (filterModal) filterModal.classList.add('hidden');
+                if (filterModal) {
+                    filterModal.classList.add('hidden');
+                    filterModal.style.display = 'none';
+                }
                 searchModal.classList.remove('hidden');
+                searchModal.style.display = 'block';
                 overlay.classList.remove('hidden');
+                overlay.style.setProperty('display', 'flex', 'important');
                 setTimeout(() => { if(searchInput) searchInput.focus(); }, 100);
             } else {
                 const mainSearchInput = document.getElementById('search-input');
@@ -3253,14 +3264,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const smartFilters = document.getElementById('smart-filters-container');
         const placeholder = document.getElementById('smart-filters-placeholder');
         
-        if (overlay) overlay.classList.add('hidden');
-        if (filterModal) filterModal.classList.add('hidden');
-        if (searchModal) searchModal.classList.add('hidden');
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.style.display = 'none';
+        }
+        if (filterModal) {
+            filterModal.classList.add('hidden');
+            filterModal.style.display = 'none';
+        }
+        if (searchModal) {
+            searchModal.classList.add('hidden');
+            searchModal.style.display = 'none';
+        }
         
         // Return smart filters to original location
         if (smartFilters && placeholder && placeholder.parentNode) {
             placeholder.parentNode.insertBefore(smartFilters, placeholder.nextSibling);
             smartFilters.classList.add('hidden');
+            smartFilters.style.display = 'none';
         }
     };
 
