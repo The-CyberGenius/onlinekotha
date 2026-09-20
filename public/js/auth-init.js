@@ -601,7 +601,7 @@
             // small delay to allow display:block to apply before animating opacity
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
-                const card = modal.querySelector('.custom-modal-card');
+                const card = modal.querySelector('.animated-border-wrap') || modal.querySelector('.custom-modal-card');
                 if (card) {
                     card.classList.remove('scale-95');
                     card.classList.add('scale-100');
@@ -647,12 +647,14 @@
         const modal = document.getElementById('upgrade-modal');
         if (modal) {
             modal.classList.add('opacity-0');
-            const card = modal.querySelector('.custom-modal-card');
+            const card = modal.querySelector('.animated-border-wrap') || modal.querySelector('.custom-modal-card');
             if (card) {
                 card.classList.remove('scale-100');
                 card.classList.add('scale-95');
             }
-            setTimeout(() => modal.classList.add('hidden'), 300);
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
         }
     };
 
