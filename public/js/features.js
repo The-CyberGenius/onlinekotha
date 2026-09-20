@@ -2471,6 +2471,8 @@
     function initWrapped() {
         const btn = document.getElementById('btn-wrapped');
         if (btn) btn.addEventListener('click', launchWrapped);
+        const btn2 = document.getElementById('btn-wrapped-2');
+        if (btn2) btn2.addEventListener('click', launchWrapped);
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initWrapped);

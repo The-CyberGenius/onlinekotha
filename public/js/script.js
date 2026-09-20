@@ -39,6 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnTop = document.getElementById('btn-top');
     const btnBottom = document.getElementById('btn-bottom');
     const btnMedia = document.getElementById('btn-media');
+    
+    const btnTop2 = document.getElementById('btn-top-2');
+    const btnBottom2 = document.getElementById('btn-bottom-2');
+    const btnMedia2 = document.getElementById('btn-media-2');
 
     // Mobile Sidebar Elements
     const sidebar = document.getElementById('sidebar');
@@ -51,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalContent = document.getElementById('modal-content');
 
     const btnAnalytics = document.getElementById('btn-analytics');
+    const btnAnalytics2 = document.getElementById('btn-analytics-2');
     const analyticsModal = document.getElementById('analytics-modal');
     const closeAnalytics = document.getElementById('close-analytics');
     const dynamicHeaderDate = document.getElementById('dynamic-header-date');
@@ -1713,24 +1718,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Inline Filters toggle under search bar
     const filtersToggle = document.getElementById('btn-filters-toggle');
+    const filtersToggle2 = document.getElementById('btn-filters-toggle-2');
     const filtersContainer = document.getElementById('smart-filters-container');
     const closeFiltersBtn = document.getElementById('close-filters-btn');
-    if (filtersToggle && filtersContainer) {
+    if (filtersContainer) {
         function openFilters() {
             filtersContainer.classList.remove('hidden');
-            filtersToggle.classList.add('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+            if (filtersToggle) filtersToggle.classList.add('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+            if (filtersToggle2) filtersToggle2.classList.add('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
             // Scroll sidebar list to top so filters are in full view
             const sidebarChatsTab = document.getElementById('sidebar-chats-tab');
             if (sidebarChatsTab) sidebarChatsTab.scrollTop = 0;
         }
         function closeFilters() {
             filtersContainer.classList.add('hidden');
-            filtersToggle.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+            if (filtersToggle) filtersToggle.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+            if (filtersToggle2) filtersToggle2.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
         }
-        filtersToggle.addEventListener('click', (e) => {
+        const toggleFilters = (e) => {
             e.stopPropagation();
             if (filtersContainer.classList.contains('hidden')) { openFilters(); } else { closeFilters(); }
-        });
+        };
+        if (filtersToggle) filtersToggle.addEventListener('click', toggleFilters);
+        if (filtersToggle2) filtersToggle2.addEventListener('click', toggleFilters);
         if (closeFiltersBtn) closeFiltersBtn.addEventListener('click', closeFilters);
     }
 
@@ -2394,7 +2404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(showOnboarding, 800);
 
     // Quick Action Listeners
-    btnTop.addEventListener('click', () => {
+    const scrollToTopAction = () => {
         if (!currentChat || currentChat === '__global__' || !allMessages.length) {
             if (window.kothaToast) window.kothaToast('Open a chat first');
             return;
@@ -2403,9 +2413,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
         setTimeout(() => scrollArea.scrollTop = 0, 10);
         toggleSidebar(false);
-    });
+    };
+    if (btnTop) btnTop.addEventListener('click', scrollToTopAction);
+    if (btnTop2) btnTop2.addEventListener('click', scrollToTopAction);
 
-    btnBottom.addEventListener('click', () => {
+    const scrollToBottomAction = () => {
         if (!currentChat || currentChat === '__global__' || !allMessages.length) {
             if (window.kothaToast) window.kothaToast('Open a chat first');
             return;
@@ -2415,7 +2427,9 @@ document.addEventListener('DOMContentLoaded', () => {
         renderChats(Math.max(0, end - CHUNK_SIZE), end);
         setTimeout(() => scrollArea.scrollTop = scrollArea.scrollHeight, 10);
         toggleSidebar(false);
-    });
+    };
+    if (btnBottom) btnBottom.addEventListener('click', scrollToBottomAction);
+    if (btnBottom2) btnBottom2.addEventListener('click', scrollToBottomAction);
 
     const openMediaGallery = () => {
         if (!currentChat || currentChat === '__global__' || !allMessages.length) {
@@ -2429,6 +2443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleSidebar(false);
     };
     if (btnMedia) btnMedia.addEventListener('click', openMediaGallery);
+    if (btnMedia2) btnMedia2.addEventListener('click', openMediaGallery);
 
     const closeAnModal = () => {
         analyticsModal.classList.remove('opacity-100');
@@ -2552,6 +2567,7 @@ document.addEventListener('DOMContentLoaded', () => {
         analyticsModal.classList.add('opacity-100');
     };
     if (btnAnalytics) btnAnalytics.addEventListener('click', openAnalyticsModal);
+    if (btnAnalytics2) btnAnalytics2.addEventListener('click', openAnalyticsModal);
 
     // Explicit Button-Triggered Search Logic
     const searchResultsContainer = document.getElementById('search-results');
