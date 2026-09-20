@@ -598,6 +598,43 @@
             color: var(--accent);
         }
 
+        .hero-split {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 48px;
+        }
+
+        .hero-text-content {
+            flex: 1;
+            min-width: 320px;
+            text-align: left;
+        }
+
+        .hero-image-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        @media (max-width: 900px) {
+            .hero-split {
+                flex-direction: column;
+                text-align: center;
+                gap: 64px;
+            }
+            .hero-text-content {
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero-text-content h1, .hero-text-content p {
+                text-align: center;
+            }
+        }
+
         .grid {
             display: grid;
             gap: 18px;
@@ -927,51 +964,73 @@
     </script>
 
     <!-- ═══════════ HERO ═══════════ -->
-    <section class="hero">
-        <div class="hero-glow"></div>
-        <div class="wrap">
-            <div class="rise d1" style="margin-bottom:30px;">
-                <span class="pill"><span class="dot"></span>AI-powered chat memories</span>
-            </div>
+    <section class="hero sec" style="padding-top: 140px; padding-bottom: 80px;">
+        <div class="wrap hero-split">
+            <!-- Left Side: Text -->
+            <div class="hero-text-content">
+                <div class="rise d1" style="margin-bottom:30px;">
+                    <span class="pill"><span class="dot"></span>AI-powered chat memories</span>
+                </div>
 
-            <h1 class="display rise d2" style="margin-bottom:22px;">
-                Bring your memories to life<br><span class="accent-text">with interactive AI.</span>
-            </h1>
+                <h1 class="display rise d2" style="margin-bottom:22px;">
+                    Bring your memories to life<br><span class="accent-text">with interactive AI.</span>
+                </h1>
 
-            <p class="lead rise d3" style="max-width:640px;margin:0 auto 34px;">
-                Transform your everyday WhatsApp chats into a living connection. Our AI deeply analyzes your history to learn their unique humor, slang, and vibe—allowing you to <span style="color:var(--text-primary);font-weight:600;">relive your favorite conversations anytime.</span>
-            </p>
-
-            <div class="rise d4"
-                style="display:flex;flex-direction:column;gap:14px;justify-content:center;align-items:center;margin-bottom:12px;">
-                <a href="/login.html" id="hero-cta" class="btn cta-primary"
-                    style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);">
-                    Import Your Chat — It's Free
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round">
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                    </svg>
-                </a>
-
-                <p class="dim"
-                    style="font-size:13px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:12px;">
-                    <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14"
-                            viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg> Free forever</span>
-                    <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14"
-                            viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg> No credit card</span>
-                    <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14"
-                            viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg> 100% Private</span>
+                <p class="lead rise d3" style="max-width:600px; margin-bottom: 34px;">
+                    Transform your everyday WhatsApp chats into a living connection. Our AI deeply analyzes your history to learn their unique humor, slang, and vibe—allowing you to <span style="color:var(--text-primary);font-weight:600;">relive your favorite conversations anytime.</span>
                 </p>
+
+                <div class="rise d4" style="display:flex; flex-direction:column; gap:16px; margin-bottom:12px;">
+                    <a href="/login.html" id="hero-cta" class="btn cta-primary"
+                        style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25); align-self: flex-start;">
+                        Import Your Chat — It's Free
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <path d="M5 12h14M13 5l7 7-7 7" />
+                        </svg>
+                    </a>
+
+                    <p class="dim" style="font-size:13px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;gap:12px; flex-wrap: wrap;">
+                        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Free forever</span>
+                        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> No credit card</span>
+                        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 100% Private</span>
+                    </p>
+                </div>
             </div>
 
+            <!-- Right Side: Visual Frame -->
+            <div class="hero-image-content rise d3">
+                <div style="position: absolute; inset: -40px; background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%); filter: blur(40px); z-index: -1;"></div>
+                
+                <div class="mockup-frame liquid-glass" style="width: 100%; max-width: 380px; aspect-ratio: 10/12; border-radius: 32px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 24px 60px rgba(0,0,0,0.4); transform: perspective(1000px) rotateY(-8deg) rotateX(4deg); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease; cursor: pointer;" onmouseover="this.style.transform='perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-8px)'; this.style.boxShadow='0 32px 80px rgba(99,102,241,0.4)';" onmouseout="this.style.transform='perspective(1000px) rotateY(-8deg) rotateX(4deg)'; this.style.boxShadow='0 24px 60px rgba(0,0,0,0.4)';">
+                    
+                    <!-- Mac OS Style Top Bar -->
+                    <div style="height: 44px; background: rgba(0,0,0,0.25); backdrop-filter: blur(10px); display: flex; align-items: center; padding: 0 18px; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                        <div style="width: 11px; height: 11px; border-radius: 50%; background: #ff5f56; box-shadow: inset 0 0 4px rgba(0,0,0,0.2);"></div>
+                        <div style="width: 11px; height: 11px; border-radius: 50%; background: #ffbd2e; box-shadow: inset 0 0 4px rgba(0,0,0,0.2);"></div>
+                        <div style="width: 11px; height: 11px; border-radius: 50%; background: #27c93f; box-shadow: inset 0 0 4px rgba(0,0,0,0.2);"></div>
+                        <div style="flex: 1; text-align: center; color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding-right: 33px;">KOTHA AI</div>
+                    </div>
 
-
+                    <!-- Replaceable Photo Area -->
+                    <div style="position: absolute; inset: 44px 0 0 0; background: linear-gradient(180deg, transparent 40%, rgba(10,10,15,0.95) 100%), url('/og-image.png') center/cover no-repeat; display: flex; flex-direction: column; justify-content: flex-end; padding: 24px;">
+                        
+                        <!-- Floating Bubbles -->
+                        <div style="background: rgba(255,255,255,0.95); padding: 14px 18px; border-radius: 20px 20px 20px 4px; color: #111; font-size: 14px; font-weight: 500; max-width: 85%; margin-bottom: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transform: translateY(0); animation: floatBubble 4s ease-in-out infinite;">
+                            Hey! Missed you so much today 🥺
+                        </div>
+                        
+                        <div style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 14px 18px; border-radius: 20px 20px 4px 20px; color: #fff; font-size: 14px; font-weight: 500; max-width: 85%; align-self: flex-end; box-shadow: 0 8px 32px rgba(99,102,241,0.3); transform: translateY(0); animation: floatBubble 4s ease-in-out infinite 1s;">
+                            Missed you too! Let's talk ❤️
+                        </div>
+                        <style>
+                            @keyframes floatBubble {
+                                0%, 100% { transform: translateY(0); }
+                                50% { transform: translateY(-4px); }
+                            }
+                        </style>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -2125,8 +2184,11 @@
 
         <!-- Floating Toggle Button with Label Badge -->
         <div style="display:flex;align-items:center;gap:10px;">
-            <button id="toggle-assistant-btn" style="width:60px;height:60px;border-radius:999px;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(99,102,241,0.35);transition:transform 0.2s, box-shadow 0.2s;overflow:hidden;position:relative;">
-                <img src="/KothaPro.png" alt="Assistant" style="width:100%;height:100%;object-fit:cover;">
+            <button id="toggle-assistant-btn" aria-label="Open AI Assistant" style="width:60px;height:60px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #8b5cf6);border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(99,102,241,0.4);transition:transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;position:relative;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    <path d="M12 9v2m0 4h.01"></path>
+                </svg>
             </button>
             <div id="assistant-badge" style="display:flex;align-items:center;gap:6px;background:rgba(18,18,28,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-primary);box-shadow:0 6px 20px rgba(0,0,0,0.3);pointer-events:none;transition:opacity 0.2s;">
                 <span style="display:inline-block;width:7px;height:7px;border-radius:999px;background:#34d399;box-shadow:0 0 8px #34d399;"></span>
