@@ -104,7 +104,7 @@
         banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-gray-900 text-white rounded-2xl p-4 shadow-2xl z-[90] flex items-center gap-3 animate-message';
         banner.innerHTML = `
             <div class="w-10 h-10 flex items-center justify-center shrink-0">
-                <img src="/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow-md">
+                <img src="/assets/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow-md">
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold">Install Kotha</p>
@@ -145,7 +145,7 @@
         banner.innerHTML = `
             <div class="flex items-start gap-3">
                 <div class="w-10 h-10 flex items-center justify-center shrink-0">
-                    <img src="/logo.svg" alt="Logo" class="w-8 h-8 drop-shadow-md">
+                    <img src="/assets/logo.svg" alt="Logo" class="w-8 h-8 drop-shadow-md">
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-bold">Install Kotha App</p>

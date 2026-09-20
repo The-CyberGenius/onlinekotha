@@ -90,7 +90,7 @@
                          class="w-full h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-105" 
                          onclick="window.kothaOpenLightbox(this.src)" 
                          loading="lazy"
-                         onerror="this.onerror=null;this.src='/favicon.svg';">
+                         onerror="this.onerror=null;this.src='/assets/favicon.svg';">
                 </div>
                 ${caption ? `<div class="px-2 pb-1 pt-1.5 text-[13px] leading-snug break-words truncate shrink-0">${caption.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
             </div>`;
@@ -386,7 +386,7 @@
                     const toast = document.createElement('div');
                     toast.innerHTML = `
                         <div style="display:flex;align-items:center;gap:12px;">
-                            <img src="${msg.avatar_url || '/favicon-96.png'}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                            <img src="${msg.avatar_url || '/assets/favicon-96.png'}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
                             <div>
                                 <div style="font-weight:700;font-size:14px;color:#111827;">${title}</div>
                                 <div style="font-size:12px;color:#4b5563;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${bodyText}</div>
@@ -417,7 +417,7 @@
                 if (Notification.permission === 'default') {
                     Notification.requestPermission();
                 } else if (Notification.permission === 'granted' && document.hidden) {
-                    const n = new Notification(title, { body: bodyText, icon: msg.avatar_url || '/favicon-96.png' });
+                    const n = new Notification(title, { body: bodyText, icon: msg.avatar_url || '/assets/favicon-96.png' });
                     n.onclick = () => {
                         window.focus();
                         openConv(msg.conv_id, title, msg.avatar_url, msg.sender_id);
