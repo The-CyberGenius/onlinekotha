@@ -3166,3 +3166,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Hide mobile bottom nav when input is focused
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('bottom-ai-input');
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (input && bottomNav) {
+        input.addEventListener('focus', () => {
+            bottomNav.classList.add('hidden');
+            bottomNav.classList.remove('flex');
+        });
+        input.addEventListener('blur', () => {
+            bottomNav.classList.remove('hidden');
+            bottomNav.classList.add('flex');
+        });
+    }
+});
