@@ -1365,12 +1365,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.ensureIdentity === 'function') {
                         await window.ensureIdentity(chat);
                     }
-                    const inp = document.getElementById('bottom-ai-input');
-                    if (inp) inp.focus();
+                    if (window.innerWidth >= 768) {
+                        const inp = document.getElementById('bottom-ai-input');
+                        if (inp) inp.focus();
+                    }
                 });
                 toggleSidebar(false);
                 // Also try focus after sidebar animation completes (mobile)
-                setTimeout(() => { const inp = document.getElementById('bottom-ai-input'); if (inp) inp.focus(); }, 350);
+                setTimeout(() => { 
+                    if (window.innerWidth >= 768) {
+                        const inp = document.getElementById('bottom-ai-input'); 
+                        if (inp) inp.focus(); 
+                    }
+                }, 350);
             });
             chatListUI.appendChild(item);
         });
