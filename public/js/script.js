@@ -3179,7 +3179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Fix for iOS Safari Keyboard overlap
 if (window.visualViewport) {
     const adjustViewport = () => {
-        document.documentElement.style.setProperty('--vh', `${window.visualViewport.height}px`);
+        document.documentElement.style.setProperty('--viewport-height', `${window.visualViewport.height}px`);
         // If the input is focused, scroll it into view
         const input = document.activeElement;
         if (input && input.tagName === 'INPUT') {

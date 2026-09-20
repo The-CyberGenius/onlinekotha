@@ -48,7 +48,7 @@
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
 </head>
 
-<body class="app-shell flex flex-col items-center justify-center fixed inset-0 w-screen overflow-hidden p-0 md:p-4 lg:p-6" style="height: calc(var(--vh, 1vh) * 100); min-height: 100dvh;">
+<body class="app-shell flex flex-col items-center justify-center fixed inset-0 w-screen overflow-hidden p-0 md:p-4 lg:p-6" style="height: var(--viewport-height, 100dvh);">
 
     <!-- macOS Window Frame (wraps #app on md+, invisible on mobile) -->
     <div id="mac-frame" class="flex flex-col w-full h-full md:h-full md:max-w-7xl md:mx-auto relative">
@@ -752,7 +752,7 @@
             </div>
 
             <!-- Mobile Bottom Navigation Bar -->
-            <div id="mobile-bottom-nav" class="md:hidden w-full h-[60px] bg-[#f0f2f5] dark:bg-[#1c1c1e] border-t border-gray-200 dark:border-white/10 flex items-center justify-around px-2 shrink-0 z-20 pb-[env(safe-area-inset-bottom)]">
+            <div id="mobile-bottom-nav" class="md:hidden w-full min-h-[60px] pt-1 bg-[#f0f2f5] dark:bg-[#1c1c1e] border-t border-gray-200 dark:border-white/10 flex items-center justify-around px-2 shrink-0 z-20 pb-[env(safe-area-inset-bottom)]">
                 <!-- Chats (Sidebar) -->
                 <button class="flex flex-col items-center justify-center w-14 h-full gap-1 text-gray-500 hover:text-[#00a884] dark:text-gray-400 dark:hover:text-[#00a884] transition-colors" onclick="if(window.kothaSidebarOpen) window.kothaSidebarOpen()">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -942,11 +942,11 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/script.js?v=4"></script>
-    <script src="js/upload.js?v=4"></script>
-    <script src="js/ai-panel.js?v=4"></script>
-    <script src="js/features.js?v=4"></script>
-    <script src="js/dm.js?v=4"></script>
+    <script src="/js/script.js?v=6"></script>
+    <script src="js/upload.js?v=6"></script>
+    <script src="js/ai-panel.js?v=6"></script>
+    <script src="js/features.js?v=6"></script>
+    <script src="js/dm.js?v=6"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });
