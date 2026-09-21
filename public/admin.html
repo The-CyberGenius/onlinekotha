@@ -1163,7 +1163,7 @@
                         <p>Track automated emails and send custom messages directly to users.</p>
                     </div>
                     <div class="controls-row">
-                        <button onclick="openManualEmailModal()" class="header-btn" style="background:var(--primary);color:white;border-color:var(--primary);">
+                        <button onclick="openManualEmailModal()" class="header-btn" style="background:var(--accent);color:white;border-color:var(--accent);">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                             Send Manual Email
                         </button>
@@ -1174,8 +1174,8 @@
                     </div>
                 </div>
 
-                <div class="table-container" style="overflow-x:auto;">
-                    <table class="data-table">
+                <div class="table-responsive">
+                    <table class="admin-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -1220,7 +1220,7 @@
                 </div>
                 <div style="display:flex;gap:8px;justify-content:flex-end;">
                     <button class="header-btn" onclick="closeManualEmailModal()">Cancel</button>
-                    <button class="header-btn" style="background:var(--primary);color:white;border-color:var(--primary);" onclick="submitManualEmail()" id="btn-send-manual-email">Send Email</button>
+                    <button class="header-btn" style="background:var(--accent);color:white;border-color:var(--accent);" onclick="submitManualEmail()" id="btn-send-manual-email">Send Email</button>
                 </div>
             </div>
         </div>

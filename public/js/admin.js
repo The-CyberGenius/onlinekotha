@@ -1314,6 +1314,7 @@ HARD RULES
             tbody.innerHTML = '';
             for (const log of data.logs) {
                 const tr = document.createElement('tr');
+                tr.className = 'user-main-row';
                 const statusColor = log.status === 'sent' || log.status === 'console' ? '#16a34a' : '#dc2626';
                 tr.innerHTML = `
                     <td style="white-space:nowrap;font-size:12px;">${formatDateTime(log.sent_at)}</td>
