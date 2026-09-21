@@ -5,6 +5,7 @@ const { db, getSetting } = require('./db');
 const { createSession, checkIpAccountLimit } = require('./auth');
 const integ = require('./integrations');
 const geoip = require('geoip-lite');
+const { sendWelcomeEmail } = require('./email');
 
 const router = express.Router();
 
@@ -88,6 +89,7 @@ function ensureStrategy(req) {
                      VALUES (?, '', ?, 'trial', ?, ?, 1, ?, ?, ?, ?, ?)`
                 ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl, ip, country);
                 user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+                user._isNewUser = true;
             }
 
             done(null, user);
@@ -146,6 +148,11 @@ router.get('/google/callback', (req, res, next) => {
         });
 
         const state = typeof req.query.state === 'string' && req.query.state.startsWith('/') ? req.query.state : (user.is_admin ? '/admin.html' : '/app');
+        
+        if (user._isNewUser) {
+            sendWelcomeEmail(user.email, user.display_name).catch(err => console.error('OAuth welcome email failed:', err.message));
+        }
+
         res.redirect(state);
     })(req, res, next);
 });
@@ -213,6 +220,7 @@ router.post('/google/onetap', async (req, res) => {
                  VALUES (?, '', ?, 'trial', ?, ?, 1, ?, ?, ?, ?, ?)`
             ).run(email, now, trialExpiresAt, isAdmin, googleId, displayName, avatarUrl, ip, country);
             user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
+            user._isNewUser = true;
         }
 
         const { claimGuestData } = require('./guest');
@@ -228,6 +236,10 @@ router.post('/google/onetap', async (req, res) => {
             ...(IS_PROD && { secure: true }),
             expires: new Date(expiresAt),
         });
+
+        if (user._isNewUser) {
+            sendWelcomeEmail(user.email, user.display_name).catch(err => console.error('One-Tap welcome email failed:', err.message));
+        }
 
         const redirect = user.is_admin ? '/admin.html' : '/app';
         res.json({ ok: true, redirect, user: { id: user.id, email: user.email, display_name: user.display_name, avatar_url: user.avatar_url } });

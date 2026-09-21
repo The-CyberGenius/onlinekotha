@@ -144,6 +144,53 @@ async function testEmail(to) {
     }
 }
 
+async function sendWelcomeEmail(to, name) {
+    const greeting = name ? `Hi ${name},` : 'Hi there,';
+    
+    const body = `
+        <p>${greeting}</p>
+        <p>Thanks for joining Kotha! We're thrilled to have you here.</p>
+        
+        <h3 style="color:#111827;font-size:16px;margin-top:24px;">How to use Kotha:</h3>
+        <ol style="color:#4b5563;font-size:15px;line-height:1.6;padding-left:20px;">
+            <li style="margin-bottom:8px;"><strong>Chat & Explore:</strong> Start interacting immediately by jumping into a chat or exploring the models available.</li>
+            <li style="margin-bottom:8px;"><strong>Settings:</strong> Customize your profile and AI preferences by clicking on the settings icon on the bottom left.</li>
+            <li style="margin-bottom:8px;"><strong>Save your work:</strong> Your chats are automatically saved so you can pick up exactly where you left off across any device.</li>
+        </ol>
+
+        <h3 style="color:#111827;font-size:16px;margin-top:24px;">Unlock more with the Pro Plan 🌟</h3>
+        <p style="color:#4b5563;font-size:15px;">If you need more power, our Pro plan gives you:</p>
+        <ul style="color:#4b5563;font-size:15px;line-height:1.6;padding-left:20px;">
+            <li style="margin-bottom:6px;"><strong>Unlimited Messages:</strong> No daily chat limits.</li>
+            <li style="margin-bottom:6px;"><strong>Premium Models:</strong> Chat with the most advanced AI models (GPT-4, Claude Opus, etc.).</li>
+            <li style="margin-bottom:6px;"><strong>Faster Response:</strong> Priority processing for zero delays.</li>
+            <li style="margin-bottom:6px;"><strong>Early Access:</strong> Be the first to try out our new experimental features!</li>
+        </ul>
+        <p style="color:#4b5563;font-size:15px;margin-top:16px;">You can upgrade anytime from the "Plans" section in your dashboard.</p>
+        
+        <p style="color:#4b5563;font-size:15px;margin-top:24px;">
+            Happy exploring!<br>
+            <strong>The Kotha Team</strong>
+        </p>
+    `;
+
+    const html = emailLayout(
+        'Welcome aboard! 🚀',
+        body,
+        getBaseUrl(),
+        'Explore Kotha'
+    );
+
+    const text = `${greeting}\n\nThanks for joining Kotha! We're thrilled to have you here.\n\nHow to use Kotha:\n1. Chat & Explore\n2. Settings\n3. Save your work\n\nUnlock more with the Pro Plan:\n- Unlimited Messages\n- Premium Models\n- Faster Response\n- Early Access\n\nHappy exploring!\nThe Kotha Team`;
+
+    return sendMail({
+        to,
+        subject: "Welcome to Kotha! 🚀 Here's how to get started",
+        html,
+        text
+    });
+}
+
 function configured() {
     return !!buildTransporter();
 }
@@ -156,4 +203,5 @@ module.exports = {
     testEmail,
     resetTransporter,
     configured,
+    sendWelcomeEmail,
 };

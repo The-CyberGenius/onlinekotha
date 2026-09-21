@@ -12,7 +12,7 @@ const {
     logout,
     effectivePlan,
 } = require('../auth');
-const { sendVerifyEmail, sendPasswordResetEmail, consumeToken } = require('../email');
+const { sendVerifyEmail, sendPasswordResetEmail, consumeToken, sendWelcomeEmail } = require('../email');
 const { claimGuestData, getGuestStatus } = require('../guest');
 const { router: oauthRouter } = require('../oauth');
 
@@ -70,6 +70,10 @@ router.post('/signup', authLimiter, async (req, res) => {
 
         const { token, expiresAt } = createSession(user.id);
         res.cookie('session', token, { ...COOKIE_OPTS, expires: new Date(expiresAt) });
+        
+        // Send async welcome email
+        sendWelcomeEmail(user.email, user.display_name).catch(err => console.error('Welcome email failed:', err.message));
+        
         res.json({ ok: true, user });
     } catch (err) {
         res.status(400).json({ error: err.message || 'Signup failed' });
