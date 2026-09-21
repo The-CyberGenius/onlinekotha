@@ -1350,13 +1350,13 @@ HARD RULES
         
         if (tpl === 'general') {
             sub.value = 'Important Update from Kotha';
-            body.value = '<p>Hi there,</p><p>We wanted to share an important update with you...</p><p>Best,<br>The Kotha Team</p>';
+            body.value = '<p>Hi there,</p><p>We wanted to share an important update with you...</p><p>Check it out here: <a href="https://onlinekotha.com">onlinekotha.com</a></p><p>Best,<br>The Kotha Team</p>';
         } else if (tpl === 'warning') {
             sub.value = 'Action Required: Account Warning';
-            body.value = '<p>Hi,</p><p>We noticed some unusual activity on your account. Please review our Terms of Service.</p><p>Regards,<br>Kotha Support</p>';
+            body.value = '<p>Hi,</p><p>We noticed some unusual activity on your account. Please review our Terms of Service at <a href="https://onlinekotha.com">onlinekotha.com</a>.</p><p>Regards,<br>Kotha Support</p>';
         } else if (tpl === 'promo') {
             sub.value = 'Unlock Kotha Pro Today! 🌟';
-            body.value = '<p>Hi!</p><p>Are you enjoying Kotha? Upgrade to the Pro plan today to unlock unlimited messages, premium models, and priority support.</p><p>Check out the Plans tab in your dashboard!</p><p>Happy exploring,<br>The Kotha Team</p>';
+            body.value = '<p>Hi!</p><p>Are you enjoying Kotha? Upgrade to the Pro plan today to unlock unlimited messages, premium models, and priority support.</p><p>Check out the Plans tab in your dashboard: <a href="https://onlinekotha.com">onlinekotha.com</a></p><p>Happy exploring,<br>The Kotha Team</p>';
         } else {
             sub.value = '';
             body.value = '';
