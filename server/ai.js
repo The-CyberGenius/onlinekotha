@@ -695,4 +695,52 @@ function parseDateStr(dateStr) {
     return new Date(parseInt(y), parseInt(parts[1]) - 1, parseInt(parts[0])).getTime();
 }
 
+
+// Compatibility Endpoint
+router.post('/chat/:folder/compatibility', aiGate, async (req, res) => {
+    try {
+        const chatFolder = req.params.folder;
+        const { dirKey } = getOwner(req);
+        const baseDir = path.resolve(userDir(dirKey));
+        const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
+        const chatDir = path.resolve(baseDir, cleanFolder);
+        if (!chatDir.startsWith(baseDir)) return res.status(403).json({ error: 'Invalid path' });
+
+        const parsed = await getMessages(chatDir);
+        const chatMessages = parsed.messages || [];
+        
+        // Take a uniform sample of max 200 messages for analysis
+        let sample = [];
+        if (chatMessages.length <= 200) {
+            sample = chatMessages;
+        } else {
+            const step = Math.max(1, Math.floor(chatMessages.length / 200));
+            for (let i = 0; i < chatMessages.length; i += step) {
+                sample.push(chatMessages[i]);
+                if (sample.length >= 200) break;
+            }
+        }
+        
+        const contextStr = formatContext(sample);
+        const prompt = `Analyze the following chat context and determine a compatibility score (0 to 100) between the participants based on their communication style, responsiveness, affection, shared humor, and conflict resolution. 
+Provide a short 2-3 sentence summary explaining the score.
+Output STRICTLY valid JSON with this format: {"score": 85, "summary": "Your explanation here."}
+        
+Context:
+${contextStr}`;
+
+        const reply = await callLLM([{ role: 'user', content: prompt }], 'Respond ONLY with JSON.');
+        
+        let jsonStr = reply;
+        const match = reply.match(/\{.*\}/s);
+        if (match) jsonStr = match[0];
+        
+        const data = JSON.parse(jsonStr);
+        res.json({ score: data.score, summary: data.summary });
+    } catch (e) {
+        console.error('Compatibility error:', e);
+        res.status(500).json({ error: 'Failed to analyze compatibility' });
+    }
+});
+
 module.exports = router;

@@ -522,6 +522,62 @@
     };
 
     // ─────────────────────────────────────────────
+    //  Media Upload
+    // ─────────────────────────────────────────────
+    const attachBtn = document.getElementById('ai-attach-btn');
+    const fileInput = document.getElementById('ai-file-input');
+    
+    if (attachBtn && fileInput) {
+        attachBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Optional: check file size (e.g., 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                toast('Image too large. Max 5MB.');
+                return;
+            }
+
+            attachBtn.disabled = true;
+            attachBtn.style.opacity = '0.5';
+            toast('Uploading image...');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const resp = await fetch('/api/media/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await resp.json();
+                if (data.url) {
+                    // Append markdown to input
+                    const currentText = bottomInput.value;
+                    const imgMd = `![image](${data.url})`;
+                    bottomInput.value = currentText ? `${currentText}\n${imgMd}` : imgMd;
+                    updateSendBtn();
+                    toast('Image attached! Type a message or hit send.');
+                } else {
+                    toast(data.error || 'Upload failed');
+                }
+            } catch (err) {
+                console.error('Upload error', err);
+                toast('Upload error');
+            } finally {
+                attachBtn.disabled = false;
+                attachBtn.style.opacity = '1';
+                fileInput.value = ''; // Reset
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────
     //  Send handler
     // ─────────────────────────────────────────────
     async function handleSend() {

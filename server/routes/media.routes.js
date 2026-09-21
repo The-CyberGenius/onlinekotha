@@ -76,4 +76,46 @@ router.get('/*rest', requireUserOrGuest, (req, res, next) => {
     res.sendFile(fullPath);
 });
 
+
+const multer = require('multer');
+const crypto = require('crypto');
+
+const MEDIA_DIR = path.join(__dirname, '..', '..', 'data', 'chat_media');
+if (!fs.existsSync(MEDIA_DIR)) {
+    fs.mkdirSync(MEDIA_DIR, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, MEDIA_DIR),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        const rand = crypto.randomBytes(8).toString('hex');
+        cb(null, `media_${Date.now()}_${rand}${ext}`);
+    }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) return cb(new Error('Only images allowed'));
+        cb(null, true);
+    }
+});
+
+router.post('/chat-upload', upload.single('file'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    res.json({ url: `/api/media/chat-view/${req.file.filename}` });
+});
+
+router.get('/chat-view/:filename', (req, res) => {
+    const filename = req.params.filename;
+    if (!/^[a-zA-Z0-9_\-\.]+$/.test(filename) || filename.includes('..')) {
+        return res.status(400).json({ error: 'Invalid filename' });
+    }
+    const filePath = path.join(MEDIA_DIR, filename);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Not found' });
+    res.sendFile(filePath);
+});
+
 module.exports = router;

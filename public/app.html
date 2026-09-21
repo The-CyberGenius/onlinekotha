@@ -739,15 +739,16 @@
                     </div>
                     <div id="ai-input-wrap"
                         class="flex items-center gap-2.5 bg-white dark:bg-[#2a3942] rounded-xl px-3 py-2 min-h-[52px] shadow-sm">
-                        <button
+                        <button id="ai-attach-btn"
                             class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                            title="Attach file (Disabled)">
+                            title="Attach image">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round">
                                 <path
                                     d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                             </svg>
                         </button>
+                        <input type="file" id="ai-file-input" accept="image/*" class="hidden" style="display: none;">
                         <input type="text" id="bottom-ai-input" placeholder="Type a message..."
                             class="flex-1 bg-transparent border-none text-[15px] font-medium text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 min-w-0 outline-none">
                         <button id="bottom-ai-send"
@@ -961,6 +962,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/script.js?v=13"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="/js/ai-panel.js?v=9"></script>
     <script src="/js/upload.js?v=9"></script>
     <script src="/js/features.js?v=9"></script>

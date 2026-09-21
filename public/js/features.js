@@ -736,305 +736,9 @@
 
     // ── Canvas export card — Instagram/Facebook story optimized (1080×1920) ──
     function exportWrappedCanvas(stats, action) {
-        try {
-            const C = document.createElement('canvas');
-            const W = 1080, H = 1920;
-            C.width = W; C.height = H;
-            const ctx = C.getContext('2d');
-            if (!ctx) { showToast('Canvas not supported'); return; }
-
-            // ── Rich gradient background ──
-            const bg = ctx.createLinearGradient(0, 0, W, H);
-            bg.addColorStop(0, '#0f0720');
-            bg.addColorStop(0.3, '#1a0d3a');
-            bg.addColorStop(0.6, '#120a2e');
-            bg.addColorStop(1, '#080510');
-            ctx.fillStyle = bg;
-            ctx.fillRect(0, 0, W, H);
-
-            // ── Multiple glow orbs for depth ──
-            const orbs = [
-                [180, 240, '#6366f1', 420, 0.25],
-                [900, 400, '#a855f7', 350, 0.18],
-                [540, 960, '#ec4899', 500, 0.12],
-                [200, 1500, '#f59e0b', 380, 0.15],
-                [850, 1650, '#6366f1', 300, 0.2],
-            ];
-            orbs.forEach(([x, y, hex, r, alpha]) => {
-                const hr = parseInt(hex.slice(1, 3), 16), hg = parseInt(hex.slice(3, 5), 16), hb = parseInt(hex.slice(5, 7), 16);
-                const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-                g.addColorStop(0, `rgba(${hr},${hg},${hb},${alpha})`);
-                g.addColorStop(0.6, `rgba(${hr},${hg},${hb},${alpha * 0.3})`);
-                g.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = g;
-                ctx.fillRect(0, 0, W, H);
-            });
-
-            // ── Noise/grain texture overlay ──
-            for (let i = 0; i < 3000; i++) {
-                const nx = Math.random() * W, ny = Math.random() * H;
-                ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.015})`;
-                ctx.fillRect(nx, ny, 1, 1);
-            }
-
-            ctx.textBaseline = 'top';
-
-            // ── Top branding bar ──
-            ctx.textAlign = 'left';
-            ctx.font = '800 28px -apple-system, "Segoe UI", sans-serif';
-            ctx.fillStyle = '#818cf8';
-            ctx.fillText('✦ KOTHA WRAPPED', 80, 100);
-            // Professional watermark top right
-            ctx.textAlign = 'right';
-            ctx.font = '800 24px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
-            ctx.fillText('onlinekotha.com', W - 80, 104);
-
-            // Thin accent line
-            const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
-            lineGrad.addColorStop(0, '#6366f1');
-            lineGrad.addColorStop(0.5, '#ec4899');
-            lineGrad.addColorStop(1, '#f59e0b');
-            ctx.fillStyle = lineGrad;
-            ctx.fillRect(80, 148, W - 160, 3);
-
-            // ── Name section ──
-            ctx.textAlign = 'left';
-            ctx.font = '900 72px -apple-system, "Segoe UI", sans-serif';
-            ctx.fillStyle = '#fff';
-            const nameText = `Chat with`;
-            ctx.fillText(nameText, 80, 200);
-
-            // Name with gradient
-            let nameFont = 80;
-            ctx.font = `900 ${nameFont}px -apple-system, "Segoe UI", sans-serif`;
-            const nameVal = stats.otherName;
-            while (ctx.measureText(nameVal).width > W - 180 && nameFont > 40) {
-                nameFont -= 2;
-                ctx.font = `900 ${nameFont}px -apple-system, "Segoe UI", sans-serif`;
-            }
-            const nameGrad = ctx.createLinearGradient(80, 290, 600, 290);
-            nameGrad.addColorStop(0, '#a5b4fc');
-            nameGrad.addColorStop(0.5, '#c084fc');
-            nameGrad.addColorStop(1, '#f472b6');
-            ctx.fillStyle = nameGrad;
-            ctx.fillText(nameVal, 80, 290);
-
-            // Nickname subtitle
-            let subtitleY = 290 + nameFont + 10;
-            if (stats.detectedNickname && stats.detectedNickname.toLowerCase() !== stats.otherName.toLowerCase()) {
-                ctx.font = '700 30px -apple-system, sans-serif';
-                ctx.fillStyle = '#c084fc';
-                ctx.fillText(`aka "${stats.detectedNickname}"`, 80, subtitleY);
-                subtitleY += 45;
-            }
-
-            // Date range
-            ctx.font = '600 26px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            ctx.fillText(`${stats.firstDate || '—'}  →  ${stats.lastDate || '—'}`, 80, subtitleY);
-
-            // ── Glass card: Total Messages ──
-            const cardY = subtitleY + 80;
-            ctx.beginPath();
-            roundedRect(ctx, 60, cardY, W - 120, 260, 32);
-            ctx.fillStyle = 'rgba(255,255,255,0.04)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            ctx.font = '800 22px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.4)';
-            ctx.letterSpacing = '3px';
-            ctx.fillText('TOTAL MESSAGES', 110, cardY + 35);
-
-            ctx.font = '900 120px -apple-system, sans-serif';
-            const numGrad = ctx.createLinearGradient(110, cardY + 70, 110, cardY + 200);
-            numGrad.addColorStop(0, '#ffffff');
-            numGrad.addColorStop(1, '#a5b4fc');
-            ctx.fillStyle = numGrad;
-            ctx.fillText(stats.totalMessages.toLocaleString(), 110, cardY + 75);
-
-            ctx.font = '600 24px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.25)';
-            ctx.fillText(`${stats.avgWords} avg words per message`, 110, cardY + 210);
-
-            // ── Talk Ratio section ──
-            const ratY = cardY + 300;
-            ctx.font = '800 22px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.4)';
-            ctx.fillText('WHO TALKED MORE', 80, ratY);
-
-            // Sender 1
-            const s1Y = ratY + 50;
-            ctx.font = 'bold 30px -apple-system, sans-serif';
-            ctx.fillStyle = '#a5b4fc';
-            ctx.fillText(`${stats.sender1Name}`, 80, s1Y);
-            ctx.textAlign = 'right';
-            ctx.fillText(`${stats.sender1Percent}%`, W - 80, s1Y);
-            ctx.textAlign = 'left';
-
-            const barFullW = W - 160;
-            // Bar track
-            ctx.beginPath(); roundedRect(ctx, 80, s1Y + 48, barFullW, 16, 8);
-            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
-            // Bar fill
-            const s1W = Math.max(4, barFullW * stats.sender1Percent / 100);
-            ctx.beginPath(); roundedRect(ctx, 80, s1Y + 48, s1W, 16, 8);
-            const s1Grad = ctx.createLinearGradient(80, 0, 80 + s1W, 0);
-            s1Grad.addColorStop(0, '#6366f1');
-            s1Grad.addColorStop(1, '#818cf8');
-            ctx.fillStyle = s1Grad; ctx.fill();
-
-            // Sender 2
-            const s2Y = s1Y + 85;
-            ctx.font = 'bold 30px -apple-system, sans-serif';
-            ctx.fillStyle = '#f472b6';
-            ctx.fillText(`${stats.sender2Name}`, 80, s2Y);
-            ctx.textAlign = 'right';
-            ctx.fillText(`${stats.sender2Percent}%`, W - 80, s2Y);
-            ctx.textAlign = 'left';
-
-            ctx.beginPath(); roundedRect(ctx, 80, s2Y + 48, barFullW, 16, 8);
-            ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
-            const s2W = Math.max(4, barFullW * stats.sender2Percent / 100);
-            ctx.beginPath(); roundedRect(ctx, 80, s2Y + 48, s2W, 16, 8);
-            const s2Grad = ctx.createLinearGradient(80, 0, 80 + s2W, 0);
-            s2Grad.addColorStop(0, '#ec4899');
-            s2Grad.addColorStop(1, '#a855f7');
-            ctx.fillStyle = s2Grad; ctx.fill();
-
-            // ── Two glass cards side by side: Peak Time + Vibe ──
-            const pairY = s2Y + 110;
-            const cardW = (W - 180) / 2;
-
-            // Peak time card
-            ctx.beginPath(); roundedRect(ctx, 60, pairY, cardW, 180, 24);
-            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
-
-            ctx.font = '800 18px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            ctx.fillText('PEAK TIME', 100, pairY + 30);
-            ctx.font = '900 36px -apple-system, sans-serif';
-            ctx.fillStyle = '#fbbf24';
-            // Split peak label if needed
-            const peakWords = stats.peakLabel.split(' ');
-            if (peakWords.length > 2) {
-                ctx.font = '900 32px -apple-system, sans-serif';
-                ctx.fillText(peakWords.slice(0, -1).join(' '), 100, pairY + 75);
-                ctx.fillText(peakWords.slice(-1).join(' '), 100, pairY + 115);
-            } else {
-                ctx.fillText(stats.peakLabel, 100, pairY + 85);
-            }
-
-            // Vibe card
-            const vibeX = 60 + cardW + 60;
-            ctx.beginPath(); roundedRect(ctx, vibeX, pairY, cardW, 180, 24);
-            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
-
-            ctx.font = '800 18px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            ctx.fillText('CHAT VIBE', vibeX + 40, pairY + 30);
-            ctx.font = '900 32px -apple-system, sans-serif';
-            const vibeGrad = ctx.createLinearGradient(vibeX, pairY + 75, vibeX + cardW, pairY + 75);
-            vibeGrad.addColorStop(0, '#f472b6');
-            vibeGrad.addColorStop(1, '#c084fc');
-            ctx.fillStyle = vibeGrad;
-            const vibeWords = stats.vibe.split(' ');
-            if (vibeWords.length > 2) {
-                ctx.font = '900 28px -apple-system, sans-serif';
-                ctx.fillText(vibeWords.slice(0, -1).join(' '), vibeX + 40, pairY + 75);
-                ctx.fillText(vibeWords.slice(-1).join(' '), vibeX + 40, pairY + 115);
-            } else {
-                ctx.fillText(stats.vibe, vibeX + 40, pairY + 85);
-            }
-
-            // ── Emoji row ──
-            const emojiY = pairY + 220;
-            ctx.beginPath(); roundedRect(ctx, 60, emojiY, W - 120, 120, 24);
-            ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
-            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
-
-            ctx.font = '800 18px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.35)';
-            ctx.fillText('TOP EMOJIS', 100, emojiY + 20);
-            ctx.font = '56px -apple-system, sans-serif';
-            ctx.fillText(stats.topEmojis.slice(0, 5).join('   ') || '💬', 100, emojiY + 50);
-
-            // ── Footer with CTA ──
-            // Gradient accent line
-            ctx.fillStyle = lineGrad;
-            ctx.fillRect(80, H - 220, W - 160, 2);
-
-            ctx.textAlign = 'center';
-            ctx.font = '800 28px -apple-system, sans-serif';
-            ctx.fillStyle = 'rgba(255,255,255,0.5)';
-            ctx.fillText('Generate your own stats at', W / 2, H - 180);
-
-            // Beautiful Pill Badge for onlinekotha.com
-            ctx.beginPath();
-            roundedRect(ctx, W / 2 - 220, H - 135, 440, 70, 35);
-            const badgeGrad = ctx.createLinearGradient(W / 2 - 220, 0, W / 2 + 220, 0);
-            badgeGrad.addColorStop(0, '#6366f1');
-            badgeGrad.addColorStop(0.5, '#c084fc');
-            badgeGrad.addColorStop(1, '#f472b6');
-            ctx.fillStyle = badgeGrad;
-            ctx.fill();
-
-            // Shadow / glow for badge
-            ctx.shadowColor = 'rgba(192, 132, 252, 0.4)';
-            ctx.shadowBlur = 20;
-            ctx.fill();
-            ctx.shadowBlur = 0; // reset
-
-            ctx.font = '900 32px -apple-system, sans-serif';
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText('onlinekotha.com', W / 2, H - 117);
-
-            // ── Export ──
-            const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_kotha_wrapped.png`;
-            if (action === 'copy') {
-                if (navigator.clipboard && window.ClipboardItem) {
-                    try {
-                        const copyPromise = new Promise((resolve, reject) => {
-                            C.toBlob((blob) => {
-                                if (blob) resolve(blob);
-                                else reject(new Error('Canvas to blob failed'));
-                            }, 'image/png', 1.0);
-                        });
-                        navigator.clipboard.write([
-                            new ClipboardItem({ 'image/png': copyPromise })
-                        ]).then(() => {
-                            showToast('✅ Copied to clipboard!');
-                        }).catch((err) => {
-                            console.error('Clipboard write error, falling back to download:', err);
-                            C.toBlob((blob) => {
-                                if (blob) fallbackDownload(blob, fname);
-                            }, 'image/png', 1.0);
-                        });
-                    } catch (e) {
-                        console.error('ClipboardItem promise error, falling back:', e);
-                        C.toBlob((blob) => {
-                            if (blob) fallbackDownload(blob, fname);
-                        }, 'image/png', 1.0);
-                    }
-                } else {
-                    C.toBlob((blob) => {
-                        if (blob) fallbackDownload(blob, fname);
-                    }, 'image/png', 1.0);
-                }
-            } else {
-                syncDownload(C, fname);
-            }
-        } catch (err) {
-            console.error('Wrapped export error:', err);
-            showToast('Export failed — ' + (err.message || 'unknown error'));
-        }
+        const lastIdx = document.querySelectorAll('.wrapped-slide').length - 1;
+        exportSingleStoryCard(stats, lastIdx);
     }
-
     function fallbackDownload(blob, fname) {
         const dataUrl = URL.createObjectURL(blob);
         performDirectDownload(dataUrl, fname);
@@ -1169,503 +873,60 @@
     //  SINGLE STORY CARD EXPORT — 1080×1920 Instagram/WhatsApp story PNG
     // ═══════════════════════════════════════════════════════════════
     function exportSingleStoryCard(stats, idx) {
-        return new Promise((resolveCard) => {
-            const W = 1080, H = 1920;
-            const C = document.createElement('canvas');
-            C.width = W; C.height = H;
-            const ctx = C.getContext('2d');
-            if (!ctx) { showToast('Canvas not supported'); resolveCard(); return; }
+        if (typeof html2canvas === 'undefined') {
+            showToast('Export library not loaded. Please refresh.');
+            return;
+        }
 
-            // ── Drawing helpers ──
-            function drawBg() {
-                const bg = ctx.createLinearGradient(0, 0, W, H);
-                bg.addColorStop(0, '#0f0720');
-                bg.addColorStop(0.35, '#1a0d3a');
-                bg.addColorStop(0.65, '#120a2e');
-                bg.addColorStop(1, '#080510');
-                ctx.fillStyle = bg;
-                ctx.fillRect(0, 0, W, H);
+        const overlay = document.getElementById('wrapped-overlay');
+        const container = overlay ? overlay.querySelector('.wrapped-container') : null;
+        if (!container) return;
 
-                // Glow orbs
-                const orbs = [
-                    [180, 300, '#6366f1', 400, 0.2],
-                    [900, 500, '#a855f7', 350, 0.15],
-                    [540, 1000, '#ec4899', 450, 0.1],
-                    [200, 1500, '#f59e0b', 350, 0.12],
-                    [850, 1700, '#6366f1', 280, 0.18]
-                ];
-                orbs.forEach(([x, y, hex, r, a]) => {
-                    const hr = parseInt(hex.slice(1, 3), 16), hg = parseInt(hex.slice(3, 5), 16), hb = parseInt(hex.slice(5, 7), 16);
-                    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-                    g.addColorStop(0, `rgba(${hr},${hg},${hb},${a})`);
-                    g.addColorStop(1, 'rgba(0,0,0,0)');
-                    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-                });
-            }
-
-            function drawBranding(t) {
-                const alpha = Math.min(1, t * 3);
-                ctx.save(); ctx.globalAlpha = alpha;
-                ctx.textBaseline = 'top'; ctx.textAlign = 'left';
-                ctx.font = '800 28px -apple-system, sans-serif';
-                ctx.fillStyle = '#818cf8';
-                ctx.fillText('✦ KOTHA WRAPPED', 80, 100);
-
-                // Professional watermark top right
-                ctx.textAlign = 'right';
-                ctx.font = '800 24px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.7)';
-                ctx.fillText('onlinekotha.com', W - 80, 104);
-
-                // Accent line
-                const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
-                lineGrad.addColorStop(0, '#6366f1');
-                lineGrad.addColorStop(0.5, '#ec4899');
-                lineGrad.addColorStop(1, '#f59e0b');
-                ctx.fillStyle = lineGrad;
-                ctx.fillRect(80, 148, W - 160, 3);
-                ctx.restore();
-            }
-
-            function drawFooter(t) {
-                const alpha = Math.min(1, t * 2);
-                ctx.save(); ctx.globalAlpha = alpha; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-
-                // Top border line for footer
-                const lineGrad = ctx.createLinearGradient(80, 0, W - 80, 0);
-                lineGrad.addColorStop(0, '#6366f1'); lineGrad.addColorStop(0.5, '#ec4899'); lineGrad.addColorStop(1, '#f59e0b');
-                ctx.fillStyle = lineGrad;
-                ctx.fillRect(80, H - 220, W - 160, 2);
-
-                ctx.font = '800 28px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.fillText('Generate your own stats at', W / 2, H - 180);
-
-                // Beautiful Pill Badge for onlinekotha.com
-                ctx.beginPath();
-                roundedRect(ctx, W / 2 - 220, H - 135, 440, 70, 35);
-                const badgeGrad = ctx.createLinearGradient(W / 2 - 220, 0, W / 2 + 220, 0);
-                badgeGrad.addColorStop(0, '#6366f1');
-                badgeGrad.addColorStop(0.5, '#c084fc');
-                badgeGrad.addColorStop(1, '#f472b6');
-                ctx.fillStyle = badgeGrad;
-                ctx.fill();
-
-                // Shadow / glow for badge
-                ctx.shadowColor = 'rgba(192, 132, 252, 0.4)';
-                ctx.shadowBlur = 20;
-                ctx.fill();
-                ctx.shadowBlur = 0; // reset
-
-                ctx.font = '900 32px -apple-system, sans-serif';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText('onlinekotha.com', W / 2, H - 117);
-
-                ctx.restore();
-            }
-
-            // Scene 1: Welcome + Name
-            function drawScene1(t) {
-                const cy = 400;
-                ctx.save();
-                ctx.font = `120px -apple-system, sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.fillText('✨', W / 2, cy - 80);
-                ctx.restore();
-
-                ctx.save();
-                ctx.font = '900 72px -apple-system, sans-serif';
-                ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-                ctx.fillText('Your Chat Story', W / 2, cy + 80);
-                ctx.restore();
-
-                ctx.save();
-                let nf = 80;
-                ctx.font = `900 ${nf}px -apple-system, sans-serif`;
-                while (ctx.measureText('with ' + stats.otherName).width > W - 160 && nf > 40) {
-                    nf -= 2; ctx.font = `900 ${nf}px -apple-system, sans-serif`;
-                }
-                const ng = ctx.createLinearGradient(W / 2 - 300, 0, W / 2 + 300, 0);
-                ng.addColorStop(0, '#a5b4fc'); ng.addColorStop(0.5, '#c084fc'); ng.addColorStop(1, '#f472b6');
-                ctx.fillStyle = ng; ctx.fillText('with ' + stats.otherName, W / 2, cy + 170);
-                ctx.restore();
-
-                ctx.save(); ctx.globalAlpha = 0.5;
-                ctx.font = '600 30px -apple-system, sans-serif';
-                ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-                ctx.fillText(`${stats.firstDate || '—'}  →  ${stats.lastDate || '—'}`, W / 2, cy + 170 + nf + 30);
-                ctx.restore();
-
-                ctx.save();
-                ctx.font = '700 36px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.textAlign = 'center';
-                ctx.fillText(`${stats.totalMessages.toLocaleString()} messages analyzed`, W / 2, cy + 170 + nf + 90);
-                ctx.restore();
-            }
-
-            // Scene 2: Total Messages + Talk Ratio
-            function drawScene2(t) {
-                const cy = 300;
-                ctx.save();
-                ctx.font = '800 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('TOTAL MESSAGES', 80, cy);
-                ctx.restore();
-
-                ctx.font = '900 140px -apple-system, sans-serif';
-                const numG = ctx.createLinearGradient(80, cy + 50, 80, cy + 200);
-                numG.addColorStop(0, '#ffffff'); numG.addColorStop(1, '#a5b4fc');
-                ctx.fillStyle = numG;
-                ctx.fillText(stats.totalMessages.toLocaleString(), 80, cy + 50);
-
-                ctx.save();
-                const ratY = cy + 280;
-                ctx.font = '800 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('WHO TALKED MORE', 80, ratY);
-
-                const barW = W - 160;
-
-                ctx.font = 'bold 30px -apple-system, sans-serif';
-                ctx.fillStyle = '#a5b4fc';
-                ctx.fillText(stats.sender1Name, 80, ratY + 55);
-                ctx.textAlign = 'right'; ctx.fillText(stats.sender1Percent + '%', W - 80, ratY + 55); ctx.textAlign = 'left';
-                ctx.beginPath(); roundedRect(ctx, 80, ratY + 100, barW, 20, 10);
-                ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
-                const s1w = Math.max(4, barW * stats.sender1Percent / 100);
-                ctx.beginPath(); roundedRect(ctx, 80, ratY + 100, s1w, 20, 10);
-                const sg1 = ctx.createLinearGradient(80, 0, 80 + s1w, 0);
-                sg1.addColorStop(0, '#6366f1'); sg1.addColorStop(1, '#818cf8');
-                ctx.fillStyle = sg1; ctx.fill();
-
-                ctx.fillStyle = '#f472b6';
-                ctx.fillText(stats.sender2Name, 80, ratY + 145);
-                ctx.textAlign = 'right'; ctx.fillText(stats.sender2Percent + '%', W - 80, ratY + 145); ctx.textAlign = 'left';
-                ctx.beginPath(); roundedRect(ctx, 80, ratY + 190, barW, 20, 10);
-                ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
-                const s2w = Math.max(4, barW * stats.sender2Percent / 100);
-                ctx.beginPath(); roundedRect(ctx, 80, ratY + 190, s2w, 20, 10);
-                const sg2 = ctx.createLinearGradient(80, 0, 80 + s2w, 0);
-                sg2.addColorStop(0, '#ec4899'); sg2.addColorStop(1, '#a855f7');
-                ctx.fillStyle = sg2; ctx.fill();
-                ctx.restore();
-            }
-
-            // Scene 3: Peak Time + Time Distribution
-            function drawScene3(t) {
-                const cy = 300;
-                ctx.save();
-                ctx.font = '800 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('PEAK CHAT TIME', 80, cy);
-                ctx.restore();
-
-                ctx.save();
-                ctx.font = '900 64px -apple-system, sans-serif';
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillText(stats.peakLabel, 80, cy + 55);
-                ctx.restore();
-
-                const periods = ['morning', 'afternoon', 'evening', 'night'];
-                const icons = { morning: '🌅', afternoon: '☀️', evening: '🌆', night: '🦉' };
-                const labels = { morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening', night: 'Late Night' };
-
-                periods.forEach((p, i) => {
-                    const count = stats.timeCounts[p];
-                    const pct = stats.totalMessages > 0 ? Math.round((count / stats.totalMessages) * 100) : 0;
-                    const isP = p === stats.peakPeriod;
-                    const by = cy + 180 + i * 90;
-
-                    ctx.save();
-                    ctx.font = `${isP ? 'bold' : '600'} 28px -apple-system, sans-serif`;
-                    ctx.fillStyle = isP ? '#fbbf24' : 'rgba(255,255,255,0.4)';
-                    ctx.fillText(`${icons[p]} ${labels[p]}`, 80, by);
-                    ctx.textAlign = 'right';
-                    ctx.fillText(`${count.toLocaleString()} (${pct}%)`, W - 80, by);
-                    ctx.textAlign = 'left';
-
-                    const barW = W - 160;
-                    ctx.beginPath(); roundedRect(ctx, 80, by + 40, barW, 14, 7);
-                    ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fill();
-                    const bw = Math.max(2, barW * pct / 100);
-                    ctx.beginPath(); roundedRect(ctx, 80, by + 40, bw, 14, 7);
-                    ctx.fillStyle = isP ? '#fbbf24' : 'rgba(255,255,255,0.15)'; ctx.fill();
-                    ctx.restore();
-                });
-            }
-
-            // Scene 4: Fun Facts & Records
-            function drawScene4(t) {
-                ctx.textBaseline = 'top'; ctx.textAlign = 'left';
-                const cy = 220;
-                ctx.font = '800 24px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('FUN FACTS', 80, cy);
-
-                const facts = [
-                    ['🔥', 'LONGEST STREAK', stats.maxStreak + ' days straight', '#fb923c'],
-                    ['📅', 'DAYS CHATTING', stats.totalDays + ' days · ' + stats.msgsPerDay + ' msgs/day', '#a5b4fc'],
-                    ['💬', 'TOTAL WORDS', stats.totalWords.toLocaleString() + ' words', '#c084fc'],
-                    ['😂', 'LOL MOMENTS', stats.laughCount.toLocaleString() + ' msgs with laughter', '#fbbf24'],
-                ];
-                if (stats.mediaCount > 0) facts.push(['📸', 'MEDIA SHARED', stats.mediaCount.toLocaleString() + ' photos/videos', '#22d3ee']);
-
-                facts.forEach(([icon, label, value, color], i) => {
-                    const fy = cy + 65 + i * 145;
-                    // Card
-                    ctx.beginPath(); roundedRect(ctx, 60, fy, W - 120, 120, 24);
-                    ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
-                    // Icon
-                    ctx.font = '48px -apple-system, sans-serif';
-                    ctx.fillText(icon, 90, fy + 15);
-                    // Label
-                    ctx.font = '700 18px -apple-system, sans-serif';
-                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                    ctx.fillText(label, 165, fy + 20);
-                    // Value
-                    let vf = 38;
-                    ctx.font = `900 ${vf}px -apple-system, sans-serif`;
-                    while (ctx.measureText(value).width > W - 280 && vf > 22) { vf -= 2; ctx.font = `900 ${vf}px -apple-system, sans-serif`; }
-                    ctx.fillStyle = color;
-                    ctx.fillText(value, 165, fy + 55);
-                });
-            }
-
-            // Scene 5: Who's Eager + Day Activity
-            function drawScene5(t) {
-                ctx.textBaseline = 'top'; ctx.textAlign = 'center';
-                const cy = 220;
-                ctx.font = '800 24px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText("WHO'S MORE EAGER?", W / 2, cy);
-
-                ctx.font = '600 28px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                ctx.fillText('Who texts first each day?', W / 2, cy + 50);
-
-                // VS layout
-                const vsY = cy + 120;
-                // Sender 1
-                ctx.font = '900 72px -apple-system, sans-serif';
-                ctx.fillStyle = stats.s1First >= stats.s2First ? '#a5b4fc' : 'rgba(255,255,255,0.3)';
-                ctx.fillText(String(stats.s1First), W / 2 - 200, vsY);
-                ctx.font = '700 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.fillText(stats.sender1Name, W / 2 - 200, vsY + 80);
-                if (stats.s1First >= stats.s2First) {
-                    ctx.font = '700 22px -apple-system, sans-serif';
-                    ctx.fillStyle = '#a5b4fc';
-                    ctx.fillText('👑 STARTER', W / 2 - 200, vsY + 115);
-                }
-                // VS
-                ctx.font = '800 40px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                ctx.fillText('vs', W / 2, vsY + 30);
-                // Sender 2
-                ctx.font = '900 72px -apple-system, sans-serif';
-                ctx.fillStyle = stats.s2First > stats.s1First ? '#f472b6' : 'rgba(255,255,255,0.3)';
-                ctx.fillText(String(stats.s2First), W / 2 + 200, vsY);
-                ctx.font = '700 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.fillText(stats.sender2Name, W / 2 + 200, vsY + 80);
-                if (stats.s2First > stats.s1First) {
-                    ctx.font = '700 22px -apple-system, sans-serif';
-                    ctx.fillStyle = '#f472b6';
-                    ctx.fillText('👑 STARTER', W / 2 + 200, vsY + 115);
-                }
-
-                // Busiest day card
-                const bdY = vsY + 190;
-                ctx.textAlign = 'left';
-                ctx.beginPath(); roundedRect(ctx, 60, bdY, W - 120, 130, 28);
-                ctx.fillStyle = 'rgba(251,191,36,0.06)'; ctx.fill();
-                ctx.strokeStyle = 'rgba(251,191,36,0.2)'; ctx.lineWidth = 2; ctx.stroke();
-                ctx.font = '700 20px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('BUSIEST DAY OF WEEK', 110, bdY + 25);
-                ctx.font = '900 42px -apple-system, sans-serif';
-                ctx.fillStyle = '#fbbf24';
-                ctx.fillText(stats.busiestDay + 's are your day! 📆', 110, bdY + 60);
-
-                // Most active date
-                if (stats.busiestDateCount > 0) {
-                    const mdY = bdY + 165;
-                    ctx.beginPath(); roundedRect(ctx, 60, mdY, W - 120, 120, 28);
-                    ctx.fillStyle = 'rgba(52,211,153,0.06)'; ctx.fill();
-                    ctx.strokeStyle = 'rgba(52,211,153,0.2)'; ctx.lineWidth = 2; ctx.stroke();
-                    ctx.font = '700 20px -apple-system, sans-serif';
-                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                    ctx.fillText('MOST ACTIVE DAY EVER', 110, mdY + 22);
-                    ctx.font = '900 36px -apple-system, sans-serif';
-                    ctx.fillStyle = '#34d399';
-                    ctx.fillText(stats.busiestDate + ' — ' + stats.busiestDateCount + ' msgs! 🎉', 110, mdY + 60);
-                }
-
-                // Questions
-                if (stats.totalQuestions > 0) {
-                    const qY = bdY + (stats.busiestDateCount > 0 ? 320 : 165);
-                    ctx.beginPath(); roundedRect(ctx, 60, qY, W - 120, 110, 28);
-                    ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5; ctx.stroke();
-                    ctx.font = '700 20px -apple-system, sans-serif';
-                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                    ctx.fillText('QUESTIONS ASKED ❓', 110, qY + 20);
-                    ctx.font = '800 30px -apple-system, sans-serif';
-                    ctx.fillStyle = '#c084fc';
-                    ctx.fillText(stats.sender1Name + ': ' + stats.s1Questions + '  ·  ' + stats.sender2Name + ': ' + stats.s2Questions, 110, qY + 55);
-                }
-            }
-
-            // Scene 6: Emojis
-            function drawScene6(t) {
-                ctx.textBaseline = 'top'; ctx.textAlign = 'center';
-                const cy = 300;
-                ctx.font = '800 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('EMOJI CHAMPIONS', W / 2, cy);
-
-                const emojis = stats.topEmojis.slice(0, 5);
-                const spacing = 170;
-                const startX = W / 2 - ((emojis.length - 1) * spacing) / 2;
-
-                // Podium style
-                emojis.forEach((emoji, i) => {
-                    const ex = startX + i * spacing;
-                    const heights = [260, 200, 160, 120, 100];
-                    const barH = heights[i] || 100;
-                    const barY = 720 - barH;
-                    const colors = ['#6366f1', '#a855f7', '#ec4899', '#f472b6', '#818cf8'];
-                    // Bar
-                    ctx.beginPath(); roundedRect(ctx, ex - 55, barY, 110, barH, 20);
-                    const bg = ctx.createLinearGradient(0, barY, 0, barY + barH);
-                    bg.addColorStop(0, colors[i]); bg.addColorStop(1, 'rgba(0,0,0,0.1)');
-                    ctx.fillStyle = bg; ctx.fill();
-                    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1.5; ctx.stroke();
-                    // Emoji on top
-                    ctx.font = `${i === 0 ? 72 : i < 3 ? 56 : 44}px -apple-system, sans-serif`;
-                    ctx.fillText(emoji, ex, barY - (i === 0 ? 85 : i < 3 ? 70 : 55));
-                    // Rank
-                    ctx.font = '800 28px -apple-system, sans-serif';
-                    ctx.fillStyle = '#fff';
-                    ctx.fillText('#' + (i + 1), ex, barY + 20);
-                });
-                ctx.textAlign = 'left';
-            }
-
-            // Scene 7: Vibe
-            function drawScene7(t) {
-                ctx.textBaseline = 'top'; ctx.textAlign = 'center';
-                const cy = 350;
-                ctx.font = '800 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.4)';
-                ctx.fillText('YOUR CHAT VIBE', W / 2, cy);
-
-                ctx.font = '900 56px -apple-system, sans-serif';
-                const vg = ctx.createLinearGradient(W / 2 - 300, 0, W / 2 + 300, 0);
-                vg.addColorStop(0, '#f472b6'); vg.addColorStop(1, '#c084fc');
-                ctx.fillStyle = vg;
-                ctx.fillText(stats.vibe, W / 2, cy + 55);
-
-                ctx.save(); ctx.globalAlpha = 0.6;
-                ctx.font = '600 28px -apple-system, sans-serif';
-                ctx.fillStyle = '#fff';
-                const desc = stats.vibeDesc || '';
-                if (desc.length > 55) {
-                    const mid = desc.lastIndexOf(' ', 55);
-                    ctx.fillText(desc.slice(0, mid > 0 ? mid : 55), W / 2, cy + 145);
-                    ctx.fillText(desc.slice(mid > 0 ? mid + 1 : 55), W / 2, cy + 183);
-                } else {
-                    ctx.fillText(desc, W / 2, cy + 145);
-                }
-                ctx.restore();
-
-                // Big emoji
-                ctx.font = '120px -apple-system, sans-serif';
-                ctx.fillText(stats.topEmojis[0] || '💬', W / 2, cy + 250);
-
-                // Late night stat
-                ctx.font = '700 26px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                ctx.fillText(stats.lateNightPct + '% of chats happen after midnight 🌙', W / 2, cy + 420);
-                ctx.textAlign = 'left';
-            }
-
-            // Scene 8: Summary card + CTA (for share image)
-            function drawScene8(t) {
-                const cardY = 220;
-                const cardH = 1000;
-                ctx.textBaseline = 'top';
-
-                ctx.save();
-                ctx.beginPath(); roundedRect(ctx, 80, cardY, W - 160, cardH, 40);
-                ctx.fillStyle = 'rgba(255,255,255,0.04)'; ctx.fill();
-                ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 2; ctx.stroke();
-
-                ctx.textAlign = 'left';
-                let y = cardY + 40;
-
-                ctx.font = '900 48px -apple-system, sans-serif';
-                ctx.fillStyle = '#fff';
-                let nf2 = 48;
-                ctx.font = `900 ${nf2}px -apple-system, sans-serif`;
-                while (ctx.measureText('Chat with ' + stats.otherName).width > W - 280 && nf2 > 28) { nf2 -= 2; ctx.font = `900 ${nf2}px -apple-system, sans-serif`; }
-                ctx.fillText('Chat with ' + stats.otherName, 140, y);
-                y += nf2 + 25;
-
-                const items = [
-                    ['💬', 'MESSAGES', stats.totalMessages.toLocaleString(), '#a5b4fc'],
-                    ['📅', 'DAYS ACTIVE', String(stats.totalDays), '#818cf8'],
-                    ['🔥', 'STREAK', stats.maxStreak + ' days', '#fb923c'],
-                    ['⏰', 'PEAK TIME', stats.peakLabel, '#fbbf24'],
-                    ['✨', 'VIBE', stats.vibe, '#f472b6'],
-                    ['😂', 'LOL MOMENTS', stats.laughCount.toLocaleString(), '#fbbf24'],
-                ];
-                // 2-col grid
-                const colW = (W - 320) / 2;
-                items.forEach(([icon, label, value, color], i) => {
-                    const col = i % 2;
-                    const row = Math.floor(i / 2);
-                    const cx = 140 + col * (colW + 40);
-                    const ry = y + row * 120;
-
-                    ctx.font = '36px -apple-system, sans-serif';
-                    ctx.fillText(icon, cx, ry);
-                    ctx.font = '700 16px -apple-system, sans-serif';
-                    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                    ctx.fillText(label, cx + 50, ry + 5);
-                    let vf2 = 36;
-                    ctx.font = `900 ${vf2}px -apple-system, sans-serif`;
-                    while (ctx.measureText(value).width > colW - 60 && vf2 > 20) { vf2 -= 2; ctx.font = `900 ${vf2}px -apple-system, sans-serif`; }
-                    ctx.fillStyle = color;
-                    ctx.fillText(value, cx + 50, ry + 30);
-                });
-                y += Math.ceil(items.length / 2) * 120 + 15;
-
-                // Emojis
-                ctx.font = '700 16px -apple-system, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.35)';
-                ctx.fillText('TOP EMOJIS', 140, y);
-                ctx.font = '52px -apple-system, sans-serif';
-                ctx.fillText(stats.topEmojis.slice(0, 5).join('  ') || '💬', 140, y + 28);
-
-                ctx.restore();
-            }
-
-            const scenes = [drawScene1, drawScene2, drawScene3, drawScene4, drawScene5, drawScene6, drawScene7, drawScene8];
-
-            ctx.clearRect(0, 0, W, H);
-            drawBg();
-            drawBranding(1.0);
-            scenes[idx](1.0);
-            drawFooter(1.0);
-
-            const fname = `wrapped_story_${idx + 1}_${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}.png`;
-            syncDownload(C, fname);
-            resolveCard();
+        // Hide UI elements we don't want in the screenshot
+        const actionBtns = overlay.querySelectorAll('.wrapped-action-btns');
+        const ogDisplays = [];
+        actionBtns.forEach(btn => {
+            ogDisplays.push(btn.style.display);
+            btn.style.display = 'none';
         });
-    }
+        
+        const closeBtn = document.getElementById('wrapped-close-btn');
+        const progContainer = document.getElementById('wrapped-progress-container');
+        const navTaps = overlay.querySelectorAll('.wrapped-nav-tap');
+        
+        if (closeBtn) closeBtn.style.opacity = '0';
+        if (progContainer) progContainer.style.opacity = '0';
+        navTaps.forEach(tap => tap.style.display = 'none');
 
+        // Render the whole container (which includes active slide and background blobs)
+        setTimeout(() => {
+            html2canvas(container, {
+                backgroundColor: '#0a0a0f',
+                scale: window.devicePixelRatio || 2,
+                useCORS: true,
+                logging: false,
+                width: container.offsetWidth,
+                height: container.offsetHeight
+            }).then(canvas => {
+                // Restore UI
+                actionBtns.forEach((btn, i) => btn.style.display = ogDisplays[i]);
+                if (closeBtn) closeBtn.style.opacity = '1';
+                if (progContainer) progContainer.style.opacity = '1';
+                navTaps.forEach(tap => tap.style.display = 'block');
+                
+                const fname = `${stats.otherName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_wrapped_${idx + 1}.png`;
+                syncDownload(canvas, fname);
+            }).catch(err => {
+                // Restore UI on error
+                actionBtns.forEach((btn, i) => btn.style.display = ogDisplays[i]);
+                if (closeBtn) closeBtn.style.opacity = '1';
+                if (progContainer) progContainer.style.opacity = '1';
+                navTaps.forEach(tap => tap.style.display = 'block');
+                console.error('html2canvas error:', err);
+                showToast('Failed to export card.');
+            });
+        }, 150);
+    }
     // ── Wrapped loading overlay (shown until THIS chat's messages are ready) ──
     function showWrappedLoader() {
         if (document.getElementById('wrapped-loader')) return;
@@ -1715,6 +976,14 @@
         const raw = window.kothaGetAllMessages ? window.kothaGetAllMessages() : [];
         if (!raw || raw.length === 0) { hideWrappedLoader(); showToast('Open a chat first!'); return; }
 
+        
+        // Fetch compatibility score in background
+        let compatData = null;
+        let compatPromise = fetch(`/api/ai/chat/${encodeURIComponent(targetChat)}/compatibility`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => { compatData = data; return data; })
+            .catch(() => null);
+
         const msgs = raw.filter(m => m.sender && m.type !== 'system');
         if (msgs.length < 5) { hideWrappedLoader(); showToast('Need at least 5 messages for Wrapped!'); return; }
 
@@ -1747,8 +1016,8 @@
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">KOTHA WRAPPED</div>
                             <div class="wrapped-main-body">
-                                <div class="text-5xl mb-5" style="animation:pulse 2s infinite">✨</div>
-                                <h2 class="wrapped-title" style="overflow-wrap:break-word;word-break:break-word;">Your Chat Story<br>with <span class="text-indigo-400 font-black">${escH(stats.otherName)}</span></h2>
+                                <div class="text-5xl mb-5 wrapped-stat-pop">✨</div>
+                                <h2 class="wrapped-title wrapped-premium-glow" style="overflow-wrap:break-word;word-break:break-word;">Your Chat Story<br>with <span class="text-indigo-400 font-black">${escH(stats.otherName)}</span></h2>
                                 ${stats.detectedNickname && stats.detectedNickname.toLowerCase() !== stats.otherName.toLowerCase() ? `<p class="text-xs text-purple-400/80 mt-1 font-bold tracking-wide">aka "${escH(stats.detectedNickname)}"</p>` : ''}
                                 <p class="text-sm text-gray-400 mt-4 leading-relaxed max-w-[280px]">${stats.totalMessages.toLocaleString()} messages analyzed across ${stats.firstDate || '?'} to ${stats.lastDate || '?'}</p>
                                 <p class="text-xs text-gray-600 mt-3 font-medium">${stats.avgWords} avg words per message</p>
@@ -1769,8 +1038,8 @@
                             <div class="wrapped-header-tag">THE VOLUME</div>
                             <div class="wrapped-main-body w-full">
                                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-2">Total Messages Exchanged</p>
-                                <div class="wrapped-accent-huge mb-6">${stats.totalMessages.toLocaleString()}</div>
-                                <div class="wrapped-badge-box mt-4 text-left">
+                                <div class="wrapped-accent-huge mb-6 wrapped-shimmer-text wrapped-stat-pop">${stats.totalMessages.toLocaleString()}</div>
+                                <div class="wrapped-badge-box mt-4 text-left wrapped-premium-glass">
                                     <p class="text-xs font-bold text-gray-300 mb-3">Who talked more?</p>
                                     <div class="mb-3">
                                         <div class="flex justify-between text-xs font-semibold mb-1 text-indigo-300">
@@ -1809,7 +1078,7 @@
                             <div class="wrapped-main-body w-full">
                                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">You chat the most as...</p>
                                 <div class="text-xl font-black text-amber-400 mb-6">${stats.peakLabel}</div>
-                                <div class="wrapped-badge-box text-left space-y-2.5">
+                                <div class="wrapped-badge-box text-left space-y-2.5 wrapped-premium-glass">
                                     ${['morning', 'afternoon', 'evening', 'night'].map(p => {
             const icons = { morning: '🌅', afternoon: '☀️', evening: '🌆', night: '🦉' };
             const labels = { morning: 'Morning (6am–12pm)', afternoon: 'Afternoon (12–5pm)', evening: 'Evening (5–10pm)', night: 'Late Night (10pm–6am)' };
@@ -1994,15 +1263,61 @@
                             <div class="wrapped-header-tag">THE VIBE CHECK</div>
                             <div class="wrapped-main-body">
                                 <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Your Relationship Vibe</p>
-                                <div class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400 mb-4">${stats.vibe}</div>
-                                <div class="wrapped-badge-box mt-4">
+                                <div class="text-3xl font-black wrapped-shimmer-text mb-4 wrapped-stat-pop">${stats.vibe}</div>
+                                <div class="wrapped-badge-box mt-4 wrapped-premium-glass">
                                     <p class="text-xs text-gray-300 leading-relaxed font-medium">${stats.vibeDesc}</p>
                                 </div>
-                                <div class="text-6xl mt-6" style="animation:pulse 2s infinite">${stats.topEmojis[0] || '💬'}</div>
+                                <div class="text-6xl mt-6 wrapped-stat-pop">${stats.topEmojis[0] || '💬'}</div>
                                 <div class="mt-4 text-xs text-gray-500 font-bold">${stats.lateNightPct}% of chats happen after midnight 🌙</div>
                             </div>
                             <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
                                 <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT FOR SHARE CARD →</div>
+                        </div>
+                    </div>
+
+                    
+                    <!-- 7.5: Compatibility -->
+                    <div class="wrapped-slide">
+                        <div class="wrapped-slide-content">
+                            <div class="wrapped-header-tag">COMPATIBILITY SCORE</div>
+                            <div class="wrapped-main-body w-full flex flex-col items-center justify-center">
+                                <div id="compat-loader" class="text-center py-10">
+                                    <div class="animate-pulse mb-3">
+                                        <svg class="w-12 h-12 text-indigo-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-400 text-sm font-bold">AI Analyzing Chat Tone...</p>
+                                </div>
+                                <div id="compat-content" class="hidden w-full text-center">
+                                    <div class="relative w-40 h-40 mx-auto mb-6">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10" />
+                                            <circle id="compat-ring" cx="50" cy="50" r="45" fill="none" stroke="url(#gradient)" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" class="transition-all duration-1000 ease-out" stroke-linecap="round" />
+                                            <defs>
+                                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stop-color="#f472b6" />
+                                                    <stop offset="100%" stop-color="#6366f1" />
+                                                </linearGradient>
+                                            </defs>
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                            <span id="compat-score" class="text-4xl font-black text-white">0</span>
+                                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">% MATCH</span>
+                                        </div>
+                                    </div>
+                                    <div class="wrapped-badge-box text-left wrapped-premium-glass">
+                                        <p id="compat-summary" class="text-sm text-gray-300 leading-relaxed font-medium">...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6.5">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -2016,7 +1331,7 @@
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">SHARE YOUR STORY</div>
                             <div class="wrapped-main-body w-full">
-                                <div class="bg-gradient-to-br from-indigo-950/40 to-purple-950/40 border border-indigo-500/20 backdrop-blur-md rounded-3xl p-5 w-full text-left shadow-2xl relative overflow-hidden">
+                                <div class="bg-gradient-to-br from-indigo-950/40 to-purple-950/40 border border-indigo-500/20 backdrop-blur-md rounded-3xl p-5 w-full text-left shadow-2xl relative overflow-hidden wrapped-premium-glass">
                                     <div class="absolute -top-10 -right-10 w-24 h-24 bg-pink-500/10 rounded-full filter blur-xl"></div>
                                     <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-500/10 rounded-full filter blur-xl"></div>
                                     <div class="flex justify-between items-center mb-3">
@@ -2116,7 +1431,33 @@
 
         // Patch showSlide to also update nav taps
         const origShowSlide = WrappedStory.prototype.showSlide;
-        activeStory = new WrappedStory(slideEls, () => { });
+        
+        activeStory = new WrappedStory(slideEls, (idx) => {
+            const slide = slideEls[idx];
+            if (slide && slide.querySelector('#compat-loader')) {
+                compatPromise.then(data => {
+                    const loader = slide.querySelector('#compat-loader');
+                    const cContent = slide.querySelector('#compat-content');
+                    if (!loader || !cContent) return;
+                    loader.classList.add('hidden');
+                    cContent.classList.remove('hidden');
+                    if (data && data.score) {
+                        slide.querySelector('#compat-score').innerText = data.score;
+                        slide.querySelector('#compat-summary').innerText = data.summary || "Great connection!";
+                        setTimeout(() => {
+                            const ring = slide.querySelector('#compat-ring');
+                            if (ring) {
+                                const offset = 283 - (283 * data.score) / 100;
+                                ring.style.strokeDashoffset = offset;
+                            }
+                        }, 100);
+                    } else {
+                        slide.querySelector('#compat-summary').innerText = "Could not calculate compatibility.";
+                    }
+                });
+            }
+        });
+
         const storyRef = activeStory;
         const origShow = storyRef.showSlide.bind(storyRef);
         storyRef.showSlide = function (index) {
