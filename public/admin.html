@@ -867,6 +867,7 @@
             <button data-tab="settings" class="tab-item">Limits</button>
             <button data-tab="dm-logs" class="tab-item">DM Logs</button>
             <button data-tab="contact-messages" class="tab-item">Contact Messages</button>
+            <button data-tab="email-logs" class="tab-item">Email Logs</button>
         </nav>
 
         <!-- Tab 1: Users -->
@@ -1152,6 +1153,77 @@
                 </div>
             </div>
         </section>
+
+        <!-- Tab 9: Email Logs -->
+        <section id="tab-email-logs" class="tab-content hidden">
+            <div class="admin-card">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <h2>Email Logs & Manual Send</h2>
+                        <p>Track automated emails and send custom messages directly to users.</p>
+                    </div>
+                    <div class="controls-row">
+                        <button onclick="openManualEmailModal()" class="header-btn" style="background:var(--primary);color:white;border-color:var(--primary);">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                            Send Manual Email
+                        </button>
+                        <button onclick="loadEmailLogs()" class="header-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container" style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Recipient</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="email-logs-tbody">
+                            <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal for Manual Email -->
+        <div id="manual-email-modal" class="modal-overlay hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999;">
+            <div class="modal-content" style="background:var(--card-bg);width:500px;max-width:90%;border-radius:12px;padding:24px;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+                <h3 style="margin-top:0;margin-bottom:16px;">Send Manual Email</h3>
+                <div style="margin-bottom:12px;">
+                    <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text-secondary);">Template</label>
+                    <select id="manual-email-template" class="input-text" style="width:100%;" onchange="applyEmailTemplate()">
+                        <option value="">Custom Message</option>
+                        <option value="general">General Notice</option>
+                        <option value="warning">Account Warning</option>
+                        <option value="promo">Pro Plan Promo</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text-secondary);">Recipient Email</label>
+                    <input type="email" id="manual-email-to" class="input-text" style="width:100%;" placeholder="user@example.com">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text-secondary);">Subject</label>
+                    <input type="text" id="manual-email-subject" class="input-text" style="width:100%;" placeholder="e.g., Important Update from Kotha">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;margin-bottom:4px;font-size:12px;color:var(--text-secondary);">Message Body (HTML supported)</label>
+                    <textarea id="manual-email-body" class="input-text" style="width:100%;height:150px;resize:vertical;" placeholder="<p>Hi there...</p>"></textarea>
+                </div>
+                <div style="display:flex;gap:8px;justify-content:flex-end;">
+                    <button class="header-btn" onclick="closeManualEmailModal()">Cancel</button>
+                    <button class="header-btn" style="background:var(--primary);color:white;border-color:var(--primary);" onclick="submitManualEmail()" id="btn-send-manual-email">Send Email</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="/js/admin.js?v=202609181536"></script>

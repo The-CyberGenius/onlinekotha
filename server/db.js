@@ -204,6 +204,20 @@ CREATE TABLE IF NOT EXISTS demo_usage (
   history TEXT,
   updated_at INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS email_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  recipient_email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  status TEXT NOT NULL,
+  error_message TEXT,
+  sent_at INTEGER NOT NULL,
+  type TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_email_logs_user ON email_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(type);
 `);
 
 // Migrations: ALTER existing users table for new columns

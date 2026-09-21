@@ -1297,6 +1297,103 @@ HARD RULES
             window.submitPlayground();
         });
     }
+    window.loadEmailLogs = async function() {
+        const tbody = document.getElementById('email-logs-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Loading...</td></tr>';
+        try {
+            const r = await fetch('/api/admin/emails');
+            const data = await r.json();
+            if (!data.ok) throw new Error(data.error || 'Failed to load');
+            
+            if (data.logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">No emails sent yet.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            for (const log of data.logs) {
+                const tr = document.createElement('tr');
+                const statusColor = log.status === 'sent' || log.status === 'console' ? '#16a34a' : '#dc2626';
+                tr.innerHTML = `
+                    <td style="white-space:nowrap;font-size:12px;">${formatDateTime(log.sent_at)}</td>
+                    <td><span style="background:var(--bg-page);padding:2px 6px;border-radius:4px;font-size:11px;border:1px solid var(--border);">${log.type || 'unknown'}</span></td>
+                    <td><div style="font-weight:600;font-size:13px;">${log.recipient_email}</div><div style="font-size:11px;color:var(--text-muted);">${log.user_email ? 'User: ' + log.display_name : 'No Account'}</div></td>
+                    <td><div style="font-size:13px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${log.subject}</div></td>
+                    <td>
+                        <span style="color:${statusColor};font-size:12px;font-weight:600;">${log.status.toUpperCase()}</span>
+                        ${log.error_message ? `<div style="font-size:10px;color:var(--danger);max-width:150px;white-space:normal;">${log.error_message}</div>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--danger);">${err.message}</td></tr>`;
+        }
+    };
+
+    window.openManualEmailModal = function() {
+        document.getElementById('manual-email-modal').classList.remove('hidden');
+        document.getElementById('manual-email-template').value = '';
+        window.applyEmailTemplate();
+    };
+
+    window.closeManualEmailModal = function() {
+        document.getElementById('manual-email-modal').classList.add('hidden');
+    };
+
+    window.applyEmailTemplate = function() {
+        const tpl = document.getElementById('manual-email-template').value;
+        const sub = document.getElementById('manual-email-subject');
+        const body = document.getElementById('manual-email-body');
+        
+        if (tpl === 'general') {
+            sub.value = 'Important Update from Kotha';
+            body.value = '<p>Hi there,</p><p>We wanted to share an important update with you...</p><p>Best,<br>The Kotha Team</p>';
+        } else if (tpl === 'warning') {
+            sub.value = 'Action Required: Account Warning';
+            body.value = '<p>Hi,</p><p>We noticed some unusual activity on your account. Please review our Terms of Service.</p><p>Regards,<br>Kotha Support</p>';
+        } else if (tpl === 'promo') {
+            sub.value = 'Unlock Kotha Pro Today! 🌟';
+            body.value = '<p>Hi!</p><p>Are you enjoying Kotha? Upgrade to the Pro plan today to unlock unlimited messages, premium models, and priority support.</p><p>Check out the Plans tab in your dashboard!</p><p>Happy exploring,<br>The Kotha Team</p>';
+        } else {
+            sub.value = '';
+            body.value = '';
+        }
+    };
+
+    window.submitManualEmail = async function() {
+        const btn = document.getElementById('btn-send-manual-email');
+        const email = document.getElementById('manual-email-to').value.trim();
+        const subject = document.getElementById('manual-email-subject').value.trim();
+        const bodyHtml = document.getElementById('manual-email-body').value.trim();
+        
+        if (!email || !subject || !bodyHtml) {
+            alert('Please fill in all fields.');
+            return;
+        }
+        
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+        try {
+            const r = await fetch('/api/admin/emails/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, subject, bodyHtml })
+            });
+            const data = await r.json();
+            if (!data.ok) throw new Error(data.error || 'Failed to send');
+            
+            alert(`Email sent successfully via ${data.mode}!`);
+            window.closeManualEmailModal();
+            window.loadEmailLogs();
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Send Email';
+        }
+    };
 
     await loadKnown();
     await loadStats();
@@ -1306,5 +1403,6 @@ HARD RULES
     await loadIntegrations();
     await loadSettings();
     await loadUsers();
+    await loadEmailLogs();
 })();
 

@@ -41,18 +41,44 @@ function resetTransporter() {
     cachedFingerprint = null;
 }
 
-async function sendMail({ to, subject, html, text }) {
+async function sendMail({ to, subject, html, text, userId = null, type = 'general' }) {
     const transporter = buildTransporter();
-    if (!transporter) {
-        console.log('\n📧 [EMAIL — would send, SMTP not configured]');
-        console.log('   To:', to);
-        console.log('   Subject:', subject);
-        console.log('   Text:', text || html.replace(/<[^>]*>/g, '').slice(0, 200));
-        console.log('');
-        return { ok: true, mode: 'console' };
+    
+    let mode = 'smtp';
+    let status = 'sent';
+    let errorMsg = null;
+    let ok = true;
+
+    try {
+        if (!transporter) {
+            console.log('\n📧 [EMAIL — would send, SMTP not configured]');
+            console.log('   To:', to);
+            console.log('   Subject:', subject);
+            console.log('   Text:', text || html.replace(/<[^>]*>/g, '').slice(0, 200));
+            console.log('');
+            mode = 'console';
+            status = 'console'; // Indicate it wasn't actually sent via SMTP
+        } else {
+            await transporter.sendMail({ from: getFrom(), to, subject, html, text });
+        }
+    } catch (err) {
+        console.error('Email sending failed:', err);
+        ok = false;
+        status = 'failed';
+        errorMsg = err.message;
     }
-    await transporter.sendMail({ from: getFrom(), to, subject, html, text });
-    return { ok: true, mode: 'smtp' };
+
+    try {
+        db.prepare(
+            `INSERT INTO email_logs (user_id, recipient_email, subject, status, error_message, sent_at, type)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`
+        ).run(userId, to, subject, status, errorMsg, Date.now(), type);
+    } catch (dbErr) {
+        console.error('Failed to log email:', dbErr);
+    }
+
+    if (!ok) return { ok: false, mode, error: errorMsg };
+    return { ok: true, mode };
 }
 
 function createToken(userId, kind) {
@@ -105,6 +131,8 @@ async function sendVerifyEmail(user) {
         subject: 'Verify your Kotha account',
         html,
         text: `Verify your email: ${url}`,
+        userId: user.id,
+        type: 'verify'
     });
 }
 
@@ -122,6 +150,8 @@ async function sendPasswordResetEmail(user) {
         subject: 'Reset your Kotha password',
         html,
         text: `Reset your password: ${url}`,
+        userId: user.id,
+        type: 'reset'
     });
 }
 
@@ -187,12 +217,27 @@ async function sendWelcomeEmail(to, name) {
         to,
         subject: "Welcome to Kotha! 🚀 Here's how to get started",
         html,
-        text
+        text,
+        type: 'welcome'
     });
 }
 
 function configured() {
     return !!buildTransporter();
+}
+
+async function sendManualEmail(to, userId, subject, bodyHtml) {
+    const html = emailLayout(subject, bodyHtml, null, null);
+    const text = bodyHtml.replace(/<[^>]*>?/gm, ''); // simple strip tags
+    
+    return sendMail({
+        to,
+        subject,
+        html,
+        text,
+        userId,
+        type: 'manual'
+    });
 }
 
 module.exports = {
@@ -204,4 +249,5 @@ module.exports = {
     resetTransporter,
     configured,
     sendWelcomeEmail,
+    sendManualEmail,
 };

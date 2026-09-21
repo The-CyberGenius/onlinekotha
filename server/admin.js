@@ -961,4 +961,42 @@ router.delete('/contact-messages/:id', (req, res) => {
     }
 });
 
+// ── Email Logs ──
+router.get('/emails', (req, res) => {
+    try {
+        const logs = db.prepare(`
+            SELECT el.*, u.email as user_email, u.display_name 
+            FROM email_logs el 
+            LEFT JOIN users u ON el.user_id = u.id 
+            ORDER BY el.sent_at DESC 
+            LIMIT 500
+        `).all();
+        res.json({ ok: true, logs });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch email logs' });
+    }
+});
+
+router.post('/emails/send', async (req, res) => {
+    try {
+        let { email: to, subject, bodyHtml } = req.body;
+        if (!to || !subject || !bodyHtml) {
+            return res.status(400).json({ error: 'Missing to, subject, or bodyHtml' });
+        }
+        
+        let userId = null;
+        const user = db.prepare('SELECT id FROM users WHERE email = ?').get(to);
+        if (user) userId = user.id;
+
+        const result = await email.sendManualEmail(to, userId, subject, bodyHtml);
+        if (result.ok) {
+            res.json({ ok: true, mode: result.mode });
+        } else {
+            res.status(500).json({ error: result.error });
+        }
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to send manual email' });
+    }
+});
+
 module.exports = router;
