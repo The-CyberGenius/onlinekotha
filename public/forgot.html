@@ -69,7 +69,7 @@
             msgEl.classList.add('hidden');
 
             try {
-                const resp = await fetch('/api/auth/forgot-password', {
+                const resp = await fetch('/api/auth/forgot', {
                     method: 'POST',
                     headers: {'content-type':'application/json'},
                     body: JSON.stringify({email})

@@ -77,10 +77,10 @@
             msgEl.classList.add('hidden');
 
             try {
-                const resp = await fetch('/api/auth/reset-password', {
+                const resp = await fetch('/api/auth/reset', {
                     method: 'POST',
                     headers: {'content-type':'application/json'},
-                    body: JSON.stringify({token, newPassword})
+                    body: JSON.stringify({token, password: newPassword})
                 });
                 
                 if (resp.ok) {
