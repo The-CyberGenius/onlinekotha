@@ -1091,7 +1091,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!msg.date) return;
                     const parts = msg.date.split(/[\/\-.]/);
                     if (parts.length === 3) {
-                        const yRaw = parts[2].trim();
+                        let yRaw = parts[2].trim();
+                        if (parts[0].trim().length === 4) {
+                            yRaw = parts[0].trim(); // Handle YYYY-MM-DD
+                        }
                         const fullY = yRaw.length === 2 ? 2000 + parseInt(yRaw) : parseInt(yRaw);
                         if (!isNaN(fullY) && fullY >= 2009 && fullY <= currentYearNum + 1) {
                             yearCounts[yRaw] = (yearCounts[yRaw] || 0) + 1;
