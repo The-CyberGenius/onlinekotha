@@ -186,17 +186,17 @@
     <!-- ═══════════ MINIMAL DESIGN SYSTEM ═══════════ -->
     <style>
         :root {
-            --bg: #000000;
-            --bg-soft: #0a0a0a;
-            --text-primary: #ffffff;
+            --bg: #0a0a0a;
+            --bg-soft: #101012;
+            --text-primary: #f5f5f7;
             --text-secondary: #a1a1aa;
-            --text-muted: #52525b;
-            --card-bg: #050505;
+            --text-muted: #6b6b75;
+            --card-bg: #121214;
             --border: rgba(255, 255, 255, 0.08);
             --border-strong: rgba(255, 255, 255, 0.16);
-            --accent: #3b82f6;
-            --accent-strong: #2563eb;
-            --msg-ai-bg: rgba(255, 255, 255, 0.04);
+            --accent: #818cf8;
+            --accent-strong: #6366f1;
+            --msg-ai-bg: rgba(255, 255, 255, 0.05);
         }
 
         html.light {
@@ -229,40 +229,74 @@
         }
 
         /* =========================================================
-           SaaS Grid Background & High Contrast Theme
+           Apple Liquid Glass & Ambient Background
         ========================================================= */
+        @keyframes orb-float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes orb-float-reverse {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-30px, 50px) scale(0.9); }
+            66% { transform: translate(20px, -20px) scale(1.1); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
         .ambient-bg {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             z-index: -1;
-            background-color: var(--bg);
-            background-image: 
-                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
-            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+            overflow: hidden;
+            background-color: #050505;
         }
         html.light .ambient-bg {
-            background-image: 
-                linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+            background-color: #fafafa;
         }
 
         .orb {
-            display: none; /* Hide old orbs */
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+        }
+        html.light .orb {
+            opacity: 0.5;
+        }
+
+        .orb-1 {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(59,130,246,0.8) 0%, rgba(30,58,138,0) 70%);
+            top: -100px; left: -100px;
+            animation: orb-float 15s ease-in-out infinite;
+        }
+        html.light .orb-1 {
+            background: radial-gradient(circle, rgba(147,197,253,1) 0%, rgba(59,130,246,0) 70%);
+        }
+
+        .orb-2 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(139,92,246,0.6) 0%, rgba(76,29,149,0) 70%);
+            bottom: -50px; right: -50px;
+            animation: orb-float-reverse 18s ease-in-out infinite;
+        }
+        html.light .orb-2 {
+            background: radial-gradient(circle, rgba(196,181,253,1) 0%, rgba(139,92,246,0) 70%);
         }
 
         .liquid-glass {
-            background: var(--card-bg) !important;
-            border: 1px solid var(--border) !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+            background: rgba(20, 20, 25, 0.4) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
             color: var(--text-primary) !important;
         }
         html.light .liquid-glass {
-            background: #ffffff !important;
-            border: 1px solid rgba(0, 0, 0, 0.1) !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+            background: rgba(255, 255, 255, 0.4) !important;
+            border: 1px solid rgba(255, 255, 255, 0.5) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05) !important;
         }
 
         .liquid-glass-card {
@@ -391,22 +425,11 @@
             background: var(--text-primary);
             color: var(--bg);
             border-color: var(--text-primary);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-        }
-        html.light .cta-primary {
-            background: #000;
-            color: #fff;
-            border-color: #000;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
         }
 
         .cta-primary:hover {
             transform: translateY(-2px);
             opacity: .92;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-        }
-        html.light .cta-primary:hover {
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
         .btn-ghost {
@@ -552,17 +575,15 @@
         /* ── Cards ── */
         .card {
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 32px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+            border-radius: 20px;
+            padding: 30px;
+            transition: border-color .25s, transform .25s;
         }
 
         .card:hover {
-            border-color: rgba(59, 130, 246, 0.4);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            border-color: var(--border-strong);
+            transform: translateY(-3px);
         }
 
         .card-icon {
@@ -575,8 +596,6 @@
             margin-bottom: 18px;
             background: color-mix(in srgb, var(--accent) 14%, transparent);
             color: var(--accent);
-            box-shadow: 0 0 15px color-mix(in srgb, var(--accent) 20%, transparent);
-            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
         }
 
         .hero-split {
@@ -953,20 +972,20 @@
             <!-- Left Side: Text -->
             <div class="hero-text-content">
                 <div class="rise d1" style="margin-bottom:30px;">
-                    <span class="pill" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);"><span class="dot" style="background: #3b82f6; box-shadow: 0 0 8px #3b82f6;"></span>AI-powered chat memories</span>
+                    <span class="pill"><span class="dot"></span>AI-powered chat memories</span>
                 </div>
 
-                <h1 class="display rise d2" style="margin-bottom:22px; font-weight: 900; letter-spacing: -0.05em; background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    Bring your memories to life<br><span style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">with interactive AI.</span>
+                <h1 class="display rise d2" style="margin-bottom:22px;">
+                    Bring your memories to life<br><span class="accent-text">with interactive AI.</span>
                 </h1>
 
-                <p class="lead rise d3" style="max-width:600px; margin-bottom: 34px; color: #a1a1aa; font-size: 1.1rem;">
-                    Transform your everyday WhatsApp chats into a living connection. Our AI deeply analyzes your history to learn their unique humor, slang, and vibe—allowing you to <span style="color:#ffffff;font-weight:600;">relive your favorite conversations anytime.</span>
+                <p class="lead rise d3" style="max-width:600px; margin-bottom: 34px;">
+                    Transform your everyday WhatsApp chats into a living connection. Our AI deeply analyzes your history to learn their unique humor, slang, and vibe—allowing you to <span style="color:var(--text-primary);font-weight:600;">relive your favorite conversations anytime.</span>
                 </p>
 
                 <div class="rise d4" style="display:flex; flex-direction:column; gap:16px; margin-bottom:12px;">
                     <a href="/login.html" id="hero-cta" class="btn cta-primary"
-                        style="min-height:54px;padding:0 32px;font-size:16px; align-self: flex-start; text-transform: uppercase; letter-spacing: 1px;">
+                        style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25); align-self: flex-start;">
                         Import Your Chat — It's Free
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                             <path d="M5 12h14M13 5l7 7-7 7" />
@@ -983,8 +1002,8 @@
 
             <!-- Right Side: Visual Frame -->
             <div class="hero-image-content rise d3">
-                <div style="position: absolute; inset: -40px; background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%); filter: blur(50px); z-index: -1;"></div>
-                <div class="mockup-frame liquid-glass" style="width: 100%; max-width: 520px; aspect-ratio: 16/10; border-radius: 20px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 24px 60px rgba(0,0,0,0.6); transform: perspective(1000px) rotateY(-8deg) rotateX(4deg); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease; cursor: pointer;" onmouseover="this.style.transform='perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-8px)'; this.style.boxShadow='0 32px 80px rgba(59,130,246,0.3)';" onmouseout="this.style.transform='perspective(1000px) rotateY(-8deg) rotateX(4deg)'; this.style.boxShadow='0 24px 60px rgba(0,0,0,0.6)';">
+                <div style="position: absolute; inset: -40px; background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%); filter: blur(40px); z-index: -1;"></div>
+                <div class="mockup-frame liquid-glass" style="width: 100%; max-width: 520px; aspect-ratio: 16/10; border-radius: 20px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 24px 60px rgba(0,0,0,0.4); transform: perspective(1000px) rotateY(-8deg) rotateX(4deg); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease; cursor: pointer;" onmouseover="this.style.transform='perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-8px)'; this.style.boxShadow='0 32px 80px rgba(99,102,241,0.4)';" onmouseout="this.style.transform='perspective(1000px) rotateY(-8deg) rotateX(4deg)'; this.style.boxShadow='0 24px 60px rgba(0,0,0,0.4)';">
                     
                     <!-- Mac OS Style Top Bar -->
                     <div style="height: 44px; background: rgba(0,0,0,0.25); backdrop-filter: blur(10px); display: flex; align-items: center; padding: 0 18px; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);">
