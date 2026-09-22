@@ -651,7 +651,7 @@ button,
 /* Desktop sidebar collapse */
 /* Reserve space for the macOS dock — desktop only (no bottom gap on mobile) */
 @media (min-width: 768px) {
-    body.app-shell { padding-bottom: 65px; }
+    body.app-shell { padding-bottom: 100px; }
 }
 
 @media (min-width: 768px) {
