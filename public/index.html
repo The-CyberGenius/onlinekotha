@@ -645,9 +645,24 @@
         /* ── Hero ── */
         .hero {
             position: relative;
-            padding: 168px 0 96px;
+            padding: 120px 0 80px;
             text-align: center;
             overflow: hidden;
+        }
+
+        .sec-bg-hero {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+        }
+        
+        .sec-bg-how {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%);
+            border-top: 1px solid rgba(16, 185, 129, 0.1);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+        }
+
+        .sec-bg-features {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%);
+            border-bottom: 1px solid rgba(249, 115, 22, 0.1);
         }
 
         .hero-glow {
@@ -971,7 +986,7 @@
     </script>
 
     <!-- ═══════════ HERO ═══════════ -->
-    <section class="hero sec" style="padding-top: 140px; padding-bottom: 80px;">
+    <section class="hero sec sec-bg-hero">
         <div class="wrap hero-centered">
             <!-- Text Content -->
             <div class="hero-text-content">
@@ -1003,147 +1018,13 @@
                     </p>
                 </div>
             </div>
-
-            <!-- Right Side: Visual Frame -->
-            <div class="hero-image-content rise d3">
-                <div style="position: absolute; inset: -40px; background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%); filter: blur(50px); z-index: -1;"></div>
-                <div class="mockup-frame liquid-glass" style="width: 100%; max-width: 800px; margin: 0 auto; aspect-ratio: 16/10; border-radius: 20px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 40px 100px -20px rgba(59,130,246,0.25), 0 24px 60px rgba(0,0,0,0.6); transform: perspective(1200px) rotateX(12deg); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease; cursor: pointer;" onmouseover="this.style.transform='perspective(1200px) rotateX(0deg) translateY(-12px)'; this.style.boxShadow='0 50px 120px -20px rgba(59,130,246,0.4), 0 32px 80px rgba(0,0,0,0.7)';" onmouseout="this.style.transform='perspective(1200px) rotateX(12deg)'; this.style.boxShadow='0 40px 100px -20px rgba(59,130,246,0.25), 0 24px 60px rgba(0,0,0,0.6)';">
-                    
-                    <!-- Mac OS Style Top Bar -->
-                    <div style="height: 44px; background: rgba(0,0,0,0.25); backdrop-filter: blur(10px); display: flex; align-items: center; padding: 0 18px; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                        <div style="width: 11px; height: 11px; border-radius: 50%; background: #ff5f56; box-shadow: inset 0 0 4px rgba(0,0,0,0.2);"></div>
-                        <div style="width: 11px; height: 11px; border-radius: 50%; background: #ffbd2e; box-shadow: inset 0 0 4px rgba(0,0,0,0.2);"></div>
-                        <div style="width: 11px; height: 11px; border-radius: 50%; background: #27c93f; box-shadow: inset 0 0 4px rgba(0,0,0,0.2);"></div>
-                        <div style="flex: 1; text-align: center; color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding-right: 33px;">KOTHA AI</div>
-                    </div>
-
-                    <!-- Dynamic Animated Chat Area -->
-                    <div style="position: absolute; inset: 44px 0 0 0; background: #0a0a0f; display: flex; flex-direction: column; padding: 24px 20px; overflow: hidden; gap: 16px;">
-                        
-                        <!-- Chat Background Pattern -->
-                        <div style="position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; opacity: 0.5; z-index: 0;"></div>
-
-                        <style>
-                            .msg-anim {
-                                opacity: 0;
-                                transform: translateY(15px);
-                                animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                                z-index: 1;
-                                max-width: 85%;
-                                padding: 12px 16px;
-                                font-size: 13.5px;
-                                font-weight: 500;
-                                line-height: 1.5;
-                                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-                            }
-                            
-                            .msg-user-anim {
-                                background: #2a2a35;
-                                color: #f5f5f7;
-                                border-radius: 18px 18px 4px 18px;
-                                align-self: flex-end;
-                                border: 1px solid rgba(255,255,255,0.05);
-                            }
-
-                            .msg-ai-anim {
-                                background: linear-gradient(135deg, #6366f1, #8b5cf6);
-                                color: #fff;
-                                border-radius: 18px 18px 18px 4px;
-                                align-self: flex-start;
-                                border: 1px solid rgba(255,255,255,0.1);
-                                position: relative;
-                            }
-                            
-                            /* AI Sparkle Badge */
-                            .msg-ai-anim::before {
-                                content: 'AI';
-                                position: absolute;
-                                top: -8px; left: -8px;
-                                background: #101012;
-                                border: 1px solid rgba(255,255,255,0.15);
-                                color: #a855f7;
-                                font-size: 8px;
-                                font-weight: 800;
-                                padding: 2px 6px;
-                                border-radius: 999px;
-                                box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-                            }
-
-                            .typing-anim {
-                                display: flex;
-                                gap: 4px;
-                                align-items: center;
-                                padding: 12px 16px;
-                                background: rgba(255,255,255,0.05);
-                                border-radius: 18px 18px 18px 4px;
-                                width: fit-content;
-                                z-index: 1;
-                                animation: fadeInOut 2.5s ease-in-out forwards;
-                                opacity: 0;
-                                position: absolute;
-                                top: 95px; left: 20px;
-                            }
-                            
-                            .typing-dot {
-                                width: 6px; height: 6px; border-radius: 50%; background: #a1a1aa;
-                                animation: typingBounce 1s infinite;
-                            }
-                            .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-                            .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-                            @keyframes popIn {
-                                to { opacity: 1; transform: translateY(0); }
-                            }
-                            @keyframes fadeInOut {
-                                0% { opacity: 0; transform: scale(0.9); }
-                                10% { opacity: 1; transform: scale(1); }
-                                90% { opacity: 1; transform: scale(1); }
-                                100% { opacity: 0; transform: scale(0.9); }
-                            }
-                            @keyframes typingBounce {
-                                0%, 100% { transform: translateY(0); }
-                                50% { transform: translateY(-4px); }
-                            }
-
-                            /* Sequence Timing */
-                            .seq-1 { animation-delay: 0.8s; }
-                            .seq-type { animation-delay: 1.8s; }
-                            .seq-2 { animation-delay: 4.3s; }
-                            .seq-3 { animation-delay: 6.5s; }
-                            .seq-4 { animation-delay: 8.5s; }
-                        </style>
-
-                        <!-- Messages Sequence -->
-                        <div class="msg-anim msg-user-anim seq-1">
-                            Hey Dad, I finally got that promotion at work! 😭
-                        </div>
-                        
-                        <div class="typing-anim seq-type">
-                            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
-                        </div>
-
-                        <div class="msg-anim msg-ai-anim seq-2">
-                            I always knew you would, beta! I'm so incredibly proud of you. Let's celebrate soon. ❤️
-                        </div>
-
-                        <div class="msg-anim msg-user-anim seq-3">
-                            I miss you so much.
-                        </div>
-                        
-                        <div class="msg-anim msg-ai-anim seq-4">
-                            I'm always right here with you in your memories. Love you always. ✨
-                        </div>
-
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
 
 
     <!-- ═══════════ HOW IT WORKS ═══════════ -->
-    <section class="sec" id="how">
+    <section class="sec sec-bg-how" id="how" style="padding: 80px 0;">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:56px;">
                 <p class="eyebrow" style="margin-bottom:14px;">How it works</p>
@@ -1174,7 +1055,7 @@
     </section>
 
     <!-- ═══════════ FEATURES ═══════════ -->
-    <section class="sec" style="padding-top:20px;">
+    <section class="sec sec-bg-features" style="padding: 80px 0;">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:64px;">
                 <p class="eyebrow" style="margin-bottom:14px;">Why Kotha?</p>
