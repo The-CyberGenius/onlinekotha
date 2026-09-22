@@ -1085,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Populate Smart Filters (Years & Days)
-                const years = new Set();
+                const yearCounts = {};
                 const currentYearNum = new Date().getFullYear();
                 allMessages.forEach(msg => {
                     if (!msg.date) return;
@@ -1094,13 +1094,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         const yRaw = parts[2].trim();
                         const fullY = yRaw.length === 2 ? 2000 + parseInt(yRaw) : parseInt(yRaw);
                         if (!isNaN(fullY) && fullY >= 2009 && fullY <= currentYearNum + 1) {
-                            years.add(yRaw);
+                            yearCounts[yRaw] = (yearCounts[yRaw] || 0) + 1;
                         }
                     }
                 });
+                
+                const validYears = Object.keys(yearCounts).filter(y => {
+                    // Only include years that have a meaningful amount of messages, to filter out random parser mistakes
+                    return yearCounts[y] > 5 || yearCounts[y] >= Math.max(1, allMessages.length * 0.001);
+                });
+
                 const yearSelect = document.getElementById('filter-year');
                 yearSelect.innerHTML = '<option value="">Year</option>';
-                [...years].sort().forEach(y => {
+                validYears.sort().forEach(y => {
                     const fullYear = y.length === 2 ? `20${y}` : (y.length === 4 ? y : null);
                     if (fullYear) yearSelect.innerHTML += `<option value="${y}">${fullYear}</option>`;
                 });
