@@ -402,8 +402,8 @@
             const exitBtn = document.getElementById('exit-impersonation-btn');
             if (exitBtn) exitBtn.classList.remove('hidden');
 
-            // Add thin red line at the top of the body
-            document.body.classList.add('border-t-4', 'border-red-500');
+            // Add thin red line at the top of the body and CSS hook for mobile dock
+            document.body.classList.add('border-t-4', 'border-red-500', 'impersonating-mobile-dock');
 
             // Inject "Send as AI" and "Pause AI" controls into Mac Dock
             const dockGlassBar = document.getElementById('dock-glass-bar');
