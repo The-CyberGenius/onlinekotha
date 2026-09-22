@@ -1086,10 +1086,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Populate Smart Filters (Years & Days)
                 const years = new Set();
+                const currentYearNum = new Date().getFullYear();
                 allMessages.forEach(msg => {
                     if (!msg.date) return;
                     const parts = msg.date.split(/[\/\-.]/);
-                    if (parts.length === 3) years.add(parts[2].trim());
+                    if (parts.length === 3) {
+                        const yRaw = parts[2].trim();
+                        const fullY = yRaw.length === 2 ? 2000 + parseInt(yRaw) : parseInt(yRaw);
+                        if (!isNaN(fullY) && fullY >= 2009 && fullY <= currentYearNum + 1) {
+                            years.add(yRaw);
+                        }
+                    }
                 });
                 const yearSelect = document.getElementById('filter-year');
                 yearSelect.innerHTML = '<option value="">Year</option>';
@@ -1112,6 +1119,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const applyFiltersBtn = document.getElementById('apply-filters-btn');
 
                 const applyFilters = () => {
+                    let anchorId = null;
+                    const msgs = document.querySelectorAll('.chat-message');
+                    for (let i = 0; i < msgs.length; i++) {
+                        const rect = msgs[i].getBoundingClientRect();
+                        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+                            anchorId = msgs[i].id.replace('msg-', '');
+                            break;
+                        }
+                    }
+                    if (!anchorId && msgs.length > 0) {
+                        anchorId = msgs[Math.floor(msgs.length/2)].id.replace('msg-', '');
+                    }
+
                     const d = daySelect.value;
                     const m = filterMonth.value;
                     const y = yearSelect.value;
@@ -1203,6 +1223,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             }, 80);
                             statsInfo.innerHTML = `Jumped to date. Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> total messages.`;
                         } else {
+                            if (anchorId && !hasDateFilter) {
+                                const aidx = displayedMessages.findIndex(m => m.id == anchorId);
+                                if (aidx !== -1) {
+                                    const start = Math.max(0, aidx - 30);
+                                    const end = Math.min(displayedMessages.length, start + CHUNK_SIZE);
+                                    renderChats(start, end, 'reset');
+                                    setTimeout(() => {
+                                        const targetEl = document.getElementById(`msg-${anchorId}`);
+                                        if (targetEl) {
+                                            targetEl.scrollIntoView({ block: 'center' });
+                                        }
+                                    }, 80);
+                                    statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> messages.`;
+                                    toggleSidebar(false);
+                                    return;
+                                }
+                            }
                             // Default: show newest messages at bottom
                             const end = displayedMessages.length;
                             renderChats(Math.max(0, end - CHUNK_SIZE), end, 'reset');
@@ -2469,10 +2506,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.kothaToast) window.kothaToast('Open a chat first');
             return;
         }
-        displayedMessages = allMessages.filter(msg => msg.attachment && msg.type !== 'system');
-        renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length));
-        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length}</span> media attachments.`;
-        setTimeout(() => scrollArea.scrollTop = 0, 10);
+        
+        window.__showOnlyMedia = !window.__showOnlyMedia;
+        
+        [btnMedia, btnMedia2].forEach(btn => {
+            if (btn) {
+                if (window.__showOnlyMedia) {
+                    btn.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
+                    btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+                } else {
+                    btn.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
+                    btn.classList.add('text-gray-500', 'dark:text-gray-400');
+                }
+            }
+        });
+        
+        const applyFiltersBtn = document.getElementById('apply-filters-btn');
+        if (applyFiltersBtn) applyFiltersBtn.click();
+        
         toggleSidebar(false);
     };
     if (btnMedia) btnMedia.addEventListener('click', openMediaGallery);
