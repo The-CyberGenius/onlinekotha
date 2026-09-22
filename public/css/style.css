@@ -2658,6 +2658,7 @@ html.dark .custom-modal-card .modal-tab.active {
     background: linear-gradient(90deg, #f472b6, #c084fc, #6366f1, #f472b6);
     background-size: 300% 100%;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: wrappedShimmer 4s infinite linear;
 }
