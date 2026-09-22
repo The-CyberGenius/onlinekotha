@@ -1270,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Apply button — single click to filter
                 if (applyFiltersBtn) {
-                    applyFiltersBtn.addEventListener('click', applyFilters);
+                    applyFiltersBtn.onclick = applyFilters;
                 }
 
                 // NO auto-change listeners on dropdowns — only the Apply button triggers filtering

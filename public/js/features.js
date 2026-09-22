@@ -873,7 +873,7 @@
     //  SINGLE STORY CARD EXPORT — 1080×1920 Instagram/WhatsApp story PNG
     // ═══════════════════════════════════════════════════════════════
     function exportSingleStoryCard(stats, idx) {
-        if (typeof html2canvas === 'undefined') {
+        if (typeof htmlToImage === 'undefined') {
             showToast('Export library not loaded. Please refresh.');
             return;
         }
@@ -900,13 +900,9 @@
 
         // Render the whole container (which includes active slide and background blobs)
         setTimeout(() => {
-            html2canvas(container, {
+            htmlToImage.toCanvas(container, {
                 backgroundColor: '#0a0a0f',
-                scale: window.devicePixelRatio || 2,
-                useCORS: true,
-                logging: false,
-                width: container.offsetWidth,
-                height: container.offsetHeight
+                pixelRatio: window.devicePixelRatio || 2
             }).then(canvas => {
                 // Restore UI
                 actionBtns.forEach((btn, i) => btn.style.display = ogDisplays[i]);

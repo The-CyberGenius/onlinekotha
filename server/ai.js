@@ -729,10 +729,17 @@ Output STRICTLY valid JSON with this format: {"score": 85, "summary": "Your expl
 Context:
 ${contextStr}`;
 
-        const reply = await callLLM([{ role: 'user', content: prompt }], 'Respond ONLY with JSON.');
+        let replyText = '';
+        await callLLM({
+            feature: 'chat',
+            messages: [{ role: 'user', content: prompt }],
+            systemPrompt: 'Respond ONLY with JSON.',
+            userId: req.user?.id || null,
+            onToken: (txt) => { replyText += txt; }
+        });
         
-        let jsonStr = reply;
-        const match = reply.match(/\{.*\}/s);
+        let jsonStr = replyText;
+        const match = replyText.match(/\{.*\}/s);
         if (match) jsonStr = match[0];
         
         const data = JSON.parse(jsonStr);
