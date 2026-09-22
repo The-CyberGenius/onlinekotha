@@ -900,6 +900,40 @@
         html.light .badge-dark {
             display: none;
         }
+
+        /* ── Hero Typography theme fixes ── */
+        .hero-title-main {
+            background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        html.light .hero-title-main {
+            background: #111827;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-title-accent {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc-text {
+            color: #a1a1aa;
+        }
+        html.light .hero-desc-text {
+            color: #4b5563;
+        }
+
+        .hero-desc-highlight {
+            color: #ffffff;
+            font-weight: 600;
+        }
+        html.light .hero-desc-highlight {
+            color: #111827;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -956,12 +990,12 @@
                     <span class="pill" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);"><span class="dot" style="background: #3b82f6; box-shadow: 0 0 8px #3b82f6;"></span>AI-powered chat memories</span>
                 </div>
 
-                <h1 class="display rise d2" style="margin-bottom:22px; font-weight: 900; letter-spacing: -0.05em; background: linear-gradient(180deg, #ffffff 0%, #a1a1aa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    Bring your memories to life<br><span style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">with interactive AI.</span>
+                <h1 class="display rise d2 hero-title-main" style="margin-bottom:22px; font-weight: 900; letter-spacing: -0.05em;">
+                    Bring your memories to life<br><span class="hero-title-accent">with interactive AI.</span>
                 </h1>
 
-                <p class="lead rise d3" style="max-width:600px; margin-bottom: 34px; color: #a1a1aa; font-size: 1.1rem;">
-                    Transform your everyday WhatsApp chats into a living connection. Our AI deeply analyzes your history to learn their unique humor, slang, and vibe—allowing you to <span style="color:#ffffff;font-weight:600;">relive your favorite conversations anytime.</span>
+                <p class="lead rise d3 hero-desc-text" style="max-width:600px; margin-bottom: 34px; font-size: 1.1rem;">
+                    Transform your everyday WhatsApp chats into a living connection. Our AI deeply analyzes your history to learn their unique humor, slang, and vibe—allowing you to <span class="hero-desc-highlight">relive your favorite conversations anytime.</span>
                 </p>
 
                 <div class="rise d4" style="display:flex; flex-direction:column; gap:16px; margin-bottom:12px;">
