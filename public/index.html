@@ -969,9 +969,9 @@
                 </button>
                 <a href="/login.html" id="nav-login" class="btn-link" style="display:none;">Log in</a>
                 <button id="nav-logout-btn" class="btn-link hidden" style="border:0;background:none;">Logout</button>
-                <a href="/login.html" id="nav-cta" class="btn cta-primary"
+                <a href="/app.html" id="nav-cta" class="btn cta-primary"
                     style="min-height:46px;padding:0 18px;">
-                    Get Started
+                    Try Live Demo
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
@@ -1003,9 +1003,9 @@
                 </p>
 
                 <div class="rise d4" style="display:flex; flex-direction:column; align-items: center; gap:20px; margin-bottom:12px;">
-                    <a href="/login.html" id="hero-cta" class="btn cta-primary"
+                    <a href="/app.html" id="hero-cta" class="btn cta-primary"
                         style="min-height:56px;padding:0 36px;font-size:16px; text-transform: uppercase; letter-spacing: 1px;">
-                        Import Your Chat — It's Free
+                        Try Live Demo — Free
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                             <path d="M5 12h14M13 5l7 7-7 7" />
                         </svg>
@@ -1216,10 +1216,10 @@
                             <span>3 AI conversations / day</span>
                         </li>
                     </ul>
-                    <a href="/login.html" class="btn"
+                    <a href="/app.html" class="btn"
                         style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
                         onmouseover="this.style.background='var(--msg-ai-bg)'"
-                        onmouseout="this.style.background='transparent'">Get Started Free</a>
+                        onmouseout="this.style.background='transparent'">Try Live Demo — Free</a>
                 </div>
 
                 <!-- Pro Plan (Monthly) -->
@@ -1431,9 +1431,9 @@
                 fade away.</h2>
             <p class="lead" style="max-width:520px;margin:0 auto 34px;">Every conversation holds a piece of someone you
                 love. Kotha keeps it — beautifully, privately, forever.</p>
-            <a href="/login.html" id="final-cta" class="btn cta-primary"
+            <a href="/app.html" id="final-cta" class="btn cta-primary"
                 style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);">
-                Import Your Chat — It's Free
+                Try Live Demo — Free
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     stroke-linecap="round">
                     <path d="M5 12h14M13 5l7 7-7 7" />
@@ -1718,11 +1718,11 @@
                 if (d.user) {
                     const dest = d.user.is_admin ? '/admin.html' : '/app';
                     const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
-                    document.querySelectorAll('a[href="/login.html"], a[href="/login.html"]').forEach(a => {
+                    document.querySelectorAll('a[href="/login.html"], a[href="/app.html"]').forEach(a => {
                         if (a.id === 'btn-get-pro') {
                             a.href = '/app?checkout=1';
                             // Do not modify the text of the checkout button
-                        } else if (/get|start|bring|preserv|free|talking/i.test(a.textContent)) {
+                        } else if (/get|start|bring|preserv|free|talking|demo/i.test(a.textContent)) {
                             a.href = dest;
                             a.textContent = label;
                         } else {
