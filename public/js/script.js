@@ -54,28 +54,21 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.disabled = true;
         btn.classList.add('opacity-75');
 
-        try {
-            const res = await fetch('/api/dodo/create-checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plan: planType })
-            });
-            const data = await res.json();
-            
-            if (!res.ok) throw new Error(data.error || 'Failed to create checkout');
-            
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                throw new Error("No checkout URL returned");
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Error creating payment session: " + e.message);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            btn.classList.remove('opacity-75');
+        // Pass metadata to Dodo checkout link so the webhook knows who paid
+        const userId = window.__USER__ ? window.__USER__.id : '';
+        const email = window.__USER__ ? window.__USER__.email : '';
+        
+        // Construct the checkout URL
+        let checkoutUrl = '';
+        if (planType === 'pro_lifetime') {
+            checkoutUrl = `https://checkout.dodopayments.com/buy/pdt_0NmeknVE7dw1eni6bdKN1?quantity=1&metadata_user_id=${userId}&metadata_plan=${planType}&customer_email=${encodeURIComponent(email)}`;
+        } else {
+            checkoutUrl = `https://checkout.dodopayments.com/buy/pdt_0NmImonOlRx3cxyGfsvry?quantity=1&metadata_user_id=${userId}&metadata_plan=${planType}&customer_email=${encodeURIComponent(email)}`;
         }
+
+        setTimeout(() => {
+            window.location.href = checkoutUrl;
+        }, 300);
     }
 
     if (payBtn) {
