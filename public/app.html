@@ -415,19 +415,22 @@
         <div id="main-panel"
             class="flex-1 flex flex-col relative w-full md:w-auto min-w-0 min-h-0 h-full bg-[#efeae2] dark:bg-[#0b141a]">
 
-            <!-- ── Top Floating Guest Mode Banner ── -->
-            <div id="guest-preview-banner" class="hidden absolute top-[70px] left-1/2 -translate-x-1/2 z-[45] flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-900/90 dark:bg-slate-800/90 backdrop-blur-md text-white border border-indigo-500/30 shadow-lg text-[11px] font-medium select-none whitespace-nowrap">
-                <span class="flex items-center gap-1.5 text-indigo-300">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <!-- ── Top Guest Mode Banner (Static Strip) ── -->
+            <div id="guest-preview-banner" class="hidden w-full flex-shrink-0 z-[50] flex items-center justify-center gap-2.5 px-3 py-1.5 bg-indigo-50 dark:bg-[#1a1f36] text-indigo-700 dark:text-indigo-300 border-b border-indigo-200/50 dark:border-indigo-800/50 text-[11px] font-medium select-none whitespace-nowrap">
+                <span class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     Guest Mode
                 </span>
-                <span class="h-3 w-px bg-white/20"></span>
+                <span class="h-3 w-px bg-indigo-300/50 dark:bg-indigo-700/50"></span>
                 <button onclick="openAuthModal()" class="px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-sm hover:scale-105 active:scale-95 cursor-pointer">
                     Sign In
                 </button>
             </div>
 
-            <!-- ── DM Empty State (shown when DM tab is open but no chat is selected) ── -->
+            <!-- Container for the absolute overlay views so they don't overlap the banner -->
+            <div class="flex-1 relative w-full min-h-0 flex flex-col">
+
+                <!-- ── DM Empty State (shown when DM tab is open but no chat is selected) ── -->
             <div id="dm-empty-state" class="hidden absolute inset-0 z-[25] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b141a] border-l border-gray-200/80 dark:border-gray-800/80 overflow-hidden select-none">
                 
                 <!-- Mobile sidebar toggle for Empty State -->
@@ -803,8 +806,10 @@
                     </button>
                 </div>
             </div>
+            
+            </div><!-- /view-container -->
+            
     </div>
-
     <!-- end #app -->
 
     </div>
