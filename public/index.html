@@ -639,103 +639,133 @@
         .phone-screen {
             flex: 1;
             position: relative;
-            background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+            background: var(--bg);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Story Carousel ── */
+        .story-container {
+            display: flex;
+            overflow-x: hidden;
+            scroll-snap-type: x mandatory;
+            width: 100%;
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+        .story-card {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
             padding: 24px;
             text-align: center;
+            height: 100%;
         }
-        .phone-screen::before {
-            content: "";
+        
+        /* Vibrant gradients matching Day/Night */
+        .story-bg-1 { background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1)); }
+        .story-bg-2 { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1)); }
+        .story-bg-3 { background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.1)); }
+        .story-bg-4 { background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(139, 92, 246, 0.1)); }
+        .story-bg-5 { background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(16, 185, 129, 0.1)); }
+        .story-bg-6 { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1)); }
+        .story-bg-7 { background: linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(245, 158, 11, 0.1)); }
+
+        .story-progress-container {
             position: absolute;
-            inset: 0;
-            opacity: 0.2;
-            background-image: radial-gradient(circle at top right, #818cf8 0%, transparent 60%);
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            gap: 4px;
+            z-index: 50;
         }
-        .phone-screen::after {
-            content: "";
+        .story-progress-bar {
+            flex: 1;
+            height: 3px;
+            background: var(--border-strong);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .story-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--text-primary);
+            transition: width 0.1s linear;
+        }
+        .story-nav-left, .story-nav-right {
             position: absolute;
-            inset: 0;
-            opacity: 0.2;
-            background-image: radial-gradient(circle at bottom left, #c084fc 0%, transparent 60%);
+            top: 0;
+            bottom: 0;
+            width: 40%;
+            z-index: 40;
+            cursor: pointer;
         }
-        .wrapped-label {
-            position: relative;
-            z-index: 10;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 800;
-            color: #a5b4fc;
-            margin-bottom: 32px;
-            opacity: 0.9;
-        }
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 16px;
-            width: 100%;
-            margin-bottom: 16px;
-            transition: transform 0.2s ease;
-        }
-        .stat-card:hover {
-            transform: scale(1.05);
-        }
-        .stat-value {
+        .story-nav-left { left: 0; }
+        .story-nav-right { right: 0; }
+
+        /* Story Typography & Elements */
+        .story-title {
             font-size: 2.5rem;
             font-weight: 900;
-            color: #fff;
-            margin-bottom: 4px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            line-height: 1;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
         }
-        .stat-label {
-            font-size: 11px;
+        .story-subtitle {
+            font-size: 14px;
             font-weight: 600;
-            color: #c7d2fe;
+            color: var(--accent);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            margin-bottom: 16px;
         }
-        .stat-row {
-            display: flex;
-            gap: 16px;
-            width: 100%;
-            margin-bottom: 32px;
-        }
-        .stat-card-small {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 12px;
-        }
-        .stat-value-small {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 4px;
-            line-height: 1;
-        }
-        .stat-label-small {
-            font-size: 9px;
-            font-weight: 600;
-            color: #c7d2fe;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .wrapped-footer {
-            position: relative;
-            z-index: 10;
-            font-size: 13px;
+        .story-text {
+            font-size: 15px;
             font-weight: 500;
-            color: rgba(224, 231, 255, 0.9);
-            font-style: italic;
+            color: var(--text-secondary);
             line-height: 1.5;
+        }
+        .story-highlight {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin: 8px 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .story-share-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .story-share-btn:hover {
+            transform: scale(1.1);
         }
 
         /* ── Trust Row ── */
@@ -1223,30 +1253,176 @@
                 <div class="rise d5 mockup-wrapper">
                     
                     <!-- The Phone Frame -->
-                    <div class="phone-mockup">
+                    <div class="phone-mockup" id="demo-story-mockup">
                         <div class="phone-notch"></div>
+                        
                         <div class="phone-screen">
-                            <p class="wrapped-label">OUR CHAT, WRAPPED</p>
-                            
-                            <div class="stat-card">
-                                <h3 class="stat-value">12,842</h3>
-                                <p class="stat-label">messages</p>
+                            <!-- Story Progress Indicators -->
+                            <div class="story-progress-container" id="story-progress">
+                                <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
                             </div>
-                            
-                            <div class="stat-row">
-                                <div class="stat-card-small">
-                                    <h3 class="stat-value-small">574</h3>
-                                    <p class="stat-label-small">days</p>
-                                </div>
-                                <div class="stat-card-small">
-                                    <h3 class="stat-value-small">607K</h3>
-                                    <p class="stat-label-small">words</p>
-                                </div>
+
+                            <!-- Navigation Hit Areas -->
+                            <div class="story-nav-left" id="story-prev"></div>
+                            <div class="story-nav-right" id="story-next"></div>
+
+                            <!-- Share Button -->
+                            <div class="story-share-btn" id="story-share">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                             </div>
-                            
-                            <p class="wrapped-footer">"Your story, told by your conversations."</p>
+
+                            <!-- Story Slides Container -->
+                            <div class="story-container" id="story-carousel">
+                                
+                                <!-- Slide 1: Intro -->
+                                <div class="story-card story-bg-1">
+                                    <h2 class="story-subtitle">OnlineKotha Presents</h2>
+                                    <h1 class="story-title">Your Chat, Wrapped.</h1>
+                                    <p class="story-text mt-4">Let's see what your conversations remember about you.</p>
+                                </div>
+
+                                <!-- Slide 2: Stats -->
+                                <div class="story-card story-bg-2">
+                                    <h2 class="story-subtitle">The Numbers</h2>
+                                    <div class="story-highlight" style="font-size: 3rem;">12,842</div>
+                                    <p class="story-text">messages sent over</p>
+                                    <div class="story-highlight">574 Days</div>
+                                </div>
+
+                                <!-- Slide 3: Vibe Check -->
+                                <div class="story-card story-bg-3">
+                                    <h2 class="story-subtitle">Vibe Check</h2>
+                                    <div class="text-[4rem] mb-2">🎢</div>
+                                    <div class="story-highlight">80% Chaos 😂</div>
+                                    <div class="story-highlight">20% Wholesome ❤️</div>
+                                </div>
+
+                                <!-- Slide 4: Top Words -->
+                                <div class="story-card story-bg-4">
+                                    <h2 class="story-subtitle">Most Used Words</h2>
+                                    <div class="story-highlight w-full">#1 bhai</div>
+                                    <div class="story-highlight w-full">#2 wtf</div>
+                                    <div class="story-highlight w-full">#3 haha</div>
+                                    <div class="story-highlight w-full">#4 okay</div>
+                                </div>
+
+                                <!-- Slide 5: Night Owls -->
+                                <div class="story-card story-bg-5">
+                                    <h2 class="story-subtitle">Time Patterns</h2>
+                                    <div class="text-[4rem] mb-2">🦉</div>
+                                    <h1 class="story-title">Night Owls</h1>
+                                    <p class="story-text mt-2">Most active at 2:00 AM</p>
+                                </div>
+
+                                <!-- Slide 6: AI Clone -->
+                                <div class="story-card story-bg-6">
+                                    <h2 class="story-subtitle">The Magic</h2>
+                                    <h1 class="story-title text-3xl">AI Clone Ready</h1>
+                                    <p class="story-text mt-4">We taught our AI exactly how you text.</p>
+                                    <div class="story-highlight mt-4 text-sm font-normal">
+                                        "bhai me nahi aa raha, tu jaa 😂"
+                                    </div>
+                                </div>
+
+                                <!-- Slide 7: Outro -->
+                                <div class="story-card story-bg-7">
+                                    <h1 class="story-title">Your Turn</h1>
+                                    <p class="story-text mt-2 mb-6">Import your chat and relive your memories securely.</p>
+                                    <a href="/app.html" class="btn cta-primary" style="padding: 12px 24px; font-weight: 700;">Generate Yours</a>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Story Javascript Logic -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                            const carousel = document.getElementById('story-carousel');
+                            const prevBtn = document.getElementById('story-prev');
+                            const nextBtn = document.getElementById('story-next');
+                            const shareBtn = document.getElementById('story-share');
+                            const progressFills = document.querySelectorAll('.story-progress-fill');
+                            
+                            if (!carousel) return;
+
+                            let currentSlide = 0;
+                            const totalSlides = 7;
+                            const slideDuration = 4000; // 4 seconds per slide
+                            let storyInterval;
+                            let progressStartTime;
+                            let animationFrameId;
+
+                            function updateProgressBars() {
+                                progressFills.forEach((fill, index) => {
+                                    if (index < currentSlide) {
+                                        fill.style.width = '100%';
+                                        fill.style.transition = 'none';
+                                    } else if (index > currentSlide) {
+                                        fill.style.width = '0%';
+                                        fill.style.transition = 'none';
+                                    }
+                                });
+                                
+                                const currentFill = progressFills[currentSlide];
+                                if (currentFill) {
+                                    currentFill.style.width = '0%';
+                                    currentFill.style.transition = 'none';
+                                    // Trigger reflow
+                                    void currentFill.offsetWidth;
+                                    currentFill.style.transition = `width ${slideDuration}ms linear`;
+                                    currentFill.style.width = '100%';
+                                }
+                            }
+
+                            function goToSlide(index) {
+                                if (index < 0) index = 0;
+                                if (index >= totalSlides) index = 0; // Loop back to start
+                                
+                                currentSlide = index;
+                                const slideWidth = carousel.clientWidth;
+                                carousel.scrollTo({ left: slideWidth * currentSlide, behavior: 'smooth' });
+                                
+                                updateProgressBars();
+                                startTimer();
+                            }
+
+                            function startTimer() {
+                                clearInterval(storyInterval);
+                                storyInterval = setInterval(() => {
+                                    goToSlide(currentSlide + 1);
+                                }, slideDuration);
+                            }
+
+                            prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+                            nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+                            
+                            shareBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (navigator.share) {
+                                    navigator.share({
+                                        title: 'OnlineKotha Chat Wrapped',
+                                        text: 'Check out my WhatsApp Chat Wrapped on OnlineKotha!',
+                                        url: window.location.href,
+                                    }).catch(console.error);
+                                } else {
+                                    alert('Link copied to clipboard!');
+                                }
+                            });
+
+                            // Initialize
+                            setTimeout(() => {
+                                goToSlide(0);
+                            }, 500);
+                        });
+                    </script>
 
                     <!-- Trust Row -->
                     <div class="trust-row">
