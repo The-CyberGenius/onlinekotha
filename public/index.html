@@ -602,6 +602,201 @@
             position: relative;
         }
 
+        /* ── Phone Mockup (Chat Wrapped) ── */
+        .mockup-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 24px;
+        }
+        .phone-mockup {
+            position: relative;
+            width: 280px;
+            height: 560px;
+            border-radius: 40px;
+            border: 8px solid #1e293b;
+            background: #0f172a;
+            box-shadow: 0 25px 50px -12px rgba(99,102,241,0.25);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 32px;
+            z-index: 10;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 24px;
+            background: #1e293b;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 20;
+        }
+        .phone-screen {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+        .phone-screen::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.2;
+            background-image: radial-gradient(circle at top right, #818cf8 0%, transparent 60%);
+        }
+        .phone-screen::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.2;
+            background-image: radial-gradient(circle at bottom left, #c084fc 0%, transparent 60%);
+        }
+        .wrapped-label {
+            position: relative;
+            z-index: 10;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 800;
+            color: #a5b4fc;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            width: 100%;
+            margin-bottom: 16px;
+            transition: transform 0.2s ease;
+        }
+        .stat-card:hover {
+            transform: scale(1.05);
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 4px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #c7d2fe;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .stat-row {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 32px;
+        }
+        .stat-card-small {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 12px;
+        }
+        .stat-value-small {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+        .stat-label-small {
+            font-size: 9px;
+            font-weight: 600;
+            color: #c7d2fe;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .wrapped-footer {
+            position: relative;
+            z-index: 10;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(224, 231, 255, 0.9);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* ── Trust Row ── */
+        .trust-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 32px;
+            width: 100%;
+        }
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .trust-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #334155;
+        }
+
+        /* ── Feature Row ── */
+        .feature-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            opacity: 0.8;
+            margin-top: 12px;
+        }
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .feature-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .feature-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         @media (max-width: 900px) {
             .hero-centered {
                 gap: 40px;
@@ -1001,28 +1196,102 @@
                 </div>
 
                 <h1 class="display rise d2 hero-title-main" style="margin-bottom:22px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(40px, 7vw, 72px); line-height: 1.05;">
-                    Bring your memories to life<br><span class="hero-title-accent">with interactive AI.</span>
+                    Your chats are<br><span class="hero-title-accent">memories too.</span>
                 </h1>
 
-                <p class="lead rise d3 hero-desc-text" style="max-width:640px; margin-bottom: 40px; font-size: 1.15rem; color: #a1a1aa;">
-                    Transform your everyday WhatsApp chats into a living connection. Our AI deeply analyzes your history to learn their unique humor, slang, and vibe—allowing you to <span class="hero-desc-highlight">relive your favorite conversations anytime.</span>
+                <p class="lead rise d3 hero-desc-text" style="max-width:640px; margin-bottom: 20px; font-size: 1.15rem; color: #a1a1aa; line-height: 1.6;">
+                    Turn your WhatsApp conversations into beautiful, searchable memories — and explore them with AI.
+                </p>
+                
+                <p class="rise d3" style="max-width:640px; margin-bottom: 40px; font-size: 0.95rem; color: #71717a; font-weight: 500; letter-spacing: 0.02em;">
+                    See what your conversations remember about you.
                 </p>
 
-                <div class="rise d4" style="display:flex; flex-direction:column; align-items: center; gap:20px; margin-bottom:12px;">
+                <div class="rise d4" style="display:flex; flex-direction:column; align-items: center; gap:16px; margin-bottom:40px;">
                     <a href="/app.html" id="hero-cta" class="btn cta-primary"
-                        style="min-height:56px;padding:0 36px;font-size:16px; text-transform: uppercase; letter-spacing: 1px;">
-                        Try Live Demo — Free
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                            <path d="M5 12h14M13 5l7 7-7 7" />
-                        </svg>
+                        style="min-height:56px;padding:0 40px;font-size:16px; font-weight: 700; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);">
+                        See Your Chat Story &rarr;
                     </a>
 
-                    <p class="dim" style="font-size:14px;font-weight:600;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:16px; flex-wrap: wrap;">
-                        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Free forever</span>
-                        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> No credit card</span>
-                        <span style="display:inline-flex;align-items:center;gap:4px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"></polyline></svg> 100% Private</span>
+                    <p class="dim" style="font-size:13px;font-weight:500;letter-spacing:.02em; color: #71717a;">
+                        Free to explore &bull; No credit card
                     </p>
                 </div>
+                </div>
+
+                <!-- Chat Wrapped Phone Mockup & Features -->
+                <div class="rise d5 mockup-wrapper">
+                    
+                    <!-- The Phone Frame -->
+                    <div class="phone-mockup">
+                        <div class="phone-notch"></div>
+                        <div class="phone-screen">
+                            <p class="wrapped-label">OUR CHAT, WRAPPED</p>
+                            
+                            <div class="stat-card">
+                                <h3 class="stat-value">12,842</h3>
+                                <p class="stat-label">messages</p>
+                            </div>
+                            
+                            <div class="stat-row">
+                                <div class="stat-card-small">
+                                    <h3 class="stat-value-small">574</h3>
+                                    <p class="stat-label-small">days</p>
+                                </div>
+                                <div class="stat-card-small">
+                                    <h3 class="stat-value-small">607K</h3>
+                                    <p class="stat-label-small">words</p>
+                                </div>
+                            </div>
+                            
+                            <p class="wrapped-footer">"Your story, told by your conversations."</p>
+                        </div>
+                    </div>
+
+                    <!-- Trust Row -->
+                    <div class="trust-row">
+                        <span class="trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Private</span>
+                        <span class="trust-dot"></span>
+                        <span class="trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Fast</span>
+                        <span class="trust-dot"></span>
+                        <span class="trust-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete anytime</span>
+                    </div>
+
+                    <!-- Feature Icons Row -->
+                    <div class="feature-row">
+                        <div class="feature-item">
+                            <div class="feature-icon-wrapper" style="color: #818cf8;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </div>
+                            <span class="feature-label">Import</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon-wrapper" style="color: #34d399;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            </div>
+                            <span class="feature-label">Preserve</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon-wrapper" style="color: #fbbf24;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </div>
+                            <span class="feature-label">Search</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon-wrapper" style="color: #f472b6;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </div>
+                            <span class="feature-label">Chat w/ AI</span>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon-wrapper" style="color: #c084fc;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                            </div>
+                            <span class="feature-label">Wrapped</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
