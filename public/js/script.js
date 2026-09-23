@@ -1266,6 +1266,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Close sidebar on mobile after applying
                     toggleSidebar(false);
+                    if (typeof window.closeMobileFilterModal === 'function') {
+                        window.closeMobileFilterModal();
+                    }
                 };
 
                 // Apply button — single click to filter
