@@ -38,6 +38,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarTitle = document.getElementById('sidebar-title');
     const statsInfo = document.getElementById('stats-info');
     const searchBox = document.getElementById('search-box');
+    const payBtn = document.getElementById('modal-pay-btn');
+    const payMonthlyBtn = document.getElementById('modal-pay-monthly-btn');
+
+    async function handlePayment(planType) {
+        if (window.__IS_GUEST__) {
+            window.closeUpgradeModal();
+            window.openAuthModal("Please log in to upgrade to Pro.");
+            return;
+        }
+
+        const btn = planType === 'pro_lifetime' ? payBtn : payMonthlyBtn;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="text-[14px] font-bold mx-auto">Redirecting to checkout...</span>';
+        btn.disabled = true;
+        btn.classList.add('opacity-75');
+
+        try {
+            const res = await fetch('/api/dodo/create-checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plan: planType })
+            });
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error || 'Failed to create checkout');
+            
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error("No checkout URL returned");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error creating payment session: " + e.message);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.remove('opacity-75');
+        }
+    }
+
+    if (payBtn) {
+        payBtn.addEventListener('click', () => handlePayment('pro_lifetime'));
+    }
+    if (payMonthlyBtn) {
+        payMonthlyBtn.addEventListener('click', () => handlePayment('pro_monthly'));
+    }
+
+    // Chat Interface Logic
     const searchActionBtn = document.getElementById('search-action-btn');
     const searchClearBtn = document.getElementById('search-clear-btn');
     const resultsList = document.getElementById('results-list');
