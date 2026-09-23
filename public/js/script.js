@@ -1813,6 +1813,9 @@ document.addEventListener('DOMContentLoaded', () => {
             filtersContainer.classList.add('hidden');
             if (filtersToggle) filtersToggle.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
             if (filtersToggle2) filtersToggle2.classList.remove('text-amber-600', 'bg-amber-50', 'dark:bg-amber-900/30');
+            if (typeof window.closeMobileFilterModal === 'function') {
+                window.closeMobileFilterModal();
+            }
         }
         const toggleFilters = (e) => {
             e.stopPropagation();
@@ -3325,6 +3328,45 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainSearchInput) {
                 if (window.kothaSidebarOpen) window.kothaSidebarOpen();
                 setTimeout(() => mainSearchInput.focus(), 150);
+            }
+        });
+    }
+
+    // --- Mobile Filter Modal Closing Logic ---
+    window.closeMobileFilterModal = function() {
+        const overlay = document.getElementById('mobile-popup-overlay');
+        const filterModal = document.getElementById('mobile-filter-modal');
+        const smartFilters = document.getElementById('smart-filters-container');
+        const placeholder = document.getElementById('smart-filters-placeholder');
+        
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.style.setProperty('display', 'none', 'important');
+        }
+        if (filterModal) {
+            filterModal.classList.add('hidden');
+            filterModal.style.display = 'none';
+        }
+        
+        // Return smart filters to original location
+        if (smartFilters && placeholder && placeholder.parentNode) {
+            smartFilters.classList.add('hidden');
+            smartFilters.style.display = 'none';
+            placeholder.parentNode.insertBefore(smartFilters, placeholder.nextSibling);
+        }
+    };
+
+    const closeMobileFilterBtn = document.getElementById('close-mobile-filter');
+    if (closeMobileFilterBtn) {
+        closeMobileFilterBtn.addEventListener('click', window.closeMobileFilterModal);
+    }
+
+    const mobOverlay = document.getElementById('mobile-popup-overlay');
+    if (mobOverlay) {
+        mobOverlay.addEventListener('click', (e) => {
+            if (e.target === mobOverlay) {
+                if (typeof window.closeMobileFilterModal === 'function') window.closeMobileFilterModal();
+                if (typeof closeSearchModal === 'function') closeSearchModal();
             }
         });
     }
