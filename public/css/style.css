@@ -30,6 +30,18 @@ body {
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Prevent iOS Safari auto-zoom on input focus */
+@supports (-webkit-touch-callout: none) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
+
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
 }
