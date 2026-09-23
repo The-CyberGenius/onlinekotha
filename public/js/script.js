@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Construct the checkout URL
         let checkoutUrl = '';
         if (planType === 'pro_lifetime') {
-            checkoutUrl = `https://checkout.dodopayments.com/buy/pdt_0NmeknVE7dw1eni6bdKN1?quantity=1&metadata_user_id=${userId}&metadata_plan=${planType}&customer_email=${encodeURIComponent(email)}`;
-        } else {
             checkoutUrl = `https://checkout.dodopayments.com/buy/pdt_0NmImonOlRx3cxyGfsvry?quantity=1&metadata_user_id=${userId}&metadata_plan=${planType}&customer_email=${encodeURIComponent(email)}`;
+        } else {
+            checkoutUrl = `https://checkout.dodopayments.com/buy/pdt_0NmeknVE7dw1eni6bdKN1?quantity=1&metadata_user_id=${userId}&metadata_plan=${planType}&customer_email=${encodeURIComponent(email)}`;
         }
 
         setTimeout(() => {
