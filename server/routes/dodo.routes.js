@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const db = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireUser } = require('../auth');
 const integrations = require('../integrations');
 
 const DODO_API_URL = 'https://live.dodopayments.com/payments';
@@ -18,7 +18,7 @@ function getDodoWebhookSecret() {
 }
 
 // 1. Create Checkout Session (Payment Link)
-router.post('/create-checkout', requireAuth, async (req, res) => {
+router.post('/create-checkout', requireUser, async (req, res) => {
     try {
         const { plan } = req.body;
         const apiKey = getDodoApiKey();
