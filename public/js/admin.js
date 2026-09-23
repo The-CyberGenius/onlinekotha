@@ -36,18 +36,39 @@
         window.location.replace('/login.html');
     });
 
-    // Tabs
+    // Tabs (with localStorage persistence)
+    function activateTab(tabName) {
+        document.querySelectorAll('.tab-item').forEach(b => {
+            b.classList.remove('tab-active');
+            if (b.dataset.tab === tabName) b.classList.add('tab-active');
+        });
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(`tab-${tabName}`)?.classList.remove('hidden');
+    }
+
     document.querySelectorAll('.tab-item').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
-            document.querySelectorAll('.tab-item').forEach(b => {
-                b.classList.remove('tab-active');
-            });
-            btn.classList.add('tab-active');
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-            document.getElementById(`tab-${tab}`)?.classList.remove('hidden');
+            activateTab(tab);
+            localStorage.setItem('admin-active-tab', tab);
         });
     });
+
+    // Restore last active tab on page load
+    const savedTab = localStorage.getItem('admin-active-tab');
+    if (savedTab && document.getElementById(`tab-${savedTab}`)) {
+        activateTab(savedTab);
+        // Trigger data load for tabs that need it
+        if (savedTab === 'contact-messages') {
+            setTimeout(() => document.querySelector('[data-tab="contact-messages"]')?.click(), 100);
+        } else if (savedTab === 'website-activity') {
+            setTimeout(() => document.querySelector('[data-tab="website-activity"]')?.click(), 100);
+        } else if (savedTab === 'dm-logs') {
+            setTimeout(() => document.querySelector('[data-tab="dm-logs"]')?.click(), 100);
+        } else if (savedTab === 'email-logs') {
+            setTimeout(() => { if (typeof loadEmailLogs === 'function') loadEmailLogs(); }, 100);
+        }
+    }
 
     let knownProviders = {};
 
