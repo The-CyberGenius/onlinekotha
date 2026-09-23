@@ -605,28 +605,17 @@
             else if (mv === sc) { vibe = 'Supportive Hype 🤝'; vibeDesc = "Fire, thumbs up, and crowns — you're each other's biggest cheerleader."; }
         }
 
-        // Average words per message and Top Words
+        // Average words per message
         let totalWords = 0;
         let longestMsg = '', longestMsgLen = 0;
-        const wordCounts = {};
-        const stopWords = new Set(['the', 'is', 'in', 'and', 'to', 'a', 'of', 'it', 'that', 'i', 'you', 'my', 'for', 'on', 'with', 'this', 'was', 'as', 'at', 'be', 'are', 'hai', 'ki', 'ka', 'ko', 'se', 'bhi', 'ho', 'hi', 'me', 'main', 'toh', 'kya', 'ye', 'tha', 'nahi', 'karna', 'liye', 'ek', 'wo', 'ab', 'agar', 'aur', 'kuch', 'hoga', 'hum', 'he', 'we', 'but', 'not', 'have', 'do', 'can', 'so', 'if', 'or', 'all', 'your', 'from', 'they', 'like', 'just', 'about', 'out', 'what', 'up', 'when', 'there', 'who', 'how', 'k', 'h', 'nhi', 'haan', 'ha', 'na', 'ok', 'okay']);
-        
         messages.forEach(m => {
             if (m.text) {
-                const words = m.text.toLowerCase().split(/[^a-z0-9]+/);
-                words.forEach(w => {
-                    if (w.length > 2 && !stopWords.has(w) && !/^\d+$/.test(w)) {
-                        wordCounts[w] = (wordCounts[w] || 0) + 1;
-                    }
-                });
-                
                 const wc = m.text.split(/\s+/).length;
                 totalWords += wc;
                 if (wc > longestMsgLen) { longestMsgLen = wc; longestMsg = m.text; }
             }
         });
         const avgWords = totalMessages > 0 ? Math.round(totalWords / totalMessages) : 0;
-        const topWordsList = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).map(e => e[0]);
 
         // Date range
         let firstDate = '', lastDate = '';
@@ -734,7 +723,6 @@
             timeCounts: tc,
             topEmojis, vibe, vibeDesc,
             avgWords, firstDate, lastDate, detectedNickname,
-            topWords: topWordsList,
             // Advanced
             totalDays, msgsPerDay, totalWords,
             busiestDay, busiestDayIdx, dayCounts, dayNames,
@@ -894,15 +882,8 @@
         const container = overlay ? overlay.querySelector('.wrapped-container') : null;
         if (!container) return;
 
-        let targetElement = container;
-        const shareCard = document.getElementById('share-card-export');
-        const isShareCardSlide = shareCard && shareCard.closest('.wrapped-slide').classList.contains('active');
-        if (isShareCardSlide) {
-            targetElement = shareCard;
-        }
-
         // Hide UI elements we don't want in the screenshot
-        const actionBtns = overlay.querySelectorAll('.wrapped-action-btns, .export-actions');
+        const actionBtns = overlay.querySelectorAll('.wrapped-action-btns');
         const ogDisplays = [];
         actionBtns.forEach(btn => {
             ogDisplays.push(btn.style.display);
@@ -919,8 +900,8 @@
 
         // Render the whole container (which includes active slide and background blobs)
         setTimeout(() => {
-            htmlToImage.toCanvas(targetElement, {
-                backgroundColor: isShareCardSlide ? '#0B0A10' : '#0a0a0f',
+            htmlToImage.toCanvas(container, {
+                backgroundColor: '#0a0a0f',
                 pixelRatio: window.devicePixelRatio || 2
             }).then(canvas => {
                 // Restore UI
@@ -1026,32 +1007,38 @@
 
                 <div class="wrapped-slide-wrapper" id="wrapped-slide-wrapper">
 
-                    <!-- 1: Cover -->
+                    <!-- 1: Welcome -->
                     <div class="wrapped-slide active">
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">KOTHA WRAPPED</div>
                             <div class="wrapped-main-body">
-                                <div class="text-5xl mb-5 wrapped-stat-pop" style="filter: drop-shadow(0 0 20px rgba(99,102,241,0.6));">✨</div>
-                                <h2 class="wrapped-title wrapped-premium-glow">Your Story<br>with <span class="text-indigo-400 font-black">${escH(stats.otherName)}</span></h2>
-                                <p class="text-sm text-gray-400 mt-4 leading-relaxed">It's been a journey. Let's look back at everything you two shared.</p>
+                                <div class="text-5xl mb-5 wrapped-stat-pop drop-shadow-2xl">✨</div>
+                                <h2 class="wrapped-title wrapped-premium-glow" style="overflow-wrap:break-word;word-break:break-word; text-shadow: 0 0 25px rgba(99,102,241,0.5);">Your Chat Story<br>with <span class="text-indigo-400 font-black" style="filter: drop-shadow(0 0 10px rgba(99,102,241,0.6));">${escH(stats.otherName)}</span></h2>
+                                ${stats.detectedNickname && stats.detectedNickname.toLowerCase() !== stats.otherName.toLowerCase() ? `<p class="text-xs text-purple-400/80 mt-1 font-bold tracking-wide">aka "${escH(stats.detectedNickname)}"</p>` : ''}
+                                <p class="text-sm text-gray-400 mt-4 leading-relaxed max-w-[280px]">${stats.totalMessages.toLocaleString()} messages analyzed across ${stats.firstDate || '?'} to ${stats.lastDate || '?'}</p>
+                                <p class="text-xs text-gray-600 mt-3 font-medium">${stats.avgWords} avg words per message</p>
                             </div>
-                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP TO BEGIN →</div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="0">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT TO BEGIN →</div>
                         </div>
                     </div>
 
-                    <!-- 2: Total Messages -->
+                    <!-- 2: Volume -->
                     <div class="wrapped-slide">
                         <div class="wrapped-slide-content">
-                            <div class="wrapped-header-tag">THE CONVERSATION</div>
+                            <div class="wrapped-header-tag">THE VOLUME</div>
                             <div class="wrapped-main-body w-full">
-                                <p class="text-sm text-gray-400 mb-2">You exchanged</p>
-                                <div class="wrapped-accent-huge mb-4 wrapped-shimmer-text wrapped-stat-pop">${stats.totalMessages.toLocaleString()}</div>
-                                <p class="text-sm text-gray-400 mb-8">messages this year.</p>
-                                
-                                <div class="wrapped-badge-box text-left wrapped-premium-glass">
-                                    <p class="text-xs font-bold text-gray-300 mb-3 uppercase tracking-wider">Who talked more?</p>
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-semibold">Total Messages Exchanged</p>
+                                <div class="wrapped-accent-huge mb-6 wrapped-shimmer-text wrapped-stat-pop drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">${stats.totalMessages.toLocaleString()}</div>
+                                <div class="wrapped-badge-box mt-4 text-left wrapped-premium-glass">
+                                    <p class="text-xs font-bold text-gray-300 mb-3">Who talked more?</p>
                                     <div class="mb-3">
-                                        <div class="flex justify-between text-sm font-bold mb-1 text-indigo-300">
+                                        <div class="flex justify-between text-xs font-semibold mb-1 text-indigo-300">
                                             <span>${escH(stats.sender1Name)}</span>
                                             <span>${stats.sender1Percent}%</span>
                                         </div>
@@ -1060,7 +1047,7 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="flex justify-between text-sm font-bold mb-1 text-purple-300">
+                                        <div class="flex justify-between text-xs font-semibold mb-1 text-purple-300">
                                             <span>${escH(stats.sender2Name)}</span>
                                             <span>${stats.sender2Percent}%</span>
                                         </div>
@@ -1070,229 +1057,339 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="1">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
                         </div>
                     </div>
 
-                    <!-- 3: Days Together -->
+                    <!-- 3: Timing -->
                     <div class="wrapped-slide">
                         <div class="wrapped-slide-content">
-                            <div class="wrapped-header-tag">TIME TOGETHER</div>
+                            <div class="wrapped-header-tag">TIMING IS EVERYTHING</div>
                             <div class="wrapped-main-body w-full">
-                                <p class="text-sm text-gray-400 mb-2">You've been talking for</p>
-                                <div class="text-6xl font-black text-amber-400 mb-2 wrapped-stat-pop" style="text-shadow: 0 0 30px rgba(251,191,36,0.3);">${stats.totalDays}</div>
-                                <p class="text-sm text-gray-400 mb-8 uppercase tracking-widest font-bold">Days</p>
-                                
-                                <div class="wrapped-badge-box text-left flex items-center gap-4 wrapped-premium-glass border-orange-500/30">
-                                    <div class="text-4xl filter drop-shadow-[0_0_15px_rgba(251,146,60,0.5)]">🔥</div>
-                                    <div>
-                                        <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Longest Streak</p>
-                                        <p class="text-xl font-black text-orange-400">${stats.maxStreak} Days Straight</p>
-                                    </div>
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-3 font-semibold">You chat the most as...</p>
+                                <div class="text-xl font-black text-amber-400 mb-6 drop-shadow-[0_0_12px_rgba(251,191,36,0.6)] animate-pulse">${stats.peakLabel}</div>
+                                <div class="wrapped-badge-box text-left space-y-2.5 wrapped-premium-glass">
+                                    ${['morning', 'afternoon', 'evening', 'night'].map(p => {
+            const icons = { morning: '🌅', afternoon: '☀️', evening: '🌆', night: '🦉' };
+            const labels = { morning: 'Morning (6am–12pm)', afternoon: 'Afternoon (12–5pm)', evening: 'Evening (5–10pm)', night: 'Late Night (10pm–6am)' };
+            const count = stats.timeCounts[p];
+            const pct = stats.totalMessages > 0 ? Math.round((count / stats.totalMessages) * 100) : 0;
+            const isP = p === stats.peakPeriod;
+            return `
+                                            <div>
+                                                <div class="flex justify-between text-xs ${isP ? 'text-amber-300 font-bold' : 'text-gray-400'} mb-1">
+                                                    <span>${icons[p]} ${labels[p]}</span>
+                                                    <span class="font-bold">${count.toLocaleString()} (${pct}%)</span>
+                                                </div>
+                                                <div class="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                                                    <div class="h-full rounded-full ${isP ? 'bg-amber-400' : 'bg-white/15'}" style="width:${pct}%"></div>
+                                                </div>
+                                            </div>
+                                        `;
+        }).join('')}
                                 </div>
-                                <p class="text-xs text-center text-gray-500 mt-6 font-medium">You average ${stats.msgsPerDay} messages every day you talk.</p>
                             </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="2">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Share / Save
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
                         </div>
                     </div>
 
-                    <!-- 4: Your Vibe -->
+                    <!-- 4: Fun Facts & Records -->
+                    <div class="wrapped-slide">
+                        <div class="wrapped-slide-content">
+                            <div class="wrapped-header-tag">FUN FACTS</div>
+                            <div class="wrapped-main-body w-full">
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-4">Mind-blowing chat stats</p>
+                                <div class="space-y-3 w-full">
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">🔥</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Longest Streak</p>
+                                            <p class="text-lg font-black text-orange-400">${stats.maxStreak} days straight</p>
+                                        </div>
+                                    </div>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">📅</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Days Chatting</p>
+                                            <p class="text-lg font-black text-indigo-300">${stats.totalDays} days · ${stats.msgsPerDay} msgs/day</p>
+                                        </div>
+                                    </div>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">💬</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Words Written</p>
+                                            <p class="text-lg font-black text-purple-300">${stats.totalWords.toLocaleString()} words</p>
+                                        </div>
+                                    </div>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">😂</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">LOL Moments</p>
+                                            <p class="text-lg font-black text-yellow-300">${stats.laughCount.toLocaleString()} msgs with laughter</p>
+                                        </div>
+                                    </div>
+                                    ${stats.mediaCount > 0 ? `
+                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
+                                        <span class="text-2xl">📸</span>
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Media Shared</p>
+                                            <p class="text-lg font-black text-cyan-300">${stats.mediaCount.toLocaleString()} photos/videos/audio</p>
+                                        </div>
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="3">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
+                        </div>
+                    </div>
+
+                    <!-- 5: Who Starts + Day Activity -->
+                    <div class="wrapped-slide">
+                        <div class="wrapped-slide-content">
+                            <div class="wrapped-header-tag">WHO'S MORE EAGER?</div>
+                            <div class="wrapped-main-body w-full">
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Who texts first each day?</p>
+                                <div class="flex justify-center gap-6 mb-6">
+                                    <div class="text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                                        <div class="text-3xl font-black ${stats.s1First >= stats.s2First ? 'text-indigo-400 drop-shadow-[0_0_10px_rgba(129,140,248,0.5)]' : 'text-gray-400'}">${stats.s1First}</div>
+                                        <p class="text-[10px] text-gray-300 mt-1 font-bold">${escH(stats.sender1Name)}</p>
+                                        ${stats.s1First >= stats.s2First ? '<p class="text-[9px] text-indigo-400 font-extrabold mt-0.5 animate-bounce">👑 STARTER</p>' : ''}
+                                    </div>
+                                    <div class="text-gray-600 text-2xl font-bold self-center">vs</div>
+                                    <div class="text-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
+                                        <div class="text-3xl font-black ${stats.s2First > stats.s1First ? 'text-pink-400 drop-shadow-[0_0_10px_rgba(244,114,182,0.5)]' : 'text-gray-400'}">${stats.s2First}</div>
+                                        <p class="text-[10px] text-gray-300 mt-1 font-bold">${escH(stats.sender2Name)}</p>
+                                        ${stats.s2First > stats.s1First ? '<p class="text-[9px] text-pink-400 font-extrabold mt-0.5 animate-bounce">👑 STARTER</p>' : ''}
+                                    </div>
+                                </div>
+
+                                <div class="wrapped-badge-box text-left w-full mb-3">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2">Busiest Day of Week</p>
+                                    <p class="text-lg font-black text-amber-400">${stats.busiestDay}s are your day! 📆</p>
+                                </div>
+
+                                ${stats.totalQuestions > 0 ? `
+                                <div class="wrapped-badge-box text-left w-full mb-3">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2">Questions Asked</p>
+                                    <p class="text-sm font-bold text-gray-300">${stats.totalQuestions.toLocaleString()} total questions</p>
+                                    <div class="flex gap-3 mt-2">
+                                        <span class="text-xs text-indigo-300 font-bold">${escH(stats.sender1Name)}: ${stats.s1Questions}</span>
+                                        <span class="text-xs text-pink-300 font-bold">${escH(stats.sender2Name)}: ${stats.s2Questions}</span>
+                                    </div>
+                                </div>` : ''}
+
+                                ${stats.busiestDateCount > 0 ? `
+                                <div class="wrapped-badge-box text-left w-full">
+                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Most Active Day Ever</p>
+                                    <p class="text-sm font-black text-green-400">${stats.busiestDate} — ${stats.busiestDateCount} messages! 🎉</p>
+                                </div>` : ''}
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="4">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
+                        </div>
+                    </div>
+
+                    <!-- 6: Emojis -->
+                    <div class="wrapped-slide">
+                        <div class="wrapped-slide-content">
+                            <div class="wrapped-header-tag">EMOJI CHAMPIONS</div>
+                            <div class="wrapped-main-body w-full">
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-6">Your most used emojis</p>
+                                ${stats.topEmojis.length > 0 ? `
+                                    <div class="flex items-end justify-center gap-4 h-40">
+                                        ${stats.topEmojis.slice(0, 3).map((emoji, i) => {
+            const h = ['h-32', 'h-24', 'h-20'][i];
+            const s = ['text-5xl', 'text-4xl', 'text-3xl'][i];
+            const c = ['bg-indigo-600/30 border-indigo-500/50', 'bg-purple-600/30 border-purple-500/50', 'bg-pink-600/30 border-pink-500/50'][i];
+            return `
+                                                <div class="flex flex-col items-center gap-1.5">
+                                                    <div class="w-16 ${h} ${c} border backdrop-blur-sm rounded-t-2xl flex items-center justify-center ${s} shadow-lg" style="animation:slideUp 400ms ${i * 100}ms both cubic-bezier(0.16,1,0.3,1)">${emoji}</div>
+                                                    <span class="text-[10px] font-bold text-gray-400">#${i + 1}</span>
+                                                </div>
+                                            `;
+        }).join('')}
+                                    </div>
+                                    ${stats.topEmojis.length > 3 ? `
+                                        <div class="flex gap-4 mt-6 justify-center">
+                                            ${stats.topEmojis.slice(3, 5).map((emoji, i) => `
+                                                <div class="bg-gray-800/40 border border-gray-700/50 rounded-xl px-3 py-1.5 flex items-center gap-2">
+                                                    <span class="text-xl">${emoji}</span>
+                                                    <span class="text-[10px] font-bold text-gray-400">#${i + 4}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                ` : `<div class="text-gray-500 text-sm">No emojis found in this chat!</div>`}
+                            </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="5">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
+                        </div>
+                    </div>
+
+                    <!-- 7: Vibe -->
                     <div class="wrapped-slide">
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">THE VIBE CHECK</div>
-                            <div class="wrapped-main-body w-full">
-                                <p class="text-sm text-gray-400 mb-4">If your chat was a mood, it would be...</p>
-                                <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400 mb-6 wrapped-stat-pop" style="line-height:1.2;">${stats.vibe}</div>
-                                <div class="wrapped-badge-box text-left wrapped-premium-glass p-5">
-                                    <p class="text-sm text-gray-200 leading-relaxed font-medium italic">"${stats.vibeDesc}"</p>
+                            <div class="wrapped-main-body">
+                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-3">Your Relationship Vibe</p>
+                                <div class="text-3xl font-black wrapped-shimmer-text mb-4 wrapped-stat-pop">${stats.vibe}</div>
+                                <div class="wrapped-badge-box mt-4 wrapped-premium-glass">
+                                    <p class="text-xs text-gray-300 leading-relaxed font-medium">${stats.vibeDesc}</p>
                                 </div>
-                                <div class="mt-8">
-                                    <p class="text-sm font-bold text-gray-400 mb-2">You are ${stats.peakLabel}</p>
-                                    <div class="h-2 rounded-full bg-white/[0.05] overflow-hidden w-full">
-                                        <div class="h-full rounded-full bg-indigo-500" style="width:${stats.lateNightPct}%"></div>
-                                    </div>
-                                    <p class="text-[10px] text-gray-500 mt-2 font-bold uppercase tracking-widest">${stats.lateNightPct}% late night chats</p>
-                                </div>
+                                <div class="text-6xl mt-6 wrapped-stat-pop">${stats.topEmojis[0] || '💬'}</div>
+                                <div class="mt-4 text-xs text-gray-500 font-bold">${stats.lateNightPct}% of chats happen after midnight 🌙</div>
                             </div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT FOR SHARE CARD →</div>
                         </div>
                     </div>
 
-                    <!-- 5: Your Words -->
+                    
+                    <!-- 7.5: Compatibility -->
                     <div class="wrapped-slide">
                         <div class="wrapped-slide-content">
-                            <div class="wrapped-header-tag">YOUR WORDS</div>
-                            <div class="wrapped-main-body w-full">
-                                <p class="text-sm text-gray-400 mb-2">Together, you wrote</p>
-                                <div class="text-4xl font-black text-purple-400 mb-6 wrapped-stat-pop">${stats.totalWords.toLocaleString()} <span class="text-2xl text-purple-400/50">words</span></div>
-                                
-                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-4">Your Most Used Words</p>
-                                <div class="flex flex-wrap justify-center gap-2 mb-6">
-                                    ${stats.topWords.slice(0,8).map((w,i) => `<span class="bg-purple-900/40 border border-purple-500/30 text-purple-200 px-3 py-1.5 rounded-full text-sm font-bold" style="animation:slideUp 300ms ${i*100}ms both;">${w}</span>`).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 6: Your Moments -->
-                    <div class="wrapped-slide">
-                        <div class="wrapped-slide-content">
-                            <div class="wrapped-header-tag">YOUR MOMENTS</div>
-                            <div class="wrapped-main-body w-full">
-                                <div class="wrapped-badge-box text-left mb-4 wrapped-premium-glass border-green-500/20">
-                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Most Active Day</p>
-                                    <p class="text-xl font-black text-green-400 mb-1">${stats.busiestDate}</p>
-                                    <p class="text-xs text-gray-300">You couldn't stop talking (${stats.busiestDateCount} messages)!</p>
-                                </div>
-                                
-                                <div class="wrapped-badge-box text-left wrapped-premium-glass">
-                                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-3 text-center">Who initiates more?</p>
-                                    <div class="flex justify-around items-center">
-                                        <div class="text-center">
-                                            <div class="text-3xl font-black ${stats.s1First >= stats.s2First ? 'text-indigo-400' : 'text-gray-500'}">${stats.s1First}</div>
-                                            <p class="text-[10px] text-gray-400 mt-1 font-bold">${escH(stats.sender1Name)}</p>
-                                        </div>
-                                        <div class="text-gray-700 text-xl font-bold">vs</div>
-                                        <div class="text-center">
-                                            <div class="text-3xl font-black ${stats.s2First > stats.s1First ? 'text-pink-400' : 'text-gray-500'}">${stats.s2First}</div>
-                                            <p class="text-[10px] text-gray-400 mt-1 font-bold">${escH(stats.sender2Name)}</p>
-                                        </div>
+                            <div class="wrapped-header-tag">COMPATIBILITY SCORE</div>
+                            <div class="wrapped-main-body w-full flex flex-col items-center justify-center">
+                                <div id="compat-loader" class="text-center py-10">
+                                    <div class="animate-pulse mb-3">
+                                        <svg class="w-12 h-12 text-indigo-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                                        </svg>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 7: The Little Things -->
-                    <div class="wrapped-slide">
-                        <div class="wrapped-slide-content">
-                            <div class="wrapped-header-tag">THE LITTLE THINGS</div>
-                            <div class="wrapped-main-body w-full">
-                                <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-4">Top Emojis</p>
-                                ${stats.topEmojis.length > 0 ? `
-                                    <div class="flex justify-center items-end gap-3 mb-8 h-24">
-                                        ${stats.topEmojis.slice(0, 3).map((emoji, i) => {
-                                            const h = ['h-24', 'h-16', 'h-12'][i];
-                                            const s = ['text-6xl', 'text-4xl', 'text-3xl'][i];
-                                            return `
-                                                <div class="flex flex-col items-center justify-end" style="animation:slideUp 400ms ${i*150}ms both;">
-                                                    <div class="${s} drop-shadow-2xl mb-2 hover:scale-110 transition-transform">${emoji}</div>
-                                                </div>
-                                            `;
-                                        }).join('')}
-                                    </div>
-                                ` : `<p class="text-sm text-gray-500 mb-8">No emojis used.</p>`}
-                                
-                                <div class="grid grid-cols-2 gap-3 w-full">
-                                    <div class="wrapped-badge-box p-3 text-center wrapped-premium-glass border-yellow-500/20">
-                                        <div class="text-2xl mb-1">😂</div>
-                                        <div class="text-lg font-black text-yellow-400">${stats.laughCount}</div>
-                                        <div class="text-[9px] text-gray-400 uppercase font-bold">Laughs</div>
-                                    </div>
-                                    <div class="wrapped-badge-box p-3 text-center wrapped-premium-glass border-cyan-500/20">
-                                        <div class="text-2xl mb-1">📸</div>
-                                        <div class="text-lg font-black text-cyan-400">${stats.mediaCount}</div>
-                                        <div class="text-[9px] text-gray-400 uppercase font-bold">Media Sent</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 8: Final Memory (Compatibility Placeholder) -->
-                    <div class="wrapped-slide">
-                        <div class="wrapped-slide-content">
-                            <div class="wrapped-header-tag">FINAL ANALYSIS</div>
-                            <div class="wrapped-main-body w-full flex flex-col items-center justify-center h-full pb-10">
-                                <div id="compat-loader" class="text-center">
-                                    <div class="animate-pulse mb-4 text-5xl">🔮</div>
-                                    <p class="text-gray-300 text-sm font-bold tracking-wide">AI is feeling the vibe...</p>
+                                    <p class="text-gray-400 text-sm font-bold">AI Analyzing Chat Tone...</p>
                                 </div>
                                 <div id="compat-content" class="hidden w-full text-center">
-                                    <div class="relative w-32 h-32 mx-auto mb-6">
-                                        <svg class="w-full h-full transform -rotate-90 filter drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" viewBox="0 0 100 100">
-                                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8" />
-                                            <circle id="compat-ring" cx="50" cy="50" r="45" fill="none" stroke="url(#gradient)" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283" class="transition-all duration-1000 ease-out" stroke-linecap="round" />
+                                    <div class="relative w-40 h-40 mx-auto mb-6">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10" />
+                                            <circle id="compat-ring" cx="50" cy="50" r="45" fill="none" stroke="url(#gradient)" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" class="transition-all duration-1000 ease-out" stroke-linecap="round" />
                                             <defs>
-                                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                    <stop offset="0%" stop-color="#818cf8" />
-                                                    <stop offset="100%" stop-color="#c084fc" />
+                                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stop-color="#f472b6" />
+                                                    <stop offset="100%" stop-color="#6366f1" />
                                                 </linearGradient>
                                             </defs>
                                         </svg>
                                         <div class="absolute inset-0 flex items-center justify-center flex-col">
-                                            <span id="compat-score" class="text-3xl font-black text-white">0</span>
-                                            <span class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">% MATCH</span>
+                                            <span id="compat-score" class="text-4xl font-black text-white">0</span>
+                                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">% MATCH</span>
                                         </div>
                                     </div>
-                                    <p id="compat-summary" class="text-sm text-gray-300 font-medium italic px-4 leading-relaxed">...</p>
+                                    <div class="wrapped-badge-box text-left wrapped-premium-glass">
+                                        <p id="compat-summary" class="text-sm text-gray-300 leading-relaxed font-medium">...</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase mt-auto">TAP TO REVEAL SHARE CARD →</div>
+                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6.5">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    Save Card
+                                </button>
+                            </div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT FOR SHARE CARD →</div>
                         </div>
                     </div>
 
-                    <!-- 9: Share Card -->
+                    <!-- 8: Share / Export -->
                     <div class="wrapped-slide">
-                        <div class="wrapped-slide-content" style="padding:0; justify-content:center;">
-                            <!-- THE CARD (Perfect for 9:16) -->
-                            <div id="share-card-export" class="share-card-container w-full h-full flex flex-col justify-between p-6 relative overflow-hidden bg-[#0B0A10]" style="aspect-ratio: 9/16; max-height:100%; box-sizing:border-box;">
-                                <!-- Dynamic Background Elements -->
-                                <div class="absolute top-[-10%] left-[-20%] w-[70%] h-[40%] bg-indigo-600/30 rounded-full blur-[60px]"></div>
-                                <div class="absolute bottom-[-10%] right-[-20%] w-[80%] h-[50%] bg-purple-700/20 rounded-full blur-[70px]"></div>
-                                
-                                <!-- Header -->
-                                <div class="relative z-10 flex justify-between items-start mt-2">
-                                    <div>
-                                        <h3 class="text-white font-black text-xl tracking-tight">Kotha Wrapped</h3>
-                                        <p class="text-indigo-300 font-bold text-xs uppercase tracking-widest mt-1">2024 Edition</p>
+                        <div class="wrapped-slide-content">
+                            <div class="wrapped-header-tag">SHARE YOUR STORY</div>
+                            <div class="wrapped-main-body w-full">
+                                <div class="bg-gradient-to-br from-indigo-950/40 to-purple-950/40 border border-indigo-500/20 backdrop-blur-md rounded-3xl p-5 w-full text-left shadow-2xl relative overflow-hidden wrapped-premium-glass">
+                                    <div class="absolute -top-10 -right-10 w-24 h-24 bg-pink-500/10 rounded-full filter blur-xl"></div>
+                                    <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-500/10 rounded-full filter blur-xl"></div>
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span class="text-[9px] font-black text-indigo-400 tracking-wider uppercase">Kotha Wrapped</span>
+                                        <span class="text-[9px] text-gray-500 font-bold">onlinekotha.com</span>
                                     </div>
-                                    <div class="text-right">
-                                        <span class="text-3xl filter drop-shadow-lg">${stats.topEmojis[0] || '💬'}</span>
+                                    <h3 class="text-base font-black text-white leading-tight mb-3">Chat with ${escH(stats.otherName)}</h3>
+                                    <div class="space-y-2.5">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Messages</p>
+                                                <p class="text-lg font-black text-white">${stats.totalMessages.toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Days Active</p>
+                                                <p class="text-lg font-black text-indigo-300">${stats.totalDays}</p>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Streak</p>
+                                                <p class="text-xs font-black text-orange-400">🔥 ${stats.maxStreak}d</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Peak</p>
+                                                <p class="text-xs font-extrabold text-amber-300">${stats.peakLabel}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Vibe</p>
+                                                <p class="text-xs font-extrabold text-purple-300">${stats.vibe}</p>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">LOL Moments</p>
+                                                <p class="text-xs font-black text-yellow-300">😂 ${stats.laughCount.toLocaleString()}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider">Words Written</p>
+                                                <p class="text-xs font-black text-green-300">${stats.totalWords.toLocaleString()}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p class="text-[8px] text-gray-400 uppercase font-extrabold tracking-wider mb-1">Top Emojis</p>
+                                            <p class="text-lg font-bold flex gap-1.5">${stats.topEmojis.slice(0, 5).join(' ') || '💬'}</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Center Content -->
-                                <div class="relative z-10 my-auto">
-                                    <p class="text-gray-400 text-sm font-medium mb-1">My chat story with</p>
-                                    <h2 class="text-4xl font-black text-white mb-6 leading-none tracking-tight">${escH(stats.otherName)}</h2>
-                                    
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-                                            <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1">Messages</p>
-                                            <p class="text-2xl font-black text-white">${stats.totalMessages.toLocaleString()}</p>
-                                        </div>
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-                                            <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1">Days Active</p>
-                                            <p class="text-2xl font-black text-amber-400">${stats.totalDays}</p>
-                                        </div>
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-                                            <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1">The Vibe</p>
-                                            <p class="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400 leading-tight">${stats.vibe.replace(/ .*/, '')}</p>
-                                        </div>
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
-                                            <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1">Late Night</p>
-                                            <p class="text-xl font-black text-indigo-300">${stats.lateNightPct}%</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Footer -->
-                                <div class="relative z-10 flex justify-center items-center mb-2">
-                                    <div class="bg-black/40 backdrop-blur-sm border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2">
-                                        <span class="text-[10px] text-gray-300 font-medium">Create yours at</span>
-                                        <span class="text-[10px] font-bold text-white tracking-wide">onlinekotha.com</span>
-                                    </div>
+                                <!-- BUTTONS — z-index raised above nav taps -->
+                                <div class="wrapped-action-btns flex flex-col gap-2 mt-5 w-full relative" style="z-index:200">
+                                    <button class="wrapped-download-btn mt-0 flex items-center gap-2 w-full justify-center" id="wrapped-download-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                        Share / Download Card
+                                    </button>
+                                    <button class="bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12.5px] rounded-xl py-2.5 px-4 flex items-center gap-2 w-full justify-center transition active:scale-95 cursor-pointer" id="wrapped-copy-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                        Copy Image to Clipboard
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <!-- EXPORT ACTIONS (Hidden during export) -->
-                            <div class="export-actions absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/90 to-transparent flex flex-col gap-2 z-50">
-                                <button id="wrapped-download-btn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-transform active:scale-95 w-full">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                    Save to Camera Roll
-                                </button>
-                                <button class="wrapped-close-modal-btn bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded-xl flex items-center justify-center transition w-full text-xs">
-                                    Close Wrapped
-                                </button>
-                            </div>
+                            <div class="text-[10px] text-gray-500 text-center uppercase tracking-widest">← TAP LEFT TO REWATCH</div>
                         </div>
                     </div>
                 </div>
