@@ -416,16 +416,13 @@
             class="flex-1 flex flex-col relative w-full md:w-auto min-w-0 min-h-0 h-full bg-[#efeae2] dark:bg-[#0b141a]">
 
             <!-- ── Top Floating Guest Mode Banner ── -->
-            <div id="guest-preview-banner" class="hidden absolute top-[70px] left-1/2 -translate-x-1/2 z-[45] flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-slate-900/90 via-indigo-950/90 to-purple-950/90 backdrop-blur-md text-white border border-indigo-500/40 shadow-2xl text-xs font-semibold select-none">
-                <span class="flex items-center gap-1.5 text-indigo-300 font-bold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    Guest Preview
+            <div id="guest-preview-banner" class="hidden absolute top-[70px] left-1/2 -translate-x-1/2 z-[45] flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-slate-900/90 dark:bg-slate-800/90 backdrop-blur-md text-white border border-indigo-500/30 shadow-lg text-[11px] font-medium select-none whitespace-nowrap">
+                <span class="flex items-center gap-1.5 text-indigo-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Guest Mode
                 </span>
                 <span class="h-3 w-px bg-white/20"></span>
-                <span class="text-gray-200">
-                    <b id="guest-chat-rem" class="text-white font-extrabold">1</b> Chat & <b id="guest-ai-rem" class="text-white font-extrabold">10</b> AI Msgs Left
-                </span>
-                <button onclick="openAuthModal()" class="ml-1 px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold text-[11px] transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
+                <button onclick="openAuthModal()" class="px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition shadow-sm hover:scale-105 active:scale-95 cursor-pointer">
                     Sign In
                 </button>
             </div>
