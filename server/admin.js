@@ -998,5 +998,265 @@ router.post('/emails/send', async (req, res) => {
         res.status(500).json({ error: 'Failed to send manual email' });
     }
 });
+// ─────────────────────────────────────────────
+// Analytics APIs
+// ─────────────────────────────────────────────
+
+router.get('/analytics/summary', (req, res) => {
+    try {
+        const liveThreshold = Date.now() - (5 * 60 * 1000); // 5 minutes
+        const liveCount = db.prepare('SELECT COUNT(DISTINCT visitor_id) as c FROM analytics_sessions WHERE last_active >= ?').get(liveThreshold).c;
+
+        const popularPages = db.prepare(`
+            SELECT page as path, COUNT(*) as views
+            FROM analytics_events
+            WHERE event_type = 'page_view' AND created_at >= ?
+            GROUP BY page
+            ORDER BY views DESC
+            LIMIT 5
+        `).all(Date.now() - (24 * 60 * 60 * 1000));
+
+        const topReferrers = db.prepare(`
+            SELECT referrer, COUNT(*) as visits
+            FROM analytics_sessions
+            WHERE start_time >= ?
+            GROUP BY referrer
+            ORDER BY visits DESC
+            LIMIT 5
+        `).all(Date.now() - (24 * 60 * 60 * 1000));
+
+        const recentVisitors = db.prepare(`
+            SELECT v.ip_address, v.country, e.page as path, s.referrer, e.created_at
+            FROM analytics_events e
+            JOIN analytics_visitors v ON e.visitor_id = v.visitor_id
+            LEFT JOIN analytics_sessions s ON e.session_id = s.session_id
+            ORDER BY e.created_at DESC
+            LIMIT 10
+        `).all();
+
+        res.json({ liveCount, popularPages, topReferrers, recentVisitors });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch summary' });
+    }
+});
+
+router.delete('/analytics/clear', (req, res) => {
+    try {
+        db.prepare('DELETE FROM analytics_events').run();
+        db.prepare('DELETE FROM analytics_sessions').run();
+        db.prepare('DELETE FROM analytics_visitors').run();
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to clear analytics' });
+    }
+});
+
+router.get('/analytics/overview', (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayMs = today.getTime();
+        const liveThreshold = Date.now() - (5 * 60 * 1000); // 5 minutes
+
+        const totalVisitors = db.prepare('SELECT COUNT(*) as c FROM analytics_visitors').get().c;
+        const totalPageViews = db.prepare("SELECT COUNT(*) as c FROM analytics_events WHERE event_type = 'page_view'").get().c;
+        const signups = db.prepare("SELECT COUNT(*) as c FROM analytics_events WHERE event_type = 'signup_completed'").get().c;
+        const todayViews = db.prepare("SELECT COUNT(*) as c FROM analytics_events WHERE event_type = 'page_view' AND created_at >= ?").get(todayMs).c;
+        const liveNow = db.prepare('SELECT COUNT(DISTINCT visitor_id) as c FROM analytics_sessions WHERE last_active >= ?').get(liveThreshold).c;
+
+        res.json({
+            ok: true,
+            totalVisitors,
+            totalPageViews,
+            signups,
+            todayViews,
+            liveNow
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load analytics overview' });
+    }
+});
+
+router.get('/analytics/chart', (req, res) => {
+    try {
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        
+        // Group by day using strftime on created_at / 1000
+        const query = `
+            SELECT 
+                strftime('%Y-%m-%d', created_at / 1000, 'unixepoch') as date,
+                COUNT(CASE WHEN event_type = 'page_view' THEN 1 END) as views,
+                COUNT(DISTINCT visitor_id) as visitors,
+                COUNT(CASE WHEN event_type = 'signup_completed' THEN 1 END) as signups
+            FROM analytics_events
+            WHERE created_at >= ?
+            GROUP BY date
+            ORDER BY date ASC
+        `;
+        const data = db.prepare(query).all(thirtyDaysAgo);
+        res.json({ ok: true, data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load chart data' });
+    }
+});
+
+router.get('/analytics/top-pages', (req, res) => {
+    try {
+        const query = `
+            SELECT page, COUNT(*) as views, COUNT(DISTINCT visitor_id) as visitors
+            FROM analytics_events
+            WHERE event_type = 'page_view' AND page != ''
+            GROUP BY page
+            ORDER BY views DESC
+            LIMIT 10
+        `;
+        const data = db.prepare(query).all();
+        res.json({ ok: true, data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load top pages' });
+    }
+});
+
+router.get('/analytics/top-countries', (req, res) => {
+    try {
+        const query = `
+            SELECT country, COUNT(*) as visitors
+            FROM analytics_visitors
+            WHERE country != 'Unknown'
+            GROUP BY country
+            ORDER BY visitors DESC
+            LIMIT 10
+        `;
+        const data = db.prepare(query).all();
+        res.json({ ok: true, data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load top countries' });
+    }
+});
+
+router.get('/analytics/visitors', (req, res) => {
+    try {
+        let { page = 1, limit = 50, search = '' } = req.query;
+        page = parseInt(page) || 1;
+        limit = parseInt(limit) || 50;
+        const offset = (page - 1) * limit;
+
+        let whereClause = '';
+        const params = [];
+        if (search) {
+            whereClause = 'WHERE ip_address LIKE ? OR visitor_id LIKE ?';
+            params.push(`%${search}%`, `%${search}%`);
+        }
+
+        const countQuery = `SELECT COUNT(*) as c FROM analytics_visitors ${whereClause}`;
+        const total = db.prepare(countQuery).get(...params).c;
+
+        const dataQuery = `
+            SELECT 
+                visitor_id, user_id, ip_address, country, city, device, browser, os, 
+                first_seen, last_seen, total_visits, total_page_views 
+            FROM analytics_visitors 
+            ${whereClause} 
+            ORDER BY last_seen DESC 
+            LIMIT ? OFFSET ?
+        `;
+        params.push(limit, offset);
+        const data = db.prepare(dataQuery).all(...params);
+
+        // Fetch latest session for these visitors to get landing page/referrer
+        if (data.length > 0) {
+            const visitorIds = data.map(v => v.visitor_id);
+            const placeholders = visitorIds.map(() => '?').join(',');
+            const sessionQuery = `
+                SELECT session_id, visitor_id, landing_page, referrer, utm_source, last_active, start_time
+                FROM analytics_sessions
+                WHERE visitor_id IN (${placeholders})
+                GROUP BY visitor_id HAVING MAX(last_active)
+            `;
+            const sessions = db.prepare(sessionQuery).all(...visitorIds);
+            const sessionMap = {};
+            sessions.forEach(s => sessionMap[s.visitor_id] = s);
+            
+            data.forEach(v => {
+                v.latest_session = sessionMap[v.visitor_id] || null;
+            });
+        }
+
+        res.json({ ok: true, data, total, page, limit });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load visitors' });
+    }
+});
+
+router.get('/analytics/visitor/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const visitor = db.prepare('SELECT * FROM analytics_visitors WHERE visitor_id = ?').get(id);
+        if (!visitor) return res.status(404).json({ error: 'Visitor not found' });
+
+        const events = db.prepare('SELECT * FROM analytics_events WHERE visitor_id = ? ORDER BY created_at DESC LIMIT 100').all(id);
+        
+        // Try to fetch associated user info if user_id exists
+        let user = null;
+        if (visitor.user_id) {
+            user = db.prepare('SELECT id, email, display_name FROM users WHERE id = ?').get(visitor.user_id);
+        }
+
+        res.json({ ok: true, visitor, events, user });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load visitor timeline' });
+    }
+});
+
+router.get('/analytics/export', (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                datetime(first_seen / 1000, 'unixepoch') as "Date First Seen",
+                visitor_id as "Visitor ID",
+                user_id as "User ID",
+                ip_address as "IP Address",
+                country as "Country",
+                city as "City",
+                device as "Device",
+                browser as "Browser",
+                os as "OS",
+                total_page_views as "Page Views"
+            FROM analytics_visitors
+            ORDER BY first_seen DESC
+            LIMIT 5000
+        `;
+        const data = db.prepare(query).all();
+        
+        if (data.length === 0) {
+            return res.status(404).send('No data available');
+        }
+
+        const headers = Object.keys(data[0]);
+        const csvRows = [headers.join(',')];
+        
+        data.forEach(row => {
+            const values = headers.map(header => {
+                const val = row[header] !== null ? String(row[header]) : '';
+                return `"${val.replace(/"/g, '""')}"`;
+            });
+            csvRows.push(values.join(','));
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="visitors_export.csv"');
+        res.send(csvRows.join('\n'));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to export CSV' });
+    }
+});
 
 module.exports = router;

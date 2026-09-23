@@ -97,6 +97,9 @@
             const data = await res.json();
             if (!res.ok || !data.ok) throw new Error(data.error || 'Invalid email or PIN');
 
+            if (window.trackKothaEvent) {
+                window.trackKothaEvent('login_completed', { user_id: data.user ? data.user.id : undefined });
+            }
             window.location.reload();
         } catch (err) {
             if (errEl) {
@@ -145,6 +148,9 @@
             const data = await res.json();
             if (!res.ok || !data.ok) throw new Error(data.error || 'Signup failed');
 
+            if (window.trackKothaEvent) {
+                window.trackKothaEvent('signup_completed', { user_id: data.user ? data.user.id : undefined });
+            }
             window.location.reload();
         } catch (err) {
             if (errEl) {

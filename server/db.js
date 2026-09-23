@@ -216,8 +216,62 @@ CREATE TABLE IF NOT EXISTS email_logs (
   type TEXT,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
-CREATE INDEX IF NOT EXISTS idx_email_logs_user ON email_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(type);
+
+-- ── Visitor Analytics tables ──
+CREATE TABLE IF NOT EXISTS analytics_visitors (
+  visitor_id TEXT PRIMARY KEY,
+  user_id INTEGER,
+  ip_address TEXT,
+  country TEXT,
+  country_code TEXT,
+  region TEXT,
+  city TEXT,
+  isp TEXT,
+  first_seen INTEGER NOT NULL,
+  last_seen INTEGER NOT NULL,
+  total_visits INTEGER DEFAULT 0,
+  total_page_views INTEGER DEFAULT 0,
+  device TEXT,
+  browser TEXT,
+  os TEXT,
+  screen_res TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_analytics_visitors_user ON analytics_visitors(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_visitors_country ON analytics_visitors(country_code);
+
+CREATE TABLE IF NOT EXISTS analytics_sessions (
+  session_id TEXT PRIMARY KEY,
+  visitor_id TEXT NOT NULL,
+  start_time INTEGER NOT NULL,
+  last_active INTEGER NOT NULL,
+  landing_page TEXT,
+  referrer TEXT,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  utm_content TEXT,
+  device TEXT,
+  browser TEXT,
+  os TEXT,
+  FOREIGN KEY (visitor_id) REFERENCES analytics_visitors(visitor_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_analytics_sessions_visitor ON analytics_sessions(visitor_id);
+
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  visitor_id TEXT NOT NULL,
+  session_id TEXT,
+  event_type TEXT NOT NULL,
+  page TEXT,
+  created_at INTEGER NOT NULL,
+  metadata TEXT,
+  FOREIGN KEY (visitor_id) REFERENCES analytics_visitors(visitor_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_visitor ON analytics_events(visitor_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_type ON analytics_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_created ON analytics_events(created_at);
 `);
 
 // Migrations: ALTER existing users table for new columns

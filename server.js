@@ -194,6 +194,9 @@ app.use('/api/demo-chat', demoRouter);
 const dodoRouter = require('./server/routes/dodo.routes');
 app.use('/api/dodo', dodoRouter);
 
+const analyticsRouter = require('./server/routes/analytics.routes');
+app.use('/api/analytics', analyticsRouter);
+
 // ─────────────────────────────────────────────
 // DM REST API
 // ─────────────────────────────────────────────

@@ -796,7 +796,169 @@
         /* Modal backgrounds in dark mode */
         :is([data-theme="dark"], [data-theme="very-dark"], [data-theme="neon-dark"]) .modal-content { background: var(--card-bg); }
 
+        /* ── Data Table (Website Activity) ─────────────────── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+        .data-table th {
+            padding: 10px 12px;
+            background: var(--bg-page);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table tbody tr:hover {
+            background-color: var(--bg-page);
+        }
+
+        /* ── Table Container (Scroll Wrapper) ─────────────── */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .table-container .data-table {
+            min-width: 800px;
+        }
+
+        /* ── Secondary Button ─────────────────────────────── */
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-page);
+            border-color: var(--border-hover);
+            color: var(--accent);
+        }
+
+        /* ── Analytics Grid (Responsive 2-col) ────────────── */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        @media screen and (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Analytics sub-cards ───────────────────────────── */
+        .analytics-sub-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .analytics-sub-card h3 {
+            margin: 0 0 16px 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ── Visitor Log Header (responsive) ───────────────── */
+        .analytics-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .analytics-log-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .analytics-log-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .analytics-search-input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-page);
+            color: var(--text-primary);
+            font-size: 13px;
+            width: 250px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .analytics-search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+        .analytics-search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* ── Pagination ────────────────────────────────────── */
+        .analytics-pagination {
+            margin-top: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            align-items: center;
+        }
+
+        @media screen and (max-width: 640px) {
+            .analytics-search-input {
+                width: 100%;
+                min-width: 0;
+            }
+            .analytics-log-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .analytics-log-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/js/analytics.js" async></script>
 </head>
 <body>
     <div id="auth-gate" style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--text-muted);font-size:13px;font-weight:500;">Checking access...</div>
@@ -868,7 +1030,113 @@
             <button data-tab="dm-logs" class="tab-item">DM Logs</button>
             <button data-tab="contact-messages" class="tab-item">Contact Messages</button>
             <button data-tab="email-logs" class="tab-item">Email Logs</button>
+            <button data-tab="website-activity" class="tab-item">Website Activity</button>
         </nav>
+
+        <!-- Tab 11: Website Activity -->
+        <section id="tab-website-activity" class="tab-content hidden">
+            <div class="admin-card">
+                <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <div class="section-header-title">
+                        <h2>Website Activity <span id="analytics-live-now" style="font-size:12px; color:var(--success); background:rgba(16, 185, 129, 0.15); padding:2px 8px; border-radius:99px; margin-left:10px;">🟢 0 live now</span></h2>
+                        <p>Track unique visitors, page views, and conversions across the site.</p>
+                    </div>
+                    <div>
+                        <button onclick="exportAnalyticsCSV()" class="header-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-grid" style="margin-bottom:24px;">
+                    <div class="stat-card">
+                        <span class="stat-label">Total Visitors</span>
+                        <div class="stat-value" id="analytics-total-visitors">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Total Page Views</span>
+                        <div class="stat-value" id="analytics-total-views">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Signups from Visitors</span>
+                        <div class="stat-value" id="analytics-signups">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">Views Today</span>
+                        <div class="stat-value" id="analytics-today-views">0</div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <!-- Left Column: Top Pages & Countries -->
+                    <div style="display:flex; flex-direction:column; gap:20px; min-width:0;">
+                        <div class="analytics-sub-card">
+                            <h3>Top Pages</h3>
+                            <table class="data-table" style="width:100%; text-align:left; font-size:13px;">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600;">Page</th>
+                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600; text-align:right;">Views</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-top-pages"></tbody>
+                            </table>
+                        </div>
+                        <div class="analytics-sub-card">
+                            <h3>Top Countries</h3>
+                            <table class="data-table" style="width:100%; text-align:left; font-size:13px;">
+                                <thead>
+                                    <tr>
+                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600;">Country</th>
+                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600; text-align:right;">Visitors</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-top-countries"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Chart -->
+                    <div class="analytics-sub-card" style="display:flex; flex-direction:column; position:relative; min-height:300px;">
+                        <h3>Traffic Overview</h3>
+                        <div style="position:relative; flex:1; width:100%; height:100%;">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visitor Log Table -->
+                <div class="analytics-log-header">
+                    <h3>Visitor Activity Log</h3>
+                    <div class="analytics-log-controls">
+                        <input type="text" id="analytics-search" placeholder="Search IP or Visitor ID..." class="analytics-search-input" onkeyup="if(event.key === 'Enter') loadAnalyticsVisitors(1)">
+                        <button onclick="clearAnalyticsLogs()" class="btn-secondary" style="border-color:#fca5a5; color:var(--danger);">Clear Logs</button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Visitor ID</th>
+                                <th>Status</th>
+                                <th>IP Address</th>
+                                <th>Location</th>
+                                <th>Landing Page</th>
+                                <th>Device / OS</th>
+                                <th>Last Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analytics-visitor-list">
+                            <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="analytics-pagination" id="analytics-pagination"></div>
+            </div>
+        </section>
 
         <!-- Tab 1: Users -->
         <section id="tab-users" class="tab-content">
@@ -1226,7 +1494,7 @@
         </div>
     </div>
 
-    <script src="/js/admin.js?v=202609181536"></script>
+    <script src="/js/admin.js?v=202609240300"></script>
     <script>
 
     // ── Theme Manager ────────────────────────────────────────────────────────
@@ -1459,11 +1727,251 @@
                 }).catch(err => alert('Error deleting message'));
         };
 
+        // Analytics Tab handling
+        let analyticsChartInstance = null;
+        let analyticsChartData = null; // Cache chart data for re-renders
+
+        function getChartColors() {
+            const style = getComputedStyle(document.documentElement);
+            return {
+                grid: style.getPropertyValue('--border').trim() || '#e2e8f0',
+                text: style.getPropertyValue('--text-secondary').trim() || '#475569',
+                muted: style.getPropertyValue('--text-muted').trim() || '#94a3b8'
+            };
+        }
+
+        function renderChart(labels, views, visitors) {
+            const ctx = document.getElementById('analyticsChart');
+            if (!ctx) return;
+            if (analyticsChartInstance) analyticsChartInstance.destroy();
+            
+            const colors = getChartColors();
+            analyticsChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Page Views',
+                            data: views,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Unique Visitors',
+                            data: visitors,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: colors.text, font: { weight: '600' } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: colors.grid },
+                            ticks: { color: colors.muted }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: colors.muted }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Re-render chart when theme changes
+        new MutationObserver(() => {
+            if (analyticsChartData) {
+                renderChart(analyticsChartData.labels, analyticsChartData.views, analyticsChartData.visitors);
+            }
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+        
+        function loadAnalytics() {
+            // Load Overview
+            fetch('/api/admin/analytics/overview')
+                .then(r => r.json())
+                .then(data => {
+                    if(data.ok) {
+                        document.getElementById('analytics-total-visitors').textContent = data.totalVisitors.toLocaleString();
+                        document.getElementById('analytics-total-views').textContent = data.totalPageViews.toLocaleString();
+                        document.getElementById('analytics-signups').textContent = data.signups.toLocaleString();
+                        document.getElementById('analytics-today-views').textContent = data.todayViews.toLocaleString();
+                        document.getElementById('analytics-live-now').innerHTML = `🟢 ${data.liveNow} live now`;
+                    }
+                });
+
+            // Load Chart
+            fetch('/api/admin/analytics/chart')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok && data.data) {
+                        analyticsChartData = {
+                            labels: data.data.map(d => d.date),
+                            views: data.data.map(d => d.views),
+                            visitors: data.data.map(d => d.visitors)
+                        };
+                        renderChart(analyticsChartData.labels, analyticsChartData.views, analyticsChartData.visitors);
+                    }
+                });
+
+            // Load Top Pages
+            fetch('/api/admin/analytics/top-pages')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok && data.data) {
+                        document.getElementById('analytics-top-pages').innerHTML = data.data.map(p => `
+                            <tr>
+                                <td style="padding:8px 0;">${p.page}</td>
+                                <td style="padding:8px 0; text-align:right; font-weight:600;">${p.views.toLocaleString()}</td>
+                            </tr>
+                        `).join('');
+                    }
+                });
+
+            // Load Top Countries
+            fetch('/api/admin/analytics/top-countries')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok && data.data) {
+                        document.getElementById('analytics-top-countries').innerHTML = data.data.map(c => `
+                            <tr>
+                                <td style="padding:8px 0;">${c.country}</td>
+                                <td style="padding:8px 0; text-align:right; font-weight:600;">${c.visitors.toLocaleString()}</td>
+                            </tr>
+                        `).join('');
+                    }
+                });
+
+            loadAnalyticsVisitors(1);
+        }
+
+        window.loadAnalyticsVisitors = function(page) {
+            const search = document.getElementById('analytics-search').value.trim();
+            const list = document.getElementById('analytics-visitor-list');
+            list.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>';
+            
+            fetch(`/api/admin/analytics/visitors?page=${page}&limit=15&search=${encodeURIComponent(search)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        if (data.data.length === 0) {
+                            list.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No visitors found.</td></tr>';
+                            return;
+                        }
+
+                        list.innerHTML = data.data.map(v => {
+                            const status = v.user_id ? '<span style="color:#10b981; font-weight:600;">Signed Up</span>' : '<span style="color:#64748b; font-weight:600;">Anonymous</span>';
+                            const landing = v.latest_session ? v.latest_session.landing_page : '-';
+                            const active = new Date(v.last_seen).toLocaleString();
+                            return `
+                                <tr>
+                                    <td style="font-family:monospace; font-size:12px;">${v.visitor_id.substring(0,8)}</td>
+                                    <td>${status}</td>
+                                    <td style="font-family:monospace; font-size:12px;">${v.ip_address}</td>
+                                    <td>${v.city ? v.city + ', ' : ''}${v.country}</td>
+                                    <td>${landing}</td>
+                                    <td>${v.device} / ${v.os}</td>
+                                    <td>${active}</td>
+                                    <td><button onclick="viewVisitorTimeline('${v.visitor_id}')" class="btn-secondary" style="padding:4px 8px; font-size:11px;">View</button></td>
+                                </tr>
+                            `;
+                        }).join('');
+
+                        // Pagination
+                        const totalPages = Math.ceil(data.total / data.limit);
+                        const pContainer = document.getElementById('analytics-pagination');
+                        let paginationHtml = '';
+                        if (page > 1) paginationHtml += `<button onclick="loadAnalyticsVisitors(${page - 1})" class="btn-secondary" style="padding:4px 10px;">Prev</button>`;
+                        paginationHtml += `<span style="font-size:13px; font-weight:500; display:flex; align-items:center;">Page ${page} of ${totalPages || 1}</span>`;
+                        if (page < totalPages) paginationHtml += `<button onclick="loadAnalyticsVisitors(${page + 1})" class="btn-secondary" style="padding:4px 10px;">Next</button>`;
+                        pContainer.innerHTML = paginationHtml;
+                    }
+                });
+        };
+
+        window.exportAnalyticsCSV = function() {
+            window.location.href = '/api/admin/analytics/export';
+        };
+
+        window.clearAnalyticsLogs = function() {
+            if(!confirm('Are you sure you want to clear all analytics data? This cannot be undone.')) return;
+            fetch('/api/admin/analytics/clear', { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        alert('Logs cleared successfully');
+                        loadAnalytics();
+                    } else {
+                        alert('Failed to clear logs');
+                    }
+                })
+                .catch(err => alert('Error clearing logs'));
+        };
+
+        window.viewVisitorTimeline = function(visitorId) {
+            fetch(`/api/admin/analytics/visitor/${visitorId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        const eventsHtml = data.events.map(e => `
+                            <div style="margin-bottom:12px; padding-left:16px; border-left:2px solid var(--accent); position:relative;">
+                                <div style="position:absolute; left:-6px; top:0; width:10px; height:10px; border-radius:50%; background:var(--accent);"></div>
+                                <div style="font-size:11px; color:var(--text-muted);">${new Date(e.created_at).toLocaleString()}</div>
+                                <div style="font-size:13px; font-weight:600; color:var(--text-primary);">${e.event_type}</div>
+                                ${e.page ? `<div style="font-size:12px; color:var(--text-secondary);">Page: ${e.page}</div>` : ''}
+                            </div>
+                        `).join('');
+
+                        const v = data.visitor;
+                        const content = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border); padding-bottom:16px;">
+                                <h2 style="margin:0; font-size:18px;">Visitor Timeline</h2>
+                                <button onclick="document.body.removeChild(this.closest('.modal-overlay'))" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; font-size:13px; background:var(--bg-page); padding:16px; border-radius:8px;">
+                                <div><strong>ID:</strong> ${v.visitor_id}</div>
+                                <div><strong>IP:</strong> ${v.ip_address}</div>
+                                <div><strong>Location:</strong> ${v.city ? v.city+', ' : ''}${v.country}</div>
+                                <div><strong>Device:</strong> ${v.device} (${v.os})</div>
+                                <div><strong>Browser:</strong> ${v.browser}</div>
+                                <div><strong>User ID:</strong> ${v.user_id || 'None'}</div>
+                            </div>
+                            <h3 style="font-size:14px; margin-bottom:16px;">Event Timeline</h3>
+                            <div style="max-height:400px; overflow-y:auto; padding-right:10px;">
+                                ${eventsHtml || '<p>No events found.</p>'}
+                            </div>
+                        `;
+
+                        const overlay = document.createElement('div');
+                        overlay.className = 'modal-overlay';
+                        overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; display:flex; justify-content:center; align-items:center;';
+                        overlay.innerHTML = `<div style="background:var(--card-bg); width:90%; max-width:600px; border-radius:12px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.1);">${content}</div>`;
+                        document.body.appendChild(overlay);
+                    }
+                });
+        };
+
         // Tab click integration
         document.querySelectorAll('.tab-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (btn.dataset.tab === 'contact-messages') {
                     loadContactMessages();
+                } else if (btn.dataset.tab === 'website-activity') {
+                    loadAnalytics();
                 }
             });
         });
