@@ -198,12 +198,57 @@
                 const bubble = el.querySelector('.dm-bubble');
                 if (bubble) {
                     let pressTimer;
+                    let touchStartX = 0;
+                    let touchStartY = 0;
+                    let touchMoved = false;
+
                     bubble.addEventListener('contextmenu', e => { e.preventDefault(); showCtxMenu(e, m, isMe); });
+                    
                     bubble.addEventListener('touchstart', ev => {
-                        pressTimer = setTimeout(() => showCtxMenu(ev.touches[0], m, isMe), 600);
+                        touchStartX = ev.touches[0].clientX;
+                        touchStartY = ev.touches[0].clientY;
+                        touchMoved = false;
+                        bubble.style.transition = 'none';
+                        pressTimer = setTimeout(() => {
+                            if (!touchMoved) showCtxMenu(ev.touches[0], m, isMe);
+                        }, 500);
                     }, { passive: true });
-                    bubble.addEventListener('touchend', () => clearTimeout(pressTimer), { passive: true });
-                    bubble.addEventListener('touchmove', () => clearTimeout(pressTimer), { passive: true });
+                    
+                    bubble.addEventListener('touchmove', ev => {
+                        const touchX = ev.touches[0].clientX;
+                        const touchY = ev.touches[0].clientY;
+                        const diffX = touchX - touchStartX;
+                        const diffY = touchY - touchStartY;
+                        
+                        if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
+                            touchMoved = true;
+                            clearTimeout(pressTimer);
+                        }
+                        
+                        // Swipe right to reply gesture
+                        if (Math.abs(diffX) > Math.abs(diffY) && diffX > 0) {
+                             if (diffX < 80) {
+                                bubble.style.transform = `translateX(${diffX}px)`;
+                             }
+                        }
+                    }, { passive: true });
+                    
+                    bubble.addEventListener('touchend', ev => {
+                        clearTimeout(pressTimer);
+                        const match = bubble.style.transform ? bubble.style.transform.match(/translateX\((.+)px\)/) : null;
+                        if (match) {
+                            const diffX = parseFloat(match[1]);
+                            if (diffX > 40) {
+                                // Trigger reply
+                                const senderName = m.sender_id === me?.id ? 'You' : (m.display_name || 'User');
+                                const previewBody = m.type === 'image' ? '📷 Photo' : m.type === 'audio' ? '🎤 Voice note' : m.type === 'video' ? '🎥 Video' : m.type === 'document' ? '📄 Document' : (m.body || '').substring(0, 80);
+                                setReply(m.id, previewBody, m.type, senderName, m.sender_id);
+                            }
+                        }
+                        bubble.style.transition = 'transform 0.2s ease-out';
+                        bubble.style.transform = 'translateX(0)';
+                        setTimeout(() => bubble.style.transition = '', 200);
+                    }, { passive: true });
                 }
             }
         }
