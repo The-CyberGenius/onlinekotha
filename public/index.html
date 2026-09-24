@@ -626,14 +626,13 @@
         }
         .phone-notch {
             position: absolute;
-            top: 0;
+            top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 120px;
+            width: 85px;
             height: 24px;
             background: #1e293b;
-            border-bottom-left-radius: 16px;
-            border-bottom-right-radius: 16px;
+            border-radius: 20px;
             z-index: 20;
         }
         .phone-screen {
@@ -1373,7 +1372,7 @@
                                 <div class="story-card story-bg-7">
                                     <h1 class="story-title">Your Turn</h1>
                                     <p class="story-text mt-2 mb-6">Import your chat and relive your memories securely.</p>
-                                    <a href="/app.html?action=import" class="btn cta-primary" style="padding: 12px 24px; font-weight: 700;">Generate Yours</a>
+                                    <a href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport" class="btn cta-primary" style="padding: 12px 24px; font-weight: 700;">Generate Yours</a>
                                 </div>
 
                             </div>
