@@ -821,16 +821,73 @@
         scrollBottomBtn.addEventListener('click', scrollBottom);
     }
 
-    // ── Send ──────────────────────────────────────────────────
+    // ── Attachments & Pasting ─────────────────────────────────
     const attachBtn = document.getElementById('dm-attach-btn');
     const fileInput = document.getElementById('dm-file-input');
+    
+    let pendingAttachmentFile = null;
+    const attachmentPreview = document.getElementById('dm-attachment-preview');
+    const attachmentImg = document.getElementById('dm-attachment-img');
+    const attachmentName = document.getElementById('dm-attachment-name');
+    const attachmentClose = document.getElementById('dm-attachment-close');
 
     attachBtn?.addEventListener('click', () => fileInput?.click());
 
-    fileInput?.addEventListener('change', async (e) => {
-        let file = e.target.files[0];
+    function setAttachment(file) {
         if (!file || !activeConvId) return;
+        pendingAttachmentFile = file;
+        if (attachmentName) attachmentName.textContent = file.name || 'Pasted Image';
         
+        if (file.type.startsWith('image/') && attachmentImg) {
+            const reader = new FileReader();
+            reader.onload = e => { 
+                attachmentImg.src = e.target.result; 
+                attachmentImg.classList.remove('hidden'); 
+            };
+            reader.readAsDataURL(file);
+        } else if (attachmentImg) {
+            attachmentImg.classList.add('hidden');
+        }
+        
+        attachmentPreview?.classList.remove('hidden');
+        chatInput?.dispatchEvent(new Event('input')); // toggle send button
+        chatInput?.focus();
+    }
+
+    function clearAttachment() {
+        pendingAttachmentFile = null;
+        attachmentPreview?.classList.add('hidden');
+        if (attachmentImg) attachmentImg.src = '';
+        if (fileInput) fileInput.value = '';
+        chatInput?.dispatchEvent(new Event('input')); // toggle send button
+    }
+
+    attachmentClose?.addEventListener('click', clearAttachment);
+
+    chatInput?.addEventListener('paste', e => {
+        if (!activeConvId) return;
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                if (blob) {
+                    e.preventDefault();
+                    if (!blob.name || blob.name === 'image.png') {
+                        Object.defineProperty(blob, 'name', { writable: true, value: `pasted_image_${Date.now()}.png` });
+                    }
+                    setAttachment(blob);
+                    return; // Support one file at a time
+                }
+            }
+        }
+    });
+
+    fileInput?.addEventListener('change', (e) => {
+        if (e.target.files[0]) setAttachment(e.target.files[0]);
+    });
+
+    async function uploadFile(file) {
         let fileType = 'document';
         const nameUpper = file.name.toUpperCase();
         const isSvg = nameUpper.endsWith('.SVG') || file.type === 'image/svg+xml';
@@ -838,11 +895,9 @@
 
         if (isImage) {
             fileType = 'image';
-            // Compress only raster images (skip SVG vector files)
             if (file.type.startsWith('image/') && !isSvg) {
-                try {
-                    file = await compressImage(file, 0.7, 1200);
-                } catch(err) { console.warn('[compressImage error]', err); }
+                try { file = await compressImage(file, 0.7, 1200); } 
+                catch(err) { console.warn('[compressImage error]', err); }
             }
         }
         else if (file.type.startsWith('audio/') || nameUpper.endsWith('.MP3') || nameUpper.endsWith('.WAV') || nameUpper.endsWith('.OGG') || nameUpper.endsWith('.M4A')) fileType = 'audio';
@@ -851,30 +906,43 @@
         const fd = new FormData();
         fd.append('file', file);
         
-        const originalPlaceholder = chatInput.placeholder;
-        chatInput.placeholder = 'Uploading media...';
-        chatInput.disabled = true;
-        
         try {
             const r = await fetch('/api/dm/upload', { method: 'POST', body: fd });
             const data = await r.json();
-            if (data.url) {
-                send(null, fileType, data.url, file.name);
-            } else {
-                alert('Upload failed: ' + (data.error || 'unknown'));
-            }
+            if (data.url) return { url: data.url, type: fileType };
+            alert('Upload failed: ' + (data.error || 'unknown'));
         } catch(err) {
             console.error('Upload error', err);
             alert('Upload error');
-        } finally {
-            chatInput.placeholder = originalPlaceholder;
-            chatInput.disabled = false;
-            fileInput.value = '';
-            chatInput.focus();
         }
-    });
+        return null;
+    }
 
     async function send(ev, forcedType = 'text', forcedMediaUrl = null, fallbackBody = '') {
+        // Handle pending attachment
+        if (pendingAttachmentFile && !forcedMediaUrl) {
+            const originalPlaceholder = chatInput.placeholder;
+            chatInput.placeholder = 'Uploading media...';
+            chatInput.disabled = true;
+            if (chatSend) chatSend.style.opacity = '0.5';
+            
+            const file = pendingAttachmentFile;
+            const caption = chatInput.value.trim();
+            
+            const uploadRes = await uploadFile(file);
+            
+            chatInput.placeholder = originalPlaceholder;
+            chatInput.disabled = false;
+            if (chatSend) chatSend.style.opacity = '1';
+            chatInput.focus();
+            
+            if (uploadRes) {
+                clearAttachment();
+                return send(null, uploadRes.type, uploadRes.url, caption);
+            }
+            return;
+        }
+
         let body = '';
         if (forcedType === 'text') {
             body = chatInput?.value.trim();
@@ -946,7 +1014,7 @@
         saveDraft(); // persist what's typed (survives refresh)
         
         // Toggle Mic / Send buttons
-        if (chatInput.value.trim().length > 0) {
+        if (chatInput.value.trim().length > 0 || pendingAttachmentFile) {
             chatSend?.classList.remove('hidden');
             dmMicBtn?.classList.add('hidden');
         } else {
