@@ -1005,24 +1005,33 @@
     <!-- AI Panel removed — AI chat is now inline -->
 
     <!-- Webcam Modal -->
-    <div id="dm-webcam-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Take Photo</h3>
-                <button id="dm-webcam-close" class="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 transition">
+    <div id="dm-webcam-modal" class="hidden fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-gray-900 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col relative border border-gray-800">
+            <!-- Header over video -->
+            <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/60 to-transparent">
+                <button id="dm-webcam-close" class="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition backdrop-blur-md">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
+                <div class="flex gap-3">
+                    <button id="dm-webcam-mirror" class="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition backdrop-blur-md" title="Mirror View">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 15l-5-5 5-5"/><path d="M17 15v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5"/><line x1="22" y1="22" x2="22" y2="2"/></svg>
+                    </button>
+                    <button id="dm-webcam-switch" class="p-2 rounded-full bg-black/40 hover:bg-black/60 text-white transition backdrop-blur-md" title="Switch Camera">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                    </button>
+                </div>
             </div>
+            
             <div class="relative bg-black aspect-[4/3] w-full flex items-center justify-center">
-                <video id="dm-webcam-video" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                <video id="dm-webcam-video" autoplay playsinline class="w-full h-full object-cover hidden" style="transform: scaleX(-1);"></video>
                 <div id="dm-webcam-loader" class="text-white flex flex-col items-center">
                     <svg class="animate-spin h-8 w-8 text-white mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     <span class="text-sm">Starting camera...</span>
                 </div>
             </div>
-            <div class="p-6 flex justify-center bg-gray-50 dark:bg-gray-800/50">
-                <button id="dm-webcam-capture" class="w-16 h-16 rounded-full bg-white border-4 border-indigo-500 flex items-center justify-center hover:scale-105 transition shadow-lg disabled:opacity-50 disabled:hover:scale-100">
-                    <div class="w-12 h-12 rounded-full bg-indigo-500"></div>
+            <div class="p-6 flex justify-center bg-gray-900 border-t border-gray-800">
+                <button id="dm-webcam-capture" class="w-16 h-16 rounded-full bg-transparent border-4 border-white flex items-center justify-center hover:scale-105 transition shadow-lg group">
+                    <div class="w-12 h-12 rounded-full bg-white group-active:scale-95 transition"></div>
                 </button>
             </div>
         </div>
@@ -1034,7 +1043,7 @@
     <script src="/js/ai-panel.js?v=9"></script>
     <script src="/js/upload.js?v=9"></script>
     <script src="/js/features.js?v=9"></script>
-    <script src="js/dm.js?v=10"></script>
+    <script src="js/dm.js?v=11"></script>
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => { });

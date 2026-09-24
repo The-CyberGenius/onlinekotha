@@ -870,25 +870,24 @@
     });
 
     let webcamStream = null;
+    let webcamMirrored = true;
+    let webcamFacingMode = 'user';
     const webcamModal = document.getElementById('dm-webcam-modal');
     const webcamVideo = document.getElementById('dm-webcam-video');
     const webcamLoader = document.getElementById('dm-webcam-loader');
     
-    async function openWebcamModal() {
-        webcamModal?.classList.remove('hidden');
+    async function startWebcamStream() {
+        if (webcamStream) {
+            webcamStream.getTracks().forEach(track => track.stop());
+        }
         if (webcamVideo) webcamVideo.classList.add('hidden');
         if (webcamLoader) webcamLoader.classList.remove('hidden');
         
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert("Camera access is not supported by your browser or requires a secure HTTPS connection.");
-            closeWebcamModal();
-            return;
-        }
-
         try {
-            webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+            webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: webcamFacingMode }, audio: false });
             if (webcamVideo) {
                 webcamVideo.srcObject = webcamStream;
+                webcamVideo.style.transform = webcamMirrored ? 'scaleX(-1)' : 'scaleX(1)';
                 webcamVideo.onloadedmetadata = () => {
                     webcamLoader?.classList.add('hidden');
                     webcamVideo.classList.remove('hidden');
@@ -900,6 +899,31 @@
             closeWebcamModal();
         }
     }
+
+    async function openWebcamModal() {
+        webcamModal?.classList.remove('hidden');
+        
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert("Camera access is not supported by your browser or requires a secure HTTPS connection.");
+            closeWebcamModal();
+            return;
+        }
+        
+        startWebcamStream();
+    }
+    
+    document.getElementById('dm-webcam-mirror')?.addEventListener('click', () => {
+        webcamMirrored = !webcamMirrored;
+        if (webcamVideo) {
+            webcamVideo.style.transform = webcamMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+        }
+    });
+
+    document.getElementById('dm-webcam-switch')?.addEventListener('click', () => {
+        webcamFacingMode = webcamFacingMode === 'user' ? 'environment' : 'user';
+        webcamMirrored = webcamFacingMode === 'user';
+        startWebcamStream();
+    });
     
     function closeWebcamModal() {
         webcamModal?.classList.add('hidden');
@@ -918,9 +942,12 @@
         canvas.width = webcamVideo.videoWidth;
         canvas.height = webcamVideo.videoHeight;
         const ctx = canvas.getContext('2d');
-        // Mirror the image to match the typical webcam view
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
+        
+        if (webcamMirrored) {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+        }
+        
         ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
         
         canvas.toBlob((blob) => {
