@@ -1235,7 +1235,13 @@
                 <a href="/login.html" id="nav-login" class="btn-link" style="display:none;">Log in</a>
                 
                 <div id="nav-user-profile" class="hidden" style="display: none; align-items: center; gap: 8px;">
-                    <img id="nav-user-avatar" src="" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(120,120,120,0.2);">
+                    <div id="nav-avatar-container" style="width: 32px; height: 32px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid rgba(120,120,120,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <img id="nav-user-avatar" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                        <svg id="nav-user-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
                     <div style="display: flex; flex-direction: column; line-height: 1.2;">
                         <span id="nav-user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary); max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
                         <a href="#" id="nav-logout-btn" style="font-size: 11px; color: var(--text-secondary); text-decoration: none;">Logout</a>
@@ -2216,6 +2222,7 @@
                     const navLogin = document.getElementById('nav-login');
                     const navProfile = document.getElementById('nav-user-profile');
                     const navAvatar = document.getElementById('nav-user-avatar');
+                    const navIcon = document.getElementById('nav-user-icon');
                     const navName = document.getElementById('nav-user-name');
                     const navLogout = document.getElementById('nav-logout-btn');
                     
@@ -2223,8 +2230,15 @@
                     if (navProfile) {
                         navProfile.classList.remove('hidden');
                         navProfile.style.display = 'flex';
-                        if (navAvatar) {
-                            navAvatar.src = d.user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.user.name || 'User')}&background=random`;
+                        if (navAvatar && navIcon) {
+                            if (d.user.picture) {
+                                navAvatar.src = d.user.picture;
+                                navAvatar.style.display = 'block';
+                                navIcon.style.display = 'none';
+                            } else {
+                                navAvatar.style.display = 'none';
+                                navIcon.style.display = 'block';
+                            }
                         }
                         if (navName) navName.textContent = d.user.name || 'User';
                     }
