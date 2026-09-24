@@ -860,7 +860,70 @@
     document.getElementById('dm-attach-camera-btn')?.addEventListener('click', () => {
         attachMenu?.classList.add('hidden');
         attachMenu?.classList.remove('flex');
-        cameraInput?.click();
+        
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+            cameraInput?.click();
+        } else {
+            openWebcamModal();
+        }
+    });
+
+    let webcamStream = null;
+    const webcamModal = document.getElementById('dm-webcam-modal');
+    const webcamVideo = document.getElementById('dm-webcam-video');
+    const webcamLoader = document.getElementById('dm-webcam-loader');
+    
+    async function openWebcamModal() {
+        webcamModal?.classList.remove('hidden');
+        if (webcamVideo) webcamVideo.classList.add('hidden');
+        if (webcamLoader) webcamLoader.classList.remove('hidden');
+        
+        try {
+            webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+            if (webcamVideo) {
+                webcamVideo.srcObject = webcamStream;
+                webcamVideo.onloadedmetadata = () => {
+                    webcamLoader?.classList.add('hidden');
+                    webcamVideo.classList.remove('hidden');
+                };
+            }
+        } catch (err) {
+            console.warn('[Webcam Error]', err);
+            alert("Could not access camera. Please ensure you have given permission or a camera is connected.");
+            closeWebcamModal();
+        }
+    }
+    
+    function closeWebcamModal() {
+        webcamModal?.classList.add('hidden');
+        if (webcamStream) {
+            webcamStream.getTracks().forEach(track => track.stop());
+            webcamStream = null;
+        }
+    }
+    
+    document.getElementById('dm-webcam-close')?.addEventListener('click', closeWebcamModal);
+    
+    document.getElementById('dm-webcam-capture')?.addEventListener('click', () => {
+        if (!webcamVideo || !webcamStream) return;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = webcamVideo.videoWidth;
+        canvas.height = webcamVideo.videoHeight;
+        const ctx = canvas.getContext('2d');
+        // Mirror the image to match the typical webcam view
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob) => {
+            if (blob) {
+                Object.defineProperty(blob, 'name', { writable: true, value: `photo_${Date.now()}.jpg` });
+                setAttachment(blob);
+                closeWebcamModal();
+            }
+        }, 'image/jpeg', 0.9);
     });
 
     document.getElementById('dm-attach-gallery-btn')?.addEventListener('click', () => {
