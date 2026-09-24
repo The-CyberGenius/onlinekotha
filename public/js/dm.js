@@ -179,11 +179,23 @@
             timeOverlay = `<div class="flex items-center justify-end mt-1 space-x-1" style="min-width: 45px;"><span class="text-[10px] opacity-60" style="font-size: 10px;">${timeStr}</span>${readHtml}</div>`;
         }
 
+        const lastMsgNode = chatMsgs.lastElementChild;
+        const isSameSender = lastMsgNode && lastMsgNode.dataset.senderId == m.sender_id;
+        
+        // Native grouping styles
+        const mtClass = isSameSender ? 'mt-0.5' : 'mt-2';
+        let cornerClass = '';
+        if (isMe) {
+            cornerClass = isSameSender ? 'rounded-l-2xl rounded-r-[4px]' : 'rounded-l-2xl rounded-tr-[4px] rounded-br-2xl';
+        } else {
+            cornerClass = isSameSender ? 'rounded-r-2xl rounded-l-[4px]' : 'rounded-r-2xl rounded-tl-[4px] rounded-bl-2xl';
+        }
+        
         const html = `
-            <div id="${msgElId}" class="flex gap-2 text-sm ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1 relative">
-                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
+            <div id="${msgElId}" data-sender-id="${m.sender_id}" class="flex gap-2 text-[15px] ${isMe ? 'flex-row-reverse' : 'flex-row'} ${mtClass} relative">
+                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0 ${isSameSender ? 'invisible' : ''}" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm ${isSameSender ? 'invisible' : ''}\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
                 <div class="max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                    <div class="dm-bubble break-words px-2.5 py-1.5 md:px-3 md:py-2 rounded-xl md:rounded-2xl shadow-sm leading-snug md:leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'} ${extraClass}">
+                    <div class="dm-bubble break-words px-2.5 py-1.5 md:px-3 md:py-2 shadow-sm leading-snug md:leading-relaxed relative ${cornerClass} ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100'} ${extraClass}">
                         ${replyHtml}
                         ${contentHtml}
                         ${timeOverlay}
