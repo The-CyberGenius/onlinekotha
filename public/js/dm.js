@@ -879,6 +879,12 @@
         if (webcamVideo) webcamVideo.classList.add('hidden');
         if (webcamLoader) webcamLoader.classList.remove('hidden');
         
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert("Camera access is not supported by your browser or requires a secure HTTPS connection.");
+            closeWebcamModal();
+            return;
+        }
+
         try {
             webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
             if (webcamVideo) {
