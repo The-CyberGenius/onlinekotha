@@ -87,6 +87,15 @@ document.addEventListener('DOMContentLoaded', () => {
             handlePayment(plan);
         }, 1000);
     }
+    
+    // Auto-trigger import modal if action=import is in URL
+    const actionParam = urlParams.get('action');
+    if (actionParam === 'import') {
+        setTimeout(() => {
+            const openUploadBtn = document.getElementById('open-upload-btn');
+            if (openUploadBtn) openUploadBtn.click();
+        }, 500);
+    }
 
     // Chat Interface Logic
     const searchActionBtn = document.getElementById('search-action-btn');
