@@ -184,11 +184,22 @@
         
         // Native grouping styles
         const mtClass = isSameSender ? 'mt-0.5' : 'mt-2';
-        let cornerClass = '';
-        if (isMe) {
-            cornerClass = isSameSender ? 'rounded-l-2xl rounded-r-[4px]' : 'rounded-l-2xl rounded-tr-[4px] rounded-br-2xl';
-        } else {
-            cornerClass = isSameSender ? 'rounded-r-2xl rounded-l-[4px]' : 'rounded-r-2xl rounded-tl-[4px] rounded-bl-2xl';
+        
+        // Use standard Tailwind classes that are already compiled
+        const cornerClass = isMe ? 'rounded-2xl rounded-tr-sm' : 'rounded-2xl rounded-tl-sm';
+        
+        // If same sender, update the previous bubble to connect with this one
+        if (isSameSender) {
+            const prevBubble = lastMsgNode.querySelector('.dm-bubble');
+            if (prevBubble) {
+                if (isMe) {
+                    prevBubble.classList.remove('rounded-br-2xl');
+                    prevBubble.classList.add('rounded-br-sm');
+                } else {
+                    prevBubble.classList.remove('rounded-bl-2xl');
+                    prevBubble.classList.add('rounded-bl-sm');
+                }
+            }
         }
         
         const html = `
