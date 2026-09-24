@@ -2249,6 +2249,43 @@
                             window.location.reload();
                         });
                     }
+                } else {
+                    // Not logged in: Show Google One Tap
+                    try {
+                        const idRes = await fetch('/api/auth/google/client-id');
+                        const idData = await idRes.json();
+                        if (idData.clientId) {
+                            const script = document.createElement('script');
+                            script.src = "https://accounts.google.com/gsi/client";
+                            script.async = true;
+                            script.defer = true;
+                            document.head.appendChild(script);
+
+                            window.handleGoogleOneTap = async (response) => {
+                                try {
+                                    const res = await fetch('/api/auth/google/onetap', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ credential: response.credential })
+                                    });
+                                    const data = await res.json();
+                                    if (data.ok) {
+                                        window.location.href = data.redirect || '/app';
+                                    }
+                                } catch (e) { console.error('One Tap Error', e); }
+                            };
+
+                            script.onload = () => {
+                                window.google.accounts.id.initialize({
+                                    client_id: idData.clientId,
+                                    callback: window.handleGoogleOneTap,
+                                    auto_select: false,
+                                    cancel_on_tap_outside: false
+                                });
+                                window.google.accounts.id.prompt();
+                            };
+                        }
+                    } catch (e) { console.error('Failed to init One Tap', e); }
                 }
             } catch { }
         })();
