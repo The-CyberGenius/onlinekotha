@@ -71,7 +71,7 @@
             let escaped = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             return escaped.replace(urlRegex, function(url) {
-                return `<a href="${url}" target="_blank" class="text-sky-600 dark:text-sky-400 hover:underline" rel="noopener noreferrer" onclick="event.stopPropagation();">${url}</a>`;
+                return `<a href="${url}" target="_blank" class="text-blue-500 hover:underline" rel="noopener noreferrer">${url}</a>`;
             });
         }
         const mediaUrlLower = (m.media_url || '').toLowerCase().split('?')[0];
@@ -841,7 +841,33 @@
     const attachmentName = document.getElementById('dm-attachment-name');
     const attachmentClose = document.getElementById('dm-attachment-close');
 
-    attachBtn?.addEventListener('click', () => fileInput?.click());
+    const attachMenu = document.getElementById('dm-attach-menu');
+    const cameraInput = document.getElementById('dm-camera-input');
+
+    attachBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        attachMenu?.classList.toggle('hidden');
+        attachMenu?.classList.toggle('flex');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!attachBtn?.contains(e.target) && !attachMenu?.contains(e.target)) {
+            attachMenu?.classList.add('hidden');
+            attachMenu?.classList.remove('flex');
+        }
+    });
+
+    document.getElementById('dm-attach-camera-btn')?.addEventListener('click', () => {
+        attachMenu?.classList.add('hidden');
+        attachMenu?.classList.remove('flex');
+        cameraInput?.click();
+    });
+
+    document.getElementById('dm-attach-gallery-btn')?.addEventListener('click', () => {
+        attachMenu?.classList.add('hidden');
+        attachMenu?.classList.remove('flex');
+        fileInput?.click();
+    });
 
     function setAttachment(file) {
         if (!file || !activeConvId) return;
@@ -894,6 +920,9 @@
     });
 
     fileInput?.addEventListener('change', (e) => {
+        if (e.target.files[0]) setAttachment(e.target.files[0]);
+    });
+    cameraInput?.addEventListener('change', (e) => {
         if (e.target.files[0]) setAttachment(e.target.files[0]);
     });
 
