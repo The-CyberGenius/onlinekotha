@@ -2254,6 +2254,8 @@
                     try {
                         const idRes = await fetch('/api/auth/google/client-id');
                         const idData = await idRes.json();
+                        console.log('Google Client ID fetched:', idData.clientId ? 'Yes' : 'No');
+                        
                         if (idData.clientId) {
                             const script = document.createElement('script');
                             script.src = "https://accounts.google.com/gsi/client";
@@ -2276,13 +2278,28 @@
                             };
 
                             script.onload = () => {
+                                console.log('Google GIS script loaded, initializing One Tap...');
                                 window.google.accounts.id.initialize({
                                     client_id: idData.clientId,
                                     callback: window.handleGoogleOneTap,
                                     auto_select: false,
-                                    cancel_on_tap_outside: false
+                                    cancel_on_tap_outside: false,
+                                    context: 'signin',
+                                    itp_support: true
                                 });
-                                window.google.accounts.id.prompt();
+                                window.google.accounts.id.prompt((notification) => {
+                                    if (notification.isNotDisplayed()) {
+                                        console.warn('One Tap not displayed:', notification.getNotDisplayedReason());
+                                    } else if (notification.isSkippedMoment()) {
+                                        console.warn('One Tap skipped:', notification.getSkippedReason());
+                                    } else {
+                                        console.log('One Tap prompt is displaying!');
+                                    }
+                                });
+                            };
+                            
+                            script.onerror = () => {
+                                console.error('Failed to load Google GIS script');
                             };
                         }
                     } catch (e) { console.error('Failed to init One Tap', e); }
