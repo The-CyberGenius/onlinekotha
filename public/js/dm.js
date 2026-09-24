@@ -65,6 +65,15 @@
         const deleted = m.type === 'deleted';
         let contentHtml = '';
         let extraClass = '';
+        
+        function linkify(text) {
+            if (!text) return '';
+            let escaped = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return escaped.replace(urlRegex, function(url) {
+                return `<a href="${url}" target="_blank" class="text-sky-600 dark:text-sky-400 hover:underline" rel="noopener noreferrer" onclick="event.stopPropagation();">${url}</a>`;
+            });
+        }
         const mediaUrlLower = (m.media_url || '').toLowerCase().split('?')[0];
         const isImgType = m.type === 'image' || (m.media_url && (
             mediaUrlLower.endsWith('.svg') || mediaUrlLower.endsWith('.png') ||
@@ -92,7 +101,7 @@
                          loading="lazy"
                          onerror="this.onerror=null;this.src='../img/favicon.svg';">
                 </div>
-                ${caption ? `<div class="px-2 pb-1 pt-1.5 text-[13px] leading-snug break-words truncate shrink-0">${caption.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+                ${caption ? `<div class="px-2 pb-1 pt-1.5 text-[13px] leading-snug break-words truncate shrink-0">${linkify(caption)}</div>` : ''}
             </div>`;
         } else if (m.type === 'video' && m.media_url) {
             extraClass = '!p-1';
@@ -101,7 +110,7 @@
                 <div class="relative overflow-hidden rounded-xl bg-black flex items-center justify-center flex-1 w-full">
                     <video src="${m.media_url}" style="width: 100%; height: 100%; object-fit: contain;" controls preload="metadata" playsinline class="block shadow-sm"></video>
                 </div>
-                ${m.body ? `<div class="px-2 pb-1 pt-1.5 text-[13px] leading-snug break-words truncate shrink-0">${m.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : ''}
+                ${m.body ? `<div class="px-2 pb-1 pt-1.5 text-[13px] leading-snug break-words truncate shrink-0">${linkify(m.body)}</div>` : ''}
             </div>`;
         } else if (m.type === 'audio' && m.media_url) {
             const avatarUrl = isMe ? (me?.avatar_url || '/images/default-avatar.png') : (document.getElementById('dm-chat-avatar')?.src || '/images/default-avatar.png');
@@ -147,14 +156,15 @@
                 contentHtml = `<a href="${m.media_url}" target="_blank" class="flex items-center gap-2 bg-black/10 dark:bg-white/10 p-2.5 rounded-lg hover:bg-black/20 dark:hover:bg-white/20 transition underline shadow-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M14 2H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 3v5h5M16 13H8M16 17H8M10 9H8"/></svg><span class="truncate max-w-[180px] text-[13px]">${m.body || 'Document'}</span></a>`;
             }
         } else {
-            contentHtml = `<div class="text-[15px] leading-snug">${(m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+            contentHtml = `<div class="text-[15px] leading-snug break-words" style="word-break: break-word;">${linkify(m.body || '')}</div>`;
         }
 
         // Reply-to preview (shows above the message content)
         let replyHtml = '';
         if (m.reply_to_id && (m.reply_to_body || m.reply_to_type)) {
             const replyName = m.reply_to_sender_id === me?.id ? 'You' : (m.reply_to_sender_name || 'User');
-            const replyBody = m.reply_to_type === 'image' ? '📷 Photo' : m.reply_to_type === 'audio' ? '🎤 Voice note' : m.reply_to_type === 'video' ? '🎥 Video' : m.reply_to_type === 'document' ? '📄 Document' : (m.reply_to_body || '').substring(0, 80).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const replyBodyRaw = m.reply_to_type === 'image' ? '📷 Photo' : m.reply_to_type === 'audio' ? '🎤 Voice note' : m.reply_to_type === 'video' ? '🎥 Video' : m.reply_to_type === 'document' ? '📄 Document' : (m.reply_to_body || '').substring(0, 80);
+            const replyBody = linkify(replyBodyRaw);
             replyHtml = `
                 <div class="dm-reply-quote mb-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer border-l-[3px] border-indigo-400 ${isMe ? 'bg-[#c4efc0] dark:bg-[#004d40]' : 'bg-gray-100 dark:bg-[#1a2329]'}" onclick="document.getElementById('dm-msg-${m.reply_to_id}')?.scrollIntoView({behavior:'smooth', block:'center'})">
                     <div class="text-[10px] font-bold text-indigo-500">${esc(replyName)}</div>
