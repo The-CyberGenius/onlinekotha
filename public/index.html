@@ -1232,7 +1232,7 @@
                         <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
                     </svg>
                 </button>
-                <a href="/login.html" id="nav-login" class="btn-link" style="display:none;">Log in</a>
+                <a href="/api/auth/google?next=%2Fapp.html" id="nav-login" class="btn-link" style="display:none;">Log in</a>
                 
                 <div id="nav-user-profile" class="hidden" style="display: none; align-items: center; gap: 8px;">
                     <div id="nav-avatar-container" style="width: 32px; height: 32px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid rgba(120,120,120,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden;">
@@ -1751,7 +1751,7 @@
                             <span>Save Unlimited Chats</span>
                         </li>
                     </ul>
-                    <a href="/login.html?checkout=pro_monthly" class="btn checkout-btn" data-plan="pro_monthly"
+                    <a href="/api/auth/google?next=%2Fapp.html%3Fcheckout%3Dpro_monthly" class="btn checkout-btn" data-plan="pro_monthly"
                         style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
                         onmouseover="this.style.background='var(--msg-ai-bg)'"
                         onmouseout="this.style.background='transparent'">
@@ -1832,7 +1832,7 @@
                         </li>
                     </ul>
 
-                    <a href="/login.html?checkout=pro_lifetime" id="btn-get-pro" class="btn checkout-btn" data-plan="pro_lifetime"
+                    <a href="/api/auth/google?next=%2Fapp.html%3Fcheckout%3Dpro_lifetime" id="btn-get-pro" class="btn checkout-btn" data-plan="pro_lifetime"
                         style="width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(to right, #4f46e5, #9333ea); color: #fff; border: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(99,102,241,0.4); transition: all 0.2s; text-align: center;"
                         onmouseover="this.style.boxShadow='0 6px 20px rgba(99,102,241,0.6)'; this.style.transform='translateY(-2px)';"
                         onmouseout="this.style.boxShadow='0 4px 15px rgba(99,102,241,0.4)'; this.style.transform='translateY(0)';">
@@ -1971,8 +1971,8 @@
                     <p class="foot-head">Support</p>
                     <a href="/contact.html" class="foot-link">Contact Us</a><br>
                     <a href="#faq" class="foot-link">FAQ</a><br>
-                    <a href="/login.html" class="foot-link">Login</a><br>
-                    <a href="/login.html" class="foot-link">Sign up free</a>
+                    <a href="/api/auth/google?next=%2Fapp.html" class="foot-link">Login</a><br>
+                    <a href="/api/auth/google?next=%2Fapp.html" class="foot-link">Sign up free</a>
                 </div>
             </div>
             <div
@@ -2206,7 +2206,7 @@
                 if (d.user) {
                     const dest = d.user.is_admin ? '/admin.html' : '/app';
                     const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
-                    document.querySelectorAll('a[href^="/login.html"], a[href^="/app.html"], a[href^="/api/auth/google"]').forEach(a => {
+                    document.querySelectorAll('a[href^="/api/auth/google"], a[href^="/app.html"]').forEach(a => {
                         if (a.classList.contains('checkout-btn')) {
                             const plan = a.getAttribute('data-plan') || 'pro_lifetime';
                             a.href = `/app?checkout=${plan}`;
@@ -2615,7 +2615,7 @@
             prevBtn?.addEventListener('click', () => { if (cur > 0) { cur--; render(); } });
             nextBtn?.addEventListener('click', () => {
                 if (cur < steps.length - 1) { cur++; render(); }
-                else { close(); window.location.href = '/login.html'; }
+                else { close(); window.location.href = '/api/auth/google?next=%2Fapp.html'; }
             });
             document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
         })();
@@ -2726,7 +2726,7 @@
             <!-- Limit reached CTA (hidden initially) -->
             <div id="demo-limit-cta" class="hidden" style="margin-top:12px;text-align:center;">
                 <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Demo limit reached!</p>
-                <a href="/login.html"
+                <a href="/api/auth/google?next=%2Fapp.html"
                     style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:700;font-size:11px;padding:8px 16px;border-radius:999px;">
                     Sign up free for unlimited
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
