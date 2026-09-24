@@ -183,7 +183,7 @@
             <div id="${msgElId}" class="flex gap-2 text-sm ${isMe ? 'flex-row-reverse' : 'flex-row'} mb-1 relative">
                 ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
                 <div class="max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}">
-                    <div class="dm-bubble select-none break-words px-3 py-2 rounded-2xl shadow-sm leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'} ${extraClass}" style="-webkit-touch-callout: none;">
+                    <div class="dm-bubble break-words px-2.5 py-1.5 md:px-3 md:py-2 rounded-xl md:rounded-2xl shadow-sm leading-snug md:leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'} ${extraClass}">
                         ${replyHtml}
                         ${contentHtml}
                         ${timeOverlay}
@@ -197,58 +197,19 @@
             if (el) {
                 const bubble = el.querySelector('.dm-bubble');
                 if (bubble) {
-                    let pressTimer;
-                    let touchStartX = 0;
-                    let touchStartY = 0;
-                    let touchMoved = false;
-
+                    let lastTap = 0;
                     bubble.addEventListener('contextmenu', e => { e.preventDefault(); showCtxMenu(e, m, isMe); });
                     
-                    bubble.addEventListener('touchstart', ev => {
-                        touchStartX = ev.touches[0].clientX;
-                        touchStartY = ev.touches[0].clientY;
-                        touchMoved = false;
-                        bubble.style.transition = 'none';
-                        pressTimer = setTimeout(() => {
-                            if (!touchMoved) showCtxMenu(ev.touches[0], m, isMe);
-                        }, 500);
-                    }, { passive: true });
-                    
-                    bubble.addEventListener('touchmove', ev => {
-                        const touchX = ev.touches[0].clientX;
-                        const touchY = ev.touches[0].clientY;
-                        const diffX = touchX - touchStartX;
-                        const diffY = touchY - touchStartY;
-                        
-                        if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
-                            touchMoved = true;
-                            clearTimeout(pressTimer);
-                        }
-                        
-                        // Swipe right to reply gesture
-                        if (Math.abs(diffX) > Math.abs(diffY) && diffX > 0) {
-                             if (diffX < 80) {
-                                bubble.style.transform = `translateX(${diffX}px)`;
-                             }
-                        }
-                    }, { passive: true });
-                    
                     bubble.addEventListener('touchend', ev => {
-                        clearTimeout(pressTimer);
-                        const match = bubble.style.transform ? bubble.style.transform.match(/translateX\((.+)px\)/) : null;
-                        if (match) {
-                            const diffX = parseFloat(match[1]);
-                            if (diffX > 40) {
-                                // Trigger reply
-                                const senderName = m.sender_id === me?.id ? 'You' : (m.display_name || 'User');
-                                const previewBody = m.type === 'image' ? '📷 Photo' : m.type === 'audio' ? '🎤 Voice note' : m.type === 'video' ? '🎥 Video' : m.type === 'document' ? '📄 Document' : (m.body || '').substring(0, 80);
-                                setReply(m.id, previewBody, m.type, senderName, m.sender_id);
-                            }
+                        const currentTime = new Date().getTime();
+                        const tapLength = currentTime - lastTap;
+                        if (tapLength < 350 && tapLength > 0) {
+                            // Double tap detected
+                            showCtxMenu(ev.changedTouches[0] || ev, m, isMe);
+                            ev.preventDefault();
                         }
-                        bubble.style.transition = 'transform 0.2s ease-out';
-                        bubble.style.transform = 'translateX(0)';
-                        setTimeout(() => bubble.style.transition = '', 200);
-                    }, { passive: true });
+                        lastTap = currentTime;
+                    });
                 }
             }
         }
