@@ -1233,7 +1233,15 @@
                     </svg>
                 </button>
                 <a href="/login.html" id="nav-login" class="btn-link" style="display:none;">Log in</a>
-                <button id="nav-logout-btn" class="btn-link hidden" style="border:0;background:none;">Logout</button>
+                
+                <div id="nav-user-profile" class="hidden" style="display: none; align-items: center; gap: 8px;">
+                    <img id="nav-user-avatar" src="" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(120,120,120,0.2);">
+                    <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                        <span id="nav-user-name" style="font-size: 13px; font-weight: 600; color: var(--text-primary); max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                        <a href="#" id="nav-logout-btn" style="font-size: 11px; color: var(--text-secondary); text-decoration: none;">Logout</a>
+                    </div>
+                </div>
+
                 <a href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport" id="nav-cta" class="btn cta-primary"
                     style="min-height:46px;padding:0 18px;">
                     Try Live Demo
@@ -2192,26 +2200,37 @@
                 if (d.user) {
                     const dest = d.user.is_admin ? '/admin.html' : '/app';
                     const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
-                    document.querySelectorAll('a[href^="/login.html"], a[href^="/app.html"]').forEach(a => {
+                    document.querySelectorAll('a[href^="/login.html"], a[href^="/app.html"], a[href^="/api/auth/google"]').forEach(a => {
                         if (a.classList.contains('checkout-btn')) {
                             const plan = a.getAttribute('data-plan') || 'pro_lifetime';
                             a.href = `/app?checkout=${plan}`;
                             // Do not modify the text of the checkout button
-                        } else if (/get|start|bring|preserv|free|talking|demo/i.test(a.textContent)) {
+                        } else if (/get|start|bring|preserv|free|talking|demo|see your chat/i.test(a.textContent) || a.id === 'nav-cta' || a.id === 'hero-cta' || a.id === 'final-cta') {
                             a.href = dest;
-                            a.textContent = label;
-                        } else {
+                            a.innerHTML = label;
+                        } else if (a.id !== 'nav-logout-btn') {
                             a.href = dest;
                         }
                     });
-                    // Show logout button, hide login link
+                    // Show user profile, hide login link
                     const navLogin = document.getElementById('nav-login');
+                    const navProfile = document.getElementById('nav-user-profile');
+                    const navAvatar = document.getElementById('nav-user-avatar');
+                    const navName = document.getElementById('nav-user-name');
                     const navLogout = document.getElementById('nav-logout-btn');
+                    
                     if (navLogin) navLogin.style.display = 'none';
+                    if (navProfile) {
+                        navProfile.classList.remove('hidden');
+                        navProfile.style.display = 'flex';
+                        if (navAvatar) {
+                            navAvatar.src = d.user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.user.name || 'User')}&background=random`;
+                        }
+                        if (navName) navName.textContent = d.user.name || 'User';
+                    }
                     if (navLogout) {
-                        navLogout.classList.remove('hidden');
-                        navLogout.style.display = 'inline-flex';
-                        navLogout.addEventListener('click', async () => {
+                        navLogout.addEventListener('click', async (e) => {
+                            e.preventDefault();
                             try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); } catch { }
                             window.location.reload();
                         });
