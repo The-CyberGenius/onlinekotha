@@ -551,6 +551,18 @@
                         </div>
                     </div>
 
+                    <!-- Reply Preview Banner -->
+                    <div id="dm-reply-preview" class="hidden w-full px-3 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1a2329] flex items-center gap-3 shrink-0 animate-in">
+                        <div class="w-1 self-stretch rounded-full bg-indigo-500 shrink-0"></div>
+                        <div class="flex-1 min-w-0">
+                            <div id="dm-reply-name" class="text-[11px] font-bold text-indigo-500 truncate"></div>
+                            <div id="dm-reply-body" class="text-[12px] text-gray-500 dark:text-gray-400 truncate"></div>
+                        </div>
+                        <button id="dm-reply-close" class="w-7 h-7 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition shrink-0" title="Cancel reply">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
                     <input type="file" id="dm-file-input" class="hidden" accept="image/*,audio/*,video/*,.pdf,.doc,.docx">
                     <button id="dm-attach-btn" class="w-10 h-10 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 transition shrink-0" title="Attach media">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

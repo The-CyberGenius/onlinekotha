@@ -389,18 +389,31 @@ app.post('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     ).get(convId, req.user.id, req.user.id);
     if (!conv) return res.status(403).json({ error: 'Not your conversation' });
 
+    const reply_to_id = req.body?.reply_to_id ? Number(req.body.reply_to_id) : null;
+
     const now    = Date.now();
     const result = db.prepare(
-        'INSERT INTO dm_messages (conv_id, sender_id, body, type, media_url, created_at, read_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run(convId, req.user.id, body, type, media_url, now, now);
+        'INSERT INTO dm_messages (conv_id, sender_id, body, type, media_url, created_at, read_at, reply_to_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    ).run(convId, req.user.id, body, type, media_url, now, now, reply_to_id);
 
     const msg = {
         id: result.lastInsertRowid, conv_id: convId,
         sender_id: req.user.id, body, type, media_url: media_url,
-        created_at: now, read_at: now,
+        created_at: now, read_at: now, reply_to_id,
         display_name: req.user.display_name || req.user.email.split('@')[0],
         avatar_url: req.user.avatar_url,
     };
+
+    // Attach replied-to message data
+    if (reply_to_id) {
+        const replied = db.prepare('SELECT dm.body, dm.type, dm.sender_id, u.display_name as reply_sender_name FROM dm_messages dm JOIN users u ON u.id = dm.sender_id WHERE dm.id = ?').get(reply_to_id);
+        if (replied) {
+            msg.reply_to_body = replied.body;
+            msg.reply_to_type = replied.type;
+            msg.reply_to_sender_name = replied.reply_sender_name;
+            msg.reply_to_sender_id = replied.sender_id;
+        }
+    }
 
     // Push via socket.io if the other user is online
     const otherId = conv.user_a === req.user.id ? conv.user_b : conv.user_a;
@@ -422,9 +435,13 @@ app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
     const before = Number(req.query.before) || Date.now() + 1000;
     const after  = Number(req.query.after)  || 0;
     const msgs = db.prepare(`
-        SELECT dm.*, u.display_name, u.avatar_url, u.email
+        SELECT dm.*, u.display_name, u.avatar_url, u.email,
+               r.body as reply_to_body, r.type as reply_to_type, r.sender_id as reply_to_sender_id,
+               ru.display_name as reply_to_sender_name
         FROM dm_messages dm
         JOIN users u ON u.id = dm.sender_id
+        LEFT JOIN dm_messages r ON r.id = dm.reply_to_id
+        LEFT JOIN users ru ON ru.id = r.sender_id
         WHERE dm.conv_id = ? AND dm.created_at < ? AND dm.created_at > ?
         ORDER BY dm.created_at DESC
         LIMIT 40
@@ -510,10 +527,12 @@ io.on('connection', (socket) => {
         ).get(conv_id, uid, uid);
         if (!conv) return;
 
+        const reply_to_id = data.reply_to_id ? Number(data.reply_to_id) : null;
+
         const now = Date.now();
         const result = db.prepare(
-            'INSERT INTO dm_messages (conv_id, sender_id, body, type, media_url, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-        ).run(conv_id, uid, body ? body.trim() : '', type, media_url, now);
+            'INSERT INTO dm_messages (conv_id, sender_id, body, type, media_url, created_at, reply_to_id) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        ).run(conv_id, uid, body ? body.trim() : '', type, media_url, now, reply_to_id);
 
         const msg = {
             id: result.lastInsertRowid,
@@ -524,9 +543,21 @@ io.on('connection', (socket) => {
             media_url,
             created_at: now,
             read_at: null,
+            reply_to_id,
             display_name: socket.user.display_name || socket.user.email.split('@')[0],
             avatar_url: socket.user.avatar_url,
         };
+
+        // Attach replied-to message data if replying
+        if (reply_to_id) {
+            const replied = db.prepare('SELECT dm.body, dm.type, dm.sender_id, u.display_name as reply_sender_name FROM dm_messages dm JOIN users u ON u.id = dm.sender_id WHERE dm.id = ?').get(reply_to_id);
+            if (replied) {
+                msg.reply_to_body = replied.body;
+                msg.reply_to_type = replied.type;
+                msg.reply_to_sender_name = replied.reply_sender_name;
+                msg.reply_to_sender_id = replied.sender_id;
+            }
+        }
 
         // Send to both users (all their open sockets)
         const otherId = conv.user_a === uid ? conv.user_b : conv.user_a;

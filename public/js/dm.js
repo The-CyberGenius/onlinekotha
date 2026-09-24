@@ -150,6 +150,18 @@
             contentHtml = `<div class="text-[15px] leading-snug">${(m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
         }
 
+        // Reply-to preview (shows above the message content)
+        let replyHtml = '';
+        if (m.reply_to_id && (m.reply_to_body || m.reply_to_type)) {
+            const replyName = m.reply_to_sender_id === me?.id ? 'You' : (m.reply_to_sender_name || 'User');
+            const replyBody = m.reply_to_type === 'image' ? '📷 Photo' : m.reply_to_type === 'audio' ? '🎤 Voice note' : m.reply_to_type === 'video' ? '🎥 Video' : m.reply_to_type === 'document' ? '📄 Document' : (m.reply_to_body || '').substring(0, 80).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            replyHtml = `
+                <div class="dm-reply-quote mb-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer border-l-[3px] border-indigo-400 ${isMe ? 'bg-[#c4efc0] dark:bg-[#004d40]' : 'bg-gray-100 dark:bg-[#1a2329]'}" onclick="document.getElementById('dm-msg-${m.reply_to_id}')?.scrollIntoView({behavior:'smooth', block:'center'})">
+                    <div class="text-[10px] font-bold text-indigo-500">${esc(replyName)}</div>
+                    <div class="text-[11px] opacity-70 truncate">${replyBody}</div>
+                </div>`;
+        }
+
         const timeStr = new Date(m.created_at || Date.now()).toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true});
         
         let readHtml = '';
@@ -172,6 +184,7 @@
                 ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
                 <div class="max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}">
                     <div class="dm-bubble break-words px-3 py-2 rounded-2xl shadow-sm leading-relaxed relative ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100 rounded-tr-sm' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100 rounded-tl-sm'} ${extraClass}">
+                        ${replyHtml}
                         ${contentHtml}
                         ${timeOverlay}
                     </div>
@@ -179,15 +192,15 @@
             </div>`;
         chatMsgs.insertAdjacentHTML('beforeend', html);
 
-        if (isMe && !deleted) {
+        if (!deleted) {
             const el = document.getElementById(msgElId);
             if (el) {
                 const bubble = el.querySelector('.dm-bubble');
                 if (bubble) {
                     let pressTimer;
-                    bubble.addEventListener('contextmenu', e => { e.preventDefault(); showCtxMenu(e, m.id, isMe); });
+                    bubble.addEventListener('contextmenu', e => { e.preventDefault(); showCtxMenu(e, m, isMe); });
                     bubble.addEventListener('touchstart', ev => {
-                        pressTimer = setTimeout(() => showCtxMenu(ev.touches[0], m.id, isMe), 600);
+                        pressTimer = setTimeout(() => showCtxMenu(ev.touches[0], m, isMe), 600);
                     }, { passive: true });
                     bubble.addEventListener('touchend', () => clearTimeout(pressTimer), { passive: true });
                     bubble.addEventListener('touchmove', () => clearTimeout(pressTimer), { passive: true });
@@ -222,6 +235,7 @@
     let convs = [];
     let contextMenu = null;
     let renderedIds = new Set();   // message IDs already on screen (dedup socket+poll)
+    let replyingTo = null;         // { id, body, type, sender_name, sender_id }
 
     // ── DOM ───────────────────────────────────────────────────
     const tabChatsBtn  = document.getElementById('tab-chats-btn');
@@ -246,6 +260,10 @@
     const typingEl     = document.getElementById('dm-typing-indicator');
     const scrollBottomBtn = document.getElementById('dm-scroll-bottom-btn');
     const scrollUnreadBadge = document.getElementById('dm-scroll-unread-badge');
+    const replyPreview  = document.getElementById('dm-reply-preview');
+    const replyNameEl   = document.getElementById('dm-reply-name');
+    const replyBodyEl   = document.getElementById('dm-reply-body');
+    const replyCloseBtn = document.getElementById('dm-reply-close');
 
     const dmMicBtn         = document.getElementById('dm-mic-btn');
     const dmRecOverlay     = document.getElementById('dm-recording-overlay');
@@ -414,15 +432,19 @@
                 }
 
                 // 3. Browser Native Notification (if hidden)
-                if (Notification.permission === 'default') {
-                    Notification.requestPermission();
-                } else if (Notification.permission === 'granted' && document.hidden) {
-                    const n = new Notification(title, { body: bodyText, icon: msg.avatar_url || '../img/favicon-96.png' });
-                    n.onclick = () => {
-                        window.focus();
-                        openConv(msg.conv_id, title, msg.avatar_url, msg.sender_id);
-                    };
-                }
+                try {
+                    if ('Notification' in window) {
+                        if (Notification.permission === 'default') {
+                            Notification.requestPermission();
+                        } else if (Notification.permission === 'granted' && document.hidden) {
+                            const n = new Notification(title, { body: bodyText, icon: msg.avatar_url || '../img/favicon-96.png' });
+                            n.onclick = () => {
+                                window.focus();
+                                openConv(msg.conv_id, title, msg.avatar_url, msg.sender_id);
+                            };
+                        }
+                    }
+                } catch(e) { /* notification API not available */ }
             }
 
             const idx = convs.findIndex(c => c.conv_id === msg.conv_id);
@@ -504,9 +526,9 @@
         socket.on('dm:read', ({conv_id}) => {
             if (activeConvId === conv_id) {
                 // Update all grey ticks to blue double ticks
-                const ticks = document.querySelectorAll('.dm-tick.text-gray-400, .dm-tick.text-white\\\\/80');
-                ticks.forEach(t => {
-                    t.classList.remove('text-gray-400', 'text-white/80', 'dark:text-gray-500');
+                document.querySelectorAll('.dm-tick').forEach(t => {
+                    if (t.classList.contains('text-[#53bdeb]')) return; // already read
+                    t.classList.remove('text-gray-400', 'dark:text-gray-500');
                     t.classList.add('text-[#53bdeb]');
                     t.innerHTML = '<path d="M5 12l5 5L20 7"/><path d="M5 17l5-5-5-5" class="opacity-0"/><path d="M10 17l10-10"/>';
                 });
@@ -579,7 +601,7 @@
 
     // ── Open conversation ─────────────────────────────────────
     async function openConv(convId) {
-        if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+        try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch(e) {}
         if (window.location.hash !== `#chat-${convId}`) {
             history.pushState(null, '', `#chat-${convId}`);
         }
@@ -685,7 +707,8 @@
     
 
     // ── Context menu (delete) ─────────────────────────────────
-    function showCtxMenu(e, msgId, isMe) {
+    function showCtxMenu(e, msg, isMe) {
+        const msgId = typeof msg === 'object' ? msg.id : msg;
         closeCtxMenu();
         const dark = dk();
         contextMenu = document.createElement('div');
@@ -707,6 +730,14 @@
             contextMenu.style.top  = Math.min(e.clientY, window.innerHeight - 100) + 'px';
         }
         const actions = [
+            { icon:'↩️', label:'Reply', fn: () => {
+                const msgData = typeof msg === 'object' ? msg : null;
+                if (msgData) {
+                    const senderName = msgData.sender_id === me?.id ? 'You' : (msgData.display_name || 'User');
+                    const previewBody = msgData.type === 'image' ? '📷 Photo' : msgData.type === 'audio' ? '🎤 Voice note' : msgData.type === 'video' ? '🎥 Video' : msgData.type === 'document' ? '📄 Document' : (msgData.body || '').substring(0, 80);
+                    setReply(msgData.id, previewBody, msgData.type, senderName, msgData.sender_id);
+                }
+            }},
             { icon:'📋', label:'Copy',   fn: () => { const el=document.getElementById(`dm-msg-${msgId}`); navigator.clipboard?.writeText(el?.querySelector('.dm-bubble')?.textContent?.trim()||''); } },
         ];
         if (isMe) actions.push({ icon:'🗑️', label:'Delete', color:'#ef4444', fn: () => deleteMsg(msgId) });
@@ -843,13 +874,13 @@
         const convAtSend = activeConvId;
 
         if (socket?.connected) {
-            socket.emit('dm:send', {conv_id: activeConvId, body, type: forcedType, media_url: forcedMediaUrl});
+            socket.emit('dm:send', {conv_id: activeConvId, body, type: forcedType, media_url: forcedMediaUrl, reply_to_id: replyingTo?.id || null});
         } else {
             try {
                 const r = await fetch(`/api/dm/conversations/${activeConvId}/messages`, {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({body, type: forcedType, media_url: forcedMediaUrl}),
+                    body: JSON.stringify({body, type: forcedType, media_url: forcedMediaUrl, reply_to_id: replyingTo?.id || null}),
                 });
                 if (r.ok) {
                     const msg = await r.json();
@@ -864,8 +895,22 @@
         }
     }
 
-    chatSend?.addEventListener('click', send);
-    chatInput?.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
+    chatSend?.addEventListener('click', (ev) => { send(ev); clearReply(); });
+    chatInput?.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();clearReply();} });
+
+    // ── Reply helpers ─────────────────────────────────────────
+    function setReply(id, body, type, senderName, senderId) {
+        replyingTo = { id, body, type, sender_name: senderName, sender_id: senderId };
+        if (replyNameEl) replyNameEl.textContent = senderName;
+        if (replyBodyEl) replyBodyEl.textContent = body;
+        replyPreview?.classList.remove('hidden');
+        chatInput?.focus();
+    }
+    function clearReply() {
+        replyingTo = null;
+        replyPreview?.classList.add('hidden');
+    }
+    replyCloseBtn?.addEventListener('click', clearReply);
 
     let typingTimer;
     chatInput?.addEventListener('input', () => {

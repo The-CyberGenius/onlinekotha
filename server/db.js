@@ -333,6 +333,7 @@ CREATE TABLE IF NOT EXISTS dm_messages (
   media_url TEXT,
   created_at INTEGER NOT NULL,
   read_at INTEGER,
+  reply_to_id INTEGER,
   FOREIGN KEY (conv_id) REFERENCES dm_conversations(id) ON DELETE CASCADE,
   FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -375,6 +376,9 @@ const curFree = db.prepare("SELECT value FROM settings WHERE key = 'free_user_da
 if (curFree && (curFree.value === '0' || curFree.value === '3')) {
     db.prepare("UPDATE settings SET value = '5' WHERE key = 'free_user_daily_messages'").run();
 }
+
+// Migration: add reply_to_id column if it doesn't exist
+try { db.prepare('ALTER TABLE dm_messages ADD COLUMN reply_to_id INTEGER').run(); } catch(e) { /* already exists */ }
 
 function getSetting(key, fallback = null) {
     const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
