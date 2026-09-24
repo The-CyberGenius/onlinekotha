@@ -669,14 +669,35 @@
             height: 100%;
         }
         
-        /* Vibrant gradients matching Day/Night */
-        .story-bg-1 { background: linear-gradient(135deg, #4f46e5, #9333ea); color: #fff; }
-        .story-bg-2 { background: linear-gradient(135deg, #059669, #2563eb); color: #fff; }
-        .story-bg-3 { background: linear-gradient(135deg, #d97706, #dc2626); color: #fff; }
-        .story-bg-4 { background: linear-gradient(135deg, #db2777, #7c3aed); color: #fff; }
-        .story-bg-5 { background: linear-gradient(135deg, #0284c7, #059669); color: #fff; }
-        .story-bg-6 { background: linear-gradient(135deg, #4f46e5, #db2777); color: #fff; }
-        .story-bg-7 { background: linear-gradient(135deg, #e11d48, #d97706); color: #fff; }
+        /* Vibrant gradients matching Spotify Wrapped vibes with abstract overlays */
+        .story-bg-1 { 
+            background: radial-gradient(circle at 100% 0%, #a855f7 0%, transparent 50%), radial-gradient(circle at 0% 100%, #ec4899 0%, transparent 50%), linear-gradient(135deg, #4f46e5, #312e81); 
+            color: #fff; 
+        }
+        .story-bg-2 { 
+            background: radial-gradient(circle at 80% 20%, #34d399 0%, transparent 60%), radial-gradient(circle at 20% 80%, #3b82f6 0%, transparent 60%), linear-gradient(135deg, #065f46, #1e3a8a); 
+            color: #fff; 
+        }
+        .story-bg-3 { 
+            background: radial-gradient(circle at 100% 100%, #fcd34d 0%, transparent 50%), radial-gradient(circle at 0% 0%, #ef4444 0%, transparent 50%), linear-gradient(135deg, #b45309, #7f1d1d); 
+            color: #fff; 
+        }
+        .story-bg-4 { 
+            background: radial-gradient(circle at 50% 0%, #f472b6 0%, transparent 60%), radial-gradient(circle at 50% 100%, #c084fc 0%, transparent 60%), linear-gradient(135deg, #9d174d, #4c1d95); 
+            color: #fff; 
+        }
+        .story-bg-5 { 
+            background: radial-gradient(circle at 0% 50%, #38bdf8 0%, transparent 50%), radial-gradient(circle at 100% 50%, #34d399 0%, transparent 50%), linear-gradient(135deg, #0369a1, #065f46); 
+            color: #fff; 
+        }
+        .story-bg-6 { 
+            background: radial-gradient(circle at 20% 0%, #818cf8 0%, transparent 60%), radial-gradient(circle at 80% 100%, #fb7185 0%, transparent 60%), linear-gradient(135deg, #3730a3, #9f1239); 
+            color: #fff; 
+        }
+        .story-bg-7 { 
+            background: radial-gradient(circle at 100% 0%, #fb923c 0%, transparent 50%), radial-gradient(circle at 0% 100%, #f43f5e 0%, transparent 50%), linear-gradient(135deg, #9f1239, #9a3412); 
+            color: #fff; 
+        }
 
         .story-progress-container {
             position: absolute;
@@ -704,36 +725,40 @@
             position: absolute;
             top: 0;
             bottom: 0;
-            width: 40%;
             z-index: 40;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
-        .story-nav-left { left: 0; }
-        .story-nav-right { right: 0; }
+        .story-nav-left { left: 0; width: 35%; }
+        .story-nav-right { right: 0; width: 65%; }
 
         /* Story Typography & Elements */
         .story-title {
-            font-size: 2.5rem;
+            font-size: 2.75rem;
             font-weight: 900;
             color: #ffffff;
             margin-bottom: 8px;
-            line-height: 1.1;
-            letter-spacing: -0.02em;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            text-transform: capitalize;
         }
         .story-subtitle {
-            font-size: 14px;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.7);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 16px;
+            letter-spacing: 0.15em;
+            margin-bottom: 12px;
         }
         .story-text {
-            font-size: 15px;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.95);
-            line-height: 1.5;
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            max-width: 240px;
+            margin: 0 auto;
         }
         .story-highlight {
             background: rgba(255, 255, 255, 0.15);
@@ -1236,15 +1261,15 @@
                 </div>
 
                 <h1 class="display rise d2 hero-title-main" style="margin-bottom:22px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(40px, 7vw, 72px); line-height: 1.05;">
-                    Your chats are<br><span class="hero-title-accent">memories too.</span>
+                    Your WhatsApp chats,<br><span class="hero-title-accent">Wrapped & AI-powered.</span>
                 </h1>
 
                 <p class="lead rise d3 hero-desc-text" style="max-width:640px; margin-bottom: 20px; font-size: 1.15rem; color: #a1a1aa; line-height: 1.6;">
-                    Turn your WhatsApp conversations into beautiful, searchable memories — and explore them with AI.
+                    Upload your chat export to get a personalized "Wrapped" summary, and instantly create an AI that texts exactly like the person you were talking to.
                 </p>
                 
                 <p class="rise d3" style="max-width:640px; margin-bottom: 40px; font-size: 0.95rem; color: #71717a; font-weight: 500; letter-spacing: 0.02em;">
-                    See what your conversations remember about you.
+                    Private. Secure. Free to try.
                 </p>
 
                 <div class="rise d4" style="display:flex; flex-direction:column; align-items: center; gap:16px; margin-bottom:40px;">
@@ -1410,8 +1435,18 @@
                                 }, slideDuration);
                             }
 
-                            prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
-                            nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+                            function handleNav(direction, e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                goToSlide(currentSlide + direction);
+                            }
+
+                            // Use both touchstart and click for maximum responsiveness on mobile
+                            prevBtn.addEventListener('touchstart', (e) => handleNav(-1, e), {passive: false});
+                            prevBtn.addEventListener('click', (e) => handleNav(-1, e));
+                            
+                            nextBtn.addEventListener('touchstart', (e) => handleNav(1, e), {passive: false});
+                            nextBtn.addEventListener('click', (e) => handleNav(1, e));
                             
                             shareBtn.addEventListener('click', (e) => {
                                 e.preventDefault();
