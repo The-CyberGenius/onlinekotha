@@ -407,8 +407,16 @@
         function getNext() {
             const params = new URLSearchParams(window.location.search);
             const n = params.get('next');
-            if (n && n.startsWith('/')) return n;
-            return '/app';
+            const checkout = params.get('checkout');
+            let nextUrl = '/app';
+            if (n && n.startsWith('/')) {
+                nextUrl = n;
+            }
+            if (checkout) {
+                const separator = nextUrl.includes('?') ? '&' : '?';
+                nextUrl += `${separator}checkout=${encodeURIComponent(checkout)}`;
+            }
+            return nextUrl;
         }
 
         function showAuthError(msg) {

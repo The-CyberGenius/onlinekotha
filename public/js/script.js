@@ -78,6 +78,16 @@ document.addEventListener('DOMContentLoaded', () => {
         payMonthlyBtn.addEventListener('click', () => handlePayment('pro_monthly'));
     }
 
+    // Auto-trigger checkout if URL param is present
+    const urlParams = new URLSearchParams(window.location.search);
+    const checkoutPlan = urlParams.get('checkout');
+    if (checkoutPlan === 'pro_lifetime' || checkoutPlan === 'pro_monthly' || checkoutPlan === '1') {
+        const plan = checkoutPlan === '1' ? 'pro_lifetime' : checkoutPlan;
+        setTimeout(() => {
+            handlePayment(plan);
+        }, 1000);
+    }
+
     // Chat Interface Logic
     const searchActionBtn = document.getElementById('search-action-btn');
     const searchClearBtn = document.getElementById('search-clear-btn');
