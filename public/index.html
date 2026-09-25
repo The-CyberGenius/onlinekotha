@@ -1232,7 +1232,7 @@
             font-weight: 700;
         }
 
-        /* ── Hero Capability Stage (Typewriter) ── */
+        /* ── Hero Capability Stage & 3-Piece Puzzle (Complete the Picture) ── */
         .hero-capability-wrapper {
             display: flex;
             flex-direction: column;
@@ -1243,7 +1243,7 @@
         }
 
         .hero-capability-concept {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 500;
             letter-spacing: 0.03em;
             color: var(--text-secondary);
@@ -1252,21 +1252,179 @@
             opacity: 0.9;
         }
 
+        /* ── 3-Piece Puzzle Tracker ── */
+        .hero-puzzle-tracker {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 14px;
+            padding: 4px 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.35s ease;
+        }
+        html.light .hero-puzzle-tracker {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .puzzle-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            font-size: 12.5px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .puzzle-tab:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        html.light .puzzle-tab:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .puzzle-tab-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            opacity: 0.65;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .puzzle-tab-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            transition: all 0.25s ease;
+        }
+        html.light .puzzle-tab-num {
+            background: rgba(0, 0, 0, 0.07);
+        }
+
+        /* Active piece 1 (Memories) */
+        .puzzle-tab[data-tab="0"].active {
+            color: #f472b6;
+            background: rgba(244, 114, 182, 0.12);
+            border-color: rgba(244, 114, 182, 0.35);
+            box-shadow: 0 0 14px rgba(244, 114, 182, 0.22);
+        }
+        .puzzle-tab[data-tab="0"].active .puzzle-tab-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .puzzle-tab[data-tab="0"].active .puzzle-tab-num {
+            background: #f472b6;
+            color: #0f172a;
+        }
+
+        /* Active piece 2 (Privacy) */
+        .puzzle-tab[data-tab="1"].active {
+            color: #34d399;
+            background: rgba(52, 211, 153, 0.12);
+            border-color: rgba(52, 211, 153, 0.35);
+            box-shadow: 0 0 14px rgba(52, 211, 153, 0.22);
+        }
+        .puzzle-tab[data-tab="1"].active .puzzle-tab-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .puzzle-tab[data-tab="1"].active .puzzle-tab-num {
+            background: #34d399;
+            color: #0f172a;
+        }
+
+        /* Active piece 3 (AI) */
+        .puzzle-tab[data-tab="2"].active {
+            color: #818cf8;
+            background: rgba(129, 140, 248, 0.14);
+            border-color: rgba(129, 140, 248, 0.4);
+            box-shadow: 0 0 14px rgba(129, 140, 248, 0.25);
+        }
+        .puzzle-tab[data-tab="2"].active .puzzle-tab-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .puzzle-tab[data-tab="2"].active .puzzle-tab-num {
+            background: #818cf8;
+            color: #0f172a;
+        }
+
+        /* Connecting puzzle joint */
+        .puzzle-joint-connector {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            position: relative;
+        }
+        .puzzle-joint-connector::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 1px;
+            transition: all 0.3s ease;
+        }
+        html.light .puzzle-joint-connector::before {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .puzzle-joint-connector.connected::before {
+            background: linear-gradient(90deg, #f472b6, #34d399);
+            box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+        }
+        .puzzle-joint-connector[data-joint="1"].connected::before {
+            background: linear-gradient(90deg, #34d399, #818cf8);
+            box-shadow: 0 0 8px rgba(129, 140, 248, 0.4);
+        }
+
+        /* All completed state for tracker */
+        .hero-puzzle-tracker.all-connected {
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        /* ── Dynamic Capability Stage (Pill) ── */
         .hero-capability-stage {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 8px 20px;
+            padding: 8px 18px;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
-            min-height: 46px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 4px 22px rgba(0, 0, 0, 0.25);
+            min-height: 48px;
             max-width: 95vw;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
         }
         .hero-capability-stage:hover {
             border-color: rgba(99, 102, 241, 0.35);
@@ -1282,12 +1440,80 @@
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.1);
         }
 
+        .hero-capability-stage.stage-completed {
+            border-color: rgba(129, 140, 248, 0.5);
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.08) 0%, rgba(52, 211, 153, 0.08) 50%, rgba(129, 140, 248, 0.1) 100%);
+            box-shadow: 0 0 28px rgba(99, 102, 241, 0.28), inset 0 0 16px rgba(255, 255, 255, 0.04);
+        }
+        html.light .hero-capability-stage.stage-completed {
+            border-color: rgba(99, 102, 241, 0.45);
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.07) 0%, rgba(52, 211, 153, 0.07) 50%, rgba(129, 140, 248, 0.09) 100%);
+            box-shadow: 0 0 24px rgba(99, 102, 241, 0.18);
+        }
+
+        /* ── Down-to-Down Cascade Content Block ── */
+        .hero-cap-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.24s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease;
+            will-change: transform, opacity;
+        }
+
+        .hero-cap-content.slide-down-out {
+            transform: translateY(14px);
+            opacity: 0;
+        }
+        .hero-cap-content.slide-down-pre-in {
+            transform: translateY(-14px);
+            opacity: 0;
+            transition: none !important;
+        }
+        .hero-cap-content.slide-down-in {
+            transform: translateY(0);
+            opacity: 1;
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+        }
+
+        .hero-cap-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            transition: all 0.28s ease;
+        }
+        .hero-cap-badge.badge-memories {
+            background: rgba(244, 114, 182, 0.15);
+            color: #f472b6;
+            border: 1px solid rgba(244, 114, 182, 0.3);
+        }
+        .hero-cap-badge.badge-privacy {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+        .hero-cap-badge.badge-ai {
+            background: rgba(129, 140, 248, 0.18);
+            color: #a5b4fc;
+            border: 1px solid rgba(129, 140, 248, 0.35);
+        }
+        .hero-cap-badge.badge-complete {
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.25), rgba(129, 140, 248, 0.25));
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
         .hero-cap-icon-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             flex-shrink: 0;
             transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
         }
@@ -1295,7 +1521,7 @@
         .hero-cap-text-container {
             display: inline-flex;
             align-items: center;
-            font-size: clamp(13px, 3.4vw, 15.5px);
+            font-size: clamp(12.5px, 3.2vw, 15.5px);
             font-weight: 600;
             line-height: 1.4;
             min-height: 26px;
@@ -1344,6 +1570,51 @@
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
             border-width: 0;
+        }
+
+        /* Responsive on mobile */
+        @media (max-width: 540px) {
+            .hero-title-main {
+                font-size: clamp(24px, 6.6vw, 34px) !important;
+            }
+            .hero-puzzle-tracker {
+                gap: 2px;
+                padding: 3px 5px;
+                margin-bottom: 12px;
+            }
+            .puzzle-tab {
+                padding: 4px 8px;
+                font-size: 11px;
+                gap: 4px;
+            }
+            .puzzle-tab-num {
+                width: 14px;
+                height: 14px;
+                font-size: 9px;
+            }
+            .puzzle-joint-connector {
+                width: 8px;
+            }
+            .hero-capability-stage {
+                padding: 6px 12px;
+                min-height: 42px;
+                max-width: calc(100vw - 32px);
+            }
+            .hero-cap-content {
+                gap: 6px;
+            }
+            .hero-cap-badge {
+                padding: 2px 5px;
+                font-size: 9.5px;
+            }
+            .hero-cap-text-container {
+                font-size: clamp(11px, 2.9vw, 12.5px);
+            }
+        }
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 0 16px;
+            }
         }
 
         /* Accessibility: prefers-reduced-motion */
@@ -1647,135 +1918,263 @@
                     Your old conversations<br><span class="hero-title-accent">don't have to end.</span>
                 </h1>
 
-                <!-- ── Dynamic Capability Stage ── -->
+                <!-- ── Dynamic Capability Stage & 3-Piece Puzzle (Complete the Picture) ── -->
                 <div class="hero-capability-wrapper rise d2">
-                    <div class="hero-capability-concept">More than just a chat.</div>
+                    <div class="hero-capability-concept">Your conversations are more than messages...</div>
+
+                    <!-- 3-Piece Puzzle Tracker -->
+                    <div class="hero-puzzle-tracker" id="hero-puzzle-tracker" role="tablist" aria-label="OnlineKotha 3 core experience pillars">
+                        <button type="button" class="puzzle-tab active" data-tab="0" role="tab" aria-selected="true" aria-label="Piece 1: Memories">
+                            <span class="puzzle-tab-icon">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.4 7.8c0-1.6-1.3-2.8-2.8-2.8h-1.7c-.2 0-.4-.2-.4-.4a2.6 2.6 0 1 0-5.1 0c0 .2-.2.4-.4.4H7.3C5.7 5 4.5 6.3 4.5 7.8v1.7c0 .2-.2.4-.4.4a2.6 2.6 0 1 0 0 5.1c.2 0 .4.2.4.4v1.7C4.5 18.7 5.7 20 7.3 20h1.7c.2 0 .4.2.4.4a2.6 2.6 0 1 0 5.1 0c0-.2.2-.4.4-.4h1.7c1.6 0 2.8-1.3 2.8-2.8v-1.7c0-.2.2-.4.4-.4a2.6 2.6 0 1 0 0-5.1c-.2 0-.4-.2-.4-.4v-1.7z"/></svg>
+                            </span>
+                            <span class="puzzle-tab-label">Memories</span>
+                            <span class="puzzle-tab-num">1</span>
+                        </button>
+
+                        <div class="puzzle-joint-connector" data-joint="0"></div>
+
+                        <button type="button" class="puzzle-tab" data-tab="1" role="tab" aria-selected="false" aria-label="Piece 2: Privacy">
+                            <span class="puzzle-tab-icon">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </span>
+                            <span class="puzzle-tab-label">Privacy</span>
+                            <span class="puzzle-tab-num">2</span>
+                        </button>
+
+                        <div class="puzzle-joint-connector" data-joint="1"></div>
+
+                        <button type="button" class="puzzle-tab" data-tab="2" role="tab" aria-selected="false" aria-label="Piece 3: AI">
+                            <span class="puzzle-tab-icon">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            </span>
+                            <span class="puzzle-tab-label">AI</span>
+                            <span class="puzzle-tab-num">3</span>
+                        </button>
+                    </div>
+
+                    <!-- Capability Stage Pill with Down-to-Down Cascade -->
                     <div class="hero-capability-stage" id="hero-capability-stage" role="region" aria-label="Product capabilities preview">
-                        <span class="hero-cap-icon-box" id="hero-cap-icon-box">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01" stroke-width="2.5"/></svg>
-                        </span>
-                        <div class="hero-cap-text-container">
-                            <span class="hero-cap-text" id="hero-cap-text" aria-hidden="true">Continue your old conversations with AI</span><span class="hero-cap-cursor" aria-hidden="true"></span>
+                        <div class="hero-cap-content" id="hero-cap-content">
+                            <span class="hero-cap-badge badge-memories" id="hero-cap-badge">Memories</span>
+                            <span class="hero-cap-icon-box" id="hero-cap-icon-box">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+                            </span>
+                            <div class="hero-cap-text-container">
+                                <span class="hero-cap-text" id="hero-cap-text" aria-hidden="true">Turn your chats into beautiful stories</span><span class="hero-cap-cursor" aria-hidden="true"></span>
+                            </div>
                         </div>
                     </div>
-                    <!-- Accessible screen reader announcer (updates per whole phrase, not per character) -->
+
+                    <!-- Accessible screen reader announcer -->
                     <div class="sr-only" id="hero-cap-sr-announcer" aria-live="polite" aria-atomic="true">
-                        Continue your old conversations with AI
+                        Turn your chats into beautiful stories
                     </div>
                 </div>
 
-                <!-- Capability Stage Typewriter Animation Script -->
+                <!-- Capability Stage 3-Piece Puzzle & Cascade Typewriter Script -->
                 <script>
                     (function() {
-                        const capabilities = [
+                        const items = [
                             {
-                                text: 'Continue your old conversations with AI',
-                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01" stroke-width="2.5"/></svg>'
+                                badge: 'Memories',
+                                badgeClass: 'badge-memories',
+                                tabIndex: 0,
+                                text: 'Turn your chats into beautiful stories',
+                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>',
+                                pauseDuration: 2200
                             },
                             {
-                                text: 'Search years of conversations',
-                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
+                                badge: 'Privacy',
+                                badgeClass: 'badge-privacy',
+                                tabIndex: 1,
+                                text: 'Keep your conversations private & yours',
+                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10 11V9a2 2 0 1 1 4 0v2"/></svg>',
+                                pauseDuration: 2200
                             },
                             {
-                                text: 'Understand your conversations',
-                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
+                                badge: 'AI',
+                                badgeClass: 'badge-ai',
+                                tabIndex: 2,
+                                text: 'Continue conversations with AI that remembers the context',
+                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M8 10h.01M12 10h.01M16 10h.01" stroke-width="2.5"/></svg>',
+                                pauseDuration: 2400
                             },
                             {
-                                text: 'See your Chat Wrapped',
-                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>'
-                            },
-                            {
-                                text: 'Relive memories with On This Day',
-                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
-                            },
-                            {
-                                text: 'Rediscover photos & moments',
-                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>'
-                            },
-                            {
-                                text: 'Turn old chats into living memories',
-                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v1a3 3 0 0 0-2 2.83V11a3 3 0 0 0 1.5 2.6A3 3 0 0 0 6 16v1a3 3 0 0 0 3 3h1v2h4v-2h1a3 3 0 0 0 3-3v-1a3 3 0 0 0-1.5-2.4 3 3 0 0 0 1.5-2.6v-1.17A3 3 0 0 0 16 7V6a4 4 0 0 0-4-4z"/><line x1="12" y1="2" x2="12" y2="22"/></svg>'
+                                badge: 'All in One',
+                                badgeClass: 'badge-complete',
+                                tabIndex: -1,
+                                isComplete: true,
+                                text: 'One place for your conversations, memories & stories.',
+                                icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+                                pauseDuration: 3600
                             }
                         ];
 
-                        function initTypewriter() {
-                            const textEl = document.getElementById('hero-cap-text');
+                        function initHeroPuzzle() {
+                            const trackerEl = document.getElementById('hero-puzzle-tracker');
+                            const stageEl = document.getElementById('hero-capability-stage');
+                            const contentEl = document.getElementById('hero-cap-content');
+                            const badgeEl = document.getElementById('hero-cap-badge');
                             const iconEl = document.getElementById('hero-cap-icon-box');
+                            const textEl = document.getElementById('hero-cap-text');
                             const srEl = document.getElementById('hero-cap-sr-announcer');
 
-                            if (!textEl || !iconEl) return;
+                            if (!stageEl || !contentEl || !badgeEl || !iconEl || !textEl) return;
 
-                            // Accessibility check
                             const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                             if (prefersReduced) return;
 
                             let currentIndex = 0;
-                            let isDeleting = true;
-                            let charIndex = capabilities[0].text.length;
-                            let timer = null;
+                            let isTransitioning = false;
+                            let typeTimer = null;
+                            let pauseTimer = null;
 
-                            const PAUSE_VISIBLE = 2000;  // ~2s pause on complete phrase
-                            const PAUSE_EMPTY = 180;     // Pause after deletion before typing next
-                            const TYPE_SPEED = 45;       // Smooth typing speed
-                            const DELETE_SPEED = 24;     // Smooth deletion speed
+                            const TYPE_SPEED = 40; // ms per character
 
-                            function setVisualState(cap) {
-                                iconEl.style.opacity = '0';
-                                iconEl.style.transform = 'translateY(4px) scale(0.85)';
+                            function updateTrackerState(itemIndex) {
+                                if (!trackerEl) return;
+                                const tabs = trackerEl.querySelectorAll('.puzzle-tab');
+                                const joint0 = trackerEl.querySelector('.puzzle-joint-connector[data-joint="0"]');
+                                const joint1 = trackerEl.querySelector('.puzzle-joint-connector[data-joint="1"]');
+
+                                if (itemIndex === 0) {
+                                    tabs.forEach((tab, i) => {
+                                        tab.classList.toggle('active', i === 0);
+                                        tab.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+                                    });
+                                    if (joint0) joint0.classList.remove('connected');
+                                    if (joint1) joint1.classList.remove('connected');
+                                    trackerEl.classList.remove('all-connected');
+                                    stageEl.classList.remove('stage-completed');
+                                } else if (itemIndex === 1) {
+                                    tabs.forEach((tab, i) => {
+                                        tab.classList.toggle('active', i === 1);
+                                        tab.setAttribute('aria-selected', i === 1 ? 'true' : 'false');
+                                    });
+                                    if (joint0) joint0.classList.add('connected');
+                                    if (joint1) joint1.classList.remove('connected');
+                                    trackerEl.classList.remove('all-connected');
+                                    stageEl.classList.remove('stage-completed');
+                                } else if (itemIndex === 2) {
+                                    tabs.forEach((tab, i) => {
+                                        tab.classList.toggle('active', i === 2);
+                                        tab.setAttribute('aria-selected', i === 2 ? 'true' : 'false');
+                                    });
+                                    if (joint0) joint0.classList.add('connected');
+                                    if (joint1) joint1.classList.add('connected');
+                                    trackerEl.classList.remove('all-connected');
+                                    stageEl.classList.remove('stage-completed');
+                                } else if (itemIndex === 3) {
+                                    // Complete the picture
+                                    tabs.forEach((tab) => {
+                                        tab.classList.add('active');
+                                        tab.setAttribute('aria-selected', 'true');
+                                    });
+                                    if (joint0) joint0.classList.add('connected');
+                                    if (joint1) joint1.classList.add('connected');
+                                    trackerEl.classList.add('all-connected');
+                                    stageEl.classList.add('stage-completed');
+                                }
+                            }
+
+                            function startTyping(targetItem) {
+                                clearTimeout(typeTimer);
+                                clearTimeout(pauseTimer);
+
+                                let charIdx = 0;
+                                const full = targetItem.text;
+                                textEl.textContent = '';
+
+                                function typeStep() {
+                                    if (document.hidden) {
+                                        typeTimer = setTimeout(typeStep, 300);
+                                        return;
+                                    }
+
+                                    charIdx++;
+                                    textEl.textContent = full.substring(0, charIdx);
+
+                                    if (charIdx < full.length) {
+                                        typeTimer = setTimeout(typeStep, TYPE_SPEED);
+                                    } else {
+                                        if (srEl) srEl.textContent = full;
+                                        pauseTimer = setTimeout(() => {
+                                            transitionToNext();
+                                        }, targetItem.pauseDuration || 2200);
+                                    }
+                                }
+
+                                typeStep();
+                            }
+
+                            function transitionTo(nextIndex) {
+                                if (isTransitioning) return;
+                                isTransitioning = true;
+                                clearTimeout(typeTimer);
+                                clearTimeout(pauseTimer);
+
+                                // 1. Downward slide out (↓)
+                                contentEl.classList.remove('slide-down-in', 'slide-down-pre-in');
+                                contentEl.classList.add('slide-down-out');
 
                                 setTimeout(() => {
-                                    iconEl.innerHTML = cap.icon;
-                                    iconEl.style.opacity = '1';
-                                    iconEl.style.transform = 'translateY(0) scale(1)';
-                                }, 100);
+                                    currentIndex = nextIndex;
+                                    const nextItem = items[currentIndex];
+
+                                    // 2. Update visual badge, icon & tracker state
+                                    badgeEl.textContent = nextItem.badge;
+                                    badgeEl.className = 'hero-cap-badge ' + nextItem.badgeClass;
+                                    iconEl.innerHTML = nextItem.icon;
+                                    textEl.textContent = '';
+                                    updateTrackerState(currentIndex);
+
+                                    // 3. Prepare for downward slide in (starts slightly above at -14px)
+                                    contentEl.classList.remove('slide-down-out');
+                                    contentEl.classList.add('slide-down-pre-in');
+
+                                    // Force layout reflow
+                                    void contentEl.offsetHeight;
+
+                                    // 4. Slide gracefully down into place
+                                    contentEl.classList.remove('slide-down-pre-in');
+                                    contentEl.classList.add('slide-down-in');
+
+                                    isTransitioning = false;
+
+                                    // 5. Start typing out text
+                                    startTyping(nextItem);
+                                }, 240);
                             }
 
-                            function typeLoop() {
-                                // Conserve CPU / power if tab is backgrounded
-                                if (document.hidden) {
-                                    timer = setTimeout(typeLoop, 500);
-                                    return;
-                                }
-
-                                const currentCap = capabilities[currentIndex];
-                                const fullText = currentCap.text;
-
-                                if (!isDeleting) {
-                                    charIndex++;
-                                    textEl.textContent = fullText.substring(0, charIndex);
-
-                                    if (charIndex >= fullText.length) {
-                                        charIndex = fullText.length;
-                                        if (srEl) srEl.textContent = fullText;
-                                        isDeleting = true;
-                                        timer = setTimeout(typeLoop, PAUSE_VISIBLE);
-                                        return;
-                                    }
-                                    timer = setTimeout(typeLoop, TYPE_SPEED);
-                                } else {
-                                    charIndex--;
-                                    textEl.textContent = fullText.substring(0, Math.max(0, charIndex));
-
-                                    if (charIndex <= 0) {
-                                        charIndex = 0;
-                                        isDeleting = false;
-                                        currentIndex = (currentIndex + 1) % capabilities.length;
-                                        const nextCap = capabilities[currentIndex];
-                                        setVisualState(nextCap);
-                                        timer = setTimeout(typeLoop, PAUSE_EMPTY);
-                                        return;
-                                    }
-                                    timer = setTimeout(typeLoop, DELETE_SPEED);
-                                }
+                            function transitionToNext() {
+                                const next = (currentIndex + 1) % items.length;
+                                transitionTo(next);
                             }
 
-                            timer = setTimeout(typeLoop, PAUSE_VISIBLE);
+                            // Interactive tab clicks
+                            if (trackerEl) {
+                                trackerEl.addEventListener('click', (e) => {
+                                    const tabBtn = e.target.closest('.puzzle-tab');
+                                    if (!tabBtn) return;
+                                    const tabIdx = parseInt(tabBtn.getAttribute('data-tab'), 10);
+                                    if (!isNaN(tabIdx) && tabIdx !== currentIndex) {
+                                        transitionTo(tabIdx);
+                                    }
+                                });
+                            }
+
+                            // Initialize first item pause then start sequence
+                            updateTrackerState(0);
+                            pauseTimer = setTimeout(() => {
+                                transitionToNext();
+                            }, items[0].pauseDuration || 2200);
                         }
 
                         if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', initTypewriter);
+                            document.addEventListener('DOMContentLoaded', initHeroPuzzle);
                         } else {
-                            initTypewriter();
+                            initHeroPuzzle();
                         }
                     })();
                 </script>
