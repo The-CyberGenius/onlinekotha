@@ -1419,6 +1419,183 @@ HARD RULES
         }
     };
 
+    // ─── DM Logs Viewer (with Photo / Media support) ──────────────────────
+    let currentDmPage = 1;
+
+    async function loadDmLogs(page = 1, search = '') {
+        currentDmPage = page;
+        const listEl = document.getElementById('dm-log-list');
+        const pagEl = document.getElementById('dm-log-pagination');
+        if (!listEl) return;
+
+        listEl.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Loading conversations…</p>';
+
+        try {
+            const query = new URLSearchParams({ page, limit: 25, search }).toString();
+            const res = await fetch(`/api/admin/dm/conversations?${query}`);
+            const data = await res.json();
+
+            if (!data.rows || !data.rows.length) {
+                listEl.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No DM conversations found.</p>';
+                if (pagEl) pagEl.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <table style="width:100%;border-collapse:collapse;text-align:left;">
+                    <thead>
+                        <tr style="background:var(--bg-page);border-bottom:1px solid var(--border);color:var(--text-muted);font-size:11px;text-transform:uppercase;">
+                            <th style="padding:10px 12px;">Participants</th>
+                            <th style="padding:10px 12px;text-align:center;">Messages</th>
+                            <th style="padding:10px 12px;">Last Message</th>
+                            <th style="padding:10px 12px;text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (const c of data.rows) {
+                const nameA = c.user_a_name || c.user_a_email.split('@')[0];
+                const nameB = c.user_b_name || c.user_b_email.split('@')[0];
+                html += `
+                    <tr style="border-bottom:1px solid var(--border);font-size:12px;">
+                        <td style="padding:10px 12px;">
+                            <div style="font-weight:600;color:var(--text-primary);">${nameA} <span style="color:var(--text-muted);font-weight:normal;">(${c.user_a_email})</span></div>
+                            <div style="color:var(--text-muted);font-size:11px;">↔ ${nameB} <span>(${c.user_b_email})</span></div>
+                        </td>
+                        <td style="padding:10px 12px;text-align:center;font-weight:600;">${c.msg_count || 0}</td>
+                        <td style="padding:10px 12px;color:var(--text-muted);white-space:nowrap;">${formatDateTime(c.last_at || c.created_at)}</td>
+                        <td style="padding:10px 12px;text-align:right;white-space:nowrap;">
+                            <button class="btn-subtle dm-view-btn" data-id="${c.id}" data-title="${nameA} & ${nameB}" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;cursor:pointer;margin-right:6px;">View Chat</button>
+                            <a href="/api/admin/dm/conversations/${c.id}/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">.TXT</a>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            html += '</tbody></table>';
+            listEl.innerHTML = html;
+
+            // Bind view buttons
+            listEl.querySelectorAll('.dm-view-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.dataset.id;
+                    const title = btn.dataset.title;
+                    viewDmConversation(id, title);
+                });
+            });
+
+            // Pagination
+            if (pagEl) {
+                const totalPages = Math.ceil(data.total / data.limit) || 1;
+                let pagHtml = '';
+                if (page > 1) {
+                    pagHtml += `<button class="btn-subtle" onclick="window.loadDmLogsPage(${page - 1})" style="padding:4px 8px;font-size:11px;cursor:pointer;">← Prev</button>`;
+                }
+                pagHtml += `<span style="align-self:center;color:var(--text-muted);font-size:11px;">Page ${page} of ${totalPages}</span>`;
+                if (page < totalPages) {
+                    pagHtml += `<button class="btn-subtle" onclick="window.loadDmLogsPage(${page + 1})" style="padding:4px 8px;font-size:11px;cursor:pointer;">Next →</button>`;
+                }
+                pagEl.innerHTML = pagHtml;
+            }
+        } catch (err) {
+            console.error('Failed to load DM logs:', err);
+            listEl.innerHTML = `<p style="color:var(--danger);text-align:center;padding:20px;">Error: ${err.message}</p>`;
+        }
+    }
+
+    window.loadDmLogsPage = function(page) {
+        const search = document.getElementById('dm-log-search')?.value.trim() || '';
+        loadDmLogs(page, search);
+    };
+
+    async function viewDmConversation(convId, title) {
+        const viewer = document.getElementById('dm-log-viewer');
+        const msgContainer = document.getElementById('dm-log-messages');
+        const titleEl = document.getElementById('dm-log-viewer-title');
+        const dlBtn = document.getElementById('dm-log-download-btn');
+        if (!viewer || !msgContainer) return;
+
+        viewer.classList.remove('hidden');
+        titleEl.textContent = title || `Conversation #${convId}`;
+        dlBtn.href = `/api/admin/dm/conversations/${convId}/download`;
+        msgContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Loading messages…</p>';
+
+        try {
+            const res = await fetch(`/api/admin/dm/conversations/${convId}/messages`);
+            const data = await res.json();
+            const msgs = data.messages || [];
+
+            if (!msgs.length) {
+                msgContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No messages in this conversation.</p>';
+                return;
+            }
+
+            msgContainer.innerHTML = msgs.map(m => {
+                const sender = m.sender_name || m.sender_email || `User #${m.sender_id}`;
+                const hasMedia = Boolean(m.media_url);
+                const isImg = hasMedia && (m.type === 'image' || /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(m.media_url) || m.media_url.includes('/uploads/dm/'));
+
+                let mediaHtml = '';
+                if (hasMedia) {
+                    if (isImg) {
+                        mediaHtml = `
+                            <div style="margin-top:6px;">
+                                <a href="${m.media_url}" target="_blank" title="Click to view full photo">
+                                    <img src="${m.media_url}" alt="Photo" style="max-width:240px;max-height:240px;border-radius:8px;object-fit:cover;border:1px solid var(--border);display:block;" loading="lazy" />
+                                </a>
+                                <span style="font-size:10px;color:var(--text-muted);margin-top:2px;display:inline-block;">📷 Photo attachment (tap to zoom)</span>
+                            </div>
+                        `;
+                    } else {
+                        mediaHtml = `
+                            <div style="margin-top:6px;">
+                                <a href="${m.media_url}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:underline;">📎 Download Attachment</a>
+                            </div>
+                        `;
+                    }
+                }
+
+                return `
+                    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                            <span style="font-weight:600;color:var(--text-primary);">${sender}</span>
+                            <span style="font-size:10px;color:var(--text-muted);">${formatDateTime(m.created_at)}</span>
+                        </div>
+                        ${m.body ? `<div style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word;">${m.body}</div>` : ''}
+                        ${mediaHtml}
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        } catch (err) {
+            msgContainer.innerHTML = `<p style="color:var(--danger);text-align:center;padding:20px;">Failed to load messages: ${err.message}</p>`;
+        }
+    }
+
+    // Bind DM logs tab and search events
+    document.querySelector('[data-tab="dm-logs"]')?.addEventListener('click', () => {
+        loadDmLogs(1, '');
+    });
+
+    document.getElementById('dm-log-search-btn')?.addEventListener('click', () => {
+        const search = document.getElementById('dm-log-search')?.value.trim() || '';
+        loadDmLogs(1, search);
+    });
+
+    document.getElementById('dm-log-search')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const search = e.target.value.trim();
+            loadDmLogs(1, search);
+        }
+    });
+
+    document.getElementById('dm-log-back')?.addEventListener('click', () => {
+        document.getElementById('dm-log-viewer')?.classList.add('hidden');
+    });
+
     await loadKnown();
     await loadStats();
     await loadProviders();

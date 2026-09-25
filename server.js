@@ -104,9 +104,11 @@ app.use(compression({
 app.use(cookieParser());
 
 // Payment webhooks need the raw body for signature verification — must come BEFORE express.json()
-
-
-app.use(express.json());
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf;
+    }
+}));
 app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
 
@@ -119,8 +121,13 @@ app.use('/api/user', userRouter);
 // ---------- Admin (must come BEFORE static so /admin routes aren't shadowed) ----------
 app.use('/api/admin', adminRouter);
 
-// /admin → redirect to /admin.html
-app.get('/admin', (req, res) => res.redirect('/admin.html'));
+// /admin → redirect to /admin.html (only if admin)
+app.get('/admin', (req, res) => {
+    if (!req.user || !req.user.is_admin) {
+        return res.redirect('/login.html?redirect=/admin.html');
+    }
+    res.redirect('/admin.html');
+});
 
 // /app → main viewer (app.html). Allows both authenticated users & guests!
 app.get('/app', (req, res) => {
@@ -138,6 +145,9 @@ app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 
 // Static frontend (landing /, login, admin, css, js, etc.) with caching
 app.get('/admin.html', (req, res) => {
+    if (!req.user || !req.user.is_admin) {
+        return res.redirect('/login.html?redirect=/admin.html');
+    }
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });

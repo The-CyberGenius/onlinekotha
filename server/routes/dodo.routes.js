@@ -79,19 +79,57 @@ router.post('/create-checkout', requireUser, async (req, res) => {
 });
 
 // 2. Webhook Handler
-router.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+router.post('/webhook', (req, res) => {
     const signature = req.headers['dodo-signature'] || req.headers['webhook-signature'];
     const secret = getDodoWebhookSecret();
 
-    if (!secret || !signature) {
-        return res.status(400).send('Webhook secret or signature missing');
+    if (!secret) {
+        console.error('Dodo Webhook secret missing in server config');
+        return res.status(500).send('Webhook secret not configured');
+    }
+
+    if (!signature) {
+        return res.status(400).send('Missing webhook signature');
+    }
+
+    const rawPayload = req.rawBody || (Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body)));
+
+    try {
+        const hmac = crypto.createHmac('sha256', secret);
+        hmac.update(rawPayload);
+        const expectedSig = hmac.digest('hex');
+
+        const sigCandidates = String(signature).split(',').map(s => s.trim());
+        let isValid = false;
+
+        for (const cand of sigCandidates) {
+            const cleanCand = cand.startsWith('v1=') ? cand.slice(3) : cand;
+            if (cleanCand.length === expectedSig.length) {
+                try {
+                    if (crypto.timingSafeEqual(Buffer.from(cleanCand), Buffer.from(expectedSig))) {
+                        isValid = true;
+                        break;
+                    }
+                } catch {}
+            }
+        }
+
+        if (!isValid) {
+            console.warn('Dodo webhook signature verification failed.');
+            return res.status(401).send('Invalid signature');
+        }
+    } catch (err) {
+        console.error('Signature verification error:', err);
+        return res.status(401).send('Signature verification failed');
     }
 
     let event;
     try {
-        event = JSON.parse(req.body.toString());
+        event = typeof req.body === 'object' && req.body !== null && !Buffer.isBuffer(req.body)
+            ? req.body
+            : JSON.parse(rawPayload.toString('utf8'));
     } catch (err) {
-        console.error('Webhook payload parse failed.', err);
+        console.error('Webhook payload parse failed:', err);
         return res.status(400).send('Invalid payload');
     }
 

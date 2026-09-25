@@ -31,6 +31,13 @@ const authLimiter = rateLimit({
     validate: false,
 });
 
+const forgotLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: 'Too many requests. Please wait a few minutes before trying again.' },
+    validate: false,
+});
+
 // Self-serve Signup with Name, Email, 6-Digit PIN, and Optional Phone
 router.post('/signup', authLimiter, async (req, res) => {
     try {
@@ -88,7 +95,7 @@ router.get('/verify', (req, res) => {
     res.redirect('/verify-success.html');
 });
 
-router.post('/forgot', async (req, res) => {
+router.post('/forgot', forgotLimiter, async (req, res) => {
     const { email } = req.body || {};
     if (!email) return res.status(400).json({ error: 'email required' });
     const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email.toLowerCase().trim());
@@ -99,7 +106,7 @@ router.post('/forgot', async (req, res) => {
     res.json({ ok: true });
 });
 
-router.post('/reset', async (req, res) => {
+router.post('/reset', forgotLimiter, async (req, res) => {
     const { token, password } = req.body || {};
     if (!token || !password) return res.status(400).json({ error: 'token + password required' });
     if (!/^\d{4,6}$/.test(password)) return res.status(400).json({ error: 'Please enter a 4 to 6-digit PIN (numbers only)' });
@@ -112,7 +119,7 @@ router.post('/reset', async (req, res) => {
     res.json({ ok: true });
 });
 
-router.post('/resend-verify', (req, res) => {
+router.post('/resend-verify', forgotLimiter, (req, res) => {
     if (!req.user) return res.status(401).json({ error: 'Login required' });
     const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
     if (u.email_verified) return res.json({ ok: true, already: true });
