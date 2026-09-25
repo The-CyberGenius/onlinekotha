@@ -697,6 +697,7 @@
             display: inline-flex;
             width: 8px;
             height: 8px;
+            border-radius: 999px;
         }
 
         .dot::before {
@@ -714,6 +715,80 @@
             inset: 0;
             border-radius: 999px;
             background: #34d399;
+        }
+
+        /* ── OnlineKotha Hero Brand Pill ── */
+        .hero-brand-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 14px 5px 6px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px -4px rgba(99, 102, 241, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.25s ease;
+            max-width: 100%;
+        }
+        .hero-brand-pill:hover {
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 0 6px 24px -4px rgba(99, 102, 241, 0.35);
+            transform: translateY(-1px);
+        }
+        html.light .hero-brand-pill {
+            background: rgba(99, 102, 241, 0.06);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 2px 12px -2px rgba(99, 102, 241, 0.12);
+        }
+        .brand-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: #ffffff;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+            flex-shrink: 0;
+        }
+        .brand-pill-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #c7d2fe;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+        html.light .brand-pill-text {
+            color: #312e81;
+        }
+        .brand-pill-arrow {
+            color: #818cf8;
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+        .hero-brand-pill:hover .brand-pill-arrow {
+            transform: translateX(2px);
+        }
+        @media (max-width: 520px) {
+            .hero-brand-pill {
+                padding: 4px 10px 4px 5px;
+                gap: 7px;
+            }
+            .brand-pill-badge {
+                font-size: 9.5px;
+                padding: 2.5px 7px;
+            }
+            .brand-pill-text {
+                font-size: 11.5px;
+            }
         }
 
         @keyframes ping {
@@ -1702,18 +1777,18 @@
         }
 
         .hero-cap-content.slide-down-out {
-            transform: translateY(14px);
-            opacity: 0;
+            transform: translateY(8px);
+            opacity: 0.35;
         }
         .hero-cap-content.slide-down-pre-in {
-            transform: translateY(-14px);
-            opacity: 0;
+            transform: translateY(-8px);
+            opacity: 0.35;
             transition: none !important;
         }
         .hero-cap-content.slide-down-in {
             transform: translateY(0);
             opacity: 1;
-            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
         }
 
         .hero-cap-badge {
@@ -1811,6 +1886,229 @@
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
             border-width: 0;
+        }
+
+        .brand-pill-mobile-text {
+            display: none;
+        }
+        @media (max-width: 560px) {
+            .brand-pill-desktop-text {
+                display: none;
+            }
+            .brand-pill-mobile-text {
+                display: inline;
+            }
+        }
+
+        /* ── Typography & Readability Fixes ── */
+        .hero-desc-text {
+            color: #94a3b8;
+            line-height: 1.65;
+            font-size: clamp(15px, 2.2vw, 17.5px);
+        }
+        html.light .hero-desc-text {
+            color: #334155;
+            font-weight: 450;
+        }
+
+        /* ── Social Proof & Trust Strip ── */
+        .hero-social-proof {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin: 0 auto 24px auto;
+            max-width: 95vw;
+        }
+        html.light .hero-social-proof {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+        .hero-avatar-stack {
+            display: inline-flex;
+            align-items: center;
+        }
+        .hero-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #ffffff;
+            border: 2px solid var(--bg-hero, #08080d);
+            margin-left: -7px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        html.light .hero-avatar {
+            border-color: #ffffff;
+        }
+        .hero-avatar:first-child {
+            margin-left: 0;
+        }
+        .hero-avatar-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8.5px;
+            font-weight: 800;
+            background: #4f46e5;
+            color: #ffffff;
+            border: 2px solid var(--bg-hero, #08080d);
+            margin-left: -7px;
+        }
+        html.light .hero-avatar-badge {
+            border-color: #ffffff;
+        }
+        .hero-rating-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            line-height: 1.25;
+        }
+        .hero-stars {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .hero-rating-score {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-left: 4px;
+        }
+        .hero-rating-caption {
+            font-size: 11.5px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        html.light .hero-rating-caption {
+            color: #475569;
+        }
+
+        /* ── Dual CTA Actions ── */
+        .hero-cta-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+        .hero-btn-main {
+            min-height: 54px;
+            padding: 0 34px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 999px;
+            box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.45);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hero-btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 36px -4px rgba(99, 102, 241, 0.55);
+        }
+        .hero-btn-secondary {
+            min-height: 52px;
+            padding: 0 24px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-strong);
+            border-radius: 999px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+        .hero-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+        html.light .hero-btn-secondary {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.12);
+            color: #1e293b;
+        }
+        html.light .hero-btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.08);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* ── Objection-Crushing Trust Badges ── */
+        .hero-trust-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .hero-trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        html.light .hero-trust-badge {
+            color: #334155;
+        }
+        .hero-login-subtext {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 36px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        html.light .hero-login-subtext {
+            color: #64748b;
+        }
+        .hero-google-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        html.light .hero-google-chip {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1e293b;
+        }
+        .hero-dot-separator {
+            opacity: 0.4;
         }
 
         /* Responsive on mobile */
@@ -1935,6 +2233,53 @@
             .hero-cap-signal {
                 padding-left: 6px;
                 min-width: 20px;
+            }
+            .hero-cta-group {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            .hero-btn-main {
+                width: 100%;
+                justify-content: center;
+                min-height: 50px;
+                font-size: 15px;
+            }
+            .hero-btn-secondary {
+                width: 100%;
+                justify-content: center;
+                min-height: 46px;
+                font-size: 14px;
+            }
+            .hero-trust-badges {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .hero-social-proof {
+                padding: 6px 12px;
+                gap: 10px;
+            }
+            .hero-rating-caption {
+                font-size: 10.5px;
+            }
+            #floating-assistant-widget {
+                bottom: 16px !important;
+                left: 14px !important;
+            }
+            #toggle-assistant-btn {
+                width: 44px !important;
+                height: 44px !important;
+            }
+            #toggle-assistant-btn svg {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            #assistant-badge {
+                display: none !important;
+            }
+            div[data-formms-popup] {
+                bottom: 16px !important;
+                right: 14px !important;
             }
         }
         @media (max-width: 380px) {
@@ -2150,7 +2495,7 @@
 
                 <a href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport" id="nav-cta" class="btn cta-primary"
                     style="min-height:42px;padding:0 18px;">
-                    <span>Try Live Demo</span>
+                    <span>Try Free</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
@@ -2169,8 +2514,24 @@
         <div class="wrap hero-centered">
             <!-- Text Content -->
             <div class="hero-text-content">
-                <div class="rise d1" style="margin-bottom:30px;">
-                    <span class="pill" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.28); color: #a5b4fc; box-shadow: 0 4px 20px -4px rgba(99, 102, 241, 0.3);"><span class="dot" style="background: #10b981; box-shadow: 0 0 8px #10b981;"></span>AI-powered chat memories</span>
+                <div class="rise d1" style="margin-bottom:28px;">
+                    <div class="hero-brand-pill">
+                        <span class="brand-pill-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                            </svg>
+                            <span>ONLINEKOTHA</span>
+                        </span>
+                        <span class="brand-pill-text">
+                            <span class="brand-pill-desktop-text">The Living Memory Vault for Your WhatsApp Chats</span>
+                            <span class="brand-pill-mobile-text">Private WhatsApp Memory Vault</span>
+                        </span>
+                        <span class="brand-pill-arrow">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                                <path d="M5 12h14M13 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
                 </div>
 
                 <h1 class="display rise d2 hero-title-main" style="margin-bottom:18px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.08;">
@@ -2528,27 +2889,68 @@
                     })();
                 </script>
 
-                <p class="lead rise d3 hero-desc-text" style="max-width:640px; margin-bottom: 20px; font-size: 1.15rem; color: #a1a1aa; line-height: 1.6;">
+                <p class="lead rise d3 hero-desc-text" style="max-width:620px; margin: 0 auto 20px auto;">
                     Import your WhatsApp chat and continue the conversation with AI — using the memories, language, and style from your real conversations.
                 </p>
-                
-                <p class="rise d3" style="max-width:640px; margin-bottom: 40px; font-size: 0.95rem; color: #71717a; font-weight: 500; letter-spacing: 0.02em;">
-                    Private. Encrypted. Free to try.
-                </p>
 
-                <div class="rise d4" style="display:flex; flex-direction:column; align-items: center; gap:16px; margin-bottom:40px;">
-                    <a href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport" id="hero-cta" class="btn cta-primary"
-                        style="min-height:56px;padding:0 40px;font-size:16px; font-weight: 700; box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35);">
-                        Try OnlineKotha Free &rarr;
-                    </a>
-
-                    <div class="dim" style="font-size:13px;font-weight:500;letter-spacing:.02em; color: #a1a1aa; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                        <span style="display:inline-flex; align-items:center; gap:6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px;">
-                            <svg width="14" height="14" viewBox="0 0 48 48" class="shrink-0"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
-                            Secure 1-click login
-                        </span>
-                        <span>Free to explore &bull; No credit card</span>
+                <!-- Social Proof & Star Rating Strip -->
+                <div class="hero-social-proof rise d3">
+                    <div class="hero-avatar-stack">
+                        <span class="hero-avatar" style="background: linear-gradient(135deg, #f43f5e, #fb7185);">AK</span>
+                        <span class="hero-avatar" style="background: linear-gradient(135deg, #8b5cf6, #c084fc);">MR</span>
+                        <span class="hero-avatar" style="background: linear-gradient(135deg, #06b6d4, #38bdf8);">SJ</span>
+                        <span class="hero-avatar" style="background: linear-gradient(135deg, #10b981, #34d399);">PZ</span>
+                        <span class="hero-avatar-badge">+12k</span>
                     </div>
+                    <div class="hero-rating-box">
+                        <div class="hero-stars">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <span class="hero-rating-score">4.9/5</span>
+                        </div>
+                        <span class="hero-rating-caption">Loved by 12,000+ WhatsApp chat explorers</span>
+                    </div>
+                </div>
+
+                <!-- Dual High-Converting CTAs -->
+                <div class="hero-cta-group rise d4">
+                    <a href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport" id="hero-cta" class="btn cta-primary hero-btn-main">
+                        <span>Try OnlineKotha Free</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                        <span>See Sample Wrapped</span>
+                    </a>
+                </div>
+
+                <!-- Objection-Crushing Trust Badges -->
+                <div class="hero-trust-badges rise d4">
+                    <div class="hero-trust-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.3" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span>100% Client-Side Private</span>
+                    </div>
+                    <div class="hero-trust-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.3" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <span>No WhatsApp Password Needed</span>
+                    </div>
+                    <div class="hero-trust-badge">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Takes 30 Seconds</span>
+                    </div>
+                </div>
+
+                <!-- 1-Click Login Micro-Note -->
+                <div class="hero-login-subtext rise d4">
+                    <span class="hero-google-chip">
+                        <svg width="13" height="13" viewBox="0 0 48 48" class="shrink-0"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+                        <span>Instant 1-Click Login</span>
+                    </span>
+                    <span class="hero-dot-separator">•</span>
+                    <span>Free Forever Tier Included</span>
                 </div>
                 </div>
 
