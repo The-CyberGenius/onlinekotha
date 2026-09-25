@@ -237,6 +237,11 @@
 
         html {
             scroll-behavior: smooth;
+            scroll-padding-top: 88px;
+        }
+
+        section[id], div[id] {
+            scroll-margin-top: 88px;
         }
 
         /* =========================================================
@@ -4093,20 +4098,16 @@
                     }
                 } else {
                     window.kothaUser = null;
-                    // Not logged in: Show Google One Tap
+                    // Not logged in: Show Google One Tap cleanly with FedCM support
                     try {
                         const idRes = await fetch('/api/auth/google/client-id');
                         const idData = await idRes.json();
 
-                        if (idData.clientId) {
+                        if (idData && idData.clientId && !window.oneTapInitialized) {
                             window.googleClientId = idData.clientId;
-                            const script = document.createElement('script');
-                            script.src = "https://accounts.google.com/gsi/client";
-                            script.async = true;
-                            script.defer = true;
-                            document.head.appendChild(script);
 
                             window.handleGoogleOneTap = async (response) => {
+                                if (!response || !response.credential) return;
                                 try {
                                     const res = await fetch('/api/auth/google/onetap', {
                                         method: 'POST',
@@ -4114,40 +4115,48 @@
                                         body: JSON.stringify({ credential: response.credential })
                                     });
                                     const data = await res.json();
-                                    if (data.ok) {
+                                    if (data && data.ok) {
                                         window.location.href = data.redirect || '/app.html?action=import';
                                     }
-                                } catch (e) { console.error('One Tap Error', e); }
+                                } catch (e) {
+                                    console.error('One Tap Error', e);
+                                }
                             };
 
-                            script.onload = () => {
-                                window.gisLoaded = true;
-                                window.google.accounts.id.initialize({
-                                    client_id: idData.clientId,
-                                    callback: window.handleGoogleOneTap,
-                                    auto_select: false,
-                                    cancel_on_tap_outside: false,
-                                    context: 'signin',
-                                    itp_support: true
-                                });
-                                window.gisInitialized = true;
-                                window.google.accounts.id.prompt((notification) => {
-                                    if (notification.isNotDisplayed()) {
-                                        console.warn('One Tap not displayed:', notification.getNotDisplayedReason());
-                                    } else if (notification.isSkippedMoment()) {
-                                        console.warn('One Tap skipped:', notification.getSkippedReason());
-                                    } else {
-                                        console.log('One Tap prompt is displaying!');
+                            const initOneTapGis = () => {
+                                if (window.oneTapInitialized) return;
+                                if (!window.google || !window.google.accounts || !window.google.accounts.id) return;
+                                window.oneTapInitialized = true;
+
+                                try {
+                                    window.google.accounts.id.initialize({
+                                        client_id: idData.clientId,
+                                        callback: window.handleGoogleOneTap,
+                                        auto_select: false,
+                                        cancel_on_tap_outside: false,
+                                        context: 'signin',
+                                        itp_support: true,
+                                        use_fedcm_for_prompt: true
+                                    });
+                                    window.google.accounts.id.prompt();
+                                } catch (err) {
+                                    // Ignore prompt collision or user dismissal
+                                }
+                            };
+
+                            if (window.google && window.google.accounts && window.google.accounts.id) {
+                                initOneTapGis();
+                            } else {
+                                const checkInterval = setInterval(() => {
+                                    if (window.google && window.google.accounts && window.google.accounts.id) {
+                                        clearInterval(checkInterval);
+                                        initOneTapGis();
                                     }
-                                });
-                            };
-
-                            script.onerror = () => {
-                                console.error('Failed to load Google GIS script');
-                                window.gisFailed = true;
-                            };
+                                }, 100);
+                                setTimeout(() => clearInterval(checkInterval), 6000);
+                            }
                         }
-                    } catch (e) { console.error('Failed to init One Tap', e); }
+                    } catch (e) { }
                 }
             } catch { }
         })();
@@ -4668,40 +4677,6 @@
             }
         })();
 
-        // Google One-Tap auto-prompt for non-logged in visitors
-        (function () {
-            fetch('/api/auth/me')
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.user) return; // User already logged in
-                    fetch('/api/auth/google/client-id')
-                        .then(res => res.json())
-                        .then(idData => {
-                            if (idData.clientId && window.google && window.google.accounts) {
-                                google.accounts.id.initialize({
-                                    client_id: idData.clientId,
-                                    callback: async function (response) {
-                                        if (!response.credential) return;
-                                        try {
-                                            const res = await fetch('/api/auth/google/onetap', {
-                                                method: 'POST',
-                                                headers: { 'content-type': 'application/json' },
-                                                body: JSON.stringify({ credential: response.credential }),
-                                            });
-                                            const resData = await res.json();
-                                            if (resData.ok && resData.redirect) {
-                                                window.location.href = resData.redirect;
-                                            }
-                                        } catch (e) {
-                                            console.error('One-Tap error', e);
-                                        }
-                                    }
-                                });
-                                google.accounts.id.prompt();
-                            }
-                        }).catch(() => { });
-                }).catch(() => { });
-        })();
     </script>
     <!-- ── Interactive Support Chat (functional - Floating Widget) ── -->
     <div id="floating-assistant-widget"

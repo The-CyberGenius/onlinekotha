@@ -397,9 +397,11 @@
                     btn.href = `/api/auth/google?next=${encodeURIComponent(getNext())}`;
 
                     // Google One-Tap 1-Click Prompt
-                    if (window.google && window.google.accounts) {
+                    if (window.google && window.google.accounts && !window.oneTapInitialized) {
+                        window.oneTapInitialized = true;
                         google.accounts.id.initialize({
                             client_id: data.clientId,
+                            use_fedcm_for_prompt: true,
                             callback: async function (response) {
                                 if (!response.credential) return;
                                 try {
