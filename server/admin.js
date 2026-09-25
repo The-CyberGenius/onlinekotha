@@ -506,7 +506,11 @@ router.get('/impersonate/start', (req, res) => {
     const chat = req.query.chat || '';
     if (!uid) return res.status(400).send('UID required');
     res.cookie('admin_impersonate_uid', uid, { httpOnly: true, path: '/' });
-    res.redirect(`/app?chat=${encodeURIComponent(chat)}`);
+    if (chat) {
+        res.redirect(`/app?chat=${encodeURIComponent(chat)}`);
+    } else {
+        res.redirect(`/app`);
+    }
 });
 
 router.get('/impersonate/stop', (req, res) => {

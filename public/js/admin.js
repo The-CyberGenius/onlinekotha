@@ -710,12 +710,20 @@ HARD RULES
                 html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${u.total_cost.toFixed(3)}</span></td>`;
                 html += `<td>${ipCountry}</td>`;
                 html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
-                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
+                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-impersonate-btn btn-subtle" title="Login as this user">Login As</button><button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
                 html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div></td></tr>`;
             }
             html += '</tbody></table></div>';
             list.innerHTML = html;
         }
+
+        // Impersonate general user
+        list.querySelectorAll('.user-impersonate-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const uid = btn.dataset.uid;
+                window.location.href = `/api/admin/impersonate/start?uid=${uid}`;
+            });
+        });
 
         // Manage plan modal
         list.querySelectorAll('.user-plan-btn').forEach(btn => {
