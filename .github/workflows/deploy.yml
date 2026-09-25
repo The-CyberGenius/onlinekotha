@@ -12,12 +12,12 @@ jobs:
       - name: Deploy to ubuntu
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.ubuntu_HOST }}
-          username: ${{ secrets.ubuntu_USERNAME }}
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Navigate to the project directory (Change this path if needed)
-            cd /home/${{ secrets.EC2_USERNAME }}/OnlineKotha || cd /var/www/OnlineKotha || cd ~/onlinekotha || cd ~/kotha
+            # Navigate to the project directory
+            cd /var/www/onlinekotha
             
             # Pull latest code
             git pull origin main
@@ -25,5 +25,5 @@ jobs:
             # Install any new dependencies
             npm install
             
-            # Restart the app using PM2 (adjust process name if needed)
-            pm2 restart all
+            # Restart the app using PM2
+            pm2 restart kotha
