@@ -710,20 +710,12 @@ HARD RULES
                 html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${u.total_cost.toFixed(3)}</span></td>`;
                 html += `<td>${ipCountry}</td>`;
                 html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
-                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-impersonate-btn btn-subtle" title="Login as this user">Login As</button><button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
+                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
                 html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div></td></tr>`;
             }
             html += '</tbody></table></div>';
             list.innerHTML = html;
         }
-
-        // Impersonate general user
-        list.querySelectorAll('.user-impersonate-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const uid = btn.dataset.uid;
-                window.location.href = `/api/admin/impersonate/start?uid=${uid}`;
-            });
-        });
 
         // Manage plan modal
         list.querySelectorAll('.user-plan-btn').forEach(btn => {
@@ -850,15 +842,17 @@ HARD RULES
                 btn.textContent = 'Hide';
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
+                    const loginAsBtnHtml = `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:10px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:white;cursor:pointer;text-transform:none;">Login As User</button>`;
+
                     if (!chats.length) {
-                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--text-muted);">No chats uploaded yet</div>';
+                        area.innerHTML = `<div style="background:var(--bg-page);border-radius:8px;padding:20px;text-align:center;font-size:13px;color:var(--text-muted);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:12px;"><div>No chats uploaded yet</div>${loginAsBtnHtml}</div>`;
                         return;
                     }
                     const isMob = window.matchMedia('(max-width: 768px)').matches;
                     if (isMob) {
                         // Mobile: stacked chat cards
                         area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
-                            '<div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">Chats (' + chats.length + ')</span></div>' +
+                            '<div style="padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">Chats (' + chats.length + ')</span>' + loginAsBtnHtml + '</div>' +
                             chats.map(c => {
                                 const name = (c.display_name || c.folder_name).replace('WhatsApp Chat - ', '');
                                 const del = c.deleted_by_user ? ' <span class="badge badge-expired" style="font-size:9px;">deleted</span>' : '';
@@ -879,11 +873,11 @@ HARD RULES
                         // Desktop: table-like flex rows
                         area.innerHTML = `
                             <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
-                                <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg-page);">
+                                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg-page);">
                                     <div style="flex:1;min-width:0;">Chat Name</div>
                                     <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
                                     <div style="width:130px;flex-shrink:0;">Imported</div>
-                                    <div style="width:150px;text-align:right;flex-shrink:0;">Actions</div>
+                                    <div style="width:150px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;"><span>Actions</span>${loginAsBtnHtml}</div>
                                 </div>
                                 ${chats.map(c => `
                                     <div style="padding:8px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
