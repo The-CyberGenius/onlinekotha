@@ -73,8 +73,8 @@ function ensureStrategy(req) {
                 const now = Date.now();
                 const trialHours = Number(getSetting('trial_duration_hours', '24'));
                 const trialExpiresAt = now + trialHours * 60 * 60 * 1000;
-                const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
-                const isAdmin = adminEmail && email === adminEmail ? 1 : 0;
+                const adminEmails = (process.env.ADMIN_EMAIL || '').toLowerCase().split(',').map(e => e.trim()).filter(Boolean);
+                const isAdmin = adminEmails.includes(email) ? 1 : 0;
 
                 let country = null;
                 if (ip) {

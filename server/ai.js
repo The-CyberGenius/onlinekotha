@@ -48,25 +48,13 @@ function aiGate(req, res, next) {
     if (plan === 'paid') return next();
 
     if (plan === 'free') {
-        // Calculate lifetime messages for the honeymoon phase
-        const lifetimeUsed = db.prepare(
-            `SELECT COUNT(*) AS n FROM conv_messages cm
-             JOIN conversations c ON c.id = cm.conversation_id
-             WHERE c.user_id = ? AND cm.role = 'user'`
-        ).get(req.user.id).n;
-
-        // Free tier: strict lifetime cap of X messages, then Y free messages per day
-        const freeLifetimeMax = Number(getSetting('free_lifetime_messages', '10'));
-        const freeDailyMax = Number(getSetting('free_user_daily_messages', '1'));
-        
-        if (lifetimeUsed >= freeLifetimeMax) {
-            if (usedToday >= freeDailyMax) {
-                return res.status(429).json({
-                    error: `You've used your ${freeLifetimeMax} free trial messages and your ${freeDailyMax} free daily message(s). Upgrade to Pro to continue chatting!`,
-                    limit: freeLifetimeMax,
-                    used: lifetimeUsed,
-                });
-            }
+        const freeDailyMax = Number(getSetting('free_user_daily_messages', '5'));
+        if (freeDailyMax > 0 && usedToday >= freeDailyMax) {
+            return res.status(429).json({
+                error: `You've used your ${freeDailyMax} free AI messages for today. Upgrade to Pro for unlimited AI conversations!`,
+                limit: freeDailyMax,
+                used: usedToday,
+            });
         }
     } else {
         // Trial users: higher cap but still limited

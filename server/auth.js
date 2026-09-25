@@ -25,8 +25,8 @@ function checkIpAccountLimit(ip, userEmail = '') {
     if (!cleanIp || cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost') return;
 
     // Check if it's admin email
-    const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
-    if (adminEmail && userEmail && userEmail.toLowerCase().trim() === adminEmail) return;
+    const adminEmails = (process.env.ADMIN_EMAIL || '').toLowerCase().split(',').map(e => e.trim()).filter(Boolean);
+    if (userEmail && adminEmails.includes(userEmail.toLowerCase().trim())) return;
 
     const row = db.prepare('SELECT COUNT(*) as count FROM users WHERE ip_address = ?').get(cleanIp);
     if (row && row.count >= MAX_ACCOUNTS_PER_IP) {
@@ -54,8 +54,8 @@ function createUser(email, password, options = {}) {
     const trialHours = Number(getSetting('trial_duration_hours', '24'));
     const trialExpiresAt = now + trialHours * 60 * 60 * 1000;
 
-    const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase().trim();
-    const isAdmin = adminEmail && cleanEmail === adminEmail ? 1 : 0;
+    const adminEmails = (process.env.ADMIN_EMAIL || '').toLowerCase().split(',').map(e => e.trim()).filter(Boolean);
+    const isAdmin = adminEmails.includes(cleanEmail) ? 1 : 0;
 
     const displayName = options.display_name ? options.display_name.trim() : null;
     const phone = options.phone ? options.phone.trim() : null;
