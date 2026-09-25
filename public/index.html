@@ -1516,6 +1516,7 @@
                             let touchStartY = 0;
                             let touchStartTime = 0;
                             let isSwiping = false;
+                            let lastNavTime = 0;
 
                             phoneScreen.addEventListener('touchstart', (e) => {
                                 if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
@@ -1535,11 +1536,11 @@
                                     const touchEndY = e.changedTouches[0].clientY;
                                     const diffX = touchEndX - touchStartX;
                                     const diffY = touchEndY - touchStartY;
-                                    const elapsed = Date.now() - touchStartTime;
 
-                                    // Swipe gesture detection
+                                    // Swipe gesture detection (horizontal swipe > 35px)
                                     if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
                                         isSwiping = true;
+                                        lastNavTime = Date.now();
                                         if (diffX < 0) {
                                             goToSlide(currentSlide + 1); // Swipe left -> Next
                                         } else {
@@ -1547,29 +1548,22 @@
                                         }
                                         return;
                                     }
-
-                                    // Quick Tap detection
-                                    if (elapsed < 400 && Math.abs(diffX) < 15 && Math.abs(diffY) < 15) {
-                                        const rect = phoneScreen.getBoundingClientRect();
-                                        const tapX = touchEndX - rect.left;
-                                        if (tapX < rect.width * 0.35) {
-                                            goToSlide(currentSlide - 1);
-                                        } else {
-                                            goToSlide(currentSlide + 1);
-                                        }
-                                        return;
-                                    }
                                 }
+                                // If not a swipe, resume timer (tap will be cleanly handled by click listener)
                                 startTimer();
                             }, { passive: true });
 
-                            // Desktop Click Navigation (and mouse fallback)
+                            // Unified Click / Tap Navigation (prevents double-firing on touch devices)
                             phoneScreen.addEventListener('click', (e) => {
                                 if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
-                                if (isSwiping) {
+                                
+                                const now = Date.now();
+                                if (isSwiping || (now - lastNavTime < 350)) {
                                     isSwiping = false;
                                     return;
                                 }
+                                lastNavTime = now;
+
                                 const rect = phoneScreen.getBoundingClientRect();
                                 const clickX = e.clientX - rect.left;
                                 if (clickX < rect.width * 0.35) {
