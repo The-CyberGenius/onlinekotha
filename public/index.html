@@ -321,6 +321,9 @@
             .sec {
                 padding: 72px 0;
             }
+            .display {
+                font-size: clamp(1.85rem, 7vw, 2.8rem);
+            }
         }
 
         /* ── Type ── */
@@ -1228,6 +1231,388 @@
             color: #111827;
             font-weight: 700;
         }
+
+        /* ── Hero Capability Stage ── */
+        .hero-capability-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 24px;
+            width: 100%;
+            max-width: 680px;
+        }
+
+        .hero-capability-concept {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .hero-capability-stage {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            min-height: 48px;
+            max-width: 95vw;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hero-capability-stage:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.15);
+        }
+        html.light .hero-capability-stage {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+        html.light .hero-capability-stage:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.1);
+        }
+
+        .hero-cap-badge {
+            font-size: 11px;
+            font-weight: 700;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 14%, transparent);
+            padding: 3px 7px;
+            border-radius: 6px;
+            border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+            line-height: 1;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .hero-cap-icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+        }
+
+        .hero-cap-text-container {
+            display: inline-flex;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.4;
+            min-height: 24px;
+            white-space: nowrap;
+            letter-spacing: -0.01em;
+        }
+
+        .hero-cap-text {
+            color: var(--text-primary);
+            background: linear-gradient(135deg, #ffffff 40%, #93c5fd 80%, #c4b5fd 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline;
+        }
+        html.light .hero-cap-text {
+            background: linear-gradient(135deg, #111827 40%, #2563eb 80%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-cap-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.15em;
+            background: #6366f1;
+            margin-left: 3px;
+            vertical-align: text-bottom;
+            border-radius: 1px;
+            animation: heroCaretBlink 0.9s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes heroCaretBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.15; }
+        }
+
+        .hero-cap-signal {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding-left: 8px;
+            margin-left: 2px;
+            border-left: 1px solid var(--border);
+            min-width: 24px;
+            height: 18px;
+            opacity: 0.85;
+            flex-shrink: 0;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        /* Micro-signals */
+        .cap-sig-dots {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .cap-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 999px;
+            background: var(--accent);
+            animation: capPulse 1.4s infinite ease-in-out;
+        }
+        .cap-dot:nth-child(1) { animation-delay: 0s; }
+        .cap-dot:nth-child(2) { animation-delay: 0.2s; }
+        .cap-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .cap-sig-radar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            position: relative;
+        }
+        .cap-radar-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            border: 1.5px solid var(--accent);
+            animation: capRadar 1.6s infinite cubic-bezier(0, 0.2, 0.8, 1);
+        }
+        .cap-radar-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 999px;
+            background: var(--accent);
+        }
+
+        .cap-sig-bars {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2.5px;
+            height: 12px;
+        }
+        .cap-bar {
+            width: 2.5px;
+            border-radius: 1px;
+            background: var(--accent);
+            animation: capBarWave 1.2s infinite ease-in-out;
+        }
+        .cap-bar.b1 { height: 6px; animation-delay: 0s; }
+        .cap-bar.b2 { height: 12px; animation-delay: 0.2s; }
+        .cap-bar.b3 { height: 8px; animation-delay: 0.4s; }
+
+        .cap-sig-stories {
+            display: inline-flex;
+            align-items: center;
+            gap: 2.5px;
+        }
+        .cap-dash {
+            width: 5px;
+            height: 2.5px;
+            border-radius: 999px;
+            background: var(--accent);
+            opacity: 0.4;
+            animation: capStoryFill 1.5s infinite ease-in-out;
+        }
+        .cap-dash:nth-child(1) { animation-delay: 0s; }
+        .cap-dash:nth-child(2) { animation-delay: 0.25s; }
+        .cap-dash:nth-child(3) { animation-delay: 0.5s; }
+
+        .cap-sig-day {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 15%, transparent);
+            padding: 1px 4px;
+            border-radius: 4px;
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+        }
+
+        .cap-sig-spark {
+            font-size: 11px;
+            color: #ec4899;
+            animation: capSparkle 1.8s infinite ease-in-out;
+            line-height: 1;
+        }
+
+        .cap-sig-media {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 10px;
+            border-radius: 2px;
+            border: 1.5px solid var(--accent);
+            position: relative;
+        }
+        .cap-sig-media::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--accent);
+            top: 1px;
+            right: 1px;
+        }
+
+        .cap-sig-glow {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #34d399;
+            box-shadow: 0 0 8px #34d399;
+            animation: capPulse 1.8s infinite ease-in-out;
+        }
+
+        @keyframes capPulse {
+            0%, 100% { transform: scale(0.85); opacity: 0.5; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+        @keyframes capRadar {
+            0% { transform: scale(0.4); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+        @keyframes capBarWave {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1.1); }
+        }
+        @keyframes capStoryFill {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        @keyframes capSparkle {
+            0%, 100% { transform: scale(0.8) rotate(0deg); opacity: 0.6; }
+            50% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+        }
+
+        /* Screen reader utility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Accessibility: prefers-reduced-motion */
+        @media (prefers-reduced-motion: reduce) {
+            .hero-cap-cursor {
+                animation: none !important;
+                display: none !important;
+            }
+            .hero-cap-icon-box,
+            .hero-cap-badge,
+            .cap-dot,
+            .cap-radar-ring,
+            .cap-bar,
+            .cap-dash,
+            .cap-sig-spark,
+            .cap-sig-glow {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        /* Responsive Mobile adjustments */
+        @media (max-width: 640px) {
+            .nav-inner {
+                padding: 10px 12px !important;
+            }
+            #nav-cta {
+                min-height: 38px !important;
+                padding: 0 10px !important;
+                font-size: 12.5px !important;
+                gap: 5px !important;
+            }
+            #nav-login {
+                padding: 8px 4px !important;
+                font-size: 12px !important;
+            }
+            .icon-btn {
+                width: 34px !important;
+                height: 34px !important;
+            }
+            .brand {
+                gap: 6px !important;
+            }
+            .brand img {
+                width: 26px !important;
+                height: 26px !important;
+            }
+            .hero-capability-wrapper {
+                margin-bottom: 20px;
+                max-width: 100%;
+                padding: 0 8px;
+            }
+            .hero-capability-concept {
+                font-size: 11.5px;
+                margin-bottom: 8px;
+            }
+            .hero-capability-stage {
+                padding: 6px 12px;
+                min-height: 42px;
+                gap: 8px;
+                max-width: 100%;
+            }
+            .hero-cap-text-container {
+                font-size: 13px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: calc(100vw - 150px);
+            }
+            .hero-cap-badge {
+                font-size: 10px;
+                padding: 2px 5px;
+            }
+            .hero-cap-icon-box {
+                width: 18px;
+                height: 18px;
+            }
+            .hero-cap-icon-box svg {
+                width: 15px;
+                height: 15px;
+            }
+            .hero-cap-signal {
+                padding-left: 6px;
+                min-width: 20px;
+            }
+        }
+        @media (max-width: 380px) {
+            .hero-cap-text-container {
+                font-size: 12px;
+                max-width: calc(100vw - 120px);
+            }
+            .hero-capability-stage {
+                padding: 5px 10px;
+                gap: 6px;
+            }
+            .hero-cap-signal {
+                display: none;
+            }
+        }
     </style>
     <script src="/js/analytics.js" async></script>
 </head>
@@ -1299,9 +1684,169 @@
                     <span class="pill" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);"><span class="dot" style="background: #3b82f6; box-shadow: 0 0 8px #3b82f6;"></span>AI-powered chat memories</span>
                 </div>
 
-                <h1 class="display rise d2 hero-title-main" style="margin-bottom:22px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(40px, 7vw, 72px); line-height: 1.05;">
+                <h1 class="display rise d2 hero-title-main" style="margin-bottom:18px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.05;">
                     Your old conversations<br><span class="hero-title-accent">don't have to end.</span>
                 </h1>
+
+                <!-- ── Dynamic Capability Stage ── -->
+                <div class="hero-capability-wrapper rise d2">
+                    <div class="hero-capability-concept">One conversation. Many ways to experience it.</div>
+                    <div class="hero-capability-stage" id="hero-capability-stage" role="region" aria-label="Product capabilities preview">
+                        <span class="hero-cap-badge" id="hero-cap-badge">01</span>
+                        <span class="hero-cap-icon-box" id="hero-cap-icon-box">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </span>
+                        <div class="hero-cap-text-container">
+                            <span class="hero-cap-text" id="hero-cap-text" aria-hidden="true">Talk to your old conversations</span><span class="hero-cap-cursor" aria-hidden="true"></span>
+                        </div>
+                        <div class="hero-cap-signal" id="hero-cap-signal">
+                            <span class="cap-sig-dots" title="Live conversation"><span class="cap-dot"></span><span class="cap-dot"></span><span class="cap-dot"></span></span>
+                        </div>
+                    </div>
+                    <!-- Accessible screen reader announcer (updates per whole phrase, not per character) -->
+                    <div class="sr-only" id="hero-cap-sr-announcer" aria-live="polite" aria-atomic="true">
+                        Talk to your old conversations
+                    </div>
+                </div>
+
+                <!-- Capability Stage Typewriter Animation Script -->
+                <script>
+                    (function() {
+                        const capabilities = [
+                            {
+                                num: '01',
+                                text: 'Talk to your old conversations',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+                                signal: '<span class="cap-sig-dots" title="Live conversation"><span class="cap-dot"></span><span class="cap-dot"></span><span class="cap-dot"></span></span>'
+                            },
+                            {
+                                num: '02',
+                                text: 'Search years of messages',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+                                signal: '<span class="cap-sig-radar" title="Indexed search"><span class="cap-radar-ring"></span><span class="cap-radar-dot"></span></span>'
+                            },
+                            {
+                                num: '03',
+                                text: 'Analyze your conversations',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+                                signal: '<span class="cap-sig-bars" title="Chat analytics"><span class="cap-bar b1"></span><span class="cap-bar b2"></span><span class="cap-bar b3"></span></span>'
+                            },
+                            {
+                                num: '04',
+                                text: 'See your Chat Wrapped',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>',
+                                signal: '<span class="cap-sig-stories" title="Story highlights"><span class="cap-dash"></span><span class="cap-dash"></span><span class="cap-dash"></span></span>'
+                            },
+                            {
+                                num: '05',
+                                text: 'Relive memories with On This Day',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+                                signal: '<span class="cap-sig-day">Today</span>'
+                            },
+                            {
+                                num: '06',
+                                text: 'Continue conversations with AI',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>',
+                                signal: '<span class="cap-sig-spark" title="AI Memory">✦</span>'
+                            },
+                            {
+                                num: '07',
+                                text: 'Rediscover your photos & media',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
+                                signal: '<span class="cap-sig-media" title="Media archive"></span>'
+                            },
+                            {
+                                num: '08',
+                                text: 'Turn old chats into living memories',
+                                icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+                                signal: '<span class="cap-sig-glow" title="Living memory"></span>'
+                            }
+                        ];
+
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const textEl = document.getElementById('hero-cap-text');
+                            const badgeEl = document.getElementById('hero-cap-badge');
+                            const iconEl = document.getElementById('hero-cap-icon-box');
+                            const signalEl = document.getElementById('hero-cap-signal');
+                            const srEl = document.getElementById('hero-cap-sr-announcer');
+
+                            if (!textEl || !badgeEl || !iconEl || !signalEl) return;
+
+                            // Accessibility check
+                            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                            if (prefersReduced) return;
+
+                            let currentIndex = 0;
+                            let isDeleting = false;
+                            let charIndex = capabilities[0].text.length;
+                            let timer = null;
+
+                            const PAUSE_VISIBLE = 2500;  // 2.2 - 2.8s pause on complete phrase
+                            const PAUSE_EMPTY = 200;     // 150 - 250ms pause after deletion
+                            const TYPE_SPEED = 50;       // 45 - 65ms per character
+                            const DELETE_SPEED = 30;     // 25 - 40ms per character
+
+                            function setVisualState(cap) {
+                                badgeEl.style.opacity = '0';
+                                badgeEl.style.transform = 'scale(0.85)';
+                                iconEl.style.opacity = '0';
+                                iconEl.style.transform = 'scale(0.85)';
+                                signalEl.style.opacity = '0';
+
+                                setTimeout(() => {
+                                    badgeEl.textContent = cap.num;
+                                    iconEl.innerHTML = cap.icon;
+                                    signalEl.innerHTML = cap.signal;
+
+                                    badgeEl.style.opacity = '1';
+                                    badgeEl.style.transform = 'scale(1)';
+                                    iconEl.style.opacity = '1';
+                                    iconEl.style.transform = 'scale(1)';
+                                    signalEl.style.opacity = '0.85';
+                                }, 120);
+                            }
+
+                            function typeLoop() {
+                                // Conserve CPU / power if tab is backgrounded
+                                if (document.hidden) {
+                                    timer = setTimeout(typeLoop, 500);
+                                    return;
+                                }
+
+                                const currentCap = capabilities[currentIndex];
+                                const fullText = currentCap.text;
+
+                                if (!isDeleting) {
+                                    charIndex++;
+                                    textEl.textContent = fullText.substring(0, charIndex);
+
+                                    if (charIndex === fullText.length) {
+                                        if (srEl) srEl.textContent = fullText;
+                                        isDeleting = true;
+                                        timer = setTimeout(typeLoop, PAUSE_VISIBLE);
+                                        return;
+                                    }
+                                    timer = setTimeout(typeLoop, TYPE_SPEED);
+                                } else {
+                                    charIndex--;
+                                    textEl.textContent = fullText.substring(0, charIndex);
+
+                                    if (charIndex === 0) {
+                                        isDeleting = false;
+                                        currentIndex = (currentIndex + 1) % capabilities.length;
+                                        const nextCap = capabilities[currentIndex];
+                                        setVisualState(nextCap);
+                                        timer = setTimeout(typeLoop, PAUSE_EMPTY);
+                                        return;
+                                    }
+                                    timer = setTimeout(typeLoop, DELETE_SPEED);
+                                }
+                            }
+
+                            timer = setTimeout(typeLoop, PAUSE_VISIBLE);
+                        });
+                    })();
+                </script>
 
                 <p class="lead rise d3 hero-desc-text" style="max-width:640px; margin-bottom: 20px; font-size: 1.15rem; color: #a1a1aa; line-height: 1.6;">
                     Import your WhatsApp chat and continue the conversation with AI — using the memories, language, and style from your real conversations.
