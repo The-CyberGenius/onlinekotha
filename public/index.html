@@ -624,6 +624,15 @@
             margin-bottom: 32px;
             z-index: 10;
         }
+        .phone-mockup,
+        .phone-mockup * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-drag: none !important;
+        }
         .phone-notch {
             position: absolute;
             top: 8px;
@@ -634,6 +643,7 @@
             background: #1e293b;
             border-radius: 20px;
             z-index: 20;
+            pointer-events: none;
         }
         .phone-screen {
             flex: 1;
@@ -644,6 +654,13 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+            touch-action: pan-y manipulation;
+            cursor: pointer;
         }
 
         /* ── Story Carousel ── */
@@ -706,6 +723,7 @@
             display: flex;
             gap: 4px;
             z-index: 50;
+            pointer-events: none;
         }
         .story-progress-bar {
             flex: 1;
@@ -713,25 +731,32 @@
             background: rgba(255, 255, 255, 0.3);
             border-radius: 2px;
             overflow: hidden;
+            pointer-events: none;
         }
         .story-progress-fill {
             height: 100%;
             width: 0%;
             background: #ffffff;
             transition: width 0.1s linear;
+            pointer-events: none;
         }
         .story-nav-left, .story-nav-right {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            z-index: 40;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
+            display: none !important;
         }
-        .story-nav-left { left: 0; width: 35%; }
-        .story-nav-right { right: 0; width: 65%; }
 
         /* Story Typography & Elements */
+        .story-container,
+        .story-card,
+        .story-title,
+        .story-subtitle,
+        .story-highlight,
+        .story-text {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
         .story-title {
             font-size: 2.75rem;
             font-weight: 900;
@@ -1320,9 +1345,6 @@
                                 <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
                             </div>
 
-                            <!-- Navigation Hit Areas -->
-                            <div class="story-nav-left" id="story-prev"></div>
-                            <div class="story-nav-right" id="story-next"></div>
 
                             <!-- Share Button -->
                             <div class="story-share-btn" id="story-share">
@@ -1386,7 +1408,7 @@
                                 <div class="story-card story-bg-7">
                                     <h1 class="story-title">Your Turn</h1>
                                     <p class="story-text mt-2 mb-6">Import your chat and relive your memories securely.</p>
-                                    <a href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport" class="btn cta-primary" style="padding: 12px 24px; font-weight: 700;">Generate Yours</a>
+                                    <button type="button" id="story-cta-btn" class="btn cta-primary" style="padding: 12px 24px; font-weight: 700; position: relative; z-index: 60; cursor: pointer;">Generate Yours</button>
                                 </div>
 
                             </div>
@@ -1396,20 +1418,18 @@
                     <!-- Story Javascript Logic -->
                     <script>
                         document.addEventListener('DOMContentLoaded', () => {
+                            const phoneScreen = document.querySelector('.phone-screen');
                             const carousel = document.getElementById('story-carousel');
-                            const prevBtn = document.getElementById('story-prev');
-                            const nextBtn = document.getElementById('story-next');
                             const shareBtn = document.getElementById('story-share');
+                            const ctaBtn = document.getElementById('story-cta-btn');
                             const progressFills = document.querySelectorAll('.story-progress-fill');
                             
-                            if (!carousel) return;
+                            if (!carousel || !phoneScreen) return;
 
                             let currentSlide = 0;
                             const totalSlides = 7;
                             const slideDuration = 4000; // 4 seconds per slide
                             let storyInterval;
-                            let progressStartTime;
-                            let animationFrameId;
 
                             function updateProgressBars() {
                                 progressFills.forEach((fill, index) => {
@@ -1447,35 +1467,114 @@
 
                             function startTimer() {
                                 clearInterval(storyInterval);
+                                // On the last slide give more time (8s) so user can tap CTA comfortably
+                                const duration = (currentSlide === totalSlides - 1) ? 8000 : slideDuration;
                                 storyInterval = setInterval(() => {
                                     goToSlide(currentSlide + 1);
-                                }, slideDuration);
+                                }, duration);
                             }
 
-                            function handleNav(direction, e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                goToSlide(currentSlide + direction);
+                            // CTA button handler
+                            if (ctaBtn) {
+                                ctaBtn.addEventListener('click', (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (typeof window.triggerGoogleAuthOrModal === 'function') {
+                                        window.triggerGoogleAuthOrModal('/app.html?action=import');
+                                    } else {
+                                        window.location.href = '/api/auth/google?next=%2Fapp.html%3Faction%3Dimport';
+                                    }
+                                });
+                                ctaBtn.addEventListener('touchstart', (e) => {
+                                    e.stopPropagation();
+                                }, { passive: true });
                             }
 
-                            // Use both touchstart and click for maximum responsiveness on mobile
-                            prevBtn.addEventListener('touchstart', (e) => handleNav(-1, e), {passive: false});
-                            prevBtn.addEventListener('click', (e) => handleNav(-1, e));
-                            
-                            nextBtn.addEventListener('touchstart', (e) => handleNav(1, e), {passive: false});
-                            nextBtn.addEventListener('click', (e) => handleNav(1, e));
-                            
-                            shareBtn.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                if (navigator.share) {
-                                    navigator.share({
-                                        title: 'OnlineKotha Chat Wrapped',
-                                        text: 'Check out my WhatsApp Chat Wrapped on OnlineKotha!',
-                                        url: window.location.href,
-                                    }).catch(console.error);
+                            // Share button handler
+                            if (shareBtn) {
+                                shareBtn.addEventListener('click', (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (navigator.share) {
+                                        navigator.share({
+                                            title: 'OnlineKotha Chat Wrapped',
+                                            text: 'Check out my WhatsApp Chat Wrapped on OnlineKotha!',
+                                            url: window.location.href,
+                                        }).catch(() => {});
+                                    } else {
+                                        alert('Link copied to clipboard!');
+                                    }
+                                });
+                                shareBtn.addEventListener('touchstart', (e) => {
+                                    e.stopPropagation();
+                                }, { passive: true });
+                            }
+
+                            // Full screen Touch and Click navigation for virtual phone
+                            let touchStartX = 0;
+                            let touchStartY = 0;
+                            let touchStartTime = 0;
+                            let isSwiping = false;
+
+                            phoneScreen.addEventListener('touchstart', (e) => {
+                                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                                if (e.touches && e.touches.length > 0) {
+                                    touchStartX = e.touches[0].clientX;
+                                    touchStartY = e.touches[0].clientY;
+                                    touchStartTime = Date.now();
+                                    isSwiping = false;
+                                }
+                                clearInterval(storyInterval); // Pause on touch
+                            }, { passive: true });
+
+                            phoneScreen.addEventListener('touchend', (e) => {
+                                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                                if (e.changedTouches && e.changedTouches.length > 0) {
+                                    const touchEndX = e.changedTouches[0].clientX;
+                                    const touchEndY = e.changedTouches[0].clientY;
+                                    const diffX = touchEndX - touchStartX;
+                                    const diffY = touchEndY - touchStartY;
+                                    const elapsed = Date.now() - touchStartTime;
+
+                                    // Swipe gesture detection
+                                    if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                                        isSwiping = true;
+                                        if (diffX < 0) {
+                                            goToSlide(currentSlide + 1); // Swipe left -> Next
+                                        } else {
+                                            goToSlide(currentSlide - 1); // Swipe right -> Prev
+                                        }
+                                        return;
+                                    }
+
+                                    // Quick Tap detection
+                                    if (elapsed < 400 && Math.abs(diffX) < 15 && Math.abs(diffY) < 15) {
+                                        const rect = phoneScreen.getBoundingClientRect();
+                                        const tapX = touchEndX - rect.left;
+                                        if (tapX < rect.width * 0.35) {
+                                            goToSlide(currentSlide - 1);
+                                        } else {
+                                            goToSlide(currentSlide + 1);
+                                        }
+                                        return;
+                                    }
+                                }
+                                startTimer();
+                            }, { passive: true });
+
+                            // Desktop Click Navigation (and mouse fallback)
+                            phoneScreen.addEventListener('click', (e) => {
+                                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                                if (isSwiping) {
+                                    isSwiping = false;
+                                    return;
+                                }
+                                const rect = phoneScreen.getBoundingClientRect();
+                                const clickX = e.clientX - rect.left;
+                                if (clickX < rect.width * 0.35) {
+                                    goToSlide(currentSlide - 1);
                                 } else {
-                                    alert('Link copied to clipboard!');
+                                    goToSlide(currentSlide + 1);
                                 }
                             });
 
@@ -2213,6 +2312,7 @@
                 const r = await fetch('/api/auth/me?_t=' + Date.now());
                 const d = await r.json();
                 if (d.user) {
+                    window.kothaUser = d.user;
                     const dest = d.user.is_admin ? '/admin.html' : '/app';
                     const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
                     document.querySelectorAll('a[href^="/api/auth/google"], a[href^="/app.html"]').forEach(a => {
@@ -2259,13 +2359,14 @@
                         });
                     }
                 } else {
+                    window.kothaUser = null;
                     // Not logged in: Show Google One Tap
                     try {
                         const idRes = await fetch('/api/auth/google/client-id');
                         const idData = await idRes.json();
-                        console.log('Google Client ID fetched:', idData.clientId ? 'Yes' : 'No');
                         
                         if (idData.clientId) {
+                            window.googleClientId = idData.clientId;
                             const script = document.createElement('script');
                             script.src = "https://accounts.google.com/gsi/client";
                             script.async = true;
@@ -2281,13 +2382,13 @@
                                     });
                                     const data = await res.json();
                                     if (data.ok) {
-                                        window.location.href = data.redirect || '/app';
+                                        window.location.href = data.redirect || '/app.html?action=import';
                                     }
                                 } catch (e) { console.error('One Tap Error', e); }
                             };
 
                             script.onload = () => {
-                                console.log('Google GIS script loaded, initializing One Tap...');
+                                window.gisLoaded = true;
                                 window.google.accounts.id.initialize({
                                     client_id: idData.clientId,
                                     callback: window.handleGoogleOneTap,
@@ -2296,6 +2397,7 @@
                                     context: 'signin',
                                     itp_support: true
                                 });
+                                window.gisInitialized = true;
                                 window.google.accounts.id.prompt((notification) => {
                                     if (notification.isNotDisplayed()) {
                                         console.warn('One Tap not displayed:', notification.getNotDisplayedReason());
@@ -2309,12 +2411,92 @@
                             
                             script.onerror = () => {
                                 console.error('Failed to load Google GIS script');
+                                window.gisFailed = true;
                             };
                         }
                     } catch (e) { console.error('Failed to init One Tap', e); }
                 }
             } catch { }
         })();
+
+        // ── Auth Modal Management & Trigger ──
+        window.openAuthModal = function(nextUrl = '/app.html?action=import') {
+            const modal = document.getElementById('auth-modal');
+            const card = document.getElementById('auth-card');
+            const googleBtn = document.getElementById('auth-modal-google-btn');
+            const signupBtn = document.getElementById('auth-modal-signup-btn');
+            const signinBtn = document.getElementById('auth-modal-signin-btn');
+
+            if (googleBtn) googleBtn.href = `/api/auth/google?next=${encodeURIComponent(nextUrl)}`;
+            if (signupBtn) signupBtn.href = `/login.html?next=${encodeURIComponent(nextUrl)}#signup`;
+            if (signinBtn) signinBtn.href = `/login.html?next=${encodeURIComponent(nextUrl)}`;
+
+            if (modal && card) {
+                modal.classList.remove('pointer-events-none');
+                modal.style.opacity = '1';
+                card.style.transform = 'translateY(0) scale(1)';
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        window.closeAuthModal = function() {
+            const modal = document.getElementById('auth-modal');
+            const card = document.getElementById('auth-card');
+            if (modal && card) {
+                modal.style.opacity = '0';
+                card.style.transform = 'translateY(40px) scale(0.97)';
+                modal.classList.add('pointer-events-none');
+                document.body.style.overflow = '';
+            }
+        };
+
+        window.triggerGoogleAuthOrModal = function(nextUrl = '/app.html?action=import') {
+            if (window.kothaUser) {
+                window.location.href = nextUrl;
+                return;
+            }
+
+            let modalOpened = false;
+            const openModal = () => {
+                if (!modalOpened) {
+                    modalOpened = true;
+                    window.openAuthModal(nextUrl);
+                }
+            };
+
+            // If Google Identity Services is available and initialized
+            if (window.google && window.google.accounts && window.google.accounts.id && window.gisInitialized) {
+                try {
+                    window.google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment() || notification.isDismissedMoment()) {
+                            openModal();
+                        }
+                    });
+
+                    // Quick detection: if prompt does not show up within 600ms (standard incognito / private browser block)
+                    setTimeout(() => {
+                        const gsiFrame = document.querySelector('iframe[src*="accounts.google.com/gsi"]');
+                        if (!gsiFrame) {
+                            openModal();
+                        }
+                    }, 600);
+                } catch (e) {
+                    openModal();
+                }
+            } else {
+                openModal();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('auth-overlay')?.addEventListener('click', window.closeAuthModal);
+            document.getElementById('auth-modal-close')?.addEventListener('click', window.closeAuthModal);
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    window.closeAuthModal();
+                }
+            });
+        });
 
         // ── Theme Switcher Initialization ──
         (function () {
@@ -2358,6 +2540,86 @@
             });
         })();
     </script>
+
+    <!-- ═══════════ AUTH / LOGIN MODAL ═══════════ -->
+    <div id="auth-modal"
+        class="fixed inset-0 z-[950] flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none"
+        aria-hidden="true" style="opacity:0;transition:opacity 280ms cubic-bezier(.16,1,.3,1)">
+        <div id="auth-overlay" class="absolute inset-0 bg-black/70 backdrop-blur-md cursor-pointer"></div>
+        <div id="auth-card"
+            class="relative w-full sm:max-w-[420px] overflow-hidden rounded-t-[32px] sm:rounded-[28px] border border-white/10 shadow-[0_32px_80px_rgba(0,0,0,0.8)]"
+            style="background:linear-gradient(160deg,#0d0d1f 0%,#080810 100%);transform:translateY(40px) scale(0.97);transition:transform 300ms cubic-bezier(.34,1.4,.64,1)">
+
+            <!-- Top gradient bar -->
+            <div class="h-[3px] w-full" style="background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)"></div>
+
+            <!-- Close button -->
+            <button id="auth-modal-close" type="button" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition cursor-pointer z-10" aria-label="Close modal">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Drag handle (mobile) -->
+            <div class="flex justify-center pt-3 sm:hidden">
+                <div class="w-10 h-1 rounded-full bg-white/15"></div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="px-7 pt-6 pb-7 text-center">
+                <!-- App Icon / Badge -->
+                <div class="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+
+                <h3 class="text-xl font-extrabold text-white tracking-tight mb-1.5">Sign In to Continue</h3>
+                <p class="text-zinc-400 text-xs font-normal mb-6 max-w-[280px] mx-auto leading-relaxed">
+                    Create or access your account to generate your Chat Wrapped &amp; explore AI memories securely.
+                </p>
+
+                <!-- Actions -->
+                <div class="space-y-3">
+                    <!-- Google 1-click button -->
+                    <a id="auth-modal-google-btn" href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport"
+                        class="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-2xl font-bold text-sm text-slate-800 bg-white hover:bg-slate-50 transition shadow-md cursor-pointer border border-white/20">
+                        <svg width="18" height="18" viewBox="0 0 48 48">
+                            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
+                            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+                            <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+                            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </a>
+
+                    <!-- Divider -->
+                    <div class="flex items-center my-3">
+                        <div class="flex-1 border-t border-white/10"></div>
+                        <span class="px-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">or</span>
+                        <div class="flex-1 border-t border-white/10"></div>
+                    </div>
+
+                    <!-- Create Account Button -->
+                    <a id="auth-modal-signup-btn" href="/login.html?next=%2Fapp.html%3Faction%3Dimport#signup"
+                        class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold text-xs text-white transition cursor-pointer border border-white/10 hover:border-indigo-500/50"
+                        style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25));">
+                        <span>✨ Create New Account</span>
+                    </a>
+
+                    <!-- Sign In with PIN Button -->
+                    <a id="auth-modal-signin-btn" href="/login.html?next=%2Fapp.html%3Faction%3Dimport"
+                        class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs text-zinc-400 hover:text-white transition cursor-pointer hover:bg-white/5">
+                        <span>Sign In with PIN &rarr;</span>
+                    </a>
+                </div>
+
+                <div class="mt-5 pt-3 border-t border-white/5 flex items-center justify-center gap-4 text-[11px] text-zinc-500">
+                    <span class="flex items-center gap-1">🔒 Private &amp; Encrypted</span>
+                    <span>&bull;</span>
+                    <span>⚡ Instant Access</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ═══════════ HOW IT WORKS MODAL (ported verbatim) ═══════════ -->
     <div id="how-modal"
