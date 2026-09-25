@@ -670,7 +670,8 @@ button,
 @media (max-width: 767px) {
     /* When impersonating on mobile, adjust layout to show dock below toolbar */
     body.impersonating-mobile-dock #app {
-        height: calc(100% - 75px);
+        height: calc(100% - 75px - env(safe-area-inset-bottom, 0px));
+        margin-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
     }
     body.impersonating-mobile-dock #mac-dock {
         bottom: env(safe-area-inset-bottom, 8px) !important;
