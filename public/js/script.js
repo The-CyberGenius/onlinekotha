@@ -3578,20 +3578,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 limitRes.forEach(msg => {
                     const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
-                    const isMe = msg.sender === 'user';
-                    const senderName = isMe ? 'Me' : (window.currentChat ? window.currentChat.split('.')[0] : 'Partner');
-                    const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const myName = typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null;
+                    const isMe = myName && msg.sender === myName;
+                    const senderName = isMe ? 'Me' : msg.sender;
+                    const timeStr = msg.time && msg.date ? `${msg.date} • ${msg.time}` : (msg.time || 'Unknown');
                     
-                    const alignClass = isMe ? 'ml-auto bg-green-50/80 dark:bg-[#005c4b]/80 border-green-100 dark:border-green-900/30' : 'mr-auto bg-white/90 dark:bg-[#202c33]/90 border-gray-100 dark:border-gray-800';
-                    const nameColor = isMe ? 'text-green-700 dark:text-green-400' : 'text-indigo-600 dark:text-indigo-400';
+                    const alignClass = isMe ? 'ml-auto' : 'mr-auto';
+                    const bubbleClass = isMe ? 'glass-chat-me' : 'glass-chat-them';
+                    
+                    // Match the chat time colors exactly
+                    const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
+
+                    let nameHtml = '';
+                    if (!isMe) {
+                        nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${typeof getStringColor === 'function' ? getStringColor(msg.sender) : '#818cf8'}">${escapeHTML(senderName)}</p>`;
+                    }
 
                     resultsHtml += `
-                        <div class="p-2 w-[85%] ${alignClass} hover:opacity-90 shadow-sm cursor-pointer border transition-all rounded-xl mb-1.5 backdrop-blur-sm" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg(${msg.id})">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-[11px] font-bold ${nameColor}">${senderName}</span>
-                                <span class="text-[10px] ${isMe ? 'text-green-600/70 dark:text-green-200/50' : 'text-gray-400'}">${timeStr}</span>
+                        <div class="flex flex-col mb-2 w-full cursor-pointer hover:opacity-85 transition-opacity" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg(${msg.id})">
+                            <div class="max-w-[85%] md:max-w-[75%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${bubbleClass} ${alignClass} rounded-2xl flex flex-col gap-0.5 shadow-sm">
+                                ${nameHtml}
+                                <p style="color:var(--msg-text)" class="text-[13px] leading-normal font-medium whitespace-pre-wrap break-words line-clamp-2">${highlightedText}</p>
+                                <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto pt-0.5">
+                                    ${escapeHTML(timeStr)}
+                                </div>
                             </div>
-                            <p class="text-[13px] ${isMe ? 'text-gray-800 dark:text-gray-100' : 'text-gray-600 dark:text-gray-200'} line-clamp-2 leading-snug">${highlightedText}</p>
                         </div>
                     `;
                 });
