@@ -2854,7 +2854,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.jumpToMsg = (id) => {
         displayedMessages = allMessages; // Make sure we are in main view
-        const idx = displayedMessages.findIndex(m => m.id === id);
+        const idx = displayedMessages.findIndex(m => String(m.id) === String(id));
         if (idx !== -1) {
             const start = Math.max(0, idx - 50);
             const end = Math.min(displayedMessages.length, idx + 100);
@@ -2870,6 +2870,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mobOverlay) { mobOverlay.classList.add('hidden'); mobOverlay.style.display = 'none'; }
             if (searchMod) { searchMod.classList.add('hidden'); searchMod.style.display = 'none'; }
             if (filtMod) { filtMod.classList.add('hidden'); filtMod.style.display = 'none'; }
+            const inlineSearchOverlay = document.getElementById('chat-inline-search-overlay');
+            if (inlineSearchOverlay) {
+                inlineSearchOverlay.classList.add('hidden');
+                document.getElementById('inline-search-results-container').classList.add('hidden');
+            }
 
             setTimeout(() => {
                 const el = document.getElementById(`msg-${id}`);
@@ -2883,7 +2888,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         bubble.classList.add('search-result-flash');
 
                         // Highlight search query inside the message
-                        const query = searchBox.value.trim();
+                        const deskQuery = searchBox ? searchBox.value.trim() : '';
+                        const mobQuery = document.getElementById('inline-search-input') ? document.getElementById('inline-search-input').value.trim() : '';
+                        const query = deskQuery || mobQuery;
                         if (query.length >= 3) {
                             const textEl = bubble.querySelector('p');
                             if (textEl && textEl.textContent.toLowerCase().includes(query.toLowerCase())) {
@@ -2905,6 +2912,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             }, 3000);
                         }, 2500);
                     }
+                }
+                
+                // Clear the mobile input now that highlighting is set up
+                const mobInput = document.getElementById('inline-search-input');
+                if (mobInput) {
+                    mobInput.value = '';
+                    const countLabel = document.getElementById('inline-search-count');
+                    if (countLabel) countLabel.textContent = '';
                 }
             }, 100);
         }
