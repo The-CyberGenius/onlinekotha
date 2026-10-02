@@ -2990,17 +2990,23 @@ document.addEventListener('DOMContentLoaded', () => {
             let l = parseInt(frame.style.left) || r.left;
             let t = parseInt(frame.style.top) || r.top;
 
+            // If the user hasn't manually resized the frame, auto-scale it dynamically!
+            if (!userHasResized) {
+                w = Math.max(760, Math.min(window.innerWidth * 0.82, 1100));
+                h = Math.min(window.innerHeight * 0.82, Math.max(620, window.innerHeight - 130));
+            }
+
             if (w > window.innerWidth - 20) {
                 w = Math.max(380, window.innerWidth - 20);
             }
-            if (h > window.innerHeight - 90) {
-                h = Math.max(400, window.innerHeight - 90);
+            if (h > window.innerHeight - 100) {
+                h = Math.max(400, window.innerHeight - 100);
             }
             if (l + w > window.innerWidth - 10) {
                 l = Math.max(10, window.innerWidth - w - 10);
             }
-            if (t + h > window.innerHeight - 80) {
-                t = Math.max(10, window.innerHeight - h - 80);
+            if (t + h > window.innerHeight - 95) { // 95px clears the dock perfectly
+                t = Math.max(10, window.innerHeight - h - 95);
             }
             if (l < 10) l = 10;
             if (t < 10) t = 10;
@@ -3083,8 +3089,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 rhOverlay.style.display = 'none';
                 return;
             }
-            // Keep the window in viewport without jumping to center
-            clampFrameInViewport();
+            // If they haven't manually modified the window, keep it perfectly centered and auto-scaled
+            if (!userHasDragged && !userHasResized) {
+                centerFrame();
+            } else {
+                // Otherwise, keep it in viewport without overriding their custom position/size
+                clampFrameInViewport();
+            }
             syncOverlay();
         });
 
@@ -3156,7 +3167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const w = parseInt(frame.style.width) || frame.getBoundingClientRect().width;
             const h = parseInt(frame.style.height) || frame.getBoundingClientRect().height;
             const maxL = Math.max(0, window.innerWidth - Math.min(w, window.innerWidth - 60));
-            const maxT = Math.max(0, window.innerHeight - h - 80);
+            const maxT = Math.max(0, window.innerHeight - h - 95);
             
             frame.style.left = Math.max(0, Math.min(maxL, sl + (e.clientX - sx))) + 'px';
             frame.style.top = Math.max(0, Math.min(maxT, st + (e.clientY - sy))) + 'px';
@@ -3301,8 +3312,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         if (dir.includes('s')) {
                             h = Math.max(MIN_H, startH + dy);
-                            if (Math.abs((t + h) - (vh - 80)) <= SNAP) h = vh - 80 - t; // snap bottom edge above dock
-                            if (t + h > vh - 80) h = vh - 80 - t; // prevent overflowing into dock
+                            if (Math.abs((t + h) - (vh - 95)) <= SNAP) h = vh - 95 - t; // snap bottom edge above dock
+                            if (t + h > vh - 95) h = vh - 95 - t; // prevent overflowing into dock
                         }
                         if (dir.includes('n')) {
                             h = Math.max(MIN_H, startH - dy); 
