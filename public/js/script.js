@@ -2999,8 +2999,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (l + w > window.innerWidth - 10) {
                 l = Math.max(10, window.innerWidth - w - 10);
             }
-            if (t + h > window.innerHeight - 70) {
-                t = Math.max(10, window.innerHeight - h - 70);
+            if (t + h > window.innerHeight - 80) {
+                t = Math.max(10, window.innerHeight - h - 80);
             }
             if (l < 10) l = 10;
             if (t < 10) t = 10;
@@ -3153,8 +3153,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
             }
-            const maxL = Math.max(0, window.innerWidth - 60);
-            const maxT = Math.max(0, window.innerHeight - 60);
+            const w = parseInt(frame.style.width) || frame.getBoundingClientRect().width;
+            const h = parseInt(frame.style.height) || frame.getBoundingClientRect().height;
+            const maxL = Math.max(0, window.innerWidth - Math.min(w, window.innerWidth - 60));
+            const maxT = Math.max(0, window.innerHeight - h - 80);
+            
             frame.style.left = Math.max(0, Math.min(maxL, sl + (e.clientX - sx))) + 'px';
             frame.style.top = Math.max(0, Math.min(maxT, st + (e.clientY - sy))) + 'px';
             syncOverlay();
@@ -3298,17 +3301,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         if (dir.includes('s')) {
                             h = Math.max(MIN_H, startH + dy);
-                            if (Math.abs((t + h) - vh) <= SNAP) h = vh - t; // snap bottom edge
+                            if (Math.abs((t + h) - (vh - 80)) <= SNAP) h = vh - 80 - t; // snap bottom edge above dock
+                            if (t + h > vh - 80) h = vh - 80 - t; // prevent overflowing into dock
                         }
                         if (dir.includes('n')) {
                             h = Math.max(MIN_H, startH - dy); 
                             t = startT + startH - h;
                             // Prevent dragging above top of screen
-                            if (t < 0) {
-                                t = 0;
-                                h = startT + startH; // Cap height to prevent jumping off screen
+                            if (t < 10) {
+                                t = 10;
+                                h = startT + startH - 10; // Cap height to prevent jumping off screen
                             }
-                            if (Math.abs(t) <= SNAP) { h += t; t = 0; } // snap top edge
+                            if (Math.abs(t - 10) <= SNAP) { h += (t - 10); t = 10; } // snap top edge
                             userHasDragged = true;
                         }
 
