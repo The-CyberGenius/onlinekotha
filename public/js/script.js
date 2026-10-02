@@ -3591,7 +3591,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     let nameHtml = '';
                     if (!isMe) {
-                        nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${typeof getStringColor === 'function' ? getStringColor(msg.sender) : '#818cf8'}">${escapeHTML(senderName)}</p>`;
+                        const safeSender = msg.sender || 'Unknown';
+                        nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${typeof getStringColor === 'function' ? getStringColor(safeSender) : '#818cf8'}">${escapeHTML(senderName || safeSender)}</p>`;
                     }
 
                     resultsHtml += `
