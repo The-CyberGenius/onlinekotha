@@ -268,7 +268,7 @@
             </div>
 
             <!-- Global Chat (Anonymous Community) -->
-            <div class="px-2 mt-2 mb-1 shrink-0">
+            <div class="px-2 mt-2 mb-1 shrink-0" id="global-space-section">
                 <div class="flex items-center justify-between px-3 mb-1 cursor-pointer group" onclick="document.getElementById('global-chat-wrapper').classList.toggle('hidden'); document.getElementById('global-toggle-icon').classList.toggle('-rotate-90')">
                     <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Global Space</span>
                     <svg id="global-toggle-icon" width="12" height="12" class="text-gray-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -299,7 +299,7 @@
             </div>
 
             <!-- Chat List (WhatsApp-style) -->
-            <div class="px-2 py-0 flex-1 min-h-0 flex flex-col">
+            <div class="px-2 py-0 flex-1 min-h-0 flex flex-col" id="chats-list-section">
                 <div class="flex items-center justify-between px-1 mb-1 shrink-0">
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Chats</p>
                     <div class="flex items-center gap-1.5 cursor-pointer group" onclick="document.getElementById('open-upload-btn').click()">
@@ -319,7 +319,7 @@
             </div>
 
             <!-- Participant Filters (Dynamic) Sticky Bottom / Collapsible -->
-            <div id="participant-filters-container" class="hidden flex-col shrink-0 bg-white dark:bg-[#111b21] border-t border-gray-100 dark:border-gray-800 z-10 sticky bottom-0">
+            <div id="participant-filters-container" class="hidden flex-col shrink-0 bg-transparent border-t border-gray-100 dark:border-gray-800 z-10 sticky bottom-0">
                 <!-- Header / collapsed view injected by JS -->
             </div>
 
@@ -1008,7 +1008,7 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/script.js?v=18"></script>
+    <script src="/js/script.js?v=19"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="/js/ai-panel.js?v=9"></script>
     <script src="/js/upload.js?v=9"></script>

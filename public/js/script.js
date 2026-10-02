@@ -2737,13 +2737,24 @@ document.addEventListener('DOMContentLoaded', () => {
             renderChatList(filteredChats, currentChat);
         }
 
+        const globalSpaceSection = document.getElementById('global-space-section');
+        const chatsListSection = document.getElementById('chats-list-section');
+        const participantContainer = document.getElementById('participant-filters-container');
+
         if (lowerVal.length < 2) {
             if (searchResultsContainer) searchResultsContainer.classList.add('hidden');
             if (resultsList) resultsList.innerHTML = '';
+            if (globalSpaceSection) globalSpaceSection.classList.remove('hidden');
+            if (chatsListSection) chatsListSection.classList.remove('hidden');
+            if (participantContainer && window.allMessages && window.allMessages.length > 0) participantContainer.classList.remove('hidden');
             return;
         }
 
         // Deep search in loaded messages
+        if (globalSpaceSection) globalSpaceSection.classList.add('hidden');
+        if (chatsListSection) chatsListSection.classList.add('hidden');
+        if (participantContainer) participantContainer.classList.add('hidden');
+
         const filteredMsgs = [];
         if (allMessages && allMessages.length > 0) {
             for (let i = 0; i < allMessages.length; i++) {
@@ -2762,7 +2773,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultsList.innerHTML = `<div class="text-xs text-gray-400 py-2 text-center">No message matches found</div>`;
             } else {
                 let resultsHtml = '';
-                const limitRes = filteredMsgs.slice(-50);
+                // Show up to 100 results so they fill the screen better
+                const limitRes = filteredMsgs.slice(-100);
                 const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
                 limitRes.forEach(msg => {
                     const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
@@ -2788,6 +2800,14 @@ document.addEventListener('DOMContentLoaded', () => {
     searchClearBtn.addEventListener('click', () => {
         searchBox.value = '';
         searchClearBtn.classList.add('hidden');
+        
+        const globalSpaceSection = document.getElementById('global-space-section');
+        const chatsListSection = document.getElementById('chats-list-section');
+        const participantContainer = document.getElementById('participant-filters-container');
+        if (globalSpaceSection) globalSpaceSection.classList.remove('hidden');
+        if (chatsListSection) chatsListSection.classList.remove('hidden');
+        if (participantContainer && window.allMessages && window.allMessages.length > 0) participantContainer.classList.remove('hidden');
+
         if (loadedChats) {
             renderChatList(loadedChats, currentChat);
         }
