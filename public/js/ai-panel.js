@@ -420,14 +420,14 @@
     //  Shows the "Which person are you?" modal whenever
     //  user_participant is not yet saved (or is stale).
     // ─────────────────────────────────────────────
-    window.ensureIdentity = async function (chatFolder) {
+    window.ensureIdentity = async function (chatFolder, forceShow = false) {
         if (chatFolder === '__global__' || chatFolder === 'kotha_assistant') return true;
         try {
             const resp = await fetch(`/api/ai/chat/${encodeURIComponent(chatFolder)}/identity`);
             if (!resp.ok) return true;
             const data = await resp.json();
 
-            if (!data.requiresSelection) {
+            if (!data.requiresSelection && !forceShow) {
                 // Identity already stored and valid — sync it to the rendering engine
                 const savedUser = data.userParticipant;
                 const otherPerson = (data.participants || []).find(p => p !== savedUser) || null;
@@ -450,6 +450,11 @@
                 const contBtn = document.getElementById('identity-continue-btn');
                 const cancelBtn = document.getElementById('identity-cancel-btn');
                 if (!modal || !container || !contBtn) { resolve(true); return; }
+
+                // Hide cancel button if it's a mandatory selection
+                if (cancelBtn) {
+                    cancelBtn.style.display = forceShow ? 'block' : 'none';
+                }
 
                 let selectedId = null;
 

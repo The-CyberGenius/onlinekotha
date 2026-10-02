@@ -804,12 +804,23 @@ document.addEventListener('DOMContentLoaded', () => {
         window.kothaChatLoading = true;
         window.kothaLoadedChat = null;
         try {
+            // Block UI while we check/ensure identity
+            showSkeleton();
+            statsInfo.innerText = 'Loading identity...';
+
+            if (typeof window.ensureIdentity === 'function') {
+                const identityConfirmed = await window.ensureIdentity(chatName);
+                if (!identityConfirmed) {
+                    window.kothaChatLoading = false;
+                    return; // Abort loading if identity wasn't confirmed
+                }
+            }
+
             // ── Client-side cache: re-opening a chat is instant (no network/re-fetch) ──
             if (!window._chatMsgCache) window._chatMsgCache = {};
             let data = window._chatMsgCache[chatName];
 
             if (!data) {
-                showSkeleton();
                 statsInfo.innerText = 'Loading...';
                 
                 if (chatName === 'kotha_assistant') {
@@ -913,13 +924,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 const senderNames = realParticipants;
                 const chatContactName = chatName.replace('WhatsApp Chat - ', '');
                 
+                // ── Change Identity Button ──
+                const groupRolesBtn = document.getElementById('group-roles-btn');
+                if (groupRolesBtn) {
+                    groupRolesBtn.classList.remove('hidden');
+                    groupRolesBtn.innerHTML = `
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                        <span>Change Identity</span>
+                    `;
+                    groupRolesBtn.onclick = () => {
+                        if (typeof window.ensureIdentity === 'function') {
+                            window.ensureIdentity(chatName, true).then(() => {
+                                // Re-render chat entirely after change
+                                lastRenderedDate = '';
+                                chatContainer.innerHTML = '';
+                                const end = Math.min(displayedMessages.length, renderStart + (renderEnd - renderStart || 100));
+                                renderChats(renderStart, end, 'reset');
+                            });
+                        }
+                    };
+                }
 
-                // ── Identity: read from server, NEVER guess ──
-                // Identity will be set by ensureIdentity() / kothaSetMyName() after the
-                // modal resolves. Leave as null until then — renderMessage() will treat
-                // every message as "theirs" (left side) which is safe while loading.
-                myName = null;
-                otherPersonName = senderNames.length > 0 ? senderNames[0] : 'Contact';
+                // Identity is already set by ensureIdentity() earlier in loadData.
+                // We do NOT overwrite myName or otherPersonName here.
+                if (!myName) {
+                    console.warn('[IDENTITY FLOW] myName is still null after ensureIdentity! Assuming identityStatus is required.');
+                }
 
 
                 const isGroupChat = data.isGroup || isGroupChatFrontend;
@@ -1424,16 +1454,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (selector) selector.value = chat;
                 removeEmptyState();
                 renderChatList(chats, chat);
-                loadData(chat).then(async () => {
-                    // Trigger identity check
-                    if (typeof window.ensureIdentity === 'function') {
-                        await window.ensureIdentity(chat);
-                    }
+                loadData(chat).then(() => {
                     if (window.innerWidth >= 768) {
                         const inp = document.getElementById('bottom-ai-input');
                         if (inp) inp.focus();
                     }
                 });
+
                 toggleSidebar(false);
                 // Also try focus after sidebar animation completes (mobile)
                 setTimeout(() => { 
@@ -1748,11 +1775,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentChat = e.target.value;
                 window.currentChat = currentChat;
                 removeEmptyState();
-                loadData(currentChat).then(async () => {
-                    if (typeof window.ensureIdentity === 'function') {
-                        await window.ensureIdentity(currentChat);
-                    }
-                });
+                loadData(currentChat);
+
             }
         });
     }
@@ -1794,9 +1818,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Load chat data
             await loadData(selectName);
-            if (typeof window.ensureIdentity === 'function') {
-                await window.ensureIdentity(selectName);
-            }
 
             // Focus AI input
             setTimeout(() => {
