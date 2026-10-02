@@ -2491,6 +2491,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderStart = 0;
             renderEnd = 0;
 
+            removeEmptyState();
+
             connectGlobalChat();
             toggleSidebar(false);
         });

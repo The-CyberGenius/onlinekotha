@@ -268,27 +268,33 @@
             </div>
 
             <!-- Global Chat (Anonymous Community) -->
-            <div class="px-2 py-0.5 shrink-0">
-                <div id="global-chat-item"
-                    class="flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-all duration-150 group border border-transparent hover:bg-gray-100 dark:hover:bg-white/5">
-                    <div
-                        class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
-                        </svg>
-                    </div>
-                    <div class="min-w-0 flex-1">
-                        <p class="text-[12px] font-bold text-gray-800 dark:text-gray-200 truncate leading-tight">Global
-                            Chat Room</p>
-                        <p class="text-[9px] text-gray-400 font-medium mt-0.5" id="global-online-count">0 users online
-                        </p>
-                    </div>
-                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0 hidden"
-                        id="global-active-indicator"></div>
+            <div class="px-2 mt-2 mb-1 shrink-0">
+                <div class="flex items-center justify-between px-3 mb-1 cursor-pointer group" onclick="document.getElementById('global-chat-wrapper').classList.toggle('hidden'); document.getElementById('global-toggle-icon').classList.toggle('-rotate-90')">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Global Space</span>
+                    <svg id="global-toggle-icon" width="12" height="12" class="text-gray-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
-                <div id="global-online-users-list"
-                    class="hidden px-5 pt-1.5 pb-2 text-[11px] text-gray-500 dark:text-gray-400 flex flex-col gap-1.5 max-h-[110px] overflow-y-auto no-scrollbar border-l-2 border-indigo-100 dark:border-indigo-900/40 ml-4.5">
-                    <!-- Dynamic online users list will populate here -->
+                <div id="global-chat-wrapper" class="transition-all duration-200">
+                    <div id="global-chat-item"
+                        class="flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-all duration-150 group border border-transparent hover:bg-gray-100 dark:hover:bg-white/5">
+                        <div
+                            class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[12px] font-bold text-gray-800 dark:text-gray-200 truncate leading-tight">Global
+                                Chat Room</p>
+                            <p class="text-[9px] text-gray-400 font-medium mt-0.5" id="global-online-count">0 users online
+                            </p>
+                        </div>
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0 hidden"
+                            id="global-active-indicator"></div>
+                    </div>
+                    <div id="global-online-users-list"
+                        class="hidden px-5 pt-1.5 pb-2 text-[11px] text-gray-500 dark:text-gray-400 flex flex-col gap-1.5 max-h-[110px] overflow-y-auto no-scrollbar border-l-2 border-indigo-100 dark:border-indigo-900/40 ml-4.5">
+                        <!-- Dynamic online users list will populate here -->
+                    </div>
                 </div>
             </div>
 
