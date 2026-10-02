@@ -197,75 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return false;
     }
 
-    function resolveChatNames(folderName, senders) {
-        const senderNames = senders.map(s => s[0]);
-        const cleanedFolder = cleanDisplayName(folderName);
-
-        let detectedMyName = "";
-        let detectedOtherName = "";
-
-        // 1. Try to find "me" based on logged-in user email or name if available
-        if (window.__USER__ && window.__USER__.email) {
-            const emailPrefix = window.__USER__.email.split('@')[0].toLowerCase();
-            // Look for a sender name that matches email prefix
-            const matchedMe = senderNames.find(name => {
-                const n = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                return n.includes(emailPrefix) || emailPrefix.includes(n);
-            });
-            if (matchedMe) {
-                detectedMyName = matchedMe;
-            }
-        }
-
-        // 2. Try to find "me" based on common self-names
-        if (!detectedMyName) {
-            const selfName = senderNames.find(name => /^(you|me|myself)$/i.test(name));
-            if (selfName) detectedMyName = selfName;
-        }
-
-        // 3. Match folder name to senders to find the other person
-        if (cleanedFolder && !isGarbageName(cleanedFolder)) {
-            const matchedOther = senderNames.find(name => {
-                const n = name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                const f = cleanedFolder.toLowerCase().replace(/[^a-z0-9]/g, '');
-                return n.includes(f) || f.includes(n);
-            });
-            if (matchedOther) {
-                detectedOtherName = matchedOther;
-            } else {
-                detectedOtherName = cleanedFolder;
-            }
-        }
-
-        // If we found "me", then the other person is the sender who is not "me"
-        if (detectedMyName && !detectedOtherName) {
-            detectedOtherName = senderNames.find(name => name !== detectedMyName) || "";
-        }
-
-        // If we found "other", then "me" is the sender who is not "other"
-        if (detectedOtherName && !detectedMyName) {
-            detectedMyName = senderNames.find(name => name !== detectedOtherName) || "";
-        }
-
-        // Fallbacks if still unresolved
-        if (!detectedOtherName) {
-            if (cleanedFolder && !isGarbageName(cleanedFolder)) {
-                detectedOtherName = cleanedFolder;
-            } else if (senderNames.length > 2) {
-                detectedOtherName = (cleanedFolder && !isGarbageName(cleanedFolder)) 
-                    ? `${cleanedFolder} (Group)` 
-                    : `Group Chat (${senderNames.length} members)`;
-            } else {
-                detectedOtherName = senderNames[1] || senderNames[0] || "User";
-            }
-        }
-        if (!detectedMyName) {
-            detectedMyName = senderNames.find(name => name !== detectedOtherName) || senderNames[0] || "User";
-        }
-
-        return { myName: detectedMyName, otherName: detectedOtherName };
-    }
-
 
     const closeMod = () => {
         mediaModal.classList.remove('opacity-100');
@@ -982,31 +913,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const senderNames = realParticipants;
                 const chatContactName = chatName.replace('WhatsApp Chat - ', '');
                 
-                // Group Roles UI
-                const groupRolesBtn = document.getElementById('group-roles-btn');
-                if (groupRolesBtn) {
-                    if (senderNames.length > 2) {
-                        groupRolesBtn.classList.remove('hidden');
-                        groupRolesBtn.onclick = () => window.openRolesModal(senderNames, chatName);
-                    } else {
-                        groupRolesBtn.classList.add('hidden');
-                    }
-                }
 
                 // ── Identity: read from server, NEVER guess ──
-                // customRoles in localStorage is legacy group-roles; still honour it but
-                // only if it was explicitly saved by the user (not auto-populated).
-                const customRoles = JSON.parse(localStorage.getItem('roles_' + chatName) || 'null');
-                if (customRoles && customRoles.myName && customRoles.aiName) {
-                    myName = customRoles.myName;
-                    otherPersonName = customRoles.aiName;
-                } else {
-                    // Identity will be set by ensureIdentity() / kothaSetMyName() after the
-                    // modal resolves. Leave as null until then — renderMessage() will treat
-                    // every message as "theirs" (left side) which is safe while loading.
-                    myName = null;
-                    otherPersonName = senderNames.length > 0 ? senderNames[0] : 'Contact';
-                }
+                // Identity will be set by ensureIdentity() / kothaSetMyName() after the
+                // modal resolves. Leave as null until then — renderMessage() will treat
+                // every message as "theirs" (left side) which is safe while loading.
+                myName = null;
+                otherPersonName = senderNames.length > 0 ? senderNames[0] : 'Contact';
 
 
                 const isGroupChat = data.isGroup || isGroupChatFrontend;
@@ -3380,56 +3293,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })();
 
 
-    // --- Group Roles Logic ---
-    window.openRolesModal = (senders, chatName) => {
-        const modal = document.getElementById('group-roles-modal');
-        const mySelect = document.getElementById('roles-my-name');
-        const aiSelect = document.getElementById('roles-ai-name');
-        
-        mySelect.innerHTML = '';
-        aiSelect.innerHTML = '';
-        
-        senders.forEach(sender => {
-            const opt1 = document.createElement('option');
-            opt1.value = sender; opt1.textContent = sender;
-            const opt2 = document.createElement('option');
-            opt2.value = sender; opt2.textContent = sender;
-            mySelect.appendChild(opt1);
-            aiSelect.appendChild(opt2);
-        });
 
-        // Set defaults from current logic
-        mySelect.value = myName;
-        aiSelect.value = otherPersonName;
-
-        modal.classList.remove('hidden');
-        setTimeout(() => modal.classList.remove('opacity-0'), 10);
-
-        document.getElementById('close-roles-modal').onclick = () => {
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        };
-
-        document.getElementById('save-roles-btn').onclick = () => {
-            const selectedMyName = mySelect.value;
-            const selectedAiName = aiSelect.value;
-            
-            localStorage.setItem('roles_' + chatName, JSON.stringify({
-                myName: selectedMyName,
-                aiName: selectedAiName
-            }));
-            
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-            
-            // Reload the chat to apply new roles immediately
-            if (typeof window.refreshChats === 'function') {
-                window.refreshChats(chatName);
-            } else {
-                window.location.reload();
-            }
-        };
-    };
 
 });
 

@@ -528,8 +528,11 @@
                     contBtn.innerText = 'Saving…';
 
                     try {
-                        // The other person = the first participant that is NOT the selected user
-                        const aiParticipant = participants.find(p => p !== selectedId) || selectedId;
+                        // For 1-on-1: The other person = the first participant that is NOT the selected user
+                        // For Group: Do not assume a single participant; use "Group" context
+                        const aiParticipant = data.isGroup 
+                            ? "Group" 
+                            : (participants.find(p => p !== selectedId) || selectedId);
 
                         await fetch(`/api/chat/${encodeURIComponent(chatFolder)}/identity`, {
                             method: 'POST',
