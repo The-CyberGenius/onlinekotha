@@ -1603,11 +1603,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
                     showEmptyState();
                 }
-                    // Render visual chat list (always)
-                    renderChatList(chats, currentChat);
-                }
+                
+                // Render visual chat list (always)
+                renderChatList(chats, currentChat);
             } else {
-                showEmptyState();
                 renderChatList([], '');
             }
         } catch (e) {
