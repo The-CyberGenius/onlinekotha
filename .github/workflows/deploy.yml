@@ -19,9 +19,9 @@ jobs:
             # Navigate to the project directory
             cd /var/www/onlinekotha
             
-            # Pull latest code
-            git pull origin main
-            
+            # Force pull latest code, discarding any local divergent changes
+            git fetch origin
+            git reset --hard origin/main            
             # Install any new dependencies
             npm install
             
