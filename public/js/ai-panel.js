@@ -415,111 +415,156 @@
     });
 
     // ─────────────────────────────────────────────
-    //  Identity check
+    //  Identity — sole source of truth
+    //  Called every time a chat is opened.
+    //  Shows the "Which person are you?" modal whenever
+    //  user_participant is not yet saved (or is stale).
     // ─────────────────────────────────────────────
     window.ensureIdentity = async function (chatFolder) {
-        if (chatFolder === '__global__') return true;
+        if (chatFolder === '__global__' || chatFolder === 'kotha_assistant') return true;
         try {
             const resp = await fetch(`/api/chat/${encodeURIComponent(chatFolder)}/identity`);
+            if (!resp.ok) return true;
             const data = await resp.json();
-            if (!data.requiresSelection) return true; // Already selected or not needed
-            
+
+            if (!data.requiresSelection) {
+                // Identity already stored and valid — sync it to the rendering engine
+                const savedUser = data.userParticipant;
+                const otherPerson = (data.participants || []).find(p => p !== savedUser) || null;
+                if (savedUser && typeof window.kothaSetMyName === 'function') {
+                    window.kothaSetMyName(savedUser, otherPerson);
+                }
+                if (otherPerson) contactNameMap[chatFolder] = otherPerson;
+                return true;
+            }
+
+            // Need to ask the user — show the identity modal
+            const participants = data.participants || [];
+            if (participants.length === 0) return true; // nothing to choose from
+
+            const stats = data.participantStats || {};
+
             return new Promise((resolve) => {
                 const modal = document.getElementById('identity-modal');
                 const container = document.getElementById('identity-cards-container');
                 const contBtn = document.getElementById('identity-continue-btn');
                 const cancelBtn = document.getElementById('identity-cancel-btn');
-                
+                if (!modal || !container || !contBtn) { resolve(true); return; }
+
                 let selectedId = null;
-                
-                // Render cards
+
+                // ── Build participant cards ──
                 container.innerHTML = '';
-                Object.entries(data.participants).forEach(([name, count], index) => {
-                    const card = document.createElement('div');
-                    card.className = `identity-card p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group ${index === 0 ? 'border-gray-200 dark:border-gray-800 hover:border-indigo-500/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10' : 'border-gray-200 dark:border-gray-800 hover:border-indigo-500/50 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10'}`;
-                    
+                participants.forEach((name) => {
+                    const msgCount = stats[name] || 0;
                     const initial = name.charAt(0).toUpperCase();
-                    
+
+                    const card = document.createElement('div');
+                    card.className = 'identity-card p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 transition-all cursor-pointer flex items-center justify-between gap-3 hover:border-indigo-400/70 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 active:scale-[0.98]';
+                    card.setAttribute('data-name', name);
+
                     card.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shrink-0">
-                                ${initial}
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-[18px] shrink-0 shadow-md">
+                                ${escapeHTML(initial)}
                             </div>
-                            <div>
-                                <p class="text-[15px] font-semibold text-gray-900 dark:text-gray-100">${escapeHTML(name)}</p>
-                                <p class="text-[12px] text-gray-500 dark:text-gray-400">${count.toLocaleString()} messages</p>
+                            <div class="min-w-0">
+                                <p class="text-[15px] font-semibold text-gray-900 dark:text-gray-100 truncate">${escapeHTML(name)}</p>
+                                <p class="text-[12px] text-gray-500 dark:text-gray-400">${msgCount > 0 ? msgCount.toLocaleString() + ' messages' : 'Participant'}</p>
                             </div>
                         </div>
-                        <div class="radio-circle w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center transition-all group-hover:border-indigo-400">
+                        <div class="radio-circle w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center shrink-0 transition-all">
                             <div class="inner-dot w-2.5 h-2.5 rounded-full bg-indigo-600 scale-0 transition-transform"></div>
                         </div>
                     `;
-                    
-                    card.onclick = () => {
+
+                    card.addEventListener('click', () => {
+                        // Deselect all
                         container.querySelectorAll('.identity-card').forEach(c => {
                             c.classList.remove('border-indigo-600', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
-                            c.classList.add('border-gray-200', 'dark:border-gray-800');
+                            c.classList.add('border-gray-200', 'dark:border-gray-700');
                             c.querySelector('.radio-circle').classList.remove('border-indigo-600');
                             c.querySelector('.inner-dot').classList.remove('scale-100');
                             c.querySelector('.inner-dot').classList.add('scale-0');
                         });
-                        card.classList.remove('border-gray-200', 'dark:border-gray-800');
+                        // Select this one
+                        card.classList.remove('border-gray-200', 'dark:border-gray-700');
                         card.classList.add('border-indigo-600', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
                         card.querySelector('.radio-circle').classList.add('border-indigo-600');
                         card.querySelector('.inner-dot').classList.remove('scale-0');
                         card.querySelector('.inner-dot').classList.add('scale-100');
-                        
+
                         selectedId = name;
                         contBtn.disabled = false;
-                    };
+                    });
+
                     container.appendChild(card);
                 });
-                
-                // Show modal
+
+                // ── Show modal ──
+                contBtn.disabled = true;
+                contBtn.innerText = 'Continue';
                 modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.querySelector('.transform').classList.remove('scale-95', 'opacity-0');
-                    modal.querySelector('.transform').classList.add('scale-100', 'opacity-100');
-                }, 10);
-                
-                const close = (result) => {
-                    modal.querySelector('.transform').classList.remove('scale-100', 'opacity-100');
-                    modal.querySelector('.transform').classList.add('scale-95', 'opacity-0');
+                requestAnimationFrame(() => {
+                    modal.querySelector('.transform')?.classList.remove('scale-95', 'opacity-0');
+                    modal.querySelector('.transform')?.classList.add('scale-100', 'opacity-100');
+                });
+
+                const closeModal = (result) => {
+                    const inner = modal.querySelector('.transform');
+                    if (inner) {
+                        inner.classList.remove('scale-100', 'opacity-100');
+                        inner.classList.add('scale-95', 'opacity-0');
+                    }
                     setTimeout(() => {
                         modal.classList.add('hidden');
                         resolve(result);
                     }, 300);
                 };
-                
+
                 contBtn.onclick = async () => {
                     if (!selectedId) return;
                     contBtn.disabled = true;
-                    contBtn.innerText = 'Saving...';
+                    contBtn.innerText = 'Saving…';
+
                     try {
-                        const others = Object.keys(data.participants).filter(n => n !== selectedId);
-                        const aiParticipant = others.length > 0 ? others[0] : selectedId;
-                        
+                        // The other person = the first participant that is NOT the selected user
+                        const aiParticipant = participants.find(p => p !== selectedId) || selectedId;
+
                         await fetch(`/api/chat/${encodeURIComponent(chatFolder)}/identity`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userParticipant: selectedId, aiParticipant: aiParticipant })
+                            body: JSON.stringify({ userParticipant: selectedId, aiParticipant })
                         });
-                        close(true);
+
+                        // ── Update contactNameMap & script.js rendering engine ──
+                        contactNameMap[chatFolder] = aiParticipant;
+                        if (typeof window.kothaSetMyName === 'function') {
+                            window.kothaSetMyName(selectedId, aiParticipant);
+                        }
+
+                        // ── Confirmation toast ──
+                        const confirmMsg = data.isGroup
+                            ? `You're chatting as ${selectedId}`
+                            : `You're chatting as ${selectedId} · AI will respond as ${aiParticipant}`;
+                        toast(confirmMsg, 4000);
+
+                        closeModal(true);
                     } catch (e) {
-                        toast('Failed to save identity');
-                        close(false);
-                    } finally {
+                        toast('Failed to save — please try again.');
+                        contBtn.disabled = false;
                         contBtn.innerText = 'Continue';
                     }
                 };
-                
-                cancelBtn.onclick = () => close(false);
+
+                cancelBtn.onclick = () => closeModal(false);
             });
         } catch (e) {
             console.error('ensureIdentity error', e);
             return true;
         }
     };
+
 
     // ─────────────────────────────────────────────
     //  Media Upload
@@ -829,20 +874,38 @@
                         } else if (event === 'error') {
                             typingEl.remove();
                             const errMsg = data.message || 'Something went wrong';
-                            if (errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
+                            const errCode = data.code || '';
+
+                            if (errCode === 'IDENTITY_REQUIRED' || errMsg === 'identity_required') {
+                                // User hasn't selected their identity yet — show the modal
+                                onTypewriterComplete = null;
+                                stopTypewriterInstantly();
+                                _dotStop();
+                                resolve();
+                                // Trigger modal after stream closes
+                                setTimeout(async () => {
+                                    if (typeof window.ensureIdentity === 'function') {
+                                        await window.ensureIdentity(chatFolder);
+                                    }
+                                }, 100);
+                            } else if (errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
                                 if (typeof window.openUpgradeModal === 'function') {
                                     window.openUpgradeModal();
                                 } else {
                                     appendErrorBubble('Server busy. Please try again or upgrade to Pro.');
                                 }
+                                onTypewriterComplete = null;
+                                stopTypewriterInstantly();
+                                _dotStop();
+                                resolve();
                             } else {
                                 appendErrorBubble(errMsg);
+                                onTypewriterComplete = null;
+                                stopTypewriterInstantly();
+                                _dotStop();
+                                resolve();
                             }
-                            onTypewriterComplete = null;
-                            stopTypewriterInstantly();
-                            _dotStop();
-                            resolve();
-                        }
+
                     }
                 }
             } catch (err) {
@@ -992,14 +1055,15 @@
         }[c]));
     }
 
-    function toast(msg) {
+    function toast(msg, duration = 2400) {
         const t = document.createElement('div');
         t.textContent = msg;
-        t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 200ms';
+        t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1f2937;color:white;padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.2);opacity:0;transition:opacity 200ms;max-width:90vw;text-align:center;white-space:nowrap;';
         document.body.appendChild(t);
         requestAnimationFrame(() => t.style.opacity = '1');
-        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 250); }, 2400);
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 250); }, duration);
     }
+
 
     // ─────────────────────────────────────────────
     //  Sparkle button

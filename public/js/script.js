@@ -993,16 +993,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Check for user-defined roles for this group chat
+                // ── Identity: read from server, NEVER guess ──
+                // customRoles in localStorage is legacy group-roles; still honour it but
+                // only if it was explicitly saved by the user (not auto-populated).
                 const customRoles = JSON.parse(localStorage.getItem('roles_' + chatName) || 'null');
                 if (customRoles && customRoles.myName && customRoles.aiName) {
                     myName = customRoles.myName;
                     otherPersonName = customRoles.aiName;
                 } else {
-                    const resolved = resolveChatNames(chatContactName, senders);
-                    otherPersonName = resolved.otherName;
-                    myName = resolved.myName;
+                    // Identity will be set by ensureIdentity() / kothaSetMyName() after the
+                    // modal resolves. Leave as null until then — renderMessage() will treat
+                    // every message as "theirs" (left side) which is safe while loading.
+                    myName = null;
+                    otherPersonName = senderNames.length > 0 ? senderNames[0] : 'Contact';
                 }
+
 
                 const isGroupChat = data.isGroup || isGroupChatFrontend;
                 const actualGroupName = window._chatMetaCache?.[chatName]?.contactName || chatContactName;
@@ -1639,8 +1644,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 showEmptyState(); // Restore empty state
                             }
                         }
+                    } else if (currentChat && chats.includes(currentChat)) {
+                        // Already viewing an active chat, preserve it
+                        selector.value = currentChat;
+                        removeEmptyState();
                     } else {
-                        // Fresh startup: do not open any chat by default
+                        // Fresh startup with no active chat: do not open any chat by default
                         currentChat = '';
                         window.currentChat = '';
                         showEmptyState();
@@ -1837,24 +1846,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Expose for upload.js to refresh after import
     window.refreshChats = async (selectName) => {
+        if (selectName) {
+            currentChat = selectName;
+            window.currentChat = selectName;
+        }
         await loadChatsList();
         if (selectName) {
-            if (currentChat === '__global__') {
+            if (currentChat === '__global__' && typeof deactivateGlobalUI === 'function') {
                 deactivateGlobalUI();
             }
+            // Switch to chats tab if DM tab was active
+            const tabChatsBtn = document.getElementById('tab-chats-btn');
+            if (tabChatsBtn) {
+                tabChatsBtn.click();
+            }
+            const dmChatArea = document.getElementById('dm-chat-area');
+            if (dmChatArea) dmChatArea.style.display = 'none';
+            const dmEmpty = document.getElementById('dm-empty-state');
+            if (dmEmpty) dmEmpty.classList.add('hidden');
+
             const selector = document.getElementById('chat-selector');
             if (selector) {
                 selector.value = selectName;
-                currentChat = selectName;
-                window.currentChat = selectName;
-                loadData(selectName).then(async () => {
-                    if (typeof window.ensureIdentity === 'function') {
-                        await window.ensureIdentity(selectName);
-                    }
-                });
-                // Re-render chat list with new active
-                renderChatList(loadedChats, selectName);
             }
+
+            // Remove empty state completely & show header and bottom input
+            removeEmptyState();
+
+            // On mobile / compact mode: close sidebar so ONLY the chat side is visible!
+            toggleSidebar(false);
+
+            // Re-render chat list with new active chat highlighted
+            renderChatList(loadedChats, selectName);
+
+            // Load chat data
+            await loadData(selectName);
+            if (typeof window.ensureIdentity === 'function') {
+                await window.ensureIdentity(selectName);
+            }
+
+            // Focus AI input
+            setTimeout(() => {
+                const inp = document.getElementById('bottom-ai-input');
+                if (inp) inp.focus();
+            }, 100);
         }
     };
 
@@ -2920,6 +2955,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose chat data getters globally for features (like Chat Wrapped)
     window.kothaGetAllMessages = () => allMessages;
     window.kothaGetMyName = () => myName;
+
+    // Called by ai-panel.js after identity modal resolves so messages align immediately
+    window.kothaSetMyName = (name, otherName) => {
+        myName = name || null;
+        if (otherName) otherPersonName = otherName;
+        // Re-render the current visible chat slice to apply correct alignment
+        if (currentChat && displayedMessages.length > 0) {
+            lastRenderedDate = '';
+            chatContainer.innerHTML = '';
+            const end = Math.min(displayedMessages.length, renderStart + (renderEnd - renderStart || 100));
+            renderChats(renderStart, end, 'reset');
+            // Scroll to bottom to show latest messages in correct alignment
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+        }
+    };
+
     window.kothaGetOtherPersonName = () => otherPersonName;
     window.kothaGetCurrentChat = () => currentChat;
 
@@ -2949,22 +3000,61 @@ document.addEventListener('DOMContentLoaded', () => {
     (function initMacFrame() {
         const frame = document.getElementById('mac-frame');
         const titlebar = document.getElementById('mac-titlebar');
-        if (!frame || !titlebar || isMobile()) return;
+        if (!frame || !titlebar) return;
 
-        // --- Initialize square window position on desktop ---
         let inited = false;
-        if (window.innerWidth >= 768) {
-            const initialW = Math.max(850, Math.min(window.innerWidth * 0.85, 1000));
-            const initialH = Math.min(window.innerHeight * 0.85, Math.max(700, initialW - 100)); // slightly rectangular
+        let userHasDragged = false;
+        let userHasResized = false;
+
+        function centerFrame() {
+            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            const targetW = userHasResized
+                ? Math.min(parseInt(frame.style.width) || 960, window.innerWidth - 30)
+                : Math.max(760, Math.min(window.innerWidth * 0.82, 1100));
+            const targetH = userHasResized
+                ? Math.min(parseInt(frame.style.height) || 720, window.innerHeight - 100)
+                : Math.min(window.innerHeight * 0.82, Math.max(620, window.innerHeight - 130));
+
+            const left = Math.max(10, Math.round((window.innerWidth - targetW) / 2));
+            const top = Math.max(15, Math.round((window.innerHeight - targetH - 80) / 2));
+
             frame.style.position = 'absolute';
-            frame.style.width = initialW + 'px';
-            frame.style.height = initialH + 'px';
-            frame.style.left = ((window.innerWidth - initialW) / 2) + 'px';
-            // Position above dock (bottom padding ~80px)
-            frame.style.top = (window.innerHeight - initialH - 80) + 'px'; 
+            frame.style.width = Math.round(targetW) + 'px';
+            frame.style.height = Math.round(targetH) + 'px';
+            frame.style.left = left + 'px';
+            frame.style.top = top + 'px';
             frame.style.margin = '0';
             document.body.style.position = 'relative';
             inited = true;
+        }
+
+        function clampFrameInViewport() {
+            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            const r = frame.getBoundingClientRect();
+            let w = parseInt(frame.style.width) || r.width;
+            let h = parseInt(frame.style.height) || r.height;
+            let l = parseInt(frame.style.left) || r.left;
+            let t = parseInt(frame.style.top) || r.top;
+
+            if (w > window.innerWidth - 20) {
+                w = Math.max(380, window.innerWidth - 20);
+            }
+            if (h > window.innerHeight - 90) {
+                h = Math.max(400, window.innerHeight - 90);
+            }
+            if (l + w > window.innerWidth - 10) {
+                l = Math.max(10, window.innerWidth - w - 10);
+            }
+            if (t + h > window.innerHeight - 70) {
+                t = Math.max(10, window.innerHeight - h - 70);
+            }
+            if (l < 10) l = 10;
+            if (t < 10) t = 10;
+
+            frame.style.width = Math.round(w) + 'px';
+            frame.style.height = Math.round(h) + 'px';
+            frame.style.left = Math.round(l) + 'px';
+            frame.style.top = Math.round(t) + 'px';
         }
 
         function initPosition() {
@@ -2972,13 +3062,14 @@ document.addEventListener('DOMContentLoaded', () => {
             inited = true;
             const r = frame.getBoundingClientRect();
             frame.style.position = 'absolute';
-            frame.style.left = r.left + 'px';
-            frame.style.top = r.top + 'px';
-            frame.style.width = r.width + 'px';
-            frame.style.height = r.height + 'px';
+            frame.style.left = (parseInt(frame.style.left) || r.left) + 'px';
+            frame.style.top = (parseInt(frame.style.top) || r.top) + 'px';
+            frame.style.width = (parseInt(frame.style.width) || r.width) + 'px';
+            frame.style.height = (parseInt(frame.style.height) || r.height) + 'px';
             frame.style.margin = '0';
             document.body.style.position = 'relative';
         }
+
         function resetPosition() {
             frame.style.position = '';
             frame.style.left = '';
@@ -2991,33 +3082,24 @@ document.addEventListener('DOMContentLoaded', () => {
             inited = false;
         }
 
-        // --- Resize handles overlay (lives OUTSIDE the frame so it isn't clipped) ---
+        // Initialize desktop position
+        if (!isMobile() && window.innerWidth >= 768) {
+            centerFrame();
+        }
+
+        // --- Resize handles overlay ---
         const rhOverlay = document.createElement('div');
         rhOverlay.id = 'rh-overlay';
         const rhTpl = document.getElementById('resize-handles-tpl');
         if (rhTpl) rhOverlay.appendChild(rhTpl.content.cloneNode(true));
         document.body.appendChild(rhOverlay);
+
         function syncOverlay() {
             if (isMobile()) {
                 if (inited) resetPosition();
                 rhOverlay.style.display = 'none';
                 return;
-            } else if (!inited && !frame.classList.contains('mac-fullscreen')) {
-                // If resized back to desktop, re-initialize position so it doesn't break
-                if (window.innerWidth >= 768) {
-                    const initialW = Math.max(850, Math.min(window.innerWidth * 0.85, 1000));
-                    const initialH = Math.min(window.innerHeight * 0.85, Math.max(700, initialW - 100));
-                    frame.style.position = 'absolute';
-                    frame.style.width = initialW + 'px';
-                    frame.style.height = initialH + 'px';
-                    frame.style.left = ((window.innerWidth - initialW) / 2) + 'px';
-                    frame.style.top = (window.innerHeight - initialH - 80) + 'px'; 
-                    frame.style.margin = '0';
-                    document.body.style.position = 'relative';
-                    inited = true;
-                }
             }
-
             if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-minimized')) {
                 rhOverlay.style.display = 'none';
                 return;
@@ -3029,8 +3111,31 @@ document.addEventListener('DOMContentLoaded', () => {
             rhOverlay.style.width = r.width + 'px';
             rhOverlay.style.height = r.height + 'px';
         }
+
         syncOverlay();
-        window.addEventListener('resize', syncOverlay);
+
+        window.addEventListener('resize', () => {
+            if (dragging) {
+                dragging = false;
+                isActualDrag = false;
+                frame.classList.remove('is-dragging');
+            }
+            if (isMobile()) {
+                resetPosition();
+                rhOverlay.style.display = 'none';
+                return;
+            }
+            if (frame.classList.contains('mac-fullscreen')) {
+                rhOverlay.style.display = 'none';
+                return;
+            }
+            if (!userHasDragged) {
+                centerFrame();
+            } else {
+                clampFrameInViewport();
+            }
+            syncOverlay();
+        });
 
         // --- Compact (phone-like) mode based on the FRAME's own width ---
         const sidebarEl = document.getElementById('sidebar');
@@ -3041,12 +3146,15 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.toggle('kompact', compact);
             if (compact) {
                 // collapse sidebar into slide-in overlay, BUT open it automatically if no chat is active
-                if (!window.currentChat) {
+                const hasActiveChat = !!window.currentChat || (typeof window.dmIsConvActive === 'function' && window.dmIsConvActive()) || (window.location.hash && window.location.hash.startsWith('#chat-'));
+                if (!hasActiveChat) {
                     if (sidebarEl) sidebarEl.classList.remove('-translate-x-full');
                     const bd = document.getElementById('sidebar-backdrop');
                     if (bd) bd.classList.remove('hidden');
                 } else {
                     if (sidebarEl) sidebarEl.classList.add('-translate-x-full');
+                    const bd = document.getElementById('sidebar-backdrop');
+                    if (bd) bd.classList.add('hidden');
                 }
             } else {
                 if (sidebarEl) sidebarEl.classList.remove('-translate-x-full');
@@ -3059,28 +3167,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateCompact();
 
-        let dragging = false, sx, sy, sl, st;
+        let dragging = false;
+        let isActualDrag = false;
+        let sx = 0, sy = 0, sl = 0, st = 0;
+
         titlebar.addEventListener('mousedown', (e) => {
             if (e.target.closest('button')) return;
-            if (frame.classList.contains('mac-fullscreen')) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+
+            const rect = frame.getBoundingClientRect();
+            // Don't drag if click is within 10px of top, left, or right edge (resize zones)
+            if (e.clientY - rect.top < 10 || e.clientX - rect.left < 10 || rect.right - e.clientX < 10) {
+                return;
+            }
+
             initPosition();
             dragging = true;
-            sx = e.clientX; sy = e.clientY;
-            sl = parseInt(frame.style.left); st = parseInt(frame.style.top);
-            frame.classList.add('is-dragging');
+            isActualDrag = false;
+            sx = e.clientX;
+            sy = e.clientY;
+            sl = parseInt(frame.style.left) || rect.left;
+            st = parseInt(frame.style.top) || rect.top;
             e.preventDefault();
         });
+
         document.addEventListener('mousemove', (e) => {
             if (!dragging) return;
-            frame.style.left = Math.max(0, Math.min(window.innerWidth - 100, sl + (e.clientX - sx))) + 'px';
-            frame.style.top = Math.max(0, Math.min(window.innerHeight - 60, st + (e.clientY - sy))) + 'px';
+            if (!isActualDrag) {
+                if (Math.hypot(e.clientX - sx, e.clientY - sy) > 4) {
+                    isActualDrag = true;
+                    userHasDragged = true;
+                    frame.classList.add('is-dragging');
+                } else {
+                    return;
+                }
+            }
+            const maxL = Math.max(0, window.innerWidth - 60);
+            const maxT = Math.max(0, window.innerHeight - 60);
+            frame.style.left = Math.max(0, Math.min(maxL, sl + (e.clientX - sx))) + 'px';
+            frame.style.top = Math.max(0, Math.min(maxT, st + (e.clientY - sy))) + 'px';
             syncOverlay();
         });
+
         document.addEventListener('mouseup', () => {
             if (!dragging) return;
             dragging = false;
+            isActualDrag = false;
             frame.classList.remove('is-dragging');
         });
+
+        window.addEventListener('blur', () => {
+            if (dragging) {
+                dragging = false;
+                isActualDrag = false;
+                frame.classList.remove('is-dragging');
+            }
+        });
+
         // Double-click titlebar to toggle fullscreen
         titlebar.addEventListener('dblclick', (e) => {
             if (e.target.closest('button')) return;
@@ -3153,7 +3296,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 resetPosition();
                 if (dock) dock.style.setProperty('display', 'none', 'important');
             } else {
+                userHasDragged = false;
+                userHasResized = false;
                 if (dock) dock.style.removeProperty('display');
+                centerFrame();
             }
             requestAnimationFrame(syncOverlay);
         });
@@ -3169,13 +3315,17 @@ document.addEventListener('DOMContentLoaded', () => {
             rhOverlay.querySelectorAll('.rh').forEach(handle => {
                 const dir = handle.dataset.dir;
                 handle.addEventListener('mousedown', (e) => {
-                    if (frame.classList.contains('mac-fullscreen')) return;
+                    if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
                     initPosition();
                     e.preventDefault();
                     e.stopPropagation();
+                    userHasResized = true;
+
                     const startX = e.clientX, startY = e.clientY;
                     const rect = frame.getBoundingClientRect();
-                    const startL = rect.left, startT = rect.top, startW = rect.width, startH = rect.height;
+                    const startL = parseInt(frame.style.left) || rect.left;
+                    const startT = parseInt(frame.style.top) || rect.top;
+                    const startW = rect.width, startH = rect.height;
 
                     const SNAP = 20; // px — magnetic catch distance to screen edges
                     frame.classList.add('is-resizing');
@@ -3190,8 +3340,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (Math.abs((l + w) - vw) <= SNAP) w = vw - l; // snap right edge
                         }
                         if (dir.includes('w')) {
-                            w = Math.max(MIN_W, startW - dx); l = startL + startW - w;
+                            w = Math.max(MIN_W, startW - dx);
+                            l = startL + startW - w;
                             if (Math.abs(l) <= SNAP) { w += l; l = 0; } // snap left edge
+                            userHasDragged = true;
                         }
                         if (dir.includes('s')) {
                             h = Math.max(MIN_H, startH + dy);
@@ -3206,12 +3358,13 @@ document.addEventListener('DOMContentLoaded', () => {
                                 h = startT + startH; // Cap height to prevent jumping off screen
                             }
                             if (Math.abs(t) <= SNAP) { h += t; t = 0; } // snap top edge
+                            userHasDragged = true;
                         }
 
-                        frame.style.left = l + 'px';
-                        frame.style.top = t + 'px';
-                        frame.style.width = w + 'px';
-                        frame.style.height = h + 'px';
+                        frame.style.left = Math.round(l) + 'px';
+                        frame.style.top = Math.round(t) + 'px';
+                        frame.style.width = Math.round(w) + 'px';
+                        frame.style.height = Math.round(h) + 'px';
                         syncOverlay();
                     }
                     function onUp() {
