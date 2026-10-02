@@ -3453,14 +3453,82 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Header search button — opens custom mobile search popup
+    // Header search button — opens inline chat search overlay
     const headerSearchBtn = document.getElementById('header-search-btn');
-    if (headerSearchBtn) {
+    const inlineSearchOverlay = document.getElementById('chat-inline-search-overlay');
+    const closeInlineSearchBtn = document.getElementById('close-inline-search-btn');
+    const inlineSearchInput = document.getElementById('inline-search-input');
+    const inlineSearchResultsContainer = document.getElementById('inline-search-results-container');
+    const inlineResultsList = document.getElementById('inline-results-list');
+    const inlineSearchCount = document.getElementById('inline-search-count');
+
+    if (headerSearchBtn && inlineSearchOverlay && inlineSearchInput) {
         headerSearchBtn.addEventListener('click', () => {
-            const mainSearchInput = document.getElementById('search-box');
-            if (mainSearchInput) {
-                if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                setTimeout(() => mainSearchInput.focus(), 150);
+            inlineSearchOverlay.classList.remove('hidden');
+            setTimeout(() => inlineSearchInput.focus(), 100);
+        });
+
+        closeInlineSearchBtn.addEventListener('click', () => {
+            inlineSearchOverlay.classList.add('hidden');
+            inlineSearchInput.value = '';
+            inlineSearchResultsContainer.classList.add('hidden');
+            inlineSearchCount.textContent = '';
+        });
+
+        inlineSearchInput.addEventListener('focus', () => {
+            if (inlineSearchInput.value.trim().length >= 2 && inlineResultsList.innerHTML.trim() !== '') {
+                inlineSearchResultsContainer.classList.remove('hidden');
+            }
+        });
+
+        inlineSearchInput.addEventListener('input', (e) => {
+            const val = e.target.value.trim();
+            const lowerVal = val.toLowerCase();
+            
+            if (lowerVal.length < 2) {
+                inlineSearchResultsContainer.classList.add('hidden');
+                inlineResultsList.innerHTML = '';
+                inlineSearchCount.textContent = '';
+                return;
+            }
+
+            // Deep search in loaded messages
+            const filteredMsgs = [];
+            if (window.allMessages && window.allMessages.length > 0) {
+                for (let i = 0; i < window.allMessages.length; i++) {
+                    if (window.allMessages[i].text && window.allMessages[i].text.toLowerCase().includes(lowerVal)) {
+                        filteredMsgs.push(window.allMessages[i]);
+                    }
+                }
+            }
+
+            inlineSearchCount.textContent = `${filteredMsgs.length}`;
+            inlineSearchResultsContainer.classList.remove('hidden');
+
+            if (filteredMsgs.length === 0) {
+                inlineResultsList.innerHTML = `<div class="text-xs text-gray-400 py-3 text-center">No messages found for "${val}"</div>`;
+            } else {
+                let resultsHtml = '';
+                const limitRes = filteredMsgs.slice(-50);
+                const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                
+                limitRes.forEach(msg => {
+                    const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
+                    // Find sender name from window.currentChat object if possible, or fallback
+                    const senderName = msg.sender === 'user' ? 'Me' : (window.currentChat ? window.currentChat.split('.')[0] : 'Partner');
+                    const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    resultsHtml += `
+                        <div class="p-2 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-lg mb-1" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg(${msg.id})">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300">${senderName}</span>
+                                <span class="text-[10px] text-gray-400">${timeStr}</span>
+                            </div>
+                            <p class="text-[13px] text-gray-600 dark:text-gray-200 line-clamp-2 leading-snug">${highlightedText}</p>
+                        </div>
+                    `;
+                });
+                inlineResultsList.innerHTML = resultsHtml;
             }
         });
     }
