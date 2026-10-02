@@ -478,8 +478,9 @@
                                 <p class="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5 leading-tight">${msgCount > 0 ? msgCount.toLocaleString() + ' msgs' : 'Participant'}</p>
                             </div>
                         </div>
-                        <div class="radio-circle w-6 h-6 rounded-full border-2 border-gray-300 dark:border-gray-500 flex items-center justify-center shrink-0 transition-all bg-white dark:bg-black/30 mr-1 shadow-inner">
-                            <div class="inner-dot w-3 h-3 rounded-full bg-indigo-500 scale-0 transition-transform"></div>
+                        <div class="radio-icon text-gray-300 dark:text-gray-500 transition-colors mr-1">
+                            <svg class="unselected-svg w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                            <svg class="selected-svg w-6 h-6 hidden text-indigo-500" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z" clip-rule="evenodd"></path></svg>
                         </div>
                     `;
 
@@ -488,16 +489,14 @@
                         container.querySelectorAll('.identity-card').forEach(c => {
                             c.classList.remove('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-500/30', 'shadow-sm');
                             c.classList.add('border-transparent');
-                            c.querySelector('.radio-circle').classList.remove('border-indigo-500');
-                            c.querySelector('.inner-dot').classList.remove('scale-100');
-                            c.querySelector('.inner-dot').classList.add('scale-0');
+                            c.querySelector('.unselected-svg').classList.remove('hidden');
+                            c.querySelector('.selected-svg').classList.add('hidden');
                         });
                         // Select this one
                         card.classList.remove('border-transparent');
                         card.classList.add('border-indigo-500', 'bg-indigo-50', 'dark:bg-indigo-500/30', 'shadow-sm');
-                        card.querySelector('.radio-circle').classList.add('border-indigo-500');
-                        card.querySelector('.inner-dot').classList.remove('scale-0');
-                        card.querySelector('.inner-dot').classList.add('scale-100');
+                        card.querySelector('.unselected-svg').classList.add('hidden');
+                        card.querySelector('.selected-svg').classList.remove('hidden');
 
                         selectedId = name;
                         contBtn.disabled = false;

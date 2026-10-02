@@ -813,6 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const identityConfirmed = await window.ensureIdentity(chatName);
                 if (!identityConfirmed) {
                     window.kothaChatLoading = false;
+                    currentChat = '';
                     showEmptyState();
                     return; // Abort loading if identity wasn't confirmed
                 }
@@ -3495,7 +3496,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (headerSearchBtn && inlineSearchOverlay && inlineSearchInput) {
         headerSearchBtn.addEventListener('click', () => {
-            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            const sidebarBtn = document.getElementById('open-sidebar-btn');
+            const isMobile = sidebarBtn && sidebarBtn.offsetParent !== null;
+            
             if (!isMobile) {
                 // Desktop: Open sidebar search box
                 const mainSearchInput = document.getElementById('search-box');
