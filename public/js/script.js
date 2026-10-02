@@ -3478,10 +3478,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerSearchBtn = document.getElementById('header-search-btn');
     const inlineSearchOverlay = document.getElementById('chat-inline-search-overlay');
     const closeInlineSearchBtn = document.getElementById('close-inline-search-btn');
+    const clearInlineSearchBtn = document.getElementById('clear-inline-search-btn');
     const inlineSearchInput = document.getElementById('inline-search-input');
     const inlineSearchResultsContainer = document.getElementById('inline-search-results-container');
     const inlineResultsList = document.getElementById('inline-results-list');
     const inlineSearchCount = document.getElementById('inline-search-count');
+
+    // Click outside to close inline search
+    document.addEventListener('click', (e) => {
+        if (inlineSearchOverlay && !inlineSearchOverlay.classList.contains('hidden')) {
+            if (!inlineSearchOverlay.contains(e.target) && !inlineSearchResultsContainer.contains(e.target)) {
+                if (closeInlineSearchBtn) closeInlineSearchBtn.click();
+            }
+        }
+    });
 
     if (headerSearchBtn && inlineSearchOverlay && inlineSearchInput) {
         headerSearchBtn.addEventListener('click', () => {
@@ -3506,7 +3516,19 @@ document.addEventListener('DOMContentLoaded', () => {
             inlineSearchInput.value = '';
             inlineSearchResultsContainer.classList.add('hidden');
             inlineSearchCount.textContent = '';
+            if (clearInlineSearchBtn) clearInlineSearchBtn.classList.add('hidden');
         });
+
+        if (clearInlineSearchBtn) {
+            clearInlineSearchBtn.addEventListener('click', () => {
+                inlineSearchInput.value = '';
+                inlineSearchResultsContainer.classList.add('hidden');
+                inlineResultsList.innerHTML = '';
+                inlineSearchCount.textContent = '';
+                clearInlineSearchBtn.classList.add('hidden');
+                inlineSearchInput.focus();
+            });
+        }
 
         inlineSearchInput.addEventListener('focus', () => {
             if (inlineSearchInput.value.trim().length >= 2 && inlineResultsList.innerHTML.trim() !== '') {
@@ -3517,6 +3539,11 @@ document.addEventListener('DOMContentLoaded', () => {
         inlineSearchInput.addEventListener('input', (e) => {
             const val = e.target.value.trim();
             const lowerVal = val.toLowerCase();
+
+            if (clearInlineSearchBtn) {
+                if (val.length > 0) clearInlineSearchBtn.classList.remove('hidden');
+                else clearInlineSearchBtn.classList.add('hidden');
+            }
             
             if (lowerVal.length < 2) {
                 inlineSearchResultsContainer.classList.add('hidden');
@@ -3548,17 +3575,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 limitRes.forEach(msg => {
                     const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
-                    // Find sender name from window.currentChat object if possible, or fallback
-                    const senderName = msg.sender === 'user' ? 'Me' : (window.currentChat ? window.currentChat.split('.')[0] : 'Partner');
+                    const isMe = msg.sender === 'user';
+                    const senderName = isMe ? 'Me' : (window.currentChat ? window.currentChat.split('.')[0] : 'Partner');
                     const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     
+                    const alignClass = isMe ? 'ml-auto bg-green-50/80 dark:bg-[#005c4b]/80 border-green-100 dark:border-green-900/30' : 'mr-auto bg-white/90 dark:bg-[#202c33]/90 border-gray-100 dark:border-gray-800';
+                    const nameColor = isMe ? 'text-green-700 dark:text-green-400' : 'text-indigo-600 dark:text-indigo-400';
+
                     resultsHtml += `
-                        <div class="p-2 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-lg mb-1" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg(${msg.id})">
+                        <div class="p-2 w-[85%] ${alignClass} hover:opacity-90 shadow-sm cursor-pointer border transition-all rounded-xl mb-1.5 backdrop-blur-sm" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg(${msg.id})">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-[11px] font-bold text-gray-700 dark:text-gray-300">${senderName}</span>
-                                <span class="text-[10px] text-gray-400">${timeStr}</span>
+                                <span class="text-[11px] font-bold ${nameColor}">${senderName}</span>
+                                <span class="text-[10px] ${isMe ? 'text-green-600/70 dark:text-green-200/50' : 'text-gray-400'}">${timeStr}</span>
                             </div>
-                            <p class="text-[13px] text-gray-600 dark:text-gray-200 line-clamp-2 leading-snug">${highlightedText}</p>
+                            <p class="text-[13px] ${isMe ? 'text-gray-800 dark:text-gray-100' : 'text-gray-600 dark:text-gray-200'} line-clamp-2 leading-snug">${highlightedText}</p>
                         </div>
                     `;
                 });
