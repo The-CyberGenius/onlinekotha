@@ -3573,40 +3573,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 inlineResultsList.innerHTML = `<div class="text-xs text-gray-400 py-3 text-center">No messages found for "${val}"</div>`;
             } else {
                 let resultsHtml = '';
-                const limitRes = filteredMsgs.slice(-50);
-                const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                
-                limitRes.forEach(msg => {
-                    const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
-                    const myName = typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null;
-                    const isMe = myName && msg.sender === myName;
-                    const senderName = isMe ? 'Me' : msg.sender;
-                    const timeStr = msg.time && msg.date ? `${msg.date} • ${msg.time}` : (msg.time || 'Unknown');
+                try {
+                    const limitRes = filteredMsgs.slice(-50);
+                    const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
                     
-                    const alignClass = isMe ? 'ml-auto' : 'mr-auto';
-                    const bubbleClass = isMe ? 'glass-chat-me' : 'glass-chat-them';
-                    
-                    // Match the chat time colors exactly
-                    const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
+                    limitRes.forEach(msg => {
+                        const highlightedText = String(msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
+                        const myName = typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null;
+                        const isMe = myName && msg.sender === myName;
+                        const senderName = isMe ? 'Me' : String(msg.sender || 'System');
+                        const timeStr = msg.time && msg.date ? `${msg.date} • ${msg.time}` : String(msg.time || 'Unknown');
+                        
+                        const alignClass = isMe ? 'ml-auto' : 'mr-auto';
+                        const bubbleClass = isMe ? 'glass-chat-me' : 'glass-chat-them';
+                        
+                        const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
 
-                    let nameHtml = '';
-                    if (!isMe) {
-                        const safeSender = msg.sender || 'Unknown';
-                        nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${typeof getStringColor === 'function' ? getStringColor(safeSender) : '#818cf8'}">${escapeHTML(senderName || safeSender)}</p>`;
-                    }
+                        let nameHtml = '';
+                        if (!isMe) {
+                            const color = typeof getStringColor === 'function' ? getStringColor(senderName) : '#818cf8';
+                            nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${color}">${escapeHTML(senderName)}</p>`;
+                        }
 
-                    resultsHtml += `
-                        <div class="flex flex-col mb-2 w-full cursor-pointer hover:opacity-85 transition-opacity" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg(${msg.id})">
-                            <div class="max-w-[85%] md:max-w-[75%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${bubbleClass} ${alignClass} rounded-2xl flex flex-col gap-0.5 shadow-sm">
-                                ${nameHtml}
-                                <p style="color:var(--msg-text)" class="text-[13px] leading-normal font-medium whitespace-pre-wrap break-words line-clamp-2">${highlightedText}</p>
-                                <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto pt-0.5">
-                                    ${escapeHTML(timeStr)}
+                        resultsHtml += `
+                            <div class="flex flex-col mb-2 w-full cursor-pointer hover:opacity-85 transition-opacity" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg('${msg.id}')">
+                                <div class="max-w-[85%] md:max-w-[75%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${bubbleClass} ${alignClass} rounded-2xl flex flex-col gap-0.5 shadow-sm">
+                                    ${nameHtml}
+                                    <p style="color:var(--msg-text)" class="text-[13px] leading-normal font-medium whitespace-pre-wrap break-words line-clamp-2">${highlightedText}</p>
+                                    <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto pt-0.5">
+                                        ${escapeHTML(timeStr)}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                } catch (err) {
+                    resultsHtml = `<div class="p-4 m-4 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-xs font-mono break-words">Error: ${err.message}</div>`;
+                }
                 inlineResultsList.innerHTML = resultsHtml;
             }
         });
