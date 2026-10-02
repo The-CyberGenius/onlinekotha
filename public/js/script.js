@@ -3488,7 +3488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Click outside to close inline search
     document.addEventListener('click', (e) => {
         if (inlineSearchOverlay && !inlineSearchOverlay.classList.contains('hidden')) {
-            if (!inlineSearchOverlay.contains(e.target) && !inlineSearchResultsContainer.contains(e.target)) {
+            if (!inlineSearchOverlay.contains(e.target) && !inlineSearchResultsContainer.contains(e.target) && (!headerSearchBtn || !headerSearchBtn.contains(e.target))) {
                 if (closeInlineSearchBtn) closeInlineSearchBtn.click();
             }
         }
