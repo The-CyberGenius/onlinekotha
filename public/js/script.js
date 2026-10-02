@@ -3063,11 +3063,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 rhOverlay.style.display = 'none';
                 return;
             }
-            if (!userHasDragged) {
-                centerFrame();
-            } else {
-                clampFrameInViewport();
-            }
+            // Keep the window in viewport without jumping to center
+            clampFrameInViewport();
             syncOverlay();
         });
 
