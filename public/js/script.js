@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeChatBtn.addEventListener('click', () => {
             // ── Fully reset all chat state ──
             currentChat = '';
-            window.currentChat = '';
+            window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
             allMessages = [];
             displayedMessages = [];
             renderStart = 0;
@@ -1083,8 +1083,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
                             }
                             renderChats(-1, -1);
-                            renderChats(0, Math.min(CHUNK_SIZE, displayedMessages.length), 'reset');
-                            setTimeout(() => scrollArea.scrollTop = 0, 10);
+                            const end = displayedMessages.length;
+                            const start = Math.max(0, end - CHUNK_SIZE);
+                            renderChats(start, end, 'reset');
+                            setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 10);
                             toggleSidebar(false);
                         };
                         senderBtns.push(btn);
@@ -1287,15 +1289,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 // NO auto-change listeners on dropdowns — only the Apply button triggers filtering
                 // Checkboxes still auto-apply since they're simple toggles
                 [toggleMedia, toggleStickers, toggleLinks].forEach(el => {
-                    if (el) el.addEventListener('change', applyFilters);
+                    if (el) el.onchange = applyFilters;
                 });
 
-                resetFiltersBtn.addEventListener('click', () => {
-                    daySelect.value = ''; filterMonth.value = ''; yearSelect.value = '';
-                    toggleMedia.checked = true; toggleStickers.checked = true;
-                    if (toggleLinks) toggleLinks.checked = false;
-                    applyFilters();
-                });
+                if (resetFiltersBtn) {
+                    resetFiltersBtn.onclick = () => {
+                        if (daySelect) daySelect.value = ''; 
+                        if (filterMonth) filterMonth.value = ''; 
+                        if (yearSelect) yearSelect.value = '';
+                        if (toggleMedia) toggleMedia.checked = true; 
+                        if (toggleStickers) toggleStickers.checked = true;
+                        if (toggleLinks) toggleLinks.checked = false;
+                        
+                        applyFilters();
+                    };
+                }
 
                 // Initial render: last CHUNK_SIZE messages
                 const end = allMessages.length;
@@ -1413,7 +1421,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadedChats = loadedChats.filter(c => c !== 'kotha_assistant');
                     if (currentChat === 'kotha_assistant') {
                         currentChat = loadedChats.length > 0 ? loadedChats[0] : '__global__';
-                        window.currentChat = currentChat;
+                        window.currentChat = currentChat; localStorage.setItem("kotha_active_chat", currentChat);
                         loadData(currentChat);
                     }
                     renderChatList(loadedChats, currentChat);
@@ -1426,11 +1434,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadedChats = loadedChats.filter(c => c !== chat);
                     if (chat === currentChat && loadedChats.length > 0) {
                         currentChat = '';
-                        window.currentChat = '';
+                        window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
                         showEmptyState();
                     } else if (loadedChats.length === 0) {
                         currentChat = '';
-                        window.currentChat = '';
+                        window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
                         showEmptyState();
                     }
                     renderChatList(loadedChats, currentChat);
@@ -1449,7 +1457,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     deactivateGlobalUI();
                 }
                 currentChat = chat;
-                window.currentChat = chat;
+                window.currentChat = chat; localStorage.setItem("kotha_active_chat", chat);
                 const selector = document.getElementById('chat-selector');
                 if (selector) selector.value = chat;
                 removeEmptyState();
@@ -1558,42 +1566,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 selector.appendChild(opt);
             });
             if (chats.length > 0) {
-                if (currentChat === '__global__') {
-                    removeEmptyState();
-                    renderChatList(chats, '');
-                } else {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const targetChat = urlParams.get('chat');
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlChat = urlParams.get('chat');
+                const savedChat = localStorage.getItem('kotha_active_chat');
+                const targetChat = urlChat || savedChat;
 
-                    if (targetChat) {
-                        const match = chats.find(c => c === targetChat || c.toLowerCase() === targetChat.toLowerCase());
-                        if (match) {
-                            selector.value = match;
-                            currentChat = match;
-                            window.currentChat = match;
-                            loadData(match);
-                            removeEmptyState();
-                        } else {
-                            // Target chat not found
-                            if (chats.length === 1 && chats[0] === 'kotha_assistant') {
-                                currentChat = 'kotha_assistant';
-                                window.currentChat = 'kotha_assistant';
-                                loadData('kotha_assistant');
-                                removeEmptyState();
-                            } else {
-                                showEmptyState(); // Restore empty state
-                            }
-                        }
-                    } else if (currentChat && chats.includes(currentChat)) {
-                        // Already viewing an active chat, preserve it
-                        selector.value = currentChat;
+                if (targetChat === '__global__') {
+                    const btn = document.getElementById('global-chat-item');
+                    if (btn) btn.click();
+                } else if (targetChat) {
+                    const match = chats.find(c => c === targetChat || c.toLowerCase() === targetChat.toLowerCase());
+                    if (match) {
+                        if (selector) selector.value = match;
+                        currentChat = match;
+                        window.currentChat = match; localStorage.setItem("kotha_active_chat", match);
+                        loadData(match);
                         removeEmptyState();
                     } else {
-                        // Fresh startup with no active chat: do not open any chat by default
-                        currentChat = '';
-                        window.currentChat = '';
-                        showEmptyState();
+                        // Target chat not found
+                        if (chats.length === 1 && chats[0] === 'kotha_assistant') {
+                            currentChat = 'kotha_assistant';
+                            window.currentChat = 'kotha_assistant'; localStorage.setItem("kotha_active_chat", 'kotha_assistant');
+                            loadData('kotha_assistant');
+                            removeEmptyState();
+                        } else {
+                            showEmptyState(); // Restore empty state
+                        }
                     }
+                } else if (currentChat && chats.includes(currentChat)) {
+                    // Already viewing an active chat, preserve it
+                    if (selector) selector.value = currentChat;
+                    removeEmptyState();
+                } else {
+                    // Fresh startup with no active chat: do not open any chat by default
+                    currentChat = '';
+                    window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
+                    showEmptyState();
+                }
                     // Render visual chat list (always)
                     renderChatList(chats, currentChat);
                 }
@@ -1773,7 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     deactivateGlobalUI();
                 }
                 currentChat = e.target.value;
-                window.currentChat = currentChat;
+                window.currentChat = currentChat; localStorage.setItem("kotha_active_chat", currentChat);
                 removeEmptyState();
                 loadData(currentChat);
 
@@ -1785,7 +1794,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.refreshChats = async (selectName) => {
         if (selectName) {
             currentChat = selectName;
-            window.currentChat = selectName;
+            window.currentChat = selectName; localStorage.setItem("kotha_active_chat", selectName);
         }
         await loadChatsList();
         if (selectName) {
@@ -2439,7 +2448,7 @@ document.addEventListener('DOMContentLoaded', () => {
             disconnectGlobalChat();
 
             currentChat = '__global__';
-            window.currentChat = '__global__';
+            window.currentChat = '__global__'; localStorage.setItem("kotha_active_chat", '__global__');
 
             globalChatItem.classList.add('bg-indigo-50', 'border-indigo-200', 'shadow-sm');
             globalChatItem.classList.remove('hover:bg-gray-100', 'border-transparent');
@@ -3451,7 +3460,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Return smart filters to original location
         if (smartFilters && placeholder && placeholder.parentNode) {
             smartFilters.classList.add('hidden');
-            smartFilters.style.display = 'none';
+            smartFilters.style.display = '';
             placeholder.parentNode.insertBefore(smartFilters, placeholder.nextSibling);
         }
     };
