@@ -449,12 +449,12 @@
                 const container = document.getElementById('identity-cards-container');
                 const contBtn = document.getElementById('identity-continue-btn');
                 const cancelBtn = document.getElementById('identity-cancel-btn');
+                const closeIcon = document.getElementById('identity-close-icon');
                 if (!modal || !container || !contBtn) { resolve(true); return; }
 
-                // Hide cancel button if it's a mandatory selection
-                if (cancelBtn) {
-                    cancelBtn.style.display = forceShow ? 'block' : 'none';
-                }
+                // Hide cancel buttons if it's a mandatory selection
+                if (cancelBtn) cancelBtn.style.display = forceShow ? 'block' : 'none';
+                if (closeIcon) closeIcon.style.display = forceShow ? 'flex' : 'none';
 
                 let selectedId = null;
 
@@ -465,20 +465,20 @@
                     const initial = name.charAt(0).toUpperCase();
 
                     const card = document.createElement('div');
-                    card.className = 'identity-card p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 transition-all cursor-pointer flex items-center justify-between gap-3 hover:border-indigo-400/70 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 active:scale-[0.98]';
+                    card.className = 'identity-card p-3 rounded-[20px] apple-list-bg transition-all cursor-pointer flex items-center justify-between gap-3 hover:border-indigo-400/70 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 active:scale-[0.98] border border-transparent border-gray-200/50 dark:border-white/5';
                     card.setAttribute('data-name', name);
 
                     card.innerHTML = `
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-[18px] shrink-0 shadow-md">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-[16px] shrink-0 shadow-sm">
                                 ${escapeHTML(initial)}
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-[15px] font-semibold text-gray-900 dark:text-gray-100 truncate">${escapeHTML(name)}</p>
-                                <p class="text-[12px] text-gray-500 dark:text-gray-400">${msgCount > 0 ? msgCount.toLocaleString() + ' messages' : 'Participant'}</p>
+                            <div class="min-w-0 flex flex-col justify-center">
+                                <p class="text-[14px] font-bold apple-text-primary truncate leading-tight">${escapeHTML(name)}</p>
+                                <p class="text-[11px] apple-text-secondary mt-0.5 leading-tight">${msgCount > 0 ? msgCount.toLocaleString() + ' messages' : 'Participant'}</p>
                             </div>
                         </div>
-                        <div class="radio-circle w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center shrink-0 transition-all">
+                        <div class="radio-circle w-5 h-5 rounded-full border border-gray-300 dark:border-gray-500 flex items-center justify-center shrink-0 transition-all bg-white dark:bg-black/20">
                             <div class="inner-dot w-2.5 h-2.5 rounded-full bg-indigo-600 scale-0 transition-transform"></div>
                         </div>
                     `;
@@ -486,16 +486,16 @@
                     card.addEventListener('click', () => {
                         // Deselect all
                         container.querySelectorAll('.identity-card').forEach(c => {
-                            c.classList.remove('border-indigo-600', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
-                            c.classList.add('border-gray-200', 'dark:border-gray-700');
-                            c.querySelector('.radio-circle').classList.remove('border-indigo-600');
+                            c.classList.remove('border-indigo-500', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
+                            c.classList.add('border-transparent');
+                            c.querySelector('.radio-circle').classList.remove('border-indigo-500');
                             c.querySelector('.inner-dot').classList.remove('scale-100');
                             c.querySelector('.inner-dot').classList.add('scale-0');
                         });
                         // Select this one
-                        card.classList.remove('border-gray-200', 'dark:border-gray-700');
-                        card.classList.add('border-indigo-600', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
-                        card.querySelector('.radio-circle').classList.add('border-indigo-600');
+                        card.classList.remove('border-transparent');
+                        card.classList.add('border-indigo-500', 'bg-indigo-50/80', 'dark:bg-indigo-500/20');
+                        card.querySelector('.radio-circle').classList.add('border-indigo-500');
                         card.querySelector('.inner-dot').classList.remove('scale-0');
                         card.querySelector('.inner-dot').classList.add('scale-100');
 
