@@ -121,8 +121,7 @@ router.get('/chat/:folder/identity', async (req, res) => {
         : 'SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?';
     const params = req.user ? [req.params.folder, userId] : [req.params.folder, guestId];
     const chatRow = db.prepare(sql).get(...params);
-    
-    if (!chatRow) return res.status(404).json({ error: 'Chat not found' });
+    // Don't return 404 if not in DB; it might be an older chat on disk
     
     try {
         const { getMessages } = require('./cache');
@@ -131,7 +130,7 @@ router.get('/chat/:folder/identity', async (req, res) => {
         
         const { participants, participantStats, isGroup } = await getMessages(dir);
         
-        const storedParticipant = chatRow.user_participant || null;
+        const storedParticipant = chatRow ? chatRow.user_participant || null : null;
         const isValidSelection = storedParticipant && participants.includes(storedParticipant);
 
         res.json({
@@ -156,8 +155,21 @@ router.post('/chat/:folder/identity', async (req, res) => {
         : 'UPDATE chats SET user_participant = ? WHERE folder_name = ? AND guest_id = ?';
     const params = req.user ? [userParticipant, req.params.folder, userId] : [userParticipant, req.params.folder, guestId];
     
-    const info = db.prepare(sql).run(...params);
-    if (info.changes === 0) return res.status(404).json({ error: 'Chat not found' });
+    let info = db.prepare(sql).run(...params);
+    if (info.changes === 0) {
+        // Chat not in DB yet, insert it
+        const insertSql = req.user
+            ? 'INSERT INTO chats (user_id, folder_name, user_participant, created_at) VALUES (?, ?, ?, ?)'
+            : 'INSERT INTO chats (user_id, guest_id, folder_name, user_participant, created_at) VALUES (0, ?, ?, ?, ?)';
+        const insertParams = req.user 
+            ? [userId, req.params.folder, userParticipant, Date.now()]
+            : [guestId, req.params.folder, userParticipant, Date.now()];
+        try {
+            info = db.prepare(insertSql).run(...insertParams);
+        } catch(e) {
+            return res.status(500).json({ error: 'Failed to insert chat identity' });
+        }
+    }
     
     res.json({ ok: true });
 });
