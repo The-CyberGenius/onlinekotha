@@ -3574,6 +3574,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 let resultsHtml = '';
                 try {
+                    const escapeHTML = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                    const getStrColor = (str) => {
+                        let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                        const isDark = document.documentElement.classList.contains('dark');
+                        const colors = isDark ? ['#ef9a9a', '#f48fb1', '#ce93d8', '#b39ddb', '#9fa8da', '#90caf9', '#81d4fa', '#80cbc4', '#a5d6a7', '#c5e1a5', '#e6ee9c', '#ffe082', '#ffcc80', '#ffab91', '#bcaaa4', '#eeeeee'] : ['#e53935', '#d81b60', '#8e24aa', '#5e35b1', '#3949ab', '#1e88e5', '#039be5', '#00897b', '#43a047', '#7cb342', '#c0ca33', '#fbc02d', '#fb8c00', '#f4511e', '#6d4c41', '#757575'];
+                        return colors[Math.abs(hash) % colors.length];
+                    };
                     const limitRes = filteredMsgs.slice(-50);
                     const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
                     
@@ -3591,7 +3598,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         let nameHtml = '';
                         if (!isMe) {
-                            const color = typeof getStringColor === 'function' ? getStringColor(senderName) : '#818cf8';
+                            const color = getStrColor(senderName);
                             nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${color}">${escapeHTML(senderName)}</p>`;
                         }
 
