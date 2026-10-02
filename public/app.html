@@ -1013,7 +1013,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/script.js?v=20"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-    <script src="/js/ai-panel.js?v=9"></script>
+    <script src="/js/ai-panel.js?v=11"></script>
     <script src="/js/upload.js?v=9"></script>
     <script src="/js/features.js?v=10"></script>
     <script src="/js/dm.js?v=12"></script>
@@ -1391,32 +1391,35 @@
 
     <!-- Identity Selection Modal (Onboarding) -->
     <div id="identity-modal" class="hidden fixed inset-0 z-[10000] flex items-center justify-center bg-black/70 backdrop-blur-md px-4">
-        <div class="bg-white dark:bg-[#111b21] w-full mx-auto max-h-[90dvh] rounded-[24px] shadow-2xl border border-gray-100 dark:border-gray-800 flex flex-col m-auto overflow-hidden transform scale-95 opacity-0 transition-all duration-300 ease-out relative" style="max-width: 340px;">
+        <div class="bg-white dark:bg-[#111b21] w-full mx-auto max-h-[90dvh] rounded-[32px] shadow-2xl border-4 border-indigo-50 dark:border-indigo-900/30 flex flex-col m-auto overflow-hidden transform scale-95 opacity-0 transition-all duration-300 ease-out relative" style="max-width: 320px;">
             
             <!-- Cross Button (matches upgrade modal) -->
-            <button id="identity-close-icon" onclick="document.getElementById('identity-cancel-btn').click()" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer z-10 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700" title="Close">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <button id="identity-close-icon" onclick="document.getElementById('identity-cancel-btn').click()" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer z-10 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400" title="Close">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
 
             <!-- Header -->
-            <div class="px-5 pt-10 pb-4 shrink-0 text-center">
-                <h2 id="identity-modal-title" class="text-[22px] font-bold text-gray-900 dark:text-white tracking-tight leading-tight mb-2">Which person are you?</h2>
-                <p id="identity-modal-subtitle" class="text-[14px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
-                    Select yourself so AI knows who to respond as.
+            <div class="px-5 pt-8 pb-3 shrink-0 text-center relative">
+                <div class="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-full flex items-center justify-center shadow-inner">
+                    <span class="text-3xl">👋</span>
+                </div>
+                <h2 id="identity-modal-title" class="text-[20px] font-extrabold text-gray-900 dark:text-white tracking-tight leading-tight mb-1">Who are you?</h2>
+                <p id="identity-modal-subtitle" class="text-[13px] text-gray-500 dark:text-gray-400 font-medium leading-relaxed px-2">
+                    Pick your name so we can color your messages green!
                 </p>
             </div>
             
             <!-- Cards Container -->
-            <div id="identity-cards-container" class="px-5 pb-4 flex-1 overflow-y-auto space-y-3 custom-scrollbar">
+            <div id="identity-cards-container" class="px-4 pb-4 flex-1 overflow-y-auto space-y-2 custom-scrollbar">
                 <!-- Injected via JS -->
             </div>
             
             <!-- Footer Actions -->
-            <div class="px-5 py-5 shrink-0 border-t border-black/5 dark:border-white/5">
-                <button id="identity-continue-btn" disabled class="w-full bg-black dark:bg-white text-white dark:text-black font-semibold text-[15px] py-3.5 rounded-[16px] disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98] shadow-md shadow-black/10 dark:shadow-white/10">
+            <div class="px-4 py-4 shrink-0">
+                <button id="identity-continue-btn" disabled class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-extrabold text-[16px] py-4 rounded-[20px] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed transition-all duration-300 active:scale-[0.97] shadow-lg shadow-indigo-500/25">
                     Continue
                 </button>
-                <button id="identity-cancel-btn" class="w-full mt-3 apple-text-secondary hover:apple-text-primary font-medium text-[14px] py-2 rounded-[14px] transition-colors">
+                <button id="identity-cancel-btn" class="w-full mt-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-bold text-[14px] py-2.5 rounded-[16px] transition-colors active:bg-gray-100 dark:active:bg-gray-800">
                     Cancel
                 </button>
             </div>
