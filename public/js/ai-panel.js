@@ -423,7 +423,7 @@
     window.ensureIdentity = async function (chatFolder) {
         if (chatFolder === '__global__' || chatFolder === 'kotha_assistant') return true;
         try {
-            const resp = await fetch(`/api/chat/${encodeURIComponent(chatFolder)}/identity`);
+            const resp = await fetch(`/api/ai/chat/${encodeURIComponent(chatFolder)}/identity`);
             if (!resp.ok) return true;
             const data = await resp.json();
 
@@ -534,7 +534,7 @@
                             ? "Group" 
                             : (participants.find(p => p !== selectedId) || selectedId);
 
-                        await fetch(`/api/chat/${encodeURIComponent(chatFolder)}/identity`, {
+                        await fetch(`/api/ai/chat/${encodeURIComponent(chatFolder)}/identity`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ userParticipant: selectedId, aiParticipant })
