@@ -152,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dynamicHeaderDate = document.getElementById('dynamic-header-date');
 
     let allMessages = [];
+    window.getAllMessages = () => allMessages;
     let displayedMessages = [];
     let otherPersonName = "Contact";
     
@@ -3464,6 +3465,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (headerSearchBtn && inlineSearchOverlay && inlineSearchInput) {
         headerSearchBtn.addEventListener('click', () => {
+            const isMobile = window.matchMedia('(max-width: 767px)').matches;
+            if (!isMobile) {
+                // Desktop: Open sidebar search box
+                const mainSearchInput = document.getElementById('search-box');
+                if (mainSearchInput) {
+                    if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+                    setTimeout(() => mainSearchInput.focus(), 150);
+                }
+                return;
+            }
+
+            // Mobile: Inline chat search
             inlineSearchOverlay.classList.remove('hidden');
             setTimeout(() => inlineSearchInput.focus(), 100);
         });
@@ -3494,10 +3507,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Deep search in loaded messages
             const filteredMsgs = [];
-            if (window.allMessages && window.allMessages.length > 0) {
-                for (let i = 0; i < window.allMessages.length; i++) {
-                    if (window.allMessages[i].text && window.allMessages[i].text.toLowerCase().includes(lowerVal)) {
-                        filteredMsgs.push(window.allMessages[i]);
+            const msgs = typeof window.getAllMessages === 'function' ? window.getAllMessages() : [];
+            if (msgs && msgs.length > 0) {
+                for (let i = 0; i < msgs.length; i++) {
+                    if (msgs[i].text && msgs[i].text.toLowerCase().includes(lowerVal)) {
+                        filteredMsgs.push(msgs[i]);
                     }
                 }
             }
