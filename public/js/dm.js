@@ -1328,16 +1328,23 @@
         const data = await r.json();
 
         if (!data.user) {
-            if(searchResult) searchResult.innerHTML = `<div style="font-size:12px;color:#ef4444;padding:6px 0">No user found with that email.</div>`;
+            if (searchResult) searchResult.innerHTML = `<div class="text-[12px] text-red-500 font-medium py-2 px-1 text-center bg-red-50 dark:bg-red-950/20 rounded-xl mt-2 border border-red-100 dark:border-red-900/30">No user found with that email.</div>`;
             return;
         }
-        const u    = data.user;
-        const dark = dk();
-        const div  = document.createElement('div');
-        div.style.cssText = `display:flex;align-items:center;gap:10px;background:${dark?'#1f2c33':'#f8fafc'};border:1px solid ${dark?'#3b4a54':'#e5e7eb'};border-radius:12px;padding:10px;margin-top:8px`;
-        div.innerHTML = `${avatar(u,38)}<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:${dark?'#e9edef':'#111827'}">${esc(u.display_name)}</div><div style="font-size:11px;color:#8696a0">${esc(u.email)}</div></div>
-            <button id="dm-start-chat-btn" style="background:#6366f1;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:background .15s" onmouseenter="this.style.background='#4f46e5'" onmouseleave="this.style.background='#6366f1'">Start Chat</button>`;
-        if(searchResult){searchResult.innerHTML='';searchResult.appendChild(div);}
+        const u = data.user;
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-3 bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-700/50 rounded-[16px] p-3 mt-3 shadow-sm transition-all hover:shadow-md";
+        div.innerHTML = `
+            ${avatar(u, 42)}
+            <div class="flex-1 min-w-0">
+                <div class="text-[14px] font-bold text-gray-900 dark:text-gray-100 truncate">${esc(u.display_name)}</div>
+                <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5">${esc(u.email)}</div>
+            </div>
+            <button id="dm-start-chat-btn" class="bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 text-white text-[12px] font-bold py-1.5 px-4 rounded-xl shrink-0 transition-colors shadow-sm">
+                Chat
+            </button>
+        `;
+        if (searchResult) { searchResult.innerHTML = ''; searchResult.appendChild(div); }
 
         div.querySelector('#dm-start-chat-btn')?.addEventListener('click', async () => {
             const res  = await fetch('/api/dm/conversations',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:u.id})});

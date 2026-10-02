@@ -1018,8 +1018,8 @@
                                 <p class="text-sm text-gray-400 mt-4 leading-relaxed max-w-[280px]">${stats.totalMessages.toLocaleString()} messages analyzed across ${stats.firstDate || '?'} to ${stats.lastDate || '?'}</p>
                                 <p class="text-xs text-gray-600 mt-3 font-medium">${stats.avgWords} avg words per message</p>
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="0">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="0">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1057,8 +1057,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="1">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="1">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1095,8 +1095,8 @@
         }).join('')}
                                 </div>
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="2">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="2">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Share / Save
                                 </button>
@@ -1110,48 +1110,48 @@
                         <div class="wrapped-slide-content">
                             <div class="wrapped-header-tag">FUN FACTS</div>
                             <div class="wrapped-main-body w-full">
-                                <p class="text-xs text-gray-400 uppercase tracking-wider mb-4">Mind-blowing chat stats</p>
-                                <div class="space-y-3 w-full">
-                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
-                                        <span class="text-2xl">🔥</span>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-wider mb-2">Mind-blowing chat stats</p>
+                                <div class="space-y-2 w-full">
+                                    <div class="wrapped-badge-box text-left flex items-center gap-2">
+                                        <span class="text-xl">🔥</span>
                                         <div>
-                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Longest Streak</p>
-                                            <p class="text-lg font-black text-orange-400">${stats.maxStreak} days straight</p>
+                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Longest Streak</p>
+                                            <p class="text-base font-black text-orange-400 leading-tight">${stats.maxStreak} days straight</p>
                                         </div>
                                     </div>
-                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
-                                        <span class="text-2xl">📅</span>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-2">
+                                        <span class="text-xl">📅</span>
                                         <div>
-                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Days Chatting</p>
-                                            <p class="text-lg font-black text-indigo-300">${stats.totalDays} days · ${stats.msgsPerDay} msgs/day</p>
+                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Total Days Chatting</p>
+                                            <p class="text-base font-black text-indigo-300 leading-tight">${stats.totalDays} days · ${stats.msgsPerDay} msgs/day</p>
                                         </div>
                                     </div>
-                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
-                                        <span class="text-2xl">💬</span>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-2">
+                                        <span class="text-xl">💬</span>
                                         <div>
-                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Words Written</p>
-                                            <p class="text-lg font-black text-purple-300">${stats.totalWords.toLocaleString()} words</p>
+                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Total Words Written</p>
+                                            <p class="text-base font-black text-purple-300 leading-tight">${stats.totalWords.toLocaleString()} words</p>
                                         </div>
                                     </div>
-                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
-                                        <span class="text-2xl">😂</span>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-2">
+                                        <span class="text-xl">😂</span>
                                         <div>
-                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">LOL Moments</p>
-                                            <p class="text-lg font-black text-yellow-300">${stats.laughCount.toLocaleString()} msgs with laughter</p>
+                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">LOL Moments</p>
+                                            <p class="text-base font-black text-yellow-300 leading-tight">${stats.laughCount.toLocaleString()} msgs with laughter</p>
                                         </div>
                                     </div>
                                     ${stats.mediaCount > 0 ? `
-                                    <div class="wrapped-badge-box text-left flex items-center gap-3">
-                                        <span class="text-2xl">📸</span>
+                                    <div class="wrapped-badge-box text-left flex items-center gap-2">
+                                        <span class="text-xl">📸</span>
                                         <div>
-                                            <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Media Shared</p>
-                                            <p class="text-lg font-black text-cyan-300">${stats.mediaCount.toLocaleString()} photos/videos/audio</p>
+                                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Media Shared</p>
+                                            <p class="text-base font-black text-cyan-300 leading-tight">${stats.mediaCount.toLocaleString()} photos/videos</p>
                                         </div>
                                     </div>` : ''}
                                 </div>
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="3">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="3">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1201,8 +1201,8 @@
                                     <p class="text-sm font-black text-green-400">${stats.busiestDate} — ${stats.busiestDateCount} messages! 🎉</p>
                                 </div>` : ''}
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="4">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="4">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1243,8 +1243,8 @@
                                     ` : ''}
                                 ` : `<div class="text-gray-500 text-sm">No emojis found in this chat!</div>`}
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="5">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="5">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1266,8 +1266,8 @@
                                 <div class="text-6xl mt-6 wrapped-stat-pop">${stats.topEmojis[0] || '💬'}</div>
                                 <div class="mt-4 text-xs text-gray-500 font-bold">${stats.lateNightPct}% of chats happen after midnight 🌙</div>
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1291,7 +1291,7 @@
                                     <p class="text-gray-400 text-sm font-bold">AI Analyzing Chat Tone...</p>
                                 </div>
                                 <div id="compat-content" class="hidden w-full text-center">
-                                    <div class="relative w-40 h-40 mx-auto mb-6">
+                                    <div class="relative w-28 h-28 mx-auto mb-4">
                                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                                             <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10" />
                                             <circle id="compat-ring" cx="50" cy="50" r="45" fill="none" stroke="url(#gradient)" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" class="transition-all duration-1000 ease-out" stroke-linecap="round" />
@@ -1303,8 +1303,8 @@
                                             </defs>
                                         </svg>
                                         <div class="absolute inset-0 flex items-center justify-center flex-col">
-                                            <span id="compat-score" class="text-4xl font-black text-white">0</span>
-                                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">% MATCH</span>
+                                            <span id="compat-score" class="text-3xl font-black text-white leading-none mt-1">0</span>
+                                            <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">% MATCH</span>
                                         </div>
                                     </div>
                                     <div class="wrapped-badge-box text-left wrapped-premium-glass">
@@ -1312,8 +1312,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="7">
+                            <div class="wrapped-action-btns flex justify-center w-full mt-2 relative" style="z-index:200">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[11px] rounded-lg py-1.5 px-3 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="7">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1393,10 +1393,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Navigation Tap Zones -->
-                <div class="wrapped-nav-tap wrapped-nav-tap-left" id="wrapped-nav-left"></div>
-                <div class="wrapped-nav-tap wrapped-nav-tap-right" id="wrapped-nav-right"></div>
+                </div>
             </div>
         `;
         document.body.appendChild(overlay);
@@ -1412,17 +1409,9 @@
             progC.appendChild(bar);
         });
 
-        // Start story
-        const navLeft = overlay.querySelector('#wrapped-nav-left');
-        const navRight = overlay.querySelector('#wrapped-nav-right');
-
         // Helper: toggle nav tap pointer-events based on current slide
         function updateNavTapsForSlide(index) {
-            const isLastSlide = index === slideEls.length - 1;
-            // On last slide, completely disable nav taps so buttons underneath get clicks
-            navRight.style.pointerEvents = isLastSlide ? 'none' : 'auto';
-            // Keep left nav active so user can go back
-            navLeft.style.pointerEvents = 'auto';
+            // No-op now, we handle clicks directly on container
         }
 
         // Compatibility score fallback generators
@@ -1539,13 +1528,23 @@
         cont.addEventListener('pointerleave', doResume);
 
         // Nav taps
-        navLeft.addEventListener('click', (e) => {
-            e.stopPropagation();
-            storyRef.prev();
-        });
-        navRight.addEventListener('click', (e) => {
-            e.stopPropagation();
-            storyRef.next();
+        cont.addEventListener('click', (e) => {
+            // Do not advance if user clicked a button or close icon
+            if (e.target.closest('button') || e.target.closest('#wrapped-close-btn')) return;
+            
+            // Also don't advance if the user was just highlighting text or scrolling
+            if (window.getSelection().toString().length > 0) return;
+            
+            const rect = cont.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            
+            // Left 40% goes back, right 60% goes forward
+            // (Unless it's the last slide, then we still allow going back, but right tap might do nothing or close, let's keep it simple)
+            if (x < rect.width * 0.4) {
+                storyRef.prev();
+            } else {
+                storyRef.next();
+            }
         });
 
         // Close

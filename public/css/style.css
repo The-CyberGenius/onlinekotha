@@ -1842,6 +1842,8 @@ select {
     border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
+    isolation: isolate;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 /* Progress segments at top of story */
