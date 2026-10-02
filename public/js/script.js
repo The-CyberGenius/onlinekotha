@@ -3597,14 +3597,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
 
                         let nameHtml = '';
-                        if (!isMe) {
-                            const color = getStrColor(senderName);
-                            nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${color}">${escapeHTML(senderName)}</p>`;
-                        }
-
+                        // Remove sender name in search results to keep it clean like WhatsApp 1-on-1 chats
+                        
                         resultsHtml += `
                             <div class="flex flex-col mb-2 w-full cursor-pointer hover:opacity-85 transition-opacity" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg('${msg.id}')">
-                                <div class="max-w-[85%] md:max-w-[75%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${bubbleClass} ${alignClass} rounded-2xl flex flex-col gap-0.5 shadow-sm">
+                                <div class="max-w-[80%] md:max-w-[70%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${bubbleClass} ${alignClass} rounded-2xl flex flex-col gap-0.5 shadow-sm">
                                     ${nameHtml}
                                     <p style="color:var(--msg-text)" class="text-[13px] leading-normal font-medium whitespace-pre-wrap break-words line-clamp-2">${highlightedText}</p>
                                     <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto pt-0.5">

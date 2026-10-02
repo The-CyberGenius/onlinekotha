@@ -565,6 +565,7 @@
                 };
 
                 cancelBtn.onclick = () => closeModal(false);
+                if (closeIcon) closeIcon.onclick = () => closeModal(false);
             });
         } catch (e) {
             console.error('ensureIdentity error', e);
