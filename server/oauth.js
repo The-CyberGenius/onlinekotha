@@ -170,14 +170,29 @@ router.post('/google/onetap', async (req, res) => {
         const clientId = integ.get('integ.oauth.google_client_id');
         if (!clientId) return res.status(503).json({ error: 'Google One-Tap not configured' });
 
-        const { OAuth2Client } = require('google-auth-library');
-        const client = new OAuth2Client(clientId);
-
-        const ticket = await client.verifyIdToken({
-            idToken: credential,
-            audience: clientId,
-        });
-        const payload = ticket.getPayload();
+        let payload = null;
+        try {
+            const { OAuth2Client } = require('google-auth-library');
+            const client = new OAuth2Client(clientId);
+            const ticket = await client.verifyIdToken({
+                idToken: credential,
+                audience: clientId,
+            });
+            payload = ticket.getPayload();
+        } catch (authLibErr) {
+            // Fallback: verify directly with Google's tokeninfo API using fetch
+            try {
+                const tokenResp = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+                if (tokenResp.ok) {
+                    const tokenData = await tokenResp.json();
+                    if (tokenData.aud === clientId || tokenData.azp === clientId) {
+                        payload = tokenData;
+                    }
+                }
+            } catch (fetchErr) {
+                console.error('Google One-Tap tokeninfo fallback error:', fetchErr);
+            }
+        }
         if (!payload) return res.status(400).json({ error: 'Invalid token' });
 
         const googleId = payload.sub;

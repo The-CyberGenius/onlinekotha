@@ -52,10 +52,11 @@ async function getMessages(chatDir) {
     }
     
     const sortedSenders = Object.keys(sendersCount).sort((a, b) => sendersCount[b] - sendersCount[a]);
-    const dynamicThreshold = Math.max(5, totalMessages * 0.01);
+    const dynamicThreshold = Math.min(2, Math.max(1, Math.floor(totalMessages * 0.005)));
     const realParticipants = sortedSenders.filter(s => sendersCount[s] >= dynamicThreshold);
     
     if (realParticipants.length === 0) realParticipants.push(...sortedSenders);
+
 
     let isGroup = realParticipants.length > 2;
     if (isGroup && sortedSenders.length >= 2) {

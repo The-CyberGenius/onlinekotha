@@ -28,6 +28,12 @@
             --danger: #ef4444;
             --danger-bg: #fef2f2;
             --success: #10b981;
+            --bg-alt: #f1f5f9;
+            --bg-hover: #e2e8f0;
+            --table-header: #f8fafc;
+            --input-bg: #ffffff;
+            --btn-dark: #0f172a;
+            --btn-dark-text: #ffffff;
         }
         body, body * {
             user-select: text !important;
@@ -311,24 +317,24 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 900px; /* Forces scroll on mobile */
+            table-layout: auto;
         }
         .admin-table th {
-            padding: 10px 16px;
+            padding: 8px 10px;
             background: var(--bg-page);
             border-bottom: 1px solid var(--border);
             font-size: 11px;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             white-space: nowrap;
         }
         .admin-table td {
-            padding: 12px 16px;
+            padding: 8px 10px;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
-            font-size: 13px;
+            font-size: 12.5px;
             color: var(--text-primary);
             white-space: nowrap;
         }
@@ -342,28 +348,7 @@
             background-color: var(--bg-page);
         }
         .admin-table tbody tr.user-main-row:hover {
-            background-color: var(--bg-page);
-        }
-        
-        /* Sticky First Column for Mobile */
-        .admin-table th:first-child,
-        .admin-table td:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 2;
-        }
-        .admin-table th:first-child {
-            background-color: var(--bg-page);
-        }
-        /* Match zebra striping for sticky column */
-        .admin-table tbody tr.user-main-row:nth-child(4n+1) td:first-child {
-            background-color: var(--card-bg);
-        }
-        .admin-table tbody tr.user-main-row:nth-child(4n+3) td:first-child {
-            background-color: var(--bg-page);
-        }
-        .admin-table tbody tr.user-main-row:hover td:first-child {
-            background-color: var(--bg-page);
+            background-color: var(--bg-hover);
         }
         
         .user-profile-cell {
@@ -389,6 +374,8 @@
         .user-profile-text {
             display: flex;
             flex-direction: column;
+            min-width: 0;
+            max-width: 170px;
         }
         .user-name-text {
             font-size: 13px;
@@ -397,10 +384,16 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .user-email-text {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .status-dot {
             width: 6px;
@@ -471,8 +464,8 @@
             justify-content: flex-end;
         }
         .btn-subtle {
-            padding: 6px 10px;
-            font-size: 12px;
+            padding: 4px 7px;
+            font-size: 11px;
             font-weight: 600;
             border-radius: 6px;
             border: 1px solid var(--border);
@@ -482,6 +475,10 @@
             transition: all 0.15s ease;
             white-space: nowrap;
             box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
         }
         .btn-subtle:hover {
             background: var(--bg-page);
@@ -489,12 +486,12 @@
         }
         .btn-subtle-danger {
             color: var(--danger);
-            border-color: #fca5a5;
+            border-color: rgba(239, 68, 68, 0.35);
         }
         .btn-subtle-danger:hover {
             background: var(--danger-bg);
-            border-color: #f87171;
-            color: #b91c1c;
+            border-color: var(--danger);
+            color: var(--danger);
         }
 
         .hidden { display: none !important; }
@@ -720,8 +717,13 @@
         .action-cell {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             justify-content: flex-end;
+            white-space: nowrap;
+        }
+
+        #tab-users .admin-card {
+            padding: 20px 16px;
         }
     
         /* Dark Mode Variables */
@@ -1494,7 +1496,7 @@
         </div>
     </div>
 
-    <script src="/js/admin.js?v=202609240300"></script>
+    <script src="/js/admin.js?v=202609280185"></script>
     <script>
 
     // ── Theme Manager ────────────────────────────────────────────────────────
@@ -1526,145 +1528,17 @@
         });
     }
 
-    // ── DM Logs Tab Handler ──────────────────────────────────────────────────
-    (function() {
-        let dmPage = 1;
-        let dmSearch = '';
-
-        function timeStr(ts) {
-            if (!ts) return '—';
-            return new Date(ts).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-        }
-
-        async function loadDmLogs(page, search) {
-            dmPage  = page  || 1;
-            dmSearch = search !== undefined ? search : dmSearch;
-            const url = `/api/admin/dm/conversations?page=${dmPage}&limit=20${dmSearch ? '&search=' + encodeURIComponent(dmSearch) : ''}`;
-            const res  = await fetch(url);
-            const data = await res.json();
-            renderDmList(data);
-        }
-
-        function renderDmList(data) {
-            const el = document.getElementById('dm-log-list');
-            const pg = document.getElementById('dm-log-pagination');
-            if (!el) return;
-
-            if (!data.rows || data.rows.length === 0) {
-                el.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px;">No DM conversations found.</p>';
-                pg.innerHTML = '';
-                return;
-            }
-
-            el.innerHTML = `
-                <table style="width:100%;min-width:560px;border-collapse:collapse;font-size:12px;">
-                    <thead>
-                        <tr style="background:var(--bg-page);color:var(--text-muted);text-transform:uppercase;font-size:10px;letter-spacing:0.04em;border-bottom:1px solid var(--border);">
-                            <th style="text-align:left;padding:8px 10px;">ID</th>
-                            <th style="text-align:left;padding:8px 10px;">User A</th>
-                            <th style="text-align:left;padding:8px 10px;">User B</th>
-                            <th style="text-align:center;padding:8px 10px;">Messages</th>
-                            <th style="text-align:left;padding:8px 10px;">Last Activity</th>
-                            <th style="text-align:right;padding:8px 10px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.rows.map(r => `
-                        <tr style="border-bottom:1px solid var(--bg-page);">
-                            <td style="padding:8px 10px;color:var(--text-muted);font-family:monospace;">#${r.id}</td>
-                            <td style="padding:8px 10px;">
-                                <div style="font-weight:600;color:var(--text-primary);">${r.user_a_name || ''}</div>
-                                <div style="font-size:10px;color:var(--text-muted);">${r.user_a_email}</div>
-                            </td>
-                            <td style="padding:8px 10px;">
-                                <div style="font-weight:600;color:var(--text-primary);">${r.user_b_name || ''}</div>
-                                <div style="font-size:10px;color:var(--text-muted);">${r.user_b_email}</div>
-                            </td>
-                            <td style="padding:8px 10px;text-align:center;font-weight:600;color:var(--text-primary);">${r.msg_count}</td>
-                            <td style="padding:8px 10px;color:var(--text-muted);font-size:11px;">${timeStr(r.last_at)}</td>
-                            <td style="padding:8px 10px;text-align:right;">
-                                <button class="dm-view-btn" style="color:var(--accent);font-weight:600;background:none;border:none;cursor:pointer;margin-right:6px;" data-id="${r.id}" data-a="${r.user_a_email}" data-b="${r.user_b_email}">View</button>
-                                <a href="/api/admin/dm/conversations/${r.id}/download" style="color:var(--success);font-weight:600;text-decoration:none;">Download</a>
-                            </td>
-                        </tr>`).join('')}
-                    </tbody>
-                </table>`;
-
-            // Pagination
-            const pages = Math.ceil(data.total / data.limit);
-            pg.innerHTML = `
-                <span style="color:var(--text-muted);margin-right:6px;">Page ${dmPage} of ${pages} (${data.total} total)</span>
-                ${dmPage > 1 ? `<button id="dm-pg-prev" style="background:var(--bg-page);border:none;border-radius:4px;padding:3px 6px;font-weight:600;cursor:pointer;">Prev</button>` : ''}
-                ${dmPage < pages ? `<button id="dm-pg-next" style="background:var(--bg-page);border:none;border-radius:4px;padding:3px 6px;font-weight:600;cursor:pointer;">Next</button>` : ''}`;
-
-            document.getElementById('dm-pg-prev')?.addEventListener('click', () => loadDmLogs(dmPage - 1));
-            document.getElementById('dm-pg-next')?.addEventListener('click', () => loadDmLogs(dmPage + 1));
-
-            // View buttons
-            el.querySelectorAll('.dm-view-btn').forEach(btn => {
-                btn.addEventListener('click', () => viewDmConv(Number(btn.dataset.id), btn.dataset.a, btn.dataset.b));
-            });
-        }
-
-        async function viewDmConv(convId, emailA, emailB) {
-            document.getElementById('dm-log-list').classList.add('hidden');
-            document.getElementById('dm-log-pagination').classList.add('hidden');
-            const viewer = document.getElementById('dm-log-viewer');
-            viewer.classList.remove('hidden');
-            document.getElementById('dm-log-viewer-title').textContent = `${emailA} ↔ ${emailB}`;
-            document.getElementById('dm-log-download-btn').href = `/api/admin/dm/conversations/${convId}/download`;
-
-            const msgsEl = document.getElementById('dm-log-messages');
-            msgsEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:14px;">Loading…</p>';
-
-            const res  = await fetch(`/api/admin/dm/conversations/${convId}/messages`);
-            const data = await res.json();
-            if (!res.ok) { msgsEl.innerHTML = '<p style="color:var(--danger);font-size:12px;">Error loading messages.</p>'; return; }
-
-            if (data.messages.length === 0) {
-                msgsEl.innerHTML = '<p style="color:var(--text-muted);font-size:12px;text-align:center;padding:14px;">No messages yet.</p>';
-                return;
-            }
-
-            msgsEl.innerHTML = data.messages.map(m => `
-                <div style="display:flex;gap:6px;font-size:12px;padding:3px 0;">
-                    <span style="font-weight:600;color:var(--text-primary);width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;">${m.sender_name || m.sender_email}</span>
-                    <span style="color:var(--text-muted);font-size:10px;flex-shrink:0;">${timeStr(m.created_at)}</span>
-                    <span style="color:var(--text-primary);flex:1;word-break:break-word;">${m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</span>
-                </div>
-            `).join('');
-        }
-
-        document.getElementById('dm-log-back')?.addEventListener('click', () => {
-            document.getElementById('dm-log-viewer').classList.add('hidden');
-            document.getElementById('dm-log-list').classList.remove('hidden');
-            document.getElementById('dm-log-pagination').classList.remove('hidden');
-        });
-
-        document.getElementById('dm-log-search-btn')?.addEventListener('click', () => {
-            loadDmLogs(1, document.getElementById('dm-log-search').value.trim());
-        });
-        document.getElementById('dm-log-search')?.addEventListener('keydown', e => {
-            if (e.key === 'Enter') loadDmLogs(1, e.target.value.trim());
-        });
-
-        // Load when tab is clicked
-        document.querySelector('[data-tab="dm-logs"]')?.addEventListener('click', () => {
-            if (!document.getElementById('dm-log-list').querySelector('table')) loadDmLogs(1);
-        });
-
-        // Purge spam accounts
-        document.getElementById('purge-spam-btn')?.addEventListener('click', async function () {
-            if (!confirm('Delete all bot/spam accounts (@example.com, no activity)? This cannot be undone.')) return;
-            this.disabled = true; this.textContent = 'Purging…';
-            try {
-                const r = await fetch('/api/admin/purge-spam', { method: 'POST' });
-                const d = await r.json();
-                alert(d.ok ? `Deleted ${d.deleted} spam accounts.` : (d.error || 'Failed'));
-                location.reload();
-            } catch { alert('Network error'); this.disabled = false; this.textContent = 'Purge spam'; }
-        });
-    })();
+    // Purge spam accounts
+    document.getElementById('purge-spam-btn')?.addEventListener('click', async function () {
+        if (!confirm('Delete all bot/spam accounts (@example.com, no activity)? This cannot be undone.')) return;
+        this.disabled = true; this.textContent = 'Purging…';
+        try {
+            const r = await fetch('/api/admin/purge-spam', { method: 'POST' });
+            const d = await r.json();
+            alert(d.ok ? `Deleted ${d.deleted} spam accounts.` : (d.error || 'Failed'));
+            location.reload();
+        } catch { alert('Network error'); this.disabled = false; this.textContent = 'Purge spam'; }
+    });
         // Contact Messages handling
         function loadContactMessages() {
             const list = document.getElementById('contact-messages-list');

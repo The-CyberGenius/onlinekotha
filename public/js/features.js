@@ -1272,7 +1272,7 @@
                                     Save Card
                                 </button>
                             </div>
-                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT FOR SHARE CARD →</div>
+                            <div class="text-[10px] text-gray-500 text-center tracking-widest uppercase">TAP RIGHT →</div>
                         </div>
                     </div>
 
@@ -1313,7 +1313,7 @@
                                 </div>
                             </div>
                             <div class="wrapped-action-btns flex justify-center w-full mt-3 relative" style="z-index:200">
-                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="6.5">
+                                <button class="wrapped-slide-save-btn bg-white/10 hover:bg-white/20 border border-white/10 text-white font-extrabold text-[12px] rounded-xl py-2 px-3.5 flex items-center gap-1.5 transition active:scale-95 cursor-pointer" data-scene="7">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                                     Save Card
                                 </button>
@@ -1425,40 +1425,106 @@
             navLeft.style.pointerEvents = 'auto';
         }
 
-        // Patch showSlide to also update nav taps
-        const origShowSlide = WrappedStory.prototype.showSlide;
-        
-        activeStory = new WrappedStory(slideEls, (idx) => {
-            const slide = slideEls[idx];
-            if (slide && slide.querySelector('#compat-loader')) {
-                compatPromise.then(data => {
-                    const loader = slide.querySelector('#compat-loader');
-                    const cContent = slide.querySelector('#compat-content');
-                    if (!loader || !cContent) return;
-                    loader.classList.add('hidden');
-                    cContent.classList.remove('hidden');
-                    if (data && data.score) {
-                        slide.querySelector('#compat-score').innerText = data.score;
-                        slide.querySelector('#compat-summary').innerText = data.summary || "Great connection!";
-                        setTimeout(() => {
-                            const ring = slide.querySelector('#compat-ring');
-                            if (ring) {
-                                const offset = 283 - (283 * data.score) / 100;
-                                ring.style.strokeDashoffset = offset;
-                            }
-                        }, 100);
-                    } else {
-                        slide.querySelector('#compat-summary').innerText = "Could not calculate compatibility.";
-                    }
-                });
+        // Compatibility score fallback generators
+        function computeFallbackCompatScore(st) {
+            let score = 75;
+            const balanceDiff = Math.abs((st.s1Pct || 50) - (st.s2Pct || 50));
+            if (balanceDiff <= 15) score += 10;
+            else if (balanceDiff <= 30) score += 5;
+            else score += 2;
+
+            if (st.maxStreak >= 10) score += 6;
+            else if (st.maxStreak >= 3) score += 3;
+
+            if (st.laughCount >= 15) score += 5;
+            else if (st.laughCount >= 3) score += 3;
+
+            if (st.lateNightPct >= 15) score += 4;
+            if (st.totalQuestions >= 10) score += 3;
+
+            return Math.max(72, Math.min(97, score));
+        }
+
+        function computeFallbackCompatSummary(st, score) {
+            const other = st.otherName || "your friend";
+            if (score >= 90) {
+                return `Exceptional sync! Your conversations with ${other} show effortless flow, balanced engagement, and genuine shared humor.`;
+            } else if (score >= 82) {
+                return `High natural compatibility! You and ${other} share great responsiveness, comfortable banter, and strong conversational energy.`;
+            } else {
+                return `Solid conversational harmony with ${other}. Consistent check-ins and shared moments make your dynamic easygoing and reliable.`;
             }
+        }
+
+        let compatApplied = false;
+        function applyCompatData(data) {
+            if (compatApplied) return;
+            compatApplied = true;
+
+            const loader = overlay.querySelector("#compat-loader");
+            const cContent = overlay.querySelector("#compat-content");
+            const scoreEl = overlay.querySelector("#compat-score");
+            const summaryEl = overlay.querySelector("#compat-summary");
+            const ring = overlay.querySelector("#compat-ring");
+            if (!loader || !cContent) return;
+
+            loader.classList.add("hidden");
+            cContent.classList.remove("hidden");
+
+            const score = (data && (typeof data.score === "number" || (data.score && !isNaN(parseInt(data.score, 10)))))
+                ? parseInt(data.score, 10)
+                : computeFallbackCompatScore(stats);
+
+            const summary = (data && data.summary && data.summary !== "..." && String(data.summary).trim().length > 0)
+                ? String(data.summary).trim()
+                : computeFallbackCompatSummary(stats, score);
+
+            if (scoreEl) scoreEl.innerText = score;
+            if (summaryEl) summaryEl.innerText = summary;
+
+            setTimeout(() => {
+                if (ring) {
+                    const offset = 283 - (283 * score) / 100;
+                    ring.style.strokeDashoffset = offset;
+                }
+            }, 120);
+        }
+
+        // Apply compatibility as soon as the background request completes
+        compatPromise.then(data => {
+            applyCompatData(data);
+        }).catch(() => {
+            applyCompatData(null);
         });
+
+        // 5s timeout safety: ensure the loader never hangs indefinitely
+        setTimeout(() => {
+            if (!compatApplied) {
+                applyCompatData(null);
+            }
+        }, 5000);
+
+        activeStory = new WrappedStory(slideEls);
 
         const storyRef = activeStory;
         const origShow = storyRef.showSlide.bind(storyRef);
         storyRef.showSlide = function (index) {
             origShow(index);
             updateNavTapsForSlide(index);
+
+            const slide = slideEls[index];
+            if (slide && slide.querySelector("#compat-content")) {
+                const ring = slide.querySelector("#compat-ring");
+                const scoreEl = slide.querySelector("#compat-score");
+                if (compatApplied && ring && scoreEl && scoreEl.innerText !== "0") {
+                    const score = parseInt(scoreEl.innerText, 10) || 80;
+                    ring.style.strokeDashoffset = "283";
+                    setTimeout(() => {
+                        const offset = 283 - (283 * score) / 100;
+                        ring.style.strokeDashoffset = offset;
+                    }, 80);
+                }
+            }
         };
         storyRef.start();
 

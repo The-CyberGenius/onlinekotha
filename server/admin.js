@@ -804,7 +804,13 @@ router.get('/dm/conversations/:id/download', (req, res) => {
     for (const m of msgs) {
         const time = new Date(m.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
         log += `[${time} IST] ${m.sender_name} <${m.sender_email}>:\n`;
-        log += `${m.body}\n\n`;
+        if (m.media_url) {
+            log += `[Attachment (${m.type || 'file'}): https://www.onlinekotha.com${m.media_url}]\n`;
+        }
+        if (m.body) {
+            log += `${m.body}\n`;
+        }
+        log += `\n`;
     }
 
     const safeName = `dm_log_conv${convId}_${Date.now()}`;
@@ -863,7 +869,13 @@ router.get('/dm/export-all', (req, res) => {
         for (const m of cMsgs) {
             const time = new Date(m.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
             log += `[${time} IST] ${m.sender_name} <${m.sender_email}>:\n`;
-            log += `${m.body}\n\n`;
+            if (m.media_url) {
+                log += `[Attachment (${m.type || 'file'}): https://www.onlinekotha.com${m.media_url}]\n`;
+            }
+            if (m.body) {
+                log += `${m.body}\n`;
+            }
+            log += `\n`;
         }
         
         const safeEmailA = conv.user_a_email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');

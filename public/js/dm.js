@@ -396,7 +396,18 @@
             renderConvs();
         });
 
-        // ── Restore previous view/conversation after refresh ──
+        // ── Restore previous view/conversation after refresh or direct URL hash ──
+        const initialHash = window.location.hash;
+        if (initialHash && initialHash.startsWith('#chat-')) {
+            const hashConvId = Number(initialHash.replace('#chat-', ''));
+            if (hashConvId) {
+                showDmTab();
+                await loadConvs();
+                await openConv(hashConvId);
+                return;
+            }
+        }
+
         if (localStorage.getItem(LS.view) === 'messages') {
             showDmTab();              // switch to Messages tab (also loads convs)
             await loadConvs();        // ensure list is ready
@@ -645,8 +656,20 @@
             history.pushState(null, '', `#chat-${convId}`);
         }
         activeConvId = convId;
-        const c = convs.find(x => x.conv_id === convId);
-        if (!c) return;
+        window.activeDmConvId = convId;
+
+        // Ensure convs are loaded so we can find metadata
+        if (!convs.length) {
+            await loadConvs();
+        }
+        let c = convs.find(x => x.conv_id === convId);
+        if (!c) {
+            await loadConvs();
+            c = convs.find(x => x.conv_id === convId);
+        }
+        if (!c) {
+            c = { conv_id: convId, other: { id: 0, display_name: 'Chat #' + convId, email: '' }, unread: 0 };
+        }
         c.unread = 0;
         updateBadge();
         renderConvs();
@@ -654,6 +677,13 @@
         // On mobile / compact mode → close sidebar so chat takes full screen
         if (window.innerWidth < 768 || window.kothaCompact) {
             if (window.kothaSidebarClose) window.kothaSidebarClose();
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+            }
+            const bd = document.getElementById('sidebar-backdrop');
+            if (bd) bd.classList.add('hidden');
         }
 
         renderedIds = new Set();        // reset dedup tracker for this conversation
@@ -661,6 +691,11 @@
         localStorage.setItem(LS.conv, convId);
         if (chatArea)   chatArea.style.display = 'flex';
         document.getElementById('dm-empty-state')?.classList.add('hidden');
+
+        // Remove empty state from WhatsApp chat container if present
+        const emptyState = document.getElementById('empty-state');
+        if (emptyState) emptyState.remove();
+
         if (chatName) {
             chatName.innerHTML = `
                 <div style="display:inline-flex;align-items:center;gap:6px">
@@ -728,10 +763,14 @@
             return;
         }
         activeConvId = null;
+        window.activeDmConvId = null;
         if (chatArea) chatArea.style.display = 'none';
         document.getElementById('dm-empty-state')?.classList.remove('hidden');
         closeCtxMenu();
         localStorage.removeItem(LS.conv);
+        if (window.innerWidth < 768 || window.kothaCompact) {
+            if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+        }
     }
 
     // ── Date divider ──────────────────────────────────────────
@@ -1588,8 +1627,10 @@
         }
     });
 
-    window.dmShowTab   = showDmTab;
-    window.dmOpenConv  = openConv;
+    window.dmShowTab       = showDmTab;
+    window.dmOpenConv      = openConv;
+    window.dmIsConvActive  = () => !!activeConvId;
+    window.dmActiveConvId  = () => activeConvId;
 })();
 
 // ── Global Audio Player Handlers ─────────────────────────────────────────

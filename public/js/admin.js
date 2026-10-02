@@ -623,7 +623,7 @@ HARD RULES
             // ══════════════════════════════════════════════════════════
             // MOBILE — pure <div> cards, inline styles, no CSS needed
             // ══════════════════════════════════════════════════════════
-            let html = '<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:12px;">' + rows.length + ' total users</div>';
+            let html = '<div style="display:flex;align-items:center;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + rows.length + ' total registered users</span></div>';
 
             for (const u of rows) {
                 const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
@@ -655,11 +655,11 @@ HARD RULES
                 html += '</div>';
                 if (u.last_active_at) html += '<div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Active: ' + formatDateTime(u.last_active_at) + '</div>';
                 // Action buttons
-                html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">';
-                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
-                html += '<button data-uid="' + u.id + '" class="user-chats-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats</button>';
-                html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
-                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:60px;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;border:1px solid #fca5a5;background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>';
+                html += '<div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;">';
+                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
+                html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + u.chat_count + '" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats (' + u.chat_count + ')</button>';
+                html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
+                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:50px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>';
                 html += '</div>';
                 // Expand areas
                 html += '<div data-chats-for="' + u.id + '" class="hidden" style="margin-top:8px;"></div>';
@@ -691,7 +691,7 @@ HARD RULES
             // ══════════════════════════════════════════════════════════
             // DESKTOP — original table layout (unchanged)
             // ══════════════════════════════════════════════════════════
-            let html = '\n<div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:12px;">' + rows.length + ' total users</div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
+            let html = '\n<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + rows.length + ' total registered users</span></div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
             for (const u of rows) {
                 const badge = getBadge(u);
                 const loginMethod = u.google_id ? '<span class="meta-text" style="color:var(--accent);">Google Auth</span>' : '<span class="meta-text">Email Auth</span>';
@@ -710,8 +710,8 @@ HARD RULES
                 html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${u.total_cost.toFixed(3)}</span></td>`;
                 html += `<td>${ipCountry}</td>`;
                 html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
-                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle">Chats</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User">Del</button>`}</div></td></tr>`;
-                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:16px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);"></div></td></tr>`;
+                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count}" style="padding:4px 7px;font-size:11px;">Chats${u.chat_count > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
+                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
             }
             html += '</tbody></table></div>';
             list.innerHTML = html;
@@ -724,51 +724,59 @@ HARD RULES
                 const email = btn.dataset.email;
                 const currentPlan = btn.dataset.plan;
                 const trialExp = btn.dataset.trial ? Number(btn.dataset.trial) : null;
+                const isTrialActive = Boolean(trialExp && trialExp > Date.now());
 
                 const trialInfo = trialExp
-                    ? (trialExp > Date.now()
+                    ? (isTrialActive
                         ? `Active — expires ${new Date(trialExp).toLocaleString()}`
                         : `Expired on ${new Date(trialExp).toLocaleString()}`)
-                    : 'Not set';
+                    : 'Not configured';
+
+                const statusBadge = isTrialActive
+                    ? `<span style="font-size:11px;font-weight:700;color:var(--success);display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.12);padding:2px 8px;border-radius:99px;border:1px solid rgba(16,185,129,0.25);"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 6px var(--success);"></span>Active</span>`
+                    : `<span style="font-size:11px;font-weight:700;color:var(--danger);display:inline-flex;align-items:center;gap:5px;background:var(--danger-bg);padding:2px 8px;border-radius:99px;border:1px solid var(--danger);"><span style="width:6px;height:6px;border-radius:50%;background:var(--danger);display:inline-block;"></span>${trialExp ? 'Expired' : 'No Trial'}</span>`;
 
                 const modal = document.createElement('div');
-                modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:12px;';
+                modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn 0.15s ease;';
                 modal.innerHTML = `
-                    <div style="background:white;border-radius:12px;max-width:420px;width:100%;box-shadow:0 12px 30px rgba(0,0,0,0.15);overflow:hidden;">
-                        <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:16px;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);overflow:hidden;">
+                        <div style="padding:16px 20px;border-bottom:1px solid var(--border);background:var(--bg-alt);display:flex;justify-content:space-between;align-items:center;">
                             <div>
-                                <h3 style="font-weight:700;font-size:15px;color:var(--text-primary);margin:0;">Manage Plan</h3>
-                                <p style="font-size:12px;color:var(--text-muted);margin:2px 0 0;">${email}</p>
+                                <h3 style="font-weight:700;font-size:16px;color:var(--text-primary);margin:0;letter-spacing:-0.01em;">Manage User Plan</h3>
+                                <p style="font-size:12px;color:var(--text-muted);margin:3px 0 0;font-family:monospace;">${email}</p>
                             </div>
-                            <button id="plan-modal-x" style="border:none;background:transparent;font-size:18px;color:var(--text-muted);cursor:pointer;">×</button>
+                            <button id="plan-modal-x" style="border:1px solid var(--border);background:var(--card-bg);width:32px;height:32px;border-radius:8px;font-size:15px;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;" onmouseover="this.style.color='var(--text-primary)';this.style.background='var(--bg-hover)'" onmouseout="this.style.color='var(--text-muted)';this.style.background='var(--card-bg)'">✕</button>
                         </div>
-                        <div style="padding:16px;">
-                            <div style="margin-bottom:12px;">
-                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Plan Tier</label>
-                                <select id="plan-modal-plan" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;background:var(--card-bg);">
-                                    <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free</option>
-                                    <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial</option>
-                                    <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid</option>
+                        <div style="padding:20px;">
+                            <div style="margin-bottom:16px;">
+                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:6px;">Plan Tier</label>
+                                <select id="plan-modal-plan" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;outline:none;background:var(--input-bg);color:var(--text-primary);cursor:pointer;">
+                                    <option value="free" ${currentPlan === 'free' ? 'selected' : ''}>Free Tier</option>
+                                    <option value="trial" ${currentPlan === 'trial' ? 'selected' : ''}>Trial Tier (72h default)</option>
+                                    <option value="paid" ${currentPlan === 'paid' ? 'selected' : ''}>Paid Subscription</option>
                                 </select>
                             </div>
-                            <div style="margin-bottom:12px;padding:10px;background:var(--bg-page);border-radius:8px;border:1px solid var(--border);">
-                                <p style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin:0;">Trial Status</p>
-                                <p style="font-size:12px;color:var(--text-primary);margin:3px 0 0;font-weight:600;">${trialInfo}</p>
+                            <div style="margin-bottom:16px;padding:12px 14px;background:var(--bg-page);border-radius:10px;border:1px solid var(--border);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                                    <span style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;">Trial Status</span>
+                                    ${statusBadge}
+                                </div>
+                                <p style="font-size:12px;color:var(--text-primary);margin:0;font-weight:500;">${trialInfo}</p>
                             </div>
-                            <div style="margin-bottom:14px;">
-                                <label style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Extend Trial (hours)</label>
-                                <input id="plan-modal-hours" type="number" placeholder="e.g. 72" min="1" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;outline:none;margin-bottom:6px;">
-                                <div style="display:flex;gap:6px;">
-                                    <button id="plan-modal-quick-24" class="btn-subtle" style="flex:1;">+24h</button>
-                                    <button id="plan-modal-quick-72" class="btn-subtle" style="flex:1;">+72h</button>
-                                    <button id="plan-modal-quick-168" class="btn-subtle" style="flex:1;">+7d</button>
+                            <div style="margin-bottom:16px;">
+                                <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:6px;">Extend Trial Duration</label>
+                                <input id="plan-modal-hours" type="number" placeholder="Enter hours (e.g. 72)" min="1" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;outline:none;background:var(--input-bg);color:var(--text-primary);margin-bottom:8px;">
+                                <div style="display:flex;gap:8px;">
+                                    <button id="plan-modal-quick-24" type="button" class="btn-subtle" style="flex:1;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;text-align:center;">+24h (1d)</button>
+                                    <button id="plan-modal-quick-72" type="button" class="btn-subtle" style="flex:1;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;text-align:center;">+72h (3d)</button>
+                                    <button id="plan-modal-quick-168" type="button" class="btn-subtle" style="flex:1;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;text-align:center;">+7d (1w)</button>
                                 </div>
                             </div>
-                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:8px;border-radius:6px;margin-bottom:10px;"></div>
-                            <div style="display:flex;gap:6px;justify-content:flex-end;">
-                                <button id="plan-modal-cancel" class="btn-subtle">Cancel</button>
-                                <button id="plan-modal-save" style="font-size:12px;font-weight:600;color:var(--btn-dark-text);padding:7px 14px;border-radius:8px;cursor:pointer;background:var(--btn-dark);border:none;">Save</button>
-                            </div>
+                            <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:10px 12px;border-radius:8px;margin-bottom:14px;"></div>
+                        </div>
+                        <div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--bg-alt);display:flex;gap:10px;justify-content:flex-end;">
+                            <button id="plan-modal-cancel" type="button" class="btn-subtle" style="padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;">Cancel</button>
+                            <button id="plan-modal-save" type="button" style="padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;color:#ffffff;background:var(--accent);border:none;cursor:pointer;box-shadow:0 2px 10px rgba(192,132,252,0.35);transition:opacity 0.15s ease;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Save Changes</button>
                         </div>
                     </div>
                 `;
@@ -793,8 +801,9 @@ HARD RULES
 
                     if (Object.keys(body).length === 0) {
                         msgEl.style.display = 'block';
-                        msgEl.style.background = '#fff1f2';
-                        msgEl.style.color = '#e11d48';
+                        msgEl.style.background = 'var(--danger-bg)';
+                        msgEl.style.color = 'var(--danger)';
+                        msgEl.style.border = '1px solid var(--danger)';
                         msgEl.textContent = 'No changes to save';
                         return;
                     }
@@ -808,14 +817,16 @@ HARD RULES
                         const data = await r.json();
                         if (!r.ok) throw new Error(data.error || 'Failed');
                         msgEl.style.display = 'block';
-                        msgEl.style.background = '#f0fdf4';
-                        msgEl.style.color = '#16a34a';
-                        msgEl.textContent = `Updated to ${data.user.plan}`;
-                        setTimeout(async () => { modal.remove(); await loadUsers(); }, 1000);
+                        msgEl.style.background = 'rgba(16, 185, 129, 0.15)';
+                        msgEl.style.color = 'var(--success)';
+                        msgEl.style.border = '1px solid var(--success)';
+                        msgEl.textContent = `✓ Plan updated successfully to ${data.user.plan.toUpperCase()}`;
+                        setTimeout(async () => { modal.remove(); await loadUsers(); }, 800);
                     } catch (err) {
                         msgEl.style.display = 'block';
-                        msgEl.style.background = '#fff1f2';
-                        msgEl.style.color = '#e11d48';
+                        msgEl.style.background = 'var(--danger-bg)';
+                        msgEl.style.color = 'var(--danger)';
+                        msgEl.style.border = '1px solid var(--danger)';
                         msgEl.textContent = err.message;
                     }
                 });
@@ -826,6 +837,8 @@ HARD RULES
         list.querySelectorAll('.user-chats-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const uid = btn.dataset.uid;
+                const count = Number(btn.dataset.count) || 0;
+                const defaultLabel = count > 0 ? `Chats (${count})` : 'Chats';
                 const area = list.querySelector(`[data-chats-for="${uid}"]`);
                 const expandRow = document.getElementById(`expand-row-${uid}`);
                 if (!area.classList.contains('hidden')) {
@@ -833,26 +846,63 @@ HARD RULES
                     if (expandRow && list.querySelector(`[data-ai-logs-for="${uid}"]`).classList.contains('hidden')) {
                         expandRow.classList.add('hidden');
                     }
-                    btn.textContent = 'Chats';
+                    btn.textContent = defaultLabel;
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
                     return;
                 }
                 if (expandRow) expandRow.classList.remove('hidden');
                 area.innerHTML = '<div style="padding:8px;font-size:12px;color:var(--text-muted);">Loading chats...</div>';
                 area.classList.remove('hidden');
-                btn.textContent = 'Hide';
+                btn.textContent = 'Chats ▴';
+                btn.style.borderColor = 'var(--accent)';
+                btn.style.color = 'var(--accent)';
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
-                    const loginAsBtnHtml = `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:10px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:white;cursor:pointer;text-transform:none;">Login As User</button>`;
+                    const loginAsBtnHtml = `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease;" onmouseover="this.style.background='var(--accent)';this.style.color='#ffffff'" onmouseout="this.style.background='rgba(192,132,252,0.12)';this.style.color='var(--accent)'"><span>🔑</span> Login As User</button>`;
 
                     if (!chats.length) {
-                        area.innerHTML = `<div style="background:var(--bg-page);border-radius:8px;padding:20px;text-align:center;font-size:13px;color:var(--text-muted);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:12px;"><div>No chats uploaded yet</div>${loginAsBtnHtml}</div>`;
+                        area.innerHTML = `
+                            <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg-page);">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <span style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-primary);">Uploaded Chats</span>
+                                        <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:var(--bg-alt);color:var(--text-muted);font-weight:600;">0</span>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        ${loginAsBtnHtml}
+                                        <button class="chats-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;padding:2px 4px;" title="Close chats">×</button>
+                                    </div>
+                                </div>
+                                <div style="padding:22px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                                    <div style="width:38px;height:38px;border-radius:50%;background:rgba(192,132,252,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;">💬</div>
+                                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);">No WhatsApp chats uploaded yet</div>
+                                    <p style="font-size:12px;color:var(--text-muted);margin:0;max-width:320px;line-height:1.4;">This user has not imported any chats yet. You can still login to their account to test or assist.</p>
+                                    <button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="margin-top:6px;padding:7px 16px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:var(--accent);color:#ffffff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(192,132,252,0.35);"><span>🔑</span> Login As User</button>
+                                </div>
+                            </div>
+                        `;
+                        area.querySelector('.chats-close-btn')?.addEventListener('click', () => {
+                            area.classList.add('hidden');
+                            area.innerHTML = '';
+                            btn.textContent = defaultLabel;
+                            btn.style.borderColor = '';
+                            btn.style.color = '';
+                            const expandRow = document.getElementById(`expand-row-${uid}`);
+                            if (expandRow && list.querySelector(`[data-ai-logs-for="${uid}"]`).classList.contains('hidden')) {
+                                expandRow.classList.add('hidden');
+                            }
+                        });
                         return;
                     }
                     const isMob = window.matchMedia('(max-width: 768px)').matches;
                     if (isMob) {
                         // Mobile: stacked chat cards
                         area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
-                            '<div style="padding:8px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">Chats (' + chats.length + ')</span>' + loginAsBtnHtml + '</div>' +
+                            '<div style="padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;">' +
+                                '<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">Chats</span><span style="font-size:10px;padding:1px 6px;border-radius:10px;background:var(--bg-alt);color:var(--text-muted);font-weight:600;">' + chats.length + '</span></div>' +
+                                '<div style="display:flex;align-items:center;gap:8px;">' + loginAsBtnHtml + '<button class="chats-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;padding:2px 4px;">×</button></div>' +
+                            '</div>' +
                             chats.map(c => {
                                 const name = (c.display_name || c.folder_name).replace('WhatsApp Chat - ', '');
                                 const del = c.deleted_by_user ? ' <span class="badge badge-expired" style="font-size:9px;">deleted</span>' : '';
@@ -865,7 +915,7 @@ HARD RULES
                                     '<div style="display:flex;gap:6px;">' +
                                         '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">ZIP</a>' +
                                         '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--accent);cursor:pointer;">Open</button>' +
-                                        '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid #fca5a5;background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
+                                        '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
                                     '</div></div>';
                             }).join('') +
                         '</div>';
@@ -873,14 +923,24 @@ HARD RULES
                         // Desktop: table-like flex rows
                         area.innerHTML = `
                             <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
-                                <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg-page);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg-page);">
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <span style="font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-primary);">Uploaded Chats</span>
+                                        <span style="font-size:10px;padding:1px 6px;border-radius:10px;background:var(--bg-alt);color:var(--text-muted);font-weight:600;">${chats.length}</span>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        ${loginAsBtnHtml}
+                                        <button class="chats-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;padding:2px 4px;" title="Close chats">×</button>
+                                    </div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:rgba(0,0,0,0.06);">
                                     <div style="flex:1;min-width:0;">Chat Name</div>
                                     <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
-                                    <div style="width:130px;flex-shrink:0;">Imported</div>
-                                    <div style="width:150px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;"><span>Actions</span>${loginAsBtnHtml}</div>
+                                    <div style="width:120px;flex-shrink:0;">Imported</div>
+                                    <div style="width:110px;text-align:right;flex-shrink:0;">Actions</div>
                                 </div>
                                 ${chats.map(c => `
-                                    <div style="padding:8px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
+                                    <div style="padding:6px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
                                         <div style="flex:1;min-width:0;">
                                             <div style="font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                                 <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
@@ -888,8 +948,8 @@ HARD RULES
                                             </div>
                                         </div>
                                         <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.message_count || 0}</div>
-                                        <div style="width:130px;color:var(--text-muted);font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
-                                        <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
+                                        <div style="width:120px;color:var(--text-muted);font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
+                                        <div style="width:110px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
                                             <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
                                             <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:var(--accent);">Open</button>
                                             <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
@@ -899,6 +959,18 @@ HARD RULES
                             </div>
                         `;
                     }
+
+                    area.querySelector('.chats-close-btn')?.addEventListener('click', () => {
+                        area.classList.add('hidden');
+                        area.innerHTML = '';
+                        btn.textContent = defaultLabel;
+                        btn.style.borderColor = '';
+                        btn.style.color = '';
+                        const expandRow = document.getElementById(`expand-row-${uid}`);
+                        if (expandRow && list.querySelector(`[data-ai-logs-for="${uid}"]`).classList.contains('hidden')) {
+                            expandRow.classList.add('hidden');
+                        }
+                    });
 
                     area.querySelectorAll('[data-admin-open-chat]').forEach(openBtn => {
                         openBtn.addEventListener('click', () => {
@@ -926,7 +998,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--danger);">${err.message}</div>`;
+                    area.innerHTML = `<div style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--danger);">${err.message}</div>`;
                 }
             });
         });
@@ -943,16 +1015,20 @@ HARD RULES
                         expandRow.classList.add('hidden');
                     }
                     btn.textContent = 'Logs';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
                     return;
                 }
                 if (expandRow) expandRow.classList.remove('hidden');
                 area.innerHTML = '<div style="padding:8px;font-size:12px;color:var(--text-muted);">Loading AI logs...</div>';
                 area.classList.remove('hidden');
-                btn.textContent = 'Hide';
+                btn.textContent = 'Logs ▴';
+                btn.style.borderColor = '#f59e0b';
+                btn.style.color = '#f59e0b';
                 try {
                     const convs = await (await fetch(`/api/admin/users/${uid}/conversations`)).json();
                     if (!convs.length) {
-                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--text-muted);">No AI conversations yet</div>';
+                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--text-muted);border:1px solid var(--border);">No AI conversations yet</div>';
                         return;
                     }
                     const isMobLogs = window.matchMedia('(max-width: 768px)').matches;
@@ -997,6 +1073,8 @@ HARD RULES
                         area.classList.add('hidden');
                         area.innerHTML = '';
                         btn.textContent = 'Logs';
+                        btn.style.borderColor = '';
+                        btn.style.color = '';
                         const expandRow = document.getElementById(`expand-row-${uid}`);
                         if (expandRow && list.querySelector(`[data-chats-for="${uid}"]`).classList.contains('hidden')) {
                             expandRow.classList.add('hidden');
@@ -1045,7 +1123,7 @@ HARD RULES
                         });
                     });
                 } catch (err) {
-                    area.innerHTML = `<div style="background:#fee2e2;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--danger);">${err.message}</div>`;
+                    area.innerHTML = `<div style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--danger);">${err.message}</div>`;
                 }
             });
         });
@@ -1509,71 +1587,131 @@ HARD RULES
         loadDmLogs(page, search);
     };
 
-    async function viewDmConversation(convId, title) {
+    async function viewDmConversation(convId, fallbackTitle = '') {
         const viewer = document.getElementById('dm-log-viewer');
         const msgContainer = document.getElementById('dm-log-messages');
         const titleEl = document.getElementById('dm-log-viewer-title');
         const dlBtn = document.getElementById('dm-log-download-btn');
+        const listEl = document.getElementById('dm-log-list');
+        const pagEl = document.getElementById('dm-log-pagination');
+
         if (!viewer || !msgContainer) return;
 
+        // 1. Hide conversation list and pagination so the viewer is prominent
+        if (listEl && listEl.parentElement) {
+            listEl.parentElement.classList.add('hidden');
+            listEl.parentElement.style.display = 'none';
+        }
+        if (pagEl) {
+            pagEl.classList.add('hidden');
+            pagEl.style.display = 'none';
+        }
+
+        // 2. Show viewer and scroll into view
         viewer.classList.remove('hidden');
-        titleEl.textContent = title || `Conversation #${convId}`;
+        viewer.style.display = 'block';
+        viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        titleEl.textContent = fallbackTitle || `Conversation #${convId}`;
         dlBtn.href = `/api/admin/dm/conversations/${convId}/download`;
-        msgContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">Loading messages…</p>';
+        msgContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:24px;font-size:12px;">Loading messages…</p>';
 
         try {
             const res = await fetch(`/api/admin/dm/conversations/${convId}/messages`);
             const data = await res.json();
-            const msgs = data.messages || [];
+            if (!res.ok) {
+                msgContainer.innerHTML = `<p style="color:var(--danger);text-align:center;padding:20px;">Failed to load messages: ${data.error || res.statusText}</p>`;
+                return;
+            }
 
+            const conv = data.conv;
+            if (conv) {
+                const nameA = conv.user_a_name ? `${conv.user_a_name} (${conv.user_a_email})` : conv.user_a_email;
+                const nameB = conv.user_b_name ? `${conv.user_b_name} (${conv.user_b_email})` : conv.user_b_email;
+                titleEl.textContent = `${nameA} ↔ ${nameB}`;
+            }
+
+            const msgs = data.messages || [];
             if (!msgs.length) {
-                msgContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No messages in this conversation.</p>';
+                msgContainer.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;font-size:12px;">No messages in this conversation.</p>';
                 return;
             }
 
             msgContainer.innerHTML = msgs.map(m => {
-                const sender = m.sender_name || m.sender_email || `User #${m.sender_id}`;
-                const hasMedia = Boolean(m.media_url);
-                const isImg = hasMedia && (m.type === 'image' || /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(m.media_url) || m.media_url.includes('/uploads/dm/'));
+                const sender = (m.sender_name || m.sender_email || `User #${m.sender_id}`).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const rawBody = (m.body || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-                let mediaHtml = '';
-                if (hasMedia) {
-                    if (isImg) {
-                        mediaHtml = `
-                            <div style="margin-top:6px;">
-                                <a href="${m.media_url}" target="_blank" title="Click to view full photo">
-                                    <img src="${m.media_url}" alt="Photo" style="max-width:240px;max-height:240px;border-radius:8px;object-fit:cover;border:1px solid var(--border);display:block;" loading="lazy" />
-                                </a>
-                                <span style="font-size:10px;color:var(--text-muted);margin-top:2px;display:inline-block;">📷 Photo attachment (tap to zoom)</span>
-                            </div>
-                        `;
-                    } else {
-                        mediaHtml = `
-                            <div style="margin-top:6px;">
-                                <a href="${m.media_url}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:underline;">📎 Download Attachment</a>
-                            </div>
-                        `;
+                let contentHtml = '';
+                if (m.type === 'deleted') {
+                    contentHtml = `<span style="color:var(--text-muted);font-style:italic;">🚫 This message was deleted</span>`;
+                } else {
+                    let mediaHtml = '';
+                    if (m.media_url) {
+                        const url = m.media_url;
+                        const isImg = m.type === 'image' || /\.(jpg|jpeg|png|webp|gif|svg|avif)($|\?)/i.test(url) || url.includes('/uploads/dm/');
+                        const isVid = m.type === 'video' || /\.(mp4|webm|mov|mkv)($|\?)/i.test(url);
+                        const isAud = m.type === 'audio' || /\.(mp3|wav|ogg|m4a|aac|opus)($|\?)/i.test(url);
+
+                        if (isVid) {
+                            mediaHtml = `
+                                <div style="margin-top:3px;display:inline-flex;align-items:flex-end;gap:8px;">
+                                    <video src="${url}" controls preload="metadata" style="max-height:85px;max-width:160px;border-radius:6px;border:1px solid rgba(255,255,255,0.18);background:#000;display:block;"></video>
+                                    <a href="${url}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--accent);text-decoration:none;opacity:0.9;padding-bottom:2px;">Open ↗</a>
+                                </div>`;
+                        } else if (isAud) {
+                            mediaHtml = `
+                                <div style="margin-top:3px;display:inline-flex;align-items:center;gap:8px;">
+                                    <audio src="${url}" controls preload="metadata" style="height:28px;max-width:220px;"></audio>
+                                    <a href="${url}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--accent);text-decoration:none;opacity:0.9;">Open ↗</a>
+                                </div>`;
+                        } else if (isImg) {
+                            mediaHtml = `
+                                <div style="margin-top:3px;display:inline-flex;align-items:flex-end;gap:8px;">
+                                    <a href="${url}" target="_blank" rel="noopener noreferrer" title="Click to view full photo in new tab" style="display:inline-block;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,0.18);background:#1a1a1a;line-height:0;box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+                                        <img src="${url}" alt="Photo" style="max-height:85px;max-width:140px;object-fit:cover;display:block;border-radius:5px;cursor:pointer;transition:transform 0.15s ease,opacity 0.15s ease;" loading="lazy" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'" />
+                                    </a>
+                                    <a href="${url}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--accent);text-decoration:none;opacity:0.9;padding-bottom:2px;">View ↗</a>
+                                </div>`;
+                        } else {
+                            const filename = rawBody || url.split('/').pop() || 'Attachment';
+                            mediaHtml = `
+                                <div style="margin-top:3px;">
+                                    <a href="${url}" target="_blank" rel="noopener noreferrer" download style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);padding:3px 8px;border-radius:6px;color:var(--text-primary);text-decoration:none;font-size:11px;">
+                                        <span>📎</span>
+                                        <span style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${filename}</span>
+                                        <span style="color:var(--accent);font-size:10px;margin-left:4px;">Download ↗</span>
+                                    </a>
+                                </div>`;
+                        }
                     }
+
+                    const isRawFilename = m.media_url && rawBody && (rawBody === m.media_url || m.media_url.endsWith('/' + rawBody) || /^[0-9]{10,}\.[a-z0-9]+$/i.test(rawBody));
+                    const showText = rawBody && (!m.media_url || !isRawFilename);
+
+                    contentHtml = `
+                        ${showText ? `<div style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word;">${rawBody}</div>` : ''}
+                        ${mediaHtml}
+                    `;
                 }
 
                 return `
-                    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                            <span style="font-weight:600;color:var(--text-primary);">${sender}</span>
-                            <span style="font-size:10px;color:var(--text-muted);">${formatDateTime(m.created_at)}</span>
-                        </div>
-                        ${m.body ? `<div style="color:var(--text-primary);white-space:pre-wrap;word-break:break-word;">${m.body}</div>` : ''}
-                        ${mediaHtml}
+                    <div style="display:flex;gap:6px;font-size:12px;padding:4px 0;align-items:flex-start;border-bottom:1px solid rgba(255,255,255,0.03);">
+                        <span style="font-weight:600;color:var(--text-primary);width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;">${sender}</span>
+                        <span style="color:var(--text-muted);font-size:10px;flex-shrink:0;padding-top:2px;">${formatDateTime(m.created_at)}</span>
+                        <div style="color:var(--text-primary);flex:1;word-break:break-word;min-width:0;">${contentHtml}</div>
                     </div>
                 `;
             }).join('');
 
-            // Scroll to bottom
+            // Scroll to bottom of message list
             msgContainer.scrollTop = msgContainer.scrollHeight;
         } catch (err) {
             msgContainer.innerHTML = `<p style="color:var(--danger);text-align:center;padding:20px;">Failed to load messages: ${err.message}</p>`;
         }
     }
+
+    // Expose for external calls
+    window.viewDmConversation = viewDmConversation;
 
     // Bind DM logs tab and search events
     document.querySelector('[data-tab="dm-logs"]')?.addEventListener('click', () => {
@@ -1592,8 +1730,24 @@ HARD RULES
         }
     });
 
-    document.getElementById('dm-log-back')?.addEventListener('click', () => {
-        document.getElementById('dm-log-viewer')?.classList.add('hidden');
+    document.getElementById('dm-log-back')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const viewer = document.getElementById('dm-log-viewer');
+        const listEl = document.getElementById('dm-log-list');
+        const pagEl = document.getElementById('dm-log-pagination');
+
+        if (viewer) {
+            viewer.classList.add('hidden');
+            viewer.style.display = 'none';
+        }
+        if (listEl && listEl.parentElement) {
+            listEl.parentElement.classList.remove('hidden');
+            listEl.parentElement.style.display = '';
+        }
+        if (pagEl) {
+            pagEl.classList.remove('hidden');
+            pagEl.style.display = 'flex';
+        }
     });
 
     await loadKnown();

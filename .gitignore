@@ -22,3 +22,8 @@ android/
 *.zip
 PROJECT_CONTEXT.md
 marketing_ideas.md
+public/uploads/
+public/js/app.html
+server/*.db
+server/*.sqlite
+
