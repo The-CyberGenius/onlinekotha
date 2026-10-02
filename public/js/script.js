@@ -3511,7 +3511,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Mobile: Inline chat search
             inlineSearchOverlay.classList.remove('hidden');
-            setTimeout(() => inlineSearchInput.focus(), 100);
+            inlineSearchInput.focus();
         });
 
         closeInlineSearchBtn.addEventListener('click', () => {
