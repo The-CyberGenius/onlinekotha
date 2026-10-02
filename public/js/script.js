@@ -812,6 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const identityConfirmed = await window.ensureIdentity(chatName);
                 if (!identityConfirmed) {
                     window.kothaChatLoading = false;
+                    showEmptyState();
                     return; // Abort loading if identity wasn't confirmed
                 }
             }
@@ -1569,7 +1570,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const urlChat = urlParams.get('chat');
                 const savedChat = localStorage.getItem('kotha_active_chat');
-                const targetChat = urlChat || savedChat;
+                let targetChat = urlChat || savedChat;
+                
+                // If the user is viewing a Direct Message (DM) via hash, do NOT load WhatsApp chats
+                const isViewingDM = window.location.hash && window.location.hash.startsWith('#chat-');
+                if (isViewingDM) {
+                    targetChat = null;
+                }
 
                 if (targetChat === '__global__') {
                     const btn = document.getElementById('global-chat-item');
@@ -1633,6 +1640,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showEmptyState() {
+        // If the user is currently viewing a DM, do not show the WhatsApp empty state
+        if (window.location.hash && window.location.hash.startsWith('#chat-')) return;
+        
         const container = document.getElementById('chat-container');
         if (!container) return;
 

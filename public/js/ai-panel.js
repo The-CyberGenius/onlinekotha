@@ -454,7 +454,7 @@
 
                 // Hide cancel buttons if it's a mandatory selection
                 if (cancelBtn) cancelBtn.style.display = forceShow ? 'block' : 'none';
-                if (closeIcon) closeIcon.style.display = forceShow ? 'flex' : 'none';
+                if (closeIcon) closeIcon.style.display = 'flex'; // ALWAYS show close icon per user request
 
                 let selectedId = null;
 
@@ -465,7 +465,7 @@
                     const initial = name.charAt(0).toUpperCase();
 
                     const card = document.createElement('div');
-                    card.className = 'identity-card p-3 rounded-[20px] apple-list-bg transition-all cursor-pointer flex items-center justify-between gap-3 hover:border-indigo-400/70 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 active:scale-[0.98] border border-transparent border-gray-200/50 dark:border-white/5';
+                    card.className = 'identity-card p-3 rounded-[20px] bg-gray-50 dark:bg-white/5 transition-all cursor-pointer flex items-center justify-between gap-3 hover:border-indigo-400/70 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 active:scale-[0.98] border border-transparent border-gray-200/50 dark:border-white/5';
                     card.setAttribute('data-name', name);
 
                     card.innerHTML = `
@@ -474,8 +474,8 @@
                                 ${escapeHTML(initial)}
                             </div>
                             <div class="min-w-0 flex flex-col justify-center">
-                                <p class="text-[14px] font-bold apple-text-primary truncate leading-tight">${escapeHTML(name)}</p>
-                                <p class="text-[11px] apple-text-secondary mt-0.5 leading-tight">${msgCount > 0 ? msgCount.toLocaleString() + ' messages' : 'Participant'}</p>
+                                <p class="text-[14px] font-bold text-gray-900 dark:text-white truncate leading-tight">${escapeHTML(name)}</p>
+                                <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 leading-tight">${msgCount > 0 ? msgCount.toLocaleString() + ' messages' : 'Participant'}</p>
                             </div>
                         </div>
                         <div class="radio-circle w-5 h-5 rounded-full border border-gray-300 dark:border-gray-500 flex items-center justify-center shrink-0 transition-all bg-white dark:bg-black/20">
