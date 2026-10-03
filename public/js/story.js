@@ -74,6 +74,7 @@
         }
 
         /* Safe Area for Content */
+        .ok-story-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
         .ok-story-safe {
             position: absolute; top: 160px; left: 100px; right: 100px; bottom: 180px;
             display: flex; flex-direction: column; justify-content: center;
@@ -86,14 +87,14 @@
 
         /* Share Actions */
         .ok-story-actions {
-            position: absolute; bottom: 120px; left: 0; right: 0;
-            display: flex; justify-content: center; gap: 30px; z-index: 300;
+            position: absolute; bottom: 40px; left: 0; right: 0;
+            display: flex; justify-content: center; gap: 16px; z-index: 300;
         }
         .ok-story-btn {
             background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3);
-            color: #fff; padding: 20px 40px; border-radius: 40px; font-size: 28px; font-weight: 700;
+            color: #fff; padding: 12px 24px; border-radius: 40px; font-size: 15px; font-weight: 600;
             backdrop-filter: blur(20px); cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: center; gap: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         .ok-story-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
         .ok-story-btn-primary {
@@ -113,12 +114,12 @@
         .bottom-quote { position: absolute; bottom: 0; left: 0; font-size: 36px; font-weight: 500; font-style: italic; color: rgba(255,255,255,0.6); }
 
         /* Animations */
-        .anim-fade-up { opacity: 0; transform: translateY(40px); animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .anim-fade-up { animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
         .anim-delay-1 { animation-delay: 0.3s; }
         .anim-delay-2 { animation-delay: 0.6s; }
         .anim-delay-3 { animation-delay: 0.9s; }
         
-        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
         @keyframes pulse-glow { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.1); } }
         
@@ -168,7 +169,7 @@
             if (s.laughCount > 0) this.cards.push(this.cardLaughs(s));
             
             // Emoji card
-            const emojis = this.getTopEmojis(m);
+            const emojis = this.getTopEmojis(m).filter(e => e && e.emoji);
             if (emojis.length > 0) this.cards.push(this.cardEmojis(emojis));
             
             // Late night
@@ -233,7 +234,7 @@
                     
                     <div class="stat-block anim-fade-up anim-delay-2">
                         <div class="stat-label" style="color: #94d2bd; font-size: 50px;">${esc(s.busiestDate)}</div>
-                        <div class="stat-number" style="background: #fff; -webkit-background-clip: text;">${s.busiestDateCount.toLocaleString()}</div>
+                        <div class="stat-number" style="color: #ffffff;">${s.busiestDateCount.toLocaleString()}</div>
                         <div class="stat-label">Messages in 24 hours 🔥</div>
                     </div>
                 `
@@ -263,7 +264,7 @@
                 html: `
                     <div class="eyebrow anim-fade-up">Vibe check</div>
                     <div class="subtitle anim-fade-up anim-delay-1" style="font-size: 60px;">You laughed</div>
-                    <div class="stat-number anim-fade-up anim-delay-1" style="font-size: 200px; line-height: 1.1; background: #fff; -webkit-background-clip: text; word-break: break-all;">A LOT</div>
+                    <div class="stat-number anim-fade-up anim-delay-1" style="font-size: 200px; line-height: 1.1; color: #ffffff; word-break: break-all;">A LOT</div>
                     
                     <div class="stat-block anim-fade-up anim-delay-2" style="margin-top: 40px;">
                         <div class="stat-number" style="font-size: 140px;">${s.laughCount.toLocaleString()}</div>
@@ -412,11 +413,11 @@
             this.dom.header.className = 'ok-story-header';
             this.dom.header.innerHTML = `
                 <div class="ok-story-brand">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <img src="/img/logo.svg" style="width:24px; height:24px; filter: brightness(0) invert(1);" />
                     OnlineKotha
                 </div>
                 <div class="ok-story-close">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </div>
             `;
             
@@ -435,11 +436,11 @@
             this.dom.actions.style.display = 'none'; // Only show on last card or paused
             this.dom.actions.innerHTML = `
                 <button class="ok-story-btn" id="story-share-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                     Share
                 </button>
                 <button class="ok-story-btn ok-story-btn-primary" id="story-dl-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                     Save Image
                 </button>
             `;
