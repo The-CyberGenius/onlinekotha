@@ -113,6 +113,22 @@ router.delete('/conversations/:id', (req, res) => {
     res.json({ ok: true });
 });
 
+router.put('/conversations/:id/rename', (req, res) => {
+    const { userId, guestId } = getOwner(req);
+    const { newName } = req.body || {};
+    if (!newName || !newName.trim()) return res.status(400).json({ error: 'newName is required' });
+    
+    const sql = req.user
+        ? 'SELECT id FROM conversations WHERE id = ? AND user_id = ?'
+        : 'SELECT id FROM conversations WHERE id = ? AND guest_id = ?';
+    const params = req.user ? [Number(req.params.id), userId] : [Number(req.params.id), guestId];
+    const conv = db.prepare(sql).get(...params);
+    if (!conv) return res.status(404).json({ error: 'Not found' });
+    
+    db.prepare('UPDATE conversations SET title = ? WHERE id = ?').run(newName.trim(), conv.id);
+    res.json({ ok: true, title: newName.trim() });
+});
+
 // ---------- Identity Onboarding ----------
 router.get('/chat/:folder/identity', async (req, res) => {
     const { userId, guestId } = getOwner(req);
@@ -157,13 +173,23 @@ router.post('/chat/:folder/identity', async (req, res) => {
     
     let info = db.prepare(sql).run(...params);
     if (info.changes === 0) {
-        // Chat not in DB yet, insert it
+        // Chat not in DB yet, insert it. Let's try to parse it first to get metadata.
+        const myDir = userDir(req.user ? userId : guestId);
+        const finalDir = path.join(myDir, req.params.folder);
+        let msgCount = 0, isGroup = 0, parts = [];
+        try {
+            const parsed = await getMessages(finalDir);
+            msgCount = parsed.messages ? parsed.messages.length : 0;
+            isGroup = parsed.isGroup ? 1 : 0;
+            parts = parsed.participants || [];
+        } catch(e) {}
+
         const insertSql = req.user
-            ? 'INSERT INTO chats (user_id, folder_name, user_participant, created_at) VALUES (?, ?, ?, ?)'
-            : 'INSERT INTO chats (user_id, guest_id, folder_name, user_participant, created_at) VALUES (0, ?, ?, ?, ?)';
+            ? 'INSERT INTO chats (user_id, folder_name, user_participant, created_at, message_count, is_group, participants) VALUES (?, ?, ?, ?, ?, ?, ?)'
+            : 'INSERT INTO chats (user_id, guest_id, folder_name, user_participant, created_at, message_count, is_group, participants) VALUES (0, ?, ?, ?, ?, ?, ?, ?)';
         const insertParams = req.user 
-            ? [userId, req.params.folder, userParticipant, Date.now()]
-            : [guestId, req.params.folder, userParticipant, Date.now()];
+            ? [userId, req.params.folder, userParticipant, Date.now(), msgCount, isGroup, JSON.stringify(parts)]
+            : [guestId, req.params.folder, userParticipant, Date.now(), msgCount, isGroup, JSON.stringify(parts)];
         try {
             info = db.prepare(insertSql).run(...insertParams);
         } catch(e) {
@@ -206,12 +232,14 @@ router.post('/chat', aiGate, async (req, res) => {
     let chatMessages;
     let isGroup = false;
     let participants = [];
+    let participantStats = {};
     try {
         chatDir = getSafeChatDir(dirKey, chat);
         const parsed = await getMessages(chatDir);
         chatMessages = parsed.messages;
         isGroup = parsed.isGroup || false;
         participants = parsed.participants || [];
+        participantStats = parsed.participantStats || {};
     } catch (err) {
         return res.status(404).json({ error: 'Chat not found' });
     }
@@ -341,15 +369,50 @@ router.post('/chat', aiGate, async (req, res) => {
         return;
     }
 
-    // Derive contactName from participant list (first participant != userName)
-    if (!contactName) {
-        contactName = participants.find(p => p !== userName) || null;
-        if (!contactName) {
-            // Group or single-participant edge-case: use a sensible fallback label only
-            contactName = isGroup
-                ? (participants.length ? `${participants.length} members` : 'Group')
-                : 'Friend';
+    if (isGroup && participants.length > 0) {
+        // 1. Check for @mentions in the current message
+        let mentionMatched = null;
+        // Sort participants by length descending so longer names match first
+        const sortedParts = [...participants].sort((a, b) => b.length - a.length);
+        for (const p of sortedParts) {
+            if (p !== userName) {
+                // simple case-insensitive regex for @Name
+                const regex = new RegExp('@' + p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&'), 'i');
+                if (regex.test(message)) {
+                    mentionMatched = p;
+                    break;
+                }
+            }
         }
+
+        if (mentionMatched) {
+            contactName = mentionMatched;
+        } else {
+            // 2. Default to most active person in the group
+            let maxMsg = -1;
+            let topParticipant = null;
+            if (participantStats) {
+                for (const [p, count] of Object.entries(participantStats)) {
+                    if (p !== userName && count > maxMsg) {
+                        maxMsg = count;
+                        topParticipant = p;
+                    }
+                }
+            }
+            if (topParticipant) {
+                contactName = topParticipant;
+            } else {
+                contactName = participants.find(p => p !== userName) || 'Group';
+            }
+        }
+        
+        // Update the DB if contactName changed
+        if (contactName !== existingAiParticipant) {
+            db.prepare('UPDATE conversations SET ai_participant = ? WHERE id = ?').run(contactName, convId);
+        }
+    } else if (!contactName) {
+        // Derive contactName from participant list (first participant != userName) for non-groups
+        contactName = participants.find(p => p !== userName) || 'Friend';
     }
 
 

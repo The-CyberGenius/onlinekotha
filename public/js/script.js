@@ -71,6 +71,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     }
 
+    const headerRenameBtn = document.getElementById('header-rename-btn');
+    if (headerRenameBtn) {
+        headerRenameBtn.addEventListener('click', async () => {
+            if (!currentChat) return;
+            let currentName = headerName.innerText;
+            const subTitle = headerName.querySelector('span');
+            if (subTitle) currentName = currentName.replace(subTitle.innerText, '').trim();
+            
+            const newName = prompt(`Rename "${currentName}" to:`, currentName);
+            if (!newName || !newName.trim() || newName.trim() === currentName) return;
+            const cleanNewName = newName.trim();
+            try {
+                const r = await fetch(`/api/chats/${encodeURIComponent(currentChat)}/rename`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newName: cleanNewName })
+                });
+                if (!r.ok) throw new Error('Rename failed');
+                
+                if (!window._chatMetaCache) window._chatMetaCache = {};
+                if (!window._chatMetaCache[currentChat]) window._chatMetaCache[currentChat] = {};
+                window._chatMetaCache[currentChat].contactName = cleanNewName;
+                
+                headerName.innerText = cleanNewName;
+                if (subTitle) headerName.appendChild(subTitle);
+                
+                if (typeof renderChatList === 'function' && window.loadedChats) {
+                    renderChatList(window.loadedChats, currentChat);
+                }
+            } catch (err) {
+                alert('Rename failed: ' + err.message);
+            }
+        });
+    }
+
     if (payBtn) {
         payBtn.addEventListener('click', () => handlePayment('pro_lifetime'));
     }
@@ -357,11 +392,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const esc = String(text).replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
         }[c]));
-        const urlRegex = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
-        return esc.replace(urlRegex, (url) => {
+        
+        let processed = esc.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi, (url) => {
             const href = url.toLowerCase().startsWith('www.') ? `http://${url}` : url;
             return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="chat-link" onclick="event.stopPropagation()">${url}</a>`;
         });
+        
+        const mediaRegex = /&lt;(image|video|audio|sticker|document|file):\s*([^&>]+)&gt;/gi;
+        processed = processed.replace(mediaRegex, (match, type, filename) => {
+            const chatFolder = window.currentChat || (window.location.pathname.includes('/chat/') ? window.location.pathname.split('/').pop() : '');
+            const fileUrl = `/media/${encodeURIComponent(chatFolder)}/${encodeURIComponent(filename.trim())}`;
+            const t = type.toLowerCase();
+            if (t === 'image' || t === 'sticker') {
+                return `<div class="relative overflow-hidden rounded-xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-black/40 flex items-center justify-center w-[200px] h-[200px] my-1"><img src="${fileUrl}" loading="lazy" class="w-full h-full object-contain rounded-lg cursor-zoom-in" onclick="if(window.openImageModal) window.openImageModal('${fileUrl}')" alt="${filename}"></div>`;
+            } else if (t === 'video') {
+                return `<div class="my-1 border border-black/10 dark:border-white/10 rounded-xl overflow-hidden max-w-[240px]"><video controls class="w-full h-auto max-h-[300px]"><source src="${fileUrl}"></video><a href="${fileUrl}" target="_blank" download class="block text-[10px] text-center bg-black/5 dark:bg-white/5 py-1 text-indigo-500 font-bold hover:underline">Download</a></div>`;
+            } else if (t === 'audio') {
+                return `<div class="my-1"><audio controls preload="metadata" class="h-10 w-64 max-w-full rounded-xl"><source src="${fileUrl}"></audio></div>`;
+            } else {
+                return `<div class="flex items-center gap-2 p-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg my-1 max-w-xs"><div class="text-xs font-bold w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-800 rounded">DOC</div><a href="${fileUrl}" target="_blank" download class="text-[11px] font-bold text-indigo-500 hover:underline truncate w-full">${filename}</a></div>`;
+            }
+        });
+        
+        return processed;
     }
     window.kothaLinkify = kothaLinkify;
 
@@ -959,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const actualGroupName = window._chatMetaCache?.[chatName]?.contactName || chatContactName;
 
                 if (isGroupChat) {
-                    headerName.innerText = actualGroupName.replace(/\(Group, \d+ members\)/, '').trim();
+                    headerName.innerText = actualGroupName.replace(/(Group, d+ members)/, '').trim();
                     const participantCount = data.participants ? data.participants.length : senderNames.length;
                     const subTitle = document.createElement('span');
                     subTitle.className = 'text-[11px] font-normal text-gray-400 block -mt-1';
@@ -982,6 +1035,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     window._chatMetaCache[chatName].contactName = isGroupChat ? actualGroupName : otherPersonName;
                 }
                 renderChatList(loadedChats, currentChat);
+                
+                const hrBtn = document.getElementById('header-rename-btn');
+                if (hrBtn) {
+                    hrBtn.classList.remove('hidden');
+                    hrBtn.classList.add('flex');
+                }
 
                 // Animate bottom input placeholder typewriter effect
                 const bottomAiInput = document.getElementById('bottom-ai-input');
@@ -1405,8 +1464,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     window._chatMetaCache[chat].contactName = cleanNewName;
                     
                     if (chat === currentChat) {
-                        const headerName = document.getElementById('contact-name');
-                        if (headerName) headerName.innerText = cleanNewName;
+                        const headerName = document.getElementById('chat-header-name');
+                        if (headerName) {
+                            // Preserve subtitle span if it exists (for group chats)
+                            const subTitle = headerName.querySelector('span');
+                            headerName.innerText = cleanNewName.replace(/\\(Group, \\d+ members\\)/g, '').trim();
+                            if (subTitle) headerName.appendChild(subTitle);
+                        }
                     }
                     renderChatList(loadedChats, currentChat);
                 } catch (err) {

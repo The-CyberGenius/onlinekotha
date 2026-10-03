@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  .main-chat-background { position: relative; background: red; }
+  .hidden { display: none; }
+  .absolute { position: absolute; }
+  .bottom-0 { bottom: 0; }
+  .left-0 { left: 0; }
+  .right-0 { right: 0; }
+  .z-40 { z-index: 40; }
+  .relative { position: relative; }
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .flex-1 { flex: 1; }
+  .h-full { height: 100vh; }
+  .w-full { width: 100%; }
+  .overflow-hidden { overflow: hidden; }
+</style>
+</head>
+<body style="margin:0;">
+<div class="relative flex flex-col flex-1 h-full w-full overflow-hidden" style="background: blue;">
+  <div style="height: 60px; background: green;">Header</div>
+  
+  <div id="inline-search-results-container" class="absolute bottom-0 left-0 right-0 main-chat-background z-40" style="top: 60px; position: absolute !important;">
+    I am the search results
+  </div>
+
+  <div class="relative z-10" style="flex:1; background: yellow;">Chat Content</div>
+</div>
+</body>
+</html>
