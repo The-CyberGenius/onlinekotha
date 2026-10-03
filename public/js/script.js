@@ -918,6 +918,7 @@ document.addEventListener('DOMContentLoaded', () => {
             allMessages = data;
             // Messages now belong to this chat — safe for Wrapped to read.
             window.kothaLoadedChat = chatName;
+            if (window.preloadWrappedStory) window.preloadWrappedStory(chatName);
             window.kothaChatLoading = false;
             displayedMessages = allMessages; // Default view is everything
             datePartsOrder = detectDateFormat(allMessages);

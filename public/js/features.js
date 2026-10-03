@@ -942,6 +942,41 @@
         if (el) el.remove();
     }
 
+    
+    // ── Preload Wrapped ──
+        window.kothaWrappedCache = {};
+    window.preloadWrappedStory = function(chatName) {
+        if (!chatName) return;
+        const raw = window.kothaGetAllMessages ? window.kothaGetAllMessages() : [];
+        const msgs = raw.filter(m => m.sender && m.type !== 'system');
+        if (msgs.length < 5) return;
+
+        const stats = computeWrappedStats(msgs);
+        const compatPromise = fetch(`/api/ai/chat/${encodeURIComponent(chatName)}/compatibility`, { method: 'POST' })
+            .then(res => res.json())
+            .catch(() => null);
+
+        window.kothaWrappedCache[chatName] = { stats, compatPromise };
+
+        compatPromise.then(() => {
+            if (window.kothaGetCurrentChat && window.kothaGetCurrentChat() === chatName) {
+                ['btn-wrapped', 'btn-wrapped-2'].forEach(id => {
+                    const b = document.getElementById(id);
+                    if (b) b.classList.add('wrapped-ready-pop');
+                });
+            }
+        });
+    };
+
+        compatPromise.then(() => {
+            if (window.kothaGetCurrentChat && window.kothaGetCurrentChat() === chatName) {
+                ['btn-wrapped', 'btn-wrapped-2'].forEach(id => {
+                    const b = document.getElementById(id);
+                    if (b) b.classList.add('wrapped-ready-pop');
+                });
+            }
+        });
+
     // ── Launch Wrapped ──
     async function launchWrapped() {
         const targetChat = window.kothaGetCurrentChat ? window.kothaGetCurrentChat() : null;
@@ -975,15 +1010,28 @@
         
         // Fetch compatibility score in background
         let compatData = null;
-        let compatPromise = fetch(`/api/ai/chat/${encodeURIComponent(targetChat)}/compatibility`, { method: 'POST' })
-            .then(res => res.json())
-            .then(data => { compatData = data; return data; })
-            .catch(() => null);
+        
 
         const msgs = raw.filter(m => m.sender && m.type !== 'system');
         if (msgs.length < 5) { hideWrappedLoader(); showToast('Need at least 5 messages for Wrapped!'); return; }
 
-        const stats = computeWrappedStats(msgs);
+        let stats, compatPromise;
+        const cache = window.kothaWrappedCache && window.kothaWrappedCache[targetChat];
+        if (cache) {
+             stats = cache.stats;
+             compatPromise = cache.compatPromise;
+        } else {
+             stats = computeWrappedStats(msgs);
+             compatPromise = fetch(`/api/ai/chat/${encodeURIComponent(targetChat)}/compatibility`, { method: 'POST' })
+                 .then(res => res.json())
+                 .catch(() => null);
+        }
+        
+        ['btn-wrapped', 'btn-wrapped-2'].forEach(id => {
+            const b = document.getElementById(id);
+            if (b) b.classList.remove('wrapped-ready-pop');
+        });
+
         hideWrappedLoader();
 
         if (window.StoryEngine) {
