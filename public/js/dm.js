@@ -166,7 +166,7 @@
             const replyBodyRaw = m.reply_to_type === 'image' ? '📷 Photo' : m.reply_to_type === 'audio' ? '🎤 Voice note' : m.reply_to_type === 'video' ? '🎥 Video' : m.reply_to_type === 'document' ? '📄 Document' : (m.reply_to_body || '').substring(0, 80);
             const replyBody = linkify(replyBodyRaw);
             replyHtml = `
-                <div class="dm-reply-quote mb-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer border-l-[3px] border-indigo-400 ${isMe ? 'bg-[#c4efc0] dark:bg-[#004d40]' : 'bg-gray-100 dark:bg-[#1a2329]'}" onclick="document.getElementById('dm-msg-${m.reply_to_id}')?.scrollIntoView({behavior:'smooth', block:'center'})">
+                <div class="dm-reply-quote mb-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer border-l-[3px] border-indigo-400 ${isMe ? 'dm-reply-me' : 'dm-reply-them'}" onclick="document.getElementById('dm-msg-${m.reply_to_id}')?.scrollIntoView({behavior:'smooth', block:'center'})">
                     <div class="text-[10px] font-bold text-indigo-500">${esc(replyName)}</div>
                     <div class="text-[11px] opacity-70 truncate">${replyBody}</div>
                 </div>`;

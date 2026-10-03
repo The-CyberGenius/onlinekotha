@@ -2705,3 +2705,17 @@ html.dark .custom-modal-card .modal-tab.active {
     100% { text-shadow: 0 0 25px rgba(167, 139, 250, 0.8), 0 0 50px rgba(236, 72, 153, 0.6); }
 }
 
+
+/* DM Replied Message Backgrounds */
+.dm-reply-me {
+    background-color: #c4efc0;
+}
+.dark .dm-reply-me {
+    background-color: #004d40;
+}
+.dm-reply-them {
+    background-color: #f3f4f6;
+}
+.dark .dm-reply-them {
+    background-color: #1a2329;
+}
