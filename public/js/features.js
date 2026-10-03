@@ -986,6 +986,11 @@
         const stats = computeWrappedStats(msgs);
         hideWrappedLoader();
 
+        if (window.StoryEngine) {
+            window.StoryEngine.launch(stats, msgs, targetChat, compatPromise);
+            return;
+        }
+
         // Build overlay
         const overlay = document.createElement('div');
         overlay.id = 'wrapped-overlay';
