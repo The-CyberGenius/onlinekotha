@@ -944,7 +944,7 @@
 
     
     // ── Preload Wrapped ──
-        window.kothaWrappedCache = {};
+    window.kothaWrappedCache = {};
     window.preloadWrappedStory = function(chatName) {
         if (!chatName) return;
         const raw = window.kothaGetAllMessages ? window.kothaGetAllMessages() : [];
@@ -967,15 +967,6 @@
             }
         });
     };
-
-        compatPromise.then(() => {
-            if (window.kothaGetCurrentChat && window.kothaGetCurrentChat() === chatName) {
-                ['btn-wrapped', 'btn-wrapped-2'].forEach(id => {
-                    const b = document.getElementById(id);
-                    if (b) b.classList.add('wrapped-ready-pop');
-                });
-            }
-        });
 
     // ── Launch Wrapped ──
     async function launchWrapped() {
@@ -1007,10 +998,6 @@
         const raw = window.kothaGetAllMessages ? window.kothaGetAllMessages() : [];
         if (!raw || raw.length === 0) { hideWrappedLoader(); showToast('Open a chat first!'); return; }
 
-        
-        // Fetch compatibility score in background
-        let compatData = null;
-        
 
         const msgs = raw.filter(m => m.sender && m.type !== 'system');
         if (msgs.length < 5) { hideWrappedLoader(); showToast('Need at least 5 messages for Wrapped!'); return; }
