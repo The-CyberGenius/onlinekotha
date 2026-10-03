@@ -17,7 +17,7 @@ const dmUpload = multer({
     limits: { fileSize: 50 * 1024 * 1024 }
 });
 
-const { db } = require('./server/db');
+const { db, updateLastActive } = require('./server/db');
 const {
     authMiddleware,
     requireUser,
@@ -500,6 +500,7 @@ io.on('connection', (socket) => {
     const isFirstConnection = !onlineUsers.has(uid) || onlineUsers.get(uid).size === 0;
     if (!onlineUsers.has(uid)) onlineUsers.set(uid, new Set());
     onlineUsers.get(uid).add(socket.id);
+    updateLastActive(uid);
 
     // Send immediate initial presence list to this newly connected user
     const currentOnlineIds = Array.from(onlineUsers.keys()).map(Number);
@@ -599,6 +600,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('dm:typing', ({ conv_id, typing }) => {
+        updateLastActive(uid);
         const conv = db.prepare(
             'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
         ).get(conv_id, uid, uid);

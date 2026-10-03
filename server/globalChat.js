@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { db, getSetting } = require('./db');
+const { db, getSetting, updateLastActive } = require('./db');
 const { requireUser } = require('./auth');
 const { countWords, checkBurstLimit } = require('./rateLimit');
 
@@ -168,6 +168,7 @@ router.post('/send', requireUser, (req, res) => {
 
     const now = Date.now();
     const sender = getAnonymousName(req.user.id);
+    updateLastActive(req.user.id);
 
     // Save to DB (for administrative moderation / audit logs)
     const info = db.prepare(`

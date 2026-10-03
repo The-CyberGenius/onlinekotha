@@ -391,4 +391,11 @@ function setSetting(key, value) {
     ).run(key, String(value));
 }
 
-module.exports = { db, getSetting, setSetting, DB_PATH };
+function updateLastActive(userId) {
+    if (!userId) return;
+    try {
+        db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(Date.now(), userId);
+    } catch (e) {}
+}
+
+module.exports = { db, getSetting, setSetting, DB_PATH, updateLastActive };
