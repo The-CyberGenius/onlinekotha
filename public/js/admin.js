@@ -1,4 +1,10 @@
 (async function () {
+    function formatBytes(bytes) {
+        if (!bytes || bytes === 0) return '0 B';
+        const k = 1024, dm = 2, sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
     function formatDateTime(ts) {
         if (!ts) return 'N/A';
         const d = new Date(ts);
@@ -906,15 +912,20 @@ HARD RULES
                             chats.map(c => {
                                 const name = (c.display_name || c.folder_name).replace('WhatsApp Chat - ', '');
                                 const del = c.deleted_by_user ? ' <span class="badge badge-expired" style="font-size:9px;">deleted</span>' : '';
+                                const sizeStr = c.size_bytes ? formatBytes(c.size_bytes) : '0 B';
+                                const restoreBtn = c.deleted_by_user ? '<button data-admin-restore-chat="' + c.id + '" data-uid="' + uid + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(16,185,129,0.35);background:var(--card-bg);color:#10b981;cursor:pointer;">Restore</button>' : '';
+                                
                                 return '<div data-admin-chat-row="' + c.id + '" style="padding:10px;border-bottom:1px solid var(--bg-alt);">' +
                                     '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:4px;">' + name + del + '</div>' +
                                     '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);margin-bottom:6px;">' +
                                         '<span>' + (c.message_count || 0) + ' msgs</span>' +
+                                        '<span>' + sizeStr + '</span>' +
                                         '<span>' + formatDateTime(c.created_at) + '</span>' +
                                     '</div>' +
-                                    '<div style="display:flex;gap:6px;">' +
+                                    '<div style="display:flex;gap:6px;align-items:center;">' +
                                         '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">ZIP</a>' +
                                         '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--accent);cursor:pointer;">Open</button>' +
+                                        restoreBtn +
                                         '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
                                     '</div></div>';
                             }).join('') +
@@ -935,9 +946,10 @@ HARD RULES
                                 </div>
                                 <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:rgba(0,0,0,0.06);">
                                     <div style="flex:1;min-width:0;">Chat Name</div>
+                                    <div style="width:70px;text-align:center;flex-shrink:0;">Size</div>
                                     <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
                                     <div style="width:120px;flex-shrink:0;">Imported</div>
-                                    <div style="width:110px;text-align:right;flex-shrink:0;">Actions</div>
+                                    <div style="width:150px;text-align:right;flex-shrink:0;">Actions</div>
                                 </div>
                                 ${chats.map(c => `
                                     <div style="padding:6px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
@@ -947,11 +959,13 @@ HARD RULES
                                                 ${c.deleted_by_user ? '<span class="badge badge-expired" style="margin-left:4px;">deleted</span>' : ''}
                                             </div>
                                         </div>
+                                        <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.size_bytes ? formatBytes(c.size_bytes) : '0 B'}</div>
                                         <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.message_count || 0}</div>
                                         <div style="width:120px;color:var(--text-muted);font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
-                                        <div style="width:110px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
+                                        <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
                                             <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
                                             <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:var(--accent);">Open</button>
+                                            ${c.deleted_by_user ? `<button data-admin-restore-chat="${c.id}" data-uid="${uid}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#10b981;">Restore</button>` : ''}
                                             <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
                                         </div>
                                     </div>
@@ -994,6 +1008,25 @@ HARD RULES
                                 alert('Error: ' + err.message);
                                 delBtn.textContent = 'Del';
                                 delBtn.disabled = false;
+                            }
+                        });
+                    });
+
+                    area.querySelectorAll('[data-admin-restore-chat]').forEach(restoreBtn => {
+                        restoreBtn.addEventListener('click', async () => {
+                            const chatId = restoreBtn.dataset.adminRestoreChat;
+                            const uid = restoreBtn.dataset.uid;
+                            restoreBtn.textContent = '...';
+                            restoreBtn.disabled = true;
+                            try {
+                                const r = await fetch(`/api/admin/users/${uid}/chats/${chatId}/restore`, { method: 'PATCH' });
+                                if (!r.ok) throw new Error((await r.json()).error || 'Failed');
+                                // Refresh chat list
+                                btn.click();
+                            } catch (err) {
+                                alert('Error: ' + err.message);
+                                restoreBtn.textContent = 'Restore';
+                                restoreBtn.disabled = false;
                             }
                         });
                     });

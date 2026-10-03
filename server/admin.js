@@ -424,6 +424,22 @@ router.get('/users', (req, res) => {
     res.json(rows);
 });
 
+// Helper to get folder size
+function getFolderSize(dirPath) {
+    let totalSize = 0;
+    if (!fs.existsSync(dirPath)) return 0;
+    const files = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const file of files) {
+        const fullPath = path.join(dirPath, file.name);
+        if (file.isDirectory()) {
+            totalSize += getFolderSize(fullPath);
+        } else {
+            try { totalSize += fs.statSync(fullPath).size; } catch (e) {}
+        }
+    }
+    return totalSize;
+}
+
 // Get user's chats list
 router.get('/users/:id/chats', (req, res) => {
     const userId = Number(req.params.id);
@@ -432,7 +448,26 @@ router.get('/users/:id/chats', (req, res) => {
     const chats = db.prepare(
         'SELECT id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE user_id = ? ORDER BY created_at DESC'
     ).all(userId);
-    res.json(chats);
+    
+    // Attach folder sizes
+    const chatsWithSize = chats.map(chat => {
+        const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+        chat.size_bytes = getFolderSize(chatDir);
+        return chat;
+    });
+
+    res.json(chatsWithSize);
+});
+
+// Restore a deleted chat
+router.patch('/users/:id/chats/:chatId/restore', (req, res) => {
+    const userId = Number(req.params.id);
+    const chatId = Number(req.params.chatId);
+    
+    const info = db.prepare('UPDATE chats SET deleted_by_user = 0 WHERE id = ? AND user_id = ?').run(chatId, userId);
+    
+    if (info.changes === 0) return res.status(404).json({ error: 'Chat not found' });
+    res.json({ ok: true });
 });
 
 // Permanently delete a user's chat (files + DB)
