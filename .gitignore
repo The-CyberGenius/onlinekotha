@@ -8,22 +8,43 @@ src/
 kotha.db
 backups/
 newReadme.md
+
+# Test / dev scripts (never commit to production)
 test_*.js
+test-*.js
+*.test.js
 schema.js
+
+# Platform builds
 *.pages
-# Android App Development
 android/
 *.apk
 *.aab
-# Claude Code local settings
-.claude/settings.local.json
-25aug.md
-# Gradle large zip files
 *.zip
+
+# IDE / tool metadata
+.claude/settings.local.json
 PROJECT_CONTEXT.md
+
+# Marketing / archive files
+25aug.md
 marketing_ideas.md
-public/uploads/
-public/js/app.html
+_archive/
+
+# DB files (live only in data/)
 server/*.db
 server/*.sqlite
+db.sqlite
 
+# Temporary patch scripts (one-time use — should never be committed)
+patch_*.js
+fix_*.js
+fix-*.js
+update_*.js
+*-test.js
+testSize.js
+make-admin.js
+
+# Generated uploads
+public/uploads/
+public/js/app.html
