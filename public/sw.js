@@ -52,6 +52,10 @@ self.addEventListener('fetch', (e) => {
     }
 
     // Network-first for API, navigation, and auth routes
+    if (url.pathname.includes('messages?after') || url.pathname.includes('/online-count')) {
+        return; // Bypass ServiceWorker entirely for real-time polling to reduce DevTools noise
+    }
+    
     if (e.request.mode === 'navigate' || url.pathname.startsWith('/api/') || url.pathname === '/app' || url.pathname === '/login.html') {
         // SSE route MUST bypass Service Worker completely
         if (url.pathname === '/api/admin/playground') {

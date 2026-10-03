@@ -1431,6 +1431,7 @@
         if (pollTimer) return;
         pollTimer = setInterval(async () => {
             if (!activeConvId) return;
+            if (socket && socket.connected) return; // Skip polling if real-time socket is active
             try {
                 const r    = await fetch(`/api/dm/conversations/${activeConvId}/messages?after=${lastPollAt}`);
                 if (!r.ok) return;
@@ -1458,6 +1459,7 @@
         convPollTimer = setInterval(() => {
             if (!dmTab || dmTab.classList.contains('hidden')) return; // only when Messages tab visible
             if (activeConvId) return; // don't disrupt while reading a chat
+            if (socket && socket.connected) return; // Skip polling if real-time socket is active
             loadConvs();
         }, 4000);
     }
