@@ -2755,6 +2755,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (globalSpaceSection) globalSpaceSection.classList.add('hidden');
         if (chatsListSection) chatsListSection.classList.add('hidden');
         if (participantContainer) participantContainer.classList.add('hidden');
+        if (searchResultsContainer) searchResultsContainer.classList.remove('hidden');
 
         const filteredMsgs = [];
         if (allMessages && allMessages.length > 0) {
@@ -3571,6 +3572,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Deep search in loaded messages
+            inlineSearchResultsContainer.classList.remove('hidden');
             const filteredMsgs = [];
             const msgs = typeof window.getAllMessages === 'function' ? window.getAllMessages() : [];
             if (msgs && msgs.length > 0) {
