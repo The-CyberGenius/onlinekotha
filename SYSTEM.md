@@ -96,7 +96,7 @@
 
 | Table | Purpose |
 |---|---|
-| `users` | Accounts: email, password_hash, plan, trial_expires_at, is_admin |
+| `users` | Accounts: email, password_hash, plan (`trial`/`pro`/`pro_lifetime`), trial_expires_at, is_admin |
 | `sessions` | Auth sessions (token → user_id) |
 | `email_tokens` | Email verification + password reset tokens |
 | `chats` | Metadata for each uploaded chat (user_id, name, message_count) |
@@ -108,6 +108,13 @@
 | `global_messages` | Public global chat room messages |
 | `usage_log` | Per-user AI word/token usage |
 | `payments` | Payment records (Dodo Payments) |
+
+> 💰 **Canonical Pricing (as of Oct 2026):**
+> - Free tier: unlimited chat imports, 5 AI messages/day
+> - **Pro Monthly: $6/month** (auto-renews, cancel anytime)
+> - **Pro Lifetime: $49 one-time** (permanent access, no renewal)
+> - Processed via: Dodo Payments
+
 | `analytics_visitors` | Unique visitor tracking |
 | `analytics_sessions` | Per-session page-view sequences |
 | `analytics_events` | Individual events (page_view, login, message_sent…) |
