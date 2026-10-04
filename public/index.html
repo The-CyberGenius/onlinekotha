@@ -7,14 +7,11 @@
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
-        // Prevent Flash of Incorrect Theme (FOIT)
+        // Prevent Flash of Incorrect Theme (FOIT) - default to pop light theme
         (function () {
-            const storedTheme = localStorage.getItem('kotha_theme');
-            if (storedTheme === 'dark') {
-                document.documentElement.classList.remove('light');
-            } else {
-                document.documentElement.classList.add('light');
-            }
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('kotha_theme', 'light');
         })();
     </script>
     <meta charset="UTF-8">
@@ -222,7 +219,29 @@
     </script>
     <!-- ═══════════ DESIGN SYSTEM ═══════════ -->
     <style>
-        :root {
+        :root,
+        html.light {
+            --bg: #ffffff;
+            --bg-soft: #f8fafc;
+            --bg-elevated: #ffffff;
+            --text-primary: #090d16;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --card-hover: #ffffff;
+            --border: rgba(15, 23, 42, 0.08);
+            --border-strong: rgba(15, 23, 42, 0.16);
+            --border-glow: rgba(99, 102, 241, 0.35);
+            --accent: #6366f1;
+            --accent-strong: #4f46e5;
+            --accent-rose: #ec4899;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --msg-ai-bg: #f0f4ff;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+        }
+
+        html.dark {
             --bg: #07090e;
             --bg-soft: #0c101a;
             --bg-elevated: #111726;
@@ -241,27 +260,6 @@
             --accent-amber: #f59e0b;
             --msg-ai-bg: rgba(99, 102, 241, 0.08);
             --bg-glass: rgba(14, 19, 32, 0.85);
-        }
-
-        html.light {
-            --bg: #f8fafc;
-            --bg-soft: #f1f5f9;
-            --bg-elevated: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #94a3b8;
-            --card-bg: rgba(255, 255, 255, 0.92);
-            --card-hover: #ffffff;
-            --border: rgba(15, 23, 42, 0.08);
-            --border-strong: rgba(15, 23, 42, 0.15);
-            --border-glow: rgba(99, 102, 241, 0.25);
-            --accent: #4f46e5;
-            --accent-strong: #4338ca;
-            --accent-rose: #db2777;
-            --accent-emerald: #059669;
-            --accent-amber: #d97706;
-            --msg-ai-bg: #eef2ff;
-            --bg-glass: rgba(255, 255, 255, 0.9);
         }
 
         * {
@@ -436,11 +434,13 @@
             border-radius: 24px;
             padding: 28px;
             transition: all .3s ease;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
         }
 
         .card:hover {
-            border-color: var(--border-strong);
+            border-color: var(--border-glow);
             transform: translateY(-3px);
+            box-shadow: 0 16px 36px -6px rgba(99, 102, 241, 0.12);
         }
 
         .liquid-glass {
@@ -707,7 +707,7 @@
             display: inline-block;
             color: var(--accent);
             cursor: pointer;
-            background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -1263,11 +1263,11 @@
             display: block;
         }
 
-        html:not(.light) .badge-dark {
+        html.dark .badge-dark {
             display: block;
         }
 
-        html:not(.light) .badge-light {
+        html.dark .badge-light {
             display: none;
         }
 
@@ -1716,27 +1716,7 @@
             </div>
         </div>
     </section>
-    <!-- ═══════════ SOCIAL PROOF STRIP ═══════════ -->
-    <div class="proof">
-        <div class="proof-inner">
-            <div class="proof-stats">
-                <div class="proof-stat"><b>4.9/5</b><span>Rated by 184 users</span></div>
-                <div class="proof-stat"><b>Any language</b><span>Hindi · Hinglish · English + more</span></div>
-                <div class="proof-stat"><b>~1 min</b><span>To import a chat</span></div>
-                <div class="proof-stat"><b>100% private</b><span>Never sold, never trained on</span></div>
-            </div>
-            <div class="proof-cta">
-                <a href="/app.html?action=import" class="btn cta-primary"
-                    style="min-height:44px;padding:0 20px;font-size:14px;">
-                    Open the app
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round">
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
+
     <!-- ═══════════ BEFORE / AFTER INTERACTIVE DEMO ═══════════ -->
     <section class="sec" id="demo-story-mockup">
         <div class="wrap demo-wrap">
@@ -2780,17 +2760,17 @@
                     moonIcon.classList.add('hidden');
                 }
             }
-            updateIcons(root.classList.contains('light'));
+            updateIcons(!root.classList.contains('dark'));
             toggleBtn?.addEventListener('click', () => {
                 root.classList.add('theme-transition');
-                const isCurrentlyLight = root.classList.contains('light');
-                const newTheme = isCurrentlyLight ? 'dark' : 'light';
-                if (newTheme === 'light') {
-                    root.classList.add('light');
-                    root.classList.remove('dark');
-                } else {
-                    root.classList.remove('light');
+                const isCurrentlyDark = root.classList.contains('dark');
+                const newTheme = isCurrentlyDark ? 'light' : 'dark';
+                if (newTheme === 'dark') {
                     root.classList.add('dark');
+                    root.classList.remove('light');
+                } else {
+                    root.classList.remove('dark');
+                    root.classList.add('light');
                 }
                 updateIcons(newTheme === 'light');
                 localStorage.setItem('kotha_theme', newTheme);
