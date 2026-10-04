@@ -2724,15 +2724,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('stat-total-links').innerText = totalLinks.toLocaleString();
         document.getElementById('stat-first-date').innerText = firstDate;
 
+        // Clean sender filter — rejects URLs, links, or system message artifacts
+        const isCleanSender = (name) => {
+            if (!name || typeof name !== 'string') return false;
+            const s = name.trim();
+            if (s.length < 2) return false;
+            if (/^https?:\/\//i.test(s) || /^www\./i.test(s) || /https?:\/\//i.test(s) || /\.(com|org|net|me|in|io|co|app)\b/i.test(s)) return false;
+            if (/(end-to-end|security code|changed the subject|changed this group|left the group|joined using|added you|removed you|<media omitted>|omitted|deleted this message)/i.test(s)) return false;
+            return true;
+        };
+
         const senderCounts = {};
         allMessages.forEach(msg => {
-            if (msg.sender && msg.type !== 'system') senderCounts[msg.sender] = (senderCounts[msg.sender] || 0) + 1;
+            if (msg.sender && msg.type !== 'system' && isCleanSender(msg.sender)) {
+                senderCounts[msg.sender] = (senderCounts[msg.sender] || 0) + 1;
+            }
         });
+
+        // Fallback if no sender parsed cleanly
+        if (Object.keys(senderCounts).length === 0) {
+            senderCounts[otherPersonName || 'You'] = totalMsgs;
+        }
 
         let contributorsHtml = '';
         const sortedContributors = Object.entries(senderCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+        const maxTotal = Math.max(1, totalMsgs);
         sortedContributors.forEach(([sName, count], idx) => {
-            const pct = Math.round((count / totalMsgs) * 100);
+            const pct = Math.round((count / maxTotal) * 100);
             const colors = ['text-indigo-400 bg-indigo-500/10', 'text-pink-400 bg-pink-500/10', 'text-emerald-400 bg-emerald-500/10'];
             const barColors = ['bg-indigo-500', 'bg-pink-500', 'bg-emerald-500'];
             const cClass = colors[idx] || 'text-teal-400 bg-teal-500/10';
@@ -2752,6 +2770,89 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         document.getElementById('stat-contributors').innerHTML = contributorsHtml;
 
+        // ── Compute Impressive Chat Stats ──
+        // 1. Peak Weekday
+        const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const weekdayTallies = [0, 0, 0, 0, 0, 0, 0];
+        allMessages.forEach(m => {
+            if (!m.date || m.type === 'system') return;
+            const pd = parseMsgDate(m.date);
+            if (pd) {
+                const dObj = new Date(pd.y, pd.mon - 1, pd.day);
+                if (!isNaN(dObj.getTime())) {
+                    weekdayTallies[dObj.getDay()]++;
+                }
+            }
+        });
+        let maxWIdx = 5, maxWCnt = 0;
+        weekdayTallies.forEach((cnt, idx) => {
+            if (cnt > maxWCnt) { maxWCnt = cnt; maxWIdx = idx; }
+        });
+        const peakWeekday = weekdayNames[maxWIdx];
+
+        // 2. Night Owls (11 PM – 5 AM)
+        let nightCount = 0;
+        allMessages.forEach(m => {
+            if (!m.time || m.type === 'system') return;
+            const isPM = /pm/i.test(m.time);
+            const isAM = /am/i.test(m.time);
+            const parts = m.time.replace(/[^0-9:]/g, '').split(':');
+            let h = parseInt(parts[0], 10);
+            if (isNaN(h)) return;
+            if (isPM && h !== 12) h += 12;
+            if (isAM && h === 12) h = 0;
+            if (h >= 23 || h < 5) nightCount++;
+        });
+
+        // 3. Laughs Count
+        let laughCount = 0;
+        const laughRegex = /[\u{1F602}\u{1F923}\u{1F606}]|haha|hehe|lmao|lol\b|rofl/iu;
+        allMessages.forEach(m => {
+            if (m.text && m.type !== 'system' && laughRegex.test(m.text)) {
+                laughCount++;
+            }
+        });
+
+        // 4. Top Emojis
+        const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+        const emojiCounts = {};
+        allMessages.forEach(m => {
+            if (!m.text || m.type === 'system') return;
+            const matches = m.text.match(emojiRegex);
+            if (matches) {
+                matches.forEach(e => { emojiCounts[e] = (emojiCounts[e] || 0) + 1; });
+            }
+        });
+        const topEmojis = Object.entries(emojiCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 4);
+
+        // Populate Impressive Highlight Metrics
+        const peakDayEl = document.getElementById('stat-peak-day');
+        if (peakDayEl) peakDayEl.innerText = peakWeekday;
+
+        const nightMsgsEl = document.getElementById('stat-night-msgs');
+        if (nightMsgsEl) nightMsgsEl.innerText = nightCount.toLocaleString();
+
+        const laughCountEl = document.getElementById('stat-laugh-count');
+        if (laughCountEl) laughCountEl.innerText = laughCount.toLocaleString();
+
+        const emojisRow = document.getElementById('stat-emojis-row');
+        const emojisContainer = document.getElementById('stat-top-emojis');
+        if (emojisRow && emojisContainer) {
+            if (topEmojis.length > 0) {
+                emojisContainer.innerHTML = topEmojis.map(([e, cnt]) => `
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-xs font-bold" title="${cnt} times">
+                        <span>${e}</span>
+                        <span class="text-[10px] text-white/60">${cnt}</span>
+                    </span>
+                `).join('');
+                emojisRow.classList.remove('hidden');
+            } else {
+                emojisRow.classList.add('hidden');
+            }
+        }
+
         // Hook up download/copy handlers
         const dlBtn = document.getElementById('stat-download-btn');
         const cpBtn = document.getElementById('stat-copy-btn');
@@ -2767,8 +2868,12 @@ document.addEventListener('DOMContentLoaded', () => {
             totalMedia,
             totalLinks,
             firstDate,
+            peakDay: peakWeekday,
+            nightMsgs: nightCount,
+            laughCount: laughCount,
+            topEmojis: topEmojis,
             contributors: sortedContributors.map(([sName, count]) => {
-                const pct = Math.round((count / totalMsgs) * 100);
+                const pct = Math.round((count / maxTotal) * 100);
                 return [sName, count, pct];
             })
         };

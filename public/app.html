@@ -1025,18 +1025,18 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/script.js?v=44"></script>
+    <script src="/js/script.js?v=45"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-    <script src="/js/ai-panel.js?v=44"></script>
-    <script src="/js/upload.js?v=44"></script>
-    <script src="/js/story.js?v=44"></script>
-    <script src="/js/features.js?v=44"></script>
-    <script src="/js/dm.js?v=44"></script>
+    <script src="/js/ai-panel.js?v=45"></script>
+    <script src="/js/upload.js?v=45"></script>
+    <script src="/js/story.js?v=45"></script>
+    <script src="/js/features.js?v=45"></script>
+    <script src="/js/dm.js?v=45"></script>
     <script>
         if ('caches' in window) {
             caches.keys().then(keys => {
                 keys.forEach(k => {
-                    if (k.startsWith('kotha-') && !k.includes('v44')) {
+                    if (k.startsWith('kotha-') && !k.includes('v45')) {
                         caches.delete(k);
                     }
                 });
@@ -1114,6 +1114,28 @@
                 <div class="border-t border-white/5 pt-3">
                     <p class="text-[9px] text-white/40 uppercase font-black tracking-wider mb-2">Contributors</p>
                     <div id="stat-contributors" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Impressive Highlight Metrics -->
+                <div class="grid grid-cols-3 gap-2 py-3 border-t border-white/5 text-center">
+                    <div class="bg-white/[0.04] p-2 rounded-xl border border-white/[0.06]">
+                        <p class="text-[9px] text-indigo-300 uppercase font-black tracking-wider">Peak Day</p>
+                        <p class="text-xs font-black text-white mt-1 truncate" id="stat-peak-day">-</p>
+                    </div>
+                    <div class="bg-white/[0.04] p-2 rounded-xl border border-white/[0.06]">
+                        <p class="text-[9px] text-pink-300 uppercase font-black tracking-wider">Night Owls 🌙</p>
+                        <p class="text-xs font-black text-pink-300 mt-1" id="stat-night-msgs">0</p>
+                    </div>
+                    <div class="bg-white/[0.04] p-2 rounded-xl border border-white/[0.06]">
+                        <p class="text-[9px] text-amber-300 uppercase font-black tracking-wider">Laughs 😂</p>
+                        <p class="text-xs font-black text-amber-300 mt-1" id="stat-laugh-count">0</p>
+                    </div>
+                </div>
+
+                <!-- Top Emojis Row -->
+                <div id="stat-emojis-row" class="pt-2.5 border-t border-white/5 flex items-center justify-between hidden">
+                    <span class="text-[9px] text-white/40 uppercase font-black tracking-wider">Top Emojis</span>
+                    <div id="stat-top-emojis" class="flex items-center gap-1.5 flex-wrap justify-end"></div>
                 </div>
             </div>
 

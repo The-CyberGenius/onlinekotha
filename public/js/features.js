@@ -1209,6 +1209,45 @@
                 currentItemY += 85;
             });
 
+            // ── Highlights Row: Peak Day, Night Owls, Laughs ──
+            if (stats && (stats.peakDay || stats.nightMsgs !== undefined)) {
+                const hlY = currentItemY + 30;
+                const hlW = (W - 200) / 3;
+
+                // Card 1: Peak Day
+                ctx.beginPath(); roundedRect(ctx, 80, hlY, hlW, 130, 20);
+                ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.stroke();
+                ctx.font = '800 16px -apple-system, sans-serif';
+                ctx.fillStyle = '#a5b4fc';
+                ctx.fillText('PEAK DAY', 105, hlY + 25);
+                ctx.font = '900 30px -apple-system, sans-serif';
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(stats.peakDay || '-', 105, hlY + 65);
+
+                // Card 2: Night Owls
+                ctx.beginPath(); roundedRect(ctx, 80 + hlW + 20, hlY, hlW, 130, 20);
+                ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.stroke();
+                ctx.font = '800 16px -apple-system, sans-serif';
+                ctx.fillStyle = '#f472b6';
+                ctx.fillText('NIGHT OWLS 🌙', 80 + hlW + 45, hlY + 25);
+                ctx.font = '900 30px -apple-system, sans-serif';
+                ctx.fillStyle = '#f472b6';
+                ctx.fillText((stats.nightMsgs || 0).toLocaleString(), 80 + hlW + 45, hlY + 65);
+
+                // Card 3: Laughs
+                ctx.beginPath(); roundedRect(ctx, 80 + (hlW + 20) * 2, hlY, hlW, 130, 20);
+                ctx.fillStyle = 'rgba(255,255,255,0.03)'; ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.stroke();
+                ctx.font = '800 16px -apple-system, sans-serif';
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('LAUGHS 😂', 80 + (hlW + 20) * 2 + 25, hlY + 25);
+                ctx.font = '900 30px -apple-system, sans-serif';
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText((stats.laughCount || 0).toLocaleString(), 80 + (hlW + 20) * 2 + 25, hlY + 65);
+            }
+
             // ── Footer ──
             ctx.fillStyle = lineGrad;
             ctx.fillRect(80, H - 220, W - 160, 2);

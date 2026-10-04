@@ -92,13 +92,45 @@
             text-align: center;
         }
 
-        /* Nav zones — left 35% prev, right 65% next */
+        /* Nav zones — left 35% prev, right 65% next (restricted height so header and bottom buttons are always clickable) */
         .ok-nav-l, .ok-nav-r {
-            position: absolute; top: 0; bottom: 0; z-index: 300; cursor: pointer;
+            position: absolute; top: 80px; bottom: 80px; z-index: 300; cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
         .ok-nav-l { left: 0; width: 35%; }
         .ok-nav-r { right: 0; width: 65%; }
+
+        /* Top-Right Close Button on Viewport */
+        .ok-vp-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 500;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+            transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+        .ok-vp-close-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+        }
+        .ok-vp-close-btn:active {
+            transform: scale(0.92);
+        }
 
         /* Round Share Button — positioned at bottom right of the floating story card */
         .ok-round-share-btn {
@@ -356,10 +388,7 @@
                         </defs>
                     </svg>
                     <span>OnlineKotha</span>
-                </div>
-                <button class="ok-close" aria-label="Close story">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>`;
+                </div>`;
             d.cv.appendChild(d.hdr);
 
             // Footer watermark
@@ -375,6 +404,17 @@
             d.navL.className = 'ok-nav-l';
             d.navR = document.createElement('div');
             d.navR.className = 'ok-nav-r';
+
+            // Top-Right Close Button — positioned on the floating story card with highest z-index
+            d.closeBtn = document.createElement('button');
+            d.closeBtn.className = 'ok-vp-close-btn';
+            d.closeBtn.id = 'ok-close-btn';
+            d.closeBtn.setAttribute('aria-label', 'Close story');
+            d.closeBtn.setAttribute('title', 'Close');
+            d.closeBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>`;
 
             // Single Round Share Button — positioned at bottom right of the floating story card
             d.shareBtn = document.createElement('button');
@@ -395,6 +435,7 @@
             d.vp.appendChild(d.cv);
             d.vp.appendChild(d.navL);
             d.vp.appendChild(d.navR);
+            d.vp.appendChild(d.closeBtn);
             d.vp.appendChild(d.shareBtn);
             d.ov.appendChild(d.vp);
             document.body.appendChild(d.ov);
@@ -442,10 +483,19 @@
             const d = this.dom;
 
             // Close
-            d.hdr.querySelector('.ok-close').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.close();
-            });
+            if (d.closeBtn) {
+                d.closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.close();
+                });
+            }
+            const oldClose = d.hdr.querySelector('.ok-close');
+            if (oldClose) {
+                oldClose.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.close();
+                });
+            }
             d.ov.addEventListener('click', (e) => {
                 if (e.target === d.ov) this.close();
             });
@@ -577,18 +627,15 @@
                 el.style.transform = 'none';
             });
 
-            // Keep in-place, reset transform to full 1080x1920 scale (do NOT move offscreen to -9999px)
-            const oldTransform = cv.style.transform;
-            cv.style.transform = 'none';
-
             // Filter out non-card UI controls and elements that break mobile canvas capture
             const filter = (node) => {
                 if (!node || node.nodeType !== 1) return true;
                 if (node.tagName === 'IMG') return false;
-                if (node.id === 'ok-share-btn') return false;
+                if (node.id === 'ok-share-btn' || node.id === 'ok-close-btn') return false;
                 if (node.classList && (
                     node.classList.contains('ok-prog') || 
                     node.classList.contains('ok-close') || 
+                    node.classList.contains('ok-vp-close-btn') || 
                     node.classList.contains('ok-noise') ||
                     node.classList.contains('ok-nav-l') ||
                     node.classList.contains('ok-nav-r') ||
@@ -598,9 +645,8 @@
             };
 
             try {
-                // Allow layout to stabilize
-                await new Promise(r => setTimeout(r, 60));
-
+                // htmlToImage clones the node and applies options.style to the clone directly!
+                // This means the live screen card NEVER stretches or zooms in while sharing.
                 const dataUrl = await window.htmlToImage.toPng(cv, {
                     width: 1080,
                     height: 1920,
@@ -608,7 +654,11 @@
                     cacheBust: true,
                     skipFonts: true,
                     filter: filter,
-                    backgroundColor: '#080812'
+                    backgroundColor: '#080812',
+                    style: {
+                        transform: 'none',
+                        transformOrigin: 'top left'
+                    }
                 });
 
                 if (!dataUrl || dataUrl.length < 1000) {
@@ -640,8 +690,7 @@
                 console.error('[StoryEngine] export failed:', err);
                 this._showToast('Could not save card. Try again.');
             } finally {
-                // Restore transform and animations
-                cv.style.transform = oldTransform;
+                // Restore animations
                 animatedEls.forEach(el => {
                     el.style.animation = '';
                     el.style.opacity = '';
