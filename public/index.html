@@ -738,18 +738,218 @@
             margin-bottom: 22px;
         }
 
-        .hero-cap-chip {
-            display: inline-flex;
+        /* ── Phone Mockup (Chat Wrapped Story Cards) ── */
+        .mockup-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 7px;
-            font-size: 12.5px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 7px 14px;
-            backdrop-filter: blur(10px);
+            margin-top: 40px;
+        }
+
+        .phone-mockup {
+            position: relative;
+            width: min(310px, 90vw);
+            height: 590px;
+            border-radius: 44px;
+            border: 8px solid #0f172a;
+            background: #0f172a;
+            box-shadow: 0 25px 60px -15px rgba(99, 102, 241, 0.28), 0 10px 30px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .phone-mockup,
+        .phone-mockup * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-drag: none !important;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 24px;
+            background: #0f172a;
+            border-radius: 20px;
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+        }
+
+        .phone-notch::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #1e293b;
+            box-shadow: inset 0 0 2px rgba(255,255,255,0.2);
+        }
+
+        .phone-screen {
+            flex: 1;
+            position: relative;
+            background: #0f172a;
+            border-bottom-left-radius: 36px;
+            border-bottom-right-radius: 36px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            touch-action: pan-y manipulation;
+            cursor: pointer;
+        }
+
+        .story-container {
+            display: flex;
+            overflow-x: hidden;
+            scroll-snap-type: x mandatory;
+            width: 100%;
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        .story-card {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 42px 22px 30px;
+            text-align: center;
+            height: 100%;
+            color: #ffffff;
+        }
+
+        .story-bg-1 {
+            background: radial-gradient(circle at 100% 0%, #a855f7 0%, transparent 50%), radial-gradient(circle at 0% 100%, #ec4899 0%, transparent 50%), linear-gradient(135deg, #4f46e5, #312e81);
+        }
+        .story-bg-2 {
+            background: radial-gradient(circle at 80% 20%, #34d399 0%, transparent 60%), radial-gradient(circle at 20% 80%, #3b82f6 0%, transparent 60%), linear-gradient(135deg, #065f46, #1e3a8a);
+        }
+        .story-bg-3 {
+            background: radial-gradient(circle at 100% 100%, #fcd34d 0%, transparent 50%), radial-gradient(circle at 0% 0%, #ef4444 0%, transparent 50%), linear-gradient(135deg, #b45309, #7f1d1d);
+        }
+        .story-bg-4 {
+            background: radial-gradient(circle at 50% 0%, #f472b6 0%, transparent 60%), radial-gradient(circle at 50% 100%, #c084fc 0%, transparent 60%), linear-gradient(135deg, #9d174d, #4c1d95);
+        }
+        .story-bg-5 {
+            background: radial-gradient(circle at 0% 50%, #38bdf8 0%, transparent 50%), radial-gradient(circle at 100% 50%, #34d399 0%, transparent 50%), linear-gradient(135deg, #0369a1, #065f46);
+        }
+        .story-bg-6 {
+            background: radial-gradient(circle at 20% 0%, #818cf8 0%, transparent 60%), radial-gradient(circle at 80% 100%, #fb7185 0%, transparent 60%), linear-gradient(135deg, #3730a3, #9f1239);
+        }
+        .story-bg-7 {
+            background: radial-gradient(circle at 100% 0%, #fb923c 0%, transparent 50%), radial-gradient(circle at 0% 100%, #f43f5e 0%, transparent 50%), linear-gradient(135deg, #9f1239, #9a3412);
+        }
+
+        .story-progress-container {
+            position: absolute;
+            top: 40px;
+            left: 14px;
+            right: 14px;
+            display: flex;
+            gap: 4px;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .story-progress-bar {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 2px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .story-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #ffffff;
+            transition: width 0.1s linear;
+            pointer-events: none;
+        }
+
+        .story-title {
+            font-size: 2.3rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 8px;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            font-family: inherit;
+        }
+
+        .story-subtitle {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.75);
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            margin-bottom: 14px;
+        }
+
+        .story-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.92);
+            line-height: 1.45;
+            max-width: 250px;
+            margin: 0 auto;
+        }
+
+        .story-highlight {
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 14px;
+            padding: 10px 18px;
+            margin: 6px 0;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+
+        .story-share-btn {
+            position: absolute;
+            bottom: 18px;
+            right: 18px;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .story-share-btn:hover {
+            transform: scale(1.08);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .hero-cta-group {
@@ -1714,91 +1914,104 @@
                     Encrypted &amp; private
                 </span>
             </div>
-        </div>
-    </section>
 
-    <!-- ═══════════ BEFORE / AFTER INTERACTIVE DEMO ═══════════ -->
-    <section class="sec" id="demo-story-mockup">
-        <div class="wrap demo-wrap">
-            <div style="text-align:center;margin-bottom:48px;">
-                <p class="eyebrow" style="margin-bottom:14px;">The utility, in ten seconds</p>
-                <h2 class="h2">The chat that faded. The chat that lives again.</h2>
-                <p class="lead" style="max-width:560px;margin:16px auto 0;">Left: how it ended. Right: the same
-                    conversation, continued by AI that remembers everything. Try it — right here.</p>
-            </div>
-            <div class="demo-grid">
-                <!-- BEFORE -->
-                <div class="demo-panel demo-panel-before">
-                    <div class="demo-head">
-                        <div class="demo-person">
-                            <span class="demo-avatar demo-avatar-old">A</span>
-                            <div>
-                                Aboni · WhatsApp
-                                <div class="demo-sub">Last message · 8 months ago</div>
-                            </div>
+            <!-- Interactive Virtual Phone Mockup (Chat Wrapped Story Cards) -->
+            <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <!-- Story Progress Indicators -->
+                        <div class="story-progress-container" id="story-progress">
+                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
                         </div>
-                        <span class="demo-tag demo-tag-faded">Faded out</span>
-                    </div>
-                    <div class="demo-chat">
-                        <div class="demo-bubbles">
-                            <span class="demo-bubble demo-b-in">So… Durga Puja? I'll book the tickets this week,
-                                promise</span>
-                            <span class="demo-bubble demo-b-out">Yes yes, this time for sure!</span>
-                        </div>
-                    </div>
-                    <p
-                        style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:14px;font-style:italic;">
-                        Read · no reply · the conversation just… stopped
-                    </p>
-                </div>
-                <!-- AFTER (interactive) -->
-                <div class="demo-panel demo-panel-after">
-                    <div class="demo-head">
-                        <div class="demo-person">
-                            <span class="demo-avatar demo-avatar-ai">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path
-                                        d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
-                                </svg>
-                            </span>
-                            <div>
-                                Aboni · Kotha AI
-                                <div class="demo-sub">Knows your shared memories</div>
-                            </div>
-                        </div>
-                        <span class="demo-tag demo-tag-ai">Continuing</span>
-                    </div>
-                    <div class="demo-chat" id="ba-chat">
-                        <span class="demo-bubble demo-b-in">Arre, remember that trip we planned to Darjeeling but never
-                            took?</span>
-                        <span class="demo-bubble demo-b-out">Ha ha yes! The train tickets we never booked 😅</span>
-                    </div>
-                    <div class="demo-chips">
-                        <button type="button" class="ba-chip">Remember the Darjeeling plan?</button>
-                        <button type="button" class="ba-chip">Ami tomar kotha bhabchilam</button>
-                        <button type="button" class="ba-chip">What did we decide for Durga Puja?</button>
-                    </div>
-                    <div class="demo-input-row">
-                        <input type="text" id="ba-input" maxlength="200" autocomplete="off" placeholder="Say kotha…"
-                            aria-label="Try the demo">
-                        <button type="button" id="ba-send" aria-label="Send demo message">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+
+                        <!-- Share Button -->
+                        <div class="story-share-btn" id="story-share" title="Share your story">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="18" cy="5" r="3"></circle>
+                                <circle cx="6" cy="12" r="3"></circle>
+                                <circle cx="18" cy="19" r="3"></circle>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                             </svg>
-                        </button>
+                        </div>
+
+                        <!-- Story Slides Container -->
+                        <div class="story-container" id="story-carousel">
+                            <!-- Slide 1: Intro -->
+                            <div class="story-card story-bg-1">
+                                <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
+                                <h1 class="story-title">Your Chat, Wrapped.</h1>
+                                <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations reveal about you &amp; them.</p>
+                                <span style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap to flip 👉</span>
+                            </div>
+
+                            <!-- Slide 2: Stats -->
+                            <div class="story-card story-bg-2">
+                                <h2 class="story-subtitle">The Numbers</h2>
+                                <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px;">12,842</div>
+                                <p class="story-text">messages sent over</p>
+                                <div class="story-highlight">574 Days</div>
+                            </div>
+
+                            <!-- Slide 3: Vibe Check -->
+                            <div class="story-card story-bg-3">
+                                <h2 class="story-subtitle">Vibe Check</h2>
+                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🎢</div>
+                                <div class="story-highlight" style="width: 85%;">80% Chaos 😂</div>
+                                <div class="story-highlight" style="width: 85%;">20% Wholesome ❤️</div>
+                            </div>
+
+                            <!-- Slide 4: Top Words -->
+                            <div class="story-card story-bg-4">
+                                <h2 class="story-subtitle">Most Used Words</h2>
+                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1 bhai 💬</div>
+                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀</div>
+                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂</div>
+                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 sun na 🥺</div>
+                            </div>
+
+                            <!-- Slide 5: Time Patterns -->
+                            <div class="story-card story-bg-5">
+                                <h2 class="story-subtitle">Time Patterns</h2>
+                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
+                                <h1 class="story-title" style="font-size: 2rem;">Night Owls</h1>
+                                <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14 AM</b></p>
+                            </div>
+
+                            <!-- Slide 6: AI Conversation -->
+                            <div class="story-card story-bg-6">
+                                <h2 class="story-subtitle">The Magic</h2>
+                                <h1 class="story-title" style="font-size: 1.85rem;">AI Clone Ready</h1>
+                                <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact words, humor, tone &amp; texting style.</p>
+                                <div class="story-highlight" style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
+                                    💬 "Arre me nahi aa raha, tu jaa 😂"
+                                </div>
+                            </div>
+
+                            <!-- Slide 7: Outro -->
+                            <div class="story-card story-bg-7">
+                                <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
+                                <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat &amp; relive your memories securely.</p>
+                                <a href="/app.html?action=import" id="story-cta-btn" class="btn" style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span>Try Free Now</span>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <p class="demo-note">Simulated demo — in the real app, the AI answers from your own imported chat.</p>
-            <div style="text-align:center;margin-top:22px;">
-                <a href="/app.html?action=import" class="btn cta-primary" style="min-height:50px;padding:0 28px;">
-                    Continue your real chat
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round">
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                    </svg>
-                </a>
+                <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    <span>Tap left or right to browse stories</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </div>
             </div>
         </div>
     </section>
@@ -2358,76 +2571,141 @@
                 bar.classList.toggle('show', window.scrollY > 600);
             }, { passive: true });
         })();
-        // ── Before / After demo (simulated, no backend needed) ──
+        // ── Chat Wrapped Story Carousel on Virtual Phone ──
         (function () {
-            const chat = document.getElementById('ba-chat');
-            const input = document.getElementById('ba-input');
-            const sendBtn = document.getElementById('ba-send');
-            const chips = Array.prototype.slice.call(document.querySelectorAll('.ba-chip'));
-            if (!chat || !input || !sendBtn) return;
-            const replies = [
-                { k: ['darjeeling', 'trip'], t: 'Bol! I still have the list we made — toy train tickets, momos near Chowk Bazaar, and your 3AM sunrise alarm that never rings 😄 So… Durga Puja this year?' },
-                { k: ['kotha', 'miss', 'bhav', 'bhab'], t: 'I know… it has been too long. But kotha never really ends, it just waits. Tell me everything, slowly.' },
-                { k: ['puja', 'decide', 'plan'], t: "Last thing we locked in: you booking the tickets, me handling the food list. Same deal again? Don't ghost me like last time 😅" }
-            ];
-            let busy = false;
-            function escHtml(s) {
-                return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            }
-            function scroll() { chat.scrollTop = chat.scrollHeight; }
-            function bubble(mine, text) {
-                const wrap = document.createElement('div');
-                wrap.className = 'demo-pop';
-                wrap.style.cssText = 'display:flex;justify-content:' + (mine ? 'flex-end' : 'flex-start') + ';';
-                const b = document.createElement('span');
-                b.className = 'demo-bubble ' + (mine ? 'demo-b-out' : 'demo-b-in');
-                b.innerHTML = escHtml(text);
-                wrap.appendChild(b);
-                chat.appendChild(wrap);
-                scroll();
-            }
-            function typingOn() {
-                const t = document.createElement('div');
-                t.className = 'demo-typing demo-pop';
-                t.id = 'ba-typing';
-                t.innerHTML = '<i></i><i></i><i></i>';
-                chat.appendChild(t);
-                scroll();
-            }
-            function typingOff() {
-                const t = document.getElementById('ba-typing');
-                if (t) t.remove();
-            }
-            function pickReply(text) {
-                const lower = text.toLowerCase();
-                for (let i = 0; i < replies.length; i++) {
-                    if (replies[i].k.some(function (w) { return lower.indexOf(w) !== -1; })) return replies[i].t;
+            const phoneScreen = document.querySelector('.phone-screen');
+            const carousel = document.getElementById('story-carousel');
+            const shareBtn = document.getElementById('story-share');
+            const progressFills = document.querySelectorAll('.story-progress-fill');
+            
+            if (!carousel || !phoneScreen) return;
+
+            let currentSlide = 0;
+            const totalSlides = 7;
+            const slideDuration = 4500;
+            let storyInterval = null;
+
+            function updateProgressBars() {
+                progressFills.forEach((fill, index) => {
+                    if (index < currentSlide) {
+                        fill.style.width = '100%';
+                        fill.style.transition = 'none';
+                    } else if (index > currentSlide) {
+                        fill.style.width = '0%';
+                        fill.style.transition = 'none';
+                    }
+                });
+                
+                const currentFill = progressFills[currentSlide];
+                if (currentFill) {
+                    currentFill.style.width = '0%';
+                    currentFill.style.transition = 'none';
+                    void currentFill.offsetWidth;
+                    currentFill.style.transition = `width ${slideDuration}ms linear`;
+                    currentFill.style.width = '100%';
                 }
-                return 'Ha ha, classic you. That reminds me of what you said last October — anyway, what else is new?';
             }
-            function send(text) {
-                text = (text || '').trim();
-                if (!text || busy) return;
-                busy = true;
-                sendBtn.disabled = true;
-                chips.forEach(function (c) { c.disabled = true; });
-                bubble(true, text);
-                input.value = '';
-                typingOn();
-                setTimeout(function () {
-                    typingOff();
-                    bubble(false, pickReply(text));
-                    busy = false;
-                    sendBtn.disabled = false;
-                    chips.forEach(function (c) { c.disabled = false; });
-                    input.focus();
-                }, 1200);
+
+            function goToSlide(index) {
+                if (index < 0) index = 0;
+                if (index >= totalSlides) index = 0;
+                
+                currentSlide = index;
+                const slideWidth = carousel.clientWidth;
+                carousel.scrollTo({ left: slideWidth * currentSlide, behavior: 'smooth' });
+                
+                updateProgressBars();
+                startTimer();
             }
-            sendBtn.addEventListener('click', function () { send(input.value); });
-            input.addEventListener('keydown', function (e) { if (e.key === 'Enter') send(input.value); });
-            chips.forEach(function (c) {
-                c.addEventListener('click', function () { send(c.textContent); });
+
+            function startTimer() {
+                clearInterval(storyInterval);
+                const duration = (currentSlide === totalSlides - 1) ? 8000 : slideDuration;
+                storyInterval = setInterval(() => {
+                    goToSlide(currentSlide + 1);
+                }, duration);
+            }
+
+            // Share button handler
+            if (shareBtn) {
+                shareBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'OnlineKotha Chat Wrapped',
+                            text: 'Relive your WhatsApp memories with OnlineKotha!',
+                            url: window.location.href,
+                        }).catch(() => {});
+                    } else {
+                        navigator.clipboard?.writeText(window.location.href);
+                        alert('Link copied to clipboard!');
+                    }
+                });
+            }
+
+            // Touch and Click navigation
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let isSwiping = false;
+            let lastNavTime = 0;
+
+            phoneScreen.addEventListener('touchstart', (e) => {
+                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                if (e.touches && e.touches.length > 0) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    isSwiping = false;
+                }
+                clearInterval(storyInterval);
+            }, { passive: true });
+
+            phoneScreen.addEventListener('touchend', (e) => {
+                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                if (e.changedTouches && e.changedTouches.length > 0) {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const diffX = touchEndX - touchStartX;
+                    const diffY = touchEndY - touchStartY;
+
+                    if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                        isSwiping = true;
+                        lastNavTime = Date.now();
+                        if (diffX < 0) {
+                            goToSlide(currentSlide + 1);
+                        } else {
+                            goToSlide(currentSlide - 1);
+                        }
+                        return;
+                    }
+                }
+                startTimer();
+            }, { passive: true });
+
+            phoneScreen.addEventListener('click', (e) => {
+                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                const now = Date.now();
+                if (isSwiping || (now - lastNavTime < 300)) {
+                    isSwiping = false;
+                    return;
+                }
+                lastNavTime = now;
+
+                const rect = phoneScreen.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                if (clickX < rect.width * 0.35) {
+                    goToSlide(currentSlide - 1);
+                } else {
+                    goToSlide(currentSlide + 1);
+                }
             });
+
+            phoneScreen.addEventListener('mouseenter', () => clearInterval(storyInterval));
+            phoneScreen.addEventListener('mouseleave', () => startTimer());
+
+            setTimeout(() => {
+                goToSlide(0);
+            }, 400);
         })();
         // ── Hero Interactive Demo Chat (server-connected, floating assistant) ──
         document.addEventListener('DOMContentLoaded', function heroChat() {
