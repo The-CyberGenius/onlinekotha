@@ -421,7 +421,15 @@
     //  user_participant is not yet saved (or is stale).
     // ─────────────────────────────────────────────
     window.ensureIdentity = async function (chatFolder, forceShow = false) {
-        if (chatFolder === '__global__' || chatFolder === 'kotha_assistant') return true;
+        if (chatFolder === '__global__') return true;
+        if (chatFolder === 'kotha_assistant') {
+            contactNameMap['kotha_assistant'] = 'Kotha Assistant';
+            if (typeof window.kothaSetMyName === 'function') {
+                const uName = (window.__USER__ && (window.__USER__.display_name || window.__USER__.email?.split('@')[0])) || 'You';
+                window.kothaSetMyName(uName, 'Kotha Assistant');
+            }
+            return true;
+        }
         try {
             const resp = await fetch(`/api/ai/chat/${encodeURIComponent(chatFolder)}/identity`);
             if (!resp.ok) return true;
@@ -716,8 +724,9 @@
     // ─────────────────────────────────────────────
     async function sendToAI(text, chatFolder, sendAsAI = false) {
         const convId = conversationMap[chatFolder] || null;
-        const cName = contactNameMap[chatFolder] ||
-            (document.getElementById('chat-header-name')?.innerText) || 'AI';
+        const cName = chatFolder === 'kotha_assistant'
+            ? 'Kotha Assistant'
+            : (contactNameMap[chatFolder] || (document.getElementById('chat-header-name')?.innerText) || 'AI');
         const uName = (typeof window.kothaGetMyName === 'function') ? window.kothaGetMyName() : 'User';
 
         _dotStart();
@@ -758,8 +767,23 @@
                     const stored = localStorage.getItem('kotha_assistant_history');
                     let history = [];
                     if (stored) { try { history = JSON.parse(stored); } catch(e){} }
-                    history.push({ text: text, sender: 'You', time: formatNow() });
+                    const todayIso = new Date().toLocaleDateString('en-CA');
+                    history.push({ text: text, sender: 'You', time: formatNow(), date: todayIso });
                     localStorage.setItem('kotha_assistant_history', JSON.stringify(history));
+
+                    if (window._chatMsgCache) {
+                        window._chatMsgCache['kotha_assistant'] = history;
+                    }
+                    if (!window._chatMetaCache) window._chatMetaCache = {};
+                    window._chatMetaCache['kotha_assistant'] = {
+                        ...(window._chatMetaCache['kotha_assistant'] || {}),
+                        contactName: 'Kotha Assistant',
+                        lastMessage: text.length > 40 ? text.slice(0, 40) + '…' : text,
+                        lastTime: formatNow(),
+                    };
+                    if (typeof window.renderChatList === 'function' && window.loadedChats) {
+                        window.renderChatList(window.loadedChats, window.currentChat);
+                    }
                 }
 
                 const resp = await fetch(endpoint, {
@@ -831,9 +855,10 @@
                         } else if (event === 'token') {
                             if (!responseBubble) {
                                 typingEl.remove();
-                                responseBubble = appendContactBubble(
-                                    (chatFolder && contactNameMap[chatFolder]) || data.contactName || 'AI'
-                                );
+                                const bubbleName = chatFolder === 'kotha_assistant'
+                                    ? 'Kotha Assistant'
+                                    : ((chatFolder && contactNameMap[chatFolder]) || data.contactName || 'AI');
+                                responseBubble = appendContactBubble(bubbleName);
                                 startTypewriter(
                                     responseBubble.querySelector('.ai-response-text'),
                                     scrollArea
@@ -872,8 +897,23 @@
                                     const stored = localStorage.getItem('kotha_assistant_history');
                                     let history = [];
                                     if (stored) { try { history = JSON.parse(stored); } catch(e){} }
-                                    history.push({ text: cleanedText, sender: 'Kotha Assistant', time: formatNow() });
+                                    const todayIso = new Date().toLocaleDateString('en-CA');
+                                    history.push({ text: cleanedText, sender: 'Kotha Assistant', time: formatNow(), date: todayIso });
                                     localStorage.setItem('kotha_assistant_history', JSON.stringify(history));
+
+                                    if (window._chatMsgCache) {
+                                        window._chatMsgCache['kotha_assistant'] = history;
+                                    }
+                                    if (!window._chatMetaCache) window._chatMetaCache = {};
+                                    window._chatMetaCache['kotha_assistant'] = {
+                                        ...(window._chatMetaCache['kotha_assistant'] || {}),
+                                        contactName: 'Kotha Assistant',
+                                        lastMessage: cleanedText.length > 40 ? cleanedText.slice(0, 40) + '…' : cleanedText,
+                                        lastTime: formatNow(),
+                                    };
+                                    if (typeof window.renderChatList === 'function' && window.loadedChats) {
+                                        window.renderChatList(window.loadedChats, window.currentChat);
+                                    }
                                 }
                                 resolve();
                             };

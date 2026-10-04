@@ -751,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         floatingDate.classList.remove('opacity-0');
                         floatingDate.classList.add('opacity-100');
 
-                        if (dynamicHeaderDate && closestDate !== _lastHeaderDateStr) {
+                        if (dynamicHeaderDate && closestDate !== _lastHeaderDateStr && currentChat !== 'kotha_assistant') {
                             _lastHeaderDateStr = closestDate;
                             dynamicHeaderDate.innerText = closestDate;
                             dynamicHeaderDate.classList.remove('hidden');
@@ -887,11 +887,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         try { history = JSON.parse(stored); } catch(e){}
                     }
                     if (history.length === 0) {
+                        const todayIso = new Date().toLocaleDateString('en-CA');
                         history = [
                             {
                                 text: "Hi there! 👋 I'm Kotha Assistant, the official in-app AI assistant for OnlineKotha. How can I help you today? Ask me about exporting WhatsApp chats, how AI chat works, Wrapped, or our plans!",
                                 sender: "Kotha Assistant",
-                                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                date: todayIso
                             }
                         ];
                     }
@@ -948,6 +950,54 @@ document.addEventListener('DOMContentLoaded', () => {
             if (participantContainer) {
                 participantContainer.innerHTML = '';
                 participantContainer.classList.add('hidden');
+            }
+
+            if (chatName === 'kotha_assistant') {
+                otherPersonName = 'Kotha Assistant';
+                const uName = (window.__USER__ && (window.__USER__.display_name || window.__USER__.email?.split('@')[0])) || 'You';
+                myName = uName;
+                if (typeof window.kothaSetMyName === 'function') {
+                    window.kothaSetMyName(uName, 'Kotha Assistant');
+                }
+                if (!window._chatMetaCache) window._chatMetaCache = {};
+                if (!window._chatMetaCache['kotha_assistant']) window._chatMetaCache['kotha_assistant'] = {};
+                window._chatMetaCache['kotha_assistant'].contactName = 'Kotha Assistant';
+                window._chatMetaCache['kotha_assistant'].isGroup = false;
+
+                if (headerName) {
+                    headerName.innerHTML = `Kotha Assistant <span class="text-[11px] font-normal text-emerald-500 block -mt-0.5">Online · Official Guide</span>`;
+                }
+                if (headerAvatar) {
+                    headerAvatar.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>`;
+                    headerAvatar.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+                    headerAvatar.className = 'w-10 h-10 rounded-full flex items-center justify-center text-white shrink-0 shadow-sm';
+                }
+                if (dynamicHeaderDate) {
+                    dynamicHeaderDate.innerText = '';
+                    dynamicHeaderDate.classList.add('hidden');
+                }
+                _lastHeaderDateStr = '';
+                if (sidebarAvatar) sidebarAvatar.innerText = 'K';
+
+                const groupRolesBtn = document.getElementById('group-roles-btn');
+                if (groupRolesBtn) groupRolesBtn.classList.add('hidden');
+
+                sidebarTitle.innerText = "All Chats";
+                renderChatList(loadedChats, currentChat);
+
+                const bottomAiInput = document.getElementById('bottom-ai-input');
+                if (bottomAiInput) {
+                    animatePlaceholder(bottomAiInput, 'Ask Kotha Assistant anything…');
+                }
+
+                statsInfo.innerHTML = `Kotha Assistant · Official OnlineKotha Guide`;
+
+                renderChats(-1, -1);
+                const end = displayedMessages.length;
+                const start = Math.max(0, end - CHUNK_SIZE);
+                renderChats(start, end, 'reset');
+                setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 10);
+                return;
             }
 
             if (allMessages.length > 0) {
@@ -1026,13 +1076,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     headerName.innerText = otherPersonName;
                     if (otherPersonName) {
                         headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
+                        headerAvatar.style.background = '';
+                        headerAvatar.className = 'w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-sm bg-gradient-to-br from-emerald-400 to-teal-500 text-sm';
                         if (sidebarAvatar) sidebarAvatar.innerText = 'C';
                     }
                 }
                 
                 sidebarTitle.innerText = "All Chats";
 
-                if (window._chatMetaCache[chatName]) {
+                if (window._chatMetaCache[chatName] && chatName !== 'kotha_assistant') {
                     window._chatMetaCache[chatName].contactName = isGroupChat ? actualGroupName : otherPersonName;
                 }
                 renderChatList(loadedChats, currentChat);
@@ -1404,14 +1456,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         chats.forEach((chat, idx) => {
+            const isAssistant = chat === 'kotha_assistant';
             const chatMeta = window._chatMetaCache?.[chat];
-            let displayName = chatMeta?.contactName ? cleanDisplayName(chatMeta.contactName) : cleanDisplayName(chat);
+            let displayName = isAssistant ? 'Kotha Assistant' : (chatMeta?.contactName ? cleanDisplayName(chatMeta.contactName) : cleanDisplayName(chat));
             const initial = displayName.charAt(0).toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
             const isActive = chat === activeChat;
 
             // Get last message preview from cache if available
-            const lastMsg = chatMeta?.lastMessage || '';
+            const lastMsg = chatMeta?.lastMessage || (isAssistant ? "Ask me anything about OnlineKotha…" : '');
             const lastTime = chatMeta?.lastTime || '';
             const msgCount = chatMeta?.messageCount || chatMeta?.count || '';
 
@@ -1419,11 +1472,15 @@ document.addEventListener('DOMContentLoaded', () => {
             item.className = `flex items-center gap-3 px-3 py-2.5 mx-1.5 mb-1.5 rounded-2xl cursor-pointer transition-all duration-200 group border border-transparent ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942] !border-gray-200 dark:!border-gray-700/50 shadow-sm' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-[14px] shadow-sm shrink-0">${initial}</div>
+                ${isAssistant
+                    ? `<div class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white shadow-sm shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg></div>`
+                    : `<div class="w-9 h-9 rounded-full bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-[14px] shadow-sm shrink-0">${initial}</div>`
+                }
                 <div class="min-w-0 flex-1 pb-0.5">
                     <div class="flex items-center justify-between gap-1 mt-0">
-                        <div class="flex items-center gap-1 overflow-hidden">
+                        <div class="flex items-center gap-1.5 overflow-hidden">
                             <p class="text-[14px] font-semibold text-gray-900 dark:text-gray-100 truncate leading-tight tracking-tight">${escapeHTML(displayName)}</p>
+                            ${isAssistant ? '<span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 border border-violet-200 dark:border-violet-800 shrink-0">AI Guide</span>' : ''}
                             ${chatMeta?.deletedByUser ? '<span class="px-1 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
                         </div>
                         <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
@@ -1433,84 +1490,92 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
+                    ${!isAssistant ? `
                     <button class="chat-rename-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition" title="Rename chat" data-chat="${chat}">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button class="chat-del-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition" title="Delete chat" data-chat="${chat}">
+                    </button>` : ''}
+                    <button class="chat-del-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition" title="${isAssistant ? 'Hide Assistant' : 'Delete chat'}" data-chat="${chat}">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     </button>
                 </div>
             `;
             // Rename button
-            item.querySelector('.chat-rename-btn').addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const newName = prompt(`Rename "${displayName}" to:`, displayName);
-                if (!newName || !newName.trim() || newName.trim() === displayName) return;
-                const cleanNewName = newName.trim();
-                try {
-                    const r = await fetch(`/api/chats/${encodeURIComponent(chat)}/rename`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ newName: cleanNewName })
-                    });
-                    if (!r.ok) throw new Error('Rename failed');
-                    if (!window._chatMetaCache) window._chatMetaCache = {};
-                    if (!window._chatMetaCache[chat]) window._chatMetaCache[chat] = {};
-                    window._chatMetaCache[chat].contactName = cleanNewName;
-                    
-                    if (chat === currentChat) {
-                        const headerName = document.getElementById('chat-header-name');
-                        if (headerName) {
-                            // Preserve subtitle span if it exists (for group chats)
-                            const subTitle = headerName.querySelector('span');
-                            headerName.innerText = cleanNewName.replace(/\\(Group, \\d+ members\\)/g, '').trim();
-                            if (subTitle) headerName.appendChild(subTitle);
+            const renameBtn = item.querySelector('.chat-rename-btn');
+            if (renameBtn) {
+                renameBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const newName = prompt(`Rename "${displayName}" to:`, displayName);
+                    if (!newName || !newName.trim() || newName.trim() === displayName) return;
+                    const cleanNewName = newName.trim();
+                    try {
+                        const r = await fetch(`/api/chats/${encodeURIComponent(chat)}/rename`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ newName: cleanNewName })
+                        });
+                        if (!r.ok) throw new Error('Rename failed');
+                        if (!window._chatMetaCache) window._chatMetaCache = {};
+                        if (!window._chatMetaCache[chat]) window._chatMetaCache[chat] = {};
+                        window._chatMetaCache[chat].contactName = cleanNewName;
+                        
+                        if (chat === currentChat) {
+                            const headerName = document.getElementById('chat-header-name');
+                            if (headerName) {
+                                // Preserve subtitle span if it exists (for group chats)
+                                const subTitle = headerName.querySelector('span');
+                                headerName.innerText = cleanNewName.replace(/\\(Group, \\d+ members\\)/g, '').trim();
+                                if (subTitle) headerName.appendChild(subTitle);
+                            }
                         }
+                        renderChatList(loadedChats, currentChat);
+                    } catch (err) {
+                        alert('Rename failed: ' + err.message);
                     }
-                    renderChatList(loadedChats, currentChat);
-                } catch (err) {
-                    alert('Rename failed: ' + err.message);
-                }
-            });
+                });
+            }
 
             // Delete button
-            item.querySelector('.chat-del-btn').addEventListener('click', async (e) => {
-                e.stopPropagation();
-                if (!confirm(`Delete "${displayName}"?\n\nYou won't see this chat anymore.`)) return;
-                
-                if (chat === 'kotha_assistant') {
-                    localStorage.setItem('hide_kotha_assistant', 'true');
-                    loadedChats = loadedChats.filter(c => c !== 'kotha_assistant');
-                    if (currentChat === 'kotha_assistant') {
-                        currentChat = loadedChats.length > 0 ? loadedChats[0] : '__global__';
-                        window.currentChat = currentChat; localStorage.setItem("kotha_active_chat", currentChat);
-                        loadData(currentChat);
+            const delBtn = item.querySelector('.chat-del-btn');
+            if (delBtn) {
+                delBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (chat === 'kotha_assistant') {
+                        if (!confirm('Hide Kotha Assistant from chat list? You can restore it anytime.')) return;
+                        localStorage.setItem('hide_kotha_assistant', 'true');
+                        loadedChats = loadedChats.filter(c => c !== 'kotha_assistant');
+                        if (currentChat === 'kotha_assistant') {
+                            currentChat = loadedChats.length > 0 ? loadedChats[0] : '__global__';
+                            window.currentChat = currentChat; localStorage.setItem("kotha_active_chat", currentChat);
+                            loadData(currentChat);
+                        }
+                        renderChatList(loadedChats, currentChat);
+                        return;
                     }
-                    renderChatList(loadedChats, currentChat);
-                    return;
-                }
 
-                try {
-                    const r = await fetch(`/api/chats/${encodeURIComponent(chat)}`, { method: 'DELETE' });
-                    if (!r.ok) throw new Error('Failed');
-                    loadedChats = loadedChats.filter(c => c !== chat);
-                    if (chat === currentChat && loadedChats.length > 0) {
-                        currentChat = '';
-                        window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
-                        showEmptyState();
-                    } else if (loadedChats.length === 0) {
-                        currentChat = '';
-                        window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
-                        showEmptyState();
+                    if (!confirm(`Delete "${displayName}"?\n\nYou won't see this chat anymore.`)) return;
+
+                    try {
+                        const r = await fetch(`/api/chats/${encodeURIComponent(chat)}`, { method: 'DELETE' });
+                        if (!r.ok) throw new Error('Failed');
+                        loadedChats = loadedChats.filter(c => c !== chat);
+                        if (chat === currentChat && loadedChats.length > 0) {
+                            currentChat = '';
+                            window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
+                            showEmptyState();
+                        } else if (loadedChats.length === 0) {
+                            currentChat = '';
+                            window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
+                            showEmptyState();
+                        }
+                        renderChatList(loadedChats, currentChat);
+                    } catch (err) {
+                        alert('Delete failed: ' + err.message);
                     }
-                    renderChatList(loadedChats, currentChat);
-                } catch (err) {
-                    alert('Delete failed: ' + err.message);
-                }
-            });
+                });
+            }
             // Open chat on click
             item.addEventListener('click', (e) => {
-                if (e.target.closest('.chat-del-btn')) return;
+                if (e.target.closest('.chat-del-btn') || e.target.closest('.chat-rename-btn')) return;
                 if (chat === currentChat) {
                     if (isMobile() || window.kothaCompact) toggleSidebar(false);
                     return;
@@ -1611,14 +1676,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 if (chats.includes('kotha_assistant')) {
-                    if (!window._chatMetaCache['kotha_assistant']) {
-                        window._chatMetaCache['kotha_assistant'] = {
-                            contactName: "Kotha Assistant",
-                            messageCount: 0,
-                            isGroup: false,
-                            lastMessage: "Hi there! 👋 I'm Kotha's Support Assistant...",
-                            lastTime: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                        };
+                    if (!window._chatMetaCache['kotha_assistant']) window._chatMetaCache['kotha_assistant'] = {};
+                    window._chatMetaCache['kotha_assistant'].contactName = "Kotha Assistant";
+                    window._chatMetaCache['kotha_assistant'].isGroup = false;
+                    if (!window._chatMetaCache['kotha_assistant'].lastMessage) {
+                        const stored = localStorage.getItem('kotha_assistant_history');
+                        let history = [];
+                        if (stored) { try { history = JSON.parse(stored); } catch(e){} }
+                        if (history.length > 0) {
+                            const last = history[history.length - 1];
+                            window._chatMetaCache['kotha_assistant'].lastMessage = last.text.length > 40 ? last.text.slice(0, 40) + '…' : last.text;
+                            window._chatMetaCache['kotha_assistant'].lastTime = last.time || '';
+                        } else {
+                            window._chatMetaCache['kotha_assistant'].lastMessage = "Ask me anything about OnlineKotha…";
+                            window._chatMetaCache['kotha_assistant'].lastTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        }
                     }
                 }
                 renderChatList(loadedChats, currentChat);
