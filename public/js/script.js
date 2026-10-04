@@ -1526,6 +1526,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 currentChat = chat;
                 window.currentChat = chat; localStorage.setItem("kotha_active_chat", chat);
+                try {
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('chat', chat);
+                    window.history.replaceState({ chat }, '', newUrl.toString());
+                } catch(e) {}
                 const selector = document.getElementById('chat-selector');
                 if (selector) selector.value = chat;
                 removeEmptyState();
@@ -1639,8 +1644,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const savedChat = localStorage.getItem('kotha_active_chat');
                 let targetChat = urlChat || savedChat;
                 
-                // If the user is viewing a Direct Message (DM) via hash, do NOT load WhatsApp chats
-                const isViewingDM = window.location.hash && window.location.hash.startsWith('#chat-');
+                // If the user is viewing a Direct Message (DM) via hash or saved DM conversation, do NOT load WhatsApp chats
+                const isViewingDM = (window.location.hash && window.location.hash.startsWith('#chat-')) || (localStorage.getItem('kotha_dm_view') === 'messages' && localStorage.getItem('kotha_dm_active_conv'));
                 if (isViewingDM) {
                     targetChat = null;
                 }
@@ -1648,14 +1653,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (targetChat === '__global__') {
                     const btn = document.getElementById('global-chat-item');
                     if (btn) btn.click();
+                    if (isMobile() || window.kothaCompact) {
+                        toggleSidebar(false);
+                    }
                 } else if (targetChat) {
                     const match = chats.find(c => c === targetChat || c.toLowerCase() === targetChat.toLowerCase());
                     if (match) {
                         if (selector) selector.value = match;
                         currentChat = match;
                         window.currentChat = match; localStorage.setItem("kotha_active_chat", match);
+                        
+                        try {
+                            const newUrl = new URL(window.location.href);
+                            if (newUrl.searchParams.get('chat') !== match) {
+                                newUrl.searchParams.set('chat', match);
+                                window.history.replaceState({ chat: match }, '', newUrl.toString());
+                            }
+                        } catch(e) {}
+
                         loadData(match);
                         removeEmptyState();
+
+                        // Keep mobile sidebar closed so the user stays inside the open chat after refresh
+                        if (isMobile() || window.kothaCompact) {
+                            toggleSidebar(false);
+                        }
                     } else {
                         // Target chat not found
                         if (chats.length === 1 && chats[0] === 'kotha_assistant') {
@@ -1663,19 +1685,31 @@ document.addEventListener('DOMContentLoaded', () => {
                             window.currentChat = 'kotha_assistant'; localStorage.setItem("kotha_active_chat", 'kotha_assistant');
                             loadData('kotha_assistant');
                             removeEmptyState();
+                            if (isMobile() || window.kothaCompact) {
+                                toggleSidebar(false);
+                            }
                         } else {
                             showEmptyState(); // Restore empty state
+                            if (isMobile() || window.kothaCompact) {
+                                toggleSidebar(true);
+                            }
                         }
                     }
                 } else if (currentChat && chats.includes(currentChat)) {
                     // Already viewing an active chat, preserve it
                     if (selector) selector.value = currentChat;
                     removeEmptyState();
-                } else {
+                    if (isMobile() || window.kothaCompact) {
+                        toggleSidebar(false);
+                    }
+                } else if (!isViewingDM) {
                     // Fresh startup with no active chat: do not open any chat by default
                     currentChat = '';
                     window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
                     showEmptyState();
+                    if (isMobile() || window.kothaCompact) {
+                        toggleSidebar(true);
+                    }
                 }
                 
                 // Render visual chat list (always)
@@ -1859,9 +1893,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 currentChat = e.target.value;
                 window.currentChat = currentChat; localStorage.setItem("kotha_active_chat", currentChat);
+                try {
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('chat', currentChat);
+                    window.history.replaceState({ chat: currentChat }, '', newUrl.toString());
+                } catch(err) {}
                 removeEmptyState();
                 loadData(currentChat);
-
+                if (isMobile() || window.kothaCompact) {
+                    toggleSidebar(false);
+                }
             }
         });
     }
@@ -3204,6 +3245,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Compact (phone-like) mode based on the FRAME's own width ---
         const sidebarEl = document.getElementById('sidebar');
+        function hasActiveChatOrPending() {
+            if (window.currentChat) return true;
+            if (typeof window.dmIsConvActive === 'function' && window.dmIsConvActive()) return true;
+            if (window.location.hash && window.location.hash.startsWith('#chat-')) return true;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('chat')) return true;
+
+            const savedChat = localStorage.getItem('kotha_active_chat');
+            const isViewingDM = window.location.hash && window.location.hash.startsWith('#chat-');
+            if (savedChat && !isViewingDM) return true;
+
+            const dmView = localStorage.getItem('kotha_dm_view');
+            const dmConv = localStorage.getItem('kotha_dm_active_conv');
+            if (dmView === 'messages' && dmConv) return true;
+
+            return false;
+        }
+
         function updateCompact() {
             const compact = frame.getBoundingClientRect().width < 760;
             if (compact === !!window.kothaCompact) return;
@@ -3211,18 +3271,27 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.toggle('kompact', compact);
             if (compact) {
                 // collapse sidebar into slide-in overlay, BUT open it automatically if no chat is active
-                const hasActiveChat = !!window.currentChat || (typeof window.dmIsConvActive === 'function' && window.dmIsConvActive()) || (window.location.hash && window.location.hash.startsWith('#chat-'));
+                const hasActiveChat = hasActiveChatOrPending();
                 if (!hasActiveChat) {
-                    if (sidebarEl) sidebarEl.classList.remove('-translate-x-full');
+                    if (sidebarEl) {
+                        sidebarEl.classList.remove('-translate-x-full');
+                        sidebarEl.classList.add('translate-x-0');
+                    }
                     const bd = document.getElementById('sidebar-backdrop');
                     if (bd) bd.classList.remove('hidden');
                 } else {
-                    if (sidebarEl) sidebarEl.classList.add('-translate-x-full');
+                    if (sidebarEl) {
+                        sidebarEl.classList.add('-translate-x-full');
+                        sidebarEl.classList.remove('translate-x-0');
+                    }
                     const bd = document.getElementById('sidebar-backdrop');
                     if (bd) bd.classList.add('hidden');
                 }
             } else {
-                if (sidebarEl) sidebarEl.classList.remove('-translate-x-full');
+                if (sidebarEl) {
+                    sidebarEl.classList.remove('-translate-x-full');
+                    sidebarEl.classList.remove('translate-x-0');
+                }
                 const bd = document.getElementById('sidebar-backdrop');
                 if (bd) bd.classList.add('hidden');
             }

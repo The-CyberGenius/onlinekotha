@@ -413,7 +413,10 @@
             await loadConvs();        // ensure list is ready
             const savedConv = Number(localStorage.getItem(LS.conv));
             if (savedConv && convs.find(c => c.conv_id === savedConv)) {
-                openConv(savedConv);  // reopen the same conversation + restore draft
+                await openConv(savedConv);  // reopen the same conversation + restore draft
+                if (window.innerWidth < 768 || window.kothaCompact) {
+                    if (window.kothaSidebarClose) window.kothaSidebarClose();
+                }
             }
         }
     }
