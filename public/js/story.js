@@ -1,5 +1,5 @@
-// StoryEngine for OnlineKotha — Production v3
-// Clean rewrite: fixes blank cards, broken buttons, mobile UX, export reliability
+// StoryEngine for OnlineKotha — Production v4
+// Redesigned: Sleek floating rounded card modal, single round share icon, rich Spotify-Wrapped cards, responsive mobile UX
 
 (function () {
     'use strict';
@@ -10,132 +10,224 @@
     const css = `
         .ok-ov {
             position: fixed; inset: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.97); z-index: 2147483647;
+            background: rgba(6, 6, 14, 0.92); z-index: 2147483647;
+            backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            overflow: hidden; opacity: 0; transition: opacity 0.35s ease;
-            touch-action: manipulation;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden; opacity: 1;
+            touch-action: manipulation; -webkit-user-select: none; user-select: none;
+            box-sizing: border-box;
         }
+
         .ok-vp {
             position: relative; overflow: hidden;
-            border-radius: 20px;
-            box-shadow: 0 30px 100px rgba(0,0,0,0.8);
-            flex-shrink: 0;
+            border-radius: 32px;
+            box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(99, 102, 241, 0.25);
+            border: 1.5px solid rgba(255, 255, 255, 0.18);
+            flex-shrink: 0; background: #080812;
+            transition: width 0.2s ease, height 0.2s ease;
         }
-        @media (max-width: 600px) { .ok-vp { border-radius: 0; } }
+        @media (max-width: 600px) {
+            .ok-vp {
+                border-radius: 28px;
+                border: 1.5px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.95), 0 0 25px rgba(99, 102, 241, 0.22);
+            }
+        }
 
         /* 1080×1920 canvas scaled down */
         .ok-cv {
             position: absolute; top: 0; left: 0;
             width: 1080px; height: 1920px;
             transform-origin: top left;
-            background: #080810; color: #fff; overflow: hidden;
+            background: #080812; color: #fff; overflow: hidden;
         }
 
-        /* Progress bar — INSIDE canvas, will be excluded from export */
+        /* Progress bar */
         .ok-prog {
-            position: absolute; top: 36px; left: 44px; right: 44px;
-            display: flex; gap: 10px; z-index: 200;
+            position: absolute; top: 32px; left: 40px; right: 40px;
+            display: flex; gap: 8px; z-index: 200;
         }
         .ok-seg { flex: 1; height: 5px; background: rgba(255,255,255,0.22); border-radius: 6px; overflow: hidden; }
-        .ok-fill { height: 100%; background: #fff; width: 0%; border-radius: 6px; transition: none; }
+        .ok-fill { height: 100%; background: #ffffff; width: 0%; border-radius: 6px; transition: none; }
 
         /* Header */
         .ok-hdr {
-            position: absolute; top: 62px; left: 44px; right: 44px;
+            position: absolute; top: 58px; left: 40px; right: 40px;
             display: flex; justify-content: space-between; align-items: center;
             z-index: 200;
         }
         .ok-brand {
-            display: flex; align-items: center; gap: 14px;
-            font-size: 26px; font-weight: 900; letter-spacing: 1px;
-            background: linear-gradient(90deg, #fff 30%, #a78bfa);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 26px; font-weight: 900; letter-spacing: 0.5px;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 8px 18px; border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
-        .ok-brand img { width: 32px; height: 32px; flex-shrink: 0; }
+        .ok-brand img { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; }
         .ok-close {
-            width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; background: rgba(255,255,255,0.12); cursor: pointer;
-            color: #fff; border: none; flex-shrink: 0; -webkit-text-fill-color: #fff;
+            width: 58px; height: 58px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(255,255,255,0.18); cursor: pointer;
+            color: #fff; border: 1px solid rgba(255,255,255,0.25); flex-shrink: 0;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            transition: background 0.15s, transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .ok-close:hover { background: rgba(255,255,255,0.22); }
+        .ok-close:hover { background: rgba(255,255,255,0.28); transform: scale(1.05); }
+        .ok-close:active { transform: scale(0.92); }
 
         /* Footer watermark */
         .ok-ftr {
-            position: absolute; bottom: 56px; left: 0; right: 0;
-            text-align: center; font-size: 22px; font-weight: 600;
-            color: rgba(255,255,255,0.35); letter-spacing: 5px; z-index: 50;
+            position: absolute; bottom: 44px; left: 48px; right: 48px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 20px; font-weight: 700;
+            color: rgba(255,255,255,0.45); letter-spacing: 3px; z-index: 50;
             text-transform: uppercase;
         }
 
         /* Content & safe zone */
         .ok-content { position: absolute; inset: 0; z-index: 10; }
         .ok-safe {
-            position: absolute; top: 160px; left: 100px; right: 100px; bottom: 180px;
+            position: absolute; top: 150px; left: 70px; right: 70px; bottom: 120px;
             display: flex; flex-direction: column; justify-content: center; z-index: 50;
+            text-align: center;
         }
 
         /* Nav zones — left 35% prev, right 65% next */
         .ok-nav-l, .ok-nav-r {
             position: absolute; top: 0; bottom: 0; z-index: 300; cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
         }
         .ok-nav-l { left: 0; width: 35%; }
         .ok-nav-r { right: 0; width: 65%; }
 
-        /* Action buttons — OUTSIDE canvas, always visible */
-        .ok-actions {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            display: none; justify-content: center; gap: 14px;
-            padding: 16px 20px 24px;
-            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
-            z-index: 400;
+        /* Round Share Button — positioned at bottom right of the floating story card */
+        .ok-round-share-btn {
+            position: absolute;
+            bottom: 18px;
+            right: 18px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 500;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+            transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
-        .ok-actions.visible { display: flex; }
-        .ok-btn {
-            display: flex; align-items: center; gap: 8px;
-            padding: 11px 22px; border-radius: 50px; font-size: 14px; font-weight: 700;
-            cursor: pointer; border: 1.5px solid rgba(255,255,255,0.3);
-            background: rgba(30,30,50,0.85); color: #fff;
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            transition: transform 0.15s, background 0.15s;
-            -webkit-text-fill-color: #fff; white-space: nowrap;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        .ok-round-share-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.08);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
         }
-        .ok-btn:active { transform: scale(0.95); }
-        .ok-btn-primary { background: #7c3aed; border-color: #7c3aed; }
-        .ok-btn-primary:hover { background: #6d28d9; }
-        .ok-btn-export { position: relative; }
-        .ok-btn-export.loading::after {
-            content: ''; position: absolute; inset: 0;
-            border-radius: 50px; background: rgba(255,255,255,0.1);
-            animation: ok-pulse 0.8s infinite;
+        .ok-round-share-btn:active {
+            transform: scale(0.92);
         }
-        @keyframes ok-pulse { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        .ok-round-share-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .ok-round-share-btn.loading svg {
+            animation: ok-spin 0.8s linear infinite;
+        }
+        @keyframes ok-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
 
         /* BG helpers */
         .ok-bg { position: absolute; inset: 0; z-index: 1; }
-        .ok-orb { position: absolute; border-radius: 50%; filter: blur(150px); z-index: 1; }
+        .ok-orb { position: absolute; border-radius: 50%; filter: blur(150px); z-index: 1; pointer-events: none; }
         .ok-noise {
-            position: absolute; inset: 0; z-index: 2; opacity: 0.04; pointer-events: none;
+            position: absolute; inset: 0; z-index: 2; opacity: 0.045; pointer-events: none;
             background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
         }
 
-        /* Card typography */
-        .ok-eyebrow { font-size: 30px; font-weight: 800; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 4px; margin-bottom: 36px; }
-        .ok-huge { font-size: 120px; font-weight: 900; line-height: 1.05; letter-spacing: -3px; margin-bottom: 36px; text-transform: uppercase; color: #fff; }
-        .ok-sub { font-size: 46px; font-weight: 600; color: rgba(255,255,255,0.8); line-height: 1.3; }
-        .ok-stat-num { font-size: 170px; font-weight: 900; letter-spacing: -5px; line-height: 1; color: #fff; }
-        .ok-stat-lbl { font-size: 38px; font-weight: 700; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 2px; margin-top: 14px; }
-        .ok-stat-block { display: flex; flex-direction: column; margin-top: 60px; }
-        .ok-bq { position: absolute; bottom: 0; left: 0; font-size: 34px; font-weight: 500; font-style: italic; color: rgba(255,255,255,0.55); line-height: 1.4; }
+        /* Rich Visual Components for 1080x1920 canvas */
+        .ok-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 32px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1.5px solid rgba(255, 255, 255, 0.24);
+            border-radius: 999px;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #ffffff;
+            text-transform: uppercase;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            margin-bottom: 24px;
+        }
+        .ok-glass-card {
+            background: rgba(18, 18, 34, 0.65);
+            border: 1.5px solid rgba(255, 255, 255, 0.16);
+            border-radius: 36px;
+            padding: 44px;
+            text-align: center;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+        .ok-quote-box {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            padding: 24px 32px;
+            font-size: 32px;
+            font-weight: 500;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.45;
+        }
+        .ok-metric-chip {
+            display: inline-block;
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .ok-tap-hint {
+            margin-top: 40px;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.65);
+            animation: ok-pulse 1.6s infinite ease-in-out;
+        }
 
-        /* Entry animation */
-        .ok-anim { animation: ok-up 0.75s cubic-bezier(0.16,1,0.3,1) both; }
-        .ok-d1 { animation-delay: 0.2s; }
-        .ok-d2 { animation-delay: 0.45s; }
-        .ok-d3 { animation-delay: 0.7s; }
-        @keyframes ok-up { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+        /* Card typography */
+        .ok-eyebrow { font-size: 30px; font-weight: 800; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 4px; margin-bottom: 24px; }
+        .ok-huge { font-size: 110px; font-weight: 900; line-height: 1.08; letter-spacing: -2px; margin-bottom: 24px; color: #fff; }
+        .ok-sub { font-size: 44px; font-weight: 600; color: rgba(255,255,255,0.85); line-height: 1.35; }
+        .ok-stat-num { font-size: 150px; font-weight: 900; letter-spacing: -4px; line-height: 1; color: #fff; }
+        .ok-stat-lbl { font-size: 36px; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 2px; margin-top: 14px; }
+        .ok-stat-block { display: flex; flex-direction: column; margin-top: 40px; }
+
+        /* Entry animation — safe start so text is never invisible */
+        .ok-anim { animation: ok-fade-in 0.35s ease-out both; }
+        .ok-d1 { animation-delay: 0.08s; }
+        .ok-d2 { animation-delay: 0.16s; }
+        .ok-d3 { animation-delay: 0.24s; }
+        @keyframes ok-fade-in { from { opacity: 0.6; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes ok-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+        @keyframes ok-pulse { 0%,100%{opacity:0.6; transform:scale(0.98);} 50%{opacity:1; transform:scale(1.02);} }
     `;
 
     if (!document.getElementById('ok-story-css')) {
@@ -191,20 +283,20 @@
             if ((s.s1First || 0) > 0 || (s.s2First || 0) > 0) push(this._cardFirstText(s));
             if (s.busiestDate && s.busiestDateCount > 0) push(this._cardBusiestDay(s));
             if (s.busiestDay) push(this._cardBusiestWeekday(s));
-            if ((s.mediaCount || 0) > 10) push(this._cardMedia(s));
+            if ((s.mediaCount || 0) > 5) push(this._cardMedia(s));
             if ((s.laughCount || 0) > 0) push(this._cardLaughs(s));
             if ((s.longestMsgLen || 0) > 15 && s.longestMsgPreview) push(this._cardLongestMsg(s));
-            if ((s.totalQuestions || 0) > 10) push(this._cardQuestions(s));
+            if ((s.totalQuestions || 0) > 5) push(this._cardQuestions(s));
 
             const emojis = this._topEmojis(m);
             if (emojis.length > 0) push(this._cardEmojis(emojis));
 
             const nightCount = this._nightCount(m);
-            if (nightCount > 30) push(this._cardLateNight(nightCount));
+            if (nightCount > 20) push(this._cardLateNight(nightCount));
 
             push(this._cardTotal(s));
 
-            // Safety: always at least cover + total
+            // Safety fallback
             if (this.cards.length < 2) push(this._cardTotal(s));
         }
 
@@ -223,7 +315,7 @@
             d.ov = document.createElement('div');
             d.ov.className = 'ok-ov';
 
-            // Viewport (sized by resize)
+            // Viewport (sized by resize, centered floating card)
             d.vp = document.createElement('div');
             d.vp.className = 'ok-vp';
 
@@ -258,14 +350,16 @@
                     <span>OnlineKotha</span>
                 </div>
                 <button class="ok-close" aria-label="Close story">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>`;
             d.cv.appendChild(d.hdr);
 
-            // Footer
+            // Footer watermark
             d.ftr = document.createElement('div');
             d.ftr.className = 'ok-ftr';
-            d.ftr.textContent = 'onlinekotha.com';
+            d.ftr.innerHTML = `
+                <span>onlinekotha.com</span>
+                <span>Chat Wrapped</span>`;
             d.cv.appendChild(d.ftr);
 
             // Nav zones (inside viewport, outside canvas)
@@ -274,24 +368,26 @@
             d.navR = document.createElement('div');
             d.navR.className = 'ok-nav-r';
 
-            // Action buttons (outside canvas — always legible)
-            d.actions = document.createElement('div');
-            d.actions.className = 'ok-actions';
-            d.actions.innerHTML = `
-                <button class="ok-btn ok-btn-share" id="ok-share-btn" aria-label="Share story">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                    Share
-                </button>
-                <button class="ok-btn ok-btn-primary ok-btn-export" id="ok-save-btn" aria-label="Save image">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                    Save Image
-                </button>`;
+            // Single Round Share Button — positioned at bottom right of the floating story card
+            d.shareBtn = document.createElement('button');
+            d.shareBtn.className = 'ok-round-share-btn';
+            d.shareBtn.id = 'ok-share-btn';
+            d.shareBtn.setAttribute('aria-label', 'Share story');
+            d.shareBtn.setAttribute('title', 'Share story');
+            d.shareBtn.innerHTML = `
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>`;
 
             // Assemble
             d.vp.appendChild(d.cv);
             d.vp.appendChild(d.navL);
             d.vp.appendChild(d.navR);
-            d.vp.appendChild(d.actions);
+            d.vp.appendChild(d.shareBtn);
             d.ov.appendChild(d.vp);
             document.body.appendChild(d.ov);
 
@@ -305,32 +401,38 @@
             const vh = window.innerHeight;
             const ratio = 1080 / 1920; // 9:16 ~0.5625
 
-            let vph = vh, vpw = vh * ratio;
-            if (vpw > vw) { vpw = vw; vph = vw / ratio; }
+            // Mobile and desktop: floating card with comfortable margins
+            const availW = Math.max(260, vw - 28);
+            const availH = Math.max(460, vh - 48);
 
-            // Desktop: don't take 100% height
-            if (vw > 600) {
-                const maxH = vh * 0.92;
-                if (vph > maxH) { vph = maxH; vpw = maxH * ratio; }
+            const maxW = vw > 600 ? Math.min(availW, 440) : Math.min(availW, 350);
+            const maxH = vw > 600 ? Math.min(availH, 840) : availH;
+
+            let vph = maxH;
+            let vpw = maxH * ratio;
+            if (vpw > maxW) {
+                vpw = maxW;
+                vph = maxW / ratio;
             }
 
             const scale = vpw / 1080;
 
-            this.dom.vp.style.width  = vpw + 'px';
-            this.dom.vp.style.height = vph + 'px';
+            this.dom.vp.style.width  = Math.floor(vpw) + 'px';
+            this.dom.vp.style.height = Math.floor(vph) + 'px';
             this.dom.cv.style.transform = `scale(${scale})`;
-
-            // Actions sit outside canvas but inside viewport, at bottom
-            this.dom.actions.style.width = vpw + 'px';
-            this.dom.actions.style.left  = '0';
         }
 
         _bindEvents() {
             const d = this.dom;
 
             // Close
-            d.hdr.querySelector('.ok-close').addEventListener('click', () => this.close());
-            d.ov.addEventListener('click', (e) => { if (e.target === d.ov) this.close(); });
+            d.hdr.querySelector('.ok-close').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.close();
+            });
+            d.ov.addEventListener('click', (e) => {
+                if (e.target === d.ov) this.close();
+            });
             document.addEventListener('keydown', this._onKey = (e) => {
                 if (e.key === 'Escape') this.close();
                 if (e.key === 'ArrowRight') this._next();
@@ -364,9 +466,11 @@
             d.vp.addEventListener('touchstart', startPause, { passive: true });
             d.vp.addEventListener('touchend',   endPause,   { passive: true });
 
-            // Buttons
-            d.ov.querySelector('#ok-save-btn').addEventListener('click',  (e) => { e.stopPropagation(); this._export(false); });
-            d.ov.querySelector('#ok-share-btn').addEventListener('click', (e) => { e.stopPropagation(); this._export(!!navigator.share); });
+            // Single Round Share Button
+            d.shareBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this._export(true);
+            });
         }
 
         // ── Show card ────────────────────────────────────────────────────────
@@ -376,28 +480,20 @@
 
             this.idx = idx;
             const card = this.cards[idx];
-            const isLast = idx === this.cards.length - 1;
 
-            // Render
+            // Render content
             this.dom.content.innerHTML = `
                 <div class="ok-bg" style="${card.bgStyle}"></div>
                 ${card.bgExtra || ''}
                 <div class="ok-safe">${card.html}</div>
             `;
 
-            // Progress
+            // Progress bar
             for (let i = 0; i < this.cards.length; i++) {
                 const f = document.getElementById(`ok-f${i}`);
                 if (!f) continue;
                 f.style.transition = 'none';
                 f.style.width = i < idx ? '100%' : '0%';
-            }
-
-            // Show/hide action buttons
-            if (isLast) {
-                this.dom.actions.classList.add('visible');
-            } else {
-                this.dom.actions.classList.remove('visible');
             }
 
             // Reset timer
@@ -440,24 +536,23 @@
             setTimeout(() => { this.dom.ov?.remove(); }, 400);
         }
 
-        // ── Export ───────────────────────────────────────────────────────────
-        async _export(share = false) {
+        // ── Export / Share ───────────────────────────────────────────────────
+        async _export(share = true) {
             if (this.isExporting) return;
 
-            // Check library
             if (!window.htmlToImage) {
                 this._showToast('Export library not loaded. Please refresh.');
                 return;
             }
 
             this.isExporting = true;
-            const saveBtn = this.dom.ov.querySelector('#ok-save-btn');
-            const shareBtn = this.dom.ov.querySelector('#ok-share-btn');
-            if (saveBtn) saveBtn.classList.add('loading');
+            this.isPaused = true;
+            if (this.dom.shareBtn) this.dom.shareBtn.classList.add('loading');
 
-            // Hide UI from canvas temporarily
+            // Hide UI elements from exported image
             this.dom.prog.style.visibility = 'hidden';
             this.dom.hdr.style.visibility = 'hidden';
+            
             const oldTransform = this.dom.cv.style.transform;
             this.dom.cv.style.transform = 'scale(1)';
             this.dom.cv.style.position = 'fixed';
@@ -466,7 +561,7 @@
             document.body.appendChild(this.dom.cv);
 
             try {
-                await new Promise(r => setTimeout(r, 60)); // let layout settle
+                await new Promise(r => setTimeout(r, 70)); // let layout settle
                 const dataUrl = await window.htmlToImage.toPng(this.dom.cv, {
                     width: 1080,
                     height: 1920,
@@ -475,20 +570,30 @@
                     skipFonts: false,
                 });
 
-                if (share && navigator.share) {
-                    const blob = await (await fetch(dataUrl)).blob();
-                    const file = new File([blob], 'onlinekotha_story.png', { type: 'image/png' });
+                if (share && navigator.share && navigator.canShare) {
                     try {
-                        await navigator.share({ title: 'My OnlineKotha Story', files: [file] });
+                        const blob = await (await fetch(dataUrl)).blob();
+                        const file = new File([blob], `onlinekotha_wrapped_${this.idx + 1}.png`, { type: 'image/png' });
+                        if (navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                title: 'My OnlineKotha Chat Wrapped',
+                                text: 'Check out our Chat Wrapped on OnlineKotha! ✨',
+                                files: [file]
+                            });
+                        } else {
+                            this._download(dataUrl);
+                        }
                     } catch (shareErr) {
-                        if (shareErr.name !== 'AbortError') this._download(dataUrl);
+                        if (shareErr.name !== 'AbortError') {
+                            this._download(dataUrl);
+                        }
                     }
                 } else {
                     this._download(dataUrl);
                 }
             } catch (err) {
                 console.error('[StoryEngine] export failed:', err);
-                this._showToast('Could not export card. Try again.');
+                this._showToast('Could not save card. Try again.');
             } finally {
                 // Restore canvas
                 this.dom.cv.style.position = 'absolute';
@@ -499,15 +604,17 @@
 
                 this.dom.prog.style.visibility = '';
                 this.dom.hdr.style.visibility = '';
-                if (saveBtn) saveBtn.classList.remove('loading');
+                if (this.dom.shareBtn) this.dom.shareBtn.classList.remove('loading');
                 this.isExporting = false;
+                this.isPaused = false;
+                this.lastTick = Date.now();
             }
         }
 
         _download(dataUrl) {
             const a = document.createElement('a');
             a.href = dataUrl;
-            a.download = `onlinekotha_story_${this.idx + 1}.png`;
+            a.download = `onlinekotha_wrapped_${this.idx + 1}.png`;
             a.click();
         }
 
@@ -547,18 +654,27 @@
             return n;
         }
 
-        // ── Card Templates ────────────────────────────────────────────────────
+        // ── Rich Card Templates ────────────────────────────────────────────────
         _cardCover(s) {
+            const n1 = esc(s.sender1Name || 'You');
+            const n2 = esc(s.sender2Name || 'Friend');
+            const total = (s.totalMessages || 0).toLocaleString();
             return {
-                bgStyle: 'background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);',
-                bgExtra: `<div class="ok-orb" style="top:-10%;right:-10%;width:800px;height:800px;background:rgba(167,139,250,0.35);"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 100% 0%, #a855f7 0%, transparent 55%), radial-gradient(circle at 0% 100%, #ec4899 0%, transparent 55%), linear-gradient(135deg, #1e1b4b, #312e81);',
+                bgExtra: `<div class="ok-orb" style="top:-10%;right:-10%;width:800px;height:800px;background:rgba(167,139,250,0.3);"></div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">Your Story in Conversation</div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:100px;">${esc(s.sender1Name || 'You')}<br><span style="color:#a78bfa">×</span><br>${esc(s.sender2Name || 'Friend')}</div>
-                    <div class="ok-stat-block ok-anim ok-d2">
-                        <div class="ok-stat-num" style="font-size:150px;">${(s.totalMessages || 0).toLocaleString()}</div>
-                        <div class="ok-stat-lbl">messages &amp; counting</div>
-                    </div>`
+                    <div><span class="ok-badge-pill ok-anim">✨ KOTHA WRAPPED</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:92px;line-height:1.15;margin-top:20px;">
+                        ${n1}<br><span style="color:#f472b6;font-size:70px;">×</span><br>${n2}
+                    </div>
+                    
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:40px;">
+                        <div style="font-size:28px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:2px;">Total Conversations</div>
+                        <div class="ok-stat-num" style="font-size:130px;background:linear-gradient(135deg,#ffffff,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:10px 0;">${total}</div>
+                        <div style="font-size:32px;color:rgba(255,255,255,0.85);">messages analyzed &amp; preserved</div>
+                    </div>
+                    
+                    <div class="ok-tap-hint ok-anim ok-d3">Tap right to begin 👉</div>`
             };
         }
 
@@ -567,86 +683,105 @@
             const eagerN = Math.max(s.s1First || 0, s.s2First || 0);
             const other  = (s.s1First || 0) >= (s.s2First || 0) ? s.sender2Name : s.sender1Name;
             const otherN = Math.min(s.s1First || 0, s.s2First || 0);
+            const totalFirst = (eagerN + otherN) || 1;
+            const eagerPct = Math.round((eagerN / totalFirst) * 100);
             return {
-                bgStyle: 'background: linear-gradient(to bottom, #140004, #400018);',
-                bgExtra: `<div class="ok-orb" style="bottom:-10%;left:-10%;width:800px;height:800px;background:rgba(255,60,100,0.3);"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 10% 20%, #f43f5e 0%, transparent 60%), radial-gradient(circle at 90% 80%, #8b5cf6 0%, transparent 60%), linear-gradient(135deg, #2e081d, #4c0519);',
+                bgExtra: `<div class="ok-orb" style="bottom:-10%;left:-10%;width:800px;height:800px;background:rgba(244,63,94,0.25);"></div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">Who couldn't wait?</div>
-                    <div style="display:flex;gap:40px;margin-top:80px;" class="ok-anim ok-d1">
-                        <div style="flex:1;">
-                            <div style="font-size:54px;">👑</div>
-                            <div style="font-size:52px;font-weight:800;color:#ff4d6d;text-transform:uppercase;margin:10px 0;">${esc(eager)}</div>
-                            <div style="font-size:150px;font-weight:900;line-height:1;color:#fff;">${eagerN}</div>
-                            <div style="font-size:28px;color:rgba(255,255,255,0.6);">days texted first</div>
+                    <div><span class="ok-badge-pill ok-anim">⚡ WHO'S MORE EAGER?</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:80px;margin-top:16px;line-height:1.15;">Who texted first each day?</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:40px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                            <div style="text-align:left;">
+                                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(244,63,94,0.25);border:1px solid rgba(244,63,94,0.5);padding:6px 16px;border-radius:999px;font-size:24px;font-weight:800;color:#fda4af;margin-bottom:10px;">👑 STARTER</div>
+                                <div style="font-size:46px;font-weight:900;color:#fff;">${esc(eager)}</div>
+                            </div>
+                            <div style="font-size:90px;font-weight:900;color:#fb7185;">${eagerN}</div>
                         </div>
-                        <div style="width:2px;background:rgba(255,255,255,0.1);align-self:stretch;margin-top:20px;"></div>
-                        <div style="flex:1;opacity:0.65;">
-                            <div style="font-size:52px;font-weight:800;color:#fff;text-transform:uppercase;margin-top:80px;">${esc(other)}</div>
-                            <div style="font-size:100px;font-weight:900;line-height:1;color:#fff;">${otherN}</div>
-                            <div style="font-size:28px;color:rgba(255,255,255,0.6);">days</div>
+
+                        <div style="width:100%;height:16px;background:rgba(255,255,255,0.12);border-radius:10px;overflow:hidden;margin-bottom:24px;">
+                            <div style="width:${eagerPct}%;height:100%;background:linear-gradient(90deg,#fb7185,#e11d48);border-radius:10px;"></div>
+                        </div>
+
+                        <div style="display:flex;align-items:center;justify-content:space-between;opacity:0.8;border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">
+                            <div style="font-size:38px;font-weight:700;color:#e2e8f0;">${esc(other)}</div>
+                            <div style="font-size:60px;font-weight:800;color:#cbd5e1;">${otherN} <span style="font-size:26px;font-weight:500;">days</span></div>
                         </div>
                     </div>
-                    <div class="ok-bq ok-anim ok-d2">"Yeah... we see you, ${esc(eager)}. 👀"</div>`
+
+                    <div class="ok-quote-box ok-anim ok-d3" style="margin-top:30px;">
+                        "Yeah... we see you, ${esc(eager)}. 👀"
+                    </div>`
             };
         }
 
         _cardBusiestDay(s) {
             return {
-                bgStyle: 'background: linear-gradient(to bottom, #001219, #005f73);',
-                bgExtra: `<div class="ok-orb" style="top:20%;left:20%;width:1000px;height:1000px;background:rgba(10,147,150,0.4);"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 80% 20%, #f59e0b 0%, transparent 60%), radial-gradient(circle at 10% 80%, #ef4444 0%, transparent 60%), linear-gradient(135deg, #1c1004, #451a03);',
+                bgExtra: `<div class="ok-orb" style="top:20%;left:20%;width:900px;height:900px;background:rgba(245,158,11,0.25);"></div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">That one day.</div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:110px;">When you two just wouldn't stop talking.</div>
-                    <div class="ok-stat-block ok-anim ok-d2">
-                        <div style="font-size:48px;font-weight:700;color:#94d2bd;margin-bottom:10px;">${esc(s.busiestDate)}</div>
-                        <div class="ok-stat-num">${(s.busiestDateCount || 0).toLocaleString()}</div>
-                        <div class="ok-stat-lbl">messages in 24 hours 🔥</div>
+                    <div><span class="ok-badge-pill ok-anim">🔥 MOST ACTIVE DAY EVER</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">When you two just wouldn't stop talking.</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;">
+                        <div style="font-size:60px;margin-bottom:10px;">🎉</div>
+                        <div style="font-size:38px;font-weight:800;color:#fbbf24;margin-bottom:12px;">${esc(s.busiestDate)}</div>
+                        <div class="ok-stat-num" style="font-size:135px;line-height:1;color:#fff;">${(s.busiestDateCount || 0).toLocaleString()}</div>
+                        <div style="font-size:32px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:2px;margin-top:14px;">messages in 24 hours 🔥</div>
                     </div>`
             };
         }
 
         _cardBusiestWeekday(s) {
-            const day = s.busiestDay || 'Today';
+            const day = s.busiestDay || 'Friday';
             return {
-                bgStyle: 'background: linear-gradient(135deg, #134e4a, #0f766e);',
-                bgExtra: `<div style="position:absolute;font-size:280px;font-weight:900;opacity:0.06;top:5%;left:-5%;line-height:0.85;word-break:break-all;width:115%;text-transform:uppercase;z-index:0;color:#fff;">${(day + ' ').repeat(18)}</div>`,
+                bgStyle: 'background: radial-gradient(circle at 80% 20%, #14b8a6 0%, transparent 60%), radial-gradient(circle at 20% 80%, #0d9488 0%, transparent 60%), linear-gradient(135deg, #042f2e, #115e59);',
+                bgExtra: `<div class="ok-orb" style="top:25%;right:10%;width:700px;height:700px;background:rgba(45,212,191,0.25);"></div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">Your magic day</div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:160px;color:#5eead4;">${day}</div>
-                    <div class="ok-sub ok-anim ok-d2">was your day.</div>
-                    <div class="ok-stat-block ok-anim ok-d3">
-                        <div class="ok-stat-lbl" style="color:rgba(255,255,255,0.6);font-size:36px;">You sent more messages on ${day}s than any other day of the week.</div>
+                    <div><span class="ok-badge-pill ok-anim">📅 YOUR MAGIC DAY</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:130px;line-height:1.05;background:linear-gradient(135deg,#5eead4,#ffffff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:16px;">${day}</div>
+                    <div class="ok-sub ok-anim ok-d2" style="font-size:42px;color:rgba(255,255,255,0.9);margin-top:8px;">was your day.</div>
+                    
+                    <div class="ok-glass-card ok-anim ok-d3" style="margin-top:44px;">
+                        <div style="font-size:56px;margin-bottom:12px;">⚡</div>
+                        <div style="font-size:34px;font-weight:800;color:#5eead4;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Peak Energy Day</div>
+                        <div style="font-size:32px;color:rgba(255,255,255,0.85);line-height:1.45;">You sent more messages on <b>${day}s</b> than any other day of the week.</div>
+                        <div class="ok-metric-chip" style="margin-top:24px;">🔥 The conversation never stopped</div>
                     </div>`
             };
         }
 
         _cardMedia(s) {
             return {
-                bgStyle: 'background: linear-gradient(135deg, #1e3a5f, #1d4ed8);',
-                bgExtra: `<div class="ok-orb" style="bottom:-20%;left:-20%;width:1000px;height:1000px;background:rgba(96,165,250,0.4);"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 80% 10%, #3b82f6 0%, transparent 60%), radial-gradient(circle at 20% 90%, #6366f1 0%, transparent 60%), linear-gradient(135deg, #091a3c, #172554);',
+                bgExtra: `<div class="ok-orb" style="bottom:-10%;left:-10%;width:800px;height:800px;background:rgba(59,130,246,0.25);"></div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">A gallery of memories</div>
-                    <div class="ok-anim ok-d1">
-                        <div style="font-size:120px;">📸</div>
-                        <div class="ok-huge" style="font-size:140px;color:#93c5fd;">${(s.mediaCount || 0).toLocaleString()}</div>
-                        <div class="ok-sub" style="font-size:56px;">photos &amp; videos shared.</div>
-                    </div>
-                    <div class="ok-stat-block ok-anim ok-d2">
-                        <div class="ok-stat-lbl" style="color:rgba(255,255,255,0.6);font-size:34px;">That's a lot of screenshots,<br>memes, and memories.</div>
+                    <div><span class="ok-badge-pill ok-anim">📸 GALLERY OF MEMORIES</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">A timeline of shared frames.</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;">
+                        <div style="font-size:60px;margin-bottom:10px;">🖼️</div>
+                        <div class="ok-stat-num" style="font-size:130px;line-height:1;color:#60a5fa;">${(s.mediaCount || 0).toLocaleString()}</div>
+                        <div style="font-size:34px;font-weight:700;color:#ffffff;margin-top:14px;">photos, videos &amp; voice notes</div>
+                        <div style="font-size:28px;color:rgba(255,255,255,0.65);margin-top:10px;line-height:1.4;">Screenshots, memes, and late-night voice clips.</div>
                     </div>`
             };
         }
 
         _cardLaughs(s) {
             return {
-                bgStyle: 'background: linear-gradient(135deg, #7c2d12, #c2410c);',
-                bgExtra: `<div style="position:absolute;font-size:280px;font-weight:900;opacity:0.07;top:5%;left:-5%;line-height:0.85;word-break:break-all;width:130%;z-index:0;">HAHA HAHA LOL HAHA HAHA LOL HAHA LOL</div>`,
+                bgStyle: 'background: radial-gradient(circle at 20% 20%, #f97316 0%, transparent 60%), radial-gradient(circle at 80% 80%, #e11d48 0%, transparent 60%), linear-gradient(135deg, #371407, #5c1809);',
+                bgExtra: `<div style="position:absolute;font-size:260px;font-weight:900;opacity:0.06;top:5%;left:-5%;line-height:0.85;word-break:break-all;width:130%;z-index:0;">HAHA LOL ROFL HAHA LOL</div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">Vibe check ✓</div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:130px;">You laughed<br><span style="color:#fb923c;">A LOT.</span></div>
-                    <div class="ok-stat-block ok-anim ok-d2">
-                        <div class="ok-stat-num">${(s.laughCount || 0).toLocaleString()}</div>
-                        <div class="ok-stat-lbl">messages with haha, lol, 😂</div>
+                    <div><span class="ok-badge-pill ok-anim">😂 VIBE CHECK</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:90px;margin-top:16px;line-height:1.15;">You two laughed<br><span style="color:#fdba74;">A WHOLE LOT.</span></div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;">
+                        <div style="font-size:64px;margin-bottom:10px;">🎢</div>
+                        <div class="ok-stat-num" style="font-size:130px;line-height:1;color:#fff;">${(s.laughCount || 0).toLocaleString()}</div>
+                        <div style="font-size:32px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:2px;margin-top:14px;">laughs, lol's &amp; dying emojis 💀</div>
                     </div>`
             };
         }
@@ -654,65 +789,77 @@
         _cardLongestMsg(s) {
             const preview = esc(s.longestMsgPreview || '...');
             return {
-                bgStyle: 'background: linear-gradient(to bottom, #052e16, #14532d);',
+                bgStyle: 'background: radial-gradient(circle at 50% 20%, #15803d 0%, transparent 60%), linear-gradient(135deg, #052e16, #14532d);',
                 bgExtra: '',
                 html: `
-                    <div class="ok-eyebrow ok-anim">The Novelist ✍️</div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:100px;">Someone had<br>a lot to say.</div>
-                    <div class="ok-anim ok-d2" style="background:rgba(0,0,0,0.45);padding:50px;border-radius:24px;border-left:8px solid #4ade80;margin-top:60px;">
-                        <div style="font-size:32px;font-style:italic;color:#bbf7d0;line-height:1.5;">"${preview}"</div>
-                    </div>
-                    <div class="ok-stat-block ok-anim ok-d3" style="margin-top:40px;">
-                        <div class="ok-stat-num" style="font-size:120px;color:#4ade80;">${s.longestMsgLen || 0}</div>
-                        <div class="ok-stat-lbl">words in one message</div>
+                    <div><span class="ok-badge-pill ok-anim">✍️ THE NOVELIST</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Someone had<br>a lot to say.</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:34px;text-align:left;border-left:8px solid #4ade80;">
+                        <div style="font-size:30px;font-style:italic;color:#bbf7d0;line-height:1.5;">"${preview}"</div>
+                        <div style="display:flex;align-items:baseline;gap:12px;margin-top:24px;border-top:1px solid rgba(255,255,255,0.1);padding-top:18px;">
+                            <span style="font-size:72px;font-weight:900;color:#4ade80;">${s.longestMsgLen || 0}</span>
+                            <span style="font-size:26px;color:rgba(255,255,255,0.65);">words in one message</span>
+                        </div>
                     </div>`
             };
         }
 
         _cardQuestions(s) {
-            const curious = (s.s1Questions || 0) > (s.s2Questions || 0) ? s.sender1Name : s.sender2Name;
+            const curious = (s.s1Questions || 0) >= (s.s2Questions || 0) ? s.sender1Name : s.sender2Name;
+            const totalQ = (s.s1Questions || 0) + (s.s2Questions || 0);
             return {
-                bgStyle: 'background: linear-gradient(135deg, #4c1d95, #7e22ce);',
-                bgExtra: `<div style="position:absolute;font-size:500px;font-weight:900;opacity:0.08;top:10%;right:5%;z-index:0;color:#fff;">?</div>`,
+                bgStyle: 'background: radial-gradient(circle at 90% 10%, #8b5cf6 0%, transparent 60%), radial-gradient(circle at 10% 90%, #6366f1 0%, transparent 60%), linear-gradient(135deg, #1e1145, #311068);',
+                bgExtra: `<div style="position:absolute;font-size:500px;font-weight:900;opacity:0.06;top:10%;right:5%;z-index:0;color:#fff;">?</div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">The Curious One</div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:110px;">Who asked more questions?</div>
-                    <div style="display:flex;gap:40px;margin-top:60px;" class="ok-anim ok-d2">
-                        <div style="flex:1;">
-                            <div style="font-size:44px;font-weight:800;color:#e9d5ff;text-transform:uppercase;">${esc(s.sender1Name || 'Person 1')}</div>
-                            <div style="font-size:130px;font-weight:900;line-height:1;color:#fff;">${s.s1Questions || 0}</div>
-                            <div style="font-size:28px;color:rgba(255,255,255,0.55);">questions</div>
-                        </div>
-                        <div style="flex:1;">
-                            <div style="font-size:44px;font-weight:800;color:#e9d5ff;text-transform:uppercase;">${esc(s.sender2Name || 'Person 2')}</div>
-                            <div style="font-size:130px;font-weight:900;line-height:1;color:#fff;">${s.s2Questions || 0}</div>
-                            <div style="font-size:28px;color:rgba(255,255,255,0.55);">questions</div>
+                    <div><span class="ok-badge-pill ok-anim">❓ THE CURIOUS ONE</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Who asked all the questions?</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:36px;">
+                        <div style="font-size:28px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:2px;">Total Questions Asked</div>
+                        <div style="font-size:110px;font-weight:900;color:#c084fc;line-height:1.1;margin:8px 0;">${totalQ.toLocaleString()}</div>
+                        
+                        <div style="display:flex;gap:30px;margin-top:24px;border-top:1px solid rgba(255,255,255,0.12);padding-top:22px;">
+                            <div style="flex:1;text-align:left;">
+                                <div style="font-size:32px;font-weight:800;color:#e9d5ff;">${esc(s.sender1Name || 'Person 1')}</div>
+                                <div style="font-size:64px;font-weight:900;color:#fff;margin-top:4px;">${s.s1Questions || 0}</div>
+                            </div>
+                            <div style="width:2px;background:rgba(255,255,255,0.15);"></div>
+                            <div style="flex:1;text-align:left;">
+                                <div style="font-size:32px;font-weight:800;color:#e9d5ff;">${esc(s.sender2Name || 'Person 2')}</div>
+                                <div style="font-size:64px;font-weight:900;color:#fff;margin-top:4px;">${s.s2Questions || 0}</div>
+                            </div>
                         </div>
                     </div>
-                    <div class="ok-bq ok-anim ok-d3" style="color:#d8b4fe;">Clearly, ${esc(curious)} is the curious one.</div>`
+
+                    <div class="ok-quote-box ok-anim ok-d3" style="margin-top:26px;color:#d8b4fe;">
+                        Clearly, <b>${esc(curious)}</b> keeps the curiosity flowing. 🧐
+                    </div>`
             };
         }
 
         _cardEmojis(emojis) {
             let floaters = '';
             emojis.forEach((e, i) => {
-                const sz = 100 - i * 12, l = 5 + Math.random() * 80, t = 5 + Math.random() * 75, dl = (Math.random() * 3).toFixed(1);
-                floaters += `<div style="position:absolute;left:${l}%;top:${t}%;font-size:${sz}px;animation:ok-float ${3+Math.random()*2}s ease-in-out ${dl}s infinite;z-index:0;pointer-events:none;">${e.emoji}</div>`;
+                const sz = 110 - i * 14, l = 8 + (i * 18) % 75, t = 10 + (i * 22) % 65, dl = (i * 0.4).toFixed(1);
+                floaters += `<div style="position:absolute;left:${l}%;top:${t}%;font-size:${sz}px;animation:ok-float ${3+i}s ease-in-out ${dl}s infinite;z-index:0;pointer-events:none;opacity:0.25;">${e.emoji}</div>`;
             });
             return {
-                bgStyle: 'background: linear-gradient(to bottom, #1c1c2e, #2d2d44);',
+                bgStyle: 'background: radial-gradient(circle at 10% 20%, #4c1d95 0%, transparent 60%), radial-gradient(circle at 90% 80%, #1e1b4b 0%, transparent 60%), linear-gradient(135deg, #110d24, #1e1b4b);',
                 bgExtra: floaters,
                 html: `
-                    <div style="position:relative;z-index:10;background:rgba(0,0,0,0.5);padding:70px;border-radius:40px;backdrop-filter:blur(20px);border:1.5px solid rgba(255,255,255,0.1);" class="ok-anim">
-                        <div class="ok-eyebrow" style="margin-bottom:24px;">Your chat in emojis</div>
-                        <div style="display:flex;flex-direction:column;gap:36px;">
+                    <div><span class="ok-badge-pill ok-anim">🎭 SIGNATURE EMOJIS</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Your chat's vocabulary.</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:36px;position:relative;z-index:10;">
+                        <div style="display:flex;flex-direction:column;gap:26px;">
                             ${emojis.slice(0, 4).map(e => `
-                                <div style="display:flex;align-items:center;gap:30px;">
-                                    <div style="font-size:72px;width:90px;flex-shrink:0;">${e.emoji}</div>
-                                    <div style="flex:1;height:14px;background:rgba(255,255,255,0.12);border-radius:8px;overflow:hidden;">
-                                        <div style="width:${Math.round((e.count / emojis[0].count) * 100)}%;height:100%;background:#a78bfa;border-radius:8px;"></div>
+                                <div style="display:flex;align-items:center;gap:24px;">
+                                    <div style="font-size:60px;width:76px;flex-shrink:0;text-align:center;">${e.emoji}</div>
+                                    <div style="flex:1;height:16px;background:rgba(255,255,255,0.12);border-radius:10px;overflow:hidden;">
+                                        <div style="width:${Math.round((e.count / emojis[0].count) * 100)}%;height:100%;background:linear-gradient(90deg,#a78bfa,#c084fc);border-radius:10px;"></div>
                                     </div>
-                                    <div style="font-size:36px;font-weight:700;color:rgba(255,255,255,0.55);width:130px;text-align:right;">${e.count.toLocaleString()}</div>
+                                    <div style="font-size:32px;font-weight:800;color:#ffffff;width:110px;text-align:right;">${e.count.toLocaleString()}</div>
                                 </div>`).join('')}
                         </div>
                     </div>`
@@ -721,41 +868,64 @@
 
         _cardLateNight(count) {
             return {
-                bgStyle: 'background: linear-gradient(to bottom, #020111, #1a0536);',
-                bgExtra: `<div class="ok-orb" style="top:8%;right:8%;width:200px;height:200px;background:#fff;filter:blur(60px);opacity:0.7;"></div>
-                          <div class="ok-orb" style="bottom:20%;left:20%;width:120px;height:120px;background:#a78bfa;filter:blur(40px);opacity:0.5;"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 85% 15%, #3b0764 0%, transparent 60%), radial-gradient(circle at 15% 85%, #1e1b4b 0%, transparent 60%), linear-gradient(135deg, #02010a, #0f0a21);',
+                bgExtra: `<div class="ok-orb" style="top:10%;right:10%;width:500px;height:500px;background:rgba(192,132,252,0.25);"></div>`,
                 html: `
-                    <div class="ok-eyebrow ok-anim">🌙 midnight thoughts</div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:100px;">You two had things to say after midnight.</div>
-                    <div class="ok-stat-block ok-anim ok-d2" style="margin-top:120px;">
-                        <div class="ok-stat-num">${count.toLocaleString()}</div>
-                        <div class="ok-stat-lbl">messages between 12AM – 4AM</div>
+                    <div><span class="ok-badge-pill ok-anim">🌙 NIGHT OWLS</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Things got deep after midnight.</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;">
+                        <div style="font-size:64px;margin-bottom:12px;">🦉</div>
+                        <div class="ok-stat-num" style="font-size:130px;line-height:1;color:#c084fc;">${count.toLocaleString()}</div>
+                        <div style="font-size:32px;font-weight:700;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:2px;margin-top:14px;">messages between 12 AM – 4 AM</div>
                     </div>
-                    <div class="ok-bq ok-anim ok-d3">"Sleep is overrated anyway."</div>`
+
+                    <div class="ok-quote-box ok-anim ok-d3" style="margin-top:28px;">
+                        "Sleep was clearly optional." 🥱
+                    </div>`
             };
         }
 
         _cardTotal(s) {
+            const s1Name = esc(s.sender1Name || 'Person 1');
+            const s2Name = esc(s.sender2Name || 'Person 2');
+            const total = (s.totalMessages || 0).toLocaleString();
+            const s1Count = Math.round((s.totalMessages || 0) * (s.sender1Percent || 0) / 100);
+            const s2Count = Math.round((s.totalMessages || 0) * (s.sender2Percent || 0) / 100);
+            const s1Pct = Math.round(s.sender1Percent || 50);
+            const s2Pct = Math.round(s.sender2Percent || 50);
+
             return {
-                bgStyle: 'background: linear-gradient(to bottom, #000, #0d0d1a);',
-                bgExtra: `<div class="ok-orb" style="bottom:-15%;right:-15%;width:1100px;height:1100px;background:rgba(167,139,250,0.25);"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 50% 0%, #4338ca 0%, transparent 60%), radial-gradient(circle at 50% 100%, #1e1b4b 0%, transparent 60%), linear-gradient(135deg, #09090f, #141428);',
+                bgExtra: `<div class="ok-orb" style="bottom:-10%;right:-10%;width:900px;height:900px;background:rgba(99,102,241,0.25);"></div>`,
                 html: `
-                    <div class="ok-huge ok-anim" style="font-size:180px;">${(s.totalMessages || 0).toLocaleString()}</div>
-                    <div class="ok-sub ok-anim ok-d1" style="font-size:58px;margin-bottom:60px;">messages.</div>
-                    <div class="ok-sub ok-anim ok-d2" style="font-size:44px;font-weight:400;color:rgba(255,255,255,0.6);">
-                        Not just texts.<br>
-                        Jokes. Rants. Voice notes at 2AM.<br>
-                        And somehow… you kept going.
+                    <div><span class="ok-badge-pill ok-anim">❤️ THE COMPLETE STORY</span></div>
+                    <div class="ok-stat-num ok-anim ok-d1" style="font-size:140px;line-height:1;margin-top:16px;background:linear-gradient(135deg,#ffffff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${total}</div>
+                    <div class="ok-sub ok-anim ok-d1" style="font-size:40px;color:rgba(255,255,255,0.9);margin-top:6px;">messages preserved forever.</div>
+
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:34px;">
+                        <div style="font-size:26px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:2px;margin-bottom:18px;">Contribution Breakdown</div>
+                        
+                        <div style="width:100%;height:18px;background:rgba(255,255,255,0.12);border-radius:12px;overflow:hidden;display:flex;margin-bottom:20px;">
+                            <div style="width:${s1Pct}%;height:100%;background:linear-gradient(90deg,#6366f1,#818cf8);"></div>
+                            <div style="width:${s2Pct}%;height:100%;background:linear-gradient(90deg,#ec4899,#f472b6);"></div>
+                        </div>
+
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div style="text-align:left;">
+                                <div style="font-size:32px;font-weight:800;color:#a5b4fc;">${s1Name} (${s1Pct}%)</div>
+                                <div style="font-size:42px;font-weight:900;color:#fff;">${s1Count.toLocaleString()}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:32px;font-weight:800;color:#f472b6;">${s2Name} (${s2Pct}%)</div>
+                                <div style="font-size:42px;font-weight:900;color:#fff;">${s2Count.toLocaleString()}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="ok-stat-block ok-anim ok-d3" style="margin-top:80px;border-top:2px solid rgba(255,255,255,0.08);padding-top:40px;">
-                        <div style="display:flex;justify-content:space-between;font-size:38px;font-weight:800;margin-bottom:16px;">
-                            <span>${esc(s.sender1Name || '')}</span>
-                            <span style="color:#a78bfa;">${Math.round((s.totalMessages || 0) * (s.sender1Percent || 0) / 100).toLocaleString()}</span>
-                        </div>
-                        <div style="display:flex;justify-content:space-between;font-size:38px;font-weight:800;">
-                            <span>${esc(s.sender2Name || '')}</span>
-                            <span style="color:#a78bfa;">${Math.round((s.totalMessages || 0) * (s.sender2Percent || 0) / 100).toLocaleString()}</span>
-                        </div>
+
+                    <div style="font-size:30px;color:rgba(255,255,255,0.75);line-height:1.45;margin-top:30px;" class="ok-anim ok-d3">
+                        Jokes. Rants. Late night thoughts.<br>
+                        Your memories live on <b>OnlineKotha</b>.
                     </div>`
             };
         }

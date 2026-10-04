@@ -1,6 +1,6 @@
 // Service Worker for Kotha PWA
-const CACHE_NAME = 'kotha-v36';
-const DYNAMIC_CACHE = 'kotha-dynamic-v36';
+const CACHE_NAME = 'kotha-v42';
+const DYNAMIC_CACHE = 'kotha-dynamic-v42';
 const STATIC_ASSETS = [
     '/css/style.css',
     '/js/tailwind.js',
@@ -8,8 +8,9 @@ const STATIC_ASSETS = [
     '/js/auth-init.js',
     '/js/ai-panel.js',
     '/js/upload.js',
+    '/js/story.js',
     '/js/features.js',
-    './img/favicon.svg',
+    '/img/favicon.svg',
     '/manifest.json',
 ];
 
@@ -23,7 +24,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then(keys =>
-            Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+            Promise.all(keys.filter(k => k !== CACHE_NAME && k !== DYNAMIC_CACHE).map(k => caches.delete(k)))
         )
     );
     self.clients.claim();
@@ -75,7 +76,21 @@ self.addEventListener('fetch', (e) => {
         return;
     }
 
-    // Cache-first for static assets
+    // Network-first for JavaScript, CSS, and HTML so updates are applied immediately
+    if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css') || url.pathname.endsWith('.html')) {
+        e.respondWith(
+            fetch(e.request).then(response => {
+                if (response && response.status === 200) {
+                    const copy = response.clone();
+                    caches.open(DYNAMIC_CACHE).then(cache => cache.put(e.request, copy));
+                }
+                return response;
+            }).catch(() => caches.match(e.request))
+        );
+        return;
+    }
+
+    // Cache-first for other static assets (images, fonts, icons)
     e.respondWith(
         caches.match(e.request).then(cached => cached || fetch(e.request))
     );
