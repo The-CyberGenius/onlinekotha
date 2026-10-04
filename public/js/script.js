@@ -1036,12 +1036,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     window._chatMetaCache[chatName].contactName = isGroupChat ? actualGroupName : otherPersonName;
                 }
                 renderChatList(loadedChats, currentChat);
-                
-                const hrBtn = document.getElementById('header-rename-btn');
-                if (hrBtn) {
-                    hrBtn.classList.remove('hidden');
-                    hrBtn.classList.add('flex');
-                }
 
                 // Animate bottom input placeholder typewriter effect
                 const bottomAiInput = document.getElementById('bottom-ai-input');

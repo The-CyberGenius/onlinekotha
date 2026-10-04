@@ -665,12 +665,9 @@
                         </div>
                     </div>
                     <div class="ml-3 min-w-0 flex-1">
-                        <div class="flex items-center gap-1.5">
-                            <h2 class="font-semibold text-gray-900 text-[15px] leading-tight truncate"
+                        <div class="flex items-center">
+                            <h2 class="font-semibold text-gray-900 dark:text-gray-100 text-[15px] leading-tight truncate"
                                 id="chat-header-name">Partner Name</h2>
-                            <button id="header-rename-btn" class="w-5 h-5 hidden items-center justify-center rounded-md text-gray-400 hover:text-indigo-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" title="Rename chat">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </button>
                         </div>
                         <div class="flex items-center gap-2 mt-0.5">
                             <span id="dynamic-header-date"
@@ -703,15 +700,6 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                    </button>
-                    <!-- DM shortcut button -->
-                    <button id="btn-dm" title="Direct Messages" aria-label="Direct Messages"
-                        class="ai-sparkle-btn relative" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                            <path d="M22 6l-10 7L2 6"/>
-                        </svg>
-                        <span class="dm-unread-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black rounded-full w-4 h-4 flex items-center justify-center leading-none border-2 border-white">0</span>
                     </button>
                     <!-- Close chat button -->
                     <button id="close-chat-btn" title="Close Chat" aria-label="Close Chat"
@@ -1025,18 +1013,18 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/script.js?v=45"></script>
+    <script src="/js/script.js?v=46"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-    <script src="/js/ai-panel.js?v=45"></script>
-    <script src="/js/upload.js?v=45"></script>
-    <script src="/js/story.js?v=45"></script>
-    <script src="/js/features.js?v=45"></script>
-    <script src="/js/dm.js?v=45"></script>
+    <script src="/js/ai-panel.js?v=46"></script>
+    <script src="/js/upload.js?v=46"></script>
+    <script src="/js/story.js?v=46"></script>
+    <script src="/js/features.js?v=46"></script>
+    <script src="/js/dm.js?v=46"></script>
     <script>
         if ('caches' in window) {
             caches.keys().then(keys => {
                 keys.forEach(k => {
-                    if (k.startsWith('kotha-') && !k.includes('v45')) {
+                    if (k.startsWith('kotha-') && !k.includes('v46')) {
                         caches.delete(k);
                     }
                 });
