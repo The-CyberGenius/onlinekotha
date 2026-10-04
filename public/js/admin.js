@@ -442,6 +442,7 @@ HARD RULES
         const enabledModels = models.filter(m => m.enabled);
         const featureLabels = {
             chat: 'AI Chat (talk to history)',
+            assistant: 'Kotha Assistant (official product guide & support)',
             embedding: 'Embeddings (semantic search)',
             wrapped: 'Year in Wrapped (summary)',
         };

@@ -889,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (history.length === 0) {
                         history = [
                             {
-                                text: "Hi there! 👋 I'm Kotha's Support Assistant. Want to know how to export your WhatsApp chat, or how our platform works? Ask me anything in your language!",
+                                text: "Hi there! 👋 I'm Kotha Assistant, the official in-app AI assistant for OnlineKotha. How can I help you today? Ask me about exporting WhatsApp chats, how AI chat works, Wrapped, or our plans!",
                                 sender: "Kotha Assistant",
                                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                             }

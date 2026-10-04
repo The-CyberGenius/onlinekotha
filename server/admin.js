@@ -395,22 +395,30 @@ router.post('/providers/:id/fetch-models', async (req, res) => {
     }
 });
 
+const { KOTHA_ASSISTANT_SYSTEM_PROMPT } = require('./assistant_prompt');
+
 // ---------- Routes (feature → model) ----------
-const FEATURES = ['chat', 'embedding', 'wrapped'];
+const FEATURES = ['chat', 'assistant', 'embedding', 'wrapped'];
 
 router.get('/routes', (req, res) => {
     const rows = db.prepare('SELECT * FROM routes').all();
     const map = {};
     for (const f of FEATURES) {
-        map[f] = rows.find(r => r.feature === f) || {
-            feature: f,
-            primary_model_id: null,
-            fallback_model_id: null,
-            fallback_model_id_2: null,
-            fallback_model_id_3: null,
-            max_tokens: 1024,
-            temperature: 0.7,
-        };
+        const found = rows.find(r => r.feature === f);
+        if (found) {
+            map[f] = found;
+        } else {
+            map[f] = {
+                feature: f,
+                primary_model_id: null,
+                fallback_model_id: null,
+                fallback_model_id_2: null,
+                fallback_model_id_3: null,
+                system_prompt: f === 'assistant' ? KOTHA_ASSISTANT_SYSTEM_PROMPT : null,
+                max_tokens: 1024,
+                temperature: 0.7,
+            };
+        }
     }
     res.json(map);
 });

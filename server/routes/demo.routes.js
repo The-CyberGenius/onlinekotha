@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const { callLLM } = require('../llm');
-const { getSession } = require('../auth');
-const { db } = require('../db');
+const { getSession, effectivePlan } = require('../auth');
+const { db, getSetting } = require('../db');
+const { KOTHA_ASSISTANT_SYSTEM_PROMPT } = require('../assistant_prompt');
 
 const DEMO_LIMIT = 15;
 
@@ -58,6 +59,85 @@ function saveDemoUsage(key, usage) {
         db.prepare('DELETE FROM demo_usage WHERE updated_at < ?').run(sevenDaysAgo);
     } catch (e) {
         // ignore cleanup errors
+    }
+}
+
+function getLiveUserContext(session, req) {
+    if (session && session.user) {
+        const u = session.user;
+        const plan = effectivePlan(u);
+        const isPro = plan === 'paid';
+
+        let usedToday = 0;
+        let freeDailyMax = 5;
+        let remainingToday = null;
+
+        try {
+            const startOfDay = new Date();
+            startOfDay.setHours(0, 0, 0, 0);
+            const row = db.prepare(
+                `SELECT COUNT(*) AS n FROM conv_messages cm
+                 JOIN conversations c ON c.id = cm.conversation_id
+                 WHERE c.user_id = ? AND cm.role = 'user' AND cm.created_at >= ?`
+            ).get(u.id, startOfDay.getTime());
+            usedToday = row ? row.n : 0;
+            freeDailyMax = Number(getSetting('free_user_daily_messages', '5'));
+            remainingToday = isPro ? null : Math.max(0, freeDailyMax - usedToday);
+        } catch (e) {}
+
+        let chatImportsUsed = 0;
+        try {
+            const countRow = db.prepare('SELECT COUNT(*) as n FROM saved_chats WHERE user_id = ?').get(u.id);
+            chatImportsUsed = countRow ? countRow.n : 0;
+        } catch (e) {}
+
+        return {
+            user: {
+                plan: isPro ? 'pro' : 'free',
+                is_logged_in: true,
+                email: u.email,
+                ai_messages_used_today: usedToday,
+                ai_messages_limit_today: isPro ? 'unlimited' : freeDailyMax,
+                ai_messages_remaining_today: remainingToday,
+                unlimited_ai: isPro,
+                chat_imports_used: chatImportsUsed,
+                chat_import_limit: isPro ? 'unlimited' : 5,
+            },
+            app: {
+                name: 'OnlineKotha',
+                ai_name: 'Kotha',
+                website: 'https://www.onlinekotha.com/',
+                pricing: {
+                    free: { price: '$0', imports: 5, ai_per_day: 5 },
+                    pro: { price: '$6/month', imports: 'unlimited', ai_per_day: 'unlimited' },
+                    lifetime: { price: '$49 one-time', imports: 'unlimited', ai_per_day: 'unlimited', priority_support: true },
+                },
+            },
+        };
+    } else {
+        // Guest user
+        return {
+            user: {
+                plan: 'guest',
+                is_logged_in: false,
+                ai_messages_used_today: 0,
+                ai_messages_limit_today: 5,
+                ai_messages_remaining_today: 5,
+                unlimited_ai: false,
+                chat_imports_used: 0,
+                chat_import_limit: 1,
+            },
+            app: {
+                name: 'OnlineKotha',
+                ai_name: 'Kotha',
+                website: 'https://www.onlinekotha.com/',
+                pricing: {
+                    free: { price: '$0', imports: 5, ai_per_day: 5 },
+                    pro: { price: '$6/month', imports: 'unlimited', ai_per_day: 'unlimited' },
+                    lifetime: { price: '$49 one-time', imports: 'unlimited', ai_per_day: 'unlimited', priority_support: true },
+                },
+            },
+        };
     }
 }
 
@@ -124,20 +204,25 @@ RULES:
 2. NEVER say you are AI or a chatbot.
 3. Keep responses SHORT — 1-3 lines. Real WhatsApp style.
 4. Respond in Hinglish slang.`;
-    } else if (role === 'support') {
-        systemPrompt = `You are the Kotha Support Assistant.
-CURRENT TIME (IST): ${nowIST}.
-PERSONALITY:
-- You are extremely helpful, polite, and clear.
-- You are an expert on the "Kotha" platform (a platform that lets users upload their WhatsApp chat exports to chat with AI clones of their contacts, see analytics, and preserve memories).
-- If the user asks how to export/import chats, explain clearly:
-  For iOS: Go to WhatsApp -> Open Contact Info -> Export Chat -> Without Media -> Save to Files, then upload the .zip here.
-  For Android: Go to WhatsApp -> Open Chat -> Three Dots -> More -> Export Chat -> Without Media, then upload the .txt or .zip here.
-RULES:
-1. ALWAYS respond in the SAME language the user asks their question in (e.g. Hindi, English, Hinglish, Marathi, etc.).
-2. Keep responses concise (1-3 sentences), easy to read, and friendly.
-3. Use simple emojis occasionally (👋, ✨, 📱).
-4. Never break character. You are the official Kotha Support Assistant.`;
+    } else if (role === 'support' || role === 'assistant' || !role) {
+        let basePrompt = KOTHA_ASSISTANT_SYSTEM_PROMPT;
+        try {
+            const assistantRoute = db.prepare('SELECT * FROM routes WHERE feature = ?').get('assistant');
+            if (assistantRoute && assistantRoute.system_prompt) {
+                basePrompt = assistantRoute.system_prompt;
+            }
+        } catch (e) {}
+
+        const liveContext = getLiveUserContext(session, req);
+        systemPrompt = `${basePrompt}
+
+====================================================
+LIVE USER CONTEXT & BACKEND STATE (SOURCE OF TRUTH)
+====================================================
+Current Time (IST): ${nowIST}
+Live Application & User State:
+${JSON.stringify(liveContext, null, 2)}
+`;
     } else if (role === 'ex') {
         systemPrompt = `You are the user's "Ex" (former romantic partner) chatting on WhatsApp.
 CURRENT TIME (IST): ${nowIST}.
@@ -180,11 +265,12 @@ RULES:
 
     let fullText = '';
     try {
+        const targetFeature = (role === 'support' || role === 'assistant' || !role) ? 'assistant' : 'chat';
         await callLLM({
-            feature: 'chat',
+            feature: targetFeature,
             messages: usage.history,
             systemPrompt,
-            userId: null,
+            userId: session?.user?.id || null,
             signal: abortController.signal,
             onToken: (token) => {
                 fullText += token;

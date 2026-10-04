@@ -307,6 +307,24 @@ safeAddColumn('routes', 'fallback_model_id_2', 'INTEGER');
 safeAddColumn('routes', 'fallback_model_id_3', 'INTEGER');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 
+try {
+    const { KOTHA_ASSISTANT_SYSTEM_PROMPT } = require('./assistant_prompt');
+    const existingAssistant = db.prepare('SELECT feature FROM routes WHERE feature = ?').get('assistant');
+    if (!existingAssistant) {
+        const chatRoute = db.prepare('SELECT * FROM routes WHERE feature = ?').get('chat');
+        db.prepare(`
+            INSERT INTO routes (feature, primary_model_id, fallback_model_id, fallback_model_id_2, fallback_model_id_3, max_tokens, temperature, system_prompt)
+            VALUES ('assistant', ?, ?, ?, ?, 1024, 0.7, ?)
+        `).run(
+            chatRoute ? chatRoute.primary_model_id : null,
+            chatRoute ? chatRoute.fallback_model_id : null,
+            chatRoute ? chatRoute.fallback_model_id_2 : null,
+            chatRoute ? chatRoute.fallback_model_id_3 : null,
+            KOTHA_ASSISTANT_SYSTEM_PROMPT
+        );
+    }
+} catch (e) {}
+
 // ── Webhook idempotency table ──
 db.exec(`
 CREATE TABLE IF NOT EXISTS webhook_events (

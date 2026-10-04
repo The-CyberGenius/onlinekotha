@@ -260,7 +260,10 @@ async function readSSE(stream, onEvent) {
 async function callLLM({ feature, messages, systemPrompt, userId, onToken, signal, maxTokens: maxTokensOverride }) {
     checkSpendCap();
 
-    const route = getRoute(feature);
+    let route = getRoute(feature);
+    if (!route && feature === 'assistant') {
+        route = getRoute('chat');
+    }
     if (!route) throw new LLMError(`No route configured for "${feature}"`, 'NO_ROUTE');
 
     const primary = getModelWithProvider(route.primary_model_id);
