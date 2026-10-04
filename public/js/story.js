@@ -9,30 +9,27 @@
     // ─── CSS ────────────────────────────────────────────────────────────────────
     const css = `
         .ok-ov {
-            position: fixed; inset: 0; width: 100vw; height: 100vh;
-            background: rgba(6, 6, 14, 0.92); z-index: 2147483647;
+            position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh;
+            background: rgba(6, 6, 14, 0.94); z-index: 2147483647;
             backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden; opacity: 1;
             touch-action: manipulation; -webkit-user-select: none; user-select: none;
             box-sizing: border-box;
+            padding: 16px 16px;
+            padding-bottom: max(40px, env(safe-area-inset-bottom, 36px));
+            padding-top: max(20px, env(safe-area-inset-top, 20px));
         }
 
         .ok-vp {
             position: relative; overflow: hidden;
-            border-radius: 32px;
-            box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.9), 0 0 40px rgba(99, 102, 241, 0.25);
+            border-radius: 28px;
+            box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.95), 0 0 35px rgba(99, 102, 241, 0.22);
             border: 1.5px solid rgba(255, 255, 255, 0.18);
             flex-shrink: 0; background: #080812;
-            transition: width 0.2s ease, height 0.2s ease;
-        }
-        @media (max-width: 600px) {
-            .ok-vp {
-                border-radius: 28px;
-                border: 1.5px solid rgba(255, 255, 255, 0.2);
-                box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.95), 0 0 25px rgba(99, 102, 241, 0.22);
-            }
+            margin: auto auto;
+            transition: width 0.15s ease, height 0.15s ease;
         }
 
         /* 1080×1920 canvas scaled down */
@@ -346,7 +343,18 @@
             d.hdr.className = 'ok-hdr';
             d.hdr.innerHTML = `
                 <div class="ok-brand">
-                    <img src="/img/logo.svg" alt="OnlineKotha" />
+                    <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="url(#okBrandGrad)" />
+                        <circle cx="11" cy="16" r="4.5" fill="#ffffff" />
+                        <circle cx="21" cy="16" r="4.5" fill="#ffffff" />
+                        <path d="M11 16h10" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+                        <defs>
+                            <linearGradient id="okBrandGrad" x1="0" y1="0" x2="32" y2="32">
+                                <stop offset="0%" stop-color="#8b5cf6"/>
+                                <stop offset="100%" stop-color="#ec4899"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
                     <span>OnlineKotha</span>
                 </div>
                 <button class="ok-close" aria-label="Close story">
@@ -394,19 +402,27 @@
             this._resize();
             this._onResize = () => this._resize();
             window.addEventListener('resize', this._onResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', this._onResize);
+            }
         }
 
         _resize() {
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
+            const vv = window.visualViewport;
+            const vw = vv ? vv.width : (window.innerWidth || document.documentElement.clientWidth);
+            const vh = vv ? vv.height : (window.innerHeight || document.documentElement.clientHeight);
             const ratio = 1080 / 1920; // 9:16 ~0.5625
 
-            // Mobile and desktop: floating card with comfortable margins
-            const availW = Math.max(260, vw - 28);
-            const availH = Math.max(460, vh - 48);
+            // Ample margin on all sides, especially bottom for mobile toolbars
+            const isMobile = vw <= 600;
+            const horizMargin = isMobile ? 32 : 64;
+            const vertMargin  = isMobile ? 110 : 90;
 
-            const maxW = vw > 600 ? Math.min(availW, 440) : Math.min(availW, 350);
-            const maxH = vw > 600 ? Math.min(availH, 840) : availH;
+            const availW = Math.max(260, vw - horizMargin);
+            const availH = Math.max(400, vh - vertMargin);
+
+            const maxW = isMobile ? Math.min(availW, 350) : Math.min(availW, 440);
+            const maxH = isMobile ? Math.min(availH, 580) : Math.min(availH, 840);
 
             let vph = maxH;
             let vpw = maxH * ratio;
@@ -531,6 +547,9 @@
         close() {
             cancelAnimationFrame(this.rafId);
             window.removeEventListener('resize', this._onResize);
+            if (window.visualViewport) {
+                window.visualViewport.removeEventListener('resize', this._onResize);
+            }
             document.removeEventListener('keydown', this._onKey);
             this.dom.ov.style.opacity = '0';
             setTimeout(() => { this.dom.ov?.remove(); }, 400);
@@ -549,26 +568,52 @@
             this.isPaused = true;
             if (this.dom.shareBtn) this.dom.shareBtn.classList.add('loading');
 
-            // Hide UI elements from exported image
-            this.dom.prog.style.visibility = 'hidden';
-            this.dom.hdr.style.visibility = 'hidden';
-            
-            const oldTransform = this.dom.cv.style.transform;
-            this.dom.cv.style.transform = 'scale(1)';
-            this.dom.cv.style.position = 'fixed';
-            this.dom.cv.style.top = '-9999px';
-            this.dom.cv.style.left = '-9999px';
-            document.body.appendChild(this.dom.cv);
+            const cv = this.dom.cv;
+            // Temporarily freeze animations at full opacity
+            const animatedEls = cv.querySelectorAll('.ok-anim, .ok-d1, .ok-d2, .ok-d3');
+            animatedEls.forEach(el => {
+                el.style.animation = 'none';
+                el.style.opacity = '1';
+                el.style.transform = 'none';
+            });
+
+            // Keep in-place, reset transform to full 1080x1920 scale (do NOT move offscreen to -9999px)
+            const oldTransform = cv.style.transform;
+            cv.style.transform = 'none';
+
+            // Filter out non-card UI controls and elements that break mobile canvas capture
+            const filter = (node) => {
+                if (!node || node.nodeType !== 1) return true;
+                if (node.tagName === 'IMG') return false;
+                if (node.id === 'ok-share-btn') return false;
+                if (node.classList && (
+                    node.classList.contains('ok-prog') || 
+                    node.classList.contains('ok-close') || 
+                    node.classList.contains('ok-noise') ||
+                    node.classList.contains('ok-nav-l') ||
+                    node.classList.contains('ok-nav-r') ||
+                    node.classList.contains('ok-round-share-btn')
+                )) return false;
+                return true;
+            };
 
             try {
-                await new Promise(r => setTimeout(r, 70)); // let layout settle
-                const dataUrl = await window.htmlToImage.toPng(this.dom.cv, {
+                // Allow layout to stabilize
+                await new Promise(r => setTimeout(r, 60));
+
+                const dataUrl = await window.htmlToImage.toPng(cv, {
                     width: 1080,
                     height: 1920,
                     pixelRatio: 1,
                     cacheBust: true,
-                    skipFonts: false,
+                    skipFonts: true,
+                    filter: filter,
+                    backgroundColor: '#080812'
                 });
+
+                if (!dataUrl || dataUrl.length < 1000) {
+                    throw new Error('Generated image is empty');
+                }
 
                 if (share && navigator.share && navigator.canShare) {
                     try {
@@ -595,15 +640,14 @@
                 console.error('[StoryEngine] export failed:', err);
                 this._showToast('Could not save card. Try again.');
             } finally {
-                // Restore canvas
-                this.dom.cv.style.position = 'absolute';
-                this.dom.cv.style.top = '0';
-                this.dom.cv.style.left = '0';
-                this.dom.cv.style.transform = oldTransform;
-                this.dom.vp.insertBefore(this.dom.cv, this.dom.vp.firstChild);
+                // Restore transform and animations
+                cv.style.transform = oldTransform;
+                animatedEls.forEach(el => {
+                    el.style.animation = '';
+                    el.style.opacity = '';
+                    el.style.transform = '';
+                });
 
-                this.dom.prog.style.visibility = '';
-                this.dom.hdr.style.visibility = '';
                 if (this.dom.shareBtn) this.dom.shareBtn.classList.remove('loading');
                 this.isExporting = false;
                 this.isPaused = false;
@@ -615,7 +659,9 @@
             const a = document.createElement('a');
             a.href = dataUrl;
             a.download = `onlinekotha_wrapped_${this.idx + 1}.png`;
+            document.body.appendChild(a);
             a.click();
+            setTimeout(() => { a.remove(); }, 250);
         }
 
         _showToast(msg) {
