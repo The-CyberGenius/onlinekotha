@@ -229,8 +229,15 @@
         for (const m of rows) {
             if (m.provider_label !== lastProv) {
                 const h = document.createElement('div');
-                h.style.cssText = 'font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.04em;margin-top:10px;padding-bottom:4px;';
-                h.textContent = m.provider_label;
+                h.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-bottom:4px;border-bottom:1px solid var(--border);';
+                let extraBtn = '';
+                if (m.provider_name === 'openrouter') {
+                    extraBtn = `<button class="btn-fetch-openrouter btn-subtle" data-pid="${m.provider_id}" style="font-size:10px;padding:3px 8px;font-weight:700;color:var(--accent);cursor:pointer;">⚡ Fetch OpenRouter Models</button>`;
+                }
+                h.innerHTML = `
+                    <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.04em;">${m.provider_label}</span>
+                    ${extraBtn}
+                `;
                 list.appendChild(h);
                 lastProv = m.provider_label;
             }
@@ -249,6 +256,29 @@
             `;
             list.appendChild(row);
         }
+        list.querySelectorAll('.btn-fetch-openrouter').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pid = btn.dataset.pid;
+                btn.disabled = true;
+                const oldText = btn.textContent;
+                btn.textContent = 'Fetching...';
+                try {
+                    const r = await fetch(`/api/admin/providers/${pid}/fetch-models`, { method: 'POST' });
+                    const res = await r.json();
+                    if (res.ok) {
+                        alert(`Successfully synced! Added ${res.added} new models from OpenRouter.`);
+                        await loadModels();
+                    } else {
+                        alert('Fetch failed: ' + (res.error || 'unknown error'));
+                    }
+                } catch(e) {
+                    alert('Fetch failed: ' + e.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = oldText;
+                }
+            });
+        });
         list.querySelectorAll('.model-toggle').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const enabled = btn.dataset.enabled === '1';
@@ -449,14 +479,22 @@ HARD RULES
             div.style.cssText = 'background:var(--bg-page);border:1px solid var(--border);border-radius:10px;padding:14px;';
             div.innerHTML = `
                 <div style="font-weight:700;color:var(--text-primary);font-size:13px;margin-bottom:10px;">${featureLabels[feature]}</div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-bottom:10px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:10px;margin-bottom:10px;">
                     <div>
                         <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Primary Model</label>
                         <select data-feat="${feature}" data-kind="primary" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">${opts}</select>
                     </div>
                     <div>
-                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Fallback Model</label>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Fallback Model 1</label>
                         <select data-feat="${feature}" data-kind="fallback" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">${opts}</select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Fallback Model 2</label>
+                        <select data-feat="${feature}" data-kind="fallback_2" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">${opts}</select>
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">Fallback Model 3</label>
+                        <select data-feat="${feature}" data-kind="fallback_3" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;background:var(--card-bg);">${opts}</select>
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;">
@@ -473,9 +511,13 @@ HARD RULES
             `;
             wrap.appendChild(div);
             const pri = div.querySelector('[data-kind="primary"]');
-            const fb = div.querySelector('[data-kind="fallback"]');
+            const fb1 = div.querySelector('[data-kind="fallback"]');
+            const fb2 = div.querySelector('[data-kind="fallback_2"]');
+            const fb3 = div.querySelector('[data-kind="fallback_3"]');
             if (r.primary_model_id) pri.value = String(r.primary_model_id);
-            if (r.fallback_model_id) fb.value = String(r.fallback_model_id);
+            if (r.fallback_model_id) fb1.value = String(r.fallback_model_id);
+            if (r.fallback_model_id_2) fb2.value = String(r.fallback_model_id_2);
+            if (r.fallback_model_id_3) fb3.value = String(r.fallback_model_id_3);
         }
     }
 
@@ -489,8 +531,10 @@ HARD RULES
         try {
             const featureLabels = { chat: 'chat', embedding: 'embedding', wrapped: 'wrapped' };
             const promises = Object.keys(featureLabels).map(async (feature) => {
-                const pri = document.querySelector(`select[data-feat="${feature}"][data-kind="primary"]`).value;
-                const fb = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback"]`).value;
+                const pri = document.querySelector(`select[data-feat="${feature}"][data-kind="primary"]`)?.value;
+                const fb1 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback"]`)?.value;
+                const fb2 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback_2"]`)?.value;
+                const fb3 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback_3"]`)?.value;
                 const maxTok = document.querySelector(`input[data-feat="${feature}"][data-param="max_tokens"]`);
                 const temp = document.querySelector(`input[data-feat="${feature}"][data-param="temperature"]`);
                 const sysPrompt = document.querySelector(`textarea[data-feat="${feature}"][data-param="system_prompt"]`);
@@ -500,7 +544,9 @@ HARD RULES
                     headers: { 'content-type': 'application/json' },
                     body: JSON.stringify({
                         primary_model_id: pri ? Number(pri) : null,
-                        fallback_model_id: fb ? Number(fb) : null,
+                        fallback_model_id: fb1 ? Number(fb1) : null,
+                        fallback_model_id_2: fb2 ? Number(fb2) : null,
+                        fallback_model_id_3: fb3 ? Number(fb3) : null,
                         max_tokens: maxTok ? Number(maxTok.value) || 1024 : 1024,
                         temperature: temp ? Number(temp.value) ?? 0.7 : 0.7,
                         system_prompt: sysPrompt ? sysPrompt.value.trim() : null,

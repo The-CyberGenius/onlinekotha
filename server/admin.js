@@ -356,6 +356,45 @@ router.post('/playground', async (req, res) => {
     }
 });
 
+router.post('/providers/:id/fetch-models', async (req, res) => {
+    const id = Number(req.params.id);
+    const row = db.prepare('SELECT * FROM providers WHERE id = ?').get(id);
+    if (!row) return res.status(404).json({ error: 'not found' });
+
+    try {
+        const apiKey = decrypt(row.api_key_encrypted);
+        const baseUrl = row.base_url || 'https://openrouter.ai/api/v1';
+        const r = await fetch(`${baseUrl}/models`, {
+            headers: { Authorization: `Bearer ${apiKey}` },
+        });
+        if (!r.ok) throw new Error(`Provider returned ${r.status}`);
+        const data = await r.json();
+        const models = data.data || [];
+
+        // Candidate models: free or zero prompt pricing
+        const candidates = models.filter(m => m.id.includes(':free') || (m.pricing && m.pricing.prompt === '0'));
+
+        const insertStmt = db.prepare(`
+            INSERT OR IGNORE INTO models (provider_id, model_id, display_name, input_price_per_1m, output_price_per_1m, context_window, enabled)
+            VALUES (?, ?, ?, ?, ?, ?, 1)
+        `);
+
+        let added = 0;
+        for (const m of candidates) {
+            const displayName = m.name || m.id;
+            const inPrice = Number(m.pricing?.prompt || 0) * 1000000;
+            const outPrice = Number(m.pricing?.completion || 0) * 1000000;
+            const info = insertStmt.run(id, m.id, displayName, inPrice, outPrice, m.context_length || null);
+            if (info.changes > 0) added++;
+        }
+
+        res.json({ ok: true, added, total: candidates.length });
+    } catch (err) {
+        console.error('fetch-models error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ---------- Routes (feature → model) ----------
 const FEATURES = ['chat', 'embedding', 'wrapped'];
 
@@ -367,6 +406,8 @@ router.get('/routes', (req, res) => {
             feature: f,
             primary_model_id: null,
             fallback_model_id: null,
+            fallback_model_id_2: null,
+            fallback_model_id_3: null,
             max_tokens: 1024,
             temperature: 0.7,
         };
@@ -377,17 +418,28 @@ router.get('/routes', (req, res) => {
 router.put('/routes/:feature', (req, res) => {
     const feature = req.params.feature;
     if (!FEATURES.includes(feature)) return res.status(400).json({ error: 'bad feature' });
-    const { primary_model_id, fallback_model_id, system_prompt, max_tokens, temperature } = req.body || {};
+    const { primary_model_id, fallback_model_id, fallback_model_id_2, fallback_model_id_3, system_prompt, max_tokens, temperature } = req.body || {};
     db.prepare(
-        `INSERT INTO routes (feature, primary_model_id, fallback_model_id, system_prompt, max_tokens, temperature)
-         VALUES (?, ?, ?, ?, ?, ?)
+        `INSERT INTO routes (feature, primary_model_id, fallback_model_id, fallback_model_id_2, fallback_model_id_3, system_prompt, max_tokens, temperature)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(feature) DO UPDATE SET
            primary_model_id=excluded.primary_model_id,
            fallback_model_id=excluded.fallback_model_id,
+           fallback_model_id_2=excluded.fallback_model_id_2,
+           fallback_model_id_3=excluded.fallback_model_id_3,
            system_prompt=excluded.system_prompt,
            max_tokens=excluded.max_tokens,
            temperature=excluded.temperature`
-    ).run(feature, primary_model_id || null, fallback_model_id || null, system_prompt || null, max_tokens || 1024, temperature ?? 0.7);
+    ).run(
+        feature,
+        primary_model_id || null,
+        fallback_model_id || null,
+        fallback_model_id_2 || null,
+        fallback_model_id_3 || null,
+        system_prompt || null,
+        max_tokens || 1024,
+        temperature ?? 0.7
+    );
     res.json({ ok: true });
 });
 

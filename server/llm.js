@@ -265,13 +265,15 @@ async function callLLM({ feature, messages, systemPrompt, userId, onToken, signa
 
     const primary = getModelWithProvider(route.primary_model_id);
     const fallback = getModelWithProvider(route.fallback_model_id);
-    if (!primary && !fallback) throw new LLMError('No models available for this feature', 'NO_MODEL');
+    const fallback2 = getModelWithProvider(route.fallback_model_id_2);
+    const fallback3 = getModelWithProvider(route.fallback_model_id_3);
+    const attempts = [primary, fallback, fallback2, fallback3].filter(Boolean);
+    if (!attempts.length) throw new LLMError('No models available for this feature', 'NO_MODEL');
 
     const finalSystemPrompt = systemPrompt || route.system_prompt;
     const maxTokens = maxTokensOverride || route.max_tokens || 1024;
     const temperature = route.temperature ?? 0.7;
 
-    const attempts = [primary, fallback].filter(Boolean);
     let lastError = null;
 
     for (const model of attempts) {

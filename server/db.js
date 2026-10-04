@@ -102,11 +102,15 @@ CREATE TABLE IF NOT EXISTS routes (
   feature TEXT PRIMARY KEY,
   primary_model_id INTEGER,
   fallback_model_id INTEGER,
+  fallback_model_id_2 INTEGER,
+  fallback_model_id_3 INTEGER,
   system_prompt TEXT,
   max_tokens INTEGER DEFAULT 1024,
   temperature REAL DEFAULT 0.7,
   FOREIGN KEY (primary_model_id) REFERENCES models(id) ON DELETE SET NULL,
-  FOREIGN KEY (fallback_model_id) REFERENCES models(id) ON DELETE SET NULL
+  FOREIGN KEY (fallback_model_id) REFERENCES models(id) ON DELETE SET NULL,
+  FOREIGN KEY (fallback_model_id_2) REFERENCES models(id) ON DELETE SET NULL,
+  FOREIGN KEY (fallback_model_id_3) REFERENCES models(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS usage_log (
@@ -299,6 +303,8 @@ safeAddColumn('users', 'country', 'TEXT');
 safeAddColumn('users', 'phone', 'TEXT');
 safeAddColumn('users', 'phone_country_code', 'TEXT');
 safeAddColumn('users', 'phone_prompted', 'INTEGER DEFAULT 0');
+safeAddColumn('routes', 'fallback_model_id_2', 'INTEGER');
+safeAddColumn('routes', 'fallback_model_id_3', 'INTEGER');
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 
 // ── Webhook idempotency table ──
