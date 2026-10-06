@@ -621,44 +621,46 @@
             this._showToast('Preparing story...');
 
             try {
-                // To avoid breaking the live UI and to fix iOS/Safari canvas rendering bugs with transforms:
-                // 1. We clone the canvas (ok-cv)
-                // 2. We put it off-screen without any scaling
-                // 3. We run htmlToImage on the pristine full-size clone
                 const clone = this.dom.cv.cloneNode(true);
                 
-                // Clean up the clone for export
+                // Prepare clone off-screen but within paint area
                 clone.style.transform = 'none';
                 clone.style.position = 'fixed';
-                clone.style.left = '-9999px';
+                clone.style.left = '0';
                 clone.style.top = '0';
-                clone.style.zIndex = '-999';
+                clone.style.zIndex = '-9999';
                 
-                // Remove UI elements from clone
-                const removeSelectors = ['.ok-prog', '.ok-noise', '.ok-vp-close-btn', '.ok-round-share-btn'];
-                removeSelectors.forEach(sel => {
-                    const el = clone.querySelector(sel);
-                    if (el) el.remove();
-                });
-                
-                // Freeze animations on clone
-                const animatedEls = clone.querySelectorAll('.ok-anim, .ok-d1, .ok-d2, .ok-d3');
-                animatedEls.forEach(el => {
-                    el.style.animation = 'none';
-                    el.style.opacity = '1';
-                });
-
                 document.body.appendChild(clone);
 
-                // Add a small delay to ensure DOM paints the clone (crucial for Safari)
-                await new Promise(r => setTimeout(r, 100));
+                // Remove UI elements and problematic blur filters (html-to-image fails on CSS blur)
+                const removeEls = clone.querySelectorAll('.ok-prog, .ok-noise, .ok-vp-close-btn, .ok-round-share-btn, .ok-orb');
+                removeEls.forEach(el => el.remove());
+                
+                // Freeze animations and fix glassmorphism (causes black screen)
+                const allEls = clone.querySelectorAll('*');
+                allEls.forEach(el => {
+                    // Freeze animations explicitly
+                    if (el.classList.contains('ok-anim') || el.classList.contains('ok-huge')) {
+                        el.style.animation = 'none';
+                        el.style.opacity = '1';
+                        el.style.transform = 'none';
+                    }
+                    // Strip backdrop-filter, use opaque fallback
+                    el.style.backdropFilter = 'none';
+                    el.style.webkitBackdropFilter = 'none';
+                    if (el.classList.contains('ok-glass-card')) {
+                        el.style.backgroundColor = 'rgba(30, 30, 45, 0.95)';
+                    }
+                });
+
+                // Add a small delay to ensure DOM paints the clone
+                await new Promise(r => setTimeout(r, 250));
 
                 const dataUrl = await window.htmlToImage.toPng(clone, {
                     width: 1080,
                     height: 1920,
                     pixelRatio: 1,
                     cacheBust: true,
-                    skipFonts: true,
                     backgroundColor: '#080812'
                 });
 
