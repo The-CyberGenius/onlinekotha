@@ -340,7 +340,12 @@
         const chunk = typeQueue.slice(0, Math.random() > 0.7 ? 3 : 1);
         typeQueue = typeQueue.slice(chunk.length);
         typeTarget.textContent += chunk;
-        if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
+        if (typeScrollArea) {
+            const isNearBottom = typeScrollArea.scrollHeight - typeScrollArea.scrollTop - typeScrollArea.clientHeight < 150;
+            if (isNearBottom) {
+                typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
+            }
+        }
         typeTimer = setTimeout(drainQueue, 15 + Math.random() * 15);
     }
 
@@ -351,7 +356,10 @@
 
     function cleanupTypewriter() {
         if (typeCursor) { typeCursor.remove(); typeCursor = null; }
-        if (typeScrollArea) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
+        if (typeScrollArea) {
+            const isNearBottom = typeScrollArea.scrollHeight - typeScrollArea.scrollTop - typeScrollArea.clientHeight < 150;
+            if (isNearBottom) typeScrollArea.scrollTop = typeScrollArea.scrollHeight;
+        }
         typeTarget = null;
         typeScrollArea = null;
         updateSendBtn();

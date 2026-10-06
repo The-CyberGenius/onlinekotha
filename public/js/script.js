@@ -727,15 +727,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (closestDate) {
                         // Check if AI section is visible and override closestDate
                         const aiContainer = document.getElementById('ai-chat-container');
-                        if (aiContainer && aiContainer.innerHTML.trim() !== '') {
-                            const aiRect = aiContainer.getBoundingClientRect();
-                            const scrollRect = scrollArea.getBoundingClientRect();
-                            if (aiRect.top < scrollRect.bottom - 50) {
-                                const aiSeps = Array.from(aiContainer.querySelectorAll('.ai-date-separator'));
+                        if (aiContainer && aiContainer.childElementCount > 0) {
+                            const aiTopOffset = aiContainer.offsetTop;
+                            const scrollPos = scrollArea.scrollTop + scrollArea.clientHeight;
+                            if (aiTopOffset < scrollPos - 50) {
+                                const aiSeps = aiContainer.getElementsByClassName('ai-date-separator');
                                 if (aiSeps.length > 0) {
                                     let closestSep = aiSeps[aiSeps.length - 1];
+                                    const threshold = scrollArea.scrollTop + 50;
                                     for (let i = 0; i < aiSeps.length; i++) {
-                                        if (aiSeps[i].getBoundingClientRect().top > scrollRect.top + 50) {
+                                        // offsetTop is much faster than getBoundingClientRect
+                                        if (aiSeps[i].offsetTop > threshold) {
                                             closestSep = i > 0 ? aiSeps[i - 1] : aiSeps[i];
                                             break;
                                         }
@@ -1105,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     participantContainer.classList.remove('hidden');
                     
                     const headerRow = document.createElement('div');
-                    headerRow.className = 'flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition';
+                    headerRow.className = 'flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition';
                     
                     const leftCol = document.createElement('div');
                     leftCol.className = 'flex items-center gap-1.5';
@@ -1185,7 +1187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     senders.slice(0, 4).forEach(([sName, count]) => {
                         if (!sName) return;
                         const btn = document.createElement('button');
-                        const defaultClass = 'text-[10px] bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700/50 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
+                        const defaultClass = 'text-[10px] bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700/50 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         const activeClass = 'text-[10px] bg-indigo-600 border border-indigo-600 rounded-full px-2 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         
                         btn.className = defaultClass;

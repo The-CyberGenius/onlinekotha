@@ -1771,6 +1771,65 @@
 
             .ambient-aurora { display: none; }
         }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            align-items: stretch;
+        }
+        .pricing-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+        .pricing-card-free:hover {
+            border-color: var(--border-strong);
+        }
+        
+        @media (max-width: 768px) {
+            .pricing-grid {
+                gap: 20px;
+                grid-template-columns: 1fr;
+                padding: 0 16px;
+            }
+            .pricing-card {
+                padding: 24px 20px;
+                border-radius: 24px;
+            }
+            .pricing-card h3 {
+                font-size: 1.3rem !important;
+                margin-bottom: 4px !important;
+            }
+            .pricing-card p {
+                font-size: 13px !important;
+                margin-bottom: 16px !important;
+            }
+            .pricing-card .price {
+                font-size: 2.2rem !important;
+                margin-bottom: 24px !important;
+            }
+            .pricing-card ul {
+                margin-bottom: 24px !important;
+            }
+            .pricing-card ul li {
+                font-size: 14px !important;
+                margin-bottom: 12px !important;
+            }
+            .pricing-card .btn {
+                padding: 12px !important;
+                font-size: 14px !important;
+                border-radius: 12px !important;
+            }
+        }
     </style>
     <script src="/js/analytics.js" async></script>
 </head>
@@ -2248,16 +2307,13 @@
                 <h2 class="h2" style="font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em;">
                     Start for free. Upgrade when you need to.</h2>
             </div>
-            <div
-                style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:30px;align-items:stretch;">
+            <div class="pricing-grid">
                 <!-- Free Plan -->
-                <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.05);"
-                    onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--border-strong)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border)';">
+                <div class="pricing-card pricing-card-free">
                     <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Free</h3>
                     <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">
                         Everything you need to begin preserving memories.</p>
-                    <div
+                    <div class="price"
                         style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
                         $0
                     </div>
@@ -2305,13 +2361,11 @@
                         onmouseout="this.style.background='transparent'">Try Live Demo — Free</a>
                 </div>
                 <!-- Pro Plan (Monthly) -->
-                <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.05);"
-                    onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--accent)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border)';">
+                <div class="pricing-card">
                     <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Pro</h3>
                     <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">For
                         limitless AI conversations and deeper connections.</p>
-                    <div
+                    <div class="price"
                         style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
                         $6<span
                             style="font-size: 1rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0; margin-left: 4px;">/mo</span>
@@ -2361,8 +2415,8 @@
                     </a>
                 </div>
                 <!-- Pro Plan (Lifetime) -->
-                <div
-                    style="background: var(--card-bg); border: 2px solid var(--accent); border-radius: 32px; padding: 40px 30px; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); transform: scale(1.02); z-index: 2;">
+                <div class="pricing-card"
+                    style="border: 2px solid var(--accent); position: relative; box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); transform: scale(1.02); z-index: 2;">
                     <div
                         style="position: absolute; top: 0; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, rgba(99,102,241,1), transparent);">
                     </div>
@@ -2375,7 +2429,7 @@
                     </div>
                     <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">Pay
                         once. Keep it forever. No subscriptions, no hidden fees.</p>
-                    <div
+                    <div class="price"
                         style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
                         $49<span
                             style="font-size: 1rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0; margin-left: 4px;">/lifetime</span>
