@@ -80,7 +80,7 @@
     <!-- macOS Window Frame -->
     <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-5xl md:max-h-[85vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-[#1a1f29] transition-transform duration-300 ease-out-expo">
         <!-- Title bar with traffic lights (desktop only - Draggable & Expandable) -->
-        <div id="mac-titlebar" class="hidden md:flex h-10 bg-[#2d2d32] dark:bg-[#1a1f29] items-center px-4 shrink-0 relative z-[200] select-none border-b border-black/20" title="Double click to toggle expand / Drag to move">
+        <div id="mac-titlebar" class="hidden md:flex h-10 bg-gray-100 dark:bg-[#1a1f29] items-center px-4 shrink-0 relative z-[200] select-none border-b border-black/10 dark:border-black/20" title="Double click to toggle expand / Drag to move">
             <div class="flex items-center gap-2" id="mac-traffic-lights">
                 <button id="mac-close" class="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-90 transition border border-black/10 relative group" title="Close" onclick="window.location.href='/'">
                     <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#4a0002]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -1542,14 +1542,12 @@
             let startX, startY;
             let currentTranslateX = 0, currentTranslateY = 0;
             let tempTranslateX = 0, tempTranslateY = 0;
-            let baseTop = 0;
 
             titlebar.addEventListener('mousedown', (e) => {
                 if (e.target.closest('#mac-traffic-lights') || frame.classList.contains('mac-expanded')) return;
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
-                baseTop = frame.getBoundingClientRect().top - currentTranslateY;
                 frame.style.transition = 'none'; // Disable transition for 1:1 smooth drag
             });
 
@@ -1561,9 +1559,9 @@
                 tempTranslateX = currentTranslateX + dx;
                 let newTranslateY = currentTranslateY + dy;
                 
-                // Prevent dragging past the top of the screen
-                if (baseTop + newTranslateY < 0) {
-                    newTranslateY = -baseTop;
+                // Prevent dragging UP from its initial centered position
+                if (newTranslateY < 0) {
+                    newTranslateY = 0;
                 }
                 tempTranslateY = newTranslateY;
                 
