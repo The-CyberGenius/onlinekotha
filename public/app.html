@@ -1542,12 +1542,17 @@
             let startX, startY;
             let currentTranslateX = 0, currentTranslateY = 0;
             let tempTranslateX = 0, tempTranslateY = 0;
+            let baseLeft = 0, baseTop = 0, frameW = 0;
 
             titlebar.addEventListener('mousedown', (e) => {
                 if (e.target.closest('#mac-traffic-lights') || frame.classList.contains('mac-expanded')) return;
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
+                const rect = frame.getBoundingClientRect();
+                baseLeft = rect.left - currentTranslateX;
+                baseTop = rect.top - currentTranslateY;
+                frameW = rect.width;
                 frame.style.transition = 'none'; // Disable transition for 1:1 smooth drag
             });
 
@@ -1556,13 +1561,27 @@
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
                 
-                tempTranslateX = currentTranslateX + dx;
+                let newTranslateX = currentTranslateX + dx;
                 let newTranslateY = currentTranslateY + dy;
                 
-                // Prevent dragging UP from its initial centered position
+                // --- X Constraints: Keep at least 100px of the app visible on left/right edges ---
+                const minTranslateX = 100 - frameW - baseLeft;
+                const maxTranslateX = window.innerWidth - 100 - baseLeft;
+                if (newTranslateX < minTranslateX) newTranslateX = minTranslateX;
+                if (newTranslateX > maxTranslateX) newTranslateX = maxTranslateX;
+
+                // --- Y Constraints: ---
+                // 1. Prevent dragging UP from its initial centered position (newTranslateY >= 0)
+                // 2. Prevent dragging DOWN completely off-screen (keep titlebar reachable, ~40px)
+                const maxTranslateY = window.innerHeight - 40 - baseTop;
                 if (newTranslateY < 0) {
                     newTranslateY = 0;
                 }
+                if (newTranslateY > maxTranslateY) {
+                    newTranslateY = maxTranslateY;
+                }
+                
+                tempTranslateX = newTranslateX;
                 tempTranslateY = newTranslateY;
                 
                 frame.style.transform = `translate(${tempTranslateX}px, ${tempTranslateY}px)`;
