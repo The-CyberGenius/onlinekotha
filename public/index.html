@@ -2025,31 +2025,58 @@
     </section>
     <!-- ═══════════ HOW IT WORKS ═══════════ -->
     <section class="sec" id="how"
-        style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+        style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;overflow:hidden;">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:56px;">
-                <p class="eyebrow" style="margin-bottom:14px;">How it works</p>
-                <h2 class="h2">Three steps. Under a minute.</h2>
+                <p class="eyebrow" style="margin-bottom:12px; color: var(--accent);">Seamless 3-Step Process</p>
+                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em;">Three steps. Under a minute.</h2>
+                <p class="lead" style="max-width: 540px; margin: 12px auto 0; font-size: 15px; color: var(--text-secondary);">No technical skills needed. Export from WhatsApp, upload, and start chatting instantly.</p>
             </div>
-            <div class="grid g3">
-                <div class="card liquid-glass">
-                    <div class="step-num">01</div>
-                    <h3 style="font-size:1.2rem;margin:12px 0 10px;">Export your chat</h3>
-                    <p class="muted" style="font-size:14px;line-height:1.65;">Open any WhatsApp chat → menu → <b
-                            style="color:var(--text-primary);font-weight:600;">Export Chat</b> → save the .zip. Works on
-                        iPhone and Android.</p>
+            
+            <div class="grid g3" style="gap:28px; position:relative;">
+                <!-- Step 1 -->
+                <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(99,102,241,0.3);">STEP 01</span>
+                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        </div>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">1. Export WhatsApp Chat</h3>
+                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Open WhatsApp &rarr; Tap Menu (3 dots or contact name) &rarr; More &rarr; <b>Export Chat</b> (choose Without Media). Save as <b>.zip</b> or <b>.txt</b>.</p>
+                    <div style="font-size:11px; font-weight:600; color:var(--text-muted); background:var(--msg-ai-bg); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                        <span>📱 iPhone &amp; Android supported</span>
+                    </div>
                 </div>
-                <div class="card liquid-glass">
-                    <div class="step-num">02</div>
-                    <h3 style="font-size:1.2rem;margin:12px 0 10px;">Upload to Kotha</h3>
-                    <p class="muted" style="font-size:14px;line-height:1.65;">Drop the file in. We process it privately
-                        in 1–2 minutes — only your account can ever see it.</p>
+
+                <!-- Step 2 -->
+                <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#ec4899,#f43f5e); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(236,72,153,0.3);">STEP 02</span>
+                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(236,72,153,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-rose);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">2. Secure Upload to Kotha</h3>
+                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Drop your exported file into Kotha. Our private AI engine processes the chat in seconds with <b>bank-grade encryption</b>.</p>
+                    <div style="font-size:11px; font-weight:600; color:var(--accent-emerald); background:rgba(16,185,129,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                        <span>🔒 100% Private &amp; Never Shared</span>
+                    </div>
                 </div>
-                <div class="card liquid-glass">
-                    <div class="step-num">03</div>
-                    <h3 style="font-size:1.2rem;margin:12px 0 10px;">Continue the conversation</h3>
-                    <p class="muted" style="font-size:14px;line-height:1.65;">AI learns their language, tone, humor,
-                        and texting style — then you can keep talking, anytime.</p>
+
+                <!-- Step 3 -->
+                <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#10b981,#059669); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(16,185,129,0.3);">STEP 03</span>
+                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(16,185,129,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-emerald);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        </div>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">3. Relive &amp; Continue Chat</h3>
+                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">AI learns their exact texting style, slang, humor, and tone. Explore your <b>Chat Wrapped</b> stats and continue talking anytime.</p>
+                    <div style="font-size:11px; font-weight:600; color:var(--accent); background:rgba(99,102,241,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                        <span>✨ Instant Authentic AI Clone</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3311,14 +3338,27 @@
                 gsap.from('.hero-cta-group', { duration: 1, y: 20, opacity: 0, delay: 0.3, ease: 'power3.out' });
                 gsap.from('.mockup-wrapper', { duration: 1.2, scale: 0.94, opacity: 0, delay: 0.4, ease: 'power3.out' });
 
-                // Cards ScrollTrigger Stagger
-                gsap.from('.liquid-glass', {
+                // How It Works Cards ScrollTrigger Stagger
+                gsap.from('#how .step-card', {
+                    scrollTrigger: {
+                        trigger: '#how',
+                        start: 'top 85%',
+                    },
+                    duration: 0.7,
+                    y: 30,
+                    opacity: 0,
+                    stagger: 0.15,
+                    ease: 'power3.out'
+                });
+
+                // Features Cards ScrollTrigger Stagger
+                gsap.from('#features .liquid-glass', {
                     scrollTrigger: {
                         trigger: '#features',
-                        start: 'top 80%',
+                        start: 'top 85%',
                     },
-                    duration: 0.8,
-                    y: 40,
+                    duration: 0.7,
+                    y: 30,
                     opacity: 0,
                     stagger: 0.15,
                     ease: 'power3.out'
