@@ -303,13 +303,13 @@
         body {
             background: var(--bg);
             color: var(--text-primary);
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
         }
 
         h1, h2, h3, .display, .hero-title-main, .h2 {
-            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
+            font-family: 'Inter', sans-serif !important; letter-spacing: -0.02em;
         }
 
         a {
@@ -1852,9 +1852,9 @@
             </div>
             
             <div class="nav-links" style="display:flex; align-items:center; gap:24px; font-weight:600; font-size:14px; margin-left:24px; margin-right:auto;">
-                <a href="#how" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">How it works</a>
-                <a href="#features" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Features</a>
-                <a href="#trust" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Privacy</a>
+                <a href="/#how" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">How it works</a>
+                <a href="/#features" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Features</a>
+                <a href="/#trust" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Privacy</a>
                 <a href="/pricing.html" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Pricing</a>
             </div>
 
@@ -1914,7 +1914,42 @@
             <h1 class="display rise d1 hero-title-main"
                 style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.08;">
                 <span class="hero-title-prefix">Relive Your Best</span><br>
-                <span style="color:var(--accent);">WhatsApp Memories.</span>
+                <span style="color:var(--accent); display: inline-flex; align-items: baseline; gap: 8px;">
+                    <span id="platform-rotator" style="display:inline-block; transition: opacity 0.4s ease, transform 0.4s ease; transform: translateY(0); opacity: 1;">WhatsApp</span>
+                    <span>Memories.</span>
+                </span>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const words = ['WhatsApp', 'Telegram', 'Instagram', 'iMessage'];
+                        let currentIndex = 0;
+                        const rotator = document.getElementById('platform-rotator');
+                        if (!rotator) return;
+                        
+                        setInterval(() => {
+                            // Slide out up
+                            rotator.style.opacity = '0';
+                            rotator.style.transform = 'translateY(-10px)';
+                            
+                            setTimeout(() => {
+                                currentIndex = (currentIndex + 1) % words.length;
+                                rotator.textContent = words[currentIndex];
+                                
+                                // Reset position to bottom instantly, then slide in
+                                rotator.style.transition = 'none';
+                                rotator.style.transform = 'translateY(10px)';
+                                
+                                // Force reflow
+                                void rotator.offsetHeight;
+                                
+                                // Slide in
+                                rotator.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                                rotator.style.opacity = '1';
+                                rotator.style.transform = 'translateY(0)';
+                            }, 400); // match transition duration
+                        }, 3000); // 3 second interval
+                    });
+                </script>
             </h1>
             <p class="lead rise d2" style="font-size: clamp(16px, 2vw, 21px); color: var(--text-secondary); max-width: 620px; margin: 0 auto 40px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
                 Import your exported chat files to see beautiful story cards of your past, and talk to a private AI that perfectly remembers your inside jokes.
@@ -1928,7 +1963,7 @@
                         <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo" style="border-radius:999px;">
+                <a href="/#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo" style="border-radius:999px;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3" />
@@ -2115,8 +2150,8 @@
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                         </div>
                     </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">1. Export WhatsApp Chat</h3>
-                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Open WhatsApp &rarr; Tap Menu (3 dots or contact name) &rarr; More &rarr; <b>Export Chat</b> (choose Without Media). Save as <b>.zip</b> or <b>.txt</b>.</p>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">1. Export Your Chat</h3>
+                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Open your app &rarr; Tap Menu (3 dots or contact name) &rarr; More &rarr; <b>Export Chat</b> (choose Without Media). Save as <b>.zip</b> or <b>.txt</b>.</p>
                     <div style="font-size:11px; font-weight:600; color:var(--text-muted); background:var(--msg-ai-bg); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
                         <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>iPhone &amp; Android supported</span>
                     </div>
@@ -2383,8 +2418,8 @@
                 </div>
                 <div>
                     <p class="foot-head">Product</p>
-                    <a href="#how" class="foot-link">How it works</a><br>
-                    <a href="#demo-story-mockup" class="foot-link">Try it live</a><br>
+                    <a href="/#how" class="foot-link">How it works</a><br>
+                    <a href="/#demo-story-mockup" class="foot-link">Try it live</a><br>
                     <a href="/pricing.html" class="foot-link">Pricing</a><br>
                     <a href="/app.html" class="foot-link">Open App</a><br>
                     <a href="/paper.html" class="foot-link">Documentation</a><br>
