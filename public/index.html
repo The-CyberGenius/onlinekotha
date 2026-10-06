@@ -1714,18 +1714,36 @@
             border: 1px solid var(--border);
         }
 
-        @media (max-width: 720px) {
+        @media (max-width: 768px) {
             .foot-grid {
                 grid-template-columns: 1fr 1fr !important;
                 gap: 30px !important;
             }
 
             .hero {
-                padding-top: 120px;
+                padding: 100px 0 20px !important;
+            }
+
+            .hero-centered {
+                min-height: calc(100vh - 120px);
+                justify-content: center;
+            }
+
+            .mockup-wrapper {
+                margin-top: 90px !important;
+                padding-top: 20px;
+            }
+
+            #nav-user-name {
+                max-width: 75px !important;
+            }
+
+            #nav-user-profile:not(.hidden) ~ #nav-cta {
+                display: none !important;
             }
 
             .sec {
-                padding: 60px 0;
+                padding: 50px 0;
             }
         }
 
