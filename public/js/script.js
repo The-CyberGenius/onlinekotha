@@ -3054,8 +3054,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.kothaToggleTheme = toggleTheme;
 
+    updateDmIcon(); // Set initial icon unconditionally
     if (darkBtn) {
-        updateDmIcon(); // Set initial icon
         darkBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
