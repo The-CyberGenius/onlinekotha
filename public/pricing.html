@@ -16,7 +16,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kotha — WhatsApp Chat AI | Chat with Ex, Loved Ones & AI Personality Simulator</title>
+    <title>Pricing — Kotha</title>
     <meta name="description"
         content="Upload any WhatsApp chat export (.zip/.txt) and chat with an AI simulation of your ex-partner, girlfriend, boyfriend, or loved ones. Recreate their exact texting style, inside jokes, and memories with Kotha's private AI personality simulator. Free to try worldwide.">
     <meta name="keywords"
@@ -1904,455 +1904,207 @@
             </div>
         </div>
     </nav>
-    <script>
-        // nav-login uses inline-flex when shown; reveal it once styles are ready
-        document.getElementById('nav-login').style.display = 'inline-flex';
-    </script>
-    <!-- ═══════════ HERO ═══════════ -->
-    <section class="hero sec">
-        <div class="wrap hero-centered">
-            <h1 class="display rise d1 hero-title-main"
-                style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.08;">
-                <span class="hero-title-prefix">Relive Your Best</span><br>
-                <span style="color:var(--accent);">WhatsApp Memories.</span>
-            </h1>
-            <p class="lead rise d2" style="font-size: clamp(16px, 2vw, 21px); color: var(--text-secondary); max-width: 620px; margin: 0 auto 40px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
-                Import your exported chat files to see beautiful story cards of your past, and talk to a private AI that perfectly remembers your inside jokes.
-            </p>
-            <!-- Dual High-Converting CTAs -->
-            <div class="hero-cta-group rise d3">
-                <a href="/app.html?action=import" id="hero-cta" class="btn cta-primary hero-btn-main">
-                    <span>Try OnlineKotha Free</span>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round">
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <a href="#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo" style="border-radius:999px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                    <span>See it in action</span>
-                </a>
+    <!-- ═══════════ PRICING ═══════════ -->
+    <section class="sec" id="pricing" style="padding-top: 120px;" style="padding: 100px 0; position: relative; overflow: hidden;">
+        <div
+            style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 800px; background: radial-gradient(circle, rgba(99,102,241,0.05) 0%, rgba(0,0,0,0) 70%); pointer-events: none; z-index: 0;">
+        </div>
+        <div class="narrow" style="position: relative; z-index: 1; max-width: 1000px;">
+            <div style="text-align:center;margin-bottom:60px;">
+                <p class="eyebrow" style="margin-bottom:14px; color: var(--accent);">Simple pricing</p>
+                <h2 class="h2" style="font-size: clamp(2.2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em;">
+                    Start for free. Upgrade when you need to.</h2>
             </div>
-            <div class="hero-trust-chips rise d3">
-                <span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    Instant free preview · No sign up required
-                </span>
-                <span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    Encrypted &amp; private
-                </span>
-            </div>
-
-            <!-- Interactive Virtual Phone Mockup (Chat Wrapped Story Cards) -->
-            <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
-                <div class="phone-mockup">
-                    
-                    
-                    <div class="phone-screen">
-                        <!-- iPhone Dynamic Island -->
-                        <div class="dynamic-island">
-                            <div class="dynamic-island-lens"></div>
-                        </div>
-
-                        <!-- Story Progress Indicators -->
-                        <div class="story-progress-container" id="story-progress">
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                        </div>
-
-                        <!-- Share Button -->
-                        <div class="story-share-btn" id="story-share" title="Share your story">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="18" cy="5" r="3"></circle>
-                                <circle cx="6" cy="12" r="3"></circle>
-                                <circle cx="18" cy="19" r="3"></circle>
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            <div class="pricing-grid">
+                <!-- Free Plan -->
+                <div class="pricing-card pricing-card-free">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Free</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">
+                        Everything you need to begin preserving memories.</p>
+                    <div class="price"
+                        style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
+                        $0
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0 0 40px 0; flex: 1;">
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--accent); flex-shrink: 0; margin-top: 2px;">
+                                <polyline points="20 6 9 17 4 12" />
                             </svg>
-                        </div>
-
-                        <!-- Story Slides Container -->
-                        <div class="story-container" id="story-carousel">
-                            <!-- Slide 1: Intro -->
-                            <div class="story-card story-bg-1">
-                                <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
-                                <h1 class="story-title">Your Chat, Wrapped.</h1>
-                                <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations reveal about you &amp; them.</p>
-                                <span style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap to flip 👉</span>
-                            </div>
-
-                            <!-- Slide 2: Stats -->
-                            <div class="story-card story-bg-2">
-                                <h2 class="story-subtitle">The Numbers</h2>
-                                <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px;">12,842</div>
-                                <p class="story-text">messages sent over</p>
-                                <div class="story-highlight">574 Days</div>
-                            </div>
-
-                            <!-- Slide 3: Vibe Check -->
-                            <div class="story-card story-bg-3">
-                                <h2 class="story-subtitle">Vibe Check</h2>
-                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🎢</div>
-                                <div class="story-highlight" style="width: 85%;">80% Chaos 😂</div>
-                                <div class="story-highlight" style="width: 85%;">20% Wholesome ❤️</div>
-                            </div>
-
-                            <!-- Slide 4: Top Words -->
-                            <div class="story-card story-bg-4">
-                                <h2 class="story-subtitle">Most Used Words</h2>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1 literally 💬</div>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀</div>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂</div>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 anyway ✨</div>
-                            </div>
-
-                            <!-- Slide 5: Time Patterns -->
-                            <div class="story-card story-bg-5">
-                                <h2 class="story-subtitle">Time Patterns</h2>
-                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
-                                <h1 class="story-title" style="font-size: 2rem;">Night Owls</h1>
-                                <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14 AM</b></p>
-                            </div>
-
-                            <!-- Slide 6: AI Conversation -->
-                            <div class="story-card story-bg-6">
-                                <h2 class="story-subtitle">The Magic</h2>
-                                <h1 class="story-title" style="font-size: 1.85rem;">AI Clone Ready</h1>
-                                <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact words, humor, tone &amp; texting style.</p>
-                                <div class="story-highlight" style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
-                                    💬 "Wait, are you serious right now? 😂"
-                                </div>
-                            </div>
-
-                            <!-- Slide 7: Outro -->
-                            <div class="story-card story-bg-7">
-                                <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
-                                <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat &amp; relive your memories securely.</p>
-                                <a href="/app.html?action=import" id="story-cta-btn" class="btn" style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                                    <span>Try Free Now</span>
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                            <span>Up to 5 chat imports</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--accent); flex-shrink: 0; margin-top: 2px;">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span>Beautiful chat viewer &amp; search</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--accent); flex-shrink: 0; margin-top: 2px;">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span>On This Day memories</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-muted); font-size: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--accent); flex-shrink: 0; margin-top: 2px;">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span>5 AI messages / day</span>
+                        </li>
+                    </ul>
+                    <a href="/app.html?action=import" class="btn"
+                        style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
+                        onmouseover="this.style.background='var(--msg-ai-bg)'"
+                        onmouseout="this.style.background='transparent'">Try Live Demo — Free</a>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                    <span>Tap left or right to browse stories</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                <!-- Pro Plan (Monthly) -->
+                <div class="pricing-card">
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">Pro</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">For
+                        limitless AI conversations and deeper connections.</p>
+                    <div class="price"
+                        style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
+                        $6<span
+                            style="font-size: 1rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0; margin-left: 4px;">/mo</span>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0 0 40px 0; flex: 1;">
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div
+                                style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <span>Everything in Free</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div
+                                style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <span style="font-weight: 500; color: var(--text-primary);">Unlimited AI
+                                conversations</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div
+                                style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <span>Save Unlimited Chats</span>
+                        </li>
+                    </ul>
+                    <a href="/login.html?next=%2Fapp.html%3Fcheckout%3Dpro_monthly" class="btn checkout-btn"
+                        data-plan="pro_monthly"
+                        style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
+                        onmouseover="this.style.background='var(--msg-ai-bg)'"
+                        onmouseout="this.style.background='transparent'">
+                        Start Monthly Plan
+                    </a>
+                </div>
+                <!-- Pro Plan (Lifetime) -->
+                <div class="pricing-card"
+                    style="border: 2px solid var(--accent); position: relative; box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); transform: scale(1.02); z-index: 2;">
+                    <div
+                        style="position: absolute; top: 0; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, rgba(99,102,241,1), transparent);">
+                    </div>
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">Lifetime Pro</h3>
+                        <span
+                            style="background: var(--msg-ai-bg); border: 1px solid rgba(99,102,241,0.3); color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 100px;">Pay
+                            Once</span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">Pay
+                        once. Keep it forever. No subscriptions, no hidden fees.</p>
+                    <div class="price"
+                        style="font-size: 3rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 32px; display: flex; align-items: baseline;">
+                        $49<span
+                            style="font-size: 1rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0; margin-left: 4px;">/lifetime</span>
+                    </div>
+                    <ul style="list-style: none; padding: 0; margin: 0 0 40px 0; flex: 1;">
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div
+                                style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <span>Everything in Free</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div
+                                style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <span style="font-weight: 500; color: var(--text-primary);">Unlimited AI
+                                conversations</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div
+                                style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <span>Save Unlimited Chats</span>
+                        </li>
+                        <li
+                            style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; color: var(--text-secondary); font-size: 15px;">
+                            <div
+                                style="margin-top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <span>Priority Support</span>
+                        </li>
+                    </ul>
+                    <a href="/login.html?next=%2Fapp.html%3Fcheckout%3Dpro_lifetime" id="btn-get-pro"
+                        class="btn checkout-btn" data-plan="pro_lifetime"
+                        style="width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(to right, #4f46e5, #9333ea); color: #fff; border: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(99,102,241,0.4); transition: all 0.2s; text-align: center;"
+                        onmouseover="this.style.boxShadow='0 6px 20px rgba(99,102,241,0.6)'; this.style.transform='translateY(-2px)';"
+                        onmouseout="this.style.boxShadow='0 4px 15px rgba(99,102,241,0.4)'; this.style.transform='translateY(0)';">
+                        Get Lifetime Deal
+                    </a>
+                    <p style="text-align:center; margin-top: 16px;">
+                        <span style="font-size: 12px; color: var(--text-muted);">Pay once. Keep it forever.</span>
+                    </p>
                 </div>
             </div>
         </div>
     </section>
-    
-    <!-- ═══════════ WHAT IS KOTHA ═══════════ -->
-    <section class="sec" id="what-is-kotha">
-        <div class="wrap">
-            <div style="text-align:center;margin-bottom:56px;">
-                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em;">Your Personal Time Machine.</h2>
-                <p class="lead" style="max-width: 640px; margin: 16px auto 0; font-size: 16px; color: var(--text-secondary);">
-                    OnlineKotha is a private vault for your WhatsApp memories. We don't connect to your WhatsApp account or send messages to anyone. You simply upload your exported chat files to read them in a beautiful interface, generate Spotify-style "Chat Wrapped" stories, and chat with an AI that mimics your past conversations.
-                </p>
-            </div>
-            <div class="grid g3" style="gap:28px;">
-                <div class="card liquid-glass" style="padding: 32px 28px; text-align: left;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #6366f1; border: 1px solid rgba(99,102,241,0.15);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                    </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">Chat Wrapped</h3>
-                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Turn thousands of messages into beautiful, shareable story cards. See who texted more, your top emojis, and your most active late-night chats.</p>
-                </div>
-                <div class="card liquid-glass" style="padding: 32px 28px; text-align: left;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(236,72,153,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #ec4899; border: 1px solid rgba(236,72,153,0.15);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg>
-                    </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">AI Memory Clone</h3>
-                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Our AI reads your uploaded chat and learns their exact vocabulary, inside jokes, and texting habits so you can experience their vibe again.</p>
-                </div>
-                <div class="card liquid-glass" style="padding: 32px 28px; text-align: left;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #10b981; border: 1px solid rgba(16,185,129,0.15);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">100% Private Vault</h3>
-                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Your chats are processed securely. We don't send SMS or WhatsApp messages. Everything happens in your private browser session.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- ═══════════ HOW IT WORKS ═══════════ -->
-    <section class="sec" id="how"
-        style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;overflow:hidden;">
-        <div class="wrap">
-            <div style="text-align:center;margin-bottom:56px;">
-                
-                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em;">Three steps. Under a minute.</h2>
-                <p class="lead" style="max-width: 540px; margin: 12px auto 0; font-size: 15px; color: var(--text-secondary);">No technical skills needed. Export from WhatsApp, upload, and start chatting instantly.</p>
-            </div>
-            
-            <div class="grid g3" style="gap:28px; position:relative;">
-                <!-- Step 1 -->
-                <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(99,102,241,0.3);">STEP 01</span>
-                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent);">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                        </div>
-                    </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">1. Export WhatsApp Chat</h3>
-                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Open WhatsApp &rarr; Tap Menu (3 dots or contact name) &rarr; More &rarr; <b>Export Chat</b> (choose Without Media). Save as <b>.zip</b> or <b>.txt</b>.</p>
-                    <div style="font-size:11px; font-weight:600; color:var(--text-muted); background:var(--msg-ai-bg); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>iPhone &amp; Android supported</span>
-                    </div>
-                </div>
-
-                <!-- Step 2 -->
-                <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#ec4899,#f43f5e); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(236,72,153,0.3);">STEP 02</span>
-                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(236,72,153,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-rose);">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        </div>
-                    </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">2. Secure Upload to Kotha</h3>
-                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Drop your exported file into Kotha. Our private AI engine processes the chat in seconds with <b>bank-grade encryption</b>.</p>
-                    <div style="font-size:11px; font-weight:600; color:var(--accent-emerald); background:rgba(16,185,129,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>100% Private &amp; Never Shared</span>
-                    </div>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#10b981,#059669); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(16,185,129,0.3);">STEP 03</span>
-                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(16,185,129,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-emerald);">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        </div>
-                    </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">3. Relive &amp; Continue Chat</h3>
-                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Read your old chats in a beautiful interface, view your <b>Chat Wrapped</b> stats, or safely chat with an AI trained on those memories.</p>
-                    <div style="font-size:11px; font-weight:600; color:var(--accent); background:rgba(99,102,241,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>Instant Authentic AI Clone</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- ═══════════ PRIVACY / TRUST ═══════════ -->
-    <section class="sec" id="trust">
-        <div class="wrap">
-            <div style="text-align:center;margin-bottom:52px;">
-                <h2 class="h2">How We Keep You Safe.</h2>
-                <p class="lead" style="max-width:560px;margin:16px auto 0;">Your memories are intensely personal. Here is exactly how we ensure they stay yours alone.</p>
-            </div>
-            <div class="grid g4" style="gap: 20px;">
-                <div class="card" style="padding: 24px; text-align: center;">
-                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl"
-                        style="background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.25);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                        </svg>
-                    </div>
-                    <h3 style="font-size:1rem;margin-bottom:6px;">Encrypted Processing</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">Your chat files are parsed securely and immediately discarded after structuring. We do not keep the raw files.</p>
-                </div>
-                <div class="card" style="padding: 24px; text-align: center;">
-                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl"
-                        style="background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.25);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </div>
-                    <h3 style="font-size:1rem;margin-bottom:6px;">No WhatsApp Access</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">We never connect to your live WhatsApp. We only read the static export file you manually provide.</p>
-                </div>
-                <div class="card" style="padding: 24px; text-align: center;">
-                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl"
-                        style="background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.25);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                        </svg>
-                    </div>
-                    <h3 style="font-size:1rem;margin-bottom:6px;">Zero AI Training</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">Your conversations are strictly used to serve you. They are never used to train public AI models.</p>
-                </div>
-                <div class="card" style="padding: 24px; text-align: center;">
-                    <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl"
-                        style="background: rgba(168,85,247,0.12); color: #a855f7; border: 1px solid rgba(168,85,247,0.25);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                    </div>
-                    <h3 style="font-size:1rem;margin-bottom:6px;">1-Click Deletion</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">Delete your uploaded chats permanently at any time. We leave zero trace behind.</p>
-                </div>
-            </div>
-            <div style="text-align:center;margin-top:28px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap;">
-                <a href="/privacy.html" class="btn-link">Privacy Policy</a>
-                <a href="/terms.html" class="btn-link">Terms</a>
-                <a href="/refund.html" class="btn-link">Refund Policy</a>
-            </div>
-        </div>
-    </section>
-    <!-- ═══════════ FEATURES ═══════════ -->
-    <section class="sec" id="features"
-        style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-        <div class="wrap">
-            <div style="text-align:center;margin-bottom:64px;">
-                
-                <h2 class="h2">The Ultimate Platform for Your Conversations.</h2>
-                <p class="lead" style="max-width: 600px; margin: 16px auto 0;">A dedicated platform designed to analyze your chat history, secure your memories, and give you a beautiful space to relive them.</p>
-            </div>
-            
-            <div class="grid g2" style="gap:32px;">
-                <!-- Feature 1: AI Continuation -->
-                <div class="card liquid-glass" style="padding:38px;">
-                    <div class="card-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                        </svg>
-                    </div>
-                    <h3 style="font-size:1.4rem;margin-bottom:12px;">Continue with the Exact Same Tone</h3>
-                    <p class="muted" style="line-height:1.7;">Our secure AI processes your chats to master their unique voice. It learns the slang, emojis, humor, and vibe so you can effortlessly continue your conversation exactly how it used to be.</p>
-                </div>
-                
-                <!-- Feature 2: Chat Wrapped -->
-                <div class="card liquid-glass" style="padding:38px;">
-                    <div class="card-icon" style="color: var(--accent-rose);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    </div>
-                    <h3 style="font-size:1.4rem;margin-bottom:12px;">Chat Wrapped &amp; Deep Stats</h3>
-                    <p class="muted" style="line-height:1.7;">OnlineKotha is the only platform that fully analyzes your relationship dynamics. We generate beautiful, shareable "Chat Wrapped" story cards revealing your top words, texting patterns, and vibe.</p>
-                </div>
-                
-                <!-- Feature 3: Deep Search -->
-                <div class="card liquid-glass" style="padding:38px;">
-                    <div class="card-icon" style="color: var(--accent-amber);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </div>
-                    <h3 style="font-size:1.4rem;margin-bottom:12px;">Deep Search &amp; Filters</h3>
-                    <p class="muted" style="line-height:1.7;">Never lose a memory again. Our advanced filtering system allows you to instantly pinpoint exact moments, late-night talks, or specific files from years of conversation history.</p>
-                </div>
-                
-                <!-- Feature 4: Private Chat -->
-                <div class="card liquid-glass" style="padding:38px;">
-                    <div class="card-icon" style="color: var(--accent-emerald);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    </div>
-                    <h3 style="font-size:1.4rem;margin-bottom:12px;">Ultra-Private Live Chat</h3>
-                    <p class="muted" style="line-height:1.7;">Want a completely private space for you and your partner? Register their email, search for them in the messages section, and use OnlineKotha as your dedicated, fully secure live messenger.</p>
-                </div>
-            </div>
-            
-        </div>
-    </section>
-    <!-- ═══════════ FAQ ═══════════ -->
-    <section class="sec" id="faq" style="background:var(--bg-soft);border-top:1px solid var(--border);">
-        <div class="narrow">
-            <div style="text-align:center;margin-bottom:44px;">
-                
-                <h2 class="h2">Questions, answered.</h2>
-            </div>
-            <div class="faq">
-                <details>
-                    <summary>How do I export my chat history?<span class="chev"><svg width="18" height="18"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg></span></summary>
-                    <p>Open any chat → tap the 3 dots menu → More → Export chat → Choose 'Without Media' → Save the .zip
-                        file. Then upload it to Kotha.</p>
-                </details>
-                <details>
-                    <summary>Is my chat data safe and private?<span class="chev"><svg width="18" height="18"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg></span></summary>
-                    <p>Yes. All data travels over secure encrypted connections (HTTPS/TLS), your chats stay private to
-                        your account, we never sell your data, never train AI on your personal conversations, and you
-                        can delete everything anytime with one click.</p>
-                </details>
-                <details>
-                    <summary>How does the AI learn to talk like my contact?<span class="chev"><svg width="18"
-                                height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg></span></summary>
-                    <p>Kotha's AI reads all messages in your uploaded chat to understand your contact's writing style —
-                        their language, slang, emojis, humor, and tone. It then responds in their exact style during
-                        conversations.</p>
-                </details>
-                <details>
-                    <summary>Is Kotha free to use?<span class="chev"><svg width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg></span></summary>
-                    <p>Yes! Kotha is free with up to 5 chat imports, a beautiful chat viewer, On This Day
-                        memories, and 5 AI messages per day. A Pro plan with unlimited AI chats and unlimited chat
-                        imports is available for
-                        power users.</p>
-                </details>
-                <details>
-                    <summary>Which languages does Kotha support?<span class="chev"><svg width="18" height="18"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round">
-                                <path d="M12 5v14M5 12h14" />
-                            </svg></span></summary>
-                    <p>Kotha works with any language — Hindi, English, Hinglish, Tamil, Bengali, Marathi, and more. The
-                        AI automatically matches whatever language your contact uses in chats.</p>
-                </details>
-            </div>
-        </div>
-    </section>
-    <!-- ═══════════ FINAL CTA ═══════════ -->
-    <section class="sec" style="text-align:center;">
-        <div class="narrow">
-            <h2 class="display" style="font-size:clamp(2.1rem,5vw,3.2rem);margin-bottom:18px;">Your WhatsApp history is a<br>treasure trove of memories.</h2>
-            <p class="lead" style="max-width:560px;margin:0 auto 34px;">Keep them safe in a beautiful, private vault. Relive the best moments with Chat Wrapped and nostalgic AI.</p>
-            <a href="/app.html?action=import" id="final-cta" class="btn cta-primary"
-                style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25); margin-bottom: 24px;">
-                Try OnlineKotha Free
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                    stroke-linecap="round">
-                    <path d="M5 12h14M13 5l7 7-7 7" />
-                </svg>
-            </a>
-            <div class="dim"
-                style="font-size:13px;font-weight:500;letter-spacing:.02em; color: #a1a1aa; display: flex; flex-direction: column; align-items: center; gap: 6px;">
-                <span
-                    style="display:inline-flex; align-items:center; gap:6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <span>Instant Free Preview · No sign up required</span>
-                </span>
-            </div>
-        </div>
-    </section>
-    <!-- ═══════════ FOOTER ═══════════ -->
+<!-- ═══════════ FOOTER ═══════════ -->
     <footer>
         <div class="wrap" style="padding-top:64px;padding-bottom:40px;">
             <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px;" class="foot-grid">
