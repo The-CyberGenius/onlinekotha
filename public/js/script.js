@@ -97,8 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 headerName.innerText = cleanNewName;
                 if (subTitle) headerName.appendChild(subTitle);
                 
-                if (typeof renderChatList === 'function' && window.loadedChats) {
-                    renderChatList(window.loadedChats, currentChat);
+                if (typeof renderChatList === 'function' && loadedChats) {
+                    renderChatList(loadedChats, currentChat);
                 }
             } catch (err) {
                 alert('Rename failed: ' + err.message);
@@ -1187,7 +1187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     senders.slice(0, 4).forEach(([sName, count]) => {
                         if (!sName) return;
                         const btn = document.createElement('button');
-                        const defaultClass = 'text-[10px] bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700/50 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
+                        const defaultClass = 'text-[10px] bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         const activeClass = 'text-[10px] bg-indigo-600 border border-indigo-600 rounded-full px-2 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         
                         btn.className = defaultClass;
@@ -1511,7 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
                     </div>
                     <div class="flex items-center justify-between gap-1 mt-0.5">
-                        <p class="text-[12px] text-gray-500 dark:text-gray-400 font-normal truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
+                        <p class="text-[12px] text-gray-500 dark:text-gray-400 font-normal truncate leading-tight">${isActive ? '<span class="text-indigo-500 dark:text-indigo-400 font-medium">● Active</span>' : 'Tap to open'}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
@@ -1546,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const headerName = document.getElementById('chat-header-name');
                             if (headerName) headerName.innerText = cleanNewName;
                         }
-                        renderChatList(window.loadedChats || [], currentChat);
+                        renderChatList(loadedChats || [], currentChat);
                     } catch (err) {
                         alert('Rename failed: ' + err.message);
                     }
@@ -1562,11 +1562,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         const res = await fetch(`/api/chats/${encodeURIComponent(chat)}`, { method: 'DELETE' });
                         if (!res.ok) throw new Error('Delete failed');
-                        window.loadedChats = window.loadedChats.filter(c => c !== chat);
+                        loadedChats = loadedChats.filter(c => c !== chat);
                         if (chat === currentChat) {
                             document.getElementById('close-chat-btn')?.click();
                         }
-                        renderChatList(window.loadedChats, currentChat);
+                        renderChatList(loadedChats, currentChat);
                     } catch (error) {
                         alert('Failed to delete chat: ' + error.message);
                     }
