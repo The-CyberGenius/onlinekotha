@@ -92,7 +92,7 @@
                     <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#006500]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M16 21h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
                 </button>
             </div>
-            <span class="absolute left-1/2 -translate-x-1/2 text-[12px] text-gray-400 font-semibold tracking-tight pointer-events-none">Kotha — WhatsApp Chat AI</span>
+            <span class="absolute left-1/2 -translate-x-1/2 text-[12px] text-gray-400 font-semibold tracking-tight pointer-events-none">KothaChat</span>
         </div>
 
         <!-- App content -->
@@ -1542,12 +1542,14 @@
             let startX, startY;
             let currentTranslateX = 0, currentTranslateY = 0;
             let tempTranslateX = 0, tempTranslateY = 0;
+            let baseTop = 0;
 
             titlebar.addEventListener('mousedown', (e) => {
                 if (e.target.closest('#mac-traffic-lights') || frame.classList.contains('mac-expanded')) return;
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
+                baseTop = frame.getBoundingClientRect().top - currentTranslateY;
                 frame.style.transition = 'none'; // Disable transition for 1:1 smooth drag
             });
 
@@ -1555,8 +1557,16 @@
                 if (!isDragging) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
+                
                 tempTranslateX = currentTranslateX + dx;
-                tempTranslateY = currentTranslateY + dy;
+                let newTranslateY = currentTranslateY + dy;
+                
+                // Prevent dragging past the top of the screen
+                if (baseTop + newTranslateY < 0) {
+                    newTranslateY = -baseTop;
+                }
+                tempTranslateY = newTranslateY;
+                
                 frame.style.transform = `translate(${tempTranslateX}px, ${tempTranslateY}px)`;
             });
 

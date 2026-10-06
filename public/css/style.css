@@ -273,19 +273,18 @@ html.dark .main-chat-background::before {
         radial-gradient(ellipse at 80% 80%, rgba(32, 44, 51, 0.2) 0%, transparent 55%);
 }
 
-/* Chat bubbles — Native WhatsApp style */
+/* Chat bubbles — Modern Pop Style */
 .glass-chat-me {
-    background: #d9fdd3;
-    color: #111b21;
-    box-shadow: 0 1px 0.5px rgba(11, 20, 26, .13);
-    border-radius: 8px 8px 0px 8px;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 15px -3px rgba(99, 102, 241, 0.4);
 }
 
 .glass-chat-them {
     background: #ffffff;
-    color: #111b21;
-    box-shadow: 0 1px 0.5px rgba(11, 20, 26, .13);
-    border-radius: 8px 8px 8px 0px;
+    color: #1f2937;
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f3f4f6;
 }
 
 /* Base text formatting inside bubbles */
@@ -1327,17 +1326,17 @@ html.dark #main-panel {
 
 /* Chat bubbles — dark */
 html.dark .glass-chat-me {
-    background: #005c4b !important;
-    color: #e9edef !important;
-    box-shadow: 0 1px 0.5px rgba(11, 20, 26, .2) !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 15px -3px rgba(79, 70, 229, 0.4) !important;
     border: none !important;
 }
 
 html.dark .glass-chat-them {
-    background: #202c33 !important;
-    color: #e9edef !important;
-    box-shadow: 0 1px 0.5px rgba(11, 20, 26, .2) !important;
-    border: none !important;
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 /* Force ALL text inside bubbles to be light in dark mode */
