@@ -270,7 +270,10 @@ async function callLLM({ feature, messages, systemPrompt, userId, onToken, signa
     const fallback = getModelWithProvider(route.fallback_model_id);
     const fallback2 = getModelWithProvider(route.fallback_model_id_2);
     const fallback3 = getModelWithProvider(route.fallback_model_id_3);
-    const attempts = [primary, fallback, fallback2, fallback3].filter(Boolean);
+    const fallback4 = getModelWithProvider(route.fallback_model_id_4);
+    const fallback5 = getModelWithProvider(route.fallback_model_id_5);
+
+    const attempts = [primary, fallback, fallback2, fallback3, fallback4, fallback5].filter(Boolean);
     if (!attempts.length) throw new LLMError('No models available for this feature', 'NO_MODEL');
 
     const finalSystemPrompt = systemPrompt || route.system_prompt;

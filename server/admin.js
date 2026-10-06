@@ -65,10 +65,14 @@ const KNOWN_PROVIDERS = {
         label: 'OpenRouter',
         description: 'Single API for 300+ models from all major providers. Pay-per-token, no commitment.',
         keyHint: 'Get key at openrouter.ai/keys',
-        baseUrl: 'https://openrouter.ai/api/v1',
         models: [
-            { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet (via OR)', in: 3, out: 15 },
+            { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet (via OR)', in: 3, out: 15 },
             { id: 'meta-llama/llama-3.3-70b-instruct', name: 'Llama 3.3 70B (via OR)', in: 0.13, out: 0.4 },
+            { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro (via OR)', in: 1.25, out: 5.0 },
+            { id: 'google/gemini-2.5-flash', name: 'Gemini 2.5 Flash (via OR)', in: 0.075, out: 0.3 },
+            { id: 'openai/gpt-4o', name: 'GPT-4o (via OR)', in: 2.5, out: 10.0 },
+            { id: 'deepseek/deepseek-chat', name: 'DeepSeek V3 (via OR)', in: 0.14, out: 0.28 },
+            { id: 'meta-llama/llama-3.1-8b-instruct', name: 'Llama 3.1 8B (via OR)', in: 0.05, out: 0.05 },
         ],
     },
     deepseek: {
@@ -413,7 +417,7 @@ router.get('/routes', (req, res) => {
                 primary_model_id: null,
                 fallback_model_id: null,
                 fallback_model_id_2: null,
-                fallback_model_id_3: null,
+                fallback_model_id_3: null, fallback_model_id_4: null, fallback_model_id_5: null,
                 system_prompt: f === 'assistant' ? KOTHA_ASSISTANT_SYSTEM_PROMPT : null,
                 max_tokens: 1024,
                 temperature: 0.7,
@@ -426,15 +430,18 @@ router.get('/routes', (req, res) => {
 router.put('/routes/:feature', (req, res) => {
     const feature = req.params.feature;
     if (!FEATURES.includes(feature)) return res.status(400).json({ error: 'bad feature' });
-    const { primary_model_id, fallback_model_id, fallback_model_id_2, fallback_model_id_3, system_prompt, max_tokens, temperature } = req.body || {};
+    const { primary_model_id, fallback_model_id, fallback_model_id_2, fallback_model_id_3, fallback_model_id_4, fallback_model_id_5, system_prompt, max_tokens, temperature } = req.body || {};
     db.prepare(
-        `INSERT INTO routes (feature, primary_model_id, fallback_model_id, fallback_model_id_2, fallback_model_id_3, system_prompt, max_tokens, temperature)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `INSERT INTO routes (feature, primary_model_id, fallback_model_id, fallback_model_id_2, fallback_model_id_3, fallback_model_id_4, fallback_model_id_5, system_prompt, max_tokens, temperature)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON CONFLICT(feature) DO UPDATE SET
            primary_model_id=excluded.primary_model_id,
            fallback_model_id=excluded.fallback_model_id,
            fallback_model_id_2=excluded.fallback_model_id_2,
            fallback_model_id_3=excluded.fallback_model_id_3,
+           fallback_model_id_4=excluded.fallback_model_id_4,
+           fallback_model_id_5=excluded.fallback_model_id_5,
+
            system_prompt=excluded.system_prompt,
            max_tokens=excluded.max_tokens,
            temperature=excluded.temperature`
@@ -444,6 +451,9 @@ router.put('/routes/:feature', (req, res) => {
         fallback_model_id || null,
         fallback_model_id_2 || null,
         fallback_model_id_3 || null,
+        fallback_model_id_4 || null,
+        fallback_model_id_5 || null,
+
         system_prompt || null,
         max_tokens || 1024,
         temperature ?? 0.7

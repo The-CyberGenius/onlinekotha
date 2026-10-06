@@ -515,10 +515,16 @@ HARD RULES
             const fb1 = div.querySelector('[data-kind="fallback"]');
             const fb2 = div.querySelector('[data-kind="fallback_2"]');
             const fb3 = div.querySelector('[data-kind="fallback_3"]');
+            const fb4 = div.querySelector('[data-kind="fallback_4"]');
+            const fb5 = div.querySelector('[data-kind="fallback_5"]');
+
             if (r.primary_model_id) pri.value = String(r.primary_model_id);
             if (r.fallback_model_id) fb1.value = String(r.fallback_model_id);
             if (r.fallback_model_id_2) fb2.value = String(r.fallback_model_id_2);
             if (r.fallback_model_id_3) fb3.value = String(r.fallback_model_id_3);
+            if (r.fallback_model_id_4) fb4.value = String(r.fallback_model_id_4);
+            if (r.fallback_model_id_5) fb5.value = String(r.fallback_model_id_5);
+
         }
     }
 
@@ -536,6 +542,9 @@ HARD RULES
                 const fb1 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback"]`)?.value;
                 const fb2 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback_2"]`)?.value;
                 const fb3 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback_3"]`)?.value;
+                const fb4 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback_4"]`)?.value;
+                const fb5 = document.querySelector(`select[data-feat="${feature}"][data-kind="fallback_5"]`)?.value;
+
                 const maxTok = document.querySelector(`input[data-feat="${feature}"][data-param="max_tokens"]`);
                 const temp = document.querySelector(`input[data-feat="${feature}"][data-param="temperature"]`);
                 const sysPrompt = document.querySelector(`textarea[data-feat="${feature}"][data-param="system_prompt"]`);
@@ -548,6 +557,9 @@ HARD RULES
                         fallback_model_id: fb1 ? Number(fb1) : null,
                         fallback_model_id_2: fb2 ? Number(fb2) : null,
                         fallback_model_id_3: fb3 ? Number(fb3) : null,
+                        fallback_model_id_4: fb4 ? Number(fb4) : null,
+                        fallback_model_id_5: fb5 ? Number(fb5) : null,
+
                         max_tokens: maxTok ? Number(maxTok.value) || 1024 : 1024,
                         temperature: temp ? Number(temp.value) ?? 0.7 : 0.7,
                         system_prompt: sysPrompt ? sysPrompt.value.trim() : null,

@@ -457,7 +457,7 @@
             // Ample margin on all sides, especially bottom for mobile toolbars
             const isMobile = vw <= 600;
             const horizMargin = isMobile ? 32 : 64;
-            const vertMargin  = isMobile ? 110 : 90;
+            const vertMargin  = isMobile ? 140 : 100;
 
             const availW = Math.max(260, vw - horizMargin);
             const availH = Math.max(400, vh - vertMargin);
@@ -483,6 +483,8 @@
             const d = this.dom;
 
             // Close
+            d.ov.addEventListener("click", (e) => { if (e.target === d.ov) this.close(); });
+
             if (d.closeBtn) {
                 d.closeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -605,7 +607,6 @@
             setTimeout(() => { this.dom.ov?.remove(); }, 400);
         }
 
-        // ── Export / Share ───────────────────────────────────────────────────
         async _export(share = true) {
             if (this.isExporting) return;
 
@@ -617,49 +618,51 @@
             this.isExporting = true;
             this.isPaused = true;
             if (this.dom.shareBtn) this.dom.shareBtn.classList.add('loading');
-
-            const cv = this.dom.cv;
-            // Temporarily freeze animations at full opacity
-            const animatedEls = cv.querySelectorAll('.ok-anim, .ok-d1, .ok-d2, .ok-d3');
-            animatedEls.forEach(el => {
-                el.style.animation = 'none';
-                el.style.opacity = '1';
-                el.style.transform = 'none';
-            });
-
-            // Filter out non-card UI controls and elements that break mobile canvas capture
-            const filter = (node) => {
-                if (!node || node.nodeType !== 1) return true;
-                if (node.tagName === 'IMG') return false;
-                if (node.id === 'ok-share-btn' || node.id === 'ok-close-btn') return false;
-                if (node.classList && (
-                    node.classList.contains('ok-prog') || 
-                    node.classList.contains('ok-close') || 
-                    node.classList.contains('ok-vp-close-btn') || 
-                    node.classList.contains('ok-noise') ||
-                    node.classList.contains('ok-nav-l') ||
-                    node.classList.contains('ok-nav-r') ||
-                    node.classList.contains('ok-round-share-btn')
-                )) return false;
-                return true;
-            };
+            this._showToast('Preparing story...');
 
             try {
-                // htmlToImage clones the node and applies options.style to the clone directly!
-                // This means the live screen card NEVER stretches or zooms in while sharing.
-                const dataUrl = await window.htmlToImage.toPng(cv, {
+                // To avoid breaking the live UI and to fix iOS/Safari canvas rendering bugs with transforms:
+                // 1. We clone the canvas (ok-cv)
+                // 2. We put it off-screen without any scaling
+                // 3. We run htmlToImage on the pristine full-size clone
+                const clone = this.dom.cv.cloneNode(true);
+                
+                // Clean up the clone for export
+                clone.style.transform = 'none';
+                clone.style.position = 'fixed';
+                clone.style.left = '-9999px';
+                clone.style.top = '0';
+                clone.style.zIndex = '-999';
+                
+                // Remove UI elements from clone
+                const removeSelectors = ['.ok-prog', '.ok-noise', '.ok-vp-close-btn', '.ok-round-share-btn'];
+                removeSelectors.forEach(sel => {
+                    const el = clone.querySelector(sel);
+                    if (el) el.remove();
+                });
+                
+                // Freeze animations on clone
+                const animatedEls = clone.querySelectorAll('.ok-anim, .ok-d1, .ok-d2, .ok-d3');
+                animatedEls.forEach(el => {
+                    el.style.animation = 'none';
+                    el.style.opacity = '1';
+                });
+
+                document.body.appendChild(clone);
+
+                // Add a small delay to ensure DOM paints the clone (crucial for Safari)
+                await new Promise(r => setTimeout(r, 100));
+
+                const dataUrl = await window.htmlToImage.toPng(clone, {
                     width: 1080,
                     height: 1920,
                     pixelRatio: 1,
                     cacheBust: true,
                     skipFonts: true,
-                    filter: filter,
-                    backgroundColor: '#080812',
-                    style: {
-                        transform: 'none',
-                        transformOrigin: 'top left'
-                    }
+                    backgroundColor: '#080812'
                 });
+
+                document.body.removeChild(clone);
 
                 if (!dataUrl || dataUrl.length < 1000) {
                     throw new Error('Generated image is empty');
@@ -678,28 +681,19 @@
                         } else {
                             this._download(dataUrl);
                         }
-                    } catch (shareErr) {
-                        if (shareErr.name !== 'AbortError') {
-                            this._download(dataUrl);
-                        }
+                    } catch (e) {
+                        this._download(dataUrl);
                     }
                 } else {
                     this._download(dataUrl);
                 }
             } catch (err) {
-                console.error('[StoryEngine] export failed:', err);
-                this._showToast('Could not save card. Try again.');
+                console.error('Export error:', err);
+                this._showToast('Export failed. Please try again.');
             } finally {
-                // Restore animations
-                animatedEls.forEach(el => {
-                    el.style.animation = '';
-                    el.style.opacity = '';
-                    el.style.transform = '';
-                });
-
-                if (this.dom.shareBtn) this.dom.shareBtn.classList.remove('loading');
                 this.isExporting = false;
                 this.isPaused = false;
+                if (this.dom.shareBtn) this.dom.shareBtn.classList.remove('loading');
                 this.lastTick = Date.now();
             }
         }

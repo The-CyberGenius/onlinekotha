@@ -1012,7 +1012,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const sortedSenders = Object.keys(senderCounts).sort((a, b) => senderCounts[b] - senderCounts[a]);
                 const dynamicThreshold = Math.max(5, totalMessages * 0.01);
-                const realParticipants = sortedSenders.filter(s => senderCounts[s] >= dynamicThreshold);
+                const realParticipants = sortedSenders.filter(s => senderCounts[s] >= dynamicThreshold && !s.toLowerCase().includes('http') && !s.toLowerCase().includes('www.'));
                 if (realParticipants.length === 0) realParticipants.push(...sortedSenders);
 
                 let isGroupChatFrontend = realParticipants.length > 2;
@@ -1149,7 +1149,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     participantContainer.appendChild(headerRow);
 
                     const expandedContent = document.createElement('div');
-                    expandedContent.className = 'hidden px-3 pb-3 flex flex-wrap gap-1.5 border-t border-gray-100 dark:border-gray-800 pt-2';
+                    expandedContent.className = 'hidden flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800 pt-3 pb-3 px-3';
+                    
+                    // Add quick stats strip
+                    let activeDays = new Set(allMessages.map(m => m.date)).size;
+                    let mediaCount = allMessages.filter(m => m.text && (m.text.includes('<Media omitted>') || m.text.includes('image omitted') || m.text.includes('video omitted') || m.text.includes('sticker omitted'))).length;
+                    
+                    const statsStrip = document.createElement('div');
+                    statsStrip.className = 'flex items-center gap-2 mb-1';
+                    statsStrip.innerHTML = `
+                        <div class="flex-1 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-900/20 rounded-lg p-2 text-center border border-indigo-100/50 dark:border-indigo-800/30">
+                            <div class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mb-0.5">Active Days</div>
+                            <div class="text-[14px] font-black text-gray-800 dark:text-gray-200">${activeDays}</div>
+                        </div>
+                        <div class="flex-1 bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-950/30 dark:to-pink-900/20 rounded-lg p-2 text-center border border-fuchsia-100/50 dark:border-fuchsia-800/30">
+                            <div class="text-[10px] text-fuchsia-500 font-bold uppercase tracking-widest mb-0.5">Media Shared</div>
+                            <div class="text-[14px] font-black text-gray-800 dark:text-gray-200">${formatNum(mediaCount)}</div>
+                        </div>
+                    `;
+                    expandedContent.appendChild(statsStrip);
+                    
+                    const filterWrap = document.createElement('div');
+                    filterWrap.className = 'flex flex-wrap gap-1.5';
+                    expandedContent.appendChild(filterWrap);
+                    
                     participantContainer.appendChild(expandedContent);
 
                     let isExpanded = false;
@@ -1199,7 +1222,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             toggleSidebar(false);
                         };
                         senderBtns.push(btn);
-                        expandedContent.appendChild(btn);
+                        expandedContent.querySelector(".flex-wrap").appendChild(btn);
                     });
                 }
 
@@ -1489,91 +1512,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-[12px] text-gray-500 dark:text-gray-400 font-normal truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
-                    ${!isAssistant ? `
-                    <button class="chat-rename-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition" title="Rename chat" data-chat="${chat}">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>` : ''}
-                    <button class="chat-del-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition" title="${isAssistant ? 'Hide Assistant' : 'Delete chat'}" data-chat="${chat}">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
-                </div>
-            `;
             // Rename button
-            const renameBtn = item.querySelector('.chat-rename-btn');
-            if (renameBtn) {
-                renameBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const newName = prompt(`Rename "${displayName}" to:`, displayName);
-                    if (!newName || !newName.trim() || newName.trim() === displayName) return;
-                    const cleanNewName = newName.trim();
-                    try {
-                        const r = await fetch(`/api/chats/${encodeURIComponent(chat)}/rename`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ newName: cleanNewName })
-                        });
-                        if (!r.ok) throw new Error('Rename failed');
-                        if (!window._chatMetaCache) window._chatMetaCache = {};
-                        if (!window._chatMetaCache[chat]) window._chatMetaCache[chat] = {};
-                        window._chatMetaCache[chat].contactName = cleanNewName;
-                        
-                        if (chat === currentChat) {
-                            const headerName = document.getElementById('chat-header-name');
-                            if (headerName) {
-                                // Preserve subtitle span if it exists (for group chats)
-                                const subTitle = headerName.querySelector('span');
-                                headerName.innerText = cleanNewName.replace(/\\(Group, \\d+ members\\)/g, '').trim();
-                                if (subTitle) headerName.appendChild(subTitle);
-                            }
-                        }
-                        renderChatList(loadedChats, currentChat);
-                    } catch (err) {
-                        alert('Rename failed: ' + err.message);
-                    }
-                });
-            }
-
-            // Delete button
-            const delBtn = item.querySelector('.chat-del-btn');
-            if (delBtn) {
-                delBtn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    if (chat === 'kotha_assistant') {
-                        if (!confirm('Hide Kotha Assistant from chat list? You can restore it anytime.')) return;
-                        localStorage.setItem('hide_kotha_assistant', 'true');
-                        loadedChats = loadedChats.filter(c => c !== 'kotha_assistant');
-                        if (currentChat === 'kotha_assistant') {
-                            currentChat = loadedChats.length > 0 ? loadedChats[0] : '__global__';
-                            window.currentChat = currentChat; localStorage.setItem("kotha_active_chat", currentChat);
-                            loadData(currentChat);
-                        }
-                        renderChatList(loadedChats, currentChat);
-                        return;
-                    }
-
-                    if (!confirm(`Delete "${displayName}"?\n\nYou won't see this chat anymore.`)) return;
-
-                    try {
-                        const r = await fetch(`/api/chats/${encodeURIComponent(chat)}`, { method: 'DELETE' });
-                        if (!r.ok) throw new Error('Failed');
-                        loadedChats = loadedChats.filter(c => c !== chat);
-                        if (chat === currentChat && loadedChats.length > 0) {
-                            currentChat = '';
-                            window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
-                            showEmptyState();
-                        } else if (loadedChats.length === 0) {
-                            currentChat = '';
-                            window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
-                            showEmptyState();
-                        }
-                        renderChatList(loadedChats, currentChat);
-                    } catch (err) {
-                        alert('Delete failed: ' + err.message);
-                    }
-                });
-            }
-            // Open chat on click
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.chat-del-btn') || e.target.closest('.chat-rename-btn')) return;
                 if (chat === currentChat) {
@@ -1756,9 +1695,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         } else {
                             showEmptyState(); // Restore empty state
-                            if (isMobile() || window.kothaCompact) {
-                                toggleSidebar(true);
-                            }
                         }
                     }
                 } else if (currentChat && chats.includes(currentChat)) {
@@ -1773,9 +1709,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentChat = '';
                     window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
                     showEmptyState();
-                    if (isMobile() || window.kothaCompact) {
-                        toggleSidebar(true);
-                    }
                 }
                 
                 // Render visual chat list (always)
