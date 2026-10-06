@@ -135,8 +135,8 @@
         /* Round Share Button — positioned at bottom right of the floating story card */
         .ok-round-share-btn {
             position: absolute;
-            bottom: 18px;
-            right: 18px;
+            bottom: 80px;
+            right: 24px;
             width: 48px;
             height: 48px;
             border-radius: 50%;
