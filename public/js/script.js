@@ -1512,7 +1512,65 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-[12px] text-gray-500 dark:text-gray-400 font-normal truncate leading-tight">${lastMsg ? escapeHTML(lastMsg) : (isActive ? '● Active' : 'Tap to open')}</p>
                     </div>
                 </div>
+                <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
+                    <button class="chat-rename-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition" title="Rename chat" data-chat="${chat}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                    <button class="chat-del-btn w-7 h-7 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition" title="Delete chat" data-chat="${chat}">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            `;
             // Rename button
+            const renameBtn = item.querySelector('.chat-rename-btn');
+            if (renameBtn) {
+                renameBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const newName = prompt(`Rename "${displayName}" to:`, displayName);
+                    if (!newName || !newName.trim() || newName.trim() === displayName) return;
+                    const cleanNewName = newName.trim();
+                    try {
+                        const r = await fetch(`/api/chats/${encodeURIComponent(chat)}/rename`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ newName: cleanNewName })
+                        });
+                        if (!r.ok) throw new Error('Rename failed');
+                        if (!window._chatMetaCache) window._chatMetaCache = {};
+                        if (!window._chatMetaCache[chat]) window._chatMetaCache[chat] = {};
+                        window._chatMetaCache[chat].contactName = cleanNewName;
+                        
+                        if (chat === currentChat) {
+                            const headerName = document.getElementById('chat-header-name');
+                            if (headerName) headerName.innerText = cleanNewName;
+                        }
+                        renderChatList(window.loadedChats || [], currentChat);
+                    } catch (err) {
+                        alert('Rename failed: ' + err.message);
+                    }
+                });
+            }
+
+            // Delete button
+            const delBtn = item.querySelector('.chat-del-btn');
+            if (delBtn) {
+                delBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if (!confirm(`Are you sure you want to delete "${displayName}"?`)) return;
+                    try {
+                        const res = await fetch(`/api/chats/${encodeURIComponent(chat)}`, { method: 'DELETE' });
+                        if (!res.ok) throw new Error('Delete failed');
+                        window.loadedChats = window.loadedChats.filter(c => c !== chat);
+                        if (chat === currentChat) {
+                            document.getElementById('close-chat-btn')?.click();
+                        }
+                        renderChatList(window.loadedChats, currentChat);
+                    } catch (error) {
+                        alert('Failed to delete chat: ' + error.message);
+                    }
+                });
+            }
+
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.chat-del-btn') || e.target.closest('.chat-rename-btn')) return;
                 if (chat === currentChat) {
