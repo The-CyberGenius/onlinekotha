@@ -786,6 +786,32 @@
             background: #080812;
             flex: 1;
         }
+        .dynamic-island {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 82px;
+            height: 22px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), inset 0 0 1px rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+        }
+        .dynamic-island-lens {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #0d0f18;
+            border: 1px solid #1c1e2e;
+            position: relative;
+            box-shadow: inset 0 0 2px rgba(99, 102, 241, 0.4);
+        }
         
 
 
@@ -1775,21 +1801,21 @@
         <div class="wrap hero-centered">
             <h1 class="display rise d1 hero-title-main"
                 style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.08;">
-                <span class="hero-title-prefix">Your old conversations</span><br>
+                <span class="hero-title-prefix">Your WhatsApp history</span><br>
                 <span class="hero-title-rotator-wrapper" id="hero-title-rotator-wrapper"
-                    aria-label="don't have to end.">
+                    aria-label="turns into living AI stories.">
                     <span class="hero-title-accent hero-title-rotator-text" id="hero-title-rotator-text"
-                        title="Click to cycle next phrase">don't have to end.</span>
+                        title="Click to cycle next phrase">turns into living AI stories.</span>
                 </span>
             </h1>
             <!-- Headline rotator -->
             <script>
                 (function () {
                     const phrases = [
-                        "don't have to end.",
-                        "can speak to you again.",
-                        "turn into living stories.",
-                        "never have to fade."
+                        "turns into living AI stories.",
+                        "speaks in their exact voice.",
+                        "preserves your best memories.",
+                        "never has to fade away."
                     ];
                     function initHeadlineRotator() {
                         const textEl = document.getElementById('hero-title-rotator-text');
@@ -1844,9 +1870,8 @@
                     }
                 })();
             </script>
-            <p class="lead rise d2" style="font-size: clamp(16px, 2vw, 22px); color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; font-weight: 400; line-height: 1.6; text-wrap: balance;">
-                Upload your WhatsApp history to create an AI trained on your exact conversations. 
-                Experience your memories, laughs, and stories in a whole new way.
+            <p class="lead rise d2" style="font-size: clamp(16px, 2vw, 21px); color: var(--text-secondary); max-width: 620px; margin: 0 auto 40px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
+                Import your WhatsApp chat history to uncover relationship insights, share interactive story cards, and chat with an AI trained on your contact's exact tone, humor, and texting style.
             </p>
             <!-- Dual High-Converting CTAs -->
             <div class="hero-cta-group rise d3">
@@ -1889,6 +1914,11 @@
                     
                     
                     <div class="phone-screen">
+                        <!-- iPhone Dynamic Island -->
+                        <div class="dynamic-island">
+                            <div class="dynamic-island-lens"></div>
+                        </div>
+
                         <!-- Story Progress Indicators -->
                         <div class="story-progress-container" id="story-progress">
                             <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
