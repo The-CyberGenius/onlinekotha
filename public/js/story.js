@@ -6,14 +6,15 @@
 
     const esc = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    // ─── CSS ────────────────────────────────────────────────────────────────────
     const css = `
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800;900&display=swap');
+
         .ok-ov {
             position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh;
             background: rgba(6, 6, 14, 0.94); z-index: 2147483647;
             backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow: hidden; opacity: 1;
             touch-action: manipulation; -webkit-user-select: none; user-select: none;
             box-sizing: border-box;
@@ -321,7 +322,7 @@
             if (emojis.length > 0) push(this._cardEmojis(emojis));
 
             const nightCount = this._nightCount(m);
-            if (nightCount > 20) push(this._cardLateNight(nightCount));
+            if (nightCount > 20) push(this._cardLateNight(nightCount, s));
 
             push(this._cardTotal(s));
 
@@ -770,40 +771,27 @@
         }
 
         _cardFirstText(s) {
-            const eager = (s.s1First || 0) >= (s.s2First || 0) ? s.sender1Name : s.sender2Name;
-            const eagerN = Math.max(s.s1First || 0, s.s2First || 0);
-            const other  = (s.s1First || 0) >= (s.s2First || 0) ? s.sender2Name : s.sender1Name;
-            const otherN = Math.min(s.s1First || 0, s.s2First || 0);
-            const totalFirst = (eagerN + otherN) || 1;
-            const eagerPct = Math.round((eagerN / totalFirst) * 100);
+            const first = (s.s1First || 0) >= (s.s2First || 0) ? s.sender1Name : s.sender2Name;
             return {
-                bgStyle: 'background: radial-gradient(circle at 10% 20%, #f43f5e 0%, transparent 60%), radial-gradient(circle at 90% 80%, #8b5cf6 0%, transparent 60%), linear-gradient(135deg, #2e081d, #4c0519);',
-                bgExtra: `<div class="ok-orb" style="bottom:-10%;left:-10%;width:800px;height:800px;background:rgba(244,63,94,0.25);"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 50% 50%, #10b981 0%, transparent 70%), linear-gradient(135deg, #064e3b, #022c22);',
                 html: `
-                    <div><span class="ok-badge-pill ok-anim">⚡ WHO'S MORE EAGER?</span></div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:80px;margin-top:16px;line-height:1.15;">Who texted first each day?</div>
-
-                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:40px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-                            <div style="text-align:left;">
-                                <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(244,63,94,0.25);border:1px solid rgba(244,63,94,0.5);padding:6px 16px;border-radius:999px;font-size:24px;font-weight:800;color:#fda4af;margin-bottom:10px;">👑 STARTER</div>
-                                <div style="font-size:46px;font-weight:900;color:#fff;">${esc(eager)}</div>
-                            </div>
-                            <div style="font-size:90px;font-weight:900;color:#fb7185;">${eagerN}</div>
+                    <div><span class="ok-badge-pill ok-anim">🌅 THE INITIATOR</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Who sparked the conversation first?</div>
+                    
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:40px;">
+                        <div style="font-size:24px;color:rgba(255,255,255,0.65);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;">First text of the day</div>
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.15);padding-bottom:16px;margin-bottom:16px;">
+                            <span style="font-size:36px;font-weight:800;">${esc(s.sender1Name)}</span>
+                            <span style="font-size:42px;font-weight:900;color:#6ee7b7;">${s.s1First || 0} times</span>
                         </div>
-
-                        <div style="width:100%;height:16px;background:rgba(255,255,255,0.12);border-radius:10px;overflow:hidden;margin-bottom:24px;">
-                            <div style="width:${eagerPct}%;height:100%;background:linear-gradient(90deg,#fb7185,#e11d48);border-radius:10px;"></div>
-                        </div>
-
-                        <div style="display:flex;align-items:center;justify-content:space-between;opacity:0.8;border-top:1px solid rgba(255,255,255,0.1);padding-top:20px;">
-                            <div style="font-size:38px;font-weight:700;color:#e2e8f0;">${esc(other)}</div>
-                            <div style="font-size:60px;font-weight:800;color:#cbd5e1;">${otherN} <span style="font-size:26px;font-weight:500;">days</span></div>
+                        <div style="display:flex;justify-content:space-between;">
+                            <span style="font-size:36px;font-weight:800;">${esc(s.sender2Name)}</span>
+                            <span style="font-size:42px;font-weight:900;color:#6ee7b7;">${s.s2First || 0} times</span>
                         </div>
                     </div>
-
-                    <div class="ok-quote-box ok-anim ok-d3" style="margin-top:30px;">
-                        "Yeah... we see you, ${esc(eager)}. 👀"
+                    
+                    <div class="ok-anim ok-d3 ok-quote-box" style="margin-top:40px;text-align:center;">
+                        It looks like <strong>${esc(first)}</strong> just couldn't wait to talk! 🥰
                     </div>`
             };
         }
@@ -863,16 +851,19 @@
 
         _cardLaughs(s) {
             return {
-                bgStyle: 'background: radial-gradient(circle at 20% 20%, #f97316 0%, transparent 60%), radial-gradient(circle at 80% 80%, #e11d48 0%, transparent 60%), linear-gradient(135deg, #371407, #5c1809);',
-                bgExtra: `<div style="position:absolute;font-size:260px;font-weight:900;opacity:0.06;top:5%;left:-5%;line-height:0.85;word-break:break-all;width:130%;z-index:0;">HAHA LOL ROFL HAHA LOL</div>`,
+                bgStyle: 'background: radial-gradient(circle at 20% 50%, #fb923c 0%, transparent 60%), linear-gradient(135deg, #7c2d12, #431407);',
                 html: `
-                    <div><span class="ok-badge-pill ok-anim">😂 VIBE CHECK</span></div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:90px;margin-top:16px;line-height:1.15;">You two laughed<br><span style="color:#fdba74;">A WHOLE LOT.</span></div>
+                    <div><span class="ok-badge-pill ok-anim">😂 THE COMEDIAN</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Lots of inside jokes!</div>
 
-                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;">
-                        <div style="font-size:64px;margin-bottom:10px;">🎢</div>
-                        <div class="ok-stat-num" style="font-size:130px;line-height:1;color:#fff;">${(s.laughCount || 0).toLocaleString()}</div>
-                        <div style="font-size:32px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:2px;margin-top:14px;">laughs, lol's &amp; dying emojis 💀</div>
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:40px;">
+                        <div style="font-size:24px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:1px;margin-bottom:20px;">Laughter Tracked</div>
+                        <div class="ok-stat-num" style="font-size:120px;line-height:1;color:#fdba74;">${(s.laughCount||0).toLocaleString()}</div>
+                        <div style="font-size:28px;font-weight:600;margin-top:16px;color:#fff;">times someone died laughing</div>
+                    </div>
+                    
+                    <div class="ok-anim ok-d3 ok-quote-box" style="margin-top:40px;text-align:center;">
+                        Between "haha", "lol", and "lmao", you two never run out of reasons to smile. 😄
                     </div>`
             };
         }
@@ -907,7 +898,7 @@
                     <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Who asked all the questions?</div>
 
                     <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:36px;">
-                        <div style="font-size:28px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:2px;">Total Questions Asked</div>
+                        <div style="font-size:24px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:2px;">Total Questions Asked</div>
                         <div style="font-size:110px;font-weight:900;color:#c084fc;line-height:1.1;margin:8px 0;">${totalQ.toLocaleString()}</div>
                         
                         <div style="display:flex;gap:30px;margin-top:24px;border-top:1px solid rgba(255,255,255,0.12);padding-top:22px;">
@@ -922,37 +913,28 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="ok-quote-box ok-anim ok-d3" style="margin-top:26px;color:#d8b4fe;">
-                        Clearly, <b>${esc(curious)}</b> keeps the curiosity flowing. 🧐
+                    
+                    <div class="ok-anim ok-d3 ok-quote-box" style="margin-top:32px;text-align:center;font-size:32px;">
+                        Clearly, <strong>${esc(curious)}</strong> is the one carrying the interrogation. 🕵️‍♂️
                     </div>`
             };
         }
 
         _cardEmojis(emojis) {
-            let floaters = '';
-            emojis.forEach((e, i) => {
-                const sz = 110 - i * 14, l = 8 + (i * 18) % 75, t = 10 + (i * 22) % 65, dl = (i * 0.4).toFixed(1);
-                floaters += `<div style="position:absolute;left:${l}%;top:${t}%;font-size:${sz}px;animation:ok-float ${3+i}s ease-in-out ${dl}s infinite;z-index:0;pointer-events:none;opacity:0.25;">${e.emoji}</div>`;
-            });
             return {
-                bgStyle: 'background: radial-gradient(circle at 10% 20%, #4c1d95 0%, transparent 60%), radial-gradient(circle at 90% 80%, #1e1b4b 0%, transparent 60%), linear-gradient(135deg, #110d24, #1e1b4b);',
-                bgExtra: floaters,
+                bgStyle: 'background: radial-gradient(circle at 50% -20%, #facc15 0%, transparent 60%), linear-gradient(135deg, #713f12, #422006);',
                 html: `
-                    <div><span class="ok-badge-pill ok-anim">🎭 SIGNATURE EMOJIS</span></div>
-                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Your chat's vocabulary.</div>
+                    <div><span class="ok-badge-pill ok-anim">🎭 THE VIBE CHECK</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:76px;margin-top:16px;line-height:1.15;">A picture is worth a thousand words...</div>
+                    <div class="ok-anim ok-d1" style="font-size:32px;font-weight:600;color:rgba(255,255,255,0.8);margin-top:20px;">So here are your most used ones!</div>
 
-                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:36px;position:relative;z-index:10;">
-                        <div style="display:flex;flex-direction:column;gap:26px;">
-                            ${emojis.slice(0, 4).map(e => `
-                                <div style="display:flex;align-items:center;gap:24px;">
-                                    <div style="font-size:60px;width:76px;flex-shrink:0;text-align:center;">${e.emoji}</div>
-                                    <div style="flex:1;height:16px;background:rgba(255,255,255,0.12);border-radius:10px;overflow:hidden;">
-                                        <div style="width:${Math.round((e.count / emojis[0].count) * 100)}%;height:100%;background:linear-gradient(90deg,#a78bfa,#c084fc);border-radius:10px;"></div>
-                                    </div>
-                                    <div style="font-size:32px;font-weight:800;color:#ffffff;width:110px;text-align:right;">${e.count.toLocaleString()}</div>
-                                </div>`).join('')}
-                        </div>
+                    <div class="ok-anim ok-d2" style="display:flex;justify-content:center;gap:36px;flex-wrap:wrap;margin-top:50px;">
+                        ${emojis.map((e, i) => `<div style="font-size:${130 - (i*12)}px; animation: ok-float ${3 + i*0.5}s ease-in-out infinite alternate;">${e}</div>`).join('')}
+                    </div>
+                    
+                    <div class="ok-glass-card ok-anim ok-d3" style="margin-top:50px;padding:32px;background:rgba(255,255,255,0.1);">
+                        <div style="font-size:24px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:12px;">Your Chat Personality</div>
+                        <div style="font-size:38px;font-weight:800;color:#fef08a;">Uniquely Yours ✨</div>
                     </div>`
             };
         }
@@ -978,45 +960,44 @@
         }
 
         _cardTotal(s) {
-            const s1Name = esc(s.sender1Name || 'Person 1');
-            const s2Name = esc(s.sender2Name || 'Person 2');
-            const total = (s.totalMessages || 0).toLocaleString();
-            const s1Count = Math.round((s.totalMessages || 0) * (s.sender1Percent || 0) / 100);
-            const s2Count = Math.round((s.totalMessages || 0) * (s.sender2Percent || 0) / 100);
-            const s1Pct = Math.round(s.sender1Percent || 50);
-            const s2Pct = Math.round(s.sender2Percent || 50);
+            const p1 = s.sender1Percent || 50;
+            const p2 = s.sender2Percent || 50;
+            let dynamic = 'A perfectly balanced connection! ⚖️';
+            if (p1 > 60) dynamic = `<strong>${esc(s.sender1Name)}</strong> is definitely the talkative one! 🗣️`;
+            else if (p2 > 60) dynamic = `<strong>${esc(s.sender2Name)}</strong> carries the conversation! 🗣️`;
+            else if (p1 > 55) dynamic = `<strong>${esc(s.sender1Name)}</strong> talks just a little bit more. 😉`;
+            else if (p2 > 55) dynamic = `<strong>${esc(s.sender2Name)}</strong> talks just a little bit more. 😉`;
 
             return {
-                bgStyle: 'background: radial-gradient(circle at 50% 0%, #4338ca 0%, transparent 60%), radial-gradient(circle at 50% 100%, #1e1b4b 0%, transparent 60%), linear-gradient(135deg, #09090f, #141428);',
-                bgExtra: `<div class="ok-orb" style="bottom:-10%;right:-10%;width:900px;height:900px;background:rgba(99,102,241,0.25);"></div>`,
+                bgStyle: 'background: radial-gradient(circle at 10% 20%, #f43f5e 0%, transparent 50%), radial-gradient(circle at 90% 80%, #9333ea 0%, transparent 50%), linear-gradient(135deg, #4c0519, #3b0764);',
                 html: `
-                    <div><span class="ok-badge-pill ok-anim">❤️ THE COMPLETE STORY</span></div>
-                    <div class="ok-stat-num ok-anim ok-d1" style="font-size:140px;line-height:1;margin-top:16px;background:linear-gradient(135deg,#ffffff,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${total}</div>
-                    <div class="ok-sub ok-anim ok-d1" style="font-size:40px;color:rgba(255,255,255,0.9);margin-top:6px;">messages preserved forever.</div>
+                    <div><span class="ok-badge-pill ok-anim">💬 THE YAPPERS</span></div>
+                    <div class="ok-huge ok-anim ok-d1" style="font-size:84px;margin-top:16px;line-height:1.15;">Who texted more?</div>
 
-                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:36px;padding:34px;">
-                        <div style="font-size:26px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:2px;margin-bottom:18px;">Contribution Breakdown</div>
+                    <div class="ok-glass-card ok-anim ok-d2" style="margin-top:40px;">
+                        <div style="font-size:24px;font-weight:700;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:2px;margin-bottom:24px;">Message Breakdown</div>
                         
-                        <div style="width:100%;height:18px;background:rgba(255,255,255,0.12);border-radius:12px;overflow:hidden;display:flex;margin-bottom:20px;">
-                            <div style="width:${s1Pct}%;height:100%;background:linear-gradient(90deg,#6366f1,#818cf8);"></div>
-                            <div style="width:${s2Pct}%;height:100%;background:linear-gradient(90deg,#ec4899,#f472b6);"></div>
+                        <!-- P1 -->
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;">
+                            <div style="font-size:36px;font-weight:800;">${esc(s.sender1Name)}</div>
+                            <div style="font-size:36px;font-weight:900;color:#fda4af;">${p1}%</div>
                         </div>
-
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <div style="text-align:left;">
-                                <div style="font-size:32px;font-weight:800;color:#a5b4fc;">${s1Name} (${s1Pct}%)</div>
-                                <div style="font-size:42px;font-weight:900;color:#fff;">${s1Count.toLocaleString()}</div>
-                            </div>
-                            <div style="text-align:right;">
-                                <div style="font-size:32px;font-weight:800;color:#f472b6;">${s2Name} (${s2Pct}%)</div>
-                                <div style="font-size:42px;font-weight:900;color:#fff;">${s2Count.toLocaleString()}</div>
-                            </div>
+                        <div style="height:24px;background:rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;margin-bottom:40px;">
+                            <div style="height:100%;width:${p1}%;background:#f43f5e;border-radius:12px;"></div>
+                        </div>
+                        
+                        <!-- P2 -->
+                        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;">
+                            <div style="font-size:36px;font-weight:800;">${esc(s.sender2Name)}</div>
+                            <div style="font-size:36px;font-weight:900;color:#d8b4fe;">${p2}%</div>
+                        </div>
+                        <div style="height:24px;background:rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;">
+                            <div style="height:100%;width:${p2}%;background:#9333ea;border-radius:12px;"></div>
                         </div>
                     </div>
 
-                    <div style="font-size:30px;color:rgba(255,255,255,0.75);line-height:1.45;margin-top:30px;" class="ok-anim ok-d3">
-                        Jokes. Rants. Late night thoughts.<br>
-                        Your memories live on <b>OnlineKotha</b>.
+                    <div class="ok-anim ok-d3 ok-quote-box" style="margin-top:40px;text-align:center;font-size:32px;">
+                        ${dynamic}
                     </div>`
             };
         }
