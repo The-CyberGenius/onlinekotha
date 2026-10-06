@@ -18,6 +18,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Inter font — loaded with display=swap to avoid FOIT -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+    <!-- Apply dark mode immediately to avoid flash -->
+    <script>
+        if (localStorage.getItem('kotha_dark') === '1' || (!localStorage.getItem('kotha_dark') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
@@ -70,7 +78,7 @@
 <body class="app-shell flex flex-col items-center justify-center fixed top-0 left-0 w-screen h-screen overflow-hidden p-2 md:p-5 lg:p-6 bg-[#0e131f] dark:bg-[#090d16]" style="height: var(--viewport-height, 100dvh);">
 
     <!-- macOS Window Frame -->
-    <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-6xl md:max-h-[90vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 dark:border-gray-800 transition-all duration-200">
+    <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-5xl md:max-h-[85vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-[#1a1f29] transition-transform duration-300 ease-out-expo">
         <!-- Title bar with traffic lights (desktop only - Draggable & Expandable) -->
         <div id="mac-titlebar" class="hidden md:flex h-10 bg-[#2d2d32] dark:bg-[#1a1f29] items-center px-4 shrink-0 relative z-[200] select-none border-b border-black/20" title="Double click to toggle expand / Drag to move">
             <div class="flex items-center gap-2" id="mac-traffic-lights">
@@ -782,7 +790,7 @@
                         </button>
                     </div>
                     <div id="ai-input-wrap"
-                        class="flex items-center gap-2.5 bg-white dark:bg-[#2a3942] rounded-xl px-3 py-2 min-h-[52px] shadow-sm">
+                        class="flex items-center gap-2.5 bg-white/90 dark:bg-[#202c33]/90 backdrop-blur-xl border border-gray-200 dark:border-gray-700/50 rounded-2xl px-3 py-2 min-h-[56px] shadow-sm hover:shadow-md focus-within:shadow-lg focus-within:ring-2 focus-within:ring-indigo-500/30 transition-all duration-300">
                         <button id="ai-attach-btn"
                             class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                             title="Attach image">
@@ -794,9 +802,9 @@
                         </button>
                         <input type="file" id="ai-file-input" accept="image/*" class="hidden" style="display: none;">
                         <input type="text" id="bottom-ai-input" placeholder="Type a message..."
-                            class="flex-1 bg-transparent border-none text-[15px] font-medium text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 min-w-0 outline-none">
+                            class="flex-1 bg-transparent border-none text-[15px] font-medium text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 min-w-0 outline-none">
                         <button id="bottom-ai-send"
-                            class="w-9 h-9 rounded-full bg-[#00a884] flex items-center justify-center text-white hover:bg-[#008f6f] active:scale-95 transition shrink-0 disabled:opacity-25 disabled:cursor-not-allowed shadow-md"
+                            class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white hover:opacity-90 hover:shadow-lg hover:shadow-indigo-500/30 active:scale-90 transition-all duration-300 shrink-0 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed shadow-md"
                             disabled>
                             <svg class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -1529,35 +1537,36 @@
                 window.toggleMacExpand();
             });
 
-            // Draggable Window inside viewport
+            // Draggable Window inside viewport (Smooth hardware accelerated)
             let isDragging = false;
-            let startX, startY, initialLeft = 0, initialTop = 0;
+            let startX, startY;
+            let currentTranslateX = 0, currentTranslateY = 0;
+            let tempTranslateX = 0, tempTranslateY = 0;
 
             titlebar.addEventListener('mousedown', (e) => {
                 if (e.target.closest('#mac-traffic-lights') || frame.classList.contains('mac-expanded')) return;
                 isDragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
-                const rect = frame.getBoundingClientRect();
-                initialLeft = rect.left;
-                initialTop = rect.top;
-
-                frame.style.position = 'absolute';
-                frame.style.left = `${initialLeft}px`;
-                frame.style.top = `${initialTop}px`;
-                frame.style.margin = '0';
+                frame.style.transition = 'none'; // Disable transition for 1:1 smooth drag
             });
 
             document.addEventListener('mousemove', (e) => {
                 if (!isDragging) return;
                 const dx = e.clientX - startX;
                 const dy = e.clientY - startY;
-                frame.style.left = `${initialLeft + dx}px`;
-                frame.style.top = `${initialTop + dy}px`;
+                tempTranslateX = currentTranslateX + dx;
+                tempTranslateY = currentTranslateY + dy;
+                frame.style.transform = `translate(${tempTranslateX}px, ${tempTranslateY}px)`;
             });
 
             document.addEventListener('mouseup', () => {
-                isDragging = false;
+                if (isDragging) {
+                    isDragging = false;
+                    currentTranslateX = tempTranslateX;
+                    currentTranslateY = tempTranslateY;
+                    frame.style.transition = ''; // Restore transitions
+                }
             });
         })();
 

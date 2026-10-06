@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.kothaLinkify = kothaLinkify;
 
     const renderMessage = (msg, index, isConsecutive = false) => {
-        const isMe = msg.sender === myName;
+        const isMe = msg.sender === myName || msg.sender === 'You';
 
         let mediaHtml = '';
         if (msg.attachment && msg.type !== 'system') {
@@ -1105,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     participantContainer.classList.remove('hidden');
                     
                     const headerRow = document.createElement('div');
-                    headerRow.className = 'flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition';
+                    headerRow.className = 'flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 transition';
                     
                     const leftCol = document.createElement('div');
                     leftCol.className = 'flex items-center gap-1.5';
@@ -1185,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     senders.slice(0, 4).forEach(([sName, count]) => {
                         if (!sName) return;
                         const btn = document.createElement('button');
-                        const defaultClass = 'text-[10px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
+                        const defaultClass = 'text-[10px] bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700/50 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         const activeClass = 'text-[10px] bg-indigo-600 border border-indigo-600 rounded-full px-2 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
                         
                         btn.className = defaultClass;
@@ -1492,7 +1492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const msgCount = chatMeta?.messageCount || chatMeta?.count || '';
 
             const item = document.createElement('div');
-            item.className = `flex items-center gap-3 px-3 py-2.5 mx-1.5 mb-1.5 rounded-2xl cursor-pointer transition-all duration-200 group border border-transparent ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942] !border-gray-200 dark:!border-gray-700/50 shadow-sm' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
+            item.className = `flex items-center gap-3 px-3 py-2.5 mx-1 mb-0 rounded-xl cursor-pointer transition-all duration-200 group border-b border-gray-100 dark:border-gray-800/50 last:border-0 ${isActive ? 'bg-[#f0f2f5] dark:bg-[#2a3942] shadow-sm' : 'hover:bg-[#f5f6f6] dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
                 ${isAssistant
@@ -3900,7 +3900,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     limitRes.forEach(msg => {
                         const highlightedText = String(msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
                         const myName = typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null;
-                        const isMe = myName && msg.sender === myName;
+                        const isMe = (myName && msg.sender === myName) || msg.sender === 'You';
                         const senderName = isMe ? 'Me' : String(msg.sender || 'System');
                         const timeStr = msg.time && msg.date ? `${msg.date} • ${msg.time}` : String(msg.time || 'Unknown');
                         
