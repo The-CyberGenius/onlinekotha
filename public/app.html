@@ -39,6 +39,24 @@
         #dm-messages {
             background-color: transparent;
         }
+        #mac-frame.mac-expanded {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 0 !important;
+            border: none !important;
+            position: relative !important;
+            top: 0 !important;
+            left: 0 !important;
+            margin: 0 !important;
+        }
+        #mac-titlebar {
+            cursor: grab;
+        }
+        #mac-titlebar:active {
+            cursor: grabbing;
+        }
     </style>
 
     <script src="/js/auth-init.js?v=3.1"></script>
@@ -52,9 +70,9 @@
 <body class="app-shell flex flex-col items-center justify-center fixed top-0 left-0 w-screen h-screen overflow-hidden p-2 md:p-5 lg:p-6 bg-[#0e131f] dark:bg-[#090d16]" style="height: var(--viewport-height, 100dvh);">
 
     <!-- macOS Window Frame -->
-    <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-6xl md:max-h-[90vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 dark:border-gray-800">
-        <!-- Title bar with traffic lights (desktop only) -->
-        <div id="mac-titlebar" class="hidden md:flex h-10 bg-[#2d2d32] dark:bg-[#1a1f29] items-center px-4 shrink-0 relative z-[200] select-none border-b border-black/20">
+    <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-6xl md:max-h-[90vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-white/10 dark:border-gray-800 transition-all duration-200">
+        <!-- Title bar with traffic lights (desktop only - Draggable & Expandable) -->
+        <div id="mac-titlebar" class="hidden md:flex h-10 bg-[#2d2d32] dark:bg-[#1a1f29] items-center px-4 shrink-0 relative z-[200] select-none border-b border-black/20" title="Double click to toggle expand / Drag to move">
             <div class="flex items-center gap-2" id="mac-traffic-lights">
                 <button id="mac-close" class="w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-90 transition border border-black/10 relative group" title="Close" onclick="window.location.href='/'">
                     <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#4a0002]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -62,7 +80,7 @@
                 <button id="mac-minimize" class="w-3 h-3 rounded-full bg-[#febc2e] hover:brightness-90 transition border border-black/10 relative group" title="Minimize">
                     <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#995700]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M5 12h14"/></svg>
                 </button>
-                <button id="mac-fullscreen" class="w-3 h-3 rounded-full bg-[#28c840] hover:brightness-90 transition border border-black/10 relative group" title="Fullscreen" onclick="if(!document.fullscreenElement){document.documentElement.requestFullscreen().catch(()=>{});}else{document.exitFullscreen().catch(()=>{});}">
+                <button id="mac-fullscreen" class="w-3 h-3 rounded-full bg-[#28c840] hover:brightness-90 transition border border-black/10 relative group" title="Toggle Fullscreen inside app" onclick="window.toggleMacExpand && window.toggleMacExpand()">
                     <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#006500]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M16 21h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
                 </button>
             </div>
@@ -1496,6 +1514,55 @@
 
 
         
+        // Draggable & Inside-Viewport Expansion for macOS Window Titlebar
+        (function initMacFrameDragAndExpand() {
+            const titlebar = document.getElementById('mac-titlebar');
+            const frame = document.getElementById('mac-frame');
+            if (!titlebar || !frame) return;
+
+            // Expand / Maximize toggle inside app viewport
+            window.toggleMacExpand = function() {
+                frame.classList.toggle('mac-expanded');
+                document.body.classList.toggle('p-0');
+            };
+
+            titlebar.addEventListener('dblclick', (e) => {
+                if (e.target.closest('#mac-traffic-lights')) return;
+                window.toggleMacExpand();
+            });
+
+            // Draggable Window inside viewport
+            let isDragging = false;
+            let startX, startY, initialLeft = 0, initialTop = 0;
+
+            titlebar.addEventListener('mousedown', (e) => {
+                if (e.target.closest('#mac-traffic-lights') || frame.classList.contains('mac-expanded')) return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const rect = frame.getBoundingClientRect();
+                initialLeft = rect.left;
+                initialTop = rect.top;
+
+                frame.style.position = 'absolute';
+                frame.style.left = `${initialLeft}px`;
+                frame.style.top = `${initialTop}px`;
+                frame.style.margin = '0';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                frame.style.left = `${initialLeft + dx}px`;
+                frame.style.top = `${initialTop + dy}px`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        })();
+
         // Extra lock to prevent body scroll
         document.body.addEventListener('touchmove', function(e) {
             if (e.target.closest('.overflow-y-auto, .overflow-x-auto, textarea, input')) return;
