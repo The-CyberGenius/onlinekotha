@@ -5,7 +5,7 @@
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <script>
         // Prevent Flash of Incorrect Theme (FOIT) - default to pop light theme
         (function () {
@@ -42,7 +42,7 @@
     <meta property="og:locale:alternate" content="de_DE">
     <meta property="og:locale:alternate" content="en_AU">
     <meta property="og:locale:alternate" content="en_IN">
-    <meta property="og:image" content="https://www.onlinekotha.com/og-image.png?v=2">
+    <meta property="og:image" content="https://www.onlinekotha.com/img/og-image.png?v=3">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Kotha — AI Chat Simulator for WhatsApp Chats">
@@ -53,7 +53,7 @@
     <meta name="twitter:title" content="Kotha — WhatsApp Chat AI | Chat with Ex or Loved Ones">
     <meta name="twitter:description"
         content="Turn your WhatsApp text history into an authentic AI conversation. Recreate their exact texting style, slang, and memories.">
-    <meta name="twitter:image" content="https://www.onlinekotha.com/og-image.png?v=2">
+    <meta name="twitter:image" content="https://www.onlinekotha.com/img/og-image.png?v=3">
     <link rel="canonical" href="https://www.onlinekotha.com/">
     <meta name="theme-color" content="#0a0a0f">
     <!-- Performance: preload critical font -->
@@ -2138,7 +2138,8 @@
                     <a href="/#how" class="foot-link">How it works</a><br>
                     <a href="/#demo-story-mockup" class="foot-link">Try it live</a><br>
                     <a href="/pricing.html" class="foot-link">Pricing</a><br>
-                    <a href="/app.html" class="foot-link">Open App</a><br>
+                    <a href="/app.html" class="foot-link">Open Web App</a><br>
+                    <a href="https://play.google.com/store/apps/developer?id=okshiva" class="foot-link" target="_blank" rel="noopener noreferrer">Android App (Play Store)</a><br>
                     <a href="/paper.html" class="foot-link">Documentation</a><br>
                     <a href="/blog.html" class="foot-link">Blog</a>
                 </div>
@@ -2554,7 +2555,7 @@
                     try {
                         const idRes = await fetch('/api/auth/google/client-id');
                         const idData = await idRes.json();
-                        if (idData && idData.clientId && !window.oneTapInitialized) {
+                        if (false && idData && idData.clientId) {
                             window.googleClientId = idData.clientId;
                             window.handleGoogleOneTap = async (response) => {
                                 if (!response || !response.credential) return;
