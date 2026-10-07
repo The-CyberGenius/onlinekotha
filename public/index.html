@@ -1963,12 +1963,20 @@
                         <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
                 </a>
+                <a href="https://play.google.com/store/apps/developer?id=okshiva" target="_blank" rel="noopener noreferrer" class="btn hero-btn-secondary" style="border-radius:999px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5 3l14 9-14 9V3z"></path>
+                    </svg>
+                    <span>Android App</span>
+                </a>
                 <a href="/#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo" style="border-radius:999px;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3" />
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    <span>See it in action</span>
+                    <span>See Demo</span>
                 </a>
             </div>
             <div class="hero-trust-chips rise d3">
@@ -3232,31 +3240,9 @@
                 gsap.from('.hero-cta-group', { duration: 1, y: 20, opacity: 0, delay: 0.3, ease: 'power3.out' });
                 gsap.from('.mockup-wrapper', { duration: 1.2, scale: 0.94, opacity: 0, delay: 0.4, ease: 'power3.out' });
 
-                // How It Works Cards ScrollTrigger Stagger
-                gsap.from('#how .step-card', {
-                    scrollTrigger: {
-                        trigger: '#how',
-                        start: 'top 85%',
-                    },
-                    duration: 0.7,
-                    y: 30,
-                    opacity: 0,
-                    stagger: 0.15,
-                    ease: 'power3.out'
-                });
+                
 
-                // Features Cards ScrollTrigger Stagger
-                gsap.from('#features .liquid-glass', {
-                    scrollTrigger: {
-                        trigger: '#features',
-                        start: 'top 85%',
-                    },
-                    duration: 0.7,
-                    y: 30,
-                    opacity: 0,
-                    stagger: 0.15,
-                    ease: 'power3.out'
-                });
+                
             }
 
             // 4. Ultra-smooth Ethereal Ambient Canvas (Floating Glow Mesh, No Grid)
