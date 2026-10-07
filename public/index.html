@@ -448,7 +448,7 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 20px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 var(--bg-soft);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
         }
         .liquid-glass:hover {
@@ -1915,7 +1915,7 @@
                 style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.08;">
                 <span class="hero-title-prefix">Relive Your Best</span><br>
                 <span style="color:var(--accent); display: inline-flex; align-items: baseline; gap: 8px;">
-                    <span id="platform-rotator" style="display:inline-block; transition: opacity 0.4s ease, transform 0.4s ease; transform: translateY(0); opacity: 1;">WhatsApp</span>
+                    <span id="platform-rotator" style="display:inline-block; width: 5.2em; text-align: left; transition: opacity 0.4s ease, transform 0.4s ease; transform: translateY(0); opacity: 1;">WhatsApp</span>
                     <span>Memories.</span>
                 </span>
                 
@@ -2385,7 +2385,7 @@
             <div class="dim"
                 style="font-size:13px;font-weight:500;letter-spacing:.02em; color: #a1a1aa; display: flex; flex-direction: column; align-items: center; gap: 6px;">
                 <span
-                    style="display:inline-flex; align-items:center; gap:6px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px;">
+                    style="display:inline-flex; align-items:center; gap:6px; background: var(--bg-soft); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px;">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
@@ -2697,7 +2697,7 @@
                 const doubleTickSvg = '<svg width="15" height="11" viewBox="0 0 16 11" fill="none" style="display:inline-block;vertical-align:middle;margin-left:4px;"><path d="M11.05 1L4.85 7.2L2.25 4.6L1 5.85L4.85 9.7L12.3 2.25L11.05 1Z" fill="#53bdeb"/><path d="M14.7 1L8.5 7.2L7.35 6.05L6.1 7.3L8.5 9.7L15.95 2.25L14.7 1Z" fill="#53bdeb"/></svg>';
                 div.innerHTML = `<div class="msg-user px-4 py-2.5 max-w-[85%]" style="padding:10px 16px;max-width:85%;animation:fade-up 0.3s ease forwards;">
         <p class="text-[13px] text-white leading-relaxed" style="font-size:13px;color:#fff;line-height:1.5;">${escHtml(text)}</p>
-        <p class="text-[9px] text-white/60 text-right mt-1.5" style="font-size:9px;color:rgba(255,255,255,.6);text-align:right;margin-top:6px;display:flex;align-items:center;justify-content:flex-end;"><span>${timeNow()}</span>${doubleTickSvg}</p>
+        <p class="text-[9px] text-white/60 text-right mt-1.5" style="font-size:9px;color:${isUser ? 'rgba(255,255,255,0.6)' : 'var(--text-muted)'};text-align:right;margin-top:6px;display:flex;align-items:center;justify-content:flex-end;"><span>${timeNow()}</span>${doubleTickSvg}</p>
     </div>`;
                 chatArea.appendChild(div);
                 scrollChat();
@@ -3067,7 +3067,7 @@
     <div id="floating-assistant-widget"
         style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none;opacity:0;transform:translateY(20px);transition:all 0.3s ease;">
         <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
-            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
+            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid var(--border);">
             <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
                 style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
                 <div class="relative" style="position:relative;">
