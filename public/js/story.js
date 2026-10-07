@@ -929,7 +929,7 @@
                     <div class="ok-anim ok-d1" style="font-size:32px;font-weight:600;color:rgba(255,255,255,0.8);margin-top:20px;">So here are your most used ones!</div>
 
                     <div class="ok-anim ok-d2" style="display:flex;justify-content:center;gap:36px;flex-wrap:wrap;margin-top:50px;">
-                        ${emojis.map((e, i) => `<div style="font-size:${130 - (i*12)}px; animation: ok-float ${3 + i*0.5}s ease-in-out infinite alternate;">${e}</div>`).join('')}
+                        ${emojis.map((e, i) => `<div style="font-size:${130 - (i*12)}px; animation: ok-float ${3 + i*0.5}s ease-in-out infinite alternate;">${e.emoji}</div>`).join('')}
                     </div>
                     
                     <div class="ok-glass-card ok-anim ok-d3" style="margin-top:50px;padding:32px;background:rgba(255,255,255,0.1);">
