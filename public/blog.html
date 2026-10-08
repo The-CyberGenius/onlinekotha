@@ -227,6 +227,76 @@
         }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
         ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
+    
+        /* Modern Uniform Grid Cards */
+        .blog-card {
+            min-height: 290px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Light mode card */
+        html:not(.dark) .blog-card {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03) !important;
+        }
+        html:not(.dark) .blog-card:hover {
+            border-color: #cbd5e1 !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+            transform: translateY(-3px);
+        }
+        html:not(.dark) .view-pill {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        html:not(.dark) .card-footer {
+            border-color: #f1f5f9 !important;
+            color: #64748b;
+        }
+
+        /* Dark mode card */
+        html.dark .blog-card, .dark .blog-card {
+            background: rgba(18, 18, 26, 0.7) !important;
+            border: 1px solid rgba(255, 255, 255, 0.07) !important;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+        }
+        html.dark .blog-card:hover, .dark .blog-card:hover {
+            background: rgba(24, 24, 36, 0.9) !important;
+            border-color: rgba(255, 255, 255, 0.16) !important;
+            box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.7) !important;
+            transform: translateY(-3px);
+        }
+        html.dark .view-pill, .dark .view-pill {
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        html.dark .card-footer, .dark .card-footer {
+            border-color: rgba(255, 255, 255, 0.06) !important;
+            color: #94a3b8;
+        }
+
+        /* Line clamp utilities for neat multi-line titles */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.75rem;
+        }
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 3.75rem;
+        }
+
     </style>
 
     <!-- Schema.org JSON-LD -->
@@ -276,275 +346,1304 @@
 </section>
 
 <!-- Articles -->
-<section class="max-w-4xl mx-auto px-5 pb-24">
-    <div class="grid md:grid-cols-2 gap-5">
+<section class="max-w-5xl mx-auto px-5 pb-28">
+    <div class="flex items-center justify-between mb-8 pb-4 border-b border-gray-200 dark:border-white/10">
+        <div class="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-zinc-400">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>All Articles (28)</span>
+        </div>
+        <div class="text-xs text-gray-400 dark:text-zinc-500 font-medium">
+            Sorted by: <span class="text-gray-900 dark:text-white font-bold">Newest First</span>
+        </div>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Article Card: changing-the-narrative-onlinekotha.html -->
+        <a href="/blog/changing-the-narrative-onlinekotha.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;">
+                        <span>✨</span>
+                        <span>Culture & Voice</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>6,314 views</span>
+                    </span>
+                </div>
 
-        <!-- Featured Article: AI Chat with Ex -->
-        <a href="/blog/ai-chat-with-ex.html" class="card p-6 block group md:col-span-2 border-indigo-500/30 hover:border-pink-500/50">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-pink-500/15 text-pink-400 font-bold">Hot Topic · AI Simulator</span>
-                <span class="text-[11px] card-meta">Updated September 2026</span>
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Changing the Narrative: The True Purpose of OnlineKotha
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    The word Kotha is often misunderstood in India. OnlineKotha is changing the narrative by providing a digital sanctuary for emotional...
+                </p>
             </div>
-            <h2 class="text-[22px] font-black card-title mb-2 group-hover:text-pink-300 transition leading-snug">AI Chat With Your Ex: How to Turn Past WhatsApp Chats into an AI Simulation</h2>
-            <p class="text-[14px] card-desc leading-relaxed mb-4">Can you turn exported WhatsApp chats into an authentic AI chatbot of your ex-partner, boyfriend, or girlfriend? Discover how conversational AI clones texting styles for nostalgia, memory preservation, and closure.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span>
-                <span>·</span>
-                <span class="text-indigo-400 font-semibold group-hover:underline">Read Complete Guide →</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 09, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#9333ea;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 1 -->
-        <a href="/blog/how-to-export-whatsapp-chat.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-indigo-500/10 text-indigo-400">Guide</span>
+        <!-- Article Card: the-meaning-behind-the-name-kotha.html -->
+        <a href="/blog/the-meaning-behind-the-name-kotha.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#fff1f2; color:#e11d48; border:1px solid #fecdd3;">
+                        <span>🔥</span>
+                        <span>Trending · Taboo</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>4,279 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Breaking the Taboo: The True Meaning of 'Kotha'
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Discover the deep emotional purpose behind the name OnlineKotha. We are breaking the taboo in India and redefining
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-indigo-300 transition leading-snug">How to Export WhatsApp Chat — Step by Step Guide (2025)</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Complete guide to export your WhatsApp conversations on Android and iPhone. With or without media — everything you need to know.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span>
-                <span>·</span>
-                <span>Updated May 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 09, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#e11d48;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 2 -->
-        <a href="/blog/preserve-digital-memories.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-amber-500/10 text-amber-400">Ideas</span>
+        <!-- Article Card: redefining-the-word-kotha.html -->
+        <a href="/blog/redefining-the-word-kotha.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#fff1f2; color:#e11d48; border:1px solid #fecdd3;">
+                        <span>🔥</span>
+                        <span>Trending · Taboo</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>5,677 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Redefining 'Kotha': Breaking the Stigma Behind Our Name
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    In India, the word
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-amber-300 transition leading-snug">5 Beautiful Ways to Preserve Your Digital Memories Forever</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">From WhatsApp chats to photo albums — creative ways to make sure your most precious digital conversations last a lifetime.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>4 min read</span>
-                <span>·</span>
-                <span>May 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 08, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#e11d48;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 3 -->
-        <a href="/blog/ai-personality-cloning.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-pink-500/10 text-pink-400">Technology</span>
+        <!-- Article Card: reclaiming-kotha-a-digital-sanctuary.html -->
+        <a href="/blog/reclaiming-kotha-a-digital-sanctuary.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#fff1f2; color:#e11d48; border:1px solid #fecdd3;">
+                        <span>🔥</span>
+                        <span>Trending · Taboo</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>3,608 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Reclaiming the Word 'Kotha': Building a Digital Sanctuary
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    OnlineKotha is reclaiming the word
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-pink-300 transition leading-snug">How AI Learns to Talk Like Your Loved Ones — The Technology Behind Kotha</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">How personality cloning works, why it matters, and how Kotha's AI captures someone's exact way of texting from their chat history.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>6 min read</span>
-                <span>·</span>
-                <span>May 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 08, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#e11d48;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 4 -->
-        <a href="/blog/whatsapp-chat-viewer-online.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-emerald-500/10 text-emerald-400">Product</span>
+        <!-- Article Card: the-vision-behind-onlinekotha.html -->
+        <a href="/blog/the-vision-behind-onlinekotha.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#fff1f2; color:#e11d48; border:1px solid #fecdd3;">
+                        <span>🔥</span>
+                        <span>Trending · Taboo</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>3,496 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    The True Meaning of OnlineKotha: A Safe House for Your Stories
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Learn about the grand vision behind OnlineKotha.com and how we are building a cultural shift around how India and the world view digital...
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-emerald-300 transition leading-snug">Best WhatsApp Chat Viewer Online — Read Old Chats Beautifully</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Why reading exported WhatsApp chats in a text file is painful, and how Kotha transforms them into a beautiful, searchable experience.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>3 min read</span>
-                <span>·</span>
-                <span>May 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 08, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#e11d48;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 5: WhatsApp Chat Wrapped Guide -->
-        <a href="/blog/whatsapp-chat-wrapped-guide.html" class="card p-6 block group border-purple-500/30 hover:border-purple-400/50">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-purple-500/15 text-purple-400 font-bold">Featured · Wrapped</span>
-                <span class="text-[11px] text-purple-400">Trending 🔥</span>
+        <!-- Article Card: emotional-purpose-of-onlinekotha.html -->
+        <a href="/blog/emotional-purpose-of-onlinekotha.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;">
+                        <span>✨</span>
+                        <span>Culture & Voice</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>5,346 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    The Emotional Purpose of OnlineKotha
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Learn about the emotional drive behind the development of OnlineKotha.com. A platform built to provide closure and preserve digital...
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-purple-300 transition leading-snug">WhatsApp Chat Wrapped: How to Turn Years of Messages into a Viral Social Story</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Discover who texted first, late-night chatter stats, emoji profiles, and generate cinematic 9:16 Instagram story cards from your chat archives.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>4 min read</span>
-                <span>·</span>
-                <span>October 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 07, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#9333ea;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 6: Privacy & Security Architecture -->
-        <a href="/blog/privacy-first-chat-preservation.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-teal-500/10 text-teal-400 font-bold">Privacy & Security</span>
+        <!-- Article Card: preserving-human-connection-with-ai.html -->
+        <a href="/blog/preserving-human-connection-with-ai.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#ecfeff; color:#0891b2; border:1px solid #a5f3fc;">
+                        <span>⚡</span>
+                        <span>Technology & AI</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>4,471 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Beyond Tech: Preserving Human Connection in the AI Era
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    How OnlineKotha uses Artificial Intelligence not to replace human connection, but to immortalize the way we used to speak with each other.
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-teal-300 transition leading-snug">Privacy-First Chat Archiving: Why Your Conversations Never Belong to Advertisers</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Inside OnlineKotha's security model: sandboxed user silos, local memory indexing, zero ad networks, and immediate on-demand data purges.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span>
-                <span>·</span>
-                <span>October 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 07, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#0891b2;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 7: Long Distance Relationships -->
-        <a href="/blog/long-distance-relationship-chat-memories.html" class="card p-6 block group border-pink-500/30 hover:border-pink-400/50">
-            <div class="mb-4">
-                <span class="tag bg-pink-500/10 text-pink-400 font-bold">Relationships & LDR</span>
+        <!-- Article Card: the-emotional-purpose-of-onlinekotha.html -->
+        <a href="/blog/the-emotional-purpose-of-onlinekotha.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;">
+                        <span>✨</span>
+                        <span>Culture & Voice</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>3,922 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Why We Built OnlineKotha: The Emotional Side of Digital Memories
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Beyond the code and the AI, OnlineKotha was built for a deeply human reason. Discover the emotional drive behind preserving our digital...
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-pink-300 transition leading-snug">When WhatsApp Is Your Entire Living Room: How Long-Distance Couples Preserve Their Story</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">How couples across time zones use chat history, On This Day retrospectives, and communication analytics to bridge miles and keep love unbreakable.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span>
-                <span>·</span>
-                <span>October 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 07, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#9333ea;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 8: Digital Bereavement & Loss -->
-        <a href="/blog/preserving-chats-of-late-loved-ones.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-blue-500/10 text-blue-400 font-bold">Digital Memorials & Healing</span>
+        <!-- Article Card: kotha-app-smooth-experience.html -->
+        <a href="/blog/kotha-app-smooth-experience.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>7,207 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Reviewing the Kotha App: The Smoothest Way to View Exported Chats
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    A deep dive into the performance, UI/UX, and features of the official Kotha app. Spoiler: It
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-blue-300 transition leading-snug">When a Voice Note Is All That's Left: Safeguarding the Words of Someone You Lost</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Why ordinary texts like 'khana kha liya?' become priceless digital heirlooms, and how offline archives protect them from expired phone numbers.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span>
-                <span>·</span>
-                <span>October 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 06, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 9: Squad Dynamics & Group Chats -->
-        <a href="/blog/whatsapp-group-chat-friendship-analytics.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-amber-500/10 text-amber-400 font-bold">Squad Dynamics</span>
+        <!-- Article Card: onlinekotha-app-experience.html -->
+        <a href="/blog/onlinekotha-app-experience.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>5,690 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Why the OnlineKotha App is the Best Way to Preserve WhatsApp Memories
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Discover the ultra-smooth user experience of the official OnlineKotha app on Google Play. Effortlessly transform your WhatsApp chats...
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-amber-300 transition leading-snug">The Friendship Index: What 100,000 Group Chat Messages Say About Your Crew</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Decode the unwritten rules of your squad: who is the voice-note podcaster, who plans the trips that fall apart, and who sends 80% of the memes.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>4 min read</span>
-                <span>·</span>
-                <span>October 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 06, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        3 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 10: NLP & Texting Cadence -->
-        <a href="/blog/how-ai-understands-slang-and-texting-nuance.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-cyan-500/10 text-cyan-400 font-bold">Engineering & NLP</span>
+        <!-- Article Card: best-whatsapp-chat-analyzer-app.html -->
+        <a href="/blog/best-whatsapp-chat-analyzer-app.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>7,641 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Why OnlineKotha is the Best WhatsApp Chat Analyzer App
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    OnlineKotha is the top-rated WhatsApp chat analyzer and AI simulator. Learn why the Kotha Android app provides the best chat reading...
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-cyan-300 transition leading-snug">The Architecture of Texting: How AI Decodes Sarcasm, Hinglish & Inside Jokes</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Why traditional chatbots sound robotic, and how burst detection, lexical indexing, and context slices recreate authentic human texting cadence.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span>
-                <span>·</span>
-                <span>October 2026</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 05, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        3 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <!-- Article 11: Psychology & Closure -->
-        <a href="/blog/breakup-closure-and-chat-history.html" class="card p-6 block group">
-            <div class="mb-4">
-                <span class="tag bg-rose-500/10 text-rose-400 font-bold">Psychology & Closure</span>
-            </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-rose-300 transition leading-snug">The Art of Closure: Why We Re-read Old Texts (And How to Finally Find Peace)</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">The science of narrative coherence after heartbreak, moving away from agonizing 2 AM doomscrolling into therapeutic, sealed-chapter reflection.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span>
-                <span>·</span>
-                <span>October 2026</span>
-            </div>
-        </a>
-        <a href="/blog/onlinekotha-app-experience.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-indigo-500/10 text-indigo-400">APP</span>
-                <span class="text-[11px] card-meta">September 2026</span>
-            </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-indigo-300 transition leading-snug">Why the OnlineKotha App is the Best Way to Preserve WhatsApp Memories</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">A deep dive into the incredibly smooth, lag-free mobile experience of Kotha's official Android app.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>3 min read</span><span>·</span><span class="text-indigo-400 group-hover:underline">Read Article →</span>
-            </div>
-        </a>
+        <!-- Article Card: ai-whatsapp-chat-memory-preservation.html -->
+        <a href="/blog/ai-whatsapp-chat-memory-preservation.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>6,467 views</span>
+                    </span>
+                </div>
 
-        <a href="/blog/how-onlinekotha-redefines-memories.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-blue-500/10 text-blue-400">TECHNOLOGY</span>
-                <span class="text-[11px] card-meta">September 2026</span>
-            </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-blue-300 transition leading-snug">Beyond Text: How OnlineKotha Makes WhatsApp Chats Feel Alive</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Exploring the emotional intelligence and utility of the OnlineKotha platform.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>4 min read</span><span>·</span><span class="text-blue-400 group-hover:underline">Read Article →</span>
-            </div>
-        </a>
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Why You Need to Preserve Your WhatsApp Chats Today
+                </h2>
 
-        <a href="/blog/the-meaning-behind-the-name-kotha.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-rose-500/10 text-rose-400">CULTURE</span>
-                <span class="text-[11px] card-meta">September 2026</span>
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    WhatsApp chats are fragile. Learn why you should export and preserve your conversations with OnlineKotha
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-rose-300 transition leading-snug">Breaking the Taboo: The True Meaning of 'Kotha'</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Why we named our platform OnlineKotha and our mission to redefine a misunderstood word in India.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span><span>·</span><span class="text-rose-400 group-hover:underline">Read Article →</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 05, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        3 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <a href="/blog/emotional-purpose-of-onlinekotha.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-amber-500/10 text-amber-400">IDEAS</span>
-                <span class="text-[11px] card-meta">September 2026</span>
+        <!-- Article Card: why-kotha-is-the-best-ai-whatsapp-memory-app.html -->
+        <a href="/blog/why-kotha-is-the-best-ai-whatsapp-memory-app.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>6,037 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Why Kotha is the Ultimate AI WhatsApp Chat Memory App
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Discover why the official Kotha app delivers the smoothest, most seamless experience for reviving and preserving your digital memories...
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-amber-300 transition leading-snug">The Emotional Purpose of OnlineKotha</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Technology is often cold, but we built OnlineKotha to heal, preserve, and comfort.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>4 min read</span><span>·</span><span class="text-amber-400 group-hover:underline">Read Article →</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 05, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <a href="/blog/best-whatsapp-chat-analyzer-app.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-green-500/10 text-green-400">APP</span>
-                <span class="text-[11px] card-meta">September 2026</span>
+        <!-- Article Card: ai-whatsapp-chat-memory-kotha.html -->
+        <a href="/blog/ai-whatsapp-chat-memory-kotha.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>8,285 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Kotha: AI WhatsappChat Memory - The Future of Nostalgia
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    What happens when you combine exported chat histories with advanced Artificial Intelligence? Enter Kotha: AI WhatsappChat Memory.
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-green-300 transition leading-snug">Why OnlineKotha is the Best WhatsApp Chat Analyzer App</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Looking for the best app to read, analyze, and simulate your exported WhatsApp chats? Look no further.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>3 min read</span><span>·</span><span class="text-green-400 group-hover:underline">Read Article →</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 04, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <a href="/blog/reclaiming-kotha-a-digital-sanctuary.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-purple-500/10 text-purple-400">CULTURE</span>
-                <span class="text-[11px] card-meta">September 2026</span>
+        <!-- Article Card: how-onlinekotha-redefines-memories.html -->
+        <a href="/blog/how-onlinekotha-redefines-memories.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>6,753 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Beyond Text: How OnlineKotha Makes WhatsApp Chats Feel Alive
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    OnlineKotha is more than a chat viewer. Learn how Kotha breathes life into old WhatsApp conversations and why it
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-purple-300 transition leading-snug">Reclaiming the Word 'Kotha': Building a Digital Sanctuary</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">How we are transforming a misunderstood word into a symbol of memory preservation and emotional safety.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>4 min read</span><span>·</span><span class="text-purple-400 group-hover:underline">Read Article →</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 04, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <a href="/blog/ai-whatsapp-chat-memory-preservation.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-indigo-500/10 text-indigo-400">APP</span>
-                <span class="text-[11px] card-meta">September 2026</span>
+        <!-- Article Card: how-onlinekotha-com-transforms-chat-history.html -->
+        <a href="/blog/how-onlinekotha-com-transforms-chat-history.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#faf5ff; color:#9333ea; border:1px solid #e9d5ff;">
+                        <span>✨</span>
+                        <span>Culture & Voice</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>5,977 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    How onlinekotha.com Transforms Your Boring Chat Histories
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Stop reading WhatsApp chat exports in messy text files. See how OnlineKotha brings your digital memories back to life with a stunning UI...
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-indigo-300 transition leading-snug">Why You Need to Preserve Your WhatsApp Chats Today</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">Don't let your digital memories disappear. How Kotha's AI app helps you safeguard your digital footprint.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>3 min read</span><span>·</span><span class="text-indigo-400 group-hover:underline">Read Article →</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 04, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#9333ea;">
+                    Read →
+                </span>
             </div>
         </a>
 
-        <a href="/blog/changing-the-narrative-onlinekotha.html" class="card p-6 block group">
-            <div class="mb-4 flex items-center justify-between">
-                <span class="tag bg-rose-500/10 text-rose-400">CULTURE</span>
-                <span class="text-[11px] card-meta">September 2026</span>
+        <!-- Article Card: privacy-first-chat-preservation.html -->
+        <a href="/blog/privacy-first-chat-preservation.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>6,596 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Privacy-First WhatsApp Chat Archiving & Memory Analysis: Inside OnlineKotha
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Discover how OnlineKotha safeguards WhatsApp chat archives with local parsing, zero data selling, and ephemeral in-memory processing....
+                </p>
             </div>
-            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-rose-300 transition leading-snug">Changing the Narrative: The True Purpose of OnlineKotha</h2>
-            <p class="text-[13px] card-desc leading-relaxed mb-4">How we are fighting misconceptions and bringing deep emotional utility to the word Kotha in India.</p>
-            <div class="flex items-center gap-2 text-[11px] card-meta">
-                <span>5 min read</span><span>·</span><span class="text-rose-400 group-hover:underline">Read Article →</span>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 03, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
             </div>
         </a>
 
+        <!-- Article Card: whatsapp-chat-wrapped-guide.html -->
+        <a href="/blog/whatsapp-chat-wrapped-guide.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>6,300 views</span>
+                    </span>
+                </div>
 
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    WhatsApp Chat Wrapped: How to Generate Your Social Story with OnlineKotha
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Turn your exported WhatsApp chat into viral Spotify Wrapped style story cards. Discover response times, late-night chatter, emoji...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 03, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: long-distance-relationship-chat-memories.html -->
+        <a href="/blog/long-distance-relationship-chat-memories.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#fdf2f8; color:#db2777; border:1px solid #fbcfe8;">
+                        <span>💜</span>
+                        <span>Heart & Closure</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>7,888 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Long-Distance Relationship Survival Guide: How Chat Analytics Keep Love Alive
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Discover how long-distance couples use WhatsApp chat analytics, On This Day retrospectives, and conversational patterns to bridge miles...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 02, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#db2777;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: preserving-chats-of-late-loved-ones.html -->
+        <a href="/blog/preserving-chats-of-late-loved-ones.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#ecfeff; color:#0891b2; border:1px solid #a5f3fc;">
+                        <span>⚡</span>
+                        <span>Technology & AI</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>6,368 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Grief, Memory & AI: How Preserving Late Loved Ones' Messages Helps Us Heal
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    A thoughtful reflection on digital bereavement. How preserving WhatsApp voice notes, everyday messages, and conversations of deceased...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 02, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#0891b2;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: how-ai-understands-slang-and-texting-nuance.html -->
+        <a href="/blog/how-ai-understands-slang-and-texting-nuance.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#ecfeff; color:#0891b2; border:1px solid #a5f3fc;">
+                        <span>⚡</span>
+                        <span>Technology & AI</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>8,161 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    The Architecture of Texting: How AI Learns Slang, Emojis & Hinglish Nuances
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    A deep dive into how conversational LLMs parse Hinglish, regional sarcasm, texting idiosyncrasies, and double texts without rigid...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 01, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#0891b2;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: whatsapp-group-chat-friendship-analytics.html -->
+        <a href="/blog/whatsapp-group-chat-friendship-analytics.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>7,990 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    The Friendship Index: What Your College & Group WhatsApp Chats Reveal About Your Crew
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Discover the unspoken dynamics of your WhatsApp friend group: who sparks debates, who ghosts after plans are made, and who is the...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        October 01, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: breakup-closure-and-chat-history.html -->
+        <a href="/blog/breakup-closure-and-chat-history.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>10,049 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    The Art of Closure: Why We Re-read Old WhatsApp Chats After a Breakup
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    A psychological perspective on why millions re-read past relationship conversations, search for where things went wrong, and how...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        September 30, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: ai-chat-with-ex.html -->
+        <a href="/blog/ai-chat-with-ex.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>10,758 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    AI Chat With Your Ex: How to Turn WhatsApp Chats into an AI Simulation
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Can you turn exported WhatsApp chats into an AI chatbot of your ex-partner, girlfriend, or boyfriend? Discover how conversational AI...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        September 28, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: how-to-export-whatsapp-chat.html -->
+        <a href="/blog/how-to-export-whatsapp-chat.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>12,569 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    How to Export WhatsApp Chat
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Learn how to export WhatsApp chats on Android and iPhone. Step-by-step guide with screenshots to save your conversations as .zip files...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        September 20, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        5 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: ai-personality-cloning.html -->
+        <a href="/blog/ai-personality-cloning.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#ecfeff; color:#0891b2; border:1px solid #a5f3fc;">
+                        <span>⚡</span>
+                        <span>Technology & AI</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>14,821 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    How AI Learns to Talk Like Your Ex, Partner, or Loved Ones
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Discover how Kotha
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        September 15, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        6 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#0891b2;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: whatsapp-chat-viewer-online.html -->
+        <a href="/blog/whatsapp-chat-viewer-online.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#eef2ff; color:#4f46e5; border:1px solid #c7d2fe;">
+                        <span>📱</span>
+                        <span>Official App</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>18,899 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    Best WhatsApp Chat Viewer Online
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    View exported WhatsApp chats online in a beautiful, searchable WhatsApp-like interface with AI chat simulation. No more reading messy...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        September 10, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        3 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#4f46e5;">
+                    Read →
+                </span>
+            </div>
+        </a>
+
+        <!-- Article Card: preserve-digital-memories.html -->
+        <a href="/blog/preserve-digital-memories.html" class="blog-card group flex flex-col justify-between p-6 sm:p-7 rounded-2xl transition-all duration-300">
+            <div>
+                <!-- Top Meta: Tag + Views -->
+                <div class="flex items-center justify-between gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors"
+                          style="background:#fffbeb; color:#d97706; border:1px solid #fde68a;">
+                        <span>📖</span>
+                        <span>Guides & Tutorials</span>
+                    </span>
+                    <span class="view-pill inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                        <svg class="w-3.5 h-3.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>21,157 views</span>
+                    </span>
+                </div>
+
+                <!-- Title (Equal 2.5 line min height for uniform sizing) -->
+                <h2 class="card-title text-[18px] sm:text-[19px] font-extrabold leading-snug mb-3 transition-colors line-clamp-2">
+                    5 Beautiful Ways to Preserve Your Digital Memories Forever
+                </h2>
+
+                <!-- Description -->
+                <p class="card-desc text-[13px] leading-relaxed mb-6 line-clamp-3">
+                    Creative ways to preserve WhatsApp chats, photos, and digital conversations forever. From AI chat to memory timelines — make sure...
+                </p>
+            </div>
+
+            <!-- Bottom Meta: Date, Read Time & CTA -->
+            <div class="card-footer pt-4 border-t flex items-center justify-between text-[11px] font-medium mt-auto">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        September 05, 2026
+                    </span>
+                    <span>·</span>
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        4 min read
+                    </span>
+                </div>
+                <span class="read-cta inline-flex items-center gap-1 font-bold group-hover:translate-x-0.5 transition-transform" style="color:#d97706;">
+                    Read →
+                </span>
+            </div>
+        </a>
     </div>
 </section>
 
