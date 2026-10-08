@@ -1803,6 +1803,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // If the user is currently viewing a DM, do not show the WhatsApp empty state
         if (window.location.hash && window.location.hash.startsWith('#chat-')) return;
         
+        if (closeSidebarBtn) {
+            closeSidebarBtn.classList.add('hidden');
+            closeSidebarBtn.classList.remove('flex');
+        }
+        
         const container = document.getElementById('chat-container');
         if (!container) return;
 
@@ -1929,6 +1934,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function removeEmptyState() {
         const e = document.getElementById('empty-state');
         if (e) e.remove();
+        
+        if (closeSidebarBtn) {
+            closeSidebarBtn.classList.remove('hidden');
+            closeSidebarBtn.classList.add('flex');
+        }
         
         // Show header and bottom input again
         const header = document.getElementById('chat-header-bar');
