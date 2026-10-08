@@ -58,24 +58,33 @@
     }
     </script>
 </head>
-<body class="antialiased">
+<body class="antialiased bg-gray-50 dark:bg-[#0a0a0f] text-gray-800 dark:text-[#d4d4d8] transition-colors duration-300">
 
 <!-- Nav -->
-<nav class="border-b border-white/[0.04] bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50">
-    <div class="max-w-5xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
+<nav class="border-b border-gray-200 dark:border-white/[0.04] bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
+    <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2.5 group">
             <img src="/logo.svg" alt="Kotha Logo" class="w-8 h-8 object-contain transition-transform group-hover:scale-105" />
-            <span class="font-extrabold text-[17px] tracking-tight text-white">Kotha</span>
-            <span class="text-zinc-600 text-sm font-medium ml-1">/ Blog</span>
+            <span class="font-bold text-[18px] text-gray-900 dark:text-white tracking-tight">Kotha</span>
         </a>
-        <a href="/login.html#signup" class="text-[13px] font-bold text-indigo-400 hover:text-indigo-300 transition">Get Started →</a>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.95 15.657a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-3.22a1 1 0 010-1.415l-.708-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm1.293-4.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414L3.293 6.464a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z"></path>
+                </svg>
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
+            <a href="/" class="text-[14px] text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition font-medium">← Back to App</a>
+        </div>
     </div>
 </nav>
 
 <!-- Header -->
 <section class="py-20 px-5 text-center">
     <h1 class="text-[40px] md:text-[52px] font-black tracking-tight mb-4">Blog</h1>
-    <p class="text-zinc-500 text-[16px] max-w-md mx-auto">Guides, tips, and stories about preserving your most precious conversations.</p>
+    <p class="text-gray-600 dark:text-zinc-400 text-[16px] max-w-md mx-auto">Guides, tips, and stories about preserving your most precious conversations.</p>
 </section>
 
 <!-- Articles -->
@@ -86,11 +95,11 @@
         <a href="/blog/ai-chat-with-ex.html" class="card p-6 block group md:col-span-2 border-indigo-500/30 hover:border-pink-500/50">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-pink-500/15 text-pink-400 font-bold">Hot Topic · AI Simulator</span>
-                <span class="text-[11px] text-zinc-500">Updated September 2026</span>
+                <span class="text-[11px] text-gray-600 dark:text-zinc-400">Updated September 2026</span>
             </div>
-            <h2 class="text-[22px] font-black text-white mb-2 group-hover:text-pink-300 transition leading-snug">AI Chat With Your Ex: How to Turn Past WhatsApp Chats into an AI Simulation</h2>
+            <h2 class="text-[22px] font-black text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">AI Chat With Your Ex: How to Turn Past WhatsApp Chats into an AI Simulation</h2>
             <p class="text-[14px] text-zinc-400 leading-relaxed mb-4">Can you turn exported WhatsApp chats into an authentic AI chatbot of your ex-partner, boyfriend, or girlfriend? Discover how conversational AI clones texting styles for nostalgia, memory preservation, and closure.</p>
-            <div class="flex items-center gap-3 text-[12px] text-zinc-500">
+            <div class="flex items-center gap-3 text-[12px] text-gray-600 dark:text-zinc-400">
                 <span>5 min read</span>
                 <span>·</span>
                 <span class="text-indigo-400 font-semibold group-hover:underline">Read Complete Guide →</span>
@@ -102,9 +111,9 @@
             <div class="mb-4">
                 <span class="tag bg-indigo-500/10 text-indigo-400">Guide</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-indigo-300 transition leading-snug">How to Export WhatsApp Chat — Step by Step Guide (2025)</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">Complete guide to export your WhatsApp conversations on Android and iPhone. With or without media — everything you need to know.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-indigo-300 transition leading-snug">How to Export WhatsApp Chat — Step by Step Guide (2025)</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Complete guide to export your WhatsApp conversations on Android and iPhone. With or without media — everything you need to know.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>Updated May 2026</span>
@@ -116,9 +125,9 @@
             <div class="mb-4">
                 <span class="tag bg-amber-500/10 text-amber-400">Ideas</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-amber-300 transition leading-snug">5 Beautiful Ways to Preserve Your Digital Memories Forever</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">From WhatsApp chats to photo albums — creative ways to make sure your most precious digital conversations last a lifetime.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-amber-300 transition leading-snug">5 Beautiful Ways to Preserve Your Digital Memories Forever</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">From WhatsApp chats to photo albums — creative ways to make sure your most precious digital conversations last a lifetime.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>4 min read</span>
                 <span>·</span>
                 <span>May 2026</span>
@@ -130,9 +139,9 @@
             <div class="mb-4">
                 <span class="tag bg-pink-500/10 text-pink-400">Technology</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-pink-300 transition leading-snug">How AI Learns to Talk Like Your Loved Ones — The Technology Behind Kotha</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">How personality cloning works, why it matters, and how Kotha's AI captures someone's exact way of texting from their chat history.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">How AI Learns to Talk Like Your Loved Ones — The Technology Behind Kotha</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">How personality cloning works, why it matters, and how Kotha's AI captures someone's exact way of texting from their chat history.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>6 min read</span>
                 <span>·</span>
                 <span>May 2026</span>
@@ -144,9 +153,9 @@
             <div class="mb-4">
                 <span class="tag bg-emerald-500/10 text-emerald-400">Product</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-emerald-300 transition leading-snug">Best WhatsApp Chat Viewer Online — Read Old Chats Beautifully</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">Why reading exported WhatsApp chats in a text file is painful, and how Kotha transforms them into a beautiful, searchable experience.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-300 transition leading-snug">Best WhatsApp Chat Viewer Online — Read Old Chats Beautifully</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Why reading exported WhatsApp chats in a text file is painful, and how Kotha transforms them into a beautiful, searchable experience.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>3 min read</span>
                 <span>·</span>
                 <span>May 2026</span>
@@ -159,9 +168,9 @@
                 <span class="tag bg-purple-500/15 text-purple-400 font-bold">Featured · Wrapped</span>
                 <span class="text-[11px] text-purple-400">Trending 🔥</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-purple-300 transition leading-snug">WhatsApp Chat Wrapped: How to Turn Years of Messages into a Viral Social Story</h2>
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-300 transition leading-snug">WhatsApp Chat Wrapped: How to Turn Years of Messages into a Viral Social Story</h2>
             <p class="text-[13px] text-zinc-400 leading-relaxed mb-4">Discover who texted first, late-night chatter stats, emoji profiles, and generate cinematic 9:16 Instagram story cards from your chat archives.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+            <div class="flex items-center gap-2 text-[11px] text-gray-600 dark:text-zinc-400">
                 <span>4 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -173,9 +182,9 @@
             <div class="mb-4">
                 <span class="tag bg-teal-500/10 text-teal-400 font-bold">Privacy & Security</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-teal-300 transition leading-snug">Privacy-First Chat Archiving: Why Your Conversations Never Belong to Advertisers</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">Inside OnlineKotha's security model: sandboxed user silos, local memory indexing, zero ad networks, and immediate on-demand data purges.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-teal-300 transition leading-snug">Privacy-First Chat Archiving: Why Your Conversations Never Belong to Advertisers</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Inside OnlineKotha's security model: sandboxed user silos, local memory indexing, zero ad networks, and immediate on-demand data purges.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -187,9 +196,9 @@
             <div class="mb-4">
                 <span class="tag bg-pink-500/10 text-pink-400 font-bold">Relationships & LDR</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-pink-300 transition leading-snug">When WhatsApp Is Your Entire Living Room: How Long-Distance Couples Preserve Their Story</h2>
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">When WhatsApp Is Your Entire Living Room: How Long-Distance Couples Preserve Their Story</h2>
             <p class="text-[13px] text-zinc-400 leading-relaxed mb-4">How couples across time zones use chat history, On This Day retrospectives, and communication analytics to bridge miles and keep love unbreakable.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+            <div class="flex items-center gap-2 text-[11px] text-gray-600 dark:text-zinc-400">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -201,9 +210,9 @@
             <div class="mb-4">
                 <span class="tag bg-blue-500/10 text-blue-400 font-bold">Digital Memorials & Healing</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-blue-300 transition leading-snug">When a Voice Note Is All That's Left: Safeguarding the Words of Someone You Lost</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">Why ordinary texts like 'khana kha liya?' become priceless digital heirlooms, and how offline archives protect them from expired phone numbers.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-300 transition leading-snug">When a Voice Note Is All That's Left: Safeguarding the Words of Someone You Lost</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Why ordinary texts like 'khana kha liya?' become priceless digital heirlooms, and how offline archives protect them from expired phone numbers.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -215,9 +224,9 @@
             <div class="mb-4">
                 <span class="tag bg-amber-500/10 text-amber-400 font-bold">Squad Dynamics</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-amber-300 transition leading-snug">The Friendship Index: What 100,000 Group Chat Messages Say About Your Crew</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">Decode the unwritten rules of your squad: who is the voice-note podcaster, who plans the trips that fall apart, and who sends 80% of the memes.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-amber-300 transition leading-snug">The Friendship Index: What 100,000 Group Chat Messages Say About Your Crew</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Decode the unwritten rules of your squad: who is the voice-note podcaster, who plans the trips that fall apart, and who sends 80% of the memes.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>4 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -229,9 +238,9 @@
             <div class="mb-4">
                 <span class="tag bg-cyan-500/10 text-cyan-400 font-bold">Engineering & NLP</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-cyan-300 transition leading-snug">The Architecture of Texting: How AI Decodes Sarcasm, Hinglish & Inside Jokes</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">Why traditional chatbots sound robotic, and how burst detection, lexical indexing, and context slices recreate authentic human texting cadence.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-cyan-300 transition leading-snug">The Architecture of Texting: How AI Decodes Sarcasm, Hinglish & Inside Jokes</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Why traditional chatbots sound robotic, and how burst detection, lexical indexing, and context slices recreate authentic human texting cadence.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -243,9 +252,9 @@
             <div class="mb-4">
                 <span class="tag bg-rose-500/10 text-rose-400 font-bold">Psychology & Closure</span>
             </div>
-            <h2 class="text-[18px] font-bold text-white mb-2 group-hover:text-rose-300 transition leading-snug">The Art of Closure: Why We Re-read Old Texts (And How to Finally Find Peace)</h2>
-            <p class="text-[13px] text-zinc-500 leading-relaxed mb-4">The science of narrative coherence after heartbreak, moving away from agonizing 2 AM doomscrolling into therapeutic, sealed-chapter reflection.</p>
-            <div class="flex items-center gap-2 text-[11px] text-zinc-600">
+            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rose-300 transition leading-snug">The Art of Closure: Why We Re-read Old Texts (And How to Finally Find Peace)</h2>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">The science of narrative coherence after heartbreak, moving away from agonizing 2 AM doomscrolling into therapeutic, sealed-chapter reflection.</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -256,26 +265,26 @@
 </section>
 
 <!-- CTA -->
-<section class="py-20 px-5 text-center border-t border-white/[0.04]">
+<section class="py-20 px-5 text-center border-t border-gray-200 dark:border-white/[0.04]">
     <h2 class="text-[28px] font-black tracking-tight mb-4">Ready to try Kotha?</h2>
-    <p class="text-zinc-500 text-[14px] mb-8">Import your chat history and start talking to your memories.</p>
-    <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-[14px] px-7 py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition">
+    <p class="text-gray-600 dark:text-zinc-400 text-[14px] mb-8">Import your chat history and start talking to your memories.</p>
+    <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-gray-900 dark:text-white font-bold text-[14px] px-7 py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition">
         Get Started Free
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
 </section>
 
 <!-- Footer -->
-<footer class="border-t border-white/[0.04] bg-[#060608] py-8">
+<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-[#060608] py-8">
     <div class="max-w-5xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <div class="w-6 h-6 rounded-[6px] bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
             </div>
-            <span class="font-bold text-[13px] text-white">Kotha</span>
+            <span class="font-bold text-[13px] text-gray-900 dark:text-white">Kotha</span>
             <span class="text-[11px] text-zinc-700">&copy; 2026</span>
         </div>
-        <div class="flex items-center gap-6 text-[12px] font-medium text-zinc-600">
+        <div class="flex items-center gap-6 text-[12px] font-medium text-gray-500 dark:text-zinc-500">
             <a href="/" class="hover:text-zinc-300 transition">Home</a>
             <a href="/#how" class="hover:text-zinc-300 transition">Features</a>
             <a href="/#pricing" class="hover:text-zinc-300 transition">Pricing</a>

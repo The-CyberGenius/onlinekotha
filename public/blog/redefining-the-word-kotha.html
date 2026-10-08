@@ -26,29 +26,52 @@
     <link rel="icon" type="image/svg+xml" href="/logo.svg?v=2">
     <script src="/js/tailwind.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
-        body { background: #0a0a0f; color: #d4d4d8; }
-        .feat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; }
+        ::selection { background: #6366f1 !important; color: #ffffff !important; }
+        ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
+        .feat { border-radius: 16px; padding: 20px; transition: all 0.3s ease; }
+        .dark .feat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+        html:not(.dark) .feat { background: #f9fafb; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
     </style>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
 </head>
-<body class="antialiased">
+<body class="antialiased bg-white dark:bg-[#0a0a0f] text-gray-800 dark:text-[#d4d4d8] transition-colors duration-300">
 
-<nav class="border-b border-white/[0.04] bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50">
+<nav class="border-b border-gray-200 dark:border-white/[0.04] bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
     <div class="max-w-3xl mx-auto px-5 py-4 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2.5 group">
             <img src="/logo.svg" alt="Kotha Logo" class="w-7 h-7 object-contain transition-transform group-hover:scale-105" />
-            <span class="font-bold text-[16px] text-white tracking-tight">Kotha</span>
+            <span class="font-bold text-[16px] text-gray-900 dark:text-white tracking-tight">Kotha</span>
         </a>
-        <a href="/blog.html" class="text-[13px] text-zinc-500 hover:text-white transition">← Blog</a>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.95 15.657a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-3.22a1 1 0 010-1.415l-.708-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm1.293-4.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414L3.293 6.464a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z"></path>
+                </svg>
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
+            <a href="/blog.html" class="text-[13px] font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">← Blog</a>
+        </div>
     </div>
 </nav>
 
 <article class="max-w-3xl mx-auto px-5 py-16">
     <div class="mb-10">
         <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-indigo-400 mb-3 block">Our Mission</span>
-        <h1 class="text-[32px] md:text-[40px] font-black text-white tracking-tight leading-tight mb-4">Redefining 'Kotha': Breaking the Stigma Behind Our Name</h1>
-        <p class="text-zinc-500 text-[15px] leading-relaxed">In India, the word 'Kotha' carries a heavy taboo. Learn why we chose this name and how we are reclaiming it to mean a beautiful sanctuary for conversations and stories.</p>
+        <h1 class="text-[32px] md:text-[40px] font-black text-gray-900 dark:text-white tracking-tight leading-tight mb-4">Redefining 'Kotha': Breaking the Stigma Behind Our Name</h1>
+        <p class="text-gray-600 dark:text-zinc-400 text-[16px] md:text-[18px] leading-relaxed">In India, the word 'Kotha' carries a heavy taboo. Learn why we chose this name and how we are reclaiming it to mean a beautiful sanctuary for conversations and stories.</p>
         <div class="flex items-center gap-3 mt-5 text-[12px] text-zinc-600">
             <span>5 min read</span><span>·</span><span>Updated October 2026</span>
         </div>
@@ -61,26 +84,26 @@
                 <img src="/logo.svg" alt="App Icon" class="w-full h-full object-contain drop-shadow-md">
             </div>
             <div class="flex-1 min-w-0">
-                <h3 class="text-white font-bold text-[15px] truncate mb-0.5 group-hover:text-indigo-400 transition-colors">Download Official Kotha App</h3>
-                <p class="text-[12px] text-zinc-400 truncate">Experience smooth, real-time AI chats natively on Android.</p>
+                <h3 class="text-white font-bold text-[16px] md:text-[18px] truncate mb-0.5 group-hover:text-indigo-200 transition-colors">Download Official Kotha App</h3>
+                <p class="text-[12px] text-gray-500 dark:text-zinc-400 truncate">Experience smooth, real-time AI chats natively on Android.</p>
             </div>
-            <div class="shrink-0 bg-white/5 group-hover:bg-indigo-600 text-white rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors">
+            <div class="shrink-0 bg-black/20 dark:bg-white/5 group-hover:bg-indigo-600 text-white rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors">
                 Install App
             </div>
         </div>
     </a>
 
-    <div class="space-y-6 text-[15px] leading-[1.8]">
+    <div class="space-y-6 text-[16px] md:text-[18px] leading-[1.8]">
 
         <p>When people in India hear the word <strong>"Kotha,"</strong> there is often a moment of hesitation. For decades, the word has been heavily stigmatized, culturally reduced to mean a brothel or a place of ill repute. Because of this taboo, the word is rarely spoken in polite society, and it carries a weight of shame.</p>
         
         <p>So, why did we name our emotional digital memory platform <strong>OnlineKotha.com</strong>?</p>
         
-        <h2 class="text-[24px] font-bold text-white mt-12 mb-4">The True Root of the Word</h2>
+        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white mt-12 mb-4">The True Root of the Word</h2>
         <p>To understand our choice, we have to look past the stigma and into the true roots of the word. Historically, a "Kotha" was simply a spacious room, a grand terrace, or a gathering house. It was a place where people congregated to share art, music, poetry, and conversation.</p>
         <p>Even more beautifully, in the Bengali language, the word <em>"Kotha" (কথা)</em> literally translates to <strong>"Words," "Stories," or "Conversations."</strong> When someone says "Kotha bolbo," they are saying "Let's talk."</p>
 
-        <h2 class="text-[24px] font-bold text-white mt-12 mb-4">Reclaiming the Kotha</h2>
+        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white mt-12 mb-4">Reclaiming the Kotha</h2>
         <p>We believe it is time to break the taboo. We want to erase the negative, degrading associations of the word and return it to its purest meaning. <strong>OnlineKotha</strong> is exactly what the Bengali translation implies: an online house of words, stories, and conversations.</p>
         
         <p>Our platform is a sanctuary where people upload their most precious WhatsApp chats—conversations with lost loved ones, ex-partners, and childhood friends. It is a modern-day gathering room where your digital memories are kept safe, respected, and cherished.</p>
@@ -90,12 +113,12 @@
     </div>
 </article>
 
-<footer class="border-t border-white/[0.04] py-12 mt-20">
+<footer class="border-t border-gray-200 dark:border-white/[0.04] py-12 mt-20">
     <div class="max-w-3xl mx-auto px-5 text-center">
         <p class="text-zinc-600 text-[13px] mb-4">© 2026 OnlineKotha. All rights reserved.</p>
         <div class="flex justify-center gap-4 text-[13px]">
-            <a href="/privacy.html" class="text-zinc-500 hover:text-white transition">Privacy</a>
-            <a href="/terms.html" class="text-zinc-500 hover:text-white transition">Terms</a>
+            <a href="/privacy.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:text-white transition">Privacy</a>
+            <a href="/terms.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:text-white transition">Terms</a>
             <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" class="text-indigo-400 hover:text-indigo-300 transition font-medium">Download App</a>
         </div>
     </div>

@@ -43,32 +43,55 @@
 <script src="/js/tailwind.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
-        body { background: #0a0a0f; color: #d4d4d8; }
-        .feat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; }
+        ::selection { background: #6366f1 !important; color: #ffffff !important; }
+        ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
+        .feat { border-radius: 16px; padding: 20px; transition: all 0.3s ease; }
+        .dark .feat { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+        html:not(.dark) .feat { background: #f9fafb; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
     </style>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <script type="application/ld+json">
     {"@context":"https://schema.org","@type":"Article","headline":"Best WhatsApp Chat Viewer Online","description":"View exported WhatsApp chats in a beautiful, searchable interface online. No more reading messy .txt files.","datePublished":"2025-05-01","dateModified":"2025-05-25","author":{"@type":"Organization","name":"Kotha","url":"https://www.onlinekotha.com"},"publisher":{"@type":"Organization","name":"Kotha","url":"https://www.onlinekotha.com","logo":{"@type":"ImageObject","url":"https://www.onlinekotha.com/favicon.svg"}},"image":{"@type":"ImageObject","url":"https://www.onlinekotha.com/og-image.png","width":1200,"height":630},"mainEntityOfPage":{"@type":"WebPage","@id":"https://www.onlinekotha.com/blog/whatsapp-chat-viewer-online.html"}}
     </script>
 </head>
-<body class="antialiased">
+<body class="antialiased bg-white dark:bg-[#0a0a0f] text-gray-800 dark:text-[#d4d4d8] transition-colors duration-300">
 
-<nav class="border-b border-white/[0.04] bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50">
+<nav class="border-b border-gray-200 dark:border-white/[0.04] bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
     <div class="max-w-3xl mx-auto px-5 py-4 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2.5 group">
             <img src="/logo.svg" alt="Kotha Logo" class="w-7 h-7 object-contain transition-transform group-hover:scale-105" />
-            <span class="font-bold text-[16px] text-white tracking-tight">Kotha</span>
+            <span class="font-bold text-[16px] text-gray-900 dark:text-white tracking-tight">Kotha</span>
         </a>
-        <a href="/blog.html" class="text-[13px] text-zinc-500 hover:text-white transition">← Blog</a>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.95 15.657a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-3.22a1 1 0 010-1.415l-.708-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm1.293-4.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414L3.293 6.464a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z"></path>
+                </svg>
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
+            <a href="/blog.html" class="text-[13px] font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">← Blog</a>
+        </div>
     </div>
 </nav>
 
 <article class="max-w-3xl mx-auto px-5 py-16">
     <div class="mb-10">
         <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-400 mb-3 block">Product</span>
-        <h1 class="text-[32px] md:text-[40px] font-black text-white tracking-tight leading-tight mb-4">Best WhatsApp Chat Viewer Online</h1>
-        <p class="text-zinc-500 text-[15px] leading-relaxed">Stop reading exported chats in ugly text files. Kotha shows them beautifully — like they're still in WhatsApp.</p>
+        <h1 class="text-[32px] md:text-[40px] font-black text-gray-900 dark:text-white tracking-tight leading-tight mb-4">Best WhatsApp Chat Viewer Online</h1>
+        <p class="text-gray-600 dark:text-zinc-400 text-[16px] md:text-[18px] leading-relaxed">Stop reading exported chats in ugly text files. Kotha shows them beautifully — like they're still in WhatsApp.</p>
         <div class="flex items-center gap-3 mt-5 text-[12px] text-zinc-600">
             <span>3 min read</span><span>·</span><span>May 2026</span>
         </div>
@@ -81,20 +104,20 @@
                 <img src="/logo.svg" alt="App Icon" class="w-full h-full object-contain drop-shadow-md">
             </div>
             <div class="flex-1 min-w-0">
-                <h3 class="text-white font-bold text-[15px] truncate mb-0.5 group-hover:text-indigo-400 transition-colors">Get the Official Kotha App</h3>
-                <p class="text-[12px] text-zinc-400 truncate">Experience smooth, real-time AI chats natively on Android.</p>
+                <h3 class="text-gray-900 dark:text-white font-bold text-[16px] md:text-[18px] truncate mb-0.5 group-hover:text-indigo-400 transition-colors">Get the Official Kotha App</h3>
+                <p class="text-[12px] text-gray-500 dark:text-zinc-400 truncate">Experience smooth, real-time AI chats natively on Android.</p>
             </div>
-            <div class="shrink-0 bg-white/5 group-hover:bg-indigo-600 text-white rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors">
+            <div class="shrink-0 bg-black/20 dark:bg-white/5 group-hover:bg-indigo-600 text-white rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors">
                 Install App
             </div>
         </div>
     </a>
 
-    <div class="space-y-6 text-[15px] leading-[1.8]">
+    <div class="space-y-6 text-[16px] md:text-[18px] leading-[1.8]">
 
         <p>You exported your WhatsApp chat. You open the file. And you see... this:</p>
 
-        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 font-mono text-[12px] text-zinc-500 leading-relaxed overflow-x-auto">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-4 font-mono text-[12px] text-gray-600 dark:text-zinc-400 leading-relaxed overflow-x-auto">
             12/03/23, 9:41 PM - Maa: Beta khana kha liya?<br>
             12/03/23, 9:42 PM - You: Haan maa<br>
             12/03/23, 9:42 PM - Maa: Kya khaya<br>
@@ -106,46 +129,46 @@
 
         <p>Reading thousands of these lines in a text file is painful. You can't search properly, media files are separate, and the whole experience feels wrong for something so personal.</p>
 
-        <h2 class="text-[24px] font-bold text-white mt-12 mb-4">What Kotha Does Differently</h2>
+        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white mt-12 mb-4">What Kotha Does Differently</h2>
 
         <p>Upload that same .zip file to <a href="/" class="text-indigo-400 hover:text-indigo-300 underline">Kotha</a>, and it transforms into a proper chat interface:</p>
 
         <div class="grid sm:grid-cols-2 gap-3 my-6">
             <div class="feat">
                 <div class="text-[18px] mb-2">💬</div>
-                <p class="text-[13px] font-bold text-white mb-1">Chat Bubbles</p>
-                <p class="text-[12px] text-zinc-500">Messages displayed in proper WhatsApp-style bubbles with timestamps and sender colors.</p>
+                <p class="text-[13px] font-bold text-gray-900 dark:text-white mb-1">Chat Bubbles</p>
+                <p class="text-[12px] text-gray-600 dark:text-zinc-400">Messages displayed in proper WhatsApp-style bubbles with timestamps and sender colors.</p>
             </div>
             <div class="feat">
                 <div class="text-[18px] mb-2">🔍</div>
-                <p class="text-[13px] font-bold text-white mb-1">Instant Search</p>
-                <p class="text-[12px] text-zinc-500">Search through years of messages in milliseconds. Find any word, name, or phrase.</p>
+                <p class="text-[13px] font-bold text-gray-900 dark:text-white mb-1">Instant Search</p>
+                <p class="text-[12px] text-gray-600 dark:text-zinc-400">Search through years of messages in milliseconds. Find any word, name, or phrase.</p>
             </div>
             <div class="feat">
                 <div class="text-[18px] mb-2">📸</div>
-                <p class="text-[13px] font-bold text-white mb-1">Media Gallery</p>
-                <p class="text-[12px] text-zinc-500">All shared photos, videos, and voice notes visible inline — click to expand.</p>
+                <p class="text-[13px] font-bold text-gray-900 dark:text-white mb-1">Media Gallery</p>
+                <p class="text-[12px] text-gray-600 dark:text-zinc-400">All shared photos, videos, and voice notes visible inline — click to expand.</p>
             </div>
             <div class="feat">
                 <div class="text-[18px] mb-2">📊</div>
-                <p class="text-[13px] font-bold text-white mb-1">Chat Analytics</p>
-                <p class="text-[12px] text-zinc-500">See who texts more, peak chat hours, emoji counts, and message stats.</p>
+                <p class="text-[13px] font-bold text-gray-900 dark:text-white mb-1">Chat Analytics</p>
+                <p class="text-[12px] text-gray-600 dark:text-zinc-400">See who texts more, peak chat hours, emoji counts, and message stats.</p>
             </div>
             <div class="feat">
                 <div class="text-[18px] mb-2">🤖</div>
-                <p class="text-[13px] font-bold text-white mb-1">AI Conversations</p>
-                <p class="text-[12px] text-zinc-500">Talk to an AI that <a href="/blog/ai-personality-cloning.html" class="text-indigo-400 underline">simulates conversational patterns</a>.</p>
+                <p class="text-[13px] font-bold text-gray-900 dark:text-white mb-1">AI Conversations</p>
+                <p class="text-[12px] text-gray-600 dark:text-zinc-400">Talk to an AI that <a href="/blog/ai-personality-cloning.html" class="text-indigo-400 underline">simulates conversational patterns</a>.</p>
             </div>
             <div class="feat">
                 <div class="text-[18px] mb-2">⏰</div>
-                <p class="text-[13px] font-bold text-white mb-1">On This Day</p>
-                <p class="text-[12px] text-zinc-500">Daily memory notifications from past conversations on the same date.</p>
+                <p class="text-[13px] font-bold text-gray-900 dark:text-white mb-1">On This Day</p>
+                <p class="text-[12px] text-gray-600 dark:text-zinc-400">Daily memory notifications from past conversations on the same date.</p>
             </div>
         </div>
 
-        <h2 class="text-[24px] font-bold text-white mt-12 mb-4">Works With All WhatsApp Exports</h2>
+        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white mt-12 mb-4">Works With All WhatsApp Exports</h2>
 
-        <ul class="list-disc pl-6 space-y-2 text-zinc-400">
+        <ul class="list-disc pl-6 space-y-2 text-gray-500 dark:text-zinc-400">
             <li><b class="text-zinc-300">Android exports</b> — 12-hour and 24-hour format</li>
             <li><b class="text-zinc-300">iPhone exports</b> — with bracket-style timestamps</li>
             <li><b class="text-zinc-300">With or without media</b> — both work perfectly</li>
@@ -153,9 +176,9 @@
             <li><b class="text-zinc-300">Group chats</b> — multi-person conversations with color-coded senders</li>
         </ul>
 
-        <h2 class="text-[24px] font-bold text-white mt-12 mb-4">How to Get Started</h2>
+        <h2 class="text-[24px] font-bold text-gray-900 dark:text-white mt-12 mb-4">How to Get Started</h2>
 
-        <ol class="list-decimal pl-6 space-y-2 text-zinc-400">
+        <ol class="list-decimal pl-6 space-y-2 text-gray-500 dark:text-zinc-400">
             <li><a href="/blog/how-to-export-whatsapp-chat.html" class="text-indigo-400 underline">Export your WhatsApp chat</a> as a .zip file</li>
             <li>Go to <a href="/" class="text-indigo-400 underline">onlinekotha.com</a> and create a free account</li>
             <li>Drag and drop the .zip file</li>
@@ -163,18 +186,18 @@
         </ol>
 
         <div class="mt-12 p-6 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-indigo-500/5 border border-emerald-500/15 text-center">
-            <p class="text-[18px] font-bold text-white mb-2">See your chats in a whole new way</p>
-            <p class="text-[14px] text-zinc-400 mb-5">Free forever. Upload as many chats as you want.</p>
-            <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-[14px] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/25">
+            <p class="text-[18px] font-bold text-gray-900 dark:text-white mb-2">See your chats in a whole new way</p>
+            <p class="text-[14px] text-gray-500 dark:text-zinc-400 mb-5">Free forever. Upload as many chats as you want.</p>
+            <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-gray-900 dark:text-white font-bold text-[14px] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/25">
                 Try Kotha Free →
             </a>
         </div>
     </div>
 </article>
 
-<footer class="border-t border-white/[0.04] bg-[#060608] py-8">
+<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-[#060608] py-8">
     <div class="max-w-3xl mx-auto px-5 flex items-center justify-between text-[12px] text-zinc-600">
-        <a href="/" class="font-bold text-zinc-400 hover:text-white transition">Kotha</a>
+        <a href="/" class="font-bold text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-white transition">Kotha</a>
         <div class="flex gap-5">
             <a href="/blog.html" class="hover:text-zinc-300 transition">Blog</a>
             <a href="/blog/how-to-export-whatsapp-chat.html" class="hover:text-zinc-300 transition">Export Guide</a>

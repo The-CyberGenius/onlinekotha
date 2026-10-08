@@ -67,23 +67,33 @@
     }
     </script>
 </head>
-<body class="antialiased">
+<body class="antialiased bg-white dark:bg-[#0a0a0f] text-gray-800 dark:text-[#d4d4d8] transition-colors duration-300">
 
-<nav class="border-b border-white/[0.04] bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50">
+<nav class="border-b border-gray-200 dark:border-white/[0.04] bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
     <div class="max-w-3xl mx-auto px-5 py-4 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2.5 group">
             <img src="/logo.svg" alt="Kotha Logo" class="w-7 h-7 object-contain transition-transform group-hover:scale-105" />
-            <span class="font-bold text-[16px] text-white tracking-tight">Kotha</span>
+            <span class="font-bold text-[16px] text-gray-900 dark:text-white tracking-tight">Kotha</span>
         </a>
-        <a href="/blog.html" class="text-[13px] text-zinc-500 hover:text-white transition">← Blog</a>
+        <div class="flex items-center gap-4">
+            <button id="theme-toggle" class="p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.95 15.657a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-3.22a1 1 0 010-1.415l-.708-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm1.293-4.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414L3.293 6.464a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z"></path>
+                </svg>
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </button>
+            <a href="/blog.html" class="text-[13px] font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">← Blog</a>
+        </div>
     </div>
 </nav>
 
 <article class="max-w-3xl mx-auto px-5 py-16">
     <div class="mb-10">
         <span class="text-[10px] font-bold uppercase tracking-[0.15em] text-indigo-400 mb-3 block">Guide</span>
-        <h1 class="text-[32px] md:text-[40px] font-black text-white tracking-tight leading-tight mb-4">How to Export WhatsApp Chat — Step by Step Guide</h1>
-        <p class="text-zinc-500 text-[15px] leading-relaxed">Complete guide to export your WhatsApp conversations on Android and iPhone. Save your chats as .zip files and view them beautifully with Kotha.</p>
+        <h1 class="text-[32px] md:text-[40px] font-black text-gray-900 dark:text-white tracking-tight leading-tight mb-4">How to Export WhatsApp Chat — Step by Step Guide</h1>
+        <p class="text-gray-600 dark:text-zinc-400 text-[16px] md:text-[18px] leading-relaxed">Complete guide to export your WhatsApp conversations on Android and iPhone. Save your chats as .zip files and view them beautifully with Kotha.</p>
         <div class="flex items-center gap-3 mt-5 text-[12px] text-zinc-600">
             <span>5 min read</span>
             <span>·</span>
@@ -91,7 +101,7 @@
         </div>
     </div>
 
-    <div class="prose prose-invert max-w-none space-y-8 text-[15px] leading-[1.8]">
+    <div class="prose prose-invert max-w-none space-y-8 text-[16px] md:text-[18px] leading-[1.8]">
 
         <p>WhatsApp lets you export any individual or group chat as a text file (or .zip with media). This is the first step to preserving your conversations — and bringing them to life with <a href="/" class="text-indigo-400 hover:text-indigo-300 underline">Kotha's AI</a>.</p>
 
@@ -104,15 +114,15 @@
             </div>
             <div class="step-box">
                 <p class="text-[12px] font-bold text-indigo-400 mb-1">Step 2</p>
-                <p>Tap the <b class="text-white">three-dot menu</b> (⋮) at the top right corner.</p>
+                <p>Tap the <b class="text-gray-900 dark:text-white">three-dot menu</b> (⋮) at the top right corner.</p>
             </div>
             <div class="step-box">
                 <p class="text-[12px] font-bold text-indigo-400 mb-1">Step 3</p>
-                <p>Go to <b class="text-white">More → Export chat</b>.</p>
+                <p>Go to <b class="text-gray-900 dark:text-white">More → Export chat</b>.</p>
             </div>
             <div class="step-box">
                 <p class="text-[12px] font-bold text-indigo-400 mb-1">Step 4</p>
-                <p>Choose <b class="text-white">"Include Media"</b> to include photos and videos, or "Without Media" for just the text.</p>
+                <p>Choose <b class="text-gray-900 dark:text-white">"Include Media"</b> to include photos and videos, or "Without Media" for just the text.</p>
             </div>
             <div class="step-box">
                 <p class="text-[12px] font-bold text-indigo-400 mb-1">Step 5</p>
@@ -125,11 +135,11 @@
         <div class="space-y-3">
             <div class="step-box">
                 <p class="text-[12px] font-bold text-indigo-400 mb-1">Step 1</p>
-                <p>Open the chat, then tap the <b class="text-white">contact name</b> at the top to open chat info.</p>
+                <p>Open the chat, then tap the <b class="text-gray-900 dark:text-white">contact name</b> at the top to open chat info.</p>
             </div>
             <div class="step-box">
                 <p class="text-[12px] font-bold text-indigo-400 mb-1">Step 2</p>
-                <p>Scroll down and tap <b class="text-white">"Export Chat"</b>.</p>
+                <p>Scroll down and tap <b class="text-gray-900 dark:text-white">"Export Chat"</b>.</p>
             </div>
             <div class="step-box">
                 <p class="text-[12px] font-bold text-indigo-400 mb-1">Step 3</p>
@@ -150,7 +160,7 @@
 
         <p>Once you have your .zip file, head to <a href="/" class="text-indigo-400 hover:text-indigo-300 underline">onlinekotha.com</a> and drag-drop it into the app. Kotha will:</p>
 
-        <ul class="list-disc pl-6 space-y-2 text-zinc-400">
+        <ul class="list-disc pl-6 space-y-2 text-gray-500 dark:text-zinc-400">
             <li>Parse all messages beautifully — like reading them in WhatsApp</li>
             <li>Show all media (photos, videos, voice notes)</li>
             <li>Let you search through years of messages instantly</li>
@@ -159,18 +169,18 @@
         </ul>
 
         <div class="mt-12 p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/5 border border-indigo-500/15 text-center">
-            <p class="text-[18px] font-bold text-white mb-2">Ready to bring your chats to life?</p>
-            <p class="text-[14px] text-zinc-400 mb-5">Free forever. No credit card required.</p>
-            <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-[14px] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/25">
+            <p class="text-[18px] font-bold text-gray-900 dark:text-white mb-2">Ready to bring your chats to life?</p>
+            <p class="text-[14px] text-gray-500 dark:text-zinc-400 mb-5">Free forever. No credit card required.</p>
+            <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-gray-900 dark:text-white font-bold text-[14px] px-6 py-3 rounded-xl shadow-lg shadow-indigo-500/25">
                 Start Free →
             </a>
         </div>
     </div>
 </article>
 
-<footer class="border-t border-white/[0.04] bg-[#060608] py-8">
+<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-[#060608] py-8">
     <div class="max-w-3xl mx-auto px-5 flex items-center justify-between text-[12px] text-zinc-600">
-        <a href="/" class="font-bold text-zinc-400 hover:text-white transition">Kotha</a>
+        <a href="/" class="font-bold text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:text-white transition">Kotha</a>
         <div class="flex gap-5">
             <a href="/blog.html" class="hover:text-zinc-300 transition">Blog</a>
             <a href="/#pricing" class="hover:text-zinc-300 transition">Pricing</a>
