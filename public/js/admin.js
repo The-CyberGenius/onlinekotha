@@ -924,7 +924,8 @@ HARD RULES
                 btn.style.color = 'var(--accent)';
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
-                    const loginAsBtnHtml = `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease;" onmouseover="this.style.background='var(--accent)';this.style.color='#ffffff'" onmouseout="this.style.background='rgba(192,132,252,0.12)';this.style.color='var(--accent)'"><span>🔑</span> Login As User</button>`;
+                    const isGuest = String(uid).startsWith('gst_');
+const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease;" onmouseover="this.style.background='var(--accent)';this.style.color='#ffffff'" onmouseout="this.style.background='rgba(192,132,252,0.12)';this.style.color='var(--accent)'"><span>🔑</span> Login As User</button>`;
 
                     if (!chats.length) {
                         area.innerHTML = `
@@ -943,7 +944,7 @@ HARD RULES
                                     <div style="width:38px;height:38px;border-radius:50%;background:rgba(192,132,252,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;">💬</div>
                                     <div style="font-size:13px;font-weight:600;color:var(--text-primary);">No WhatsApp chats uploaded yet</div>
                                     <p style="font-size:12px;color:var(--text-muted);margin:0;max-width:320px;line-height:1.4;">This user has not imported any chats yet. You can still login to their account to test or assist.</p>
-                                    <button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="margin-top:6px;padding:7px 16px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:var(--accent);color:#ffffff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(192,132,252,0.35);"><span>🔑</span> Login As User</button>
+                                    ${String(uid).startsWith('gst_') ? '' : `<button onclick=\"window.location.href='/api/admin/impersonate/start?uid=${uid}'\" style=\"margin-top:6px;padding:7px 16px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:var(--accent);color:#ffffff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(192,132,252,0.35);\"><span>🔑</span> Login As User</button>`}
                                 </div>
                             </div>
                         `;
@@ -1048,7 +1049,7 @@ HARD RULES
                     area.querySelectorAll('[data-admin-open-chat]').forEach(openBtn => {
                         openBtn.addEventListener('click', () => {
                             const folder = openBtn.dataset.folder;
-                            window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`;
+                            if (String(uid).startsWith('gst_')) { alert('Cannot impersonate a guest. However, you can use the Open Chat button which will be implemented for guests soon.'); return; } else { window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`; }
                         });
                     });
 

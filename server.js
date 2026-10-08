@@ -477,7 +477,7 @@ app.get('/api/dm/conversations/:id/messages', requireUser, (req, res) => {
 
 // DM Presence API endpoint
 app.get('/api/dm/presence', requireUser, (req, res) => {
-    const onlineIds = Array.from(onlineUsers.keys()).map(Number);
+    const onlineIds = Array.from(onlineUsers.keys());
     res.json({ online_user_ids: onlineIds });
 });
 
@@ -496,14 +496,14 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    const uid = Number(socket.user.id);
+    const uid = socket.user.id;
     const isFirstConnection = !onlineUsers.has(uid) || onlineUsers.get(uid).size === 0;
     if (!onlineUsers.has(uid)) onlineUsers.set(uid, new Set());
     onlineUsers.get(uid).add(socket.id);
     updateLastActive(uid);
 
     // Send immediate initial presence list to this newly connected user
-    const currentOnlineIds = Array.from(onlineUsers.keys()).map(Number);
+    const currentOnlineIds = Array.from(onlineUsers.keys());
     socket.emit('presence:init', { online_user_ids: currentOnlineIds });
 
     // Broadcast user:online to everyone else if this is their first active socket
@@ -512,7 +512,7 @@ io.on('connection', (socket) => {
     }
 
     socket.on('dm:get_presence', () => {
-        socket.emit('presence:init', { online_user_ids: Array.from(onlineUsers.keys()).map(Number) });
+        socket.emit('presence:init', { online_user_ids: Array.from(onlineUsers.keys()) });
     });
 
     socket.on('dm:send', (data) => {

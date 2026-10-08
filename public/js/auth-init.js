@@ -461,7 +461,7 @@
             const exitBtn = document.getElementById('exit-impersonation-btn');
             if (exitBtn) exitBtn.classList.remove('hidden');
             const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) logoutBtn.classList.add('hidden');
+            if (logoutBtn) logoutBtn.classList.add('hidden'); logoutBtn.style.setProperty('display', 'none', 'important');
 
             // Add thin red line at the top of the body and CSS hook for mobile dock
             document.body.classList.add('border-t-4', 'border-red-500', 'impersonating-mobile-dock');

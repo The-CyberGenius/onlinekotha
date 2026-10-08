@@ -142,7 +142,7 @@ router.get('/chat/:folder/identity', async (req, res) => {
     try {
         const { getMessages } = require('./cache');
         const { userDir, SRC_DIR } = require('./upload');
-        const dir = req.user ? path.join(userDir(userId), req.params.folder) : path.join(SRC_DIR, `g_${guestId}`, req.params.folder);
+        const dir = req.user ? path.join(userDir(userId), req.params.folder) : path.join(userDir(guestId), req.params.folder);
         
         const { participants, participantStats, isGroup } = await getMessages(dir);
         

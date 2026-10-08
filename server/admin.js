@@ -477,20 +477,41 @@ router.put('/settings', (req, res) => {
 
 // ---------- Users + Usage ----------
 router.get('/users', (req, res) => {
-    const rows = db
-        .prepare(
-            `SELECT u.id, u.email, u.plan, u.trial_expires_at, u.created_at, u.is_admin,
-                    u.google_id, u.display_name, u.avatar_url, u.ip_address, u.country, u.last_active_at,
-                    u.phone, u.phone_country_code,
-                    (SELECT COUNT(*) FROM chats WHERE user_id = u.id) AS chat_count,
-                    (SELECT COALESCE(SUM(cost_usd), 0) FROM usage_log WHERE user_id = u.id) AS total_cost
-             FROM users u ORDER BY u.id DESC`
-        )
-        .all();
-    const onlineUsers = req.app.locals.onlineUsers;
-    rows.forEach(r => {
-        r.is_online = onlineUsers && onlineUsers.has(r.id);
+    const users = db.prepare(
+        `SELECT u.id, u.email, u.plan, u.trial_expires_at, u.created_at, u.is_admin,
+                u.google_id, u.display_name, u.avatar_url, u.ip_address, u.country, u.last_active_at,
+                u.phone, u.phone_country_code,
+                (SELECT COUNT(*) FROM chats WHERE user_id = u.id) AS chat_count,
+                (SELECT COALESCE(SUM(cost_usd), 0) FROM usage_log WHERE user_id = u.id) AS total_cost
+         FROM users u`
+    ).all();
+    
+    users.forEach(u => u.is_guest = false);
+
+    const guests = db.prepare(`SELECT id, ip as ip_address, created_at, updated_at as last_active_at, chats_imported, ai_messages_count FROM guest_sessions`).all();
+    guests.forEach(g => {
+        g.is_guest = true;
+        g.email = 'Guest User (' + g.id.substring(4, 12) + ')';
+        g.display_name = 'Guest';
+        g.plan = 'guest';
+        g.chat_count = g.chats_imported;
     });
+
+    const rows = [...users, ...guests];
+    const onlineUsers = req.app.locals.onlineUsers;
+    
+    rows.forEach(r => {
+        r.is_online = onlineUsers ? (onlineUsers.has(r.id) || onlineUsers.has(Number(r.id)) || onlineUsers.has(String(r.id))) : false;
+    });
+
+    rows.sort((a, b) => {
+        if (a.is_online && !b.is_online) return -1;
+        if (!a.is_online && b.is_online) return 1;
+        const aDate = a.last_active_at || a.created_at || 0;
+        const bDate = b.last_active_at || b.created_at || 0;
+        return bDate - aDate;
+    });
+
     res.json(rows);
 });
 
@@ -521,16 +542,26 @@ function getFolderSize(dirPath) {
 // Get user's chats list
 router.get('/users/:id/chats', (req, res) => {
     try {
-        const userId = Number(req.params.id);
-        const user = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
-        if (!user) return res.status(404).json({ error: 'User not found' });
-        const chats = db.prepare(
-            'SELECT id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE user_id = ? ORDER BY created_at DESC'
-        ).all(userId);
+        const idParam = req.params.id;
+        const isGuest = typeof idParam === 'string' && idParam.startsWith('gst_');
+        let chats = [];
+        let userId = idParam;
         
-        // Attach folder sizes
+        if (isGuest) {
+            chats = db.prepare(
+                'SELECT id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE guest_id = ? ORDER BY created_at DESC'
+            ).all(idParam);
+        } else {
+            userId = Number(idParam);
+            const user = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
+            if (!user) return res.status(404).json({ error: 'User not found' });
+            chats = db.prepare(
+                'SELECT id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE user_id = ? ORDER BY created_at DESC'
+            ).all(userId);
+        }
+        
         const chatsWithSize = chats.map(chat => {
-            const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+            const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
             chat.size_bytes = getFolderSize(chatDir);
             return chat;
         });
@@ -544,10 +575,13 @@ router.get('/users/:id/chats', (req, res) => {
 
 // Restore a deleted chat
 router.patch('/users/:id/chats/:chatId/restore', (req, res) => {
-    const userId = Number(req.params.id);
+    const idParam = req.params.id;
+    const isGuest = typeof idParam === 'string' && idParam.startsWith('gst_');
     const chatId = Number(req.params.chatId);
     
-    const info = db.prepare('UPDATE chats SET deleted_by_user = 0 WHERE id = ? AND user_id = ?').run(chatId, userId);
+    const info = isGuest 
+        ? db.prepare('UPDATE chats SET deleted_by_user = 0 WHERE id = ? AND guest_id = ?').run(chatId, idParam)
+        : db.prepare('UPDATE chats SET deleted_by_user = 0 WHERE id = ? AND user_id = ?').run(chatId, Number(idParam));
     
     if (info.changes === 0) return res.status(404).json({ error: 'Chat not found' });
     res.json({ ok: true });
@@ -562,7 +596,7 @@ router.delete('/users/:id/chats/:chatId', (req, res) => {
         if (!chat) return res.status(404).json({ error: 'Chat not found' });
 
         // Remove files from disk
-        const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+        const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
         try {
             if (fs.existsSync(chatDir)) {
                 fs.rmSync(chatDir, { recursive: true, force: true });
@@ -594,7 +628,7 @@ router.get('/users/:id/chats/:chatId/download', (req, res) => {
     const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
     if (!chat) return res.status(404).json({ error: 'Chat not found' });
 
-    const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+    const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
     if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
 
     const safeName = (chat.display_name || chat.folder_name).replace(/[^a-zA-Z0-9_\-]/g, '_');
@@ -615,7 +649,7 @@ router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
     const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
     if (!chat) return res.status(404).json({ error: 'Chat not found' });
 
-    const chatDir = path.join(SRC_DIR, `u_${userId}`, chat.folder_name);
+    const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
     if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
 
     try {
