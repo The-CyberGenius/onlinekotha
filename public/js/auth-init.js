@@ -457,9 +457,11 @@
 
         // Impersonation Indicator
         if (me.user.is_impersonating) {
-            // Show exit button in header
+            // Show exit button in header, and hide logout to prevent overflow
             const exitBtn = document.getElementById('exit-impersonation-btn');
             if (exitBtn) exitBtn.classList.remove('hidden');
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.classList.add('hidden');
 
             // Add thin red line at the top of the body and CSS hook for mobile dock
             document.body.classList.add('border-t-4', 'border-red-500', 'impersonating-mobile-dock');
