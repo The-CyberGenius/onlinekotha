@@ -2946,7 +2946,7 @@
                     try {
                         const idRes = await fetch('/api/auth/google/client-id');
                         const idData = await idRes.json();
-                        if (false && idData && idData.clientId) {
+                        if (idData && idData.clientId) {
                             window.googleClientId = idData.clientId;
                             window.handleGoogleOneTap = async (response) => {
                                 if (!response || !response.credential) return;
@@ -2986,13 +2986,12 @@
                             if (window.google && window.google.accounts && window.google.accounts.id) {
                                 initOneTapGis();
                             } else {
-                                const checkInterval = setInterval(() => {
-                                    if (window.google && window.google.accounts && window.google.accounts.id) {
-                                        clearInterval(checkInterval);
-                                        initOneTapGis();
-                                    }
-                                }, 100);
-                                setTimeout(() => clearInterval(checkInterval), 6000);
+                                const script = document.createElement('script');
+                                script.src = 'https://accounts.google.com/gsi/client';
+                                script.async = true;
+                                script.defer = true;
+                                script.onload = () => setTimeout(initOneTapGis, 100);
+                                document.head.appendChild(script);
                             }
                         }
                     } catch (e) { }

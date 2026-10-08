@@ -315,6 +315,56 @@
             if (chatRem) chatRem.textContent = guestStatus.chatsRemaining ?? 1;
             if (aiRem) aiRem.textContent = guestStatus.aiMsgsRemaining ?? 10;
 
+            
+            // Trigger Google One Tap for Guest
+            try {
+                const idRes = await fetch('/api/auth/google/client-id');
+                const idData = await idRes.json();
+                if (idData && idData.clientId) {
+                    window.handleGoogleOneTap = async (response) => {
+                        if (!response || !response.credential) return;
+                        try {
+                            const res = await fetch('/api/auth/google/onetap', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ credential: response.credential })
+                            });
+                            const data = await res.json();
+                            if (data && data.ok) window.location.reload();
+                        } catch (e) {
+                            console.error('One Tap Error', e);
+                        }
+                    };
+                    const initOneTapGis = () => {
+                        if (window.oneTapInitialized) return;
+                        if (!window.google || !window.google.accounts || !window.google.accounts.id) return;
+                        window.oneTapInitialized = true;
+                        try {
+                            window.google.accounts.id.initialize({
+                                client_id: idData.clientId,
+                                callback: window.handleGoogleOneTap,
+                                auto_select: false,
+                                cancel_on_tap_outside: false,
+                                context: 'signin',
+                                itp_support: true,
+                                use_fedcm_for_prompt: true
+                            });
+                            window.google.accounts.id.prompt();
+                        } catch (err) {}
+                    };
+                    if (window.google && window.google.accounts && window.google.accounts.id) {
+                        initOneTapGis();
+                    } else {
+                        const script = document.createElement('script');
+                        script.src = 'https://accounts.google.com/gsi/client';
+                        script.async = true;
+                        script.defer = true;
+                        script.onload = () => setTimeout(initOneTapGis, 100);
+                        document.head.appendChild(script);
+                    }
+                }
+            } catch(e){}
+
             // Guest Sidebar Profile
             const info = document.getElementById('sidebar-user-info');
             if (info) info.textContent = 'Guest User';
