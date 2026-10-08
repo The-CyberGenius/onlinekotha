@@ -61,6 +61,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="alternate" type="text/plain" href="https://www.onlinekotha.com/llms.txt" title="LLM Context">
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
@@ -96,20 +97,24 @@
           }
         },
         {
-          "@type": "SoftwareApplication",
+          "@type": "WebApplication",
+          "@id": "https://www.onlinekotha.com/#webapp",
           "name": "Kotha",
           "url": "https://www.onlinekotha.com",
-          "description": "Upload WhatsApp chat exports (.zip/.txt) to chat with an authentic AI simulation of your ex-partner, girlfriend, boyfriend, or loved ones. Recreates their texting patterns, slang, humor, and memories.",
-          "applicationCategory": "SocialNetworkingApplication, CommunicationApplication",
+          "applicationCategory": "SocialNetworkingApplication, LifestyleApplication, UtilityApplication",
           "operatingSystem": "Web, Android, iOS, Windows, macOS",
+          "browserRequirements": "Requires HTML5 compatible browser (Chrome, Safari, Firefox, Edge)",
+          "description": "Upload WhatsApp chat exports (.zip/.txt) to chat with an authentic AI simulation of your ex-partner, girlfriend, boyfriend, or loved ones. Recreates their texting patterns, slang, humor, and memories.",
           "featureList": [
             "AI Chat with Ex Simulation",
-            "AI Personality Clones from Text History",
+            "AI Personality Clones from WhatsApp Chat History",
             "AI Girlfriend / Boyfriend Text Simulator",
             "WhatsApp Chat Export Viewer (.zip and .txt)",
-            "Grief & Memory Preservation AI",
+            "WhatsApp Wrapped & Relationship Analytics",
+            "Digital Grief & Memory Preservation AI",
             "On This Day Historical Chat Search",
-            "Multi-Language and Hinglish Texting Support"
+            "Multi-Language and Hinglish Texting Support",
+            "Client-Side Privacy with Zero Model Training"
           ],
           "offers": {
             "@type": "Offer",
@@ -121,70 +126,131 @@
             "ratingValue": "4.9",
             "ratingCount": "184"
           }
-        }
-      ]
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "Can I chat with an AI simulation of my ex, former partner, or loved one?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. By uploading your exported WhatsApp chat history, Kotha's AI analyzes thousands of real messages to learn your contact's exact vocabulary, humor, sentence length, emojis, and emotional tone. You can then chat with an AI clone that responds authentically in their unique texting voice."
-          }
         },
         {
-          "@type": "Question",
-          "name": "Can Kotha create an AI girlfriend or boyfriend from old WhatsApp texts?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Kotha processes your past romantic conversations, pet names, inside jokes, and daily banter to simulate an interactive AI companion that mirrors how your partner or ex used to text you, keeping the nostalgia and memories alive."
-          }
+          "@type": "HowTo",
+          "name": "How to Export WhatsApp Chat and Chat with AI on Kotha",
+          "description": "Step-by-step instructions to export your WhatsApp conversation and generate an authentic AI simulation on Kotha.",
+          "totalTime": "PT2M",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "position": 1,
+              "name": "Open the WhatsApp Chat",
+              "text": "Open WhatsApp on your mobile phone and select the individual or group conversation you wish to import."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 2,
+              "name": "Export Chat Without Media",
+              "text": "On Android: tap the three dots (⋮) -> More -> Export chat -> choose 'Without Media'. On iPhone: tap the contact name at the top -> scroll down -> tap 'Export Chat' -> choose 'Without Media'."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 3,
+              "name": "Upload to Kotha",
+              "text": "Go to https://www.onlinekotha.com/app and drag and drop the exported .zip or _chat.txt file into the upload zone."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 4,
+              "name": "Start Conversing with the AI Simulator",
+              "text": "Once processed, explore the interactive chat viewer, review WhatsApp Wrapped statistics, and click 'Chat with AI' to begin authentic conversations that mirror their texting style."
+            }
+          ]
         },
         {
-          "@type": "Question",
-          "name": "How do I export my chat history?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Open any chat → tap the 3 dots menu → More → Export chat → Choose 'Without Media' → Save the .zip file. Then upload it to Kotha."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is my chat data safe and private?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. All data travels over secure encrypted connections (HTTPS/TLS), your chats stay private to your account, we never sell your data, never train AI on your personal conversations, and you can delete everything anytime with one click."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How does the AI learn to talk like my contact?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Kotha's AI reads all messages in your uploaded chat to understand your contact's writing style — their language, slang, emojis, humor, and tone. It then responds in their exact style during conversations."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is Kotha free to use?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes! Kotha is free forever with unlimited chat imports, a beautiful chat viewer, On This Day memories, and 3 AI conversations per day. A Pro plan with unlimited AI chats is available for power users."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Which languages does Kotha support?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Kotha works with any language — Hindi, English, Hinglish, Tamil, Bengali, Marathi, and more. The AI automatically matches whatever language your contact uses in chats."
-          }
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is Kotha (OnlineKotha)?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Kotha (onlinekotha.com) is an AI-powered conversational memory platform that turns exported WhatsApp chat files into interactive AI personality simulations, a searchable online chat viewer, and conversation analytics (WhatsApp Wrapped)."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I chat with an AI simulation of my ex, former partner, or loved one?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. By uploading your exported WhatsApp chat history, Kotha's AI analyzes thousands of real messages to learn your contact's exact vocabulary, humor, sentence length, emojis, and emotional tone. You can then chat with an AI clone that responds authentically in their unique texting voice."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I view exported WhatsApp chat files online for free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Kotha provides a completely free online WhatsApp chat viewer for .txt and .zip exports. It reconstructs raw exported text into a clean WhatsApp-style visual interface with instant search and date filters."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can Kotha create an AI girlfriend or boyfriend from old WhatsApp texts?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Kotha processes your past romantic conversations, pet names, inside jokes, and daily banter to simulate an interactive AI companion that mirrors how your partner or ex used to text you, keeping nostalgia and connection alive."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does Kotha compare to generic chatbots like ChatGPT or Character.AI?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Generic AI tools have no memory of your actual conversations. Kotha is purpose-built to parse thousands of real WhatsApp timestamps, inside jokes, vocabulary quirks, and emoji habits from your real export file, creating an authentic, deeply personalized simulation that generic chatbots cannot match."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I use Kotha to remember someone who passed away (digital grief support)?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Many people use Kotha as a digital sanctuary to preserve conversations with late parents, partners, or friends. You can search cherished memories, view On This Day flashbacks, and experience comfort through respectful AI memory reflections."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do I export my chat history from WhatsApp?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Open any chat → tap the 3 dots menu (Android) or Contact Name (iPhone) → Export chat → Choose 'Without Media' → Save the .zip or .txt file. Then upload it directly to Kotha."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is my chat data safe and private? Does Kotha train AI models on personal chats?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Your data is completely private. All communication happens over encrypted TLS connections. We NEVER use your personal chats to train foundational AI models, never sell your data, and you can permanently delete all chat archives anytime with one click."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is WhatsApp Chat Wrapped?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "WhatsApp Chat Wrapped on Kotha is an annual-style analytics report showing who texted first, total message counts, late-night texting frequencies, top emojis, and response time breakdowns for your relationship or friendship."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is Kotha free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! Kotha is free to try with up to 5 chat imports, full chat viewing & search, On This Day memories, and daily AI conversation credits. Pro Monthly ($6/mo) and Lifetime ($49) plans offer unlimited AI chats."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which languages does Kotha support?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Kotha works with any language — English, Hindi, Hinglish, Spanish, German, French, and regional slang. The AI automatically detects and matches whatever language and tone your contact used."
+              }
+            }
+          ]
         }
       ]
     }

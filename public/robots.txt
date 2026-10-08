@@ -1,17 +1,28 @@
 # Robots.txt for OnlineKotha (https://www.onlinekotha.com)
+# Optimized for Google, Bing, OpenAI (ChatGPT / SearchGPT), Perplexity, Claude, Apple & Gemini
+
 User-agent: *
 Allow: /
+Allow: /app
+Allow: /pricing.html
+Allow: /blog.html
 Allow: /blog/
 Allow: /paper.html
-Allow: /app
-Allow: /blog.html
 Allow: /login.html
 Allow: /privacy.html
 Allow: /terms.html
 Allow: /contact.html
 Allow: /refund.html
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /sitemap.xml
+Allow: /favicon.svg
+Allow: /logo.svg
+Allow: /css/
+Allow: /js/
+Allow: /img/
 
-# Disallow admin & private transaction callback endpoints
+# Disallow admin & sensitive account/transaction callback endpoints
 Disallow: /api/
 Disallow: /admin.html
 Disallow: /billing-success.html
@@ -20,5 +31,77 @@ Disallow: /verify-success.html
 Disallow: /reset.html
 Disallow: /forgot.html
 
-# Sitemap
+# Explicitly enable OpenAI ChatGPT & SearchGPT crawlers for citations & suggestions
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /blog/
+Allow: /paper.html
+Allow: /pricing.html
+Disallow: /api/
+Disallow: /admin.html
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /blog/
+Allow: /paper.html
+Allow: /pricing.html
+Disallow: /api/
+Disallow: /admin.html
+
+# Explicitly enable Perplexity AI crawler for conversational recommendations
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /blog/
+Allow: /paper.html
+Allow: /pricing.html
+Disallow: /api/
+Disallow: /admin.html
+
+# Explicitly enable Anthropic Claude crawler
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /blog/
+Allow: /paper.html
+Disallow: /api/
+Disallow: /admin.html
+
+User-agent: anthropic-ai
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /blog/
+Allow: /paper.html
+Disallow: /api/
+Disallow: /admin.html
+
+# Explicitly enable Google Gemini & Extended AI
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /blog/
+Allow: /paper.html
+Disallow: /api/
+Disallow: /admin.html
+
+# Explicitly enable Apple Intelligence & Cohere
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+Disallow: /admin.html
+
+User-agent: cohere-ai
+Allow: /
+Disallow: /api/
+Disallow: /admin.html
+
+# Sitemaps and LLM Discovery
 Sitemap: https://www.onlinekotha.com/sitemap.xml

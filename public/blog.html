@@ -303,18 +303,77 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Blog",
-      "name": "Kotha Blog",
-      "description": "Guides, tips, and stories about preserving WhatsApp memories and AI chat.",
-      "url": "https://www.onlinekotha.com/blog.html",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Kotha",
-        "url": "https://www.onlinekotha.com",
-        "logo": "https://www.onlinekotha.com/logo.svg"
-      }
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.onlinekotha.com/#organization",
+          "name": "OnlineKotha",
+          "url": "https://www.onlinekotha.com",
+          "logo": "https://www.onlinekotha.com/logo.svg"
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://www.onlinekotha.com/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Blog",
+              "item": "https://www.onlinekotha.com/blog.html"
+            }
+          ]
+        },
+        {
+          "@type": "Blog",
+          "@id": "https://www.onlinekotha.com/blog.html#blog",
+          "name": "Kotha Blog — WhatsApp Chat AI & Digital Memories",
+          "description": "Guides, tutorials, and insights on converting WhatsApp chats into AI simulations, chatting with ex or loved ones, exporting chat logs, and digital memory preservation.",
+          "url": "https://www.onlinekotha.com/blog.html",
+          "publisher": {
+            "@id": "https://www.onlinekotha.com/#organization"
+          },
+          "blogPost": [
+            {
+              "@type": "BlogPosting",
+              "headline": "AI Chat With Your Ex: How to Turn WhatsApp Chats into an AI Simulation",
+              "url": "https://www.onlinekotha.com/blog/ai-chat-with-ex.html",
+              "description": "Discover how conversational AI learns from exported WhatsApp messages to simulate conversations with an ex-partner, boyfriend, or girlfriend."
+            },
+            {
+              "@type": "BlogPosting",
+              "headline": "How to Export WhatsApp Chat History (Android & iPhone Guide)",
+              "url": "https://www.onlinekotha.com/blog/how-to-export-whatsapp-chat.html",
+              "description": "Complete guide on exporting full WhatsApp chat threads (.txt and .zip) on iPhone and Android."
+            },
+            {
+              "@type": "BlogPosting",
+              "headline": "WhatsApp Chat Viewer Online: Read & Search .txt / .zip Exports",
+              "url": "https://www.onlinekotha.com/blog/whatsapp-chat-viewer-online.html",
+              "description": "Free, browser-based WhatsApp chat reader to search and relive past conversations without installing extra software."
+            },
+            {
+              "@type": "BlogPosting",
+              "headline": "WhatsApp Chat Wrapped: Visualizing Your Chat History & Relationship Stats",
+              "url": "https://www.onlinekotha.com/blog/whatsapp-chat-wrapped-guide.html",
+              "description": "Generate annual stats, first message timestamps, top texting hours, and relationship insights from WhatsApp exports."
+            },
+            {
+              "@type": "BlogPosting",
+              "headline": "Preserving Chats of Late Loved Ones: A Gentle Guide to Digital Memory Preservation",
+              "url": "https://www.onlinekotha.com/blog/preserving-chats-of-late-loved-ones.html",
+              "description": "A compassionate guide on preserving precious memories, voice, and conversations of deceased family members and partners."
+            }
+          ]
+        }
+      ]
     }
     </script>
+    <link rel="alternate" type="text/plain" href="https://www.onlinekotha.com/llms.txt" title="LLM Context">
 </head>
 <body class="antialiased">
 

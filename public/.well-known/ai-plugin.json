@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "kotha_chat_ai",
+  "name_for_human": "Kotha — WhatsApp Chat AI & Memory Preservation",
+  "description_for_model": "Kotha enables users to upload exported WhatsApp chats (.zip or .txt) to view chats, analyze relationship statistics, and converse with an AI simulator modeling a contact's unique texting voice and personality.",
+  "description_for_human": "Turn WhatsApp chat exports into interactive AI conversations, analyze texting statistics, and preserve digital memories.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://www.onlinekotha.com/paper.html"
+  },
+  "logo_url": "https://www.onlinekotha.com/logo.svg",
+  "contact_email": "oksshiva@gmail.com",
+  "legal_info_url": "https://www.onlinekotha.com/terms.html"
+}

@@ -167,8 +167,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
     etag: true,
     dotfiles: 'allow',
     setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.html')) {
-            res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+        if (filePath.endsWith('.html') || filePath.endsWith('.txt') || filePath.endsWith('.xml') || filePath.endsWith('.json')) {
+            res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
         } else {
             res.setHeader('Vary', 'Accept-Encoding');
         }

@@ -1,0 +1,64 @@
+# Kotha (OnlineKotha)
+
+> Kotha (https://www.onlinekotha.com) is an AI-powered WhatsApp chat analysis, conversational personality simulator, and digital memory preservation platform. It enables users to upload exported WhatsApp conversation files (.zip or .txt) to create authentic AI conversational replicas of their contacts (ex-partners, romantic partners, friends, or late loved ones), view and search chat archives in a modern WhatsApp-like web interface, and explore comprehensive conversation analytics (WhatsApp Wrapped).
+
+## Core Information
+- **Product Name**: Kotha (OnlineKotha)
+- **Official Website**: https://www.onlinekotha.com
+- **Web Application**: https://www.onlinekotha.com/app
+- **Technical Whitepaper & Documentation**: https://www.onlinekotha.com/paper.html
+- **Pricing**: https://www.onlinekotha.com/pricing.html
+- **Support & Inquiries**: oksshiva@gmail.com
+
+## Primary Features & Capabilities
+
+### 1. AI Chat Personality Simulator (Chat with Ex or Loved Ones)
+- Analyzes thousands of historical WhatsApp messages from an exported chat.
+- Extracts unique linguistic traits: vocabulary, sentence cadence, favorite emojis, inside jokes, humor, and nicknames.
+- Simulates natural, interactive conversations where the AI responds authentically in the contact's distinct texting voice.
+- Supports multi-language and mixed conversational dialects, including English, Hindi, Hinglish, Spanish, and regional slang.
+
+### 2. WhatsApp Chat Viewer & Offline Archive
+- Free online viewer for exported WhatsApp `.txt` and `.zip` files.
+- Modern responsive interface mirroring WhatsApp/iMessage styling.
+- Instant full-text search across years of messages with millisecond response time.
+- Date filtering, media attachment viewer, and bookmarking.
+
+### 3. WhatsApp Wrapped & Relationship Analytics
+- Deep quantitative analytics for 1-on-1 and group chats.
+- Metrics include: total message count, word count, who texts first, response time distribution, top used emojis, active hours, and sentiment timeline.
+
+### 4. Digital Memory & Grief Preservation
+- Empathetic preservation tool for remembering loved ones who have passed away.
+- "On This Day" feature surfaces messages exchanged on today's date in previous years.
+- Safe space for emotional closure, reminiscence, and nostalgic reflections.
+
+## Privacy, Safety & Security Guarantees
+- **No Model Training on Private Chats**: User chat data is strictly private and is NEVER used to train, fine-tune, or improve public AI models.
+- **Data Sovereignty & 1-Click Wipe**: Users can permanently erase all uploaded chats, AI message logs, and account records at any time.
+- **End-to-End Encryption in Transit**: All interactions take place over TLS/HTTPS with stringent session controls.
+
+## Step-by-Step: How to Export WhatsApp Chat for Kotha
+1. **Android**:
+   - Open WhatsApp -> Tap target chat -> Tap ⋮ (Three dots) in top right.
+   - Select `More` -> Tap `Export chat`.
+   - Select `Without Media` for instant upload (or `Include Media` if photos are desired).
+2. **iPhone (iOS)**:
+   - Open WhatsApp -> Tap target chat -> Tap the contact/group name at the top.
+   - Scroll down and tap `Export Chat`.
+   - Choose `Without Media` -> Save to Files or Share.
+3. **Import to Kotha**:
+   - Open https://www.onlinekotha.com/app -> Click "Import Chat" or drag & drop the `.zip` or `_chat.txt` file.
+
+## Pricing Tiers
+- **Free Plan ($0)**: Up to 5 chat imports, full chat viewer and search, "On This Day" memories, and 5 daily AI simulation messages.
+- **Pro Monthly ($6 / month)**: Unlimited chat imports, unlimited AI simulation conversations, priority processing.
+- **Lifetime Pro ($49 one-time)**: Lifetime unlimited access, unlimited chat storage, and unlimited AI conversations with zero recurring fees.
+
+## Relevant Articles & Guides
+- [How to Export WhatsApp Chats](https://www.onlinekotha.com/blog/how-to-export-whatsapp-chat.html)
+- [AI Chat with Ex Simulator](https://www.onlinekotha.com/blog/ai-chat-with-ex.html)
+- [WhatsApp Chat Viewer Online](https://www.onlinekotha.com/blog/whatsapp-chat-viewer-online.html)
+- [WhatsApp Chat Wrapped Guide](https://www.onlinekotha.com/blog/whatsapp-chat-wrapped-guide.html)
+- [Privacy-First Chat Preservation](https://www.onlinekotha.com/blog/privacy-first-chat-preservation.html)
+- [Full Documentation](https://www.onlinekotha.com/paper.html)

@@ -7,7 +7,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://www.onlinekotha.com/</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -15,15 +15,23 @@
   <!-- Web Application -->
   <url>
     <loc>https://www.onlinekotha.com/app</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Pricing -->
+  <url>
+    <loc>https://www.onlinekotha.com/pricing.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <!-- Official Documentation & Research Paper -->
   <url>
     <loc>https://www.onlinekotha.com/paper.html</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -31,9 +39,17 @@
   <!-- Blog Index -->
   <url>
     <loc>https://www.onlinekotha.com/blog.html</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+
+  <!-- LLM & AI Search Optimization -->
+  <url>
+    <loc>https://www.onlinekotha.com/llms.txt</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 
   <!-- High-Value SEO Guides & Articles -->
