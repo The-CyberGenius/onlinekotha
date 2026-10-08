@@ -2737,3 +2737,16 @@ html.dark .custom-modal-card .modal-tab.active {
 .dark .wrapped-ready-pop {
     color: #fbbf24 !important; /* amber-400 */
 }
+
+/* Dark Mode Fixes */
+html.dark #guest-preview-banner {
+    background-color: #1a1f36 !important;
+    color: #a5b4fc !important;
+    border-color: rgba(55, 48, 163, 0.5) !important;
+}
+html.dark #guest-preview-banner span.bg-indigo-300\/50 {
+    background-color: rgba(67, 56, 202, 0.5) !important;
+}
+html.dark #guest-preview-banner span.w-px {
+    background-color: rgba(67, 56, 202, 0.5) !important;
+}
