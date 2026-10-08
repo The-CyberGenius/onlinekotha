@@ -48,12 +48,57 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', -apple-system, sans-serif; }
+        * { font-family: 'Inter', -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+
+        /* ===== LIGHT MODE (default) ===== */
+        body { background: #f9fafb; color: #1f2937; }
+        nav { background: rgba(255,255,255,0.8); border-bottom: 1px solid #e5e7eb; }
+        nav .logo-text { color: #111827; }
+        nav .nav-link { color: #6b7280; }
+        nav .nav-link:hover { color: #111827; }
+        .blog-heading { color: #111827; }
+        .blog-sub { color: #4b5563; }
         .card { border-radius: 20px; transition: all 0.3s; background: #ffffff; border: 1px solid #e5e7eb; }
         .card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px -15px rgba(0,0,0,0.1); border-color: rgba(99,102,241,0.4); }
+        .card-title { color: #111827; }
+        .card-desc { color: #4b5563; }
+        .card-meta { color: #6b7280; }
+        .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 8px; }
+        .cta-section { border-top: 1px solid #e5e7eb; }
+        .cta-heading { color: #111827; }
+        .cta-sub { color: #4b5563; }
+        footer { background: #f3f4f6; border-top: 1px solid #e5e7eb; }
+        footer .footer-brand { color: #111827; }
+        footer .footer-copy { color: #9ca3af; }
+        footer .footer-link { color: #6b7280; }
+        footer .footer-link:hover { color: #111827; }
+        .theme-btn { color: #6b7280; }
+        .theme-btn:hover { background: #f3f4f6; }
+
+        /* ===== DARK MODE ===== */
+        .dark body { background: #0a0a0f; color: #d4d4d8; }
+        .dark nav { background: rgba(10,10,15,0.8); border-bottom-color: rgba(255,255,255,0.04); }
+        .dark nav .logo-text { color: #ffffff; }
+        .dark nav .nav-link { color: #a1a1aa; }
+        .dark nav .nav-link:hover { color: #ffffff; }
+        .dark .blog-heading { color: #ffffff; }
+        .dark .blog-sub { color: #a1a1aa; }
         .dark .card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
         .dark .card:hover { background: rgba(255,255,255,0.05); border-color: rgba(129,140,248,0.2); box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5); }
-        .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 8px; }
+        .dark .card-title { color: #ffffff; }
+        .dark .card-desc { color: #a1a1aa; }
+        .dark .card-meta { color: #71717a; }
+        .dark .cta-section { border-top-color: rgba(255,255,255,0.04); }
+        .dark .cta-heading { color: #ffffff; }
+        .dark .cta-sub { color: #a1a1aa; }
+        .dark footer { background: #060608; border-top-color: rgba(255,255,255,0.04); }
+        .dark footer .footer-brand { color: #ffffff; }
+        .dark footer .footer-copy { color: #3f3f46; }
+        .dark footer .footer-link { color: #71717a; }
+        .dark footer .footer-link:hover { color: #d4d4d8; }
+        .dark .theme-btn { color: #a1a1aa; }
+        .dark .theme-btn:hover { background: rgba(255,255,255,0.05); }
+
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
         ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
@@ -75,17 +120,17 @@
     }
     </script>
 </head>
-<body class="antialiased bg-gray-50 dark:bg-[#0a0a0f] text-gray-800 dark:text-[#d4d4d8] transition-colors duration-300">
+<body class="antialiased">
 
 <!-- Nav -->
-<nav class="border-b border-gray-200 dark:border-white/[0.04] bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
+<nav class="backdrop-blur-xl sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2.5 group">
             <img src="/logo.svg" alt="Kotha Logo" class="w-8 h-8 object-contain transition-transform group-hover:scale-105" />
-            <span class="font-bold text-[18px] text-gray-900 dark:text-white tracking-tight">Kotha</span>
+            <span class="font-bold text-[18px] logo-text tracking-tight">Kotha</span>
         </a>
         <div class="flex items-center gap-4">
-            <button id="theme-toggle" class="p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
+            <button id="theme-toggle" class="p-2 rounded-lg theme-btn transition-colors">
                 <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.95 15.657a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-3.22a1 1 0 010-1.415l-.708-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm1.293-4.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414L3.293 6.464a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z"></path>
                 </svg>
@@ -93,15 +138,15 @@
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                 </svg>
             </button>
-            <a href="/" class="text-[14px] text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition font-medium">← Back to App</a>
+            <a href="/" class="text-[14px] nav-link transition font-medium">← Back to App</a>
         </div>
     </div>
 </nav>
 
 <!-- Header -->
 <section class="py-20 px-5 text-center">
-    <h1 class="text-[40px] md:text-[52px] font-black tracking-tight mb-4 text-gray-900 dark:text-white">Blog</h1>
-    <p class="text-gray-600 dark:text-zinc-400 text-[16px] max-w-md mx-auto">Guides, tips, and stories about preserving your most precious conversations.</p>
+    <h1 class="text-[40px] md:text-[52px] font-black tracking-tight mb-4 blog-heading">Blog</h1>
+    <p class="blog-sub text-[16px] max-w-md mx-auto">Guides, tips, and stories about preserving your most precious conversations.</p>
 </section>
 
 <!-- Articles -->
@@ -112,11 +157,11 @@
         <a href="/blog/ai-chat-with-ex.html" class="card p-6 block group md:col-span-2 border-indigo-500/30 hover:border-pink-500/50">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-pink-500/15 text-pink-400 font-bold">Hot Topic · AI Simulator</span>
-                <span class="text-[11px] text-gray-600 dark:text-zinc-400">Updated September 2026</span>
+                <span class="text-[11px] card-meta">Updated September 2026</span>
             </div>
-            <h2 class="text-[22px] font-black text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">AI Chat With Your Ex: How to Turn Past WhatsApp Chats into an AI Simulation</h2>
-            <p class="text-[14px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Can you turn exported WhatsApp chats into an authentic AI chatbot of your ex-partner, boyfriend, or girlfriend? Discover how conversational AI clones texting styles for nostalgia, memory preservation, and closure.</p>
-            <div class="flex items-center gap-3 text-[12px] text-gray-600 dark:text-zinc-400">
+            <h2 class="text-[22px] font-black card-title mb-2 group-hover:text-pink-300 transition leading-snug">AI Chat With Your Ex: How to Turn Past WhatsApp Chats into an AI Simulation</h2>
+            <p class="text-[14px] card-desc leading-relaxed mb-4">Can you turn exported WhatsApp chats into an authentic AI chatbot of your ex-partner, boyfriend, or girlfriend? Discover how conversational AI clones texting styles for nostalgia, memory preservation, and closure.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span>
                 <span>·</span>
                 <span class="text-indigo-400 font-semibold group-hover:underline">Read Complete Guide →</span>
@@ -128,9 +173,9 @@
             <div class="mb-4">
                 <span class="tag bg-indigo-500/10 text-indigo-400">Guide</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-indigo-300 transition leading-snug">How to Export WhatsApp Chat — Step by Step Guide (2025)</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Complete guide to export your WhatsApp conversations on Android and iPhone. With or without media — everything you need to know.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-indigo-300 transition leading-snug">How to Export WhatsApp Chat — Step by Step Guide (2025)</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Complete guide to export your WhatsApp conversations on Android and iPhone. With or without media — everything you need to know.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>Updated May 2026</span>
@@ -142,9 +187,9 @@
             <div class="mb-4">
                 <span class="tag bg-amber-500/10 text-amber-400">Ideas</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-amber-300 transition leading-snug">5 Beautiful Ways to Preserve Your Digital Memories Forever</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">From WhatsApp chats to photo albums — creative ways to make sure your most precious digital conversations last a lifetime.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-amber-300 transition leading-snug">5 Beautiful Ways to Preserve Your Digital Memories Forever</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">From WhatsApp chats to photo albums — creative ways to make sure your most precious digital conversations last a lifetime.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>4 min read</span>
                 <span>·</span>
                 <span>May 2026</span>
@@ -156,9 +201,9 @@
             <div class="mb-4">
                 <span class="tag bg-pink-500/10 text-pink-400">Technology</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">How AI Learns to Talk Like Your Loved Ones — The Technology Behind Kotha</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">How personality cloning works, why it matters, and how Kotha's AI captures someone's exact way of texting from their chat history.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-pink-300 transition leading-snug">How AI Learns to Talk Like Your Loved Ones — The Technology Behind Kotha</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">How personality cloning works, why it matters, and how Kotha's AI captures someone's exact way of texting from their chat history.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>6 min read</span>
                 <span>·</span>
                 <span>May 2026</span>
@@ -170,9 +215,9 @@
             <div class="mb-4">
                 <span class="tag bg-emerald-500/10 text-emerald-400">Product</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-300 transition leading-snug">Best WhatsApp Chat Viewer Online — Read Old Chats Beautifully</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Why reading exported WhatsApp chats in a text file is painful, and how Kotha transforms them into a beautiful, searchable experience.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-emerald-300 transition leading-snug">Best WhatsApp Chat Viewer Online — Read Old Chats Beautifully</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Why reading exported WhatsApp chats in a text file is painful, and how Kotha transforms them into a beautiful, searchable experience.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>3 min read</span>
                 <span>·</span>
                 <span>May 2026</span>
@@ -185,9 +230,9 @@
                 <span class="tag bg-purple-500/15 text-purple-400 font-bold">Featured · Wrapped</span>
                 <span class="text-[11px] text-purple-400">Trending 🔥</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-300 transition leading-snug">WhatsApp Chat Wrapped: How to Turn Years of Messages into a Viral Social Story</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Discover who texted first, late-night chatter stats, emoji profiles, and generate cinematic 9:16 Instagram story cards from your chat archives.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-600 dark:text-zinc-400">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-purple-300 transition leading-snug">WhatsApp Chat Wrapped: How to Turn Years of Messages into a Viral Social Story</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Discover who texted first, late-night chatter stats, emoji profiles, and generate cinematic 9:16 Instagram story cards from your chat archives.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>4 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -199,9 +244,9 @@
             <div class="mb-4">
                 <span class="tag bg-teal-500/10 text-teal-400 font-bold">Privacy & Security</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-teal-300 transition leading-snug">Privacy-First Chat Archiving: Why Your Conversations Never Belong to Advertisers</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Inside OnlineKotha's security model: sandboxed user silos, local memory indexing, zero ad networks, and immediate on-demand data purges.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-teal-300 transition leading-snug">Privacy-First Chat Archiving: Why Your Conversations Never Belong to Advertisers</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Inside OnlineKotha's security model: sandboxed user silos, local memory indexing, zero ad networks, and immediate on-demand data purges.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -213,9 +258,9 @@
             <div class="mb-4">
                 <span class="tag bg-pink-500/10 text-pink-400 font-bold">Relationships & LDR</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">When WhatsApp Is Your Entire Living Room: How Long-Distance Couples Preserve Their Story</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">How couples across time zones use chat history, On This Day retrospectives, and communication analytics to bridge miles and keep love unbreakable.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-600 dark:text-zinc-400">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-pink-300 transition leading-snug">When WhatsApp Is Your Entire Living Room: How Long-Distance Couples Preserve Their Story</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">How couples across time zones use chat history, On This Day retrospectives, and communication analytics to bridge miles and keep love unbreakable.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -227,9 +272,9 @@
             <div class="mb-4">
                 <span class="tag bg-blue-500/10 text-blue-400 font-bold">Digital Memorials & Healing</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-300 transition leading-snug">When a Voice Note Is All That's Left: Safeguarding the Words of Someone You Lost</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Why ordinary texts like 'khana kha liya?' become priceless digital heirlooms, and how offline archives protect them from expired phone numbers.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-blue-300 transition leading-snug">When a Voice Note Is All That's Left: Safeguarding the Words of Someone You Lost</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Why ordinary texts like 'khana kha liya?' become priceless digital heirlooms, and how offline archives protect them from expired phone numbers.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -241,9 +286,9 @@
             <div class="mb-4">
                 <span class="tag bg-amber-500/10 text-amber-400 font-bold">Squad Dynamics</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-amber-300 transition leading-snug">The Friendship Index: What 100,000 Group Chat Messages Say About Your Crew</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Decode the unwritten rules of your squad: who is the voice-note podcaster, who plans the trips that fall apart, and who sends 80% of the memes.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-amber-300 transition leading-snug">The Friendship Index: What 100,000 Group Chat Messages Say About Your Crew</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Decode the unwritten rules of your squad: who is the voice-note podcaster, who plans the trips that fall apart, and who sends 80% of the memes.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>4 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -255,9 +300,9 @@
             <div class="mb-4">
                 <span class="tag bg-cyan-500/10 text-cyan-400 font-bold">Engineering & NLP</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-cyan-300 transition leading-snug">The Architecture of Texting: How AI Decodes Sarcasm, Hinglish & Inside Jokes</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Why traditional chatbots sound robotic, and how burst detection, lexical indexing, and context slices recreate authentic human texting cadence.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-cyan-300 transition leading-snug">The Architecture of Texting: How AI Decodes Sarcasm, Hinglish & Inside Jokes</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Why traditional chatbots sound robotic, and how burst detection, lexical indexing, and context slices recreate authentic human texting cadence.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -269,9 +314,9 @@
             <div class="mb-4">
                 <span class="tag bg-rose-500/10 text-rose-400 font-bold">Psychology & Closure</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rose-300 transition leading-snug">The Art of Closure: Why We Re-read Old Texts (And How to Finally Find Peace)</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">The science of narrative coherence after heartbreak, moving away from agonizing 2 AM doomscrolling into therapeutic, sealed-chapter reflection.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-rose-300 transition leading-snug">The Art of Closure: Why We Re-read Old Texts (And How to Finally Find Peace)</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">The science of narrative coherence after heartbreak, moving away from agonizing 2 AM doomscrolling into therapeutic, sealed-chapter reflection.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span>
                 <span>·</span>
                 <span>October 2026</span>
@@ -280,11 +325,11 @@
         <a href="/blog/onlinekotha-app-experience.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-indigo-500/10 text-indigo-400">APP</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-indigo-300 transition leading-snug">Why the OnlineKotha App is the Best Way to Preserve WhatsApp Memories</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">A deep dive into the incredibly smooth, lag-free mobile experience of Kotha's official Android app.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-indigo-300 transition leading-snug">Why the OnlineKotha App is the Best Way to Preserve WhatsApp Memories</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">A deep dive into the incredibly smooth, lag-free mobile experience of Kotha's official Android app.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>3 min read</span><span>·</span><span class="text-indigo-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -292,11 +337,11 @@
         <a href="/blog/how-onlinekotha-redefines-memories.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-blue-500/10 text-blue-400">TECHNOLOGY</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-300 transition leading-snug">Beyond Text: How OnlineKotha Makes WhatsApp Chats Feel Alive</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Exploring the emotional intelligence and utility of the OnlineKotha platform.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-blue-300 transition leading-snug">Beyond Text: How OnlineKotha Makes WhatsApp Chats Feel Alive</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Exploring the emotional intelligence and utility of the OnlineKotha platform.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>4 min read</span><span>·</span><span class="text-blue-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -304,11 +349,11 @@
         <a href="/blog/the-meaning-behind-the-name-kotha.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-rose-500/10 text-rose-400">CULTURE</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rose-300 transition leading-snug">Breaking the Taboo: The True Meaning of 'Kotha'</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Why we named our platform OnlineKotha and our mission to redefine a misunderstood word in India.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-rose-300 transition leading-snug">Breaking the Taboo: The True Meaning of 'Kotha'</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Why we named our platform OnlineKotha and our mission to redefine a misunderstood word in India.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span><span>·</span><span class="text-rose-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -316,11 +361,11 @@
         <a href="/blog/emotional-purpose-of-onlinekotha.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-amber-500/10 text-amber-400">IDEAS</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-amber-300 transition leading-snug">The Emotional Purpose of OnlineKotha</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Technology is often cold, but we built OnlineKotha to heal, preserve, and comfort.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-amber-300 transition leading-snug">The Emotional Purpose of OnlineKotha</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Technology is often cold, but we built OnlineKotha to heal, preserve, and comfort.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>4 min read</span><span>·</span><span class="text-amber-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -328,11 +373,11 @@
         <a href="/blog/best-whatsapp-chat-analyzer-app.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-green-500/10 text-green-400">APP</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-300 transition leading-snug">Why OnlineKotha is the Best WhatsApp Chat Analyzer App</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Looking for the best app to read, analyze, and simulate your exported WhatsApp chats? Look no further.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-green-300 transition leading-snug">Why OnlineKotha is the Best WhatsApp Chat Analyzer App</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Looking for the best app to read, analyze, and simulate your exported WhatsApp chats? Look no further.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>3 min read</span><span>·</span><span class="text-green-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -340,11 +385,11 @@
         <a href="/blog/reclaiming-kotha-a-digital-sanctuary.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-purple-500/10 text-purple-400">CULTURE</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-300 transition leading-snug">Reclaiming the Word 'Kotha': Building a Digital Sanctuary</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">How we are transforming a misunderstood word into a symbol of memory preservation and emotional safety.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-purple-300 transition leading-snug">Reclaiming the Word 'Kotha': Building a Digital Sanctuary</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">How we are transforming a misunderstood word into a symbol of memory preservation and emotional safety.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>4 min read</span><span>·</span><span class="text-purple-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -352,11 +397,11 @@
         <a href="/blog/ai-whatsapp-chat-memory-preservation.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-indigo-500/10 text-indigo-400">APP</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-indigo-300 transition leading-snug">Why You Need to Preserve Your WhatsApp Chats Today</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Don't let your digital memories disappear. How Kotha's AI app helps you safeguard your digital footprint.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-indigo-300 transition leading-snug">Why You Need to Preserve Your WhatsApp Chats Today</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">Don't let your digital memories disappear. How Kotha's AI app helps you safeguard your digital footprint.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>3 min read</span><span>·</span><span class="text-indigo-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -364,11 +409,11 @@
         <a href="/blog/changing-the-narrative-onlinekotha.html" class="card p-6 block group">
             <div class="mb-4 flex items-center justify-between">
                 <span class="tag bg-rose-500/10 text-rose-400">CULTURE</span>
-                <span class="text-[11px] text-gray-500 dark:text-zinc-500">September 2026</span>
+                <span class="text-[11px] card-meta">September 2026</span>
             </div>
-            <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rose-300 transition leading-snug">Changing the Narrative: The True Purpose of OnlineKotha</h2>
-            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">How we are fighting misconceptions and bringing deep emotional utility to the word Kotha in India.</p>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-zinc-500">
+            <h2 class="text-[18px] font-bold card-title mb-2 group-hover:text-rose-300 transition leading-snug">Changing the Narrative: The True Purpose of OnlineKotha</h2>
+            <p class="text-[13px] card-desc leading-relaxed mb-4">How we are fighting misconceptions and bringing deep emotional utility to the word Kotha in India.</p>
+            <div class="flex items-center gap-2 text-[11px] card-meta">
                 <span>5 min read</span><span>·</span><span class="text-rose-400 group-hover:underline">Read Article →</span>
             </div>
         </a>
@@ -378,9 +423,9 @@
 </section>
 
 <!-- CTA -->
-<section class="py-20 px-5 text-center border-t border-gray-200 dark:border-white/[0.04]">
-    <h2 class="text-[28px] font-black tracking-tight mb-4 text-gray-900 dark:text-white">Ready to try Kotha?</h2>
-    <p class="text-gray-600 dark:text-zinc-400 text-[14px] mb-8">Import your chat history and start talking to your memories.</p>
+<section class="py-20 px-5 text-center cta-section">
+    <h2 class="text-[28px] font-black tracking-tight mb-4 cta-heading">Ready to try Kotha?</h2>
+    <p class="cta-sub text-[14px] mb-8">Import your chat history and start talking to your memories.</p>
     <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-[14px] px-7 py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition">
         Get Started Free
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
@@ -388,18 +433,18 @@
 </section>
 
 <!-- Footer -->
-<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-gray-100 dark:bg-[#060608] py-8">
+<footer>
     <div class="max-w-5xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <img src="/favicon.svg" alt="Kotha Logo" class="w-6 h-6 object-contain">
-            <span class="font-bold text-[13px] text-gray-900 dark:text-white">Kotha</span>
-            <span class="text-[11px] text-gray-400 dark:text-zinc-700">&copy; 2026</span>
+            <span class="font-bold text-[13px] footer-brand">Kotha</span>
+            <span class="text-[11px] footer-copy">&copy; 2026</span>
         </div>
-        <div class="flex items-center gap-6 text-[12px] font-medium text-gray-500 dark:text-zinc-500">
-            <a href="/" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">Home</a>
-            <a href="/#how" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">Features</a>
-            <a href="/#pricing" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">Pricing</a>
-            <a href="/#faq" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">FAQ</a>
+        <div class="flex items-center gap-6 text-[12px] font-medium">
+            <a href="/" class="footer-link transition">Home</a>
+            <a href="/#how" class="footer-link transition">Features</a>
+            <a href="/#pricing" class="footer-link transition">Pricing</a>
+            <a href="/#faq" class="footer-link transition">FAQ</a>
         </div>
     </div>
 </footer>

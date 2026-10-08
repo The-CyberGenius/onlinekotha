@@ -17,6 +17,7 @@
             }
         })();
     </script>
+    
     <meta name="description" content="The word Kotha is often misunderstood in India. OnlineKotha is changing the narrative by providing a digital sanctuary for emotional chat preservation.">
     <meta name="keywords" content="onlinekotha meaning, kotha taboo, digital kotha, onlinekotha.com, emotional healing app, whatsapp ai chat">
     <meta name="robots" content="index, follow, max-image-preview:large">
@@ -40,42 +41,80 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', -apple-system, sans-serif; }
-        
-        /* Dark Mode */
+        * { font-family: 'Inter', -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+
+        /* LIGHT */
+        body { background: #ffffff; color: #374151; }
+        nav { background: rgba(255,255,255,0.8); border-bottom: 1px solid #e5e7eb; }
+        nav .logo-text { color: #111827; }
+        nav .nav-link { color: #6b7280; }
+        nav .nav-link:hover { color: #111827; }
+        .theme-btn { color: #6b7280; }
+        .theme-btn:hover { background: #f3f4f6; }
+        .cat-badge { background: #eef2ff; color: #4f46e5; }
+        .post-title { color: #111827; }
+        .post-subtitle { color: #4b5563; }
+        .post-meta { color: #6b7280; }
+        article h2 { color: #111827; }
+        article h3 { color: #374151; }
+        article p, article li { color: #4b5563; }
+        article a { color: #4f46e5; }
+        .step-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px 24px; }
+        .tip-box { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 14px; padding: 16px 20px; }
+        .app-cta { background: linear-gradient(135deg, #eef2ff, #f5f3ff); border: 1px solid #e0e7ff; }
+        .app-cta h3 { color: #111827; }
+        .app-cta p { color: #4b5563; }
+        .app-cta .cta-btn { background: #111827; color: #ffffff; }
+        footer { background: #f9fafb; border-top: 1px solid #e5e7eb; }
+        footer span { color: #9ca3af; }
+        footer a { color: #6b7280; }
+        footer a:hover { color: #111827; }
+
+        /* DARK */
+        .dark body { background: #0a0a0f; color: #d4d4d8; }
+        .dark nav { background: rgba(10,10,15,0.8); border-bottom-color: rgba(255,255,255,0.04); }
+        .dark nav .logo-text { color: #ffffff; }
+        .dark nav .nav-link { color: #a1a1aa; }
+        .dark nav .nav-link:hover { color: #ffffff; }
+        .dark .theme-btn { color: #a1a1aa; }
+        .dark .theme-btn:hover { background: rgba(255,255,255,0.05); }
+        .dark .cat-badge { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .dark .post-title { color: #ffffff; }
+        .dark .post-subtitle { color: #a1a1aa; }
+        .dark .post-meta { color: #71717a; }
         .dark article h2 { color: #f4f4f5; }
         .dark article h3 { color: #e4e4e7; }
-        .dark .step-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
-        .dark .tip-box { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); }
+        .dark article p, .dark article li { color: #a1a1aa; }
+        .dark article a { color: #818cf8; }
+        .dark .step-box { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+        .dark .tip-box { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.15); }
+        .dark .app-cta { background: linear-gradient(135deg, rgba(49,46,129,0.2), rgba(88,28,135,0.2)); border-color: rgba(255,255,255,0.05); }
+        .dark .app-cta h3 { color: #ffffff; }
+        .dark .app-cta p { color: #a1a1aa; }
+        .dark .app-cta .cta-btn { background: #ffffff; color: #000000; }
+        .dark footer { background: #060608; border-top-color: rgba(255,255,255,0.04); }
+        .dark footer span { color: #52525b; }
+        .dark footer a { color: #71717a; }
+        .dark footer a:hover { color: #d4d4d8; }
 
-        /* Light Mode */
-        html:not(.dark) article h2 { color: #111827; }
-        html:not(.dark) article h3 { color: #374151; }
-        html:not(.dark) .step-box { background: #f9fafb; border: 1px solid #e5e7eb; }
-        html:not(.dark) .tip-box { background: #eef2ff; border: 1px solid #c7d2fe; }
-
-        .step-box { border-radius: 16px; padding: 20px 24px; }
-        .tip-box { border-radius: 14px; padding: 16px 20px; }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
         ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
 </head>
-<body class="antialiased bg-white dark:bg-[#0a0a0f] text-gray-800 dark:text-[#d4d4d8] transition-colors duration-300">
+<body class="antialiased">
 
-<nav class="border-b border-gray-200 dark:border-white/[0.04] bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
+<nav class="backdrop-blur-xl sticky top-0 z-50">
     <div class="max-w-4xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2 group">
             <img src="/favicon.svg" alt="Kotha Logo" class="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
-            <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">Kotha</span>
+            <span class="text-xl font-bold logo-text">Kotha</span>
         </a>
         <div class="flex items-center gap-4">
-            <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-sm p-2.5 transition-colors">
-                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+            <button id="theme-toggle" type="button" class="theme-btn rounded-lg text-sm p-2.5 transition-colors">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
             </button>
-            <a href="/blog.html" class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                &larr; Blog
-            </a>
+            <a href="/blog.html" class="text-sm font-medium nav-link transition-colors">&larr; Blog</a>
         </div>
     </div>
 </nav>
@@ -84,22 +123,22 @@
     <!-- Header -->
     <header class="mb-12">
         <div class="flex items-center gap-3 mb-6">
-            <span class="px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider">CULTURE</span>
+            <span class="px-2.5 py-1 rounded-md cat-badge text-xs font-bold uppercase tracking-wider">CULTURE</span>
         </div>
-        <h1 class="text-[32px] md:text-[42px] leading-[1.15] font-extrabold text-gray-900 dark:text-white tracking-tight mb-6">
+        <h1 class="text-[32px] md:text-[42px] leading-[1.15] font-extrabold post-title tracking-tight mb-6">
             Changing the Narrative: The True Purpose of OnlineKotha
         </h1>
-        <p class="text-lg md:text-xl text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+        <p class="text-lg md:text-xl post-subtitle leading-relaxed mb-6">
             How we are fighting misconceptions and bringing deep emotional utility to the word Kotha in India.
         </p>
-        <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-500">
+        <div class="flex items-center gap-4 text-sm post-meta">
             <span>5 min read</span>
             <span>&middot;</span>
             <span>Updated September 2026</span>
         </div>
     </header>
 
-    <article class="prose prose-lg dark:prose-invert max-w-none prose-p:text-gray-600 dark:prose-p:text-gray-600 dark:prose-p:text-[#a1a1aa] prose-p:leading-relaxed prose-headings:font-bold prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline">
+    <article class="prose prose-lg max-w-none">
         
 <p>When you launch a product with a name that society considers taboo, you face immediate pushback. When we introduced <strong>OnlineKotha.com</strong> to the Indian market, we knew exactly what we were up against.</p>
 
@@ -117,32 +156,33 @@
 
     </article>
     
-    <div class="mt-16 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-100 dark:border-white/5 rounded-2xl p-8 text-center">
+    <div class="mt-16 app-cta rounded-2xl p-8 text-center">
         <div class="flex justify-center mb-4">
             <img src="/favicon.svg" alt="OnlineKotha App Logo" class="w-12 h-12">
         </div>
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Experience OnlineKotha on your Phone</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">Download the official OnlineKotha app for Android and start preserving your digital memories today. It's fast, smooth, and incredibly easy to use.</p>
-        <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-black font-semibold rounded-xl hover:opacity-90 transition-opacity">
-            <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" /></path></svg>
+        <h3 class="text-xl font-bold mb-2">Experience OnlineKotha on your Phone</h3>
+        <p class="mb-6 max-w-md mx-auto">Download the official OnlineKotha app for Android. It's fast, smooth, and incredibly easy to use.</p>
+        <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" target="_blank" rel="noopener noreferrer" class="cta-btn inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl hover:opacity-90 transition-opacity">
+            <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current"><path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/></svg>
             Get it on Google Play
         </a>
     </div>
 </main>
 
-<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-gray-50 dark:bg-[#0a0a0f] mt-12 py-12">
-    <div class="max-w-4xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500 dark:text-gray-500">
+<footer class="mt-12 py-12">
+    <div class="max-w-4xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm">
         <div class="flex items-center gap-2">
             <img src="/favicon.svg" alt="Kotha" class="w-5 h-5 opacity-50 grayscale" />
             <span>&copy; 2026 OnlineKotha. All rights reserved.</span>
         </div>
         <div class="flex gap-6">
-            <a href="/privacy.html" class="hover:text-gray-900 dark:hover:text-gray-300 transition-colors">Privacy</a>
-            <a href="/terms.html" class="hover:text-gray-900 dark:hover:text-gray-300 transition-colors">Terms</a>
-            <a href="/contact.html" class="hover:text-gray-900 dark:hover:text-gray-300 transition-colors">Contact</a>
+            <a href="/privacy.html">Privacy</a>
+            <a href="/terms.html">Terms</a>
+            <a href="/contact.html">Contact</a>
         </div>
     </div>
 </footer>
+
 
 
 <script>
@@ -151,14 +191,12 @@
     var l = document.getElementById('theme-toggle-light-icon');
     var btn = document.getElementById('theme-toggle');
     if (!d || !l || !btn) return;
-
     function syncIcons() {
         var isDark = document.documentElement.classList.contains('dark');
         d.classList.toggle('hidden', isDark);
         l.classList.toggle('hidden', !isDark);
     }
     syncIcons();
-
     btn.addEventListener('click', function() {
         var isDark = document.documentElement.classList.contains('dark');
         if (isDark) {

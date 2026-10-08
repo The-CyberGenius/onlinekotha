@@ -18,6 +18,7 @@
             }
         })();
     </script>
+    
     <meta name="description" content="What happens when you combine exported chat histories with advanced Artificial Intelligence? Enter Kotha: AI WhatsappChat Memory.">
     <meta name="keywords" content="Kotha: AI WhatsappChat Memory, onlinekotha, onlinekotha.com, kotha ai, whatsapp memory ai, chat simulation">
     <meta name="author" content="Kotha">
@@ -42,44 +43,80 @@
     <script src="/js/tailwind.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', -apple-system, sans-serif; }
-        
-        /* Dark Mode */
+        * { font-family: 'Inter', -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+
+        /* LIGHT */
+        body { background: #ffffff; color: #374151; }
+        nav { background: rgba(255,255,255,0.8); border-bottom: 1px solid #e5e7eb; }
+        nav .logo-text { color: #111827; }
+        nav .nav-link { color: #6b7280; }
+        nav .nav-link:hover { color: #111827; }
+        .theme-btn { color: #6b7280; }
+        .theme-btn:hover { background: #f3f4f6; }
+        .cat-badge { background: #eef2ff; color: #4f46e5; }
+        .post-title { color: #111827; }
+        .post-subtitle { color: #4b5563; }
+        .post-meta { color: #6b7280; }
+        article h2 { color: #111827; }
+        article h3 { color: #374151; }
+        article p, article li { color: #4b5563; }
+        article a { color: #4f46e5; }
+        .step-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px 24px; }
+        .tip-box { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 14px; padding: 16px 20px; }
+        .app-cta { background: linear-gradient(135deg, #eef2ff, #f5f3ff); border: 1px solid #e0e7ff; }
+        .app-cta h3 { color: #111827; }
+        .app-cta p { color: #4b5563; }
+        .app-cta .cta-btn { background: #111827; color: #ffffff; }
+        footer { background: #f9fafb; border-top: 1px solid #e5e7eb; }
+        footer span { color: #9ca3af; }
+        footer a { color: #6b7280; }
+        footer a:hover { color: #111827; }
+
+        /* DARK */
+        .dark body { background: #0a0a0f; color: #d4d4d8; }
+        .dark nav { background: rgba(10,10,15,0.8); border-bottom-color: rgba(255,255,255,0.04); }
+        .dark nav .logo-text { color: #ffffff; }
+        .dark nav .nav-link { color: #a1a1aa; }
+        .dark nav .nav-link:hover { color: #ffffff; }
+        .dark .theme-btn { color: #a1a1aa; }
+        .dark .theme-btn:hover { background: rgba(255,255,255,0.05); }
+        .dark .cat-badge { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .dark .post-title { color: #ffffff; }
+        .dark .post-subtitle { color: #a1a1aa; }
+        .dark .post-meta { color: #71717a; }
         .dark article h2 { color: #f4f4f5; }
         .dark article h3 { color: #e4e4e7; }
-        .dark .step-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
-        .dark .tip-box { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); }
+        .dark article p, .dark article li { color: #a1a1aa; }
+        .dark article a { color: #818cf8; }
+        .dark .step-box { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+        .dark .tip-box { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.15); }
+        .dark .app-cta { background: linear-gradient(135deg, rgba(49,46,129,0.2), rgba(88,28,135,0.2)); border-color: rgba(255,255,255,0.05); }
+        .dark .app-cta h3 { color: #ffffff; }
+        .dark .app-cta p { color: #a1a1aa; }
+        .dark .app-cta .cta-btn { background: #ffffff; color: #000000; }
+        .dark footer { background: #060608; border-top-color: rgba(255,255,255,0.04); }
+        .dark footer span { color: #52525b; }
+        .dark footer a { color: #71717a; }
+        .dark footer a:hover { color: #d4d4d8; }
 
-        /* Light Mode */
-        html:not(.dark) article h2 { color: #111827; }
-        html:not(.dark) article h3 { color: #374151; }
-        html:not(.dark) .step-box { background: #f9fafb; border: 1px solid #e5e7eb; }
-        html:not(.dark) .tip-box { background: #eef2ff; border: 1px solid #c7d2fe; }
-
-        .step-box { border-radius: 16px; padding: 20px 24px; }
-        .tip-box { border-radius: 14px; padding: 16px 20px; }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
         ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
     </head>
-<body class="antialiased bg-white dark:bg-[#0a0a0f] text-gray-800 dark:text-[#d4d4d8] transition-colors duration-300">
+<body class="antialiased">
 
-<nav class="border-b border-gray-200 dark:border-white/[0.04] bg-white/80 dark:bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-50 transition-colors duration-300">
-    <div class="max-w-3xl mx-auto px-5 py-4 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2.5 group">
-            <img src="/logo.svg" alt="Kotha Logo" class="w-7 h-7 object-contain transition-transform group-hover:scale-105" />
-            <span class="font-bold text-[16px] text-gray-900 dark:text-white tracking-tight">Kotha</span>
+<nav class="backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2 group">
+            <img src="/favicon.svg" alt="Kotha Logo" class="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+            <span class="text-xl font-bold logo-text">Kotha</span>
         </a>
         <div class="flex items-center gap-4">
-            <button id="theme-toggle" class="p-2 rounded-lg text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors">
-                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 3.22a1 1 0 011.415 0l.708.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM14.95 15.657a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-3.22a1 1 0 010-1.415l-.708-.707a1 1 0 011.414-1.414l.707.707a1 1 0 01-1.414 1.414zM2 10a1 1 0 011-1h1a1 1 0 110 2H3a1 1 0 01-1-1zm1.293-4.95a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414L3.293 6.464a1 1 0 010-1.414zM10 5a5 5 0 100 10 5 5 0 000-10z"></path>
-                </svg>
-                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                </svg>
+            <button id="theme-toggle" type="button" class="theme-btn rounded-lg text-sm p-2.5 transition-colors">
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
             </button>
-            <a href="/blog.html" class="text-[13px] font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">← Blog</a>
+            <a href="/blog.html" class="text-sm font-medium nav-link transition-colors">&larr; Blog</a>
         </div>
     </div>
 </nav>
@@ -135,17 +172,20 @@
     </div>
 </article>
 
-<footer class="border-t border-gray-200 dark:border-white/[0.04] py-12 mt-20">
-    <div class="max-w-3xl mx-auto px-5 flex flex-col items-center text-center">
-        <img src="/favicon.svg" alt="Kotha Logo" class="w-8 h-8 object-contain mb-4">
-        <p class="text-zinc-500 dark:text-zinc-600 text-[13px] mb-4">© 2026 OnlineKotha. All rights reserved.</p>
-        <div class="flex justify-center gap-4 text-[13px]">
-            <a href="/privacy.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">Privacy</a>
-            <a href="/terms.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">Terms</a>
-            <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" class="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition font-medium">Download App</a>
+<footer class="mt-12 py-12">
+    <div class="max-w-4xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm">
+        <div class="flex items-center gap-2">
+            <img src="/favicon.svg" alt="Kotha" class="w-5 h-5 opacity-50 grayscale" />
+            <span>&copy; 2026 OnlineKotha. All rights reserved.</span>
+        </div>
+        <div class="flex gap-6">
+            <a href="/privacy.html">Privacy</a>
+            <a href="/terms.html">Terms</a>
+            <a href="/contact.html">Contact</a>
         </div>
     </div>
 </footer>
+
 
 
 
@@ -155,14 +195,12 @@
     var l = document.getElementById('theme-toggle-light-icon');
     var btn = document.getElementById('theme-toggle');
     if (!d || !l || !btn) return;
-
     function syncIcons() {
         var isDark = document.documentElement.classList.contains('dark');
         d.classList.toggle('hidden', isDark);
         l.classList.toggle('hidden', !isDark);
     }
     syncIcons();
-
     btn.addEventListener('click', function() {
         var isDark = document.documentElement.classList.contains('dark');
         if (isDark) {
