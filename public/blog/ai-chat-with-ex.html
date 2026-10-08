@@ -9,15 +9,18 @@
     <title>AI Chat With Your Ex: How to Turn WhatsApp Chats into an AI Simulation | Kotha</title>
     <script>
         (function(){
-            if (localStorage.getItem('theme') === 'light') {
+            var t = localStorage.getItem('theme');
+            if (t === 'light') {
                 document.documentElement.classList.remove('dark');
-            } else if (localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            } else if (t === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
                 document.documentElement.classList.add('dark');
             } else {
                 document.documentElement.classList.remove('dark');
             }
         })();
+        window.tailwind = { config: { darkMode: 'class' } };
     </script>
+    
     
     <meta name="description" content="Can you turn exported WhatsApp chats into an AI chatbot of your ex-partner, girlfriend, or boyfriend? Discover how conversational AI clones texting styles for nostalgia, memory preservation, and closure.">
     <meta name="keywords" content="ai chat with ex, chat with ex ai, ai ex girlfriend chat, ai ex boyfriend simulator, chat with your ex ai, simulate ex in ai, talk to ex ai chatbot, recreate ex from whatsapp messages, text your ex ai simulator, ai girlfriend from real chats, ai boyfriend text simulator, turn whatsapp chats into ai, ai personality cloning from chat history">
@@ -60,69 +63,189 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png?v=2">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
     <script>
-        tailwind.config = { darkMode: 'class' };
+        window.tailwind = { config: { darkMode: 'class' } };
     </script>
     <script src="/js/tailwind.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
-        * { font-family: 'Inter', -apple-system, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+        * { font-family: 'Inter', -apple-system, sans-serif; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
 
-        /* LIGHT */
-        body { background: #ffffff; color: #374151; }
-        nav { background: rgba(255,255,255,0.8); border-bottom: 1px solid #e5e7eb; }
-        nav .logo-text { color: #111827; }
-        nav .nav-link { color: #6b7280; }
-        nav .nav-link:hover { color: #111827; }
-        .theme-btn { color: #6b7280; }
-        .theme-btn:hover { background: #f3f4f6; }
-        .cat-badge { background: #eef2ff; color: #4f46e5; }
-        .post-title { color: #111827; }
-        .post-subtitle { color: #4b5563; }
-        .post-meta { color: #6b7280; }
-        article h2 { color: #111827; }
-        article h3 { color: #374151; }
-        article p, article li { color: #4b5563; }
-        article a { color: #4f46e5; }
-        .step-box { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 20px 24px; }
-        .tip-box { background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 14px; padding: 16px 20px; }
-        .app-cta { background: linear-gradient(135deg, #eef2ff, #f5f3ff); border: 1px solid #e0e7ff; }
-        .app-cta h3 { color: #111827; }
-        .app-cta p { color: #4b5563; }
-        .app-cta .cta-btn { background: #111827; color: #ffffff; }
-        footer { background: #f9fafb; border-top: 1px solid #e5e7eb; }
-        footer span { color: #9ca3af; }
-        footer a { color: #6b7280; }
-        footer a:hover { color: #111827; }
+        /* ======================================================== */
+        /* LIGHT / DAY MODE (Default)                               */
+        /* ======================================================== */
+        html:not(.dark) body { background-color: #ffffff !important; color: #374151 !important; }
+        html:not(.dark) nav { background: rgba(255,255,255,0.85) !important; border-bottom: 1px solid #e5e7eb !important; }
+        html:not(.dark) nav .logo-text { color: #111827 !important; }
+        html:not(.dark) nav .nav-link { color: #4b5563 !important; }
+        html:not(.dark) nav .nav-link:hover { color: #111827 !important; }
+        html:not(.dark) .theme-btn { color: #4b5563 !important; }
+        html:not(.dark) .theme-btn:hover { background: #f3f4f6 !important; }
 
-        /* DARK */
-        .dark body { background: #0a0a0f; color: #d4d4d8; }
-        .dark nav { background: rgba(10,10,15,0.8); border-bottom-color: rgba(255,255,255,0.04); }
-        .dark nav .logo-text { color: #ffffff; }
-        .dark nav .nav-link { color: #a1a1aa; }
-        .dark nav .nav-link:hover { color: #ffffff; }
-        .dark .theme-btn { color: #a1a1aa; }
-        .dark .theme-btn:hover { background: rgba(255,255,255,0.05); }
-        .dark .cat-badge { background: rgba(99,102,241,0.15); color: #818cf8; }
-        .dark .post-title { color: #ffffff; }
-        .dark .post-subtitle { color: #a1a1aa; }
-        .dark .post-meta { color: #71717a; }
-        .dark article h2 { color: #f4f4f5; }
-        .dark article h3 { color: #e4e4e7; }
-        .dark article p, .dark article li { color: #a1a1aa; }
-        .dark article a { color: #818cf8; }
-        .dark .step-box { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
-        .dark .tip-box { background: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.15); }
-        .dark .app-cta { background: linear-gradient(135deg, rgba(49,46,129,0.2), rgba(88,28,135,0.2)); border-color: rgba(255,255,255,0.05); }
-        .dark .app-cta h3 { color: #ffffff; }
-        .dark .app-cta p { color: #a1a1aa; }
-        .dark .app-cta .cta-btn { background: #ffffff; color: #000000; }
-        .dark footer { background: #060608; border-top-color: rgba(255,255,255,0.04); }
-        .dark footer span { color: #52525b; }
-        .dark footer a { color: #71717a; }
-        .dark footer a:hover { color: #d4d4d8; }
+        /* All Headings in Light Mode */
+        html:not(.dark) h1, html:not(.dark) h2, html:not(.dark) h3, html:not(.dark) h4, html:not(.dark) h5, html:not(.dark) h6,
+        html:not(.dark) .post-title, html:not(.dark) .blog-heading, html:not(.dark) .card-title, html:not(.dark) .cta-heading,
+        html:not(.dark) article h1, html:not(.dark) article h2, html:not(.dark) article h3 {
+            color: #111827 !important;
+        }
+        html:not(.dark) .post-subtitle, html:not(.dark) .blog-sub, html:not(.dark) .card-desc, html:not(.dark) .cta-sub {
+            color: #4b5563 !important;
+        }
+        html:not(.dark) article p, html:not(.dark) article li, html:not(.dark) p, html:not(.dark) li {
+            color: #374151 !important;
+        }
+        html:not(.dark) strong, html:not(.dark) b {
+            color: #111827 !important;
+        }
+        html:not(.dark) .post-meta, html:not(.dark) .card-meta {
+            color: #6b7280 !important;
+        }
+        html:not(.dark) .text-zinc-300, html:not(.dark) .text-zinc-400 {
+            color: #4b5563 !important;
+        }
+        html:not(.dark) .text-zinc-500, html:not(.dark) .text-zinc-600 {
+            color: #6b7280 !important;
+        }
 
+        /* Cards & Content Boxes in Light Mode */
+        html:not(.dark) .card {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+        }
+        html:not(.dark) .card:hover {
+            border-color: rgba(99,102,241,0.4) !important;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08) !important;
+        }
+        html:not(.dark) .feat, html:not(.dark) .feature-card, html:not(.dark) .idea-card, html:not(.dark) .memory-box,
+        html:not(.dark) .persona-card, html:not(.dark) .pillar-card, html:not(.dark) .quote-box, html:not(.dark) .reflection-card,
+        html:not(.dark) .step-box, html:not(.dark) .tech-card, html:not(.dark) .tip-box, html:not(.dark) .tip-card, html:not(.dark) .compare {
+            background: #f9fafb !important;
+            border: 1px solid #e5e7eb !important;
+        }
+        html:not(.dark) .tip-box, html:not(.dark) .tip-card {
+            background: #eef2ff !important;
+            border: 1px solid #c7d2fe !important;
+        }
+        html:not(.dark) .cat-badge {
+            background: #eef2ff !important;
+            color: #4f46e5 !important;
+        }
+
+        /* Download App / CTA Card in Light Mode */
+        html:not(.dark) .app-cta, html:not(.dark) a[href*="play.google.com"] {
+            background: #ffffff !important;
+            border: 1px solid #e5e7eb !important;
+        }
+        html:not(.dark) .app-cta h3, html:not(.dark) a[href*="play.google.com"] h3 { color: #111827 !important; }
+        html:not(.dark) .app-cta p, html:not(.dark) a[href*="play.google.com"] p { color: #4b5563 !important; }
+        html:not(.dark) .cta-section { border-top: 1px solid #e5e7eb !important; }
+
+        /* Footer in Light Mode */
+        html:not(.dark) footer {
+            background: #f9fafb !important;
+            border-top: 1px solid #e5e7eb !important;
+        }
+        html:not(.dark) footer span, html:not(.dark) footer .footer-copy { color: #9ca3af !important; }
+        html:not(.dark) footer a, html:not(.dark) footer .footer-link { color: #6b7280 !important; }
+        html:not(.dark) footer a:hover, html:not(.dark) footer .footer-link:hover { color: #111827 !important; }
+        html:not(.dark) footer .footer-brand { color: #111827 !important; }
+
+        /* ======================================================== */
+        /* DARK / NIGHT MODE                                        */
+        /* ======================================================== */
+        html.dark body, .dark body { background-color: #0a0a0f !important; color: #d4d4d8 !important; }
+        html.dark nav, .dark nav { background: rgba(10,10,15,0.85) !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+        html.dark nav .logo-text, .dark nav .logo-text { color: #ffffff !important; }
+        html.dark nav .nav-link, .dark nav .nav-link { color: #a1a1aa !important; }
+        html.dark nav .nav-link:hover, .dark nav .nav-link:hover { color: #ffffff !important; }
+        html.dark .theme-btn, .dark .theme-btn { color: #a1a1aa !important; }
+        html.dark .theme-btn:hover, .dark .theme-btn:hover { background: rgba(255,255,255,0.05) !important; }
+
+        /* All Headings in Dark Mode */
+        html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
+        html.dark .post-title, html.dark .blog-heading, html.dark .card-title, html.dark .cta-heading,
+        html.dark article h1, html.dark article h2, html.dark article h3,
+        .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+        .dark .post-title, .dark .blog-heading, .dark .card-title, .dark .cta-heading,
+        .dark article h1, .dark article h2, .dark article h3 {
+            color: #ffffff !important;
+        }
+        html.dark .post-subtitle, html.dark .blog-sub, html.dark .card-desc, html.dark .cta-sub,
+        .dark .post-subtitle, .dark .blog-sub, .dark .card-desc, .dark .cta-sub {
+            color: #a1a1aa !important;
+        }
+        html.dark article p, html.dark article li, html.dark p, html.dark li,
+        .dark article p, .dark article li, .dark p, .dark li {
+            color: #a1a1aa !important;
+        }
+        html.dark strong, html.dark b, .dark strong, .dark b {
+            color: #ffffff !important;
+        }
+        html.dark .post-meta, html.dark .card-meta,
+        .dark .post-meta, .dark .card-meta {
+            color: #71717a !important;
+        }
+        html.dark .text-zinc-300, html.dark .text-zinc-400,
+        .dark .text-zinc-300, .dark .text-zinc-400 {
+            color: #a1a1aa !important;
+        }
+
+        /* Cards & Content Boxes in Dark Mode */
+        html.dark .card, .dark .card {
+            background: rgba(255,255,255,0.03) !important;
+            border: 1px solid rgba(255,255,255,0.06) !important;
+        }
+        html.dark .card:hover, .dark .card:hover {
+            background: rgba(255,255,255,0.05) !important;
+            border-color: rgba(129,140,248,0.2) !important;
+            box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5) !important;
+        }
+        html.dark .feat, html.dark .feature-card, html.dark .idea-card, html.dark .memory-box,
+        html.dark .persona-card, html.dark .pillar-card, html.dark .quote-box, html.dark .reflection-card,
+        html.dark .step-box, html.dark .tech-card, html.dark .tip-box, html.dark .tip-card, html.dark .compare,
+        .dark .feat, .dark .feature-card, .dark .idea-card, .dark .memory-box,
+        .dark .persona-card, .dark .pillar-card, .dark .quote-box, .dark .reflection-card,
+        .dark .step-box, .dark .tech-card, .dark .tip-box, .dark .tip-card, .dark .compare {
+            background: rgba(255,255,255,0.03) !important;
+            border: 1px solid rgba(255,255,255,0.06) !important;
+        }
+        html.dark .tip-box, html.dark .tip-card, .dark .tip-box, .dark .tip-card {
+            background: rgba(99,102,241,0.08) !important;
+            border: 1px solid rgba(99,102,241,0.15) !important;
+        }
+        html.dark .cat-badge, .dark .cat-badge {
+            background: rgba(99,102,241,0.15) !important;
+            color: #818cf8 !important;
+        }
+
+        /* Download App / CTA Card in Dark Mode */
+        html.dark .app-cta, .dark .app-cta,
+        html.dark a[href*="play.google.com"], .dark a[href*="play.google.com"] {
+            background: rgba(255,255,255,0.03) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+        }
+        html.dark .app-cta h3, .dark .app-cta h3,
+        html.dark a[href*="play.google.com"] h3, .dark a[href*="play.google.com"] h3 { color: #ffffff !important; }
+        html.dark .app-cta p, .dark .app-cta p,
+        html.dark a[href*="play.google.com"] p, .dark a[href*="play.google.com"] p { color: #a1a1aa !important; }
+        html.dark .cta-section, .dark .cta-section { border-top: 1px solid rgba(255,255,255,0.04) !important; }
+
+        /* Footer in Dark Mode */
+        html.dark footer, .dark footer {
+            background: #060608 !important;
+            border-top: 1px solid rgba(255,255,255,0.04) !important;
+        }
+        html.dark footer span, html.dark footer .footer-copy, .dark footer span, .dark footer .footer-copy { color: #52525b !important; }
+        html.dark footer a, html.dark footer .footer-link, .dark footer a, .dark footer .footer-link { color: #71717a !important; }
+        html.dark footer a:hover, html.dark footer .footer-link:hover, .dark footer a:hover, .dark footer .footer-link:hover { color: #d4d4d8 !important; }
+        html.dark footer .footer-brand, .dark footer .footer-brand { color: #ffffff !important; }
+
+        .step-box, .feat, .feature-card, .idea-card, .memory-box, .persona-card, .pillar-card, .quote-box, .reflection-card, .tech-card, .tip-box, .tip-card, .compare {
+            border-radius: 16px;
+            padding: 20px 24px;
+        }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
         ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
@@ -243,26 +366,26 @@
         <p><a href="/" class="text-indigo-400 hover:text-indigo-300 underline font-medium">Kotha</a> does not use generic templates. Instead, it extracts the deep linguistic fingerprint from your actual WhatsApp export:</p>
 
         <ul class="list-disc pl-6 space-y-2 text-gray-500 dark:text-zinc-400">
-            <li><b class="text-zinc-300">Vocabulary & Slang:</b> Matches their exact colloquialisms, regional phrases (English, Hinglish, Spanish, German, etc.), and idiosyncratic spellings.</li>
-            <li><b class="text-zinc-300">Emoji Frequency:</b> Learns whether they sent walls of emojis, single hearts, passive-aggressive thumbs-ups, or dry zero-emoji texts.</li>
-            <li><b class="text-zinc-300">Pacing & Reply Style:</b> Adapts to short rapid-fire messages vs. thoughtful mini-paragraphs.</li>
-            <li><b class="text-zinc-300">Contextual Memory:</b> Knows the shared events, vacation references, pet names, and topics you discussed over the years.</li>
+            <li><b>Vocabulary & Slang:</b> Matches their exact colloquialisms, regional phrases (English, Hinglish, Spanish, German, etc.), and idiosyncratic spellings.</li>
+            <li><b>Emoji Frequency:</b> Learns whether they sent walls of emojis, single hearts, passive-aggressive thumbs-ups, or dry zero-emoji texts.</li>
+            <li><b>Pacing & Reply Style:</b> Adapts to short rapid-fire messages vs. thoughtful mini-paragraphs.</li>
+            <li><b>Contextual Memory:</b> Knows the shared events, vacation references, pet names, and topics you discussed over the years.</li>
         </ul>
 
         <h2 class="text-[24px] font-bold text-gray-900 dark:text-white mt-12 mb-4">Step-by-Step: How to Chat With Your Ex Using AI</h2>
 
         <ol class="list-decimal pl-6 space-y-3 text-gray-500 dark:text-zinc-400">
             <li>
-                <b class="text-zinc-300">Export Your WhatsApp Chat:</b> Open WhatsApp → Navigate to your chat with your ex → Tap Menu (⋮ or contact info on iOS) → More → <em>Export Chat</em> → Select <em>"Without Media"</em>. You will get a <code>.zip</code> or <code>.txt</code> file.
+                <b>Export Your WhatsApp Chat:</b> Open WhatsApp → Navigate to your chat with your ex → Tap Menu (⋮ or contact info on iOS) → More → <em>Export Chat</em> → Select <em>"Without Media"</em>. You will get a <code>.zip</code> or <code>.txt</code> file.
             </li>
             <li>
-                <b class="text-zinc-300">Upload to Kotha:</b> Go to <a href="/" class="text-indigo-400 underline">onlinekotha.com</a>. Drag and drop your exported archive into the upload zone.
+                <b>Upload to Kotha:</b> Go to <a href="/" class="text-indigo-400 underline">onlinekotha.com</a>. Drag and drop your exported archive into the upload zone.
             </li>
             <li>
-                <b class="text-zinc-300">Browse the WhatsApp Web Viewer:</b> Instantly review your entire message timeline in a high-speed, modern WhatsApp-like dark interface.
+                <b>Browse the WhatsApp Web Viewer:</b> Instantly review your entire message timeline in a high-speed, modern WhatsApp-like dark interface.
             </li>
             <li>
-                <b class="text-zinc-300">Launch AI Chat Simulator:</b> Click the AI chat tab, select your contact's name, and start a conversation. Watch the AI respond in the exact voice you remember.
+                <b>Launch AI Chat Simulator:</b> Click the AI chat tab, select your contact's name, and start a conversation. Watch the AI respond in the exact voice you remember.
             </li>
         </ol>
 
@@ -271,9 +394,9 @@
         <p>Your intimate conversations and relationship history should never be public property. At Kotha, privacy is built directly into our infrastructure:</p>
 
         <ul class="list-disc pl-6 space-y-2 text-gray-500 dark:text-zinc-400">
-            <li><b class="text-zinc-300">Zero Model Training:</b> Your personal messages are strictly ephemeral and never used to train public foundation models.</li>
-            <li><b class="text-zinc-300">End-to-End Encryption:</b> Transferred over high-grade HTTPS/TLS 1.3 encryption.</li>
-            <li><b class="text-zinc-300">One-Click Permanent Deletion:</b> You can erase your chat archives and all associated AI memory vectors at any time from your account settings.</li>
+            <li><b>Zero Model Training:</b> Your personal messages are strictly ephemeral and never used to train public foundation models.</li>
+            <li><b>End-to-End Encryption:</b> Transferred over high-grade HTTPS/TLS 1.3 encryption.</li>
+            <li><b>One-Click Permanent Deletion:</b> You can erase your chat archives and all associated AI memory vectors at any time from your account settings.</li>
         </ul>
 
         <div class="mt-12 p-6 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-pink-500/5 border border-indigo-500/15 text-center">
