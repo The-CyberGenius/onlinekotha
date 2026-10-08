@@ -48,17 +48,18 @@
             background-color: transparent;
         }
         #mac-frame.mac-expanded {
-            max-width: 100% !important;
-            max-height: 100% !important;
-            width: 100% !important;
-            height: 100% !important;
+            max-width: none !important;
+            max-height: none !important;
+            width: 100vw !important;
+            height: 100vh !important;
             border-radius: 0 !important;
             border: none !important;
-            position: relative !important;
+            position: fixed !important;
             top: 0 !important;
             left: 0 !important;
             margin: 0 !important;
             transform: none !important;
+            z-index: 9999 !important;
         }
         #mac-frame.mac-expanded #mac-titlebar {
             cursor: default;
@@ -82,7 +83,7 @@
 <body class="app-shell flex flex-col items-center justify-center fixed top-0 left-0 w-screen h-screen overflow-hidden p-2 md:p-5 lg:p-6 bg-[#0e131f] dark:bg-[#090d16]" style="height: var(--viewport-height, 100dvh);">
 
     <!-- macOS Window Frame -->
-    <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-4xl md:max-h-[85vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-[#1a1f29] transition-transform duration-300 ease-out-expo">
+    <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-5xl md:max-h-[85vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-[#1a1f29] transition-transform duration-300 ease-out-expo">
         <!-- Title bar with traffic lights (desktop only - Draggable & Expandable) -->
         <div id="mac-titlebar" class="hidden md:flex h-10 bg-gray-100 dark:bg-[#1a1f29] items-center px-4 shrink-0 relative z-[200] select-none border-b border-black/10 dark:border-black/20" title="Double click to toggle expand / Drag to move">
             <div class="flex items-center gap-2" id="mac-traffic-lights">

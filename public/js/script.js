@@ -3269,7 +3269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let userHasResized = false;
 
         function centerFrame() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
             const targetW = userHasResized
                 ? Math.min(parseInt(frame.style.width) || 960, window.innerWidth - 30)
                 : Math.max(760, Math.min(window.innerWidth * 0.82, 1100));
@@ -3291,7 +3291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function clampFrameInViewport() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
             const r = frame.getBoundingClientRect();
             let w = parseInt(frame.style.width) || r.width;
             let h = parseInt(frame.style.height) || r.height;
@@ -3383,7 +3383,6 @@ document.addEventListener('DOMContentLoaded', () => {
         syncOverlay();
 
         window.addEventListener('resize', () => {
-            if (document.body.classList.contains('app-shell')) return;
             if (dragging) {
                 dragging = false;
                 isActualDrag = false;
