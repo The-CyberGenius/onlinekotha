@@ -630,10 +630,45 @@ HARD RULES
         }
     });
 
+    function sortUsers(list) {
+        function parseTs(v) {
+            if (!v) return 0;
+            if (typeof v === 'number') return v;
+            const n = Number(v);
+            if (!isNaN(n) && n > 0) return n;
+            const p = Date.parse(v);
+            return isNaN(p) ? 0 : p;
+        }
+
+        return (list || []).slice().sort((a, b) => {
+            const aOnline = Boolean(a.is_online);
+            const bOnline = Boolean(b.is_online);
+            if (aOnline && !bOnline) return -1;
+            if (!aOnline && bOnline) return 1;
+
+            const aCreated = parseTs(a.created_at);
+            const bCreated = parseTs(b.created_at);
+            if (bCreated !== aCreated) return bCreated - aCreated;
+
+            const aActive = parseTs(a.last_active_at);
+            const bActive = parseTs(b.last_active_at);
+            if (bActive !== aActive) return bActive - aActive;
+
+            return (Number(b.id) || 0) - (Number(a.id) || 0);
+        });
+    }
+
     let cachedUsers = [];
     async function loadUsers() {
-        cachedUsers = await (await fetch('/api/admin/users')).json();
-        renderUserList(cachedUsers);
+        try {
+            const res = await fetch('/api/admin/users');
+            if (res.ok) {
+                cachedUsers = await res.json();
+                renderUserList(sortUsers(cachedUsers));
+            }
+        } catch (e) {
+            console.error('Failed to load users:', e);
+        }
 
         const searchInput = document.getElementById('admin-user-search');
         if (searchInput && !searchInput._bound) {
@@ -641,7 +676,7 @@ HARD RULES
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 if (!query) {
-                    renderUserList(cachedUsers);
+                    renderUserList(sortUsers(cachedUsers));
                     return;
                 }
                 const filtered = cachedUsers.filter(u => 
@@ -650,12 +685,36 @@ HARD RULES
                     (u.display_name && u.display_name.toLowerCase().includes(query)) ||
                     (u.phone && u.phone.toLowerCase().includes(query))
                 );
-                renderUserList(filtered);
+                renderUserList(sortUsers(filtered));
+            });
+        }
+
+        const refreshBtn = document.getElementById('refresh-users-btn');
+        if (refreshBtn && !refreshBtn._bound) {
+            refreshBtn._bound = true;
+            refreshBtn.addEventListener('click', async () => {
+                refreshBtn.disabled = true;
+                refreshBtn.style.opacity = '0.6';
+                await loadUsers();
+                setTimeout(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.style.opacity = '1';
+                }, 400);
             });
         }
     }
 
+    // Auto-refresh users tab every 30s to keep online and newly registered users updated
+    setInterval(() => {
+        const tabUsers = document.getElementById('tab-users');
+        const searchInput = document.getElementById('admin-user-search');
+        if (tabUsers && tabUsers.classList.contains('active') && (!searchInput || !searchInput.value.trim())) {
+            loadUsers();
+        }
+    }, 30000);
+
     function renderUserList(rows) {
+        rows = sortUsers(rows);
         const list = document.getElementById('user-list');
         if (!rows.length) {
             list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">No users match your query</div>';
@@ -688,7 +747,8 @@ HARD RULES
 
         const registeredCount = rows.filter(u => !u.is_guest).length;
         const activeGuestCount = rows.filter(u => u.is_guest).length;
-        const countSummaryText = `${registeredCount} registered user${registeredCount !== 1 ? 's' : ''}${activeGuestCount ? ' · ' + activeGuestCount + ' active guest' + (activeGuestCount !== 1 ? 's' : '') : ''}`;
+        const onlineCount = rows.filter(u => u.is_online).length;
+        const countSummaryText = `${registeredCount} registered user${registeredCount !== 1 ? 's' : ''}${activeGuestCount ? ' · ' + activeGuestCount + ' active guest' + (activeGuestCount !== 1 ? 's' : '') : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' online now</span>' : ''}`;
 
         if (isMobile) {
             // ══════════════════════════════════════════════════════════
@@ -701,7 +761,7 @@ HARD RULES
                 const av = u.avatar_url
                     ? '<img src="' + u.avatar_url + '" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div style="display:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>'
                     : '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>';
-                const dot = u.is_online ? '<span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;margin-left:5px;"></span>' : '';
+                const dot = u.is_online ? '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px;"><span style="width:5px;height:5px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;"></span>ONLINE</span>' : '';
                 const phone = u.phone ? (u.phone_country_code||'') + ' ' + u.phone : (u.is_guest ? 'Guest mode' : 'No phone');
                 const loc = u.ip_address ? u.ip_address + (u.country ? ' · ' + getCountryName(u.country) : '') : 'No IP';
                 const costStr = Number(u.total_cost || 0).toFixed(3);
@@ -774,7 +834,7 @@ HARD RULES
                 const avatarHtml = u.avatar_url
                     ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
                     : `<div class="user-avatar">${initials}</div>`;
-                const onlineDot = u.is_online ? '<span class="status-dot" title="Online"></span>' : '';
+                const onlineDot = u.is_online ? '<span class="status-dot" title="Online" style="margin-left:6px;box-shadow:0 0 8px #10b981;"></span><span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:5px;letter-spacing:0.02em;">ONLINE</span>' : '';
                 const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code||''}${u.phone}" style="color:var(--text-primary);text-decoration:none;">${u.phone_country_code?u.phone_country_code+' ':''}${u.phone}</a>` : `<span style="color:var(--text-muted);">${u.is_guest ? 'Guest mode' : 'No phone'}</span>`;
                 const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
                 const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';

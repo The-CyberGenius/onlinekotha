@@ -493,12 +493,18 @@ router.get('/users', (req, res) => {
 
     const onlineUsers = req.app.locals.onlineUsers;
     
+    function isUserOnline(id) {
+        if (!onlineUsers || id === undefined || id === null) return false;
+        const s = onlineUsers.get(id) || onlineUsers.get(Number(id)) || onlineUsers.get(String(id));
+        return Boolean(s && (s instanceof Set ? s.size > 0 : true));
+    }
+    
     // Only include guests who imported a chat, sent AI messages, OR are currently online!
     const guests = db.prepare(`SELECT id, ip as ip_address, created_at, updated_at as last_active_at, chats_imported, ai_messages_count FROM guest_sessions`).all();
     
     const activeGuests = [];
     guests.forEach(g => {
-        const isOnline = onlineUsers ? (onlineUsers.has(g.id) || onlineUsers.has(String(g.id))) : false;
+        const isOnline = isUserOnline(g.id);
         if (g.chats_imported > 0 || g.ai_messages_count > 0 || isOnline) {
             activeGuests.push({
                 id: g.id,
@@ -524,16 +530,41 @@ router.get('/users', (req, res) => {
     });
 
     users.forEach(r => {
-        r.is_online = onlineUsers ? (onlineUsers.has(r.id) || onlineUsers.has(Number(r.id)) || onlineUsers.has(String(r.id))) : false;
+        r.is_online = isUserOnline(r.id);
     });
+
+    function parseTs(v) {
+        if (!v) return 0;
+        if (typeof v === 'number') return v;
+        const n = Number(v);
+        if (!isNaN(n) && n > 0) return n;
+        const p = Date.parse(v);
+        return isNaN(p) ? 0 : p;
+    }
 
     const rows = [...users, ...activeGuests];
     rows.sort((a, b) => {
-        if (a.is_online && !b.is_online) return -1;
-        if (!a.is_online && b.is_online) return 1;
-        const aDate = a.last_active_at || a.created_at || 0;
-        const bDate = b.last_active_at || b.created_at || 0;
-        return bDate - aDate;
+        // 1. Any user currently online is at the top!
+        const aOnline = Boolean(a.is_online);
+        const bOnline = Boolean(b.is_online);
+        if (aOnline && !bOnline) return -1;
+        if (!aOnline && bOnline) return 1;
+
+        // 2. Newest registered users on top (created_at descending)
+        const aCreated = parseTs(a.created_at);
+        const bCreated = parseTs(b.created_at);
+        if (bCreated !== aCreated) {
+            return bCreated - aCreated;
+        }
+
+        // 3. Fallback to latest active
+        const aActive = parseTs(a.last_active_at);
+        const bActive = parseTs(b.last_active_at);
+        if (bActive !== aActive) {
+            return bActive - aActive;
+        }
+
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
     });
 
     res.json(rows);
