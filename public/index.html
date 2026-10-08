@@ -1889,6 +1889,29 @@
         .d4 { animation-delay: 0.55s; }
     </style>
     <script src="/js/analytics.js" async></script>
+
+    <style>
+        /* Floating Assistant Widget Layout */
+        #floating-assistant-widget .bot-trigger-wrapper {
+            flex-direction: row-reverse; /* Mobile default: Badge on left, Button on right */
+        }
+        #demo-chat-frame {
+            transform-origin: bottom right !important; /* Mobile default */
+        }
+        @media (min-width: 768px) {
+            #floating-assistant-widget {
+                right: auto !important;
+                left: 24px !important;
+                align-items: flex-start !important;
+            }
+            #floating-assistant-widget .bot-trigger-wrapper {
+                flex-direction: row !important; /* Desktop: Button on left, Badge on right */
+            }
+            #demo-chat-frame {
+                transform-origin: bottom left !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -3230,7 +3253,7 @@
                 </a>
             </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;pointer-events:auto;">
+        <div class="bot-trigger-wrapper" style="display:flex;align-items:center;gap:10px;pointer-events:auto;">
             <button id="toggle-assistant-btn" aria-label="Open AI Assistant"
                 style="width:60px;height:60px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #8b5cf6);border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(99,102,241,0.4);transition:transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;position:relative;pointer-events:auto;">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"
