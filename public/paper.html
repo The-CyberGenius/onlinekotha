@@ -168,6 +168,8 @@
         .paper-footer p{font-size:13px;color:var(--muted)}
         .paper-footer a{color:var(--accent);text-decoration:none}
         @media(max-width:640px){.feature-grid{grid-template-columns:1fr}nav{padding:0 16px}.page-wrap{padding:0 16px 80px}.nav-links a:not(.nav-cta){display:none}}
+        ::selection { background: #6366f1 !important; color: #ffffff !important; }
+        ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
     <script src="/js/analytics.js" async></script>
 </head>
@@ -432,5 +434,32 @@
     </footer>
 
 </div>
+
+<script>
+    var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    var themeToggleBtn = document.getElementById('theme-toggle');
+
+    if (themeToggleDarkIcon && themeToggleLightIcon && themeToggleBtn) {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        });
+    }
+</script>
 </body>
 </html>

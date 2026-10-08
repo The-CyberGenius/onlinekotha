@@ -26,13 +26,17 @@
     <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg?v=2">
     <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png?v=2">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2">
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <script src="/js/tailwind.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
-        body { background: #0a0a0f; color: #d4d4d8; }
         .tech-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px; }
+        ::selection { background: #6366f1 !important; color: #ffffff !important; }
+        ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
     <script type="application/ld+json">
     {
@@ -114,9 +118,44 @@
     </div>
 </article>
 
-<footer class="border-t border-gray-200 dark:border-white/[0.04] py-10 text-center text-zinc-600 text-xs">
-    <p>© 2026 OnlineKotha. Building intelligent digital memory systems.</p>
+<footer class="border-t border-gray-200 dark:border-white/[0.04] py-12 mt-20">
+    <div class="max-w-3xl mx-auto px-5 flex flex-col items-center text-center">
+        <img src="/favicon.svg" alt="Kotha Logo" class="w-8 h-8 object-contain mb-4">
+        <p class="text-zinc-500 dark:text-zinc-600 text-[13px] mb-4">© 2026 OnlineKotha. All rights reserved.</p>
+        <div class="flex justify-center gap-4 text-[13px]">
+            <a href="/privacy.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">Privacy</a>
+            <a href="/terms.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">Terms</a>
+            <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" class="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition font-medium">Download App</a>
+        </div>
+    </div>
 </footer>
 
+
+<script>
+    var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    var themeToggleBtn = document.getElementById('theme-toggle');
+
+    if (themeToggleDarkIcon && themeToggleLightIcon && themeToggleBtn) {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        });
+    }
+</script>
 </body>
 </html>

@@ -35,10 +35,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
-        body { background: #0a0a0f; color: #f4f4f5; }
         .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; transition: all 0.3s; }
         .card:hover { background: rgba(255,255,255,0.05); border-color: rgba(129,140,248,0.2); transform: translateY(-4px); box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5); }
         .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 8px; }
+        ::selection { background: #6366f1 !important; color: #ffffff !important; }
+        ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
 
     <!-- Schema.org JSON-LD -->
@@ -278,9 +279,7 @@
 <footer class="border-t border-gray-200 dark:border-white/[0.04] bg-[#060608] py-8">
     <div class="max-w-5xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded-[6px] bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-            </div>
+            <img src="/favicon.svg" alt="Kotha Logo" class="w-6 h-6 object-contain">
             <span class="font-bold text-[13px] text-gray-900 dark:text-white">Kotha</span>
             <span class="text-[11px] text-zinc-700">&copy; 2026</span>
         </div>
@@ -293,5 +292,32 @@
     </div>
 </footer>
 
+
+<script>
+    var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    var themeToggleBtn = document.getElementById('theme-toggle');
+
+    if (themeToggleDarkIcon && themeToggleLightIcon && themeToggleBtn) {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        });
+    }
+</script>
 </body>
 </html>

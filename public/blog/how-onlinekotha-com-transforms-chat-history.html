@@ -24,6 +24,7 @@
     
     <link rel="canonical" href="https://www.onlinekotha.com/blog/how-onlinekotha-com-transforms-chat-history.html">
     <link rel="icon" type="image/svg+xml" href="/logo.svg?v=2">
+    
     <script>
         tailwind.config = { darkMode: 'class' };
     </script>
@@ -80,7 +81,7 @@
     <!-- App Download CTA -->
     <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" target="_blank" rel="noopener" class="mt-8 mb-8 flex items-center justify-between w-full bg-white dark:bg-[#11111a] border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-md active:scale-[0.98] group">
         <div class="flex items-center gap-3 sm:gap-4 overflow-hidden">
-            <img src="/apple-touch-icon.png" alt="Kotha App" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 shrink-0 object-cover">
+            <img src="/favicon.svg" alt="Kotha App" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 shrink-0 object-cover">
             <div class="flex-1 min-w-0">
                 <h3 class="text-gray-900 dark:text-white font-bold text-[14px] sm:text-[15px] md:text-[17px] truncate mb-0.5 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">Download Kotha App</h3>
                 <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-zinc-400 truncate">Smooth, real-time AI chats on Android.</p>
@@ -112,15 +113,43 @@
 </article>
 
 <footer class="border-t border-gray-200 dark:border-white/[0.04] py-12 mt-20">
-    <div class="max-w-3xl mx-auto px-5 text-center">
-        <p class="text-zinc-600 text-[13px] mb-4">© 2026 OnlineKotha. All rights reserved.</p>
+    <div class="max-w-3xl mx-auto px-5 flex flex-col items-center text-center">
+        <img src="/favicon.svg" alt="Kotha Logo" class="w-8 h-8 object-contain mb-4">
+        <p class="text-zinc-500 dark:text-zinc-600 text-[13px] mb-4">© 2026 OnlineKotha. All rights reserved.</p>
         <div class="flex justify-center gap-4 text-[13px]">
-            <a href="/privacy.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:text-white transition">Privacy</a>
-            <a href="/terms.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:text-white transition">Terms</a>
-            <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" class="text-indigo-400 hover:text-indigo-300 transition font-medium">Download App</a>
+            <a href="/privacy.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">Privacy</a>
+            <a href="/terms.html" class="text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white transition">Terms</a>
+            <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" class="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition font-medium">Download App</a>
         </div>
     </div>
 </footer>
 
+
+<script>
+    var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+    var themeToggleBtn = document.getElementById('theme-toggle');
+
+    if (themeToggleDarkIcon && themeToggleLightIcon && themeToggleBtn) {
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            themeToggleLightIcon.classList.remove('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            themeToggleDarkIcon.classList.toggle('hidden');
+            themeToggleLightIcon.classList.toggle('hidden');
+
+            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        });
+    }
+</script>
 </body>
 </html>
