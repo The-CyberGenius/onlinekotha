@@ -200,7 +200,7 @@
         
     <!-- Top-Tier Libraries: GSAP, ScrollTrigger, VanillaTilt, Lucide Icons -->
             <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Performance: defer Tailwind (non-critical) -->
     <link rel="preload" href="/css/tailwind.min.css?v=1" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript>
@@ -1499,7 +1499,11 @@
             display: none;
         }
 
-        /* ── Sticky mobile CTA ── */
+        
+        @media (max-width: 720px) {
+            body { padding-bottom: 70px; }
+        }
+/* ── Sticky mobile CTA ── */
         .sticky-cta {
             position: fixed;
             left: 0;
@@ -1536,6 +1540,29 @@
         @media (max-width: 720px) {
             .sticky-cta {
                 display: flex;
+            }
+        }
+
+        
+        /* ── Mobile Floating Widget Adjustments ── */
+        @media (max-width: 720px) {
+            #floating-assistant-widget {
+                bottom: 85px !important;
+                right: 16px !important;
+                z-index: 999999 !important;
+            }
+            #toggle-assistant-btn {
+                width: 44px !important;
+                height: 44px !important;
+            }
+            #toggle-assistant-btn svg {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            .formms-popup-container,
+            [id^="formms-widget"] {
+                bottom: 85px !important;
+                right: 70px !important; 
             }
         }
 
@@ -3028,7 +3055,27 @@
             }
         });
     </script>
+
+    <script>
+        const enforceMobileLayout = () => {
+            if (window.innerWidth <= 720) {
+                const formMsFrames = document.querySelectorAll('iframe[src*="form.ms"]');
+                formMsFrames.forEach(frame => {
+                    const parent = frame.parentElement;
+                    if(parent) {
+                        parent.style.setProperty('bottom', '85px', 'important');
+                        if (parent.style.right) {
+                            parent.style.setProperty('right', '65px', 'important'); 
+                        }
+                    }
+                });
+            }
+        };
+        window.addEventListener('load', () => setTimeout(enforceMobileLayout, 1000));
+        setInterval(enforceMobileLayout, 2000);
+    </script>
 </body>
+
 
 
 </html>
