@@ -34,7 +34,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
-        .tech-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 22px; }
+        
+        /* Dark Mode Specifics */
+        .dark article h2 { color: #f4f4f5; }
+        .dark article h3 { color: #e4e4e7; }
+        .dark .step-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
+        .dark .tip-box { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); }
+
+        /* Light Mode Specifics */
+        html:not(.dark) article h2 { color: #111827; }
+        html:not(.dark) article h3 { color: #374151; }
+        html:not(.dark) .step-box { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); }
+        html:not(.dark) .tip-box { background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.2); }
+
+        /* Shared */
+        .step-box { border-radius: 16px; padding: 20px 24px; }
+        .tip-box { border-radius: 14px; padding: 16px 20px; }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
         ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
     </style>
