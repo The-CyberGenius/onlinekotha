@@ -2122,18 +2122,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearGlobalChatBtn = document.getElementById('clear-global-chat-btn');
 
     // Poll online count independently of SSE so the sidebar updates globally
+    let isPollingStopped = false;
     async function pollGlobalOnlineCount() {
-        if (currentChat === '__global__') return; // SSE handles it when inside
+        if (isPollingStopped || document.hidden || currentChat === '__global__') return;
         try {
             const r = await fetch('/api/global-chat/online-count');
+            if (r.status === 401 || r.status === 403) {
+                isPollingStopped = true; // Stop spamming if user is a guest/unauthorized
+                return;
+            }
+            if (!r.ok) return;
             const data = await r.json();
             if (globalOnlineCount) {
                 globalOnlineCount.textContent = `${data.count} user${data.count === 1 ? '' : 's'} online`;
             }
         } catch (err) {}
     }
-    setInterval(pollGlobalOnlineCount, 5000);
-    pollGlobalOnlineCount();
+    setInterval(pollGlobalOnlineCount, 15000); // Reduced frequency for efficiency
+    setTimeout(pollGlobalOnlineCount, 1000); // Initial fetch
 
     // Reply and Reaction State variables
     window.replyingTo = null;
