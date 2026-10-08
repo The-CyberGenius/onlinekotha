@@ -486,24 +486,48 @@ router.get('/users', (req, res) => {
          FROM users u`
     ).all();
     
-    users.forEach(u => u.is_guest = false);
-
-    const guests = db.prepare(`SELECT id, ip as ip_address, created_at, updated_at as last_active_at, chats_imported, ai_messages_count FROM guest_sessions`).all();
-    guests.forEach(g => {
-        g.is_guest = true;
-        g.email = 'Guest User (' + g.id.substring(4, 12) + ')';
-        g.display_name = 'Guest';
-        g.plan = 'guest';
-        g.chat_count = g.chats_imported;
+    users.forEach(u => {
+        u.is_guest = false;
+        u.total_cost = Number(u.total_cost || 0);
     });
 
-    const rows = [...users, ...guests];
     const onlineUsers = req.app.locals.onlineUsers;
     
-    rows.forEach(r => {
+    // Only include guests who imported a chat, sent AI messages, OR are currently online!
+    const guests = db.prepare(`SELECT id, ip as ip_address, created_at, updated_at as last_active_at, chats_imported, ai_messages_count FROM guest_sessions`).all();
+    
+    const activeGuests = [];
+    guests.forEach(g => {
+        const isOnline = onlineUsers ? (onlineUsers.has(g.id) || onlineUsers.has(String(g.id))) : false;
+        if (g.chats_imported > 0 || g.ai_messages_count > 0 || isOnline) {
+            activeGuests.push({
+                id: g.id,
+                email: 'Guest (' + g.id.substring(4, 12) + ')',
+                display_name: 'Guest User',
+                plan: 'guest',
+                is_admin: 0,
+                google_id: null,
+                avatar_url: null,
+                ip_address: g.ip_address,
+                country: null,
+                phone: null,
+                phone_country_code: null,
+                trial_expires_at: null,
+                created_at: g.created_at,
+                last_active_at: g.last_active_at,
+                chat_count: g.chats_imported || 0,
+                total_cost: 0,
+                is_guest: true,
+                is_online: isOnline
+            });
+        }
+    });
+
+    users.forEach(r => {
         r.is_online = onlineUsers ? (onlineUsers.has(r.id) || onlineUsers.has(Number(r.id)) || onlineUsers.has(String(r.id))) : false;
     });
 
+    const rows = [...users, ...activeGuests];
     rows.sort((a, b) => {
         if (a.is_online && !b.is_online) return -1;
         if (!a.is_online && b.is_online) return 1;
@@ -731,6 +755,20 @@ router.patch('/users/:id/plan', (req, res) => {
 
 // Delete user account + all data
 router.delete('/users/:id', (req, res) => {
+    const idParam = req.params.id;
+    const isGuest = typeof idParam === 'string' && idParam.startsWith('gst_');
+    
+    if (isGuest) {
+        // Delete guest session and files
+        const uDir = path.join(SRC_DIR, `u_${idParam}`);
+        if (fs.existsSync(uDir)) {
+            try { fs.rmSync(uDir, { recursive: true, force: true }); } catch (e) {}
+        }
+        db.prepare('DELETE FROM chats WHERE guest_id = ?').run(idParam);
+        db.prepare('DELETE FROM guest_sessions WHERE id = ?').run(idParam);
+        return res.json({ ok: true });
+    }
+
     const userId = Number(req.params.id);
     const user = db.prepare('SELECT id, email, is_admin FROM users WHERE id = ?').get(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });

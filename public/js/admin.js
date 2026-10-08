@@ -85,7 +85,8 @@
         document.getElementById('stat-total-calls').textContent = Number(r.totalCalls || 0).toLocaleString();
         document.getElementById('stat-cap').textContent = (r.dailyCap || 0).toFixed(2);
         const users = await (await fetch('/api/admin/users')).json();
-        document.getElementById('stat-users').textContent = users.length;
+        const registeredUsers = Array.isArray(users) ? users.filter(u => !u.is_guest) : [];
+        document.getElementById('stat-users').textContent = registeredUsers.length;
     }
 
     async function loadKnown() {
@@ -665,6 +666,7 @@ HARD RULES
 
         // Shared badge helper
         function getBadge(u) {
+            if (u.is_guest) return '<span class="badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);">GUEST</span>';
             if (u.is_admin) return '<span class="badge badge-admin">ADMIN</span>';
             if (u.plan === 'paid') return '<span class="badge badge-paid">PAID</span>';
             if (u.plan === 'trial' && u.trial_expires_at > Date.now()) return '<span class="badge badge-trial">TRIAL</span>';
@@ -684,11 +686,15 @@ HARD RULES
             }
         }
 
+        const registeredCount = rows.filter(u => !u.is_guest).length;
+        const activeGuestCount = rows.filter(u => u.is_guest).length;
+        const countSummaryText = `${registeredCount} registered user${registeredCount !== 1 ? 's' : ''}${activeGuestCount ? ' · ' + activeGuestCount + ' active guest' + (activeGuestCount !== 1 ? 's' : '') : ''}`;
+
         if (isMobile) {
             // ══════════════════════════════════════════════════════════
             // MOBILE — pure <div> cards, inline styles, no CSS needed
             // ══════════════════════════════════════════════════════════
-            let html = '<div style="display:flex;align-items:center;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + rows.length + ' total registered users</span></div>';
+            let html = '<div style="display:flex;align-items:center;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + countSummaryText + '</span></div>';
 
             for (const u of rows) {
                 const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
@@ -696,8 +702,10 @@ HARD RULES
                     ? '<img src="' + u.avatar_url + '" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div style="display:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>'
                     : '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>';
                 const dot = u.is_online ? '<span style="width:7px;height:7px;border-radius:50%;background:#10b981;display:inline-block;margin-left:5px;"></span>' : '';
-                const phone = u.phone ? (u.phone_country_code||'') + ' ' + u.phone : 'No phone';
-                const loc = u.ip_address ? u.ip_address + ' · ' + getCountryName(u.country) : 'No IP';
+                const phone = u.phone ? (u.phone_country_code||'') + ' ' + u.phone : (u.is_guest ? 'Guest mode' : 'No phone');
+                const loc = u.ip_address ? u.ip_address + (u.country ? ' · ' + getCountryName(u.country) : '') : 'No IP';
+                const costStr = Number(u.total_cost || 0).toFixed(3);
+                const authMethod = u.is_guest ? 'Guest' : (u.google_id ? 'Google' : 'Email');
 
                 html += '<div data-uid="' + u.id + '" style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
                 // ── Header row (always visible)
@@ -711,18 +719,18 @@ HARD RULES
                 // ── Body (hidden by default)
                 html += '<div class="mcard-body" style="display:none;border-top:1px solid var(--bg-alt);padding:0 14px 12px;">';
                 html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;">';
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Auth</div><div style="font-size:11px;color:' + (u.google_id ? '#2563eb' : '#64748b') + ';">' + (u.google_id ? 'Google' : 'Email') + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:monospace;">$' + u.total_cost.toFixed(3) + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Auth</div><div style="font-size:11px;color:' + (u.is_guest ? '#f59e0b' : (u.google_id ? '#2563eb' : '#64748b')) + ';">' + authMethod + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:monospace;">$' + costStr + '</div></div>';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Phone</div><div style="font-size:12px;color:var(--text-secondary);">' + phone + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:var(--text-primary);">' + u.chat_count + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:var(--text-primary);">' + (u.chat_count || 0) + '</div></div>';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Location</div><div style="font-size:11px;color:var(--text-secondary);">' + loc + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Joined</div><div style="font-size:11px;color:var(--text-secondary);">' + formatDateTime(u.created_at).split(',')[0] + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Joined</div><div style="font-size:11px;color:var(--text-secondary);">' + (u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently') + '</div></div>';
                 html += '</div>';
                 if (u.last_active_at) html += '<div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Active: ' + formatDateTime(u.last_active_at) + '</div>';
                 // Action buttons
                 html += '<div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;">';
-                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
-                html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + u.chat_count + '" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats (' + u.chat_count + ')</button>';
+                if (!u.is_admin && !u.is_guest) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
+                html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + (u.chat_count || 0) + '" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats (' + (u.chat_count || 0) + ')</button>';
                 html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
                 if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:50px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>';
                 html += '</div>';
@@ -756,26 +764,29 @@ HARD RULES
             // ══════════════════════════════════════════════════════════
             // DESKTOP — original table layout (unchanged)
             // ══════════════════════════════════════════════════════════
-            let html = '\n<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + rows.length + ' total registered users</span></div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
+            let html = '\n<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + countSummaryText + '</span></div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
             for (const u of rows) {
                 const badge = getBadge(u);
-                const loginMethod = u.google_id ? '<span class="meta-text" style="color:var(--accent);">Google Auth</span>' : '<span class="meta-text">Email Auth</span>';
+                const loginMethod = u.is_guest 
+                    ? '<span class="meta-text" style="color:#f59e0b;font-weight:600;">Guest Mode</span>'
+                    : (u.google_id ? '<span class="meta-text" style="color:var(--accent);">Google Auth</span>' : '<span class="meta-text">Email Auth</span>');
                 const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
                 const avatarHtml = u.avatar_url
                     ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
                     : `<div class="user-avatar">${initials}</div>`;
                 const onlineDot = u.is_online ? '<span class="status-dot" title="Online"></span>' : '';
-                const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code||''}${u.phone}" style="color:var(--text-primary);text-decoration:none;">${u.phone_country_code?u.phone_country_code+' ':''}${u.phone}</a>` : '<span style="color:var(--text-muted);">No phone</span>';
+                const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code||''}${u.phone}" style="color:var(--text-primary);text-decoration:none;">${u.phone_country_code?u.phone_country_code+' ':''}${u.phone}</a>` : `<span style="color:var(--text-muted);">${u.is_guest ? 'Guest mode' : 'No phone'}</span>`;
                 const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
                 const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
+                const costStr = Number(u.total_cost || 0).toFixed(3);
 
                 html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name||u.email.split('@')[0]}${onlineDot}</span><span class="user-email-text">${u.email}</span></div></div></td>`;
                 html += `<td><div style="margin-bottom:4px;">${badge}</div>${loginMethod}</td>`;
-                html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">${u.chat_count} chat${u.chat_count!==1?'s':''}</span></td>`;
-                html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${u.total_cost.toFixed(3)}</span></td>`;
+                html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">${u.chat_count || 0} chat${(u.chat_count || 0)!==1?'s':''}</span></td>`;
+                html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${costStr}</span></td>`;
                 html += `<td>${ipCountry}</td>`;
-                html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${formatDateTime(u.created_at).split(',')[0]}</span>${lastActive}</td>`;
-                html += `<td><div class="action-cell">${u.is_admin?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count}" style="padding:4px 7px;font-size:11px;">Chats${u.chat_count > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
+                html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
+                html += `<td><div class="action-cell">${(u.is_admin || u.is_guest)?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
                 html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
             }
             html += '</tbody></table></div>';
