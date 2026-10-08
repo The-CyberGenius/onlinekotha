@@ -24,11 +24,11 @@
     
     <link rel="canonical" href="https://www.onlinekotha.com/blog/preserving-human-connection-with-ai.html">
     <link rel="icon" type="image/svg+xml" href="/logo.svg?v=2">
-    <script src="/js/tailwind.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = { darkMode: 'class' };
     </script>
+    <script src="/js/tailwind.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
@@ -78,18 +78,16 @@
     </div>
 
     <!-- App Download CTA -->
-    <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" target="_blank" rel="noopener" class="mt-8 mb-8 block w-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 hover:border-indigo-500/40 rounded-2xl p-4 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] group">
-        <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-2.5 shrink-0 shadow-lg group-hover:shadow-indigo-500/25">
-                <img src="/logo.svg" alt="App Icon" class="w-full h-full object-contain drop-shadow-md">
-            </div>
+    <a href="https://play.google.com/store/apps/details?id=com.onlinekotha.app" target="_blank" rel="noopener" class="mt-8 mb-8 flex items-center justify-between w-full bg-white dark:bg-[#11111a] border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 rounded-2xl p-3 sm:p-4 transition-all duration-300 hover:shadow-md active:scale-[0.98] group">
+        <div class="flex items-center gap-3 sm:gap-4 overflow-hidden">
+            <img src="/apple-touch-icon.png" alt="Kotha App" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl shadow-sm border border-gray-100 dark:border-white/5 shrink-0 object-cover">
             <div class="flex-1 min-w-0">
-                <h3 class="text-white font-bold text-[16px] md:text-[18px] truncate mb-0.5 group-hover:text-indigo-200 transition-colors">Download Official Kotha App</h3>
-                <p class="text-[12px] text-gray-500 dark:text-zinc-400 truncate">Experience smooth, real-time AI chats natively on Android.</p>
+                <h3 class="text-gray-900 dark:text-white font-bold text-[14px] sm:text-[15px] md:text-[17px] truncate mb-0.5 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">Download Kotha App</h3>
+                <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-zinc-400 truncate">Smooth, real-time AI chats on Android.</p>
             </div>
-            <div class="shrink-0 bg-black/20 dark:bg-white/5 group-hover:bg-indigo-600 text-white rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors">
-                Install App
-            </div>
+        </div>
+        <div class="shrink-0 bg-gray-900 dark:bg-white group-hover:bg-indigo-600 dark:group-hover:bg-indigo-500 text-white dark:text-black group-hover:text-white dark:group-hover:text-white rounded-full px-3 py-1.5 sm:px-4 sm:py-1.5 text-[11px] sm:text-[12px] font-bold transition-colors ml-2 sm:ml-4 shadow-sm">
+            Install
         </div>
     </a>
 
