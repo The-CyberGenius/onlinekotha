@@ -144,4 +144,29 @@
     <priority>0.3</priority>
   </url>
 
+
+  <url>
+    <loc>https://www.onlinekotha.com/blog/ai-whatsapp-chat-memory-kotha.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.onlinekotha.com/blog/kotha-app-smooth-experience.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.onlinekotha.com/blog/how-onlinekotha-com-transforms-chat-history.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.onlinekotha.com/blog/why-kotha-is-the-best-ai-whatsapp-memory-app.html</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>
