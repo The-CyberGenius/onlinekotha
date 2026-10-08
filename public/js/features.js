@@ -108,7 +108,7 @@
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold">Install Kotha</p>
-                <p class="text-[11px] text-gray-400">Add to home screen for app-like experience</p>
+                <p class="text-[11px] text-gray-400">Get it on Google Play for the best experience</p>
             </div>
             <button id="pwa-install-btn" class="bg-white text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-100 transition shrink-0">Install</button>
             <button id="pwa-dismiss-btn" class="text-gray-500 hover:text-white transition p-1 shrink-0">
@@ -117,12 +117,8 @@
         `;
         document.body.appendChild(banner);
 
-        document.getElementById('pwa-install-btn').addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const result = await deferredPrompt.userChoice;
-            if (result.outcome === 'accepted') showToast('App installed!');
-            deferredPrompt = null;
+        document.getElementById('pwa-install-btn').addEventListener('click', () => {
+            window.open('https://play.google.com/store/apps/details?id=com.onlinekotha.app', '_blank');
             banner.remove();
         });
         document.getElementById('pwa-dismiss-btn').addEventListener('click', () => banner.remove());
