@@ -8,13 +8,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog — Kotha | WhatsApp Chat AI, Personality Cloning & Ex Chat Simulator</title>
     <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        (function(){
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else if (localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
     </script>
-
     <meta name="description" content="Guides and insights on converting WhatsApp chats into AI simulations, chatting with ex or loved ones, exporting chat logs, and digital memory preservation.">
     <meta name="keywords" content="ai chat with ex, chat with ex ai, ai ex girlfriend chat, ai ex boyfriend simulator, whatsapp chat ai, turn whatsapp chats into ai, ai personality cloning, whatsapp chat viewer online">
     <meta name="robots" content="index, follow, max-image-preview:large">
@@ -46,8 +49,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
-        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; transition: all 0.3s; }
-        .card:hover { background: rgba(255,255,255,0.05); border-color: rgba(129,140,248,0.2); transform: translateY(-4px); box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5); }
+        .card { border-radius: 20px; transition: all 0.3s; background: #ffffff; border: 1px solid #e5e7eb; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px -15px rgba(0,0,0,0.1); border-color: rgba(99,102,241,0.4); }
+        .dark .card { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.06); }
+        .dark .card:hover { background: rgba(255,255,255,0.05); border-color: rgba(129,140,248,0.2); box-shadow: 0 20px 60px -15px rgba(0,0,0,0.5); }
         .tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 8px; }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
         ::-moz-selection { background: #6366f1 !important; color: #ffffff !important; }
@@ -95,7 +100,7 @@
 
 <!-- Header -->
 <section class="py-20 px-5 text-center">
-    <h1 class="text-[40px] md:text-[52px] font-black tracking-tight mb-4">Blog</h1>
+    <h1 class="text-[40px] md:text-[52px] font-black tracking-tight mb-4 text-gray-900 dark:text-white">Blog</h1>
     <p class="text-gray-600 dark:text-zinc-400 text-[16px] max-w-md mx-auto">Guides, tips, and stories about preserving your most precious conversations.</p>
 </section>
 
@@ -110,7 +115,7 @@
                 <span class="text-[11px] text-gray-600 dark:text-zinc-400">Updated September 2026</span>
             </div>
             <h2 class="text-[22px] font-black text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">AI Chat With Your Ex: How to Turn Past WhatsApp Chats into an AI Simulation</h2>
-            <p class="text-[14px] text-zinc-400 leading-relaxed mb-4">Can you turn exported WhatsApp chats into an authentic AI chatbot of your ex-partner, boyfriend, or girlfriend? Discover how conversational AI clones texting styles for nostalgia, memory preservation, and closure.</p>
+            <p class="text-[14px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Can you turn exported WhatsApp chats into an authentic AI chatbot of your ex-partner, boyfriend, or girlfriend? Discover how conversational AI clones texting styles for nostalgia, memory preservation, and closure.</p>
             <div class="flex items-center gap-3 text-[12px] text-gray-600 dark:text-zinc-400">
                 <span>5 min read</span>
                 <span>·</span>
@@ -181,7 +186,7 @@
                 <span class="text-[11px] text-purple-400">Trending 🔥</span>
             </div>
             <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-purple-300 transition leading-snug">WhatsApp Chat Wrapped: How to Turn Years of Messages into a Viral Social Story</h2>
-            <p class="text-[13px] text-zinc-400 leading-relaxed mb-4">Discover who texted first, late-night chatter stats, emoji profiles, and generate cinematic 9:16 Instagram story cards from your chat archives.</p>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">Discover who texted first, late-night chatter stats, emoji profiles, and generate cinematic 9:16 Instagram story cards from your chat archives.</p>
             <div class="flex items-center gap-2 text-[11px] text-gray-600 dark:text-zinc-400">
                 <span>4 min read</span>
                 <span>·</span>
@@ -209,7 +214,7 @@
                 <span class="tag bg-pink-500/10 text-pink-400 font-bold">Relationships & LDR</span>
             </div>
             <h2 class="text-[18px] font-bold text-gray-900 dark:text-white mb-2 group-hover:text-pink-300 transition leading-snug">When WhatsApp Is Your Entire Living Room: How Long-Distance Couples Preserve Their Story</h2>
-            <p class="text-[13px] text-zinc-400 leading-relaxed mb-4">How couples across time zones use chat history, On This Day retrospectives, and communication analytics to bridge miles and keep love unbreakable.</p>
+            <p class="text-[13px] text-gray-600 dark:text-zinc-400 leading-relaxed mb-4">How couples across time zones use chat history, On This Day retrospectives, and communication analytics to bridge miles and keep love unbreakable.</p>
             <div class="flex items-center gap-2 text-[11px] text-gray-600 dark:text-zinc-400">
                 <span>5 min read</span>
                 <span>·</span>
@@ -374,57 +379,60 @@
 
 <!-- CTA -->
 <section class="py-20 px-5 text-center border-t border-gray-200 dark:border-white/[0.04]">
-    <h2 class="text-[28px] font-black tracking-tight mb-4">Ready to try Kotha?</h2>
+    <h2 class="text-[28px] font-black tracking-tight mb-4 text-gray-900 dark:text-white">Ready to try Kotha?</h2>
     <p class="text-gray-600 dark:text-zinc-400 text-[14px] mb-8">Import your chat history and start talking to your memories.</p>
-    <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-gray-900 dark:text-white font-bold text-[14px] px-7 py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition">
+    <a href="/login.html#signup" class="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-bold text-[14px] px-7 py-3.5 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition">
         Get Started Free
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
     </a>
 </section>
 
 <!-- Footer -->
-<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-[#060608] py-8">
+<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-gray-100 dark:bg-[#060608] py-8">
     <div class="max-w-5xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
             <img src="/favicon.svg" alt="Kotha Logo" class="w-6 h-6 object-contain">
             <span class="font-bold text-[13px] text-gray-900 dark:text-white">Kotha</span>
-            <span class="text-[11px] text-zinc-700">&copy; 2026</span>
+            <span class="text-[11px] text-gray-400 dark:text-zinc-700">&copy; 2026</span>
         </div>
         <div class="flex items-center gap-6 text-[12px] font-medium text-gray-500 dark:text-zinc-500">
-            <a href="/" class="hover:text-zinc-300 transition">Home</a>
-            <a href="/#how" class="hover:text-zinc-300 transition">Features</a>
-            <a href="/#pricing" class="hover:text-zinc-300 transition">Pricing</a>
-            <a href="/#faq" class="hover:text-zinc-300 transition">FAQ</a>
+            <a href="/" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">Home</a>
+            <a href="/#how" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">Features</a>
+            <a href="/#pricing" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">Pricing</a>
+            <a href="/#faq" class="hover:text-gray-900 dark:hover:text-zinc-300 transition">FAQ</a>
         </div>
     </div>
 </footer>
 
 
 <script>
-    var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-    var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-    var themeToggleBtn = document.getElementById('theme-toggle');
+(function() {
+    var d = document.getElementById('theme-toggle-dark-icon');
+    var l = document.getElementById('theme-toggle-light-icon');
+    var btn = document.getElementById('theme-toggle');
+    if (!d || !l || !btn) return;
 
-    if (themeToggleDarkIcon && themeToggleLightIcon && themeToggleBtn) {
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            themeToggleLightIcon.classList.remove('hidden');
-        } else {
-            themeToggleDarkIcon.classList.remove('hidden');
-        }
-
-        themeToggleBtn.addEventListener('click', function() {
-            themeToggleDarkIcon.classList.toggle('hidden');
-            themeToggleLightIcon.classList.toggle('hidden');
-
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            }
-        });
+    function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        // In dark mode show the sun (light icon) so user can switch TO light
+        // In light mode show the moon (dark icon) so user can switch TO dark
+        d.classList.toggle('hidden', isDark);
+        l.classList.toggle('hidden', !isDark);
     }
+    syncIcons();
+
+    btn.addEventListener('click', function() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        }
+        syncIcons();
+    });
+})();
 </script>
 </body>
 </html>

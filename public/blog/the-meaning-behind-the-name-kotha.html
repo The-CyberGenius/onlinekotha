@@ -7,13 +7,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Breaking the Taboo: The True Meaning of 'Kotha'</title>
     <script>
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
+        (function(){
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else if (localStorage.getItem('theme') === 'dark' || window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
     </script>
-
     <meta name="description" content="Discover the deep emotional purpose behind the name OnlineKotha. We are breaking the taboo in India and redefining 'Kotha' as a safe house for stories.">
     <meta name="keywords" content="onlinekotha, kotha meaning, kotha taboo india, onlinekotha.com, true meaning of kotha, kotha safe house">
     <meta name="robots" content="index, follow, max-image-preview:large">
@@ -39,19 +42,18 @@
     <style>
         * { font-family: 'Inter', -apple-system, sans-serif; }
         
-        /* Dark Mode Specifics */
+        /* Dark Mode */
         .dark article h2 { color: #f4f4f5; }
         .dark article h3 { color: #e4e4e7; }
         .dark .step-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
         .dark .tip-box { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15); }
 
-        /* Light Mode Specifics */
+        /* Light Mode */
         html:not(.dark) article h2 { color: #111827; }
         html:not(.dark) article h3 { color: #374151; }
-        html:not(.dark) .step-box { background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); }
-        html:not(.dark) .tip-box { background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.2); }
+        html:not(.dark) .step-box { background: #f9fafb; border: 1px solid #e5e7eb; }
+        html:not(.dark) .tip-box { background: #eef2ff; border: 1px solid #c7d2fe; }
 
-        /* Shared */
         .step-box { border-radius: 16px; padding: 20px 24px; }
         .tip-box { border-radius: 14px; padding: 16px 20px; }
         ::selection { background: #6366f1 !important; color: #ffffff !important; }
@@ -98,7 +100,7 @@
         </div>
     </header>
 
-    <article class="prose prose-lg dark:prose-invert max-w-none prose-p:text-gray-600 dark:prose-p:text-[#a1a1aa] prose-p:leading-relaxed prose-headings:font-bold prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline">
+    <article class="prose prose-lg dark:prose-invert max-w-none prose-p:text-gray-600 dark:prose-p:text-gray-600 dark:prose-p:text-[#a1a1aa] prose-p:leading-relaxed prose-headings:font-bold prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline">
         
 <p>In many parts of India and South Asia, the word <strong>"Kotha"</strong> carries a heavy stigma. Historically, it has been misconstrued and reduced to a derogatory term, often associated solely with brothels or places of prostitution. But if you look deeper into history, a Kotha was something entirely different.</p>
 
@@ -135,7 +137,7 @@
     </div>
 </main>
 
-<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-white dark:bg-[#0a0a0f] mt-12 py-12">
+<footer class="border-t border-gray-200 dark:border-white/[0.04] bg-gray-50 dark:bg-[#0a0a0f] mt-12 py-12">
     <div class="max-w-4xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500 dark:text-gray-500">
         <div class="flex items-center gap-2">
             <img src="/favicon.svg" alt="Kotha" class="w-5 h-5 opacity-50 grayscale" />
@@ -149,38 +151,33 @@
     </div>
 </footer>
 
+
 <script>
-    var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-    var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+(function() {
+    var d = document.getElementById('theme-toggle-dark-icon');
+    var l = document.getElementById('theme-toggle-light-icon');
+    var btn = document.getElementById('theme-toggle');
+    if (!d || !l || !btn) return;
 
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        themeToggleLightIcon.classList.remove('hidden');
-    } else {
-        themeToggleDarkIcon.classList.remove('hidden');
+    function syncIcons() {
+        var isDark = document.documentElement.classList.contains('dark');
+        d.classList.toggle('hidden', isDark);
+        l.classList.toggle('hidden', !isDark);
     }
+    syncIcons();
 
-    var themeToggleBtn = document.getElementById('theme-toggle');
-
-    themeToggleBtn.addEventListener('click', function() {
-        themeToggleDarkIcon.classList.toggle('hidden');
-        themeToggleLightIcon.classList.toggle('hidden');
-
-        if (localStorage.theme === 'light') {
-            document.documentElement.classList.add('dark');
-            localStorage.theme = 'dark';
-        } else if (localStorage.theme === 'dark') {
+    btn.addEventListener('click', function() {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
             document.documentElement.classList.remove('dark');
-            localStorage.theme = 'light';
+            localStorage.setItem('theme', 'light');
         } else {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            }
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
         }
+        syncIcons();
     });
+})();
 </script>
 </body>
 </html>
