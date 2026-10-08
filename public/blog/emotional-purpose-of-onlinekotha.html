@@ -6,6 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Emotional Purpose of OnlineKotha</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <meta name="description" content="Learn about the emotional drive behind the development of OnlineKotha.com. A platform built to provide closure and preserve digital connections.">
     <meta name="keywords" content="onlinekotha emotional, kotha app purpose, onlinekotha.com, digital closure, ai grief, chatting with the past">
     <meta name="robots" content="index, follow, max-image-preview:large">

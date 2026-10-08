@@ -6,6 +6,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Changing the Narrative: The True Purpose of OnlineKotha</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <meta name="description" content="The word Kotha is often misunderstood in India. OnlineKotha is changing the narrative by providing a digital sanctuary for emotional chat preservation.">
     <meta name="keywords" content="onlinekotha meaning, kotha taboo, digital kotha, onlinekotha.com, emotional healing app, whatsapp ai chat">
     <meta name="robots" content="index, follow, max-image-preview:large">

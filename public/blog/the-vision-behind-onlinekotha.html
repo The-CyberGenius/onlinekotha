@@ -7,6 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The True Meaning of OnlineKotha: A Safe House for Your Stories | OnlineKotha</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <meta name="description" content="Learn about the grand vision behind OnlineKotha.com and how we are building a cultural shift around how India and the world view digital memories.">
     <meta name="keywords" content="onlinekotha vision, kotha safe house, digital memories, indian startup onlinekotha, onlinekotha.com mission">
     <meta name="author" content="Kotha">

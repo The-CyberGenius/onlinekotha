@@ -7,6 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>How onlinekotha.com Transforms Your Boring Chat Histories | OnlineKotha</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <meta name="description" content="Stop reading WhatsApp chat exports in messy text files. See how OnlineKotha brings your digital memories back to life with a stunning UI and AI.">
     <meta name="keywords" content="onlinekotha.com, onlinekotha, kotha, whatsapp chat viewer, ai memory, read exported whatsapp chats">
     <meta name="author" content="Kotha">

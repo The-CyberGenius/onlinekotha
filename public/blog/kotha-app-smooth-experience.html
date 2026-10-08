@@ -7,6 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviewing the Kotha App: The Smoothest Way to View Exported Chats | OnlineKotha</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <meta name="description" content="A deep dive into the performance, UI/UX, and features of the official Kotha app. Spoiler: It's the most useful tool for WhatsApp chat memories.">
     <meta name="keywords" content="Kotha, onlinekotha, kotha app review, smooth chat viewer, whatsapp export reader app, Kotha: AI WhatsappChat Memory">
     <meta name="author" content="Kotha">

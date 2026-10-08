@@ -7,6 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog — Kotha | WhatsApp Chat AI, Personality Cloning & Ex Chat Simulator</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <meta name="description" content="Guides and insights on converting WhatsApp chats into AI simulations, chatting with ex or loved ones, exporting chat logs, and digital memory preservation.">
     <meta name="keywords" content="ai chat with ex, chat with ex ai, ai ex girlfriend chat, ai ex boyfriend simulator, whatsapp chat ai, turn whatsapp chats into ai, ai personality cloning, whatsapp chat viewer online">
     <meta name="robots" content="index, follow, max-image-preview:large">

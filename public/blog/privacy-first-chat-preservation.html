@@ -7,6 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy-First WhatsApp Chat Archiving & Memory Analysis: Inside OnlineKotha</title>
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <meta name="description" content="Discover how OnlineKotha safeguards WhatsApp chat archives with local parsing, zero data selling, and ephemeral in-memory processing. Preserve memories without giving up privacy.">
     <meta name="keywords" content="private whatsapp viewer, secure whatsapp archive, onlinekotha privacy, safe chat analysis, whatsapp memory preservation, private chat reader">
     <meta name="author" content="OnlineKotha">
