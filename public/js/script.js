@@ -3269,7 +3269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let userHasResized = false;
 
         function centerFrame() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
             const targetW = userHasResized
                 ? Math.min(parseInt(frame.style.width) || 960, window.innerWidth - 30)
                 : Math.max(760, Math.min(window.innerWidth * 0.82, 1100));
@@ -3291,7 +3291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function clampFrameInViewport() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
             const r = frame.getBoundingClientRect();
             let w = parseInt(frame.style.width) || r.width;
             let h = parseInt(frame.style.height) || r.height;
@@ -3383,6 +3383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         syncOverlay();
 
         window.addEventListener('resize', () => {
+            if (document.body.classList.contains('app-shell')) return;
             if (dragging) {
                 dragging = false;
                 isActualDrag = false;
@@ -3393,7 +3394,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 rhOverlay.style.display = 'none';
                 return;
             }
-            if (frame.classList.contains('mac-fullscreen')) {
+            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded')) {
                 rhOverlay.style.display = 'none';
                 return;
             }
@@ -3471,7 +3472,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         titlebar.addEventListener('mousedown', (e) => {
             if (e.target.closest('button')) return;
-            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
 
             const rect = frame.getBoundingClientRect();
             // Don't drag if click is within 10px of top, left, or right edge (resize zones)
@@ -3527,6 +3528,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Double-click titlebar to toggle fullscreen
         titlebar.addEventListener('dblclick', (e) => {
+            if (document.body.classList.contains('app-shell')) return;
             if (e.target.closest('button')) return;
             document.getElementById('mac-fullscreen').click();
         });
@@ -3569,7 +3571,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // If restoring while still in fullscreen mode, keep dock hidden, otherwise show it
             if (dock) {
-                if (frame.classList.contains('mac-fullscreen')) {
+                if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded')) {
                     dock.style.setProperty('display', 'none', 'important');
                 } else {
                     dock.style.removeProperty('display');
@@ -3592,6 +3594,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (minBtn) minBtn.addEventListener('click', genieMinimize);
         if (fsBtn) fsBtn.addEventListener('click', () => {
+            if (document.body.classList.contains('app-shell')) return;
             const isFs = frame.classList.toggle('mac-fullscreen');
             if (isFs) {
                 resetPosition();
@@ -3616,7 +3619,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rhOverlay.querySelectorAll('.rh').forEach(handle => {
                 const dir = handle.dataset.dir;
                 handle.addEventListener('mousedown', (e) => {
-                    if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+                    if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
                     initPosition();
                     e.preventDefault();
                     e.stopPropagation();
