@@ -152,6 +152,7 @@ router.post('/logout', (req, res) => {
     const token = req.cookies && req.cookies.session;
     logout(token);
     res.clearCookie('session', COOKIE_OPTS);
+    res.clearCookie('admin_impersonate_uid', { path: '/' });
     res.json({ ok: true });
 });
 

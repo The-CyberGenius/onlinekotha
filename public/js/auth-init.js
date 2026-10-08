@@ -317,6 +317,7 @@
 
             
             // Trigger Google One Tap for Guest
+            (async () => {
             try {
                 const idRes = await fetch('/api/auth/google/client-id');
                 const idData = await idRes.json();
@@ -364,6 +365,7 @@
                     }
                 }
             } catch(e){}
+            })();
 
             // Guest Sidebar Profile
             const info = document.getElementById('sidebar-user-info');
@@ -444,7 +446,8 @@
                 await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
             } catch {}
             document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-            window.location.replace('/login.html');
+            document.cookie = 'admin_impersonate_uid=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+            window.location.replace('/');
         };
         if (logoutBtn) logoutBtn.addEventListener('click', doLogout);
         if (logoutBtnMob) logoutBtnMob.addEventListener('click', doLogout);
