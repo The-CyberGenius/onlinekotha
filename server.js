@@ -103,6 +103,7 @@ if (!fs.existsSync(SRC_DIR)) fs.mkdirSync(SRC_DIR, { recursive: true });
 app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 app.use(compression({
     filter: (req, res) => {
@@ -216,13 +217,28 @@ app.get('/', (req, res, next) => {
     next();
 });
 
+// Dedicated Social Preview Card Endpoints (for Twitterbot, Facebook, WhatsApp, LinkedIn, Discord)
+const serveSocialCard = (req, res) => {
+    const ogPath = path.join(__dirname, 'public', 'img', 'og-image.png');
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    res.sendFile(ogPath);
+};
+app.get(['/og-image.png', '/img/og-image.png', '/twitter-card.png', '/img/twitter-card.png'], serveSocialCard);
+
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '365d',
     etag: true,
     dotfiles: 'allow',
     setHeaders: (res, filePath) => {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
         if (filePath.endsWith('.html') || filePath.endsWith('.txt') || filePath.endsWith('.xml') || filePath.endsWith('.json')) {
             res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+        } else if (filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') || filePath.endsWith('.webp') || filePath.endsWith('.svg') || filePath.endsWith('.ico')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
         } else {
             res.setHeader('Vary', 'Accept-Encoding');
         }
