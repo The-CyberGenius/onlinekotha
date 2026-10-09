@@ -21,6 +21,39 @@ Allow: /logo.svg
 Allow: /css/
 Allow: /js/
 Allow: /img/
+Allow: /og-image.png
+Allow: /og-image.jpg
+Allow: /twitter-card.png
+Allow: /twitter-card.jpg
+
+# Social media preview crawlers (X / Twitter, Facebook, WhatsApp, Telegram, Discord, LinkedIn)
+User-agent: Twitterbot
+Allow: /
+Allow: /og-image.png
+Allow: /og-image.jpg
+Allow: /twitter-card.png
+Allow: /twitter-card.jpg
+Allow: /img/
+
+User-agent: facebookexternalhit
+Allow: /
+Allow: /og-image.png
+Allow: /og-image.jpg
+Allow: /twitter-card.png
+Allow: /twitter-card.jpg
+Allow: /img/
+
+User-agent: WhatsApp
+Allow: /
+Allow: /og-image.png
+Allow: /og-image.jpg
+Allow: /img/
+
+User-agent: TelegramBot
+Allow: /
+Allow: /og-image.png
+Allow: /og-image.jpg
+Allow: /img/
 
 # Disallow admin & sensitive account/transaction callback endpoints
 Disallow: /api/

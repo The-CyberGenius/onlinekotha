@@ -230,14 +230,22 @@ app.get('/', (req, res, next) => {
 
 // Dedicated Social Preview Card Endpoints (for Twitterbot, Facebook, WhatsApp, LinkedIn, Discord)
 const serveSocialCard = (req, res) => {
-    const ogPath = path.join(__dirname, 'public', 'img', 'og-image.png');
-    res.setHeader('Content-Type', 'image/png');
+    const isJpg = req.path.endsWith('.jpg') || req.path.endsWith('.jpeg');
+    const fileName = isJpg ? 'og-image.jpg' : 'og-image.png';
+    const contentType = isJpg ? 'image/jpeg' : 'image/png';
+    const filePath = path.join(__dirname, 'public', 'img', fileName);
+
+    res.setHeader('Content-Type', contentType);
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
-    res.sendFile(ogPath);
+    res.sendFile(filePath);
 };
-app.get(['/og-image.png', '/img/og-image.png', '/twitter-card.png', '/img/twitter-card.png'], serveSocialCard);
+app.get([
+    '/og-image.png', '/img/og-image.png', '/twitter-card.png', '/img/twitter-card.png',
+    '/og-image.jpg', '/img/og-image.jpg', '/twitter-card.jpg', '/img/twitter-card.jpg',
+    '/og-image.jpeg', '/img/og-image.jpeg'
+], serveSocialCard);
 
 // Allow serving .well-known for Android App Links / Apple App Site Association
 app.use('/.well-known', express.static(path.join(__dirname, 'public', '.well-known'), {
