@@ -2707,7 +2707,26 @@ html.dark .custom-modal-card .modal-tab.active {
 }
 
 
-/* DM Replied Message Backgrounds */
+/* DM Replied Message Styling & Multiline Support */
+.dm-reply-quote {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.dm-reply-quote:hover {
+    opacity: 0.92;
+}
+.dm-reply-quote:active {
+    transform: scale(0.99);
+}
+
 .dm-reply-me {
     background-color: #c4efc0;
 }
@@ -2719,6 +2738,47 @@ html.dark .custom-modal-card .modal-tab.active {
 }
 .dark .dm-reply-them {
     background-color: #1a2329;
+}
+
+.dm-quote-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.35;
+    max-height: 4.1em;
+}
+
+/* Ensure DM bubble and its contents never overflow horizontally */
+.dm-bubble {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* Pulse animation for jumping to a quoted message */
+@keyframes dmHighlightPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.65);
+        transform: scale(1);
+    }
+    35% {
+        box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.4);
+        transform: scale(1.02);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+        transform: scale(1);
+    }
+}
+.dm-highlight-pulse {
+    animation: dmHighlightPulse 1.2s ease-out forwards;
+    z-index: 5;
 }
 
 /* Wrapped Button Ready Animation */

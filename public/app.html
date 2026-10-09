@@ -31,7 +31,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
-    <link rel="stylesheet" href="/css/style.css?v=31">
+    <link rel="stylesheet" href="/css/style.css?v=32">
     <style>
         /* DM area theming - must override inline styles via !important for dark mode */
         #dm-chat-area {
@@ -48,6 +48,7 @@
         }
         #dm-messages {
             background-color: transparent;
+            overflow-x: hidden !important;
         }
         #mac-frame.mac-expanded {
             max-width: none !important;
@@ -544,7 +545,7 @@
             </div>
 
             <!-- ── DM Chat View (absolute overlay, shown when DM conversation is open) ── -->
-            <div id="dm-chat-area" style="display:none;position:absolute;inset:0;z-index:30;flex-direction:column;" class="bg-[#efeae2] dark:bg-[#0b141a]">
+            <div id="dm-chat-area" style="display:none;position:absolute;inset:0;z-index:30;flex-direction:column;" class="bg-[#efeae2] dark:bg-[#0b141a] overflow-hidden">
                 <!-- DM Chat Header -->
                 <div class="h-[60px] md:h-16 bg-[#f0f2f5] dark:bg-[#202c33] flex items-center gap-3 px-3 md:px-5 shrink-0 shadow-sm">
                     <button id="dm-back-btn" class="w-9 h-9 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 transition shrink-0" title="Back">
@@ -573,7 +574,7 @@
                     </button>
                 </div>
                 <!-- Messages -->
-                <div id="dm-messages" class="flex-1 min-h-0 overflow-y-auto px-3 md:px-6 py-3 flex flex-col"></div>
+                <div id="dm-messages" class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 md:px-6 py-3 flex flex-col w-full max-w-full"></div>
                 <!-- Typing indicator -->
                 <div id="dm-typing-indicator" class="hidden px-5 pb-1 text-[11px] text-gray-400 italic">typing…</div>
                 
@@ -1057,7 +1058,7 @@
     <script src="/js/upload.js?v=46"></script>
     <script src="/js/story.js?v=46"></script>
     <script src="/js/features.js?v=47"></script>
-    <script src="/js/dm.js?v=46"></script>
+    <script src="/js/dm.js?v=47"></script>
     <script>
         if ('caches' in window) {
             caches.keys().then(keys => {

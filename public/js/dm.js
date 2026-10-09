@@ -163,12 +163,12 @@
         let replyHtml = '';
         if (m.reply_to_id && (m.reply_to_body || m.reply_to_type)) {
             const replyName = m.reply_to_sender_id === me?.id ? 'You' : (m.reply_to_sender_name || 'User');
-            const replyBodyRaw = m.reply_to_type === 'image' ? '📷 Photo' : m.reply_to_type === 'audio' ? '🎤 Voice note' : m.reply_to_type === 'video' ? '🎥 Video' : m.reply_to_type === 'document' ? '📄 Document' : (m.reply_to_body || '').substring(0, 80);
+            const replyBodyRaw = m.reply_to_type === 'image' ? '📷 Photo' : m.reply_to_type === 'audio' ? '🎤 Voice note' : m.reply_to_type === 'video' ? '🎥 Video' : m.reply_to_type === 'document' ? '📄 Document' : (m.reply_to_body || '').substring(0, 160);
             const replyBody = linkify(replyBodyRaw);
             replyHtml = `
-                <div class="dm-reply-quote mb-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer border-l-[3px] border-indigo-400 ${isMe ? 'dm-reply-me' : 'dm-reply-them'}" onclick="document.getElementById('dm-msg-${m.reply_to_id}')?.scrollIntoView({behavior:'smooth', block:'center'})">
-                    <div class="text-[10px] font-bold text-indigo-500">${esc(replyName)}</div>
-                    <div class="text-[11px] opacity-70 truncate">${replyBody}</div>
+                <div class="dm-reply-quote w-full max-w-full min-w-0 mb-1.5 px-2.5 py-1.5 rounded-lg cursor-pointer border-l-[3px] border-indigo-400 ${isMe ? 'dm-reply-me' : 'dm-reply-them'}" onclick="window.dmScrollToMsg && window.dmScrollToMsg('${m.reply_to_id}')" title="Jump to original message">
+                    <div class="text-[10px] font-bold text-indigo-500 truncate leading-tight">${esc(replyName)}</div>
+                    <div class="dm-quote-text text-[11px] opacity-75 mt-0.5">${replyBody}</div>
                 </div>`;
         }
 
@@ -213,9 +213,9 @@
         }
         
         const html = `
-            <div id="${msgElId}" data-sender-id="${m.sender_id}" class="flex gap-2 text-[15px] ${isMe ? 'flex-row-reverse' : 'flex-row'} ${mtClass} relative">
-                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 flex-shrink-0 ${isSameSender ? 'invisible' : ''}" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm ${isSameSender ? 'invisible' : ''}\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
-                <div class="max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+            <div id="${msgElId}" data-sender-id="${m.sender_id}" class="flex gap-2 text-[15px] ${isMe ? 'flex-row-reverse' : 'flex-row'} ${mtClass} relative w-full max-w-full min-w-0">
+                ${!isMe ? `<img src="${m.avatar_url || ''}" class="w-7 h-7 rounded-full object-cover shadow-sm bg-indigo-100 shrink-0 ${isSameSender ? 'invisible' : ''}" onerror="this.outerHTML='<div class=\\'w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0 shadow-sm ${isSameSender ? 'invisible' : ''}\\'>${(m.display_name||'?')[0].toUpperCase()}</div>'">` : ''}
+                <div class="max-w-[85%] sm:max-w-[75%] md:max-w-[70%] min-w-0 flex flex-col ${isMe ? 'items-end' : 'items-start'}">
                     <div class="dm-bubble break-words px-2.5 py-1.5 md:px-3 md:py-2 shadow-sm leading-snug md:leading-relaxed relative ${cornerClass} ${isMe ? 'bg-[#d9fdd3] dark:bg-[#005c4b] text-gray-900 dark:text-gray-100' : 'bg-white dark:bg-[#202c33] border border-gray-100 dark:border-gray-800 text-gray-800 dark:text-gray-100'} ${extraClass}">
                         ${replyHtml}
                         ${contentHtml}
@@ -787,7 +787,27 @@
 
     
 
-    // ── Context menu (delete) ─────────────────────────────────
+    // ── Smooth Jump to Replied Message with Pulse Highlight ──
+    window.dmScrollToMsg = function(msgId) {
+        if (!msgId) return;
+        const target = document.getElementById('dm-msg-' + msgId);
+        if (!target) {
+            if (typeof showToast === 'function') {
+                showToast('Original message not found in view');
+            }
+            return;
+        }
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const bubble = target.querySelector('.dm-bubble') || target;
+        bubble.classList.remove('dm-highlight-pulse');
+        void bubble.offsetWidth; // Force CSS reflow to re-trigger pulse
+        bubble.classList.add('dm-highlight-pulse');
+        setTimeout(() => {
+            bubble.classList.remove('dm-highlight-pulse');
+        }, 1300);
+    };
+
+    // ── Context menu (delete & reply) ─────────────────────────
     function showCtxMenu(e, msg, isMe) {
         const msgId = typeof msg === 'object' ? msg.id : msg;
         closeCtxMenu();
@@ -815,7 +835,7 @@
                 const msgData = typeof msg === 'object' ? msg : null;
                 if (msgData) {
                     const senderName = msgData.sender_id === me?.id ? 'You' : (msgData.display_name || 'User');
-                    const previewBody = msgData.type === 'image' ? '📷 Photo' : msgData.type === 'audio' ? '🎤 Voice note' : msgData.type === 'video' ? '🎥 Video' : msgData.type === 'document' ? '📄 Document' : (msgData.body || '').substring(0, 80);
+                    const previewBody = msgData.type === 'image' ? '📷 Photo' : msgData.type === 'audio' ? '🎤 Voice note' : msgData.type === 'video' ? '🎥 Video' : msgData.type === 'document' ? '📄 Document' : (msgData.body || '').substring(0, 140);
                     setReply(msgData.id, previewBody, msgData.type, senderName, msgData.sender_id);
                 }
             }},
