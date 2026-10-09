@@ -960,7 +960,6 @@
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/js/analytics.js" async></script>
 </head>
 <body>
     <div id="auth-gate" style="display:flex;align-items:center;justify-content:center;height:100vh;color:var(--text-muted);font-size:13px;font-weight:500;">Checking access...</div>
@@ -1108,6 +1107,54 @@
                     </div>
                 </div>
 
+                <!-- IP Traffic Inspector & Live Firewall -->
+                <div class="analytics-sub-card" style="margin-bottom:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
+                        <div>
+                            <h3 style="display:flex; align-items:center; gap:8px; margin:0 0 4px 0; font-size:16px;">
+                                <span>🛡️</span> IP Traffic Inspector &amp; Live Firewall
+                                <span id="firewall-blocked-count-badge" style="font-size:11px; padding:2px 8px; border-radius:99px; background:rgba(239,68,68,0.15); color:var(--danger); font-weight:700; border:1px solid rgba(239,68,68,0.3);">0 Blocked</span>
+                            </h3>
+                            <p style="font-size:12px; color:var(--text-muted); margin:0;">Track total hits per IP, detect scrapers/spammers, and block or unblock any incoming IP instantly.</p>
+                        </div>
+                        <!-- Manual Block Form -->
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            <input type="text" id="manual-block-ip" placeholder="IP Address (e.g. 103.212.x.x)" style="padding:6px 10px; font-size:12px; border:1px solid var(--border); border-radius:8px; background:var(--input-bg); color:var(--text-primary); font-family:monospace; min-width:170px;">
+                            <input type="text" id="manual-block-reason" placeholder="Reason (e.g. Bot spam)" style="padding:6px 10px; font-size:12px; border:1px solid var(--border); border-radius:8px; background:var(--input-bg); color:var(--text-primary); min-width:140px;">
+                            <button onclick="submitManualBlockIp()" class="btn-secondary" style="border-color:#ef4444; color:#ef4444; font-weight:600; padding:6px 12px; font-size:12px; cursor:pointer;">🛑 Block IP</button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Controls -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <button id="firewall-tab-all" onclick="switchFirewallTab('all')" class="btn-subtle" style="font-size:12px; font-weight:700; padding:5px 12px; border-radius:6px; background:var(--bg-alt); color:var(--text-primary); border:1px solid var(--border); cursor:pointer;">All Active IPs</button>
+                            <button id="firewall-tab-blocked" onclick="switchFirewallTab('blocked')" class="btn-subtle" style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:6px; color:var(--text-muted); border:1px solid var(--border); cursor:pointer;">Blocked IPs (<span id="firewall-blocked-count">0</span>)</button>
+                        </div>
+                        <input type="text" id="firewall-search" placeholder="Filter by IP, City, Country..." style="padding:5px 10px; font-size:12px; border:1px solid var(--border); border-radius:6px; background:var(--input-bg); color:var(--text-primary); width:210px;" onkeyup="filterFirewallTable()">
+                    </div>
+
+                    <!-- IP Traffic Table -->
+                    <div class="table-container" style="max-height:360px; overflow-y:auto;">
+                        <table class="data-table" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th style="text-align:right;">Total Hits</th>
+                                    <th style="text-align:right;">Visitors</th>
+                                    <th>Location</th>
+                                    <th>Last Active</th>
+                                    <th>Status</th>
+                                    <th style="text-align:right;">Firewall Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="firewall-ip-list">
+                                <tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-muted);">Loading IP activity...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Visitor Log Table -->
                 <div class="analytics-log-header">
                     <h3>Visitor Activity Log</h3>
@@ -1124,6 +1171,7 @@
                                 <th>Visitor ID</th>
                                 <th>Status</th>
                                 <th>IP Address</th>
+                                <th style="text-align:right;">Hits</th>
                                 <th>Location</th>
                                 <th>Landing Page</th>
                                 <th>Device / OS</th>
@@ -1132,7 +1180,7 @@
                             </tr>
                         </thead>
                         <tbody id="analytics-visitor-list">
-                            <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>
+                            <tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1734,20 +1782,206 @@
                     }
                 });
 
+            loadFirewallData();
             loadAnalyticsVisitors(1);
         }
+
+        // ── Firewall & IP Traffic Inspector ────────────────────────
+        window._firewallTab = 'all';
+        window._firewallData = { topIps: [], blockedIps: [] };
+
+        window.loadFirewallData = function() {
+            const list = document.getElementById('firewall-ip-list');
+            if (!list) return;
+            fetch('/api/admin/firewall/ips')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok) {
+                        window._firewallData = data;
+                        const blockedCount = (data.blockedIps || []).length;
+                        const bBadge = document.getElementById('firewall-blocked-count-badge');
+                        if (bBadge) bBadge.textContent = `${blockedCount} Blocked`;
+                        const bCount = document.getElementById('firewall-blocked-count');
+                        if (bCount) bCount.textContent = blockedCount;
+
+                        renderFirewallTable();
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load firewall data', err);
+                });
+        };
+
+        window.renderFirewallTable = function() {
+            const list = document.getElementById('firewall-ip-list');
+            if (!list) return;
+
+            const { topIps = [], blockedIps = [] } = window._firewallData;
+            const search = (document.getElementById('firewall-search')?.value || '').toLowerCase().trim();
+
+            let rows = [];
+            if (window._firewallTab === 'blocked') {
+                rows = blockedIps.map(b => ({
+                    ip_address: b.ip,
+                    total_hits: (topIps.find(x => x.ip_address === b.ip)?.total_hits) || 0,
+                    unique_visitors: (topIps.find(x => x.ip_address === b.ip)?.unique_visitors) || 0,
+                    country: (topIps.find(x => x.ip_address === b.ip)?.country) || '—',
+                    city: (topIps.find(x => x.ip_address === b.ip)?.city) || '',
+                    last_seen: b.created_at,
+                    is_blocked: true,
+                    reason: b.reason
+                }));
+            } else {
+                rows = topIps;
+            }
+
+            if (search) {
+                rows = rows.filter(r => 
+                    (r.ip_address && r.ip_address.toLowerCase().includes(search)) ||
+                    (r.city && r.city.toLowerCase().includes(search)) ||
+                    (r.country && r.country.toLowerCase().includes(search)) ||
+                    (r.reason && r.reason.toLowerCase().includes(search))
+                );
+            }
+
+            if (!rows.length) {
+                list.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted); font-size:12px;">${window._firewallTab === 'blocked' ? 'No blocked IPs currently' : 'No matching IP records found'}</td></tr>`;
+                return;
+            }
+
+            list.innerHTML = rows.map(item => {
+                const isBlocked = Boolean(item.is_blocked);
+                const statusBadge = isBlocked 
+                    ? `<span class="badge" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);font-weight:700;">🛑 BLOCKED</span>`
+                    : `<span class="badge" style="background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.3);font-weight:700;">🟢 ACTIVE</span>`;
+                const location = `${item.city ? item.city + ', ' : ''}${item.country || 'Unknown'}`;
+                const lastSeenStr = item.last_seen ? new Date(item.last_seen).toLocaleString() : '—';
+                const hitsBadge = item.total_hits > 100 
+                    ? `<span style="font-weight:800;color:var(--accent);font-family:monospace;font-size:13px;">${item.total_hits.toLocaleString()} 🔥</span>`
+                    : `<span style="font-weight:700;color:var(--text-primary);font-family:monospace;">${item.total_hits.toLocaleString()}</span>`;
+
+                return `
+                    <tr>
+                        <td style="font-family:monospace; font-size:12px; font-weight:600;">
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span>${item.ip_address}</span>
+                                <button onclick="navigator.clipboard.writeText('${item.ip_address}'); alert('IP Copied: ${item.ip_address}');" title="Copy IP" style="border:none; background:transparent; cursor:pointer; font-size:11px; opacity:0.6;">📋</button>
+                            </div>
+                            ${item.reason ? `<div style="font-size:10px; color:var(--danger); font-family:sans-serif; margin-top:2px;">Reason: ${item.reason}</div>` : ''}
+                        </td>
+                        <td style="text-align:right;">${hitsBadge}</td>
+                        <td style="text-align:right; font-family:monospace;">${item.unique_visitors || 1}</td>
+                        <td>${location}</td>
+                        <td style="font-size:11px; color:var(--text-muted);">${lastSeenStr}</td>
+                        <td>${statusBadge}</td>
+                        <td style="text-align:right;">
+                            ${isBlocked 
+                                ? `<button onclick="unblockIp('${item.ip_address}')" class="btn-subtle" style="color:#10b981; border-color:rgba(16,185,129,0.3); font-weight:700; padding:3px 8px; font-size:11px; cursor:pointer;">Unblock</button>`
+                                : `<button onclick="promptBlockIp('${item.ip_address}')" class="btn-subtle btn-subtle-danger" style="font-weight:600; padding:3px 8px; font-size:11px; cursor:pointer;">Block IP</button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
+        window.switchFirewallTab = function(tab) {
+            window._firewallTab = tab;
+            const btnAll = document.getElementById('firewall-tab-all');
+            const btnBlocked = document.getElementById('firewall-tab-blocked');
+            if (tab === 'all') {
+                btnAll.style.background = 'var(--bg-alt)';
+                btnAll.style.color = 'var(--text-primary)';
+                btnAll.style.fontWeight = '700';
+                btnBlocked.style.background = 'transparent';
+                btnBlocked.style.color = 'var(--text-muted)';
+                btnBlocked.style.fontWeight = '600';
+            } else {
+                btnBlocked.style.background = 'var(--bg-alt)';
+                btnBlocked.style.color = 'var(--text-primary)';
+                btnBlocked.style.fontWeight = '700';
+                btnAll.style.background = 'transparent';
+                btnAll.style.color = 'var(--text-muted)';
+                btnAll.style.fontWeight = '600';
+            }
+            renderFirewallTable();
+        };
+
+        window.filterFirewallTable = function() {
+            renderFirewallTable();
+        };
+
+        window.promptBlockIp = function(ip) {
+            const reason = prompt(`Block IP address "${ip}"?\n\nAny incoming request from this IP will be blocked immediately.\n\nReason (optional):`, 'Suspicious activity / Bot');
+            if (reason !== null) {
+                blockIp(ip, reason);
+            }
+        };
+
+        window.blockIp = function(ip, reason) {
+            fetch('/api/admin/firewall/block', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip, reason })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    alert(`✅ IP ${ip} has been BLOCKED. All incoming requests from this IP are now denied.`);
+                    loadFirewallData();
+                    loadAnalyticsVisitors(1);
+                } else {
+                    alert(`Error: ${data.error || 'Failed to block IP'}`);
+                }
+            })
+            .catch(err => alert('Failed to contact firewall API'));
+        };
+
+        window.unblockIp = function(ip) {
+            if (!confirm(`Unblock IP address "${ip}"?`)) return;
+            fetch('/api/admin/firewall/unblock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    alert(`✅ IP ${ip} has been UNBLOCKED.`);
+                    loadFirewallData();
+                    loadAnalyticsVisitors(1);
+                } else {
+                    alert(`Error: ${data.error || 'Failed to unblock IP'}`);
+                }
+            })
+            .catch(err => alert('Failed to contact firewall API'));
+        };
+
+        window.submitManualBlockIp = function() {
+            const ipInput = document.getElementById('manual-block-ip');
+            const reasonInput = document.getElementById('manual-block-reason');
+            const ip = (ipInput?.value || '').trim();
+            const reason = (reasonInput?.value || '').trim();
+            if (!ip) {
+                alert('Please enter a valid IP address to block');
+                return;
+            }
+            blockIp(ip, reason || 'Manual administrative block');
+            if (ipInput) ipInput.value = '';
+            if (reasonInput) reasonInput.value = '';
+        };
 
         window.loadAnalyticsVisitors = function(page) {
             const search = document.getElementById('analytics-search').value.trim();
             const list = document.getElementById('analytics-visitor-list');
-            list.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>';
+            list.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>';
             
             fetch(`/api/admin/analytics/visitors?page=${page}&limit=15&search=${encodeURIComponent(search)}`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.ok) {
                         if (data.data.length === 0) {
-                            list.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No visitors found.</td></tr>';
+                            list.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">No visitors found.</td></tr>';
                             return;
                         }
 
@@ -1755,16 +1989,28 @@
                             const status = v.user_id ? '<span style="color:#10b981; font-weight:600;">Signed Up</span>' : '<span style="color:#64748b; font-weight:600;">Anonymous</span>';
                             const landing = v.latest_session ? v.latest_session.landing_page : '-';
                             const active = new Date(v.last_seen).toLocaleString();
+                            const isBlocked = Boolean(v.is_blocked);
                             return `
                                 <tr>
                                     <td style="font-family:monospace; font-size:12px;">${v.visitor_id.substring(0,8)}</td>
                                     <td>${status}</td>
-                                    <td style="font-family:monospace; font-size:12px;">${v.ip_address}</td>
+                                    <td style="font-family:monospace; font-size:12px; font-weight:600;">
+                                        ${v.ip_address}
+                                        ${isBlocked ? '<span style="color:var(--danger);font-size:10px;margin-left:4px;">(Blocked)</span>' : ''}
+                                    </td>
+                                    <td style="text-align:right; font-weight:700; color:var(--text-primary); font-family:monospace;">${(v.total_page_views || 0).toLocaleString()}</td>
                                     <td>${v.city ? v.city + ', ' : ''}${v.country}</td>
                                     <td>${landing}</td>
                                     <td>${v.device} / ${v.os}</td>
                                     <td>${active}</td>
-                                    <td><button onclick="viewVisitorTimeline('${v.visitor_id}')" class="btn-secondary" style="padding:4px 8px; font-size:11px;">View</button></td>
+                                    <td>
+                                        <div style="display:flex; gap:4px; align-items:center;">
+                                            <button onclick="viewVisitorTimeline('${v.visitor_id}')" class="btn-secondary" style="padding:3px 7px; font-size:11px;">View</button>
+                                            ${v.ip_address ? (isBlocked 
+                                                ? `<button onclick="unblockIp('${v.ip_address}')" class="btn-subtle" style="color:#10b981; border-color:rgba(16,185,129,0.3); font-weight:700; padding:3px 7px; font-size:11px; cursor:pointer;">Unblock</button>` 
+                                                : `<button onclick="promptBlockIp('${v.ip_address}')" class="btn-subtle btn-subtle-danger" style="padding:3px 7px; font-size:11px; cursor:pointer;">Block IP</button>`) : ''}
+                                        </div>
+                                    </td>
                                 </tr>
                             `;
                         }).join('');

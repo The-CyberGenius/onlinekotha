@@ -725,6 +725,7 @@ HARD RULES
 
         // Shared badge helper
         function getBadge(u) {
+            if (u.is_suspended) return '<span class="badge" style="background:rgba(239,68,68,0.18);color:#ef4444;border:1px solid rgba(239,68,68,0.4);font-weight:700;">SUSPENDED</span>';
             if (u.is_guest) return '<span class="badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);">GUEST</span>';
             if (u.is_admin) return '<span class="badge badge-admin">ADMIN</span>';
             if (u.plan === 'paid') return '<span class="badge badge-paid">PAID</span>';
@@ -792,6 +793,11 @@ HARD RULES
                 if (!u.is_admin && !u.is_guest) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
                 html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + (u.chat_count || 0) + '" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats (' + (u.chat_count || 0) + ')</button>';
                 html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
+                if (!u.is_admin && !u.is_guest) {
+                    const suspText = u.is_suspended ? 'Unsuspend' : 'Suspend';
+                    const suspColor = u.is_suspended ? '#10b981' : '#f59e0b';
+                    html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-suspend-btn" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid ' + suspColor + ';background:var(--card-bg);color:' + suspColor + ';cursor:pointer;">' + suspText + '</button>';
+                }
                 if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:50px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>';
                 html += '</div>';
                 // Expand areas
@@ -839,6 +845,7 @@ HARD RULES
                 const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
                 const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
                 const costStr = Number(u.total_cost || 0).toFixed(3);
+                const suspendBtn = (u.is_admin || u.is_guest) ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-suspend-btn btn-subtle" style="padding:4px 7px;font-size:11px;color:${u.is_suspended ? '#10b981' : '#f59e0b'};border-color:${u.is_suspended ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'};" title="${u.is_suspended ? 'Unsuspend Account' : 'Suspend Account'}">${u.is_suspended ? 'Unsuspend' : 'Suspend'}</button>`;
 
                 html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name||u.email.split('@')[0]}${onlineDot}</span><span class="user-email-text">${u.email}</span></div></div></td>`;
                 html += `<td><div style="margin-bottom:4px;">${badge}</div>${loginMethod}</td>`;
@@ -846,7 +853,7 @@ HARD RULES
                 html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${costStr}</span></td>`;
                 html += `<td>${ipCountry}</td>`;
                 html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
-                html += `<td><div class="action-cell">${(u.is_admin || u.is_guest)?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
+                html += `<td><div class="action-cell">${(u.is_admin || u.is_guest)?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
                 html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
             }
             html += '</tbody></table></div>';
@@ -908,6 +915,15 @@ HARD RULES
                                     <button id="plan-modal-quick-168" type="button" class="btn-subtle" style="flex:1;padding:8px 0;font-size:12px;font-weight:600;border-radius:8px;text-align:center;">+7d (1w)</button>
                                 </div>
                             </div>
+                            <div style="margin-bottom:16px;padding:12px 14px;background:var(--bg-page);border-radius:10px;border:1px solid var(--border);">
+                                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                                    <div>
+                                        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-primary);">Security & Sessions</div>
+                                        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Terminate all active user logins immediately</div>
+                                    </div>
+                                    <button id="plan-modal-revoke-btn" type="button" class="btn-subtle btn-subtle-danger" style="font-size:11px;padding:6px 12px;font-weight:600;white-space:nowrap;cursor:pointer;">Revoke All Sessions</button>
+                                </div>
+                            </div>
                             <div id="plan-modal-msg" style="display:none;font-size:12px;font-weight:600;padding:10px 12px;border-radius:8px;margin-bottom:14px;"></div>
                         </div>
                         <div style="padding:14px 20px;border-top:1px solid var(--border);background:var(--bg-alt);display:flex;gap:10px;justify-content:flex-end;">
@@ -924,6 +940,29 @@ HARD RULES
                 modal.querySelector('#plan-modal-quick-24').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '24'; });
                 modal.querySelector('#plan-modal-quick-72').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '72'; });
                 modal.querySelector('#plan-modal-quick-168').addEventListener('click', () => { modal.querySelector('#plan-modal-hours').value = '168'; });
+
+                modal.querySelector('#plan-modal-revoke-btn')?.addEventListener('click', async () => {
+                    if (!confirm(`Force logout "${email}" across all devices now?\n\nAll existing cookies and tokens will be invalidated immediately.`)) return;
+                    const btnRevoke = modal.querySelector('#plan-modal-revoke-btn');
+                    const msgEl = modal.querySelector('#plan-modal-msg');
+                    btnRevoke.disabled = true;
+                    btnRevoke.textContent = 'Revoking...';
+                    try {
+                        const r = await fetch(`/api/admin/users/${uid}/revoke-sessions`, { method: 'POST' });
+                        const resData = await r.json();
+                        if (!r.ok) throw new Error(resData.error || 'Failed');
+                        msgEl.style.display = 'block';
+                        msgEl.style.background = 'rgba(16, 185, 129, 0.15)';
+                        msgEl.style.color = 'var(--success)';
+                        msgEl.style.border = '1px solid var(--success)';
+                        msgEl.textContent = '✓ All user sessions have been terminated.';
+                        btnRevoke.textContent = 'Revoked ✓';
+                    } catch (e) {
+                        alert('Error: ' + e.message);
+                        btnRevoke.disabled = false;
+                        btnRevoke.textContent = 'Revoke All Sessions';
+                    }
+                });
 
                 modal.querySelector('#plan-modal-save').addEventListener('click', async () => {
                     const newPlan = modal.querySelector('#plan-modal-plan').value;
@@ -1199,7 +1238,13 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                     if (isMobLogs) {
                         // Mobile: stacked log cards
                         area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
-                            '<div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (' + convs.length + ')</span><button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;padding:2px 6px;">×</button></div>' +
+                            '<div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;">' +
+                                '<span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (' + convs.length + ')</span>' +
+                                '<div style="display:flex;align-items:center;gap:6px;">' +
+                                    '<button data-uid="' + uid + '" class="ai-logs-clear-all-btn" style="padding:3px 8px;font-size:10px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;" title="Delete all AI conversations for this user">Clear All</button>' +
+                                    '<button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;padding:2px 6px;">×</button>' +
+                                '</div>' +
+                            '</div>' +
                             convs.map(c =>
                                 '<div style="padding:10px;border-bottom:1px solid var(--bg-alt);">' +
                                     '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:2px;word-break:break-word;">' + (c.title || 'Untitled') + '</div>' +
@@ -1207,6 +1252,7 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                                     '<div style="display:flex;gap:6px;">' +
                                         '<button data-uid="' + uid + '" data-convid="' + c.id + '" class="ai-log-view-btn" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">View</button>' +
                                         '<a href="/api/admin/users/' + uid + '/conversations/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">TXT</a>' +
+                                        '<button data-uid="' + uid + '" data-convid="' + c.id + '" class="ai-log-del-btn" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
                                     '</div></div>'
                             ).join('') +
                         '</div>';
@@ -1215,7 +1261,10 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                             <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
                                 <div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;align-items:center;justify-content:space-between;">
                                     <span style="font-size:11px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (${convs.length})</span>
-                                    <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;">×</button>
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <button data-uid="${uid}" class="ai-logs-clear-all-btn btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 8px;font-weight:600;" title="Permanently clear all AI chats for this user">Clear All</button>
+                                        <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;">×</button>
+                                    </div>
                                 </div>
                                 ${convs.map(c => `
                                     <div style="padding:8px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
@@ -1226,6 +1275,7 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                                         <div style="display:flex;gap:4px;align-items:center;">
                                             <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 6px;">View</button>
                                             <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="btn-subtle" style="font-size:10px;padding:2px 6px;text-decoration:none;">TXT</a>
+                                            <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-del-btn btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;" title="Delete this conversation">Del</button>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -1245,6 +1295,42 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                         }
                     });
 
+                    area.querySelector('.ai-logs-clear-all-btn')?.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        if (!confirm('DELETE ALL AI conversations for this user?\n\nThis permanently removes all conversation history. This cannot be undone.')) return;
+                        try {
+                            const r = await fetch(`/api/admin/users/${uid}/conversations`, { method: 'DELETE' });
+                            const resData = await r.json();
+                            if (!r.ok) throw new Error(resData.error || 'Failed');
+                            btn.click();
+                            btn.click();
+                        } catch (err) {
+                            alert('Error wiping conversations: ' + err.message);
+                        }
+                    });
+
+                    area.querySelectorAll('.ai-log-del-btn').forEach(delBtn => {
+                        delBtn.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            const cId = delBtn.dataset.convid;
+                            const uId = delBtn.dataset.uid;
+                            if (!confirm('Permanently delete this AI conversation?')) return;
+                            delBtn.textContent = '...';
+                            delBtn.disabled = true;
+                            try {
+                                const r = await fetch(`/api/admin/users/${uId}/conversations/${cId}`, { method: 'DELETE' });
+                                const resData = await r.json();
+                                if (!r.ok) throw new Error(resData.error || 'Failed');
+                                btn.click();
+                                btn.click();
+                            } catch (err) {
+                                alert('Error deleting conversation: ' + err.message);
+                                delBtn.textContent = 'Del';
+                                delBtn.disabled = false;
+                            }
+                        });
+                    });
+
                     area.querySelectorAll('.ai-log-view-btn').forEach(vBtn => {
                         vBtn.addEventListener('click', async () => {
                             const convId = vBtn.dataset.convid;
@@ -1260,7 +1346,10 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                                                 <h4 style="font-weight:700;font-size:15px;color:var(--text-primary);margin:0;font-family:'Outfit',sans-serif;">${data.title || 'AI Conversation'}</h4>
                                                 <p style="font-size:11px;color:var(--text-muted);margin:2px 0 0;">${data.chat_folder} &middot; ${data.messages?.length || 0} messages</p>
                                             </div>
-                                            <button class="ai-log-popup-close" style="border:none;background:transparent;color:var(--text-muted);font-size:24px;line-height:1;cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">&times;</button>
+                                            <div style="display:flex;align-items:center;gap:8px;">
+                                                <button class="ai-modal-del-btn" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--danger-bg);color:var(--danger);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">🗑️ Delete</button>
+                                                <button class="ai-log-popup-close" style="border:none;background:transparent;color:var(--text-muted);font-size:24px;line-height:1;cursor:pointer;transition:color 0.2s;" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">&times;</button>
+                                            </div>
                                         </div>
                                         <div style="padding:20px;overflow-y:auto;flex:1;background:var(--bg-page);display:flex;flex-direction:column;gap:12px;">
                                             ${(data.messages || []).map(m => `
@@ -1280,6 +1369,19 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                                 `;
                                 modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
                                 modal.querySelector('.ai-log-popup-close').addEventListener('click', () => modal.remove());
+                                modal.querySelector('.ai-modal-del-btn')?.addEventListener('click', async () => {
+                                    if (!confirm('Permanently delete this AI conversation and all its messages?')) return;
+                                    try {
+                                        const r = await fetch(`/api/admin/users/${convUid}/conversations/${convId}`, { method: 'DELETE' });
+                                        const resData = await r.json();
+                                        if (!r.ok) throw new Error(resData.error || 'Failed');
+                                        modal.remove();
+                                        btn.click();
+                                        btn.click();
+                                    } catch (err) {
+                                        alert('Error deleting conversation: ' + err.message);
+                                    }
+                                });
                                 document.body.appendChild(modal);
                             } catch (err) {
                                 alert('Error loading conversation: ' + err.message);
@@ -1288,6 +1390,30 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                     });
                 } catch (err) {
                     area.innerHTML = `<div style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--danger);">${err.message}</div>`;
+                }
+            });
+        });
+
+        // Suspend / Unsuspend user
+        list.querySelectorAll('.user-suspend-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const uid = btn.dataset.uid;
+                const email = btn.dataset.email || 'this user';
+                const isCurrentlySuspended = btn.textContent.trim().toLowerCase().includes('unsuspend');
+                const actionVerb = isCurrentlySuspended ? 'UNSUSPEND' : 'SUSPEND';
+                if (!confirm(`${actionVerb} account "${email}"?\n\n${isCurrentlySuspended ? 'The user will be able to log in again.' : 'The user will be blocked from logging in and all active sessions will be terminated immediately.'}`)) return;
+                const originalText = btn.textContent;
+                btn.textContent = '...';
+                btn.disabled = true;
+                try {
+                    const r = await fetch(`/api/admin/users/${uid}/suspend`, { method: 'POST' });
+                    const resData = await r.json();
+                    if (!r.ok) throw new Error(resData.error || 'Failed');
+                    await loadUsers();
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
                 }
             });
         });

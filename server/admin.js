@@ -12,6 +12,7 @@ const email = require('./email');
 
 const oauth = require('./oauth');
 const { callLLM, callModelDirectly } = require('./llm');
+const firewall = require('./firewall');
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -479,6 +480,7 @@ router.put('/settings', (req, res) => {
 router.get('/users', (req, res) => {
     const users = db.prepare(
         `SELECT u.id, u.email, u.plan, u.trial_expires_at, u.created_at, u.is_admin,
+                COALESCE(u.is_suspended, 0) AS is_suspended,
                 u.google_id, u.display_name, u.avatar_url, u.ip_address, u.country, u.last_active_at,
                 u.phone, u.phone_country_code,
                 (SELECT COUNT(*) FROM chats WHERE user_id = u.id) AS chat_count,
@@ -488,6 +490,7 @@ router.get('/users', (req, res) => {
     
     users.forEach(u => {
         u.is_guest = false;
+        u.is_suspended = Boolean(u.is_suspended);
         u.total_cost = Number(u.total_cost || 0);
     });
 
@@ -870,21 +873,54 @@ router.post('/purge-spam', (req, res) => {
     res.json({ ok: true, deleted });
 });
 
+// ---------- Super Admin: User Suspension & Force Logout ----------
+router.post('/users/:id/suspend', (req, res) => {
+    const rawId = req.params.id;
+    if (String(rawId).startsWith('gst_')) return res.status(400).json({ error: 'Cannot suspend guest account' });
+    const userId = Number(rawId);
+    const user = db.prepare('SELECT id, is_admin, is_suspended FROM users WHERE id = ?').get(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.is_admin) return res.status(400).json({ error: 'Cannot suspend admin account' });
+
+    const newStatus = user.is_suspended ? 0 : 1;
+    db.prepare('UPDATE users SET is_suspended = ? WHERE id = ?').run(newStatus, userId);
+    if (newStatus === 1) {
+        // Force revoke all active sessions immediately
+        db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
+    }
+    res.json({ ok: true, is_suspended: Boolean(newStatus) });
+});
+
+router.post('/users/:id/revoke-sessions', (req, res) => {
+    const rawId = req.params.id;
+    if (String(rawId).startsWith('gst_')) return res.status(400).json({ error: 'Cannot revoke sessions for guest' });
+    const userId = Number(rawId);
+    db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId);
+    res.json({ ok: true, message: 'All active sessions revoked' });
+});
+
 // ---------- AI Conversation Logs (Admin) ----------
 router.get('/users/:id/conversations', (req, res) => {
-    const userId = Number(req.params.id);
-    const rows = db.prepare(
-        `SELECT c.id, c.chat_folder, c.title, c.created_at, c.updated_at,
+    const rawId = req.params.id;
+    const isGuest = String(rawId).startsWith('gst_');
+    const sql = isGuest
+        ? `SELECT c.id, c.chat_folder, c.title, c.created_at, c.updated_at,
                 (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
-         FROM conversations c WHERE c.user_id = ? ORDER BY c.updated_at DESC`
-    ).all(userId);
+           FROM conversations c WHERE c.guest_id = ? ORDER BY c.updated_at DESC`
+        : `SELECT c.id, c.chat_folder, c.title, c.created_at, c.updated_at,
+                (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
+           FROM conversations c WHERE c.user_id = ? ORDER BY c.updated_at DESC`;
+    const rows = db.prepare(sql).all(isGuest ? rawId : Number(rawId));
     res.json(rows);
 });
 
 router.get('/users/:id/conversations/:convId', (req, res) => {
-    const userId = Number(req.params.id);
+    const rawId = req.params.id;
     const convId = Number(req.params.convId);
-    const conv = db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, userId);
+    const isGuest = String(rawId).startsWith('gst_');
+    const conv = isGuest
+        ? db.prepare('SELECT * FROM conversations WHERE id = ? AND guest_id = ?').get(convId, rawId)
+        : db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, Number(rawId));
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
     const msgs = db.prepare(
         'SELECT id, role, content, citations, created_at FROM conv_messages WHERE conversation_id = ? ORDER BY id'
@@ -892,10 +928,43 @@ router.get('/users/:id/conversations/:convId', (req, res) => {
     res.json({ ...conv, messages: msgs });
 });
 
-router.get('/users/:id/conversations/:convId/download', (req, res) => {
-    const userId = Number(req.params.id);
+// Delete single AI conversation
+router.delete('/users/:id/conversations/:convId', (req, res) => {
+    const rawId = req.params.id;
     const convId = Number(req.params.convId);
-    const conv = db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, userId);
+    const isGuest = String(rawId).startsWith('gst_');
+    const conv = isGuest
+        ? db.prepare('SELECT id FROM conversations WHERE id = ? AND guest_id = ?').get(convId, rawId)
+        : db.prepare('SELECT id FROM conversations WHERE id = ? AND user_id = ?').get(convId, Number(rawId));
+    if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+
+    db.prepare('DELETE FROM conv_messages WHERE conversation_id = ?').run(conv.id);
+    db.prepare('DELETE FROM conversations WHERE id = ?').run(conv.id);
+    res.json({ ok: true, deleted: conv.id });
+});
+
+// Delete ALL AI conversations for a user
+router.delete('/users/:id/conversations', (req, res) => {
+    const rawId = req.params.id;
+    const isGuest = String(rawId).startsWith('gst_');
+    if (isGuest) {
+        db.prepare('DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE guest_id = ?)').run(rawId);
+        db.prepare('DELETE FROM conversations WHERE guest_id = ?').run(rawId);
+    } else {
+        const userId = Number(rawId);
+        db.prepare('DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = ?)').run(userId);
+        db.prepare('DELETE FROM conversations WHERE user_id = ?').run(userId);
+    }
+    res.json({ ok: true, message: 'All AI conversations cleared for this user' });
+});
+
+router.get('/users/:id/conversations/:convId/download', (req, res) => {
+    const rawId = req.params.id;
+    const convId = Number(req.params.convId);
+    const isGuest = String(rawId).startsWith('gst_');
+    const conv = isGuest
+        ? db.prepare('SELECT * FROM conversations WHERE id = ? AND guest_id = ?').get(convId, rawId)
+        : db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, Number(rawId));
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
 
     const msgs = db.prepare(
@@ -904,9 +973,9 @@ router.get('/users/:id/conversations/:convId/download', (req, res) => {
 
     // Build readable text log
     let log = `AI Conversation Log\n`;
-    log += `User ID: ${userId}\n`;
+    log += `User ID: ${rawId}\n`;
     log += `Chat: ${conv.chat_folder}\n`;
-    log += `Title: ${conv.title}\n`;
+    log += `Title: ${conv.title || 'Untitled'}\n`;
     log += `Created: ${new Date(conv.created_at).toISOString()}\n`;
     log += `${'='.repeat(50)}\n\n`;
 
@@ -916,7 +985,7 @@ router.get('/users/:id/conversations/:convId/download', (req, res) => {
         log += `[${time}] ${label}:\n${m.content}\n\n`;
     }
 
-    const safeName = `ai_log_user${userId}_conv${convId}`;
+    const safeName = `ai_log_user${rawId}_conv${convId}`;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${safeName}.txt"`);
     res.send(log);
@@ -1354,7 +1423,7 @@ router.get('/analytics/top-pages', (req, res) => {
         const query = `
             SELECT page, COUNT(*) as views, COUNT(DISTINCT visitor_id) as visitors
             FROM analytics_events
-            WHERE event_type = 'page_view' AND page != ''
+            WHERE event_type = 'page_view' AND page != '' AND page NOT LIKE '/admin%'
             GROUP BY page
             ORDER BY views DESC
             LIMIT 10
@@ -1430,6 +1499,11 @@ router.get('/analytics/visitors', (req, res) => {
             
             data.forEach(v => {
                 v.latest_session = sessionMap[v.visitor_id] || null;
+                v.is_blocked = firewall.isBlocked(v.ip_address);
+            });
+        } else {
+            data.forEach(v => {
+                v.is_blocked = firewall.isBlocked(v.ip_address);
             });
         }
 
@@ -1502,6 +1576,91 @@ router.get('/analytics/export', (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to export CSV' });
+    }
+});
+
+// ---------- Super Admin: IP Firewall & Traffic Inspector ----------
+router.get('/firewall/ips', (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 100;
+        const search = (req.query.search || '').trim();
+
+        let whereClause = "WHERE v.ip_address != '' AND v.ip_address IS NOT NULL";
+        const params = [];
+        if (search) {
+            whereClause += " AND (v.ip_address LIKE ? OR v.city LIKE ? OR v.country LIKE ?)";
+            params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+        }
+
+        // Aggregate by IP address across all visitors/sessions
+        const query = `
+            SELECT 
+                v.ip_address,
+                MAX(v.country) as country,
+                MAX(v.country_code) as country_code,
+                MAX(v.city) as city,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors,
+                SUM(v.total_page_views) as total_hits,
+                MAX(v.last_seen) as last_seen,
+                MIN(v.first_seen) as first_seen
+            FROM analytics_visitors v
+            ${whereClause}
+            GROUP BY v.ip_address
+            ORDER BY total_hits DESC, last_seen DESC
+            LIMIT ?
+        `;
+        params.push(limit);
+        const topIps = db.prepare(query).all(...params);
+
+        topIps.forEach(item => {
+            item.is_blocked = firewall.isBlocked(item.ip_address);
+        });
+
+        const blockedList = firewall.getBlockedIps();
+
+        res.json({
+            ok: true,
+            topIps,
+            blockedIps: blockedList
+        });
+    } catch (err) {
+        console.error('Firewall ips error:', err);
+        res.status(500).json({ error: 'Failed to fetch IP activity' });
+    }
+});
+
+router.post('/firewall/block', (req, res) => {
+    try {
+        const { ip, reason } = req.body || {};
+        if (!ip) return res.status(400).json({ error: 'IP is required' });
+        const result = firewall.blockIp(ip, reason || 'Blocked by super admin', req.user?.email || 'admin');
+        if (!result.ok) return res.status(400).json(result);
+        res.json({ ok: true, ip: result.ip });
+    } catch (err) {
+        console.error('Firewall block error:', err);
+        res.status(500).json({ error: 'Failed to block IP' });
+    }
+});
+
+router.post('/firewall/unblock', (req, res) => {
+    try {
+        const { ip } = req.body || {};
+        if (!ip) return res.status(400).json({ error: 'IP is required' });
+        const result = firewall.unblockIp(ip);
+        res.json({ ok: true, ip: result.ip });
+    } catch (err) {
+        console.error('Firewall unblock error:', err);
+        res.status(500).json({ error: 'Failed to unblock IP' });
+    }
+});
+
+router.delete('/firewall/clear-blocks', (req, res) => {
+    try {
+        firewall.clearAllBlocks();
+        res.json({ ok: true, message: 'All IP blocks removed' });
+    } catch (err) {
+        console.error('Firewall clear error:', err);
+        res.status(500).json({ error: 'Failed to clear IP blocks' });
     }
 });
 

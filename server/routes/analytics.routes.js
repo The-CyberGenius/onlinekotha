@@ -28,6 +28,11 @@ router.post('/event', express.json(), (req, res) => {
             return res.status(400).json({ error: 'Missing visitor_id or event_type' });
         }
 
+        // Never count admin visits in public website activity metrics
+        if (page && (page === '/admin.html' || page === '/admin' || page.startsWith('/admin'))) {
+            return res.status(200).json({ success: true, skipped: true });
+        }
+
         const now = Date.now();
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
         const realIp = ip.split(',')[0].trim();
@@ -66,11 +71,14 @@ router.post('/event', express.json(), (req, res) => {
             db.prepare(`
                 UPDATE analytics_visitors 
                 SET last_seen = ?,
+                    ip_address = CASE WHEN (ip_address IS NULL OR ip_address = '') AND ? != '' THEN ? ELSE ip_address END,
                     total_page_views = total_page_views + ?,
                     user_id = COALESCE(user_id, ?)
                 WHERE visitor_id = ?
             `).run(
                 now,
+                realIp,
+                realIp,
                 event_type === 'page_view' ? 1 : 0,
                 metadata.user_id || null,
                 visitor_id

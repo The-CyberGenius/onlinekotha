@@ -88,6 +88,11 @@ function login(email, password) {
         err.code = 'INVALID_CREDS';
         throw err;
     }
+    if (user.is_suspended) {
+        const err = new Error('Your account has been suspended by administrator. Please contact oksshiva@gmail.com for assistance.');
+        err.code = 'ACCOUNT_SUSPENDED';
+        throw err;
+    }
     if (!verifyPassword(password, user.password_hash)) {
         const err = new Error('Invalid email or password');
         err.code = 'INVALID_CREDS';
@@ -110,12 +115,16 @@ function createSession(userId) {
 function getSession(token) {
     if (!token) return null;
     const row = db.prepare(
-        `SELECT s.token, s.expires_at, u.id, u.email, u.plan, u.trial_expires_at, u.is_admin,
+        `SELECT s.token, s.expires_at, u.id, u.email, u.plan, u.trial_expires_at, u.is_admin, u.is_suspended,
                 u.display_name, u.avatar_url, u.last_active_at, u.phone, u.phone_country_code, u.phone_prompted
          FROM sessions s JOIN users u ON u.id = s.user_id
          WHERE s.token = ?`
     ).get(token);
     if (!row) return null;
+    if (row.is_suspended) {
+        db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
+        return null;
+    }
     if (row.expires_at < Date.now()) {
         db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
         return null;
@@ -128,6 +137,7 @@ function getSession(token) {
             plan: row.plan,
             trial_expires_at: row.trial_expires_at,
             is_admin: !!row.is_admin,
+            is_suspended: !!row.is_suspended,
             display_name: row.display_name || null,
             avatar_url: row.avatar_url || null,
             last_active_at: row.last_active_at || null,

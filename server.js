@@ -73,6 +73,17 @@ const io = new SocketIO(httpServer, {
 });
 app.set('io', io);
 
+const firewall = require('./server/firewall');
+
+io.use((socket, next) => {
+    const rawIp = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address || '';
+    const clientIp = rawIp.split(',')[0].trim();
+    if (firewall.isBlocked(clientIp)) {
+        return next(new Error('Access blocked by security firewall'));
+    }
+    next();
+});
+
 // Trust proxy for rate limiter (running behind Nginx)
 app.set('trust proxy', 1);
 
@@ -111,6 +122,49 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
+
+// ---------- Live IP Firewall Enforcement ----------
+app.use((req, res, next) => {
+    // Exempt authenticated admins & admin endpoints
+    if (req.user && req.user.is_admin) return next();
+    if (req.path.startsWith('/api/admin') || req.path === '/admin' || req.path === '/admin.html') return next();
+
+    const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '').split(',')[0].trim();
+    if (firewall.isBlocked(clientIp)) {
+        if (req.accepts('html') && !req.path.startsWith('/api/')) {
+            return res.status(403).send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>403 - Access Blocked</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>
+                        body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0b141a; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:#f1f5f9; padding:20px; box-sizing:border-box; }
+                        .card { max-width:440px; background:#1e293b; border:1px solid #334155; border-radius:18px; padding:36px 28px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,0.5); }
+                        .icon { font-size:48px; margin-bottom:12px; }
+                        h1 { font-size:22px; font-weight:700; margin:0 0 10px; color:#f87171; }
+                        p { font-size:14px; color:#94a3b8; line-height:1.6; margin:0 0 20px; }
+                        code { background:#0f172a; padding:3px 8px; border-radius:6px; color:#38bdf8; font-size:13px; font-family:monospace; }
+                        .footer { font-size:12px; color:#64748b; margin-top:20px; border-top:1px solid #334155; padding-top:14px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <div class="icon">🛡️</div>
+                        <h1>Access Blocked</h1>
+                        <p>Your incoming IP address (<code>${clientIp}</code>) has been blocked from accessing <strong>onlinekotha.com</strong> by security administration.</p>
+                        <p style="font-size:12px; color:#64748b;">If you believe this is an error, contact <a href="mailto:oksshiva@gmail.com" style="color:#818cf8; text-decoration:none;">oksshiva@gmail.com</a>.</p>
+                        <div class="footer">Security Firewall &bull; OnlineKotha</div>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+        return res.status(403).json({ error: 'Access denied: Your IP address has been blocked by administrator.', ip: clientIp });
+    }
+    next();
+});
 
 const authRouter = require('./server/routes/auth.routes');
 app.use('/api/auth', authRouter);

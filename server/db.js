@@ -34,11 +34,22 @@ try {
 } catch (err) {
     // Column might already exist, safe to ignore
 }
+try { db.exec(`ALTER TABLE users ADD COLUMN is_suspended INTEGER DEFAULT 0;`); } catch(e) {}
 
 try { db.exec(`ALTER TABLE chats ADD COLUMN is_group INTEGER DEFAULT 0;`); } catch(e) {}
 try { db.exec(`ALTER TABLE chats ADD COLUMN participants TEXT;`); } catch(e) {}
 try { db.exec(`ALTER TABLE chats ADD COLUMN user_participant TEXT;`); } catch(e) {}
 try { db.exec(`ALTER TABLE conversations ADD COLUMN ai_participant TEXT;`); } catch(e) {}
+
+db.exec(`
+CREATE TABLE IF NOT EXISTS blocked_ips (
+  ip TEXT PRIMARY KEY,
+  reason TEXT,
+  blocked_by TEXT,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_blocked_ips_created ON blocked_ips(created_at);
+`);
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS email_tokens (
