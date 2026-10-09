@@ -841,6 +841,76 @@
             margin-bottom: 22px;
         }
 
+        /* ── Hero Infinity Banner (Memories Too Showcase) ── */
+        .hero-banner-container {
+            width: 100%;
+            max-width: 860px;
+            margin: 36px auto 44px;
+            position: relative;
+            border-radius: 24px;
+            padding: 2px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(236, 72, 153, 0.25), rgba(99, 102, 241, 0.35));
+            box-shadow: 0 20px 50px -15px rgba(147, 51, 234, 0.25), 0 8px 24px -6px rgba(0, 0, 0, 0.12);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+        }
+        html.light .hero-banner-container {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.35), rgba(236, 72, 153, 0.2), rgba(99, 102, 241, 0.25));
+            box-shadow: 0 24px 50px -12px rgba(15, 23, 42, 0.14), 0 0 35px -8px rgba(168, 85, 247, 0.22);
+        }
+        .hero-banner-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 28px 60px -15px rgba(147, 51, 234, 0.35), 0 12px 30px -6px rgba(0, 0, 0, 0.18);
+        }
+        .hero-banner-card {
+            position: relative;
+            border-radius: 22px;
+            overflow: hidden;
+            background: #05020a;
+            display: block;
+        }
+        .hero-banner-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            aspect-ratio: 1024 / 341;
+            object-fit: cover;
+        }
+        @media (max-width: 768px) {
+            .hero-banner-container {
+                max-width: 100%;
+                margin: 26px auto 32px;
+                border-radius: 18px;
+            }
+            .hero-banner-card {
+                border-radius: 16px;
+            }
+        }
+
+        /* ── Footer Banner Badge ── */
+        .footer-banner-badge {
+            margin-top: 14px;
+            margin-bottom: 8px;
+            max-width: 250px;
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 1.5px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.25));
+            box-shadow: 0 8px 24px -6px rgba(124, 58, 237, 0.22);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .footer-banner-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 28px -6px rgba(124, 58, 237, 0.35);
+        }
+        .footer-banner-badge img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 11px;
+            background: #05020a;
+            aspect-ratio: 1024 / 341;
+        }
+
         /* ── Phone Mockup (Chat Wrapped Story Cards) ── */
         .mockup-wrapper {
             width: 100%;
@@ -2066,19 +2136,24 @@
         <div style="position: absolute; top: 20%; left: 50%; width: 80vw; max-width: 800px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 60%); opacity: 0.12; transform: translateX(-50%); filter: blur(80px); z-index: -1; pointer-events: none; animation: pulseGlow 8s ease-in-out infinite alternate;"></div>
         <div class="wrap hero-centered">
             <h1 class="display rise d1 hero-title-main"
-                style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.08;">
+                style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.2; overflow: visible;">
                 <span class="hero-title-prefix">Relive Your Best</span><br>
-                <span style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px;">
+                <span style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.2; overflow: visible; padding-bottom: 6px;">
                     <span id="platform-rotator" style="
                         background: linear-gradient(135deg, var(--accent), var(--accent-rose)); 
                         -webkit-background-clip: text; 
                         -webkit-text-fill-color: transparent; 
                         border-right: 3px solid var(--accent);
-                        padding-right: 4px;
+                        padding-right: 6px;
+                        padding-left: 2px;
+                        padding-bottom: 0.18em;
+                        margin-bottom: -0.18em;
                         display: inline-block;
                         white-space: nowrap;
+                        line-height: 1.15;
+                        overflow: visible;
                     ">WhatsApp</span>
-                    <span style="color: var(--text-primary);">Memories.</span>
+                    <span style="color: var(--text-primary); line-height: 1.15;">Memories.</span>
                 </span>
                 
                 <script>
@@ -2171,6 +2246,13 @@
                     </svg>
                     Encrypted &amp; private
                 </span>
+            </div>
+
+            <!-- Hero Showcase Infinity Banner (Chats Are Memories Too) -->
+            <div class="rise d3 hero-banner-container" id="hero-infinity-banner">
+                <div class="hero-banner-card">
+                    <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';" alt="Your Chats Are Memories Too — OnlineKotha AI Memories" loading="eager" width="1024" height="341">
+                </div>
             </div>
 
             <!-- Interactive Virtual Phone Mockup (Chat Wrapped Story Cards) -->
@@ -2598,6 +2680,10 @@
                             <img src="https://www.founder.best/api/badge/featured/onlinekotha" alt="OnlineKotha - Featured on Founder.best"
                                 style="height: 34px; width: auto; border-radius: 6px; display: block;" loading="lazy" decoding="async" />
                         </a>
+                        <!-- Branded Infinity Memory Badge (~20% footer width) -->
+                        <div class="footer-banner-badge" title="OnlineKotha — AI-Powered Chat Memories">
+                            <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';" alt="Your Chats Are Memories Too — OnlineKotha" loading="lazy" width="1024" height="341">
+                        </div>
                     </div>
                 </div>
                 <div>
