@@ -19,11 +19,16 @@ router.get('/*rest', requireUserOrGuest, (req, res, next) => {
     const rel = Array.isArray(req.params.rest)
         ? req.params.rest.join('/')
         : req.params.rest;
-    const userRel = `u_${ownerId}/${rel}`;
-    const fullPath = path.resolve(SRC_DIR, userRel);
+
+    if (!rel || rel.includes('..')) return res.status(400).end();
 
     const userBase = path.resolve(SRC_DIR, `u_${ownerId}`);
-    if (!fullPath.startsWith(userBase)) return res.status(403).end();
+    const fullPath = path.resolve(userBase, rel);
+
+    // Prevent prefix traversal (e.g. u_1 matching u_10)
+    if (!fullPath.startsWith(userBase + path.sep) && fullPath !== userBase) {
+        return res.status(403).end();
+    }
 
     if (!fs.existsSync(fullPath)) return res.status(404).end();
 

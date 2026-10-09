@@ -58,7 +58,7 @@ process.on('unhandledRejection', (reason, promise) => {
 const http = require('http');
 const { Server: SocketIO } = require('socket.io');
 
-const IS_PROD = process.env.NODE_ENV === 'production';
+const IS_PROD = process.env.NODE_ENV === 'production' || Boolean(process.env.PUBLIC_BASE_URL && process.env.PUBLIC_BASE_URL.includes('onlinekotha.com'));
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -167,6 +167,17 @@ app.use((req, res, next) => {
     next();
 });
 
+// General API Rate Limiting (protects against scraping & abusive floods)
+const generalApiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1200, // 1200 requests / 15 min per IP (~80 req/min)
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Rate limit exceeded: too many requests. Please slow down.' },
+    skip: (req) => Boolean(req.user && req.user.is_admin),
+});
+app.use('/api/', generalApiLimiter);
+
 const authRouter = require('./server/routes/auth.routes');
 app.use('/api/auth', authRouter);
 
@@ -228,10 +239,20 @@ const serveSocialCard = (req, res) => {
 };
 app.get(['/og-image.png', '/img/og-image.png', '/twitter-card.png', '/img/twitter-card.png'], serveSocialCard);
 
+// Allow serving .well-known for Android App Links / Apple App Site Association
+app.use('/.well-known', express.static(path.join(__dirname, 'public', '.well-known'), {
+    dotfiles: 'allow',
+    setHeaders: (res) => {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+    }
+}));
+
+// Main static files: strictly IGNORE dotfiles to prevent leaking .DS_Store, .env, or other hidden files
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '365d',
     etag: true,
-    dotfiles: 'allow',
+    dotfiles: 'ignore',
     setHeaders: (res, filePath) => {
         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
         res.setHeader('Access-Control-Allow-Origin', '*');

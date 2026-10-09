@@ -44,6 +44,9 @@ update_*.js
 *-test.js
 testSize.js
 make-admin.js
+*.py
+*.pyc
+__pycache__/
 
 # Generated uploads
 public/uploads/

@@ -16,8 +16,7 @@ const { sendVerifyEmail, sendPasswordResetEmail, consumeToken, sendWelcomeEmail 
 const { claimGuestData, getGuestStatus } = require('../guest');
 const { router: oauthRouter } = require('../oauth');
 
-// Shared cookie options (make sure it matches server.js)
-const IS_PROD = process.env.NODE_ENV === 'production';
+const IS_PROD = process.env.NODE_ENV === 'production' || Boolean(process.env.PUBLIC_BASE_URL && process.env.PUBLIC_BASE_URL.includes('onlinekotha.com'));
 const COOKIE_OPTS = {
     httpOnly: true,
     sameSite: 'lax',

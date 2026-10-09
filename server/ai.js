@@ -141,8 +141,15 @@ router.get('/chat/:folder/identity', async (req, res) => {
     
     try {
         const { getMessages } = require('./cache');
-        const { userDir, SRC_DIR } = require('./upload');
-        const dir = req.user ? path.join(userDir(userId), req.params.folder) : path.join(userDir(guestId), req.params.folder);
+        const chatFolder = req.params.folder;
+        if (!chatFolder || chatFolder.includes('..')) {
+            return res.status(400).json({ error: 'Invalid folder' });
+        }
+        const base = path.resolve(userDir(req.user ? userId : guestId));
+        const dir = path.resolve(base, path.normalize(chatFolder));
+        if (!dir.startsWith(base + path.sep)) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
         
         const { participants, participantStats, isGroup } = await getMessages(dir);
         
