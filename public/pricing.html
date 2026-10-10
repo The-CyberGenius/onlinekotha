@@ -1546,25 +1546,181 @@
         }
 
         
-        /* ── Mobile Floating Widget Adjustments ── */
-        @media (max-width: 720px) {
+        /* ── Mobile Floating Widget & Bottom Sheet Modal ── */
+        #demo-input {
+            font-size: 16px !important; /* Critical: prevents iOS Safari auto-zoom on input focus */
+        }
+
+        .mobile-sheet-handle {
+            display: none;
+            width: 42px;
+            height: 4.5px;
+            border-radius: 999px;
+            background: var(--text-muted);
+            opacity: 0.35;
+            margin: 2px auto 12px auto;
+            flex-shrink: 0;
+        }
+
+        #close-assistant-btn {
+            background: var(--bg-soft) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text-secondary) !important;
+            border-radius: 999px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            padding: 0;
+        }
+
+        #close-assistant-btn:hover {
+            color: var(--text-primary) !important;
+            border-color: var(--border-strong) !important;
+            background: var(--card-hover) !important;
+        }
+
+        /* Floating Assistant Widget Layout */
+        #floating-assistant-widget .bot-trigger-wrapper {
+            flex-direction: row-reverse; /* Mobile default: Badge on left, Button on right */
+        }
+        #demo-chat-frame {
+            transform-origin: bottom right !important; /* Mobile default */
+        }
+        @media (min-width: 768px) {
+            #floating-assistant-widget {
+                right: auto !important;
+                left: 24px !important;
+                align-items: flex-start !important;
+            }
+            #floating-assistant-widget .bot-trigger-wrapper {
+                flex-direction: row !important; /* Desktop: Button on left, Badge on right */
+            }
+            #demo-chat-frame {
+                transform-origin: bottom left !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-sheet-handle {
+                display: block !important;
+            }
+
             #floating-assistant-widget {
                 bottom: 85px !important;
                 right: 16px !important;
                 z-index: 999999 !important;
             }
             #toggle-assistant-btn {
-                width: 44px !important;
-                height: 44px !important;
+                width: 48px !important;
+                height: 48px !important;
             }
             #toggle-assistant-btn svg {
-                width: 20px !important;
-                height: 20px !important;
+                width: 22px !important;
+                height: 22px !important;
             }
+            /* Push Form.ms container up */
             .fm-pop-launcher {
                 bottom: 85px !important;
                 right: auto !important;
                 left: 16px !important; /* Move to left side on mobile */
+            }
+
+            /* ── Bottom Sheet Window when open on mobile ── */
+            #floating-assistant-widget.is-open {
+                position: fixed !important;
+                inset: 0 !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100% !important;
+                height: 100dvh !important;
+                max-height: 100dvh !important;
+                z-index: 2147483647 !important;
+                background: rgba(0, 0, 0, 0.65) !important;
+                backdrop-filter: blur(12px) !important;
+                -webkit-backdrop-filter: blur(12px) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-end !important;
+                align-items: stretch !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                pointer-events: auto !important;
+                opacity: 1 !important;
+                transform: none !important;
+                box-sizing: border-box !important;
+            }
+
+            #floating-assistant-widget.is-open .bot-trigger-wrapper {
+                display: none !important;
+            }
+
+            #floating-assistant-widget.is-open #demo-chat-frame {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: min(640px, 86dvh) !important;
+                max-height: 86dvh !important;
+                border-radius: 26px 26px 0 0 !important;
+                border: 1px solid var(--border) !important;
+                border-bottom: none !important;
+                background: var(--bg-elevated) !important;
+                box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.45) !important;
+                display: flex !important;
+                flex-direction: column !important;
+                padding: 12px 18px !important;
+                padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+                margin: 0 !important;
+                transform: translateY(0) !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                box-sizing: border-box !important;
+                animation: mobileSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            }
+
+            @keyframes mobileSheetSlideUp {
+                from {
+                    transform: translateY(100%);
+                    opacity: 0.7;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            #floating-assistant-widget.is-open #hero-chat {
+                flex: 1 1 auto !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                overscroll-behavior: contain !important;
+            }
+
+            #floating-assistant-widget.is-open #demo-form {
+                flex-shrink: 0 !important;
+                margin-top: 12px !important;
+                margin-bottom: 2px !important;
+            }
+
+            body.assistant-open {
+                overflow: hidden !important;
+                touch-action: none !important;
+            }
+
+            body.assistant-open .sticky-cta,
+            body.assistant-open .fm-pop-launcher,
+            body.assistant-open [data-formms-popup] {
+                display: none !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
             }
         }
 
@@ -2821,6 +2977,7 @@
         style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none;opacity:0;transform:translateY(20px);transition:all 0.3s ease;">
         <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
             style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
+            <div class="mobile-sheet-handle"></div>
             <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
                 style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
                 <div class="relative" style="position:relative;">
@@ -2845,9 +3002,8 @@
                     <span class="text-[9px] font-bold text-zinc-400" id="demo-remaining"
                         style="font-size:9px;font-weight:700;color:var(--text-muted);">15 msgs left</span>
                 </div>
-                <button id="close-assistant-btn"
-                    style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                <button id="close-assistant-btn" aria-label="Close Assistant">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -2886,7 +3042,7 @@
             <form id="demo-form" onsubmit="event.preventDefault();"
                 style="margin-top:16px;display:flex;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);">
                 <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Ask me a question..."
-                    style="background:transparent;font-size:13px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
+                    style="background:transparent;font-size:16px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
                 <button type="submit" id="demo-send" aria-label="Send message"
                     style="width:38px;height:38px;border-radius:999px;background:var(--accent-strong);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:0;cursor:pointer;">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
@@ -2906,7 +3062,7 @@
                 </a>
             </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;pointer-events:auto;">
+        <div class="bot-trigger-wrapper" style="display:flex;align-items:center;gap:10px;pointer-events:auto;">
             <button id="toggle-assistant-btn" aria-label="Open AI Assistant"
                 style="width:60px;height:60px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #8b5cf6);border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(99,102,241,0.4);transition:transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;position:relative;pointer-events:auto;">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"
@@ -2920,7 +3076,7 @@
                 </svg>
             </button>
             <div id="assistant-badge"
-                style="display:flex;align-items:center;gap:6px;background:var(--bg-glass);-webkit-border:1px solid var(--border);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-primary);box-shadow:0 6px 20px rgba(0,0,0,0.15);pointer-events:none;transition:opacity 0.2s;">
+                style="display:flex;align-items:center;gap:6px;background:var(--bg-glass);border:1px solid var(--border);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-primary);box-shadow:0 6px 20px rgba(0,0,0,0.15);pointer-events:auto;cursor:pointer;transition:opacity 0.2s;">
                 <span
                     style="display:inline-block;width:7px;height:7px;border-radius:999px;background:#34d399;box-shadow:0 0 8px #34d399;"></span>
                 <span>AI Support</span>
@@ -2934,30 +3090,104 @@
             const closeBtn = document.getElementById('close-assistant-btn');
             const chatFrame = document.getElementById('demo-chat-frame');
             const badge = document.getElementById('assistant-badge');
+            const widget = document.getElementById('floating-assistant-widget');
             let isOpen = false;
-            function toggleChat() {
-                isOpen = !isOpen;
+
+            function toggleChat(force) {
+                if (typeof force === 'boolean') {
+                    isOpen = force;
+                } else {
+                    isOpen = !isOpen;
+                }
+                const isMobile = window.innerWidth <= 768;
                 if (isOpen) {
-                    chatFrame.style.display = 'block';
-                    void chatFrame.offsetWidth;
-                    chatFrame.style.opacity = '1';
-                    chatFrame.style.pointerEvents = 'auto';
-                    chatFrame.style.transform = 'translateY(0)';
+                    if (widget) widget.classList.add('is-open');
+                    if (isMobile) {
+                        document.body.classList.add('assistant-open');
+                    }
+                    if (chatFrame) {
+                        chatFrame.style.display = 'flex';
+                        void chatFrame.offsetWidth;
+                        chatFrame.style.opacity = '1';
+                        chatFrame.style.pointerEvents = 'auto';
+                        chatFrame.style.transform = isMobile ? 'none' : 'translateY(0)';
+                    }
                     if (badge) badge.style.opacity = '0';
                     const demoInput = document.getElementById('demo-input');
-                    if (demoInput) demoInput.focus();
+                    if (demoInput) {
+                        if (isMobile) {
+                            setTimeout(() => {
+                                if (isOpen) {
+                                    try { demoInput.focus({ preventScroll: true }); } catch (e) { demoInput.focus(); }
+                                }
+                            }, 320);
+                        } else {
+                            demoInput.focus();
+                        }
+                    }
+                    const chatArea = document.getElementById('hero-chat');
+                    if (chatArea) {
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                    }
                 } else {
-                    chatFrame.style.opacity = '0';
-                    chatFrame.style.pointerEvents = 'none';
-                    chatFrame.style.transform = 'translateY(10px)';
+                    if (widget) widget.classList.remove('is-open');
+                    document.body.classList.remove('assistant-open');
+                    if (chatFrame) {
+                        chatFrame.style.opacity = '0';
+                        chatFrame.style.pointerEvents = 'none';
+                        chatFrame.style.transform = isMobile ? 'translateY(100%)' : 'translateY(10px)';
+                    }
                     if (badge) badge.style.opacity = '1';
                     setTimeout(() => {
-                        if (!isOpen) chatFrame.style.display = 'none';
+                        if (!isOpen && chatFrame) chatFrame.style.display = 'none';
                     }, 300);
                 }
             }
-            if (toggleBtn) toggleBtn.addEventListener('click', toggleChat);
-            if (closeBtn) closeBtn.addEventListener('click', toggleChat);
+
+            if (widget) {
+                widget.addEventListener('click', (e) => {
+                    // Tap on dimmed backdrop outside the sheet on mobile closes the sheet
+                    if (isOpen && window.innerWidth <= 768 && e.target === widget) {
+                        toggleChat(false);
+                    }
+                });
+            }
+            if (chatFrame) {
+                chatFrame.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleChat();
+                });
+            }
+            if (badge) {
+                badge.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleChat(true);
+                });
+            }
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleChat(false);
+                });
+            }
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isOpen) {
+                    toggleChat(false);
+                }
+            });
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', () => {
+                    if (isOpen && window.innerWidth <= 768) {
+                        const chatArea = document.getElementById('hero-chat');
+                        if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+                    }
+                });
+            }
         });
     </script>
     <div data-formms-popup="https://form.ms/2b6f4h?embed=1" data-title="OnlineKotha User Feedback" data-label=""
@@ -3046,8 +3276,8 @@
     <script>
         window.addEventListener('scroll', () => {
             const assistant = document.getElementById('floating-assistant-widget');
-            if(assistant) {
-                if(window.scrollY > 300) {
+            if (assistant && !assistant.classList.contains('is-open')) {
+                if (window.scrollY > 300) {
                     assistant.style.opacity = '1';
                     assistant.style.transform = 'translateY(0)';
                 } else {
