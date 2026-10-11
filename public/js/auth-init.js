@@ -25,6 +25,17 @@
             const sub = document.getElementById('auth-modal-sub');
             if (sub) sub.textContent = reason;
         }
+        const googleBtn = document.getElementById('modal-google-btn');
+        if (googleBtn) {
+            try {
+                const nextUrl = new URL(window.location.href);
+                nextUrl.searchParams.delete('auth');
+                const nextTarget = nextUrl.pathname + (nextUrl.search || '?chat=kotha_assistant');
+                googleBtn.href = `/api/auth/google?next=${encodeURIComponent(nextTarget)}`;
+            } catch (e) {
+                googleBtn.href = '/api/auth/google?next=%2Fapp.html%3Fchat%3Dkotha_assistant';
+            }
+        }
         modal.classList.remove('hidden');
         requestAnimationFrame(() => {
             modal.classList.remove('opacity-0');
@@ -47,6 +58,23 @@
         }
         setTimeout(() => modal.classList.add('hidden'), 300);
     };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) {
+            authModal.addEventListener('click', (e) => {
+                if (e.target === authModal) window.closeAuthModal();
+            });
+        }
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('auth-modal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    window.closeAuthModal();
+                }
+            }
+        });
+    });
 
     window.switchModalAuthTab = function (tab) {
         const signinBtn = document.getElementById('modal-tab-signin');
@@ -314,6 +342,15 @@
             const aiRem = document.getElementById('guest-ai-rem');
             if (chatRem) chatRem.textContent = guestStatus.chatsRemaining ?? 1;
             if (aiRem) aiRem.textContent = guestStatus.aiMsgsRemaining ?? 10;
+
+            // Auto-open Auth Modal if requested via URL param (e.g. auth=google, auth=true, auth=1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const authParam = urlParams.get('auth');
+            if (authParam === 'google' || authParam === 'true' || authParam === '1' || authParam === 'signin' || authParam === 'login') {
+                setTimeout(() => {
+                    window.openAuthModal('Sign in with Google to save your chats permanently and unlock AI features!');
+                }, 400);
+            }
 
             
             // Trigger Google One Tap for Guest

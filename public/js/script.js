@@ -123,9 +123,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
     
-    // Auto-trigger import modal if action=import is in URL
+    // Auto-trigger import modal if action=import is in URL (only if NOT viewing assistant and NOT auth flow)
     const actionParam = urlParams.get('action');
-    if (actionParam === 'import') {
+    const chatParam = urlParams.get('chat');
+    const authParam = urlParams.get('auth');
+    if (actionParam === 'import' && chatParam !== 'kotha_assistant' && !authParam) {
         setTimeout(() => {
             const openUploadBtn = document.getElementById('open-upload-btn');
             if (openUploadBtn) openUploadBtn.click();
@@ -1765,10 +1767,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         toggleSidebar(false);
                     }
                 } else if (!isViewingDM) {
-                    // Fresh startup with no active chat: do not open any chat by default
-                    currentChat = '';
-                    window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
-                    showEmptyState();
+                    if (chats.includes('kotha_assistant') && chats.length === 1) {
+                        currentChat = 'kotha_assistant';
+                        window.currentChat = 'kotha_assistant'; localStorage.setItem("kotha_active_chat", 'kotha_assistant');
+                        loadData('kotha_assistant');
+                        removeEmptyState();
+                        if (isMobile() || window.kothaCompact) {
+                            toggleSidebar(false);
+                        }
+                    } else {
+                        // Fresh startup with no active chat: do not open any chat by default
+                        currentChat = '';
+                        window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
+                        showEmptyState();
+                    }
                 }
                 
                 // Render visual chat list (always)

@@ -2359,7 +2359,7 @@
                             style="font-size: 11px; color: var(--text-secondary); text-decoration: none;">Logout</a>
                     </div>
                 </div>
-                <a href="/app.html?action=import" id="nav-cta" class="btn cta-primary"
+                <a href="/app.html?chat=kotha_assistant&auth=google" id="nav-cta" class="btn cta-primary"
                     style="min-height:42px;padding:0 18px;">
                     <span>Try Free</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -2455,7 +2455,7 @@
             </p>
             <!-- Dual High-Converting CTAs -->
             <div class="hero-cta-group rise d3">
-                <a href="/app.html?action=import" id="hero-cta" class="btn cta-primary hero-btn-main">
+                <a href="/app.html?chat=kotha_assistant&auth=google" id="hero-cta" class="btn cta-primary hero-btn-main">
                     <span>Try Web App</span>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round">
@@ -2627,7 +2627,7 @@
                                 <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
                                 <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat
                                     &amp; relive your memories securely.</p>
-                                <a href="/app.html?action=import" id="story-cta-btn" class="btn"
+                                <a href="/app.html?chat=kotha_assistant&auth=google" id="story-cta-btn" class="btn"
                                     style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                                     <span>Try Free Now</span>
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -3042,7 +3042,7 @@
                 a<br>treasure trove of memories.</h2>
             <p class="lead" style="max-width:560px;margin:0 auto 34px;">Keep them safe in a beautiful, private vault.
                 Relive the best moments with Chat Wrapped and nostalgic AI.</p>
-            <a href="/app.html?action=import" id="final-cta" class="btn cta-primary"
+            <a href="/app.html?chat=kotha_assistant&auth=google" id="final-cta" class="btn cta-primary"
                 style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25); margin-bottom: 24px;">
                 Try OnlineKotha Free
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -3147,7 +3147,7 @@
             <b>Ready to continue your chat?</b>
             <small>Free to start · import takes a minute</small>
         </div>
-        <a href="/app.html?action=import" class="btn cta-primary"
+        <a href="/app.html?chat=kotha_assistant&auth=google" class="btn cta-primary"
             style="min-height:42px;padding:0 16px;font-size:13.5px;flex-shrink:0;">
             Open app
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
@@ -3542,7 +3542,7 @@
                                     });
                                     const data = await res.json();
                                     if (data && data.ok) {
-                                        window.location.href = data.redirect || '/app.html?action=import';
+                                        window.location.href = data.redirect || '/app.html?chat=kotha_assistant';
                                     }
                                 } catch (e) {
                                     console.error('One Tap Error', e);
@@ -3583,7 +3583,7 @@
             } catch { }
         })();
         // ── Auth Modal Management & Trigger ──
-        window.openAuthModal = function (nextUrl = '/app.html?action=import') {
+        window.openAuthModal = function (nextUrl = '/app.html?chat=kotha_assistant') {
             const modal = document.getElementById('auth-modal');
             const card = document.getElementById('auth-card');
             const googleBtn = document.getElementById('auth-modal-google-btn');
@@ -3690,7 +3690,7 @@
                     Create or access your account to generate your Chat Wrapped &amp; explore AI memories securely.
                 </p>
                 <div class="space-y-3">
-                    <a id="auth-modal-google-btn" href="/api/auth/google?next=%2Fapp.html%3Faction%3Dimport"
+                    <a id="auth-modal-google-btn" href="/api/auth/google?next=%2Fapp.html%3Fchat%3Dkotha_assistant"
                         class="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-2xl font-bold text-sm bg-white hover:bg-slate-50 transition shadow-md cursor-pointer border border-white/20"
                         style="color:#0f172a !important;background-color:#ffffff !important;text-decoration:none;">
                         <svg width="18" height="18" viewBox="0 0 48 48">
@@ -3710,7 +3710,7 @@
                         <span class="px-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">or</span>
                         <div class="flex-1 border-t border-white/10"></div>
                     </div>
-                    <a id="auth-modal-signup-btn" href="/login.html?next=%2Fapp.html%3Faction%3Dimport#signup"
+                    <a id="auth-modal-signup-btn" href="/login.html?next=%2Fapp.html%3Fchat%3Dkotha_assistant#signup"
                         class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-bold text-xs text-white transition cursor-pointer border border-white/10 hover:border-indigo-500/50"
                         style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.25)); color:#ffffff !important; text-decoration:none;">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" class="inline-block">
@@ -3718,7 +3718,7 @@
                         </svg>
                         <span>Create New Account</span>
                     </a>
-                    <a id="auth-modal-signin-btn" href="/login.html?next=%2Fapp.html%3Faction%3Dimport"
+                    <a id="auth-modal-signin-btn" href="/login.html?next=%2Fapp.html%3Fchat%3Dkotha_assistant"
                         class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-xs text-zinc-400 hover:text-white transition cursor-pointer hover:bg-white/5"
                         style="color:#a1a1aa !important; text-decoration:none;">
                         <span>Sign In with PIN &rarr;</span>
