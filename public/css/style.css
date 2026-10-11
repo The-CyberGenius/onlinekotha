@@ -2562,6 +2562,11 @@ html.dark .onboarding-card input::placeholder {
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
 }
+#auth-modal .custom-modal-card {
+    max-width: 380px !important;
+    width: 92% !important;
+    margin: 0 auto !important;
+}
 .custom-modal-card .modal-title {
     color: #111827 !important;
 }

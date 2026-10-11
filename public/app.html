@@ -31,7 +31,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
-    <link rel="stylesheet" href="/css/style.css?v=32">
+    <link rel="stylesheet" href="/css/style.css?v=33">
     <style>
         /* DM area theming - must override inline styles via !important for dark mode */
         #dm-chat-area {
@@ -1192,19 +1192,19 @@
     </div>
     <!-- ── Apple/BigTech-Style Auth Paywall Modal ── -->
     <div id="auth-modal" class="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-md flex items-center justify-center hidden opacity-0 transition-all duration-300 px-4">
-        <div class="custom-modal-card bg-white dark:bg-[#1e293b] w-full max-w-[390px] sm:max-w-[420px] max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-7 text-center relative overflow-hidden transform scale-95 transition-transform duration-300">
+        <div class="custom-modal-card bg-white dark:bg-[#1e293b] w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-3xl p-5 sm:p-6 text-center relative overflow-hidden transform scale-95 transition-transform duration-300" style="max-width: 380px !important;">
             <button onclick="closeAuthModal()" class="modal-close absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer" title="Close">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
 
             <!-- Logo Emblem -->
-            <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center p-2.5 border border-indigo-100 dark:border-indigo-800/40">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 flex items-center justify-center p-2.5 border border-indigo-100 dark:border-indigo-800/40 shadow-sm" style="width: 48px; height: 48px;">
                 <img src="./img/logo.svg" alt="OK Logo" class="w-full h-full object-contain">
             </div>
 
-            <h3 class="text-2xl font-extrabold tracking-tight modal-title mb-1" id="auth-modal-title">Welcome to Kotha</h3>
-            <p class="text-xs modal-sub max-w-xs mx-auto leading-relaxed mb-4" id="auth-modal-sub">
-                Sign in with Google or your 6-digit PIN to save chats permanently and unlock AI features!
+            <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight modal-title mb-1" id="auth-modal-title">Welcome to Kotha</h3>
+            <p class="text-xs modal-sub max-w-[270px] mx-auto leading-relaxed mb-4" id="auth-modal-sub">
+                Sign in with Google to save your chats permanently and unlock AI features!
             </p>
 
             <!-- Google Sign In (Active Provider) -->
