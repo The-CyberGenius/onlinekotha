@@ -18,6 +18,21 @@
     }
 
     // Global Modal Controllers
+    window.toggleModalEmailAuth = function (forceState) {
+        const accordion = document.getElementById('modal-email-accordion');
+        const arrow = document.getElementById('modal-email-arrow');
+        if (!accordion) return;
+        const isHidden = accordion.classList.contains('hidden');
+        const show = typeof forceState === 'boolean' ? forceState : isHidden;
+        if (show) {
+            accordion.classList.remove('hidden');
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+        } else {
+            accordion.classList.add('hidden');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }
+    };
+
     window.openAuthModal = function (reason) {
         const modal = document.getElementById('auth-modal');
         if (!modal) return;
@@ -36,6 +51,9 @@
                 googleBtn.href = '/api/auth/google?next=%2Fapp.html%3Fchat%3Dkotha_assistant';
             }
         }
+        // Always reset manual email/PIN section to collapsed cute state
+        window.toggleModalEmailAuth(false);
+
         modal.classList.remove('hidden');
         requestAnimationFrame(() => {
             modal.classList.remove('opacity-0');
@@ -56,7 +74,10 @@
             card.classList.remove('scale-100');
             card.classList.add('scale-95');
         }
-        setTimeout(() => modal.classList.add('hidden'), 300);
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            window.toggleModalEmailAuth(false);
+        }, 300);
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -83,6 +104,7 @@
         const signupForm = document.getElementById('modal-signup-form');
         const errEl = document.getElementById('modal-auth-error');
         if (errEl) errEl.classList.add('hidden');
+        window.toggleModalEmailAuth(true);
 
         if (tab === 'signin') {
             if (signinBtn) signinBtn.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-300 shadow-sm cursor-pointer';
