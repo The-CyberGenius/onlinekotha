@@ -56,7 +56,7 @@
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-GKQ286KWDG');</script>
-    
+
     <script>
         // Prevent Flash of Incorrect Theme (FOIT) - default to pop light theme
         (function () {
@@ -69,7 +69,8 @@
     <!-- Performance: preload critical font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="alternate" type="text/plain" href="https://www.onlinekotha.com/llms.txt" title="LLM Context">
     <!-- JSON-LD Structured Data -->
@@ -273,9 +274,9 @@
     <!-- World-Class Typography: Plus Jakarta Sans & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        
+
     <!-- Top-Tier Libraries: GSAP, ScrollTrigger, VanillaTilt, Lucide Icons -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Performance: defer Tailwind (non-critical) -->
     <link rel="preload" href="/css/tailwind.min.css?v=1" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -291,7 +292,7 @@
                             caches.delete(k);
                         }
                     });
-                }).catch(() => {});
+                }).catch(() => { });
             }
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/sw.js').then(reg => {
@@ -309,7 +310,6 @@
     </script>
     <!-- ═══════════ DESIGN SYSTEM ═══════════ -->
     <style>
-        
         :root,
         html.light {
             --bg: #ffffff;
@@ -349,7 +349,7 @@
             --accent-rose: #f472b6;
             --accent-emerald: #34d399;
             --accent-amber: #fbbf24;
-            --msg-ai-bg: rgba(255,255,255, 0.04);
+            --msg-ai-bg: rgba(255, 255, 255, 0.04);
             --bg-glass: rgba(9, 9, 11, 0.8);
         }
 
@@ -382,8 +382,14 @@
             overflow-x: hidden;
         }
 
-        h1, h2, h3, .display, .hero-title-main, .h2 {
-            font-family: 'Inter', sans-serif !important; letter-spacing: -0.02em;
+        h1,
+        h2,
+        h3,
+        .display,
+        .hero-title-main,
+        .h2 {
+            font-family: 'Inter', sans-serif !important;
+            letter-spacing: -0.02em;
         }
 
         a {
@@ -412,26 +418,35 @@
         /* ── Ethereal Dynamic Ambient background (NO GRID LINES) ── */
         .ambient-bg {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             z-index: -1;
             pointer-events: none;
             background-color: var(--bg);
             overflow: hidden;
         }
+
         #ambient-canvas {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             opacity: 0.65;
         }
 
-        .ambient-aurora { display: none; }
+        .ambient-aurora {
+            display: none;
+        }
 
-        
 
-        
 
-        
+
+
+
 
         /* ── Layout primitives ── */
         .wrap {
@@ -517,7 +532,7 @@
             box-shadow: 0 16px 36px -6px rgba(99, 102, 241, 0.12);
         }
 
-        
+
         .liquid-glass {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -525,15 +540,17 @@
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 var(--bg-soft);
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
         }
+
         .liquid-glass:hover {
             transform: translateY(-4px);
-            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255,255,255,0.1);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             border-color: var(--accent);
             background: linear-gradient(180deg, var(--card-bg) 0%, rgba(99, 102, 241, 0.03) 100%);
         }
+
         html.dark .liquid-glass:hover {
             background: linear-gradient(180deg, var(--card-bg) 0%, rgba(99, 102, 241, 0.08) 100%);
-            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
 
@@ -582,23 +599,25 @@
             font-family: inherit;
         }
 
-        
+
         .cta-primary {
             background: var(--text-primary);
             color: var(--bg) !important;
             border-radius: 999px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.15);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.15);
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
             font-weight: 600;
             border: 1px solid transparent;
             letter-spacing: -0.01em;
         }
+
         html.dark .cta-primary {
-            box-shadow: 0 4px 14px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
         }
+
         .cta-primary:hover {
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
             transform: translateY(-2px) scale(1.02);
             opacity: 0.9;
         }
@@ -637,8 +656,11 @@
 
         /* ── Nav ── */
         @media (max-width: 768px) {
-            .nav-links { display: none !important; }
+            .nav-links {
+                display: none !important;
+            }
         }
+
         #nav {
             position: fixed;
             top: 0;
@@ -648,11 +670,12 @@
             transition: all .3s ease;
         }
 
-        #nav.scrolled { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); 
+        #nav.scrolled {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             background: var(--bg-glass);
-            
-            -webkit-
-            border-bottom: 1px solid var(--border);
+
+            -webkit- border-bottom: 1px solid var(--border);
         }
 
         .nav-inner {
@@ -757,7 +780,7 @@
             border: 1px solid var(--border-strong);
             border-radius: 999px;
             padding: 7px 14px;
-            
+
             cursor: default;
         }
 
@@ -853,14 +876,17 @@
             box-shadow: 0 20px 50px -15px rgba(147, 51, 234, 0.25), 0 8px 24px -6px rgba(0, 0, 0, 0.12);
             transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
         }
+
         html.light .hero-banner-container {
             background: linear-gradient(135deg, rgba(147, 51, 234, 0.35), rgba(236, 72, 153, 0.2), rgba(99, 102, 241, 0.25));
             box-shadow: 0 24px 50px -12px rgba(15, 23, 42, 0.14), 0 0 35px -8px rgba(168, 85, 247, 0.22);
         }
+
         .hero-banner-container:hover {
             transform: translateY(-2px);
             box-shadow: 0 28px 60px -15px rgba(147, 51, 234, 0.35), 0 12px 30px -6px rgba(0, 0, 0, 0.18);
         }
+
         .hero-banner-card {
             position: relative;
             border-radius: 22px;
@@ -868,6 +894,7 @@
             background: #05020a;
             display: block;
         }
+
         .hero-banner-card img {
             width: 100%;
             height: auto;
@@ -875,12 +902,14 @@
             aspect-ratio: 1024 / 341;
             object-fit: cover;
         }
+
         @media (max-width: 768px) {
             .hero-banner-container {
                 max-width: 100%;
                 margin: 26px auto 32px;
                 border-radius: 18px;
             }
+
             .hero-banner-card {
                 border-radius: 16px;
             }
@@ -898,10 +927,12 @@
             box-shadow: 0 8px 24px -6px rgba(124, 58, 237, 0.22);
             transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
+
         .footer-banner-badge:hover {
             transform: translateY(-1px);
             box-shadow: 0 12px 28px -6px rgba(124, 58, 237, 0.35);
         }
+
         .footer-banner-badge img {
             width: 100%;
             height: auto;
@@ -920,19 +951,21 @@
             margin-top: 40px;
         }
 
-        
+
         .phone-mockup {
             position: relative;
-            width: 310px; /* Refined width */
+            width: 310px;
+            /* Refined width */
             height: 640px;
-            border-radius: 54px; /* Smoother curve */
+            border-radius: 54px;
+            /* Smoother curve */
             background: #111;
             padding: 12px;
-            box-shadow: 
+            box-shadow:
                 0 0 0 2px #333,
                 0 0 0 4px #1a1a1a,
-                0 40px 100px -20px rgba(0,0,0,0.6),
-                inset 0 0 0 1px rgba(255,255,255,0.1);
+                0 40px 100px -20px rgba(0, 0, 0, 0.6),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -940,9 +973,11 @@
             transform: perspective(1000px) rotateX(2deg);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+
         .phone-mockup:hover {
             transform: perspective(1000px) rotateX(0deg) translateY(-8px);
         }
+
         .phone-screen {
             border-radius: 42px;
             overflow: hidden;
@@ -950,6 +985,7 @@
             background: #080812;
             flex: 1;
         }
+
         .dynamic-island {
             position: absolute;
             top: 10px;
@@ -964,9 +1000,10 @@
             align-items: center;
             justify-content: flex-end;
             padding-right: 10px;
-            box-shadow: inset 0px 0px 2px rgba(255, 255, 255, 0.15), 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: inset 0px 0px 2px rgba(255, 255, 255, 0.15), 0 5px 15px rgba(0, 0, 0, 0.5);
             pointer-events: none;
         }
+
         .dynamic-island-lens {
             width: 12px;
             height: 12px;
@@ -975,6 +1012,7 @@
             box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.2), inset -1px -1px 2px rgba(0, 0, 0, 0.5);
             position: relative;
         }
+
         .dynamic-island-lens::after {
             content: '';
             position: absolute;
@@ -986,7 +1024,7 @@
             border-radius: 50%;
             filter: blur(0.5px);
         }
-        
+
 
 
         .story-container {
@@ -1015,21 +1053,27 @@
         .story-bg-1 {
             background: radial-gradient(circle at 100% 0%, #a855f7 0%, transparent 50%), radial-gradient(circle at 0% 100%, #ec4899 0%, transparent 50%), linear-gradient(135deg, #4f46e5, #312e81);
         }
+
         .story-bg-2 {
             background: radial-gradient(circle at 80% 20%, #34d399 0%, transparent 60%), radial-gradient(circle at 20% 80%, #3b82f6 0%, transparent 60%), linear-gradient(135deg, #065f46, #1e3a8a);
         }
+
         .story-bg-3 {
             background: radial-gradient(circle at 100% 100%, #fcd34d 0%, transparent 50%), radial-gradient(circle at 0% 0%, #ef4444 0%, transparent 50%), linear-gradient(135deg, #b45309, #7f1d1d);
         }
+
         .story-bg-4 {
             background: radial-gradient(circle at 50% 0%, #f472b6 0%, transparent 60%), radial-gradient(circle at 50% 100%, #c084fc 0%, transparent 60%), linear-gradient(135deg, #9d174d, #4c1d95);
         }
+
         .story-bg-5 {
             background: radial-gradient(circle at 0% 50%, #38bdf8 0%, transparent 50%), radial-gradient(circle at 100% 50%, #34d399 0%, transparent 50%), linear-gradient(135deg, #0369a1, #065f46);
         }
+
         .story-bg-6 {
             background: radial-gradient(circle at 20% 0%, #818cf8 0%, transparent 60%), radial-gradient(circle at 80% 100%, #fb7185 0%, transparent 60%), linear-gradient(135deg, #3730a3, #9f1239);
         }
+
         .story-bg-7 {
             background: radial-gradient(circle at 100% 0%, #fb923c 0%, transparent 50%), radial-gradient(circle at 0% 100%, #f43f5e 0%, transparent 50%), linear-gradient(135deg, #9f1239, #9a3412);
         }
@@ -1069,7 +1113,7 @@
             margin-bottom: 8px;
             line-height: 1.08;
             letter-spacing: -0.03em;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
             font-family: inherit;
         }
 
@@ -1093,16 +1137,15 @@
 
         .story-highlight {
             background: rgba(255, 255, 255, 0.16);
-            
-            -webkit-
-            border: 1px solid rgba(255, 255, 255, 0.25);
+
+            -webkit- border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 14px;
             padding: 10px 18px;
             margin: 6px 0;
             font-size: 1.15rem;
             font-weight: 800;
             color: #ffffff;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         .story-share-btn {
@@ -1111,9 +1154,8 @@
             right: 18px;
             z-index: 50;
             background: rgba(255, 255, 255, 0.18);
-            
-            -webkit-
-            border: 1px solid rgba(255, 255, 255, 0.25);
+
+            -webkit- border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -1122,7 +1164,7 @@
             justify-content: center;
             color: #ffffff;
             cursor: pointer;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
             transition: transform 0.2s, background 0.2s;
         }
 
@@ -1151,7 +1193,7 @@
             color: var(--text-primary);
             min-height: 54px;
             padding: 0 26px;
-            
+
         }
 
         .hero-btn-secondary:hover {
@@ -1244,7 +1286,7 @@
             background: var(--card-bg);
             border: 1px solid rgba(99, 102, 241, .4);
             box-shadow: 0 20px 50px rgba(99, 102, 241, .12);
-            
+
         }
 
         .demo-head {
@@ -1556,7 +1598,7 @@
             border: 1px solid var(--border);
             border-radius: 18px;
             padding: 0 22px;
-            
+
         }
 
         .faq details[open] {
@@ -1650,11 +1692,14 @@
             display: none;
         }
 
-        
+
         @media (max-width: 720px) {
-            body { padding-bottom: 70px; }
+            body {
+                padding-bottom: 70px;
+            }
         }
-/* ── Sticky mobile CTA ── */
+
+        /* ── Sticky mobile CTA ── */
         .sticky-cta {
             position: fixed;
             left: 0;
@@ -1662,7 +1707,7 @@
             bottom: 0;
             z-index: 900;
             background: var(--bg-glass);
-            
+
             border-top: 1px solid var(--border);
             padding: 12px 18px;
             display: none;
@@ -1694,11 +1739,12 @@
             }
         }
 
-        
-        
+
+
         /* ── Mobile Floating Widget & Bottom Sheet Modal ── */
         #demo-input {
-            font-size: 16px !important; /* Critical: prevents iOS Safari auto-zoom on input focus */
+            font-size: 16px !important;
+            /* Critical: prevents iOS Safari auto-zoom on input focus */
         }
 
         .mobile-sheet-handle {
@@ -1744,19 +1790,23 @@
                 right: 16px !important;
                 z-index: 999999 !important;
             }
+
             #toggle-assistant-btn {
                 width: 48px !important;
                 height: 48px !important;
             }
+
             #toggle-assistant-btn svg {
                 width: 22px !important;
                 height: 22px !important;
             }
+
             /* Push Form.ms container up */
             .fm-pop-launcher {
                 bottom: 85px !important;
                 right: auto !important;
-                left: 16px !important; /* Move to left side on mobile */
+                left: 16px !important;
+                /* Move to left side on mobile */
             }
 
             /* ── Bottom Sheet Window when open on mobile ── */
@@ -1818,6 +1868,7 @@
                     transform: translateY(100%);
                     opacity: 0.7;
                 }
+
                 to {
                     transform: translateY(0);
                     opacity: 1;
@@ -1925,7 +1976,7 @@
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, .65);
-            
+
             -webkit-
         }
 
@@ -1982,7 +2033,7 @@
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, .65);
-            
+
             -webkit-
         }
 
@@ -2073,7 +2124,7 @@
                 max-width: 75px !important;
             }
 
-            #nav-user-profile:not(.hidden) ~ #nav-cta {
+            #nav-user-profile:not(.hidden)~#nav-cta {
                 display: none !important;
             }
 
@@ -2088,14 +2139,18 @@
                 opacity: 1;
             }
 
-            .ambient-aurora { display: none; }
+            .ambient-aurora {
+                display: none;
+            }
         }
+
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 30px;
             align-items: stretch;
         }
+
         .pricing-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -2104,89 +2159,133 @@
             display: flex;
             flex-direction: column;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
+
         .pricing-card:hover {
             transform: translateY(-4px);
             border-color: var(--accent);
         }
+
         .pricing-card-free:hover {
             border-color: var(--border-strong);
         }
-        
+
         @media (max-width: 768px) {
             .pricing-grid {
                 gap: 20px;
                 grid-template-columns: 1fr;
                 padding: 0 16px;
             }
+
             .pricing-card {
                 padding: 24px 20px;
                 border-radius: 24px;
             }
+
             .pricing-card h3 {
                 font-size: 1.3rem !important;
                 margin-bottom: 4px !important;
             }
+
             .pricing-card p {
                 font-size: 13px !important;
                 margin-bottom: 16px !important;
             }
+
             .pricing-card .price {
                 font-size: 2.2rem !important;
                 margin-bottom: 24px !important;
             }
+
             .pricing-card ul {
                 margin-bottom: 24px !important;
             }
+
             .pricing-card ul li {
                 font-size: 14px !important;
                 margin-bottom: 12px !important;
             }
+
             .pricing-card .btn {
                 padding: 12px !important;
                 font-size: 14px !important;
                 border-radius: 12px !important;
             }
         }
-    
-        
+
+
         @keyframes pulseGlow {
-            0% { opacity: 0.08; transform: translateX(-50%) scale(0.9); }
-            100% { opacity: 0.15; transform: translateX(-50%) scale(1.1); }
+            0% {
+                opacity: 0.08;
+                transform: translateX(-50%) scale(0.9);
+            }
+
+            100% {
+                opacity: 0.15;
+                transform: translateX(-50%) scale(1.1);
+            }
         }
+
         @keyframes riseUp {
-            0% { opacity: 0; transform: translateY(30px); }
-            100% { opacity: 1; transform: translateY(0); }
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .rise {
             opacity: 0;
             animation: riseUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .d1 { animation-delay: 0.1s; }
-        .d2 { animation-delay: 0.25s; }
-        .d3 { animation-delay: 0.4s; }
-        .d4 { animation-delay: 0.55s; }
+
+        .d1 {
+            animation-delay: 0.1s;
+        }
+
+        .d2 {
+            animation-delay: 0.25s;
+        }
+
+        .d3 {
+            animation-delay: 0.4s;
+        }
+
+        .d4 {
+            animation-delay: 0.55s;
+        }
     </style>
     <script src="/js/analytics.js" async></script>
 
     <style>
         /* Floating Assistant Widget Layout */
         #floating-assistant-widget .bot-trigger-wrapper {
-            flex-direction: row-reverse; /* Mobile default: Badge on left, Button on right */
+            flex-direction: row-reverse;
+            /* Mobile default: Badge on left, Button on right */
         }
+
         #demo-chat-frame {
-            transform-origin: bottom right !important; /* Mobile default */
+            transform-origin: bottom right !important;
+            /* Mobile default */
         }
+
         @media (min-width: 768px) {
             #floating-assistant-widget {
                 right: auto !important;
                 left: 24px !important;
                 align-items: flex-start !important;
             }
+
             #floating-assistant-widget .bot-trigger-wrapper {
-                flex-direction: row !important; /* Desktop: Button on left, Badge on right */
+                flex-direction: row !important;
+                /* Desktop: Button on left, Badge on right */
             }
+
             #demo-chat-frame {
                 transform-origin: bottom left !important;
             }
@@ -2207,16 +2306,26 @@
                     <span>Kotha</span>
                 </a>
             </div>
-            
-            <div class="nav-links" style="display:flex; align-items:center; gap:24px; font-weight:600; font-size:14px; margin-left:24px; margin-right:auto;">
-                <a href="/#how" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">How it works</a>
-                <a href="/#features" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Features</a>
-                <a href="/#trust" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Privacy</a>
-                <a href="/pricing.html" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'">Pricing</a>
+
+            <div class="nav-links"
+                style="display:flex; align-items:center; gap:24px; font-weight:600; font-size:14px; margin-left:24px; margin-right:auto;">
+                <a href="/#how" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;"
+                    onmouseover="this.style.color='var(--text-primary)'"
+                    onmouseout="this.style.color='var(--text-secondary)'">How it works</a>
+                <a href="/#features" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;"
+                    onmouseover="this.style.color='var(--text-primary)'"
+                    onmouseout="this.style.color='var(--text-secondary)'">Features</a>
+                <a href="/#trust" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;"
+                    onmouseover="this.style.color='var(--text-primary)'"
+                    onmouseout="this.style.color='var(--text-secondary)'">Privacy</a>
+                <a href="/pricing.html" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;"
+                    onmouseover="this.style.color='var(--text-primary)'"
+                    onmouseout="this.style.color='var(--text-secondary)'">Pricing</a>
             </div>
 
             <div class="nav-right" style="display:flex;align-items:center;gap:10px;">
-                <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark/light mode" style="border:none; background:transparent;">
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark/light mode"
+                    style="border:none; background:transparent;">
                     <svg id="theme-toggle-sun" class="hidden" width="18" height="18" fill="none" stroke="currentColor"
                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="4"></circle>
@@ -2267,12 +2376,15 @@
     </script>
     <!-- ═══════════ HERO ═══════════ -->
     <section class="hero sec" style="position: relative; overflow: visible;">
-        <div style="position: absolute; top: 20%; left: 50%; width: 80vw; max-width: 800px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 60%); opacity: 0.12; transform: translateX(-50%); filter: blur(80px); z-index: -1; pointer-events: none; animation: pulseGlow 8s ease-in-out infinite alternate;"></div>
+        <div
+            style="position: absolute; top: 20%; left: 50%; width: 80vw; max-width: 800px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 60%); opacity: 0.12; transform: translateX(-50%); filter: blur(80px); z-index: -1; pointer-events: none; animation: pulseGlow 8s ease-in-out infinite alternate;">
+        </div>
         <div class="wrap hero-centered">
             <h1 class="display rise d1 hero-title-main"
                 style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.2; overflow: visible;">
                 <span class="hero-title-prefix">Relive Your Best</span><br>
-                <span style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.2; overflow: visible; padding-bottom: 6px;">
+                <span
+                    style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.2; overflow: visible; padding-bottom: 6px;">
                     <span id="platform-rotator" style="
                         background: linear-gradient(135deg, var(--accent), var(--accent-rose)); 
                         -webkit-background-clip: text; 
@@ -2289,21 +2401,21 @@
                     ">WhatsApp</span>
                     <span style="color: var(--text-primary); line-height: 1.15;">Memories.</span>
                 </span>
-                
+
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
                         const words = ['WhatsApp', 'Telegram', 'Instagram', 'iMessage'];
                         let currentIndex = 0;
                         const rotator = document.getElementById('platform-rotator');
                         if (!rotator) return;
-                        
+
                         let isDeleting = false;
                         let txt = 'WhatsApp';
                         let typingSpeed = 100;
-                        
+
                         function type() {
                             const fullWord = words[currentIndex];
-                            
+
                             if (isDeleting) {
                                 txt = fullWord.substring(0, txt.length - 1);
                                 typingSpeed = 40;
@@ -2311,9 +2423,9 @@
                                 txt = fullWord.substring(0, txt.length + 1);
                                 typingSpeed = 100;
                             }
-                            
+
                             rotator.textContent = txt || '​'; // Zero-width space
-                            
+
                             if (!isDeleting && txt === fullWord) {
                                 typingSpeed = 2000; // Pause at end of word
                                 isDeleting = true;
@@ -2322,40 +2434,44 @@
                                 currentIndex = (currentIndex + 1) % words.length;
                                 typingSpeed = 400; // Pause before typing new word
                             }
-                            
+
                             setTimeout(type, typingSpeed);
                         }
-                        
+
                         setTimeout(type, 1500);
-                        
+
                         setInterval(() => {
-                            rotator.style.borderRightColor = rotator.style.borderRightColor === 'transparent' 
-                                ? 'var(--accent)' 
+                            rotator.style.borderRightColor = rotator.style.borderRightColor === 'transparent'
+                                ? 'var(--accent)'
                                 : 'transparent';
                         }, 500);
                     });
                 </script>
             </h1>
-            <p class="lead rise d2" style="font-size: clamp(16px, 2vw, 21px); color: var(--text-secondary); max-width: 620px; margin: 0 auto 40px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
-                Import your exported chat files to see beautiful story cards of your past, and talk to a private AI that perfectly remembers your inside jokes.
+            <p class="lead rise d2"
+                style="font-size: clamp(16px, 2vw, 21px); color: var(--text-secondary); max-width: 620px; margin: 0 auto 40px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
+                Import your exported chat files to see beautiful story cards of your past, and talk to a private AI that
+                perfectly remembers your inside jokes.
             </p>
             <!-- Dual High-Converting CTAs -->
             <div class="hero-cta-group rise d3">
                 <a href="/app.html?action=import" id="hero-cta" class="btn cta-primary hero-btn-main">
-                    <span>Try OnlineKotha Free</span>
+                    <span>Try Web App</span>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="https://play.google.com/store/apps/developer?id=okshiva" target="_blank" rel="noopener noreferrer" class="btn hero-btn-secondary" style="border-radius:999px;">
+                <a href="https://play.google.com/store/apps/developer?id=okshiva" target="_blank"
+                    rel="noopener noreferrer" class="btn hero-btn-secondary" style="border-radius:999px;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M5 3l14 9-14 9V3z"></path>
                     </svg>
                     <span>Android App</span>
                 </a>
-                <a href="/#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo" style="border-radius:999px;">
+                <a href="/#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo"
+                    style="border-radius:999px;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -2385,15 +2501,17 @@
             <!-- Hero Showcase Infinity Banner (Chats Are Memories Too) -->
             <div class="rise d3 hero-banner-container" id="hero-infinity-banner">
                 <div class="hero-banner-card">
-                    <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';" alt="Your Chats Are Memories Too — OnlineKotha AI Memories" loading="eager" width="1024" height="341">
+                    <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';"
+                        alt="Your Chats Are Memories Too — OnlineKotha AI Memories" loading="eager" width="1024"
+                        height="341">
                 </div>
             </div>
 
             <!-- Interactive Virtual Phone Mockup (Chat Wrapped Story Cards) -->
             <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
                 <div class="phone-mockup">
-                    
-                    
+
+
                     <div class="phone-screen">
                         <!-- iPhone Dynamic Island -->
                         <div class="dynamic-island">
@@ -2402,18 +2520,33 @@
 
                         <!-- Story Progress Indicators -->
                         <div class="story-progress-container" id="story-progress">
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
-                            <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                            <div class="story-progress-bar">
+                                <div class="story-progress-fill"></div>
+                            </div>
+                            <div class="story-progress-bar">
+                                <div class="story-progress-fill"></div>
+                            </div>
+                            <div class="story-progress-bar">
+                                <div class="story-progress-fill"></div>
+                            </div>
+                            <div class="story-progress-bar">
+                                <div class="story-progress-fill"></div>
+                            </div>
+                            <div class="story-progress-bar">
+                                <div class="story-progress-fill"></div>
+                            </div>
+                            <div class="story-progress-bar">
+                                <div class="story-progress-fill"></div>
+                            </div>
+                            <div class="story-progress-bar">
+                                <div class="story-progress-fill"></div>
+                            </div>
                         </div>
 
                         <!-- Share Button -->
                         <div class="story-share-btn" id="story-share" title="Share your story">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="18" cy="5" r="3"></circle>
                                 <circle cx="6" cy="12" r="3"></circle>
                                 <circle cx="18" cy="19" r="3"></circle>
@@ -2428,8 +2561,11 @@
                             <div class="story-card story-bg-1">
                                 <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
                                 <h1 class="story-title">Your Chat, Wrapped.</h1>
-                                <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations reveal about you &amp; them.</p>
-                                <span style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap to flip 👉</span>
+                                <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations
+                                    reveal about you &amp; them.</p>
+                                <span
+                                    style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap
+                                    to flip 👉</span>
                             </div>
 
                             <!-- Slide 2: Stats -->
@@ -2451,10 +2587,18 @@
                             <!-- Slide 4: Top Words -->
                             <div class="story-card story-bg-4">
                                 <h2 class="story-subtitle">Most Used Words</h2>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1 literally 💬</div>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀</div>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂</div>
-                                <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 anyway ✨</div>
+                                <div class="story-highlight"
+                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1
+                                    literally 💬</div>
+                                <div class="story-highlight"
+                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀
+                                </div>
+                                <div class="story-highlight"
+                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂
+                                </div>
+                                <div class="story-highlight"
+                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 anyway
+                                    ✨</div>
                             </div>
 
                             <!-- Slide 5: Time Patterns -->
@@ -2462,15 +2606,18 @@
                                 <h2 class="story-subtitle">Time Patterns</h2>
                                 <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
                                 <h1 class="story-title" style="font-size: 2rem;">Night Owls</h1>
-                                <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14 AM</b></p>
+                                <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14
+                                        AM</b></p>
                             </div>
 
                             <!-- Slide 6: AI Conversation -->
                             <div class="story-card story-bg-6">
                                 <h2 class="story-subtitle">The Magic</h2>
                                 <h1 class="story-title" style="font-size: 1.85rem;">AI Clone Ready</h1>
-                                <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact words, humor, tone &amp; texting style.</p>
-                                <div class="story-highlight" style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
+                                <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact
+                                    words, humor, tone &amp; texting style.</p>
+                                <div class="story-highlight"
+                                    style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
                                     💬 "Wait, are you serious right now? 😂"
                                 </div>
                             </div>
@@ -2478,54 +2625,96 @@
                             <!-- Slide 7: Outro -->
                             <div class="story-card story-bg-7">
                                 <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
-                                <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat &amp; relive your memories securely.</p>
-                                <a href="/app.html?action=import" id="story-cta-btn" class="btn" style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat
+                                    &amp; relive your memories securely.</p>
+                                <a href="/app.html?action=import" id="story-cta-btn" class="btn"
+                                    style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                                     <span>Try Free Now</span>
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5" stroke-linecap="round">
+                                        <path d="M5 12h14M13 5l7 7-7 7" />
+                                    </svg>
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                <div
+                    style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
                     <span>Tap left or right to browse stories</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
                 </div>
             </div>
         </div>
     </section>
-    
+
     <!-- ═══════════ WHAT IS KOTHA ═══════════ -->
     <section class="sec" id="what-is-kotha">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:56px;">
-                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em;">Your Personal Time Machine.</h2>
-                <p class="lead" style="max-width: 640px; margin: 16px auto 0; font-size: 16px; color: var(--text-secondary);">
-                    OnlineKotha is a private vault for your WhatsApp memories. We don't connect to your WhatsApp account or send messages to anyone. You simply upload your exported chat files to read them in a beautiful interface, generate Spotify-style "Chat Wrapped" stories, and chat with an AI that mimics your past conversations.
+                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em;">
+                    Your Personal Time Machine.</h2>
+                <p class="lead"
+                    style="max-width: 640px; margin: 16px auto 0; font-size: 16px; color: var(--text-secondary);">
+                    OnlineKotha is a private vault for your WhatsApp memories. We don't connect to your WhatsApp account
+                    or send messages to anyone. You simply upload your exported chat files to read them in a beautiful
+                    interface, generate Spotify-style "Chat Wrapped" stories, and chat with an AI that mimics your past
+                    conversations.
                 </p>
             </div>
             <div class="grid g3" style="gap:28px;">
                 <div class="card liquid-glass" style="padding: 32px 28px; text-align: left;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #6366f1; border: 1px solid rgba(99,102,241,0.15);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    <div
+                        style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #6366f1; border: 1px solid rgba(99,102,241,0.15);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
                     </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">Chat Wrapped</h3>
-                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Turn thousands of messages into beautiful, shareable story cards. See who texted more, your top emojis, and your most active late-night chats.</p>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">Chat
+                        Wrapped</h3>
+                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Turn
+                        thousands of messages into beautiful, shareable story cards. See who texted more, your top
+                        emojis, and your most active late-night chats.</p>
                 </div>
                 <div class="card liquid-glass" style="padding: 32px 28px; text-align: left;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(236,72,153,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #ec4899; border: 1px solid rgba(236,72,153,0.15);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path><path d="M12 12 2.1 7.1"></path><path d="M12 12l9.9 4.9"></path></svg>
+                    <div
+                        style="width: 44px; height: 44px; border-radius: 12px; background: rgba(236,72,153,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #ec4899; border: 1px solid rgba(236,72,153,0.15);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a10 10 0 1 0 10 10H12V2Z"></path>
+                            <path d="M12 12 2.1 7.1"></path>
+                            <path d="M12 12l9.9 4.9"></path>
+                        </svg>
                     </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">AI Memory Clone</h3>
-                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Our AI reads your uploaded chat and learns their exact vocabulary, inside jokes, and texting habits so you can experience their vibe again.</p>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">AI
+                        Memory Clone</h3>
+                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Our AI
+                        reads your uploaded chat and learns their exact vocabulary, inside jokes, and texting habits so
+                        you can experience their vibe again.</p>
                 </div>
                 <div class="card liquid-glass" style="padding: 32px 28px; text-align: left;">
-                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #10b981; border: 1px solid rgba(16,185,129,0.15);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <div
+                        style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: #10b981; border: 1px solid rgba(16,185,129,0.15);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
                     </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">100% Private Vault</h3>
-                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Your chats are processed securely. We don't send SMS or WhatsApp messages. Everything happens in your private browser session.</p>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">100%
+                        Private Vault</h3>
+                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Your
+                        chats are processed securely. We don't send SMS or WhatsApp messages. Everything happens in your
+                        private browser session.</p>
                 </div>
             </div>
         </div>
@@ -2536,54 +2725,103 @@
         style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;overflow:hidden;">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:56px;">
-                
-                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em;">Three steps. Under a minute.</h2>
-                <p class="lead" style="max-width: 540px; margin: 12px auto 0; font-size: 15px; color: var(--text-secondary);">No technical skills needed. Export from WhatsApp, upload, and start chatting instantly.</p>
+
+                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; letter-spacing: -0.03em;">
+                    Three steps. Under a minute.</h2>
+                <p class="lead"
+                    style="max-width: 540px; margin: 12px auto 0; font-size: 15px; color: var(--text-secondary);">No
+                    technical skills needed. Export from WhatsApp, upload, and start chatting instantly.</p>
             </div>
-            
+
             <div class="grid g3" style="gap:28px; position:relative;">
                 <!-- Step 1 -->
                 <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(99,102,241,0.3);">STEP 01</span>
-                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent);">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span
+                            style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(99,102,241,0.3);">STEP
+                            01</span>
+                        <div
+                            style="width:40px; height:40px; border-radius:14px; background:rgba(99,102,241,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
                         </div>
                     </div>
                     <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">1. Export Your Chat</h3>
-                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Open your app &rarr; Tap Menu (3 dots or contact name) &rarr; More &rarr; <b>Export Chat</b> (choose Without Media). Save as <b>.zip</b> or <b>.txt</b>.</p>
-                    <div style="font-size:11px; font-weight:600; color:var(--text-muted); background:var(--msg-ai-bg); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>iPhone &amp; Android supported</span>
+                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Open your app
+                        &rarr; Tap Menu (3 dots or contact name) &rarr; More &rarr; <b>Export Chat</b> (choose Without
+                        Media). Save as <b>.zip</b> or <b>.txt</b>.</p>
+                    <div
+                        style="font-size:11px; font-weight:600; color:var(--text-muted); background:var(--msg-ai-bg); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                            </svg>iPhone &amp; Android supported</span>
                     </div>
                 </div>
 
                 <!-- Step 2 -->
                 <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#ec4899,#f43f5e); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(236,72,153,0.3);">STEP 02</span>
-                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(236,72,153,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-rose);">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        <span
+                            style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#ec4899,#f43f5e); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(236,72,153,0.3);">STEP
+                            02</span>
+                        <div
+                            style="width:40px; height:40px; border-radius:14px; background:rgba(236,72,153,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-rose);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
                         </div>
                     </div>
                     <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">2. Secure Upload to Kotha</h3>
-                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Drop your exported file into Kotha. Our private AI engine processes the chat in seconds with <b>bank-grade encryption</b>.</p>
-                    <div style="font-size:11px; font-weight:600; color:var(--accent-emerald); background:rgba(16,185,129,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>100% Private &amp; Never Shared</span>
+                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Drop your exported
+                        file into Kotha. Our private AI engine processes the chat in seconds with <b>bank-grade
+                            encryption</b>.</p>
+                    <div
+                        style="font-size:11px; font-weight:600; color:var(--accent-emerald); background:rgba(16,185,129,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>100% Private &amp; Never Shared</span>
                     </div>
                 </div>
 
                 <!-- Step 3 -->
                 <div class="card liquid-glass step-card" style="padding:32px 28px; position:relative;" data-tilt>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#10b981,#059669); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(16,185,129,0.3);">STEP 03</span>
-                        <div style="width:40px; height:40px; border-radius:14px; background:rgba(16,185,129,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-emerald);">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span
+                            style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; background:linear-gradient(135deg,#10b981,#059669); color:#fff; padding:4px 12px; border-radius:999px; box-shadow:0 4px 12px rgba(16,185,129,0.3);">STEP
+                            03</span>
+                        <div
+                            style="width:40px; height:40px; border-radius:14px; background:rgba(16,185,129,0.1); display:flex; align-items:center; justify-content:center; color:var(--accent-emerald);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
                         </div>
                     </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">3. Relive &amp; Continue Chat</h3>
-                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Read your old chats in a beautiful interface, view your <b>Chat Wrapped</b> stats, or safely chat with an AI trained on those memories.</p>
-                    <div style="font-size:11px; font-weight:600; color:var(--accent); background:rgba(99,102,241,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>Instant Authentic AI Clone</span>
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px;">3. Relive &amp; Continue Chat
+                    </h3>
+                    <p class="muted" style="font-size:13.5px; line-height:1.65; margin-bottom:16px;">Read your old chats
+                        in a beautiful interface, view your <b>Chat Wrapped</b> stats, or safely chat with an AI trained
+                        on those memories.</p>
+                    <div
+                        style="font-size:11px; font-weight:600; color:var(--accent); background:rgba(99,102,241,0.1); padding:6px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                        <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                style="display:inline-block; vertical-align:-2px; margin-right:4px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 16v-4"></path>
+                                <path d="M12 8h.01"></path>
+                            </svg>Instant Authentic AI Clone</span>
                     </div>
                 </div>
             </div>
@@ -2594,7 +2832,8 @@
         <div class="wrap">
             <div style="text-align:center;margin-bottom:52px;">
                 <h2 class="h2">How We Keep You Safe.</h2>
-                <p class="lead" style="max-width:560px;margin:16px auto 0;">Your memories are intensely personal. Here is exactly how we ensure they stay yours alone.</p>
+                <p class="lead" style="max-width:560px;margin:16px auto 0;">Your memories are intensely personal. Here
+                    is exactly how we ensure they stay yours alone.</p>
             </div>
             <div class="grid g4" style="gap: 20px;">
                 <div class="card" style="padding: 24px; text-align: center;">
@@ -2607,7 +2846,8 @@
                         </svg>
                     </div>
                     <h3 style="font-size:1rem;margin-bottom:6px;">Encrypted Processing</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">Your chat files are parsed securely and immediately discarded after structuring. We do not keep the raw files.</p>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">Your chat files are parsed securely and
+                        immediately discarded after structuring. We do not keep the raw files.</p>
                 </div>
                 <div class="card" style="padding: 24px; text-align: center;">
                     <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl"
@@ -2619,7 +2859,8 @@
                         </svg>
                     </div>
                     <h3 style="font-size:1rem;margin-bottom:6px;">No WhatsApp Access</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">We never connect to your live WhatsApp. We only read the static export file you manually provide.</p>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">We never connect to your live WhatsApp. We
+                        only read the static export file you manually provide.</p>
                 </div>
                 <div class="card" style="padding: 24px; text-align: center;">
                     <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl"
@@ -2631,15 +2872,24 @@
                         </svg>
                     </div>
                     <h3 style="font-size:1rem;margin-bottom:6px;">Zero AI Training</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">Your conversations are strictly used to serve you. They are never used to train public AI models.</p>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">Your conversations are strictly used to
+                        serve you. They are never used to train public AI models.</p>
                 </div>
                 <div class="card" style="padding: 24px; text-align: center;">
                     <div class="w-12 h-12 mx-auto mb-3 flex items-center justify-center rounded-2xl"
                         style="background: rgba(168,85,247,0.12); color: #a855f7; border: 1px solid rgba(168,85,247,0.25);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                            </path>
+                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
                     </div>
                     <h3 style="font-size:1rem;margin-bottom:6px;">1-Click Deletion</h3>
-                    <p class="muted" style="font-size:13px;line-height:1.6;">Delete your uploaded chats permanently at any time. We leave zero trace behind.</p>
+                    <p class="muted" style="font-size:13px;line-height:1.6;">Delete your uploaded chats permanently at
+                        any time. We leave zero trace behind.</p>
                 </div>
             </div>
             <div style="text-align:center;margin-top:28px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap;">
@@ -2654,11 +2904,12 @@
         style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:64px;">
-                
+
                 <h2 class="h2">The Ultimate Platform for Your Conversations.</h2>
-                <p class="lead" style="max-width: 600px; margin: 16px auto 0;">A dedicated platform designed to analyze your chat history, secure your memories, and give you a beautiful space to relive them.</p>
+                <p class="lead" style="max-width: 600px; margin: 16px auto 0;">A dedicated platform designed to analyze
+                    your chat history, secure your memories, and give you a beautiful space to relive them.</p>
             </div>
-            
+
             <div class="grid g2" style="gap:32px;">
                 <!-- Feature 1: AI Continuation -->
                 <div class="card liquid-glass" style="padding:38px;">
@@ -2669,44 +2920,67 @@
                         </svg>
                     </div>
                     <h3 style="font-size:1.4rem;margin-bottom:12px;">Continue with the Exact Same Tone</h3>
-                    <p class="muted" style="line-height:1.7;">Our secure AI processes your chats to master their unique voice. It learns the slang, emojis, humor, and vibe so you can effortlessly continue your conversation exactly how it used to be.</p>
+                    <p class="muted" style="line-height:1.7;">Our secure AI processes your chats to master their unique
+                        voice. It learns the slang, emojis, humor, and vibe so you can effortlessly continue your
+                        conversation exactly how it used to be.</p>
                 </div>
-                
+
                 <!-- Feature 2: Chat Wrapped -->
                 <div class="card liquid-glass" style="padding:38px;">
                     <div class="card-icon" style="color: var(--accent-rose);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
                     </div>
                     <h3 style="font-size:1.4rem;margin-bottom:12px;">Chat Wrapped &amp; Deep Stats</h3>
-                    <p class="muted" style="line-height:1.7;">OnlineKotha is the only platform that fully analyzes your relationship dynamics. We generate beautiful, shareable "Chat Wrapped" story cards revealing your top words, texting patterns, and vibe.</p>
+                    <p class="muted" style="line-height:1.7;">OnlineKotha is the only platform that fully analyzes your
+                        relationship dynamics. We generate beautiful, shareable "Chat Wrapped" story cards revealing
+                        your top words, texting patterns, and vibe.</p>
                 </div>
-                
+
                 <!-- Feature 3: Deep Search -->
                 <div class="card liquid-glass" style="padding:38px;">
                     <div class="card-icon" style="color: var(--accent-amber);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
                     </div>
                     <h3 style="font-size:1.4rem;margin-bottom:12px;">Deep Search &amp; Filters</h3>
-                    <p class="muted" style="line-height:1.7;">Never lose a memory again. Our advanced filtering system allows you to instantly pinpoint exact moments, late-night talks, or specific files from years of conversation history.</p>
+                    <p class="muted" style="line-height:1.7;">Never lose a memory again. Our advanced filtering system
+                        allows you to instantly pinpoint exact moments, late-night talks, or specific files from years
+                        of conversation history.</p>
                 </div>
-                
+
                 <!-- Feature 4: Private Chat -->
                 <div class="card liquid-glass" style="padding:38px;">
                     <div class="card-icon" style="color: var(--accent-emerald);">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
                     </div>
                     <h3 style="font-size:1.4rem;margin-bottom:12px;">Ultra-Private Live Chat</h3>
-                    <p class="muted" style="line-height:1.7;">Want a completely private space for you and your partner? Register their email, search for them in the messages section, and use OnlineKotha as your dedicated, fully secure live messenger.</p>
+                    <p class="muted" style="line-height:1.7;">Want a completely private space for you and your partner?
+                        Register their email, search for them in the messages section, and use OnlineKotha as your
+                        dedicated, fully secure live messenger.</p>
                 </div>
             </div>
-            
+
         </div>
     </section>
     <!-- ═══════════ FAQ ═══════════ -->
     <section class="sec" id="faq" style="background:var(--bg-soft);border-top:1px solid var(--border);">
         <div class="narrow">
             <div style="text-align:center;margin-bottom:44px;">
-                
+
                 <h2 class="h2">Questions, answered.</h2>
             </div>
             <div class="faq">
@@ -2764,8 +3038,10 @@
     <!-- ═══════════ FINAL CTA ═══════════ -->
     <section class="sec" style="text-align:center;">
         <div class="narrow">
-            <h2 class="display" style="font-size:clamp(2.1rem,5vw,3.2rem);margin-bottom:18px;">Your WhatsApp history is a<br>treasure trove of memories.</h2>
-            <p class="lead" style="max-width:560px;margin:0 auto 34px;">Keep them safe in a beautiful, private vault. Relive the best moments with Chat Wrapped and nostalgic AI.</p>
+            <h2 class="display" style="font-size:clamp(2.1rem,5vw,3.2rem);margin-bottom:18px;">Your WhatsApp history is
+                a<br>treasure trove of memories.</h2>
+            <p class="lead" style="max-width:560px;margin:0 auto 34px;">Keep them safe in a beautiful, private vault.
+                Relive the best moments with Chat Wrapped and nostalgic AI.</p>
             <a href="/app.html?action=import" id="final-cta" class="btn cta-primary"
                 style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25); margin-bottom: 24px;">
                 Try OnlineKotha Free
@@ -2796,27 +3072,38 @@
                             alt="Kotha Logo" /><span>Kotha</span></a>
                     <p class="muted" style="font-size:13px;line-height:1.7;max-width:260px;margin-bottom:20px;">Keep
                         your loved ones always online. Chat with the people who matter — in their own words.</p>
-                    <div class="footer-badges" style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px;">
+                    <div class="footer-badges"
+                        style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px;">
                         <a href="https://nicklaunches.com/products/onlinekotha/?utm_source=onlinekotha.com&utm_medium=badge&utm_campaign=featured"
-                            target="_blank" rel="noopener" style="display:inline-block; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                            <img src="https://nicklaunches.com/badges/featured-dark.png" alt="OnlineKotha on Nick Launches"
-                                style="height: 36px; width: auto;" class="badge-dark" loading="lazy" />
+                            target="_blank" rel="noopener" style="display:inline-block; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                            <img src="https://nicklaunches.com/badges/featured-dark.png"
+                                alt="OnlineKotha on Nick Launches" style="height: 36px; width: auto;" class="badge-dark"
+                                loading="lazy" />
                             <img src="https://nicklaunches.com/badges/featured.png" alt="OnlineKotha on Nick Launches"
                                 style="height: 36px; width: auto;" class="badge-light" loading="lazy" />
                         </a>
                         <a href="https://www.scrolllaunch.com/products/kotha?ref=badge" target="_blank" rel="noopener"
-                            style="display:inline-block; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                            style="display:inline-block; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                             <img src="https://www.scrolllaunch.com/api/badge/kotha" alt="Featured on ScrollLaunch"
                                 style="height: 34px; width: auto; border-radius: 6px; display: block;" loading="lazy" />
                         </a>
-                        <a href="https://www.founder.best?ref=founderbest&utm_source=founder.best&utm_medium=referral" target="_blank" rel="noopener noreferrer"
-                            style="display:inline-block; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
-                            <img src="https://www.founder.best/api/badge/featured/onlinekotha" alt="OnlineKotha - Featured on Founder.best"
-                                style="height: 34px; width: auto; border-radius: 6px; display: block;" loading="lazy" decoding="async" />
+                        <a href="https://www.founder.best?ref=founderbest&utm_source=founder.best&utm_medium=referral"
+                            target="_blank" rel="noopener noreferrer"
+                            style="display:inline-block; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                            <img src="https://www.founder.best/api/badge/featured/onlinekotha"
+                                alt="OnlineKotha - Featured on Founder.best"
+                                style="height: 34px; width: auto; border-radius: 6px; display: block;" loading="lazy"
+                                decoding="async" />
                         </a>
                         <!-- Branded Infinity Memory Badge (~20% footer width) -->
                         <div class="footer-banner-badge" title="OnlineKotha — AI-Powered Chat Memories">
-                            <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';" alt="Your Chats Are Memories Too — OnlineKotha" loading="lazy" width="1024" height="341">
+                            <img src="/img/hero-banner.webp"
+                                onerror="this.onerror=null;this.src='/img/hero-banner.png';"
+                                alt="Your Chats Are Memories Too — OnlineKotha" loading="lazy" width="1024"
+                                height="341">
                         </div>
                     </div>
                 </div>
@@ -2826,7 +3113,8 @@
                     <a href="/#demo-story-mockup" class="foot-link">Try it live</a><br>
                     <a href="/pricing.html" class="foot-link">Pricing</a><br>
                     <a href="/app.html" class="foot-link">Open Web App</a><br>
-                    <a href="https://play.google.com/store/apps/developer?id=okshiva" class="foot-link" target="_blank" rel="noopener noreferrer">Android App (Play Store)</a><br>
+                    <a href="https://play.google.com/store/apps/developer?id=okshiva" class="foot-link" target="_blank"
+                        rel="noopener noreferrer">Android App (Play Store)</a><br>
                     <a href="/paper.html" class="foot-link">Documentation</a><br>
                     <a href="/blog.html" class="foot-link">Blog</a>
                 </div>
@@ -2897,7 +3185,7 @@
             const carousel = document.getElementById('story-carousel');
             const shareBtn = document.getElementById('story-share');
             const progressFills = document.querySelectorAll('.story-progress-fill');
-            
+
             if (!carousel || !phoneScreen) return;
 
             let currentSlide = 0;
@@ -2915,7 +3203,7 @@
                         fill.style.transition = 'none';
                     }
                 });
-                
+
                 const currentFill = progressFills[currentSlide];
                 if (currentFill) {
                     currentFill.style.width = '0%';
@@ -2929,11 +3217,11 @@
             function goToSlide(index) {
                 if (index < 0) index = 0;
                 if (index >= totalSlides) index = 0;
-                
+
                 currentSlide = index;
                 const slideWidth = carousel.clientWidth;
                 carousel.scrollTo({ left: slideWidth * currentSlide, behavior: 'smooth' });
-                
+
                 updateProgressBars();
                 startTimer();
             }
@@ -2956,7 +3244,7 @@
                             title: 'OnlineKotha Chat Wrapped',
                             text: 'Relive your WhatsApp memories with OnlineKotha!',
                             url: window.location.href,
-                        }).catch(() => {});
+                        }).catch(() => { });
                     } else {
                         navigator.clipboard?.writeText(window.location.href);
                         alert('Link copied to clipboard!');
@@ -3521,7 +3809,9 @@
                                 <path
                                     d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
                             </svg> I'm
-                            Kotha Assistant, the official in-app AI assistant for OnlineKotha. Want to know how to export your WhatsApp chat, how our AI learns chat style, or our plans? Ask me anything in your language!</p>
+                            Kotha Assistant, the official in-app AI assistant for OnlineKotha. Want to know how to
+                            export your WhatsApp chat, how our AI learns chat style, or our plans? Ask me anything in
+                            your language!</p>
                     </div>
                 </div>
             </div>
@@ -3781,11 +4071,11 @@
                 const formMsFrames = document.querySelectorAll('iframe[src*="form.ms"]');
                 formMsFrames.forEach(frame => {
                     const parent = frame.parentElement;
-                    if(parent) {
+                    if (parent) {
                         parent.style.setProperty('bottom', '85px', 'important');
                         // Optional: Adjust right position if it overlaps with AI button
                         if (parent.style.right) {
-                            parent.style.setProperty('right', '65px', 'important'); 
+                            parent.style.setProperty('right', '65px', 'important');
                         }
                     }
                 });
