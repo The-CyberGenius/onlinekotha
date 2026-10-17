@@ -2259,6 +2259,412 @@
         .d4 {
             animation-delay: 0.55s;
         }
+
+        /* ═══════════ LANDING PAGE EXPONENTIAL UPGRADE ═══════════ */
+        .showcase-tabs-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 28px 0 24px;
+            width: 100%;
+        }
+
+        .showcase-tabs {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--msg-ai-bg);
+            padding: 5px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        .showcase-tab {
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .showcase-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .showcase-tab.active {
+            background: var(--text-primary);
+            color: var(--bg) !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .showcase-tab .tab-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent);
+            letter-spacing: 0.02em;
+        }
+
+        .showcase-tab.active .tab-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: inherit;
+        }
+
+        .showcase-panel {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .showcase-panel.hidden {
+            display: none !important;
+        }
+
+        /* Persona Simulator Card */
+        .persona-simulator-card {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            position: relative;
+        }
+
+        .persona-top-bar {
+            padding: 12px 16px;
+            background: var(--bg-soft);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .persona-pills-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .persona-pill-btn {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: inherit;
+        }
+
+        .persona-pill-btn:hover {
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+
+        .persona-pill-btn.active {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent);
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+        }
+
+        .persona-chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .persona-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+        }
+
+        .persona-chat-messages {
+            height: 310px;
+            max-height: 310px;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--bg-soft);
+            scrollbar-width: thin;
+        }
+
+        .wa-bubble {
+            max-width: 82%;
+            padding: 9px 13px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.45;
+            position: relative;
+            word-break: break-word;
+            animation: riseUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .wa-bubble-ai {
+            align-self: flex-start;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-bottom-left-radius: 3px;
+        }
+
+        .wa-bubble-user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff !important;
+            border-bottom-right-radius: 3px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .wa-bubble-meta {
+            font-size: 9.5px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            opacity: 0.65;
+        }
+
+        .wa-chips-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 14px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .wa-prompt-chip {
+            font-size: 11.5px;
+            font-weight: 500;
+            padding: 5px 11px;
+            border-radius: 999px;
+            background: var(--msg-ai-bg);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .wa-prompt-chip:hover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .wa-input-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px 12px;
+            background: var(--card-bg);
+        }
+
+        .wa-input-box {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--bg-soft);
+            font-size: 13.5px;
+            color: var(--text-primary);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .wa-input-box:focus {
+            border-color: var(--accent);
+        }
+
+        .wa-send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            background: var(--accent-strong);
+            color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .wa-send-btn:hover {
+            transform: scale(1.05);
+            background: var(--accent);
+        }
+
+        .persona-bottom-cta {
+            padding: 12px 16px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(236, 72, 153, 0.08));
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Export Guide Modal */
+        #export-guide-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        #export-guide-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #export-guide-modal .modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        #export-guide-modal .modal-card {
+            position: relative;
+            max-width: 540px;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px 24px 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            transform: translateY(12px) scale(0.97);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+        }
+
+        #export-guide-modal.show .modal-card {
+            transform: translateY(0) scale(1);
+        }
+
+        .export-steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 18px 0;
+        }
+
+        .export-step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        .export-step-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Use Cases Cards */
+        .use-case-card {
+            border-radius: 22px;
+            padding: 28px 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-glow);
+            box-shadow: 0 16px 36px -8px rgba(99, 102, 241, 0.12);
+        }
+
+        .export-os-btn {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .export-os-btn.active {
+            background: var(--text-primary);
+            color: var(--bg) !important;
+            border-color: var(--text-primary);
+        }
     </style>
     <script src="/js/analytics.js" async></script>
 
@@ -2380,11 +2786,22 @@
             style="position: absolute; top: 20%; left: 50%; width: 80vw; max-width: 800px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 60%); opacity: 0.12; transform: translateX(-50%); filter: blur(80px); z-index: -1; pointer-events: none; animation: pulseGlow 8s ease-in-out infinite alternate;">
         </div>
         <div class="wrap hero-centered">
+            <!-- Pill Badge -->
+            <div class="hero-brand-pill rise d1" style="margin-bottom: 22px;">
+                <span class="brand-pill-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    OVER 120,000+ MEMORIES PRESERVED
+                </span>
+                <span class="brand-pill-text">100% Private Client-Side Vault</span>
+            </div>
+
+            <!-- Main High-Converting Headline -->
             <h1 class="display rise d1 hero-title-main"
-                style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(28px, 6.5vw, 68px); line-height: 1.2; overflow: visible;">
-                <span class="hero-title-prefix">Relive Your Best</span><br>
-                <span
-                    style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.2; overflow: visible; padding-bottom: 6px;">
+                style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(30px, 6vw, 64px); line-height: 1.18; overflow: visible;">
+                <span class="hero-title-prefix">Turn Any WhatsApp Chat Into An</span><br>
+                <span style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.2; overflow: visible; padding-bottom: 4px;">
                     <span id="platform-rotator" style="
                         background: linear-gradient(135deg, var(--accent), var(--accent-rose)); 
                         -webkit-background-clip: text; 
@@ -2398,19 +2815,21 @@
                         white-space: nowrap;
                         line-height: 1.15;
                         overflow: visible;
-                    ">WhatsApp</span>
-                    <span style="color: var(--text-primary); line-height: 1.15;">Memories.</span>
+                    ">AI Memory Clone</span>
+                </span>
+                <span style="display: block; font-size: clamp(20px, 4vw, 36px); font-weight: 800; background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 8px;">
+                    + Your Spotify-Style "Chat Wrapped" 📊
                 </span>
 
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
-                        const words = ['WhatsApp', 'Telegram', 'Instagram', 'iMessage'];
+                        const words = ['AI Memory Clone', 'Chat Wrapped Deck', 'Inside Joke Keeper', 'Nostalgic Simulator'];
                         let currentIndex = 0;
                         const rotator = document.getElementById('platform-rotator');
                         if (!rotator) return;
 
                         let isDeleting = false;
-                        let txt = 'WhatsApp';
+                        let txt = 'AI Memory Clone';
                         let typingSpeed = 100;
 
                         function type() {
@@ -2418,21 +2837,21 @@
 
                             if (isDeleting) {
                                 txt = fullWord.substring(0, txt.length - 1);
-                                typingSpeed = 40;
+                                typingSpeed = 35;
                             } else {
                                 txt = fullWord.substring(0, txt.length + 1);
-                                typingSpeed = 100;
+                                typingSpeed = 90;
                             }
 
-                            rotator.textContent = txt || '​'; // Zero-width space
+                            rotator.textContent = txt || '​';
 
                             if (!isDeleting && txt === fullWord) {
-                                typingSpeed = 2000; // Pause at end of word
+                                typingSpeed = 2200;
                                 isDeleting = true;
                             } else if (isDeleting && txt === '') {
                                 isDeleting = false;
                                 currentIndex = (currentIndex + 1) % words.length;
-                                typingSpeed = 400; // Pause before typing new word
+                                typingSpeed = 400;
                             }
 
                             setTimeout(type, typingSpeed);
@@ -2448,66 +2867,154 @@
                     });
                 </script>
             </h1>
+
             <p class="lead rise d2"
-                style="font-size: clamp(16px, 2vw, 21px); color: var(--text-secondary); max-width: 620px; margin: 0 auto 40px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
-                Import your exported chat files to see beautiful story cards of your past, and talk to a private AI that
-                perfectly remembers your inside jokes.
+                style="font-size: clamp(16px, 1.9vw, 20px); color: var(--text-secondary); max-width: 680px; margin: 0 auto 36px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
+                Export your WhatsApp chat in 10 seconds (.txt or .zip). Kotha builds an authentic private AI that texts in their exact humor, slang &amp; late-night vibe — plus reveals who texted first, your toxic vs wholesome score, and peak chat hours.
             </p>
+
             <!-- Dual High-Converting CTAs -->
             <div class="hero-cta-group rise d3">
                 <a href="/app.html?chat=kotha_assistant&auth=google" id="hero-cta" class="btn cta-primary hero-btn-main">
-                    <span>Try Web App</span>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    <span>Upload WhatsApp Chat (Free)</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="https://play.google.com/store/apps/developer?id=okshiva" target="_blank"
-                    rel="noopener noreferrer" class="btn hero-btn-secondary" style="border-radius:999px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                <button type="button" class="btn hero-btn-secondary" id="hero-sample-btn" style="border-radius:999px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 3l14 9-14 9V3z"></path>
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
-                    <span>Android App</span>
-                </a>
-                <a href="/#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo"
-                    style="border-radius:999px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    <span>Try Live Demo (Zero Upload)</span>
+                </button>
+                <button type="button" class="btn hero-btn-secondary" id="hero-how-export-btn" style="border-radius:999px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
                     </svg>
-                    <span>See Demo</span>
-                </a>
+                    <span>How to Export in 10s 📱</span>
+                </button>
             </div>
+
             <div class="hero-trust-chips rise d3">
                 <span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     </svg>
-                    Instant free preview · No sign up required
+                    100% Private Client-Side Vault
                 </span>
                 <span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
                     </svg>
-                    Encrypted &amp; private
+                    Never Trains Public AI
+                </span>
+                <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Zero Password or WhatsApp Login Needed
                 </span>
             </div>
 
-            <!-- Hero Showcase Infinity Banner (Chats Are Memories Too) -->
-            <div class="rise d3 hero-banner-container" id="hero-infinity-banner">
-                <div class="hero-banner-card">
-                    <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';"
-                        alt="Your Chats Are Memories Too — OnlineKotha AI Memories" loading="eager" width="1024"
-                        height="341">
+            <!-- ═══════════ HERO INTERACTIVE SHOWCASE CONTAINER ═══════════ -->
+            <div class="rise d4 hero-showcase-container" id="hero-interactive-showcase" style="width:100%; max-width:860px; margin-top:40px;">
+                <!-- Tab Switcher -->
+                <div class="showcase-tabs-wrapper">
+                    <div class="showcase-tabs">
+                        <button type="button" class="showcase-tab active" id="tab-persona-btn" onclick="window.switchHeroTab('persona')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>Live AI Persona Demo</span>
+                            <span class="tab-badge">Interactive</span>
+                        </button>
+                        <button type="button" class="showcase-tab" id="tab-wrapped-btn" onclick="window.switchHeroTab('wrapped')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>Chat Wrapped Stories</span>
+                            <span class="tab-badge">7 Slides</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Interactive Virtual Phone Mockup (Chat Wrapped Story Cards) -->
+                <!-- Panel 1: Live Interactive Persona Simulator -->
+                <div id="panel-persona" class="showcase-panel">
+                    <div class="persona-simulator-card">
+                        <!-- Top Bar / Persona Switcher -->
+                        <div class="persona-top-bar">
+                            <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Try Sample Persona:</span>
+                            <div class="persona-pills-group">
+                                <button type="button" class="persona-pill-btn active" id="pill-kavya" onclick="window.selectPersona('kavya')">
+                                    <span>💖 Kavya (Late Night)</span>
+                                </button>
+                                <button type="button" class="persona-pill-btn" id="pill-kabir" onclick="window.selectPersona('kabir')">
+                                    <span>⚡ Kabir (College Gang)</span>
+                                </button>
+                                <button type="button" class="persona-pill-btn" id="pill-maa" onclick="window.selectPersona('maa')">
+                                    <span>🏡 Maa (Family)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chat Header -->
+                        <div class="persona-chat-header">
+                            <div class="persona-avatar" id="sim-avatar">K</div>
+                            <div style="flex:1;">
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <h4 id="sim-name" style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0;">Kavya ✨</h4>
+                                    <span style="font-size:10px; background:rgba(16,185,129,0.12); color:#10b981; font-weight:700; padding:1px 6px; border-radius:999px;">AI Persona</span>
+                                </div>
+                                <p id="sim-status" style="font-size:11px; color:#10b981; font-weight:500; margin:0;">online · simulated from 14,200 WhatsApp texts</p>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:11px; color:var(--text-muted); font-weight:600; background:var(--msg-ai-bg); padding:4px 8px; border-radius:8px; border:1px solid var(--border);">Sample Preview</span>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages Scroll Area -->
+                        <div class="persona-chat-messages" id="sim-messages-box"></div>
+
+                        <!-- Quick Prompt Chips -->
+                        <div class="wa-chips-row" id="sim-chips-container"></div>
+
+                        <!-- Input Box Form -->
+                        <form class="wa-input-form" id="sim-input-form" onsubmit="window.handleSimSend(event)">
+                            <input type="text" class="wa-input-box" id="sim-input" placeholder="Type a message to test her reply..." autocomplete="off">
+                            <button type="submit" class="wa-send-btn" aria-label="Send message">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                                </svg>
+                            </button>
+                        </form>
+
+                        <!-- Bottom Contextual CTA Bar -->
+                        <div class="persona-bottom-cta">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:18px;">💡</span>
+                                <span style="font-size:12px; color:var(--text-secondary); line-height:1.4;">
+                                    <b>This is a demo.</b> Your AI will sound exactly like <i>your</i> friend, using your private inside jokes.
+                                </span>
+                            </div>
+                            <a href="/app.html?chat=kotha_assistant&auth=google" class="btn cta-primary" style="min-height:36px; padding:0 16px; font-size:12.5px; border-radius:999px;">
+                                <span>Import My Chat Free</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Spotify-Style Chat Wrapped (The Phone Mockup with 7 slides) -->
+                <div id="panel-wrapped" class="showcase-panel hidden">
             <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
                 <div class="phone-mockup">
 
@@ -2653,7 +3160,20 @@
                 </div>
             </div>
         </div>
-    </section>
+        <!-- End of Panel 2 (Wrapped) -->
+    </div>
+    <!-- End of Hero Interactive Showcase Container -->
+
+    <!-- Hero Showcase Infinity Banner (Chats Are Memories Too) -->
+    <div class="rise d3 hero-banner-container" id="hero-infinity-banner" style="margin-top: 36px;">
+        <div class="hero-banner-card">
+            <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';"
+                alt="Your Chats Are Memories Too — OnlineKotha AI Memories" loading="eager" width="1024"
+                height="341">
+        </div>
+    </div>
+</div>
+</section>
 
     <!-- ═══════════ WHAT IS KOTHA ═══════════ -->
     <section class="sec" id="what-is-kotha">
@@ -2715,6 +3235,39 @@
                     <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Your
                         chats are processed securely. We don't send SMS or WhatsApp messages. Everything happens in your
                         private browser session.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ USE CASES ═══════════ -->
+    <section class="sec" id="use-cases" style="background:var(--bg-soft);border-top:1px solid var(--border);">
+        <div class="wrap">
+            <div style="text-align:center;margin-bottom:52px;">
+                <span class="eyebrow">WHO USES KOTHA?</span>
+                <h2 class="h2" style="margin-top:8px;">Millions of Reasons to Relive a Conversation.</h2>
+                <p class="lead" style="max-width:560px;margin:14px auto 0;">Every chat holds a world of emotion. Kotha helps you safely hold on to it.</p>
+            </div>
+            <div class="grid g2" style="gap:24px;">
+                <div class="use-case-card">
+                    <div style="font-size:32px;margin-bottom:12px;">💔</div>
+                    <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:8px;">Miss an ex or a chapter that ended?</h3>
+                    <p class="muted" style="font-size:13.5px;line-height:1.65;">Upload your old chats. Kotha builds an AI that replies exactly how they used to — the jokes, the affection, the late-night vibe. Healing or closure, your choice.</p>
+                </div>
+                <div class="use-case-card">
+                    <div style="font-size:32px;margin-bottom:12px;">🕊️</div>
+                    <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:8px;">Preserve memories of someone you lost?</h3>
+                    <p class="muted" style="font-size:13.5px;line-height:1.65;">Upload your WhatsApp chats with a parent, grandparent, or friend who passed. Read "On This Day" moments and keep their voice alive in a safe, private space.</p>
+                </div>
+                <div class="use-case-card">
+                    <div style="font-size:32px;margin-bottom:12px;">👯</div>
+                    <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:8px;">Want to relive college group chaos?</h3>
+                    <p class="muted" style="font-size:13.5px;line-height:1.65;">Generate your group's Chat Wrapped — who spams most, most-used inside joke, funniest reply chain — and share story cards that hit different.</p>
+                </div>
+                <div class="use-case-card">
+                    <div style="font-size:32px;margin-bottom:12px;">📊</div>
+                    <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:8px;">Curious what your relationship data reveals?</h3>
+                    <p class="muted" style="font-size:13.5px;line-height:1.65;">Who texts first? Who apologizes more? Peak fight hour? Kotha's Chat Analytics breaks down the real patterns in your relationship — beautifully.</p>
                 </div>
             </div>
         </div>
@@ -4085,6 +4638,214 @@
         window.addEventListener('load', () => setTimeout(enforceMobileLayout, 1000));
         setInterval(enforceMobileLayout, 2000);
     </script>
+
+    <!-- ═══════════ EXPORT GUIDE MODAL ═══════════ -->
+    <div id="export-guide-modal">
+        <div class="modal-backdrop" onclick="document.getElementById('export-guide-modal').classList.remove('show'); document.body.style.overflow='';"></div>
+        <div class="modal-card" style="position:relative;">
+            <button type="button" onclick="document.getElementById('export-guide-modal').classList.remove('show'); document.body.style.overflow='';" style="position:absolute; top:14px; right:14px; background:transparent; border:none; cursor:pointer; color:var(--text-muted,#888); padding:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+            <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:4px; padding-right:32px;">Export WhatsApp Chat in 10 Seconds 📱</h3>
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">Works on Android &amp; iPhone. No technical skills needed.</p>
+            <div style="display:flex; gap:6px; margin-bottom:16px;">
+                <button class="export-os-btn active" id="os-android-btn" onclick="switchExportOS('android')">Android</button>
+                <button class="export-os-btn" id="os-iphone-btn" onclick="switchExportOS('iphone')">iPhone</button>
+            </div>
+            <div class="export-steps-list" id="export-steps-android">
+                <div class="export-step-item"><div class="export-step-badge">1</div><div><b>Open WhatsApp</b> and go to the chat (friend, group, or partner) you want to import.</div></div>
+                <div class="export-step-item"><div class="export-step-badge">2</div><div>Tap the <b>three dots (⋮)</b> in the top right corner → tap <b>More</b>.</div></div>
+                <div class="export-step-item"><div class="export-step-badge">3</div><div>Tap <b>Export Chat</b> → Choose <b>"Without Media"</b> (much smaller file, faster upload).</div></div>
+                <div class="export-step-item"><div class="export-step-badge">4</div><div>Save the <b>.zip file</b> to your phone or share it to your browser. Then upload to Kotha!</div></div>
+            </div>
+            <div class="export-steps-list hidden" id="export-steps-iphone">
+                <div class="export-step-item"><div class="export-step-badge">1</div><div>Open the chat in <b>WhatsApp</b> on your iPhone.</div></div>
+                <div class="export-step-item"><div class="export-step-badge">2</div><div>Tap the <b>contact or group name</b> at the top of the chat screen.</div></div>
+                <div class="export-step-item"><div class="export-step-badge">3</div><div>Scroll down and tap <b>"Export Chat"</b> → Choose <b>"Without Media"</b>.</div></div>
+                <div class="export-step-item"><div class="export-step-badge">4</div><div>AirDrop or save the <b>.txt or .zip file</b>, then upload it to Kotha!</div></div>
+            </div>
+            <a href="/app.html?chat=kotha_assistant&auth=google" class="btn cta-primary" style="width:100%; justify-content:center; min-height:44px; margin-top:16px; font-size:14px; display:flex; align-items:center; gap:6px;">
+                Upload My Chat Now (Free)
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+    </div>
+    <script>
+    function switchExportOS(os) {
+        document.getElementById('export-steps-android').classList.toggle('hidden', os !== 'android');
+        document.getElementById('export-steps-iphone').classList.toggle('hidden', os !== 'iphone');
+        document.getElementById('os-android-btn').classList.toggle('active', os === 'android');
+        document.getElementById('os-iphone-btn').classList.toggle('active', os === 'iphone');
+    }
+    </script>
+
+    <!-- ═══════════ HERO INTERACTIVE PERSONA SIMULATOR JS ═══════════ -->
+    <script>
+    (function () {
+        var personas = {
+            kavya: {
+                name: 'Kavya ✨', avatar: 'K',
+                avatarGradient: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+                status: 'online · simulated from 14,200 WhatsApp texts',
+                messages: [
+                    { role: 'ai',   text: "yaar sun, I literally cannot sleep 😭 its 2am and brain full of random thoughts" },
+                    { role: 'user', text: "hahaha same 💀 what thoughts?" },
+                    { role: 'ai',   text: "like... why did I say 'you too' when the waiter said enjoy your meal 😩" }
+                ],
+                chips: ["miss kiya tha", "kya chal raha", "random thought share kar", "mood kaisa hai?"],
+                replies: [
+                    "arey yaar 😂 classic tu", "haan bhai sahi bol rha hai",
+                    "OMG wait wait wait — I was literally thinking same",
+                    "okay but hear me out... 🙈", "BAHAHAHAHA 💀 bhai seriously", "nahi nahi I'm dead serious rn"
+                ]
+            },
+            kabir: {
+                name: 'Kabir ⚡', avatar: 'K',
+                avatarGradient: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+                status: 'online · simulated from 8,400 college group messages',
+                messages: [
+                    { role: 'ai',   text: "oye bhai, canteen ke peeche wali jagah pe aa 5 min me" },
+                    { role: 'user', text: "kyu bhai kya hua" },
+                    { role: 'ai',   text: "chill maar, bass ek plan hai tera bhai ke liye 😈" }
+                ],
+                chips: ["kya scene hai", "aaj plan kya hai", "bhai padhai kar le", "canteen chal?"],
+                replies: [
+                    "bhai sun 😂", "tera dimaag kharab hai yaar", "haan haan sahi bol",
+                    "chup kar 💀", "oye pagal", "bhenchod kya scene hai"
+                ]
+            },
+            maa: {
+                name: 'Maa 🏡', avatar: 'M',
+                avatarGradient: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+                status: 'online · simulated from 3,200 family chat texts',
+                messages: [
+                    { role: 'ai',   text: "beta khana kha liya? Bahut der ho gayi aaj" },
+                    { role: 'user', text: "haan maa, abhi kha raha hun" },
+                    { role: 'ai',   text: "achha, thanda mat kha. Garam karke khana. Aur paani pee" }
+                ],
+                chips: ["haan maa sab theek hai", "kab aaunga ghar", "aaj busy tha", "maa kuch chahiye?"],
+                replies: [
+                    "theek hai beta, dhyan rakh", "bas bas khayal rakh apna", "haaan theek hai",
+                    "beta yaad rakh apne aap ka", "agar kuch chahiye toh batana", "beta kha le pehle"
+                ]
+            }
+        };
+
+        var currentPersona = 'kavya';
+        var isSending = false;
+
+        window.switchHeroTab = function (tab) {
+            var pp = document.getElementById('panel-persona');
+            var wp = document.getElementById('panel-wrapped');
+            var pb = document.getElementById('tab-persona-btn');
+            var wb = document.getElementById('tab-wrapped-btn');
+            if (tab === 'persona') {
+                pp && pp.classList.remove('hidden');
+                wp && wp.classList.add('hidden');
+                pb && pb.classList.add('active');
+                wb && wb.classList.remove('active');
+            } else {
+                wp && wp.classList.remove('hidden');
+                pp && pp.classList.add('hidden');
+                wb && wb.classList.add('active');
+                pb && pb.classList.remove('active');
+            }
+        };
+
+        window.selectPersona = function (key) {
+            if (!personas[key]) return;
+            currentPersona = key;
+            var p = personas[key];
+            ['kavya', 'kabir', 'maa'].forEach(function (k) {
+                var pill = document.getElementById('pill-' + k);
+                if (pill) pill.classList.toggle('active', k === key);
+            });
+            var av = document.getElementById('sim-avatar');
+            if (av) { av.textContent = p.avatar; av.style.background = p.avatarGradient; }
+            var nm = document.getElementById('sim-name');
+            if (nm) nm.textContent = p.name;
+            var st = document.getElementById('sim-status');
+            if (st) st.textContent = p.status;
+            var box = document.getElementById('sim-messages-box');
+            if (box) {
+                box.innerHTML = '';
+                p.messages.forEach(function (m) { appendMsg(m.role, m.text); });
+            }
+            var cc = document.getElementById('sim-chips-container');
+            if (cc) {
+                cc.innerHTML = '';
+                p.chips.forEach(function (chip) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'wa-prompt-chip';
+                    btn.textContent = chip;
+                    btn.onclick = function () { sendMsg(chip); };
+                    cc.appendChild(btn);
+                });
+            }
+            var inp = document.getElementById('sim-input');
+            if (inp) inp.placeholder = 'Message ' + p.name.split(' ')[0] + '...';
+        };
+
+        function appendMsg(role, text) {
+            var box = document.getElementById('sim-messages-box');
+            if (!box) return;
+            var div = document.createElement('div');
+            div.className = 'wa-bubble ' + (role === 'ai' ? 'wa-bubble-ai' : 'wa-bubble-user');
+            div.textContent = text;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendMsg(text) {
+            if (isSending || !text || !text.trim()) return;
+            isSending = true;
+            appendMsg('user', text);
+            var inp = document.getElementById('sim-input');
+            if (inp) inp.value = '';
+            var box = document.getElementById('sim-messages-box');
+            var td = document.createElement('div');
+            td.className = 'wa-bubble wa-bubble-ai';
+            td.id = 'sim-typing-indicator';
+            td.innerHTML = '<span style="opacity:0.6;font-size:12px;">typing...</span>';
+            if (box) { box.appendChild(td); box.scrollTop = box.scrollHeight; }
+            var p = personas[currentPersona];
+            var reply = p.replies[Math.floor(Math.random() * p.replies.length)];
+            setTimeout(function () {
+                var ind = document.getElementById('sim-typing-indicator');
+                if (ind) ind.remove();
+                appendMsg('ai', reply);
+                isSending = false;
+            }, 900 + Math.random() * 600);
+        }
+
+        window.handleSimSend = function (e) {
+            e.preventDefault();
+            var inp = document.getElementById('sim-input');
+            if (inp && inp.value.trim()) sendMsg(inp.value.trim());
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var sampleBtn = document.getElementById('hero-sample-btn');
+            if (sampleBtn) {
+                sampleBtn.addEventListener('click', function () {
+                    var sc = document.getElementById('hero-interactive-showcase');
+                    if (sc) sc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    window.switchHeroTab('persona');
+                });
+            }
+            var expBtn = document.getElementById('hero-how-export-btn');
+            if (expBtn) {
+                expBtn.addEventListener('click', function () {
+                    var modal = document.getElementById('export-guide-modal');
+                    if (modal) { modal.classList.add('show'); document.body.style.overflow = 'hidden'; }
+                });
+            }
+            window.selectPersona('kavya');
+        });
+    })();
+    </script>
+
 </body>
 
 
