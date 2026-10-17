@@ -27,8 +27,8 @@ router.post('/create-checkout', requireUser, async (req, res) => {
             return res.status(500).json({ error: 'Dodo Payments is not configured on this server.' });
         }
 
-        let productId = process.env.DODO_PRODUCT_ID || integrations.get('integ.dodo.product_id');
-        let monthlyProductId = process.env.DODO_MONTHLY_PRODUCT_ID || integrations.get('integ.dodo.monthly_product_id');
+        let productId = process.env.DODO_PRODUCT_ID || process.env.DODO_PRODUCT_ID_LIFETIME || integrations.get('integ.dodo.product_id');
+        let monthlyProductId = process.env.DODO_MONTHLY_PRODUCT_ID || process.env.DODO_PRODUCT_ID_MONTHLY || integrations.get('integ.dodo.monthly_product_id');
         
         const targetProductId = plan === 'pro_monthly' ? (monthlyProductId || productId) : productId;
 

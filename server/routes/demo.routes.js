@@ -15,19 +15,24 @@ const demoLimiter = rateLimit({
     validate: false,
 });
 
-function getDemoLimitAndUsage(req, sessionId) {
-    let session = null;
-    if (req.cookies && req.cookies.session) {
-        session = getSession(req.cookies.session);
+function getAssistantOwner(req) {
+    if (req.user) {
+        return { userId: req.user.id, guestId: null };
     }
+    const guestId = req.cookies && req.cookies.kotha_guest_id;
+    return { userId: null, guestId: guestId || null };
+}
 
+function getDemoLimitAndUsage(req, sessionId) {
+    const user = req.user;
     let key, limit;
-    if (session) {
+    if (user) {
         const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }).split(',')[0];
-        key = `user_${session.user.id}_${dateStr}`;
-        limit = 15; // 15 per day for logged in
+        key = `user_${user.id}_${dateStr}`;
+        limit = (user.is_admin || user.is_pro || user.plan === 'paid') ? 9999 : 15;
     } else {
-        key = `guest_${req.ip}_${sessionId || 'x'}`;
+        const guestId = req.cookies && req.cookies.kotha_guest_id;
+        key = `guest_${guestId || req.ip}_${sessionId || 'x'}`;
         limit = 15; // 15 once for guests
     }
 
@@ -41,7 +46,7 @@ function getDemoLimitAndUsage(req, sessionId) {
     } else {
         usage = { count: 0, history: [] };
     }
-    return { session, key, limit, usage };
+    return { session: user ? { user } : null, key, limit, usage };
 }
 
 function saveDemoUsage(key, usage) {
@@ -147,12 +152,105 @@ router.get('/status', (req, res) => {
     res.json({ remaining: Math.max(0, limit - usage.count), limit });
 });
 
+// Fetch persistent Kotha Assistant conversation history for user or guest
+router.get('/history', (req, res) => {
+    const { userId, guestId } = getAssistantOwner(req);
+    if (!userId && !guestId) return res.json({ ok: true, messages: [] });
+
+    try {
+        const sql = userId
+            ? 'SELECT id, sender, role, text, time, date, created_at FROM kotha_assistant_messages WHERE user_id = ? ORDER BY id ASC'
+            : 'SELECT id, sender, role, text, time, date, created_at FROM kotha_assistant_messages WHERE guest_id = ? ORDER BY id ASC';
+        const params = [userId || guestId];
+        const messages = db.prepare(sql).all(...params);
+        res.json({ ok: true, messages });
+    } catch (err) {
+        console.error('Error fetching assistant history:', err);
+        res.status(500).json({ error: 'Failed to fetch assistant history' });
+    }
+});
+
+// Sync local storage messages to server once if server is empty
+router.post('/history/sync', (req, res) => {
+    // If admin is impersonating, never sync the admin's local storage to the user
+    if (req.user && req.user.is_impersonating) {
+        return res.json({ ok: false, message: 'Skipped during impersonation' });
+    }
+    const { messages } = req.body || {};
+    if (!Array.isArray(messages) || messages.length === 0) {
+        return res.json({ ok: true, count: 0 });
+    }
+    const { userId, guestId } = getAssistantOwner(req);
+    if (!userId && !guestId) return res.json({ ok: false });
+
+    try {
+        const existingCount = userId
+            ? db.prepare('SELECT COUNT(*) as c FROM kotha_assistant_messages WHERE user_id = ?').get(userId).c
+            : db.prepare('SELECT COUNT(*) as c FROM kotha_assistant_messages WHERE guest_id = ?').get(guestId).c;
+
+        if (existingCount === 0) {
+            const insertStmt = db.prepare(`
+                INSERT INTO kotha_assistant_messages (user_id, guest_id, sender, role, text, time, date, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+            const insertMany = db.transaction((list) => {
+                for (const m of list) {
+                    if (!m.text || m.text.includes("Hi there! 👋 I'm Kotha Assistant")) continue;
+                    const sender = m.sender || (m.role === 'user' ? 'You' : 'Kotha Assistant');
+                    const role = m.role || (sender === 'You' ? 'user' : 'assistant');
+                    const time = m.time || '';
+                    const date = m.date || new Date().toLocaleDateString('en-CA');
+                    const createdAt = m.created_at || Date.now();
+                    insertStmt.run(userId, guestId, sender, role, m.text, time, date, createdAt);
+                }
+            });
+            insertMany(messages);
+        }
+        res.json({ ok: true });
+    } catch (err) {
+        console.error('Error syncing assistant history:', err);
+        res.status(500).json({ error: 'Sync failed' });
+    }
+});
+
 router.post('/', demoLimiter, async (req, res) => {
-    const { message, sessionId, role } = req.body || {};
+    const { message, sessionId, role, sendAsAI } = req.body || {};
     if (!message || typeof message !== 'string' || message.trim().length === 0)
         return res.status(400).json({ error: 'message required' });
-    if (message.length > 300)
+    if (message.length > 500)
         return res.status(400).json({ error: 'Message too long' });
+
+    const { userId, guestId } = getAssistantOwner(req);
+    const isAssistant = role === 'support' || role === 'assistant' || !role;
+    const now = Date.now();
+    const todayIso = new Date().toLocaleDateString('en-CA');
+    const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Handle manual admin reply as AI
+    if (sendAsAI && req.user && req.user.is_admin && req.user.is_impersonating) {
+        if (isAssistant && userId) {
+            db.prepare(`
+                INSERT INTO kotha_assistant_messages (user_id, guest_id, sender, role, text, time, date, created_at)
+                VALUES (?, ?, 'Kotha Assistant', 'assistant', ?, ?, ?, ?)
+            `).run(userId, null, message.trim(), timeNow, todayIso, now);
+
+            // Broadcast to the user via Socket.IO
+            const io = req.app.get('io');
+            const onlineUsers = req.app.locals?.onlineUsers;
+            if (io && onlineUsers) {
+                const sockets = onlineUsers.get(userId);
+                if (sockets) {
+                    sockets.forEach(sid => io.to(sid).emit('assistant:message', {
+                        sender: 'Kotha Assistant',
+                        text: message.trim(),
+                        time: timeNow,
+                        date: todayIso
+                    }));
+                }
+            }
+        }
+        return res.json({ ok: true, manual: true });
+    }
 
     const { session, key, limit, usage } = getDemoLimitAndUsage(req, sessionId);
 
@@ -164,8 +262,35 @@ router.post('/', demoLimiter, async (req, res) => {
         });
     }
 
+    // Save user message to persistent history if Kotha Assistant
+    if (isAssistant && (userId || guestId)) {
+        try {
+            db.prepare(`
+                INSERT INTO kotha_assistant_messages (user_id, guest_id, sender, role, text, time, date, created_at)
+                VALUES (?, ?, 'You', 'user', ?, ?, ?, ?)
+            `).run(userId, guestId, message.trim(), timeNow, todayIso, now);
+        } catch (e) {
+            console.error('Failed to save user assistant message:', e);
+        }
+    }
+
     usage.count++;
     usage.history.push({ role: 'user', content: message.trim() });
+    
+    // For Assistant chat, load recent turns from database for richer conversational context
+    if (isAssistant && (userId || guestId)) {
+        try {
+            const recentRows = db.prepare(`
+                SELECT role, text as content FROM kotha_assistant_messages
+                WHERE ${userId ? 'user_id = ?' : 'guest_id = ?'}
+                ORDER BY id DESC LIMIT 12
+            `).all(userId || guestId).reverse();
+            if (recentRows.length > 0) {
+                usage.history = recentRows;
+            }
+        } catch (e) {}
+    }
+
     // Keep last 6 turns (12 messages)
     if (usage.history.length > 12) usage.history = usage.history.slice(-12);
     
@@ -204,7 +329,7 @@ RULES:
 2. NEVER say you are AI or a chatbot.
 3. Keep responses SHORT — 1-3 lines. Real WhatsApp style.
 4. Respond in Hinglish slang.`;
-    } else if (role === 'support' || role === 'assistant' || !role) {
+    } else if (isAssistant) {
         let basePrompt = KOTHA_ASSISTANT_SYSTEM_PROMPT;
         try {
             const assistantRoute = db.prepare('SELECT * FROM routes WHERE feature = ?').get('assistant');
@@ -213,7 +338,7 @@ RULES:
             }
         } catch (e) {}
 
-        const liveContext = getLiveUserContext(session, req);
+        const liveContext = getLiveUserContext(session ? session.user : null, req);
         systemPrompt = `${basePrompt}
 
 ====================================================
@@ -265,7 +390,7 @@ RULES:
 
     let fullText = '';
     try {
-        const targetFeature = (role === 'support' || role === 'assistant' || !role) ? 'assistant' : 'chat';
+        const targetFeature = isAssistant ? 'assistant' : 'chat';
         await callLLM({
             feature: targetFeature,
             messages: usage.history,
@@ -277,6 +402,18 @@ RULES:
                 send('token', { text: token });
             },
         });
+
+        // Save AI response to persistent history
+        if (isAssistant && (userId || guestId)) {
+            try {
+                db.prepare(`
+                    INSERT INTO kotha_assistant_messages (user_id, guest_id, sender, role, text, time, date, created_at)
+                    VALUES (?, ?, 'Kotha Assistant', 'assistant', ?, ?, ?, ?)
+                `).run(userId, guestId, fullText.trim(), timeNow, todayIso, Date.now());
+            } catch (e) {
+                console.error('Failed to save assistant response:', e);
+            }
+        }
 
         usage.history.push({ role: 'assistant', content: fullText });
         if (usage.history.length > 12) usage.history = usage.history.slice(-12);

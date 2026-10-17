@@ -884,15 +884,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 statsInfo.innerText = 'Loading...';
                 
                 if (chatName === 'kotha_assistant') {
-                    // Load assistant from local storage
-                    const stored = localStorage.getItem('kotha_assistant_history');
-                    let history = [];
-                    if (stored) {
-                        try { history = JSON.parse(stored); } catch(e){}
-                    }
-                    if (history.length === 0) {
+                    try {
+                        const resp = await fetch('/api/demo-chat/history?_t=' + Date.now());
+                        const resData = await resp.json();
+                        if (resData.ok && Array.isArray(resData.messages) && resData.messages.length > 0) {
+                            data = resData.messages;
+                        } else {
+                            // Only migrate from local storage if NOT currently impersonating (prevents admin's chat leaking into user)
+                            const isImpersonating = window.__USER__ && window.__USER__.is_impersonating;
+                            let localHist = [];
+                            if (!isImpersonating) {
+                                const uKey = window.__USER__ ? `kotha_assistant_history_${window.__USER__.id}` : 'kotha_assistant_history';
+                                const stored = localStorage.getItem(uKey) || localStorage.getItem('kotha_assistant_history');
+                                if (stored) {
+                                    try { localHist = JSON.parse(stored); } catch(e){}
+                                }
+                            }
+                            if (localHist.length > 1) {
+                                data = localHist;
+                                fetch('/api/demo-chat/history/sync', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ messages: localHist })
+                                }).then(() => {
+                                    try { localStorage.removeItem('kotha_assistant_history'); } catch(e){}
+                                }).catch(()=>{});
+                            } else {
+                                const todayIso = new Date().toLocaleDateString('en-CA');
+                                data = [
+                                    {
+                                        text: "Hi there! 👋 I'm Kotha Assistant, the official in-app AI assistant for OnlineKotha. How can I help you today? Ask me about exporting WhatsApp chats, how AI chat works, Wrapped, or our plans!",
+                                        sender: "Kotha Assistant",
+                                        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                                        date: todayIso
+                                    }
+                                ];
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Failed to fetch assistant history:', err);
                         const todayIso = new Date().toLocaleDateString('en-CA');
-                        history = [
+                        data = [
                             {
                                 text: "Hi there! 👋 I'm Kotha Assistant, the official in-app AI assistant for OnlineKotha. How can I help you today? Ask me about exporting WhatsApp chats, how AI chat works, Wrapped, or our plans!",
                                 sender: "Kotha Assistant",
@@ -901,7 +933,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         ];
                     }
-                    data = history;
                     window._chatMsgCache[chatName] = data;
                 } else {
                     const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
@@ -1680,8 +1711,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!window._chatMetaCache['kotha_assistant']) window._chatMetaCache['kotha_assistant'] = {};
                     window._chatMetaCache['kotha_assistant'].contactName = "Kotha Assistant";
                     window._chatMetaCache['kotha_assistant'].isGroup = false;
-                    if (!window._chatMetaCache['kotha_assistant'].lastMessage) {
-                        const stored = localStorage.getItem('kotha_assistant_history');
+
+                    const cacheMsgs = window._chatMsgCache && window._chatMsgCache['kotha_assistant'];
+                    if (cacheMsgs && cacheMsgs.length > 0) {
+                        const last = cacheMsgs[cacheMsgs.length - 1];
+                        window._chatMetaCache['kotha_assistant'].lastMessage = last.text.length > 40 ? last.text.slice(0, 40) + '…' : last.text;
+                        window._chatMetaCache['kotha_assistant'].lastTime = last.time || '';
+                    } else if (!window._chatMetaCache['kotha_assistant'].lastMessage) {
+                        const isImpersonating = window.__USER__ && window.__USER__.is_impersonating;
+                        const uKey = window.__USER__ ? `kotha_assistant_history_${window.__USER__.id}` : 'kotha_assistant_history';
+                        const stored = !isImpersonating ? localStorage.getItem(uKey) : null;
                         let history = [];
                         if (stored) { try { history = JSON.parse(stored); } catch(e){} }
                         if (history.length > 0) {

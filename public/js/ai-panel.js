@@ -770,14 +770,17 @@
                 if (chatFolder === 'kotha_assistant') {
                     endpoint = '/api/demo-chat';
                     payload = { message: text, sessionId: 'app_onboarding_session', role: 'support', nonce: nonce };
+                    if (sendAsAI) {
+                        payload.sendAsAI = true;
+                    }
                     
-                    // Save user message to history
-                    const stored = localStorage.getItem('kotha_assistant_history');
-                    let history = [];
-                    if (stored) { try { history = JSON.parse(stored); } catch(e){} }
+                    // Save user message to cache and user-scoped storage
+                    let history = (window._chatMsgCache && window._chatMsgCache['kotha_assistant']) ? window._chatMsgCache['kotha_assistant'] : [];
                     const todayIso = new Date().toLocaleDateString('en-CA');
-                    history.push({ text: text, sender: 'You', time: formatNow(), date: todayIso });
-                    localStorage.setItem('kotha_assistant_history', JSON.stringify(history));
+                    history.push({ text: text, sender: sendAsAI ? 'Kotha Assistant' : 'You', time: formatNow(), date: todayIso });
+                    
+                    const uKey = window.__USER__ ? `kotha_assistant_history_${window.__USER__.id}` : 'kotha_assistant_history';
+                    try { localStorage.setItem(uKey, JSON.stringify(history)); } catch(e){}
 
                     if (window._chatMsgCache) {
                         window._chatMsgCache['kotha_assistant'] = history;
@@ -902,12 +905,12 @@
                                 _dotStop();
                                 
                                 if (chatFolder === 'kotha_assistant') {
-                                    const stored = localStorage.getItem('kotha_assistant_history');
-                                    let history = [];
-                                    if (stored) { try { history = JSON.parse(stored); } catch(e){} }
+                                    let history = (window._chatMsgCache && window._chatMsgCache['kotha_assistant']) ? window._chatMsgCache['kotha_assistant'] : [];
                                     const todayIso = new Date().toLocaleDateString('en-CA');
                                     history.push({ text: cleanedText, sender: 'Kotha Assistant', time: formatNow(), date: todayIso });
-                                    localStorage.setItem('kotha_assistant_history', JSON.stringify(history));
+                                    
+                                    const uKey = window.__USER__ ? `kotha_assistant_history_${window.__USER__.id}` : 'kotha_assistant_history';
+                                    try { localStorage.setItem(uKey, JSON.stringify(history)); } catch(e){}
 
                                     if (window._chatMsgCache) {
                                         window._chatMsgCache['kotha_assistant'] = history;

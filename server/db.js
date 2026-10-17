@@ -226,6 +226,21 @@ CREATE TABLE IF NOT EXISTS demo_usage (
   updated_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS kotha_assistant_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER,
+  guest_id TEXT,
+  sender TEXT NOT NULL,
+  role TEXT NOT NULL,
+  text TEXT NOT NULL,
+  time TEXT,
+  date TEXT,
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_kam_user ON kotha_assistant_messages(user_id);
+CREATE INDEX IF NOT EXISTS idx_kam_guest ON kotha_assistant_messages(guest_id);
+
 CREATE TABLE IF NOT EXISTS email_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER,

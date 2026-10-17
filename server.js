@@ -736,10 +736,19 @@ app.use(errorHandler);
 
 httpServer.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
+    if (typeof adminRouter.syncProvidersFromEnv === 'function') {
+        adminRouter.syncProvidersFromEnv();
+    }
     if (!process.env.ENCRYPTION_SECRET) {
         console.warn('⚠️  ENCRYPTION_SECRET missing in .env — providers admin pages will fail');
     }
     if (!process.env.ADMIN_EMAIL) {
         console.warn('⚠️  ADMIN_EMAIL not set — signup with that email to become admin');
+    }
+    if (process.env.OPENROUTER_API_KEY) {
+        console.log('✓ OpenRouter API key loaded from .env');
+    }
+    if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+        console.log('✓ Google Gemini API key loaded from .env');
     }
 });

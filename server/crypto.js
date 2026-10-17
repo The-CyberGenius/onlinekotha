@@ -41,4 +41,51 @@ function maskKey(key) {
     return key.slice(0, 4) + '••••••••' + key.slice(-4);
 }
 
-module.exports = { encrypt, decrypt, maskKey };
+// Map of AI provider names to possible environment variable names
+const PROVIDER_ENV_MAP = {
+    openrouter: ['OPENROUTER_API_KEY'],
+    google: ['GEMINI_API_KEY', 'GOOGLE_API_KEY', 'GOOGLE_AI_API_KEY'],
+    openai: ['OPENAI_API_KEY'],
+    anthropic: ['ANTHROPIC_API_KEY'],
+    groq: ['GROQ_API_KEY'],
+    deepseek: ['DEEPSEEK_API_KEY'],
+    mistral: ['MISTRAL_API_KEY'],
+    qwen: ['QWEN_API_KEY', 'DASHSCOPE_API_KEY'],
+    xai: ['XAI_API_KEY', 'GROK_API_KEY'],
+    together: ['TOGETHER_API_KEY'],
+};
+
+function getProviderApiKey(providerName, encryptedPayload = null) {
+    // 1. Check process.env first (gives priority/fallback to .env keys)
+    if (providerName) {
+        const nameKey = String(providerName).toLowerCase().trim();
+        const envVars = PROVIDER_ENV_MAP[nameKey] || [];
+        for (const envVar of envVars) {
+            const val = process.env[envVar];
+            if (val && typeof val === 'string' && val.trim()) {
+                return val.trim();
+            }
+        }
+        // Generic fallback: <NAME>_API_KEY
+        const genericEnv = `${nameKey.toUpperCase().replace(/[^A-Z0-9_]/g, '_')}_API_KEY`;
+        const genVal = process.env[genericEnv];
+        if (genVal && typeof genVal === 'string' && genVal.trim()) {
+            return genVal.trim();
+        }
+    }
+
+    // 2. Fall back to decrypted payload from database if available
+    if (encryptedPayload) {
+        try {
+            const dec = decrypt(encryptedPayload);
+            if (dec && typeof dec === 'string' && dec.trim()) {
+                return dec.trim();
+            }
+        } catch {}
+    }
+
+    return null;
+}
+
+module.exports = { encrypt, decrypt, maskKey, getProviderApiKey, PROVIDER_ENV_MAP };
+

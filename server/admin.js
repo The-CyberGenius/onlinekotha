@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
 const { db, getSetting, setSetting } = require('./db');
-const { encrypt, decrypt, maskKey } = require('./crypto');
+const { encrypt, decrypt, maskKey, getProviderApiKey, PROVIDER_ENV_MAP } = require('./crypto');
 const { requireAdmin } = require('./auth');
 const { userDir, SRC_DIR } = require('./upload');
 const { getMessages } = require('./cache');
@@ -145,12 +145,59 @@ const KNOWN_PROVIDERS = {
     },
 };
 
+function syncProvidersFromEnv() {
+    try {
+        for (const [name, envVars] of Object.entries(PROVIDER_ENV_MAP)) {
+            let val = null;
+            for (const v of envVars) {
+                const envVal = process.env[v];
+                if (envVal && typeof envVal === 'string' && envVal.trim()) {
+                    val = envVal.trim();
+                    break;
+                }
+            }
+            if (!val) continue;
+
+            const known = KNOWN_PROVIDERS[name];
+            const existing = db.prepare('SELECT id, api_key_encrypted, enabled FROM providers WHERE name = ?').get(name);
+            const enc = encrypt(val);
+
+            if (existing) {
+                db.prepare('UPDATE providers SET api_key_encrypted = ?, enabled = 1 WHERE id = ?').run(enc, existing.id);
+            } else {
+                const label = known ? known.label : name;
+                const baseUrl = known ? known.baseUrl : null;
+                const info = db.prepare(
+                    'INSERT INTO providers (name, label, api_key_encrypted, base_url, enabled, created_at) VALUES (?, ?, ?, ?, 1, ?)'
+                ).run(name, label, enc, baseUrl, Date.now());
+
+                if (known && known.models && known.models.length) {
+                    const stmt = db.prepare(
+                        `INSERT OR IGNORE INTO models (provider_id, model_id, display_name, input_price_per_1m, output_price_per_1m, enabled)
+                         VALUES (?, ?, ?, ?, ?, 1)`
+                    );
+                    for (const m of known.models) {
+                        stmt.run(info.lastInsertRowid, m.id, m.name, m.in, m.out);
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Failed to sync providers from .env:', err);
+    }
+}
+
+// Automatically sync on initial load
+syncProvidersFromEnv();
+
 router.get('/known-providers', (req, res) => {
     res.json(KNOWN_PROVIDERS);
 });
 
 // ---------- Providers ----------
 router.get('/providers', (req, res) => {
+    // Keep providers fresh with environment variables
+    syncProvidersFromEnv();
     const rows = db
         .prepare('SELECT id, name, label, base_url, enabled, created_at, last_tested_at, last_test_ok, last_test_error FROM providers ORDER BY id')
         .all();
@@ -158,7 +205,8 @@ router.get('/providers', (req, res) => {
         let masked = '';
         try {
             const enc = db.prepare('SELECT api_key_encrypted FROM providers WHERE id = ?').get(r.id);
-            masked = maskKey(decrypt(enc.api_key_encrypted));
+            const apiKey = getProviderApiKey(r.name, enc?.api_key_encrypted);
+            masked = maskKey(apiKey);
         } catch {
             masked = '••••';
         }
@@ -226,7 +274,8 @@ router.post('/providers/:id/test', async (req, res) => {
     let ok = false;
     let error = null;
     try {
-        const apiKey = decrypt(row.api_key_encrypted);
+        const apiKey = getProviderApiKey(row.name, row.api_key_encrypted);
+        if (!apiKey) throw new Error(`API key missing for provider ${row.name}`);
         const result = await testProvider(row.name, apiKey, row.base_url);
         ok = result.ok;
         error = result.error || null;
@@ -367,7 +416,8 @@ router.post('/providers/:id/fetch-models', async (req, res) => {
     if (!row) return res.status(404).json({ error: 'not found' });
 
     try {
-        const apiKey = decrypt(row.api_key_encrypted);
+        const apiKey = getProviderApiKey(row.name, row.api_key_encrypted);
+        if (!apiKey) throw new Error(`API key missing for provider ${row.name}`);
         const baseUrl = row.base_url || 'https://openrouter.ai/api/v1';
         const r = await fetch(`${baseUrl}/models`, {
             headers: { Authorization: `Bearer ${apiKey}` },
@@ -911,13 +961,43 @@ router.get('/users/:id/conversations', (req, res) => {
                 (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
            FROM conversations c WHERE c.user_id = ? ORDER BY c.updated_at DESC`;
     const rows = db.prepare(sql).all(isGuest ? rawId : Number(rawId));
+
+    try {
+        const asstCount = isGuest
+            ? db.prepare('SELECT COUNT(*) as c, MAX(created_at) as last_at FROM kotha_assistant_messages WHERE guest_id = ?').get(rawId)
+            : db.prepare('SELECT COUNT(*) as c, MAX(created_at) as last_at FROM kotha_assistant_messages WHERE user_id = ?').get(Number(rawId));
+        if (asstCount && asstCount.c > 0) {
+            rows.unshift({
+                id: 'kotha_assistant',
+                chat_folder: 'kotha_assistant',
+                title: 'Kotha Assistant (Support & Inquiries)',
+                created_at: asstCount.last_at || Date.now(),
+                updated_at: asstCount.last_at || Date.now(),
+                msg_count: asstCount.c
+            });
+        }
+    } catch (e) {}
+
     res.json(rows);
 });
 
 router.get('/users/:id/conversations/:convId', (req, res) => {
     const rawId = req.params.id;
-    const convId = Number(req.params.convId);
     const isGuest = String(rawId).startsWith('gst_');
+
+    if (req.params.convId === 'kotha_assistant') {
+        const msgs = isGuest
+            ? db.prepare('SELECT id, role, text as content, created_at FROM kotha_assistant_messages WHERE guest_id = ? ORDER BY id ASC').all(rawId)
+            : db.prepare('SELECT id, role, text as content, created_at FROM kotha_assistant_messages WHERE user_id = ? ORDER BY id ASC').all(Number(rawId));
+        return res.json({
+            id: 'kotha_assistant',
+            chat_folder: 'kotha_assistant',
+            title: 'Kotha Assistant (Support & Inquiries)',
+            messages: msgs
+        });
+    }
+
+    const convId = Number(req.params.convId);
     const conv = isGuest
         ? db.prepare('SELECT * FROM conversations WHERE id = ? AND guest_id = ?').get(convId, rawId)
         : db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, Number(rawId));
@@ -931,8 +1011,18 @@ router.get('/users/:id/conversations/:convId', (req, res) => {
 // Delete single AI conversation
 router.delete('/users/:id/conversations/:convId', (req, res) => {
     const rawId = req.params.id;
-    const convId = Number(req.params.convId);
     const isGuest = String(rawId).startsWith('gst_');
+
+    if (req.params.convId === 'kotha_assistant') {
+        if (isGuest) {
+            db.prepare('DELETE FROM kotha_assistant_messages WHERE guest_id = ?').run(rawId);
+        } else {
+            db.prepare('DELETE FROM kotha_assistant_messages WHERE user_id = ?').run(Number(rawId));
+        }
+        return res.json({ ok: true, deleted: 'kotha_assistant' });
+    }
+
+    const convId = Number(req.params.convId);
     const conv = isGuest
         ? db.prepare('SELECT id FROM conversations WHERE id = ? AND guest_id = ?').get(convId, rawId)
         : db.prepare('SELECT id FROM conversations WHERE id = ? AND user_id = ?').get(convId, Number(rawId));
@@ -950,18 +1040,44 @@ router.delete('/users/:id/conversations', (req, res) => {
     if (isGuest) {
         db.prepare('DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE guest_id = ?)').run(rawId);
         db.prepare('DELETE FROM conversations WHERE guest_id = ?').run(rawId);
+        db.prepare('DELETE FROM kotha_assistant_messages WHERE guest_id = ?').run(rawId);
     } else {
         const userId = Number(rawId);
         db.prepare('DELETE FROM conv_messages WHERE conversation_id IN (SELECT id FROM conversations WHERE user_id = ?)').run(userId);
         db.prepare('DELETE FROM conversations WHERE user_id = ?').run(userId);
+        db.prepare('DELETE FROM kotha_assistant_messages WHERE user_id = ?').run(userId);
     }
     res.json({ ok: true, message: 'All AI conversations cleared for this user' });
 });
 
 router.get('/users/:id/conversations/:convId/download', (req, res) => {
     const rawId = req.params.id;
-    const convId = Number(req.params.convId);
     const isGuest = String(rawId).startsWith('gst_');
+
+    if (req.params.convId === 'kotha_assistant') {
+        const msgs = isGuest
+            ? db.prepare('SELECT role, text as content, created_at FROM kotha_assistant_messages WHERE guest_id = ? ORDER BY id ASC').all(rawId)
+            : db.prepare('SELECT role, text as content, created_at FROM kotha_assistant_messages WHERE user_id = ? ORDER BY id ASC').all(Number(rawId));
+
+        let log = `Kotha Assistant Conversation Log\n`;
+        log += `User ID: ${rawId}\n`;
+        log += `Chat: kotha_assistant\n`;
+        log += `Generated: ${new Date().toISOString()}\n`;
+        log += `${'='.repeat(50)}\n\n`;
+
+        for (const m of msgs) {
+            const time = new Date(m.created_at).toLocaleString();
+            const label = m.role === 'user' ? 'USER' : 'KOTHA ASSISTANT';
+            log += `[${time}] ${label}:\n${m.content}\n\n`;
+        }
+
+        const safeName = `assistant_log_user${rawId}`;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="${safeName}.txt"`);
+        return res.send(log);
+    }
+
+    const convId = Number(req.params.convId);
     const conv = isGuest
         ? db.prepare('SELECT * FROM conversations WHERE id = ? AND guest_id = ?').get(convId, rawId)
         : db.prepare('SELECT * FROM conversations WHERE id = ? AND user_id = ?').get(convId, Number(rawId));
@@ -1664,4 +1780,6 @@ router.delete('/firewall/clear-blocks', (req, res) => {
     }
 });
 
+router.syncProvidersFromEnv = syncProvidersFromEnv;
+router.KNOWN_PROVIDERS = KNOWN_PROVIDERS;
 module.exports = router;

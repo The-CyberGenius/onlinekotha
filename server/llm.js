@@ -1,5 +1,5 @@
 const { db, getSetting } = require('./db');
-const { decrypt } = require('./crypto');
+const { decrypt, getProviderApiKey } = require('./crypto');
 
 class LLMError extends Error {
     constructor(message, code) {
@@ -65,7 +65,8 @@ function calcCost(model, inputTokens, outputTokens) {
 // ---------- Provider streaming adapters ----------
 
 async function streamAnthropic({ model, messages, systemPrompt, maxTokens, temperature, onToken, signal }) {
-    const apiKey = decrypt(model.api_key_encrypted);
+    const apiKey = getProviderApiKey(model.provider_name, model.api_key_encrypted);
+    if (!apiKey) throw new LLMError('Anthropic API key is missing. Set ANTHROPIC_API_KEY in .env', 'NO_API_KEY');
     const url = `${model.base_url || 'https://api.anthropic.com/v1'}/messages`;
 
     const body = {
@@ -112,7 +113,8 @@ async function streamAnthropic({ model, messages, systemPrompt, maxTokens, tempe
 }
 
 async function streamOpenAICompatible({ model, messages, systemPrompt, maxTokens, temperature, onToken, signal }) {
-    const apiKey = decrypt(model.api_key_encrypted);
+    const apiKey = getProviderApiKey(model.provider_name, model.api_key_encrypted);
+    if (!apiKey) throw new LLMError(`API key for ${model.provider_name} is missing. Set ${model.provider_name.toUpperCase()}_API_KEY in .env`, 'NO_API_KEY');
     const url = `${model.base_url}/chat/completions`;
 
     const chatMessages = [];
@@ -161,7 +163,8 @@ async function streamOpenAICompatible({ model, messages, systemPrompt, maxTokens
 }
 
 async function streamGoogle({ model, messages, systemPrompt, maxTokens, temperature, onToken, signal }) {
-    const apiKey = decrypt(model.api_key_encrypted);
+    const apiKey = getProviderApiKey(model.provider_name, model.api_key_encrypted);
+    if (!apiKey) throw new LLMError('Google Gemini API key is missing. Set GEMINI_API_KEY or GOOGLE_API_KEY in .env', 'NO_API_KEY');
     const url = `${model.base_url || 'https://generativelanguage.googleapis.com/v1beta'}/models/${model.model_id}:streamGenerateContent?alt=sse&key=${apiKey}`;
 
     const contents = messages.map(m => ({
