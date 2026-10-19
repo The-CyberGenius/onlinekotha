@@ -3139,163 +3139,298 @@
         document.getElementById('nav-login').style.display = 'inline-flex';
     </script>
     <!-- ═══════════ HERO ═══════════ -->
-    <section class="hero sec" style="position:relative; overflow:hidden; padding-top:72px; padding-bottom:80px;">
+    <section class="hero sec" style="position:relative; overflow:visible; padding-top:64px; padding-bottom:72px;">
 
-        <!-- Subtle background: two soft gradient orbs, no animation -->
-        <div style="position:absolute;top:-10%;right:-5%;width:55vw;max-width:700px;height:700px;background:radial-gradient(ellipse at 70% 30%,rgba(99,102,241,0.07),transparent 65%);pointer-events:none;z-index:0;"></div>
-        <div style="position:absolute;bottom:0;left:-5%;width:45vw;max-width:560px;height:500px;background:radial-gradient(ellipse at 30% 70%,rgba(236,72,153,0.05),transparent 65%);pointer-events:none;z-index:0;"></div>
+        <!-- Subtle ambient radial glows -->
+        <div style="position:absolute;top:-8%;left:50%;width:80vw;max-width:900px;height:650px;background:radial-gradient(ellipse at center, rgba(99,102,241,0.08) 0%, transparent 65%);transform:translateX(-50%);filter:blur(60px);pointer-events:none;z-index:0;"></div>
 
-        <div class="wrap hero-two-col" style="position:relative;z-index:1;max-width:1200px;">
+        <div class="wrap hero-centered" style="position:relative;z-index:1;text-align:center;max-width:980px;margin:0 auto;">
 
-            <!-- ── LEFT: Copy ── -->
-            <div>
-
-                <!-- Category tag -->
-                <div class="hero-category-tag rise d1">
-                    <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;flex-shrink:0;"></span>
-                    Communication Intelligence Platform
-                </div>
-
-                <!-- Headline: confident, static, no animation -->
-                <h1 class="rise d1" style="font-size:clamp(34px,5.2vw,62px);font-weight:800;letter-spacing:-0.04em;line-height:1.07;margin-bottom:22px;color:var(--text-primary);">
-                    Your conversations<br>
-                    contain patterns<br>
-                    <span style="background:linear-gradient(135deg,#6366f1 20%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">you've never seen.</span>
-                </h1>
-
-                <!-- Subtitle: professional, no slang -->
-                <p class="rise d2" style="font-size:16.5px;color:var(--text-secondary);line-height:1.78;margin-bottom:34px;max-width:430px;font-weight:400;">
-                    Upload any WhatsApp export. Kotha surfaces communication dynamics, behavioral patterns, and relationship intelligence — processed entirely in your browser. Zero data leaves your device.
-                </p>
-
-                <!-- CTAs -->
-                <div class="rise d2" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;">
-                    <a href="/app.html?chat=kotha_assistant&auth=google" class="btn cta-primary" style="font-size:14.5px;padding:13px 24px;gap:8px;border-radius:10px;">
-                        Start Analyzing — Free
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-                    </a>
-                    <a href="#how" class="btn-outline-hero rise d2">
-                        How It Works
-                    </a>
-                </div>
-
-                <!-- Privacy: factual, simple, not a badge -->
-                <div class="rise d3" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    All analysis runs in your browser. Your files never reach our servers.
-                </div>
-
+            <!-- Category Pill -->
+            <div class="hero-category-tag rise d1" style="margin-bottom:20px;">
+                <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;flex-shrink:0;"></span>
+                Communication &amp; Chat Intelligence
             </div>
 
-            <!-- ── RIGHT: Product Dashboard ── -->
-            <div class="product-browser-frame rise d2">
+            <!-- Main Headline -->
+            <h1 class="display rise d1" style="font-size:clamp(36px,5.5vw,66px);font-weight:900;letter-spacing:-0.04em;line-height:1.08;margin:0 auto 20px;max-width:860px;color:var(--text-primary);">
+                Your conversations contain patterns<br>
+                <span style="background:linear-gradient(135deg,var(--accent) 20%,var(--accent-rose) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">you've never seen.</span>
+            </h1>
 
-                <!-- Browser chrome -->
-                <div class="browser-chrome-bar">
-                    <div class="browser-dots">
-                        <span></span><span></span><span></span>
+            <!-- Subtitle -->
+            <p class="lead rise d2" style="font-size:clamp(16px,1.8vw,19px);color:var(--text-secondary);max-width:680px;margin:0 auto 32px;font-weight:400;line-height:1.65;text-wrap:balance;">
+                Upload any exported WhatsApp chat (.zip or .txt). OnlineKotha reconstructs your message history, generates shareable Spotify-style Chat Wrapped stories, and maps your communication dynamics — 100% in your browser.
+            </p>
+
+            <!-- Dual CTAs -->
+            <div class="hero-cta-group rise d3" style="display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px;">
+                <a href="/app.html?chat=kotha_assistant&auth=google" class="btn cta-primary" style="font-size:14.5px;padding:13px 26px;border-radius:12px;gap:8px;">
+                    <span>Upload WhatsApp Chat — Free</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                </a>
+                <button type="button" class="btn-outline-hero" onclick="window.switchHeroTab('wrapped')" style="border-radius:12px;padding:12px 22px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <span>View Chat Wrapped on Phone</span>
+                </button>
+            </div>
+
+            <!-- Factual Privacy Note -->
+            <div class="rise d3" style="display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted);margin-bottom:38px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Client-side parsing. Your chat files are processed locally in your browser and never sent to a server.</span>
+            </div>
+
+            <!-- ═══════════ DUAL SHOWCASE: TABS & CONTAINERS ═══════════ -->
+            <div class="rise d4 hero-showcase-container" id="hero-interactive-showcase" style="width:100%;max-width:880px;margin:0 auto;">
+
+                <!-- Tab Switcher -->
+                <div class="showcase-tabs-wrapper" style="margin-bottom:24px;">
+                    <div class="showcase-tabs">
+                        <button type="button" class="showcase-tab active" id="tab-dashboard-btn" onclick="window.switchHeroTab('dashboard')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                            <span>Chat Analytics Dashboard</span>
+                        </button>
+                        <button type="button" class="showcase-tab" id="tab-wrapped-btn" onclick="window.switchHeroTab('wrapped')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                            <span>Chat Wrapped on Phone</span>
+                            <span class="tab-badge" style="background:var(--accent);color:#fff;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:700;">7 Story Slides</span>
+                        </button>
                     </div>
-                    <div class="browser-url-pill">onlinekotha.com/app</div>
-                    <div style="width:40px;"></div>
                 </div>
 
-                <!-- Dashboard inner -->
-                <div class="dashboard-body">
+                <!-- Panel 1: Analytics Dashboard (Sarah) -->
+                <div id="panel-dashboard" class="showcase-panel">
+                    <div class="product-browser-frame" style="width:100%;text-align:left;">
+                        <!-- Browser chrome -->
+                        <div class="browser-chrome-bar">
+                            <div class="browser-dots"><span></span><span></span><span></span></div>
+                            <div class="browser-url-pill">onlinekotha.com/app</div>
+                            <div style="width:40px;"></div>
+                        </div>
 
-                    <!-- Top bar: contact info + action -->
-                    <div class="dash-top-bar">
-                        <div class="dash-contact-info">
-                            <div class="dash-av">P</div>
-                            <div>
-                                <div class="dash-av-name">Priya — Chat Analytics</div>
-                                <div class="dash-av-meta">14,847 messages &middot; 2.3 years &middot; 96 active days</div>
+                        <!-- Dashboard body -->
+                        <div class="dashboard-body" style="padding:22px;">
+                            <!-- Top bar: Contact info + action -->
+                            <div class="dash-top-bar">
+                                <div class="dash-contact-info">
+                                    <div class="dash-av" style="background:linear-gradient(135deg, #6366f1, #8b5cf6);">S</div>
+                                    <div>
+                                        <div class="dash-av-name">Sarah — Chat Analytics</div>
+                                        <div class="dash-av-meta">14,847 messages · 574 days active · WhatsApp Archive</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span style="font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;font-weight:600;padding:4px 9px;border-radius:6px;border:1px solid rgba(16,185,129,0.2);">Parsed 100%</span>
+                                    <div class="dash-export-btn">Share Wrapped ↗</div>
+                                </div>
+                            </div>
+
+                            <!-- Real Metric Tiles (Genuine stats calculated by app) -->
+                            <div class="metrics-3col" style="margin-bottom:18px;">
+                                <div class="metric-tile">
+                                    <div class="metric-tile-val">14,847</div>
+                                    <div class="metric-tile-lbl">Total Messages</div>
+                                    <div class="metric-tile-delta" style="color:var(--text-secondary);">574 days consecutive</div>
+                                </div>
+                                <div class="metric-tile">
+                                    <div class="metric-tile-val">58<sup>%</sup></div>
+                                    <div class="metric-tile-lbl">You Initiated</div>
+                                    <div class="metric-tile-delta delta-g">First text of the day</div>
+                                </div>
+                                <div class="metric-tile">
+                                    <div class="metric-tile-val">11<sup>PM</sup></div>
+                                    <div class="metric-tile-lbl">Peak Chat Hour</div>
+                                    <div class="metric-tile-delta delta-b">Night owl streak 🌙</div>
+                                </div>
+                            </div>
+
+                            <!-- Message Distribution (You vs Sarah) -->
+                            <div class="chart-section" style="margin-bottom:18px;">
+                                <div class="chart-title" style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span>Message Distribution</span>
+                                    <span style="font-size:10px;color:var(--text-muted);font-weight:500;">Balanced Dynamic</span>
+                                </div>
+                                <div class="bar-row">
+                                    <div class="bar-lbl">You</div>
+                                    <div class="bar-track"><div class="bar-fill" style="width:52%;background:linear-gradient(90deg,#6366f1,#818cf8);"></div></div>
+                                    <div class="bar-pct">52% (7,720)</div>
+                                </div>
+                                <div class="bar-row">
+                                    <div class="bar-lbl">Sarah</div>
+                                    <div class="bar-track"><div class="bar-fill" style="width:48%;background:linear-gradient(90deg,#ec4899,#f472b6);"></div></div>
+                                    <div class="bar-pct">48% (7,127)</div>
+                                </div>
+                            </div>
+
+                            <!-- 24-Hour Activity Heatmap -->
+                            <div class="chart-section" style="margin-bottom:18px;">
+                                <div class="chart-title">Activity by Time of Day (24 Hours)</div>
+                                <div class="heatmap-bars">
+                                    <div style="height:18%;background:rgba(99,102,241,0.22);" title="12 AM"></div>
+                                    <div style="height:22%;background:rgba(99,102,241,0.25);" title="1 AM"></div>
+                                    <div style="height:16%;background:rgba(99,102,241,0.18);" title="2 AM"></div>
+                                    <div style="height:10%;background:rgba(99,102,241,0.12);" title="3 AM"></div>
+                                    <div style="height:8%;background:rgba(99,102,241,0.10);" title="4 AM"></div>
+                                    <div style="height:14%;background:rgba(99,102,241,0.16);" title="5 AM"></div>
+                                    <div style="height:28%;background:rgba(99,102,241,0.30);" title="6 AM"></div>
+                                    <div style="height:44%;background:rgba(99,102,241,0.45);" title="7 AM"></div>
+                                    <div style="height:52%;background:rgba(99,102,241,0.52);" title="8 AM"></div>
+                                    <div style="height:46%;background:rgba(99,102,241,0.46);" title="9 AM"></div>
+                                    <div style="height:38%;background:rgba(99,102,241,0.38);" title="10 AM"></div>
+                                    <div style="height:32%;background:rgba(99,102,241,0.32);" title="11 AM"></div>
+                                    <div style="height:48%;background:rgba(99,102,241,0.48);" title="12 PM"></div>
+                                    <div style="height:58%;background:rgba(99,102,241,0.58);" title="1 PM"></div>
+                                    <div style="height:42%;background:rgba(99,102,241,0.42);" title="2 PM"></div>
+                                    <div style="height:36%;background:rgba(99,102,241,0.36);" title="3 PM"></div>
+                                    <div style="height:34%;background:rgba(99,102,241,0.34);" title="4 PM"></div>
+                                    <div style="height:42%;background:rgba(99,102,241,0.42);" title="5 PM"></div>
+                                    <div style="height:62%;background:rgba(99,102,241,0.62);" title="6 PM"></div>
+                                    <div style="height:80%;background:rgba(99,102,241,0.78);" title="7 PM"></div>
+                                    <div style="height:86%;background:rgba(99,102,241,0.86);" title="8 PM"></div>
+                                    <div style="height:92%;background:rgba(99,102,241,0.92);" title="9 PM"></div>
+                                    <div style="height:96%;background:rgba(99,102,241,0.96);" title="10 PM"></div>
+                                    <div style="height:100%;background:#6366f1;" title="11 PM (Peak)"></div>
+                                </div>
+                                <div class="heatmap-labels">
+                                    <span>12 AM</span>
+                                    <span>6 AM</span>
+                                    <span>12 PM</span>
+                                    <span>6 PM</span>
+                                    <span style="color:var(--accent);font-weight:700;">11 PM Peak ✦</span>
+                                </div>
+                            </div>
+
+                            <!-- Real Top Emojis Leaderboard -->
+                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;padding:9px 12px;background:var(--bg-soft);border:1px solid var(--border);border-radius:8px;">
+                                <span style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Top Emojis:</span>
+                                <div style="display:flex;gap:12px;font-size:12px;color:var(--text-secondary);">
+                                    <span>😂 <b>1,420</b></span>
+                                    <span>💀 <b>982</b></span>
+                                    <span>❤️ <b>714</b></span>
+                                    <span>✨ <b>430</b></span>
+                                    <span>🥺 <b>295</b></span>
+                                </div>
+                            </div>
+
+                            <!-- On This Day memory strip -->
+                            <div class="memory-strip">
+                                <div class="memory-strip-ico">📅</div>
+                                <div style="flex:1;">
+                                    <div class="memory-strip-tag">On This Day — 2 years ago</div>
+                                    <div class="memory-strip-quote">"Can't believe we pulled that off today! Still the best adventure ever 😂"</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="dash-export-btn">Export PDF ↗</div>
                     </div>
-
-                    <!-- Metric tiles -->
-                    <div class="metrics-3col">
-                        <div class="metric-tile">
-                            <div class="metric-tile-val">4.2<sup>m</sup></div>
-                            <div class="metric-tile-lbl">Avg Response</div>
-                            <div class="metric-tile-delta delta-g">↓ 23% healthier</div>
-                        </div>
-                        <div class="metric-tile">
-                            <div class="metric-tile-val">61<sup>%</sup></div>
-                            <div class="metric-tile-lbl">You Initiate</div>
-                            <div class="metric-tile-delta delta-r">↑ pattern detected</div>
-                        </div>
-                        <div class="metric-tile">
-                            <div class="metric-tile-val">11<sup>pm</sup></div>
-                            <div class="metric-tile-lbl">Peak Hour</div>
-                            <div class="metric-tile-delta delta-b">Late night ✦</div>
-                        </div>
-                    </div>
-
-                    <!-- Bar chart: message distribution -->
-                    <div class="chart-section">
-                        <div class="chart-title">Message Distribution</div>
-                        <div class="bar-row">
-                            <div class="bar-lbl">You</div>
-                            <div class="bar-track"><div class="bar-fill" style="width:52%;background:linear-gradient(90deg,#6366f1,#818cf8);"></div></div>
-                            <div class="bar-pct">52%</div>
-                        </div>
-                        <div class="bar-row">
-                            <div class="bar-lbl">Priya</div>
-                            <div class="bar-track"><div class="bar-fill" style="width:48%;background:linear-gradient(90deg,#ec4899,#f472b6);"></div></div>
-                            <div class="bar-pct">48%</div>
-                        </div>
-                    </div>
-
-                    <!-- Heatmap: activity by hour -->
-                    <div class="chart-section">
-                        <div class="chart-title">Activity Heatmap — 24h</div>
-                        <div class="heatmap-bars">
-                            <div style="height:18%;background:rgba(99,102,241,0.18);"></div>
-                            <div style="height:22%;background:rgba(99,102,241,0.20);"></div>
-                            <div style="height:16%;background:rgba(99,102,241,0.16);"></div>
-                            <div style="height:12%;background:rgba(99,102,241,0.12);"></div>
-                            <div style="height:10%;background:rgba(99,102,241,0.10);"></div>
-                            <div style="height:14%;background:rgba(99,102,241,0.14);"></div>
-                            <div style="height:28%;background:rgba(99,102,241,0.28);"></div>
-                            <div style="height:44%;background:rgba(99,102,241,0.44);"></div>
-                            <div style="height:52%;background:rgba(99,102,241,0.50);"></div>
-                            <div style="height:46%;background:rgba(99,102,241,0.44);"></div>
-                            <div style="height:38%;background:rgba(99,102,241,0.38);"></div>
-                            <div style="height:32%;background:rgba(99,102,241,0.32);"></div>
-                            <div style="height:48%;background:rgba(99,102,241,0.48);"></div>
-                            <div style="height:58%;background:rgba(99,102,241,0.56);"></div>
-                            <div style="height:42%;background:rgba(99,102,241,0.42);"></div>
-                            <div style="height:36%;background:rgba(99,102,241,0.36);"></div>
-                            <div style="height:34%;background:rgba(99,102,241,0.34);"></div>
-                            <div style="height:40%;background:rgba(99,102,241,0.40);"></div>
-                            <div style="height:63%;background:rgba(99,102,241,0.60);"></div>
-                            <div style="height:80%;background:rgba(99,102,241,0.75);"></div>
-                            <div style="height:100%;background:#6366f1;"></div>
-                            <div style="height:88%;background:rgba(99,102,241,0.84);"></div>
-                            <div style="height:70%;background:rgba(99,102,241,0.68);"></div>
-                            <div style="height:48%;background:rgba(99,102,241,0.48);"></div>
-                        </div>
-                        <div class="heatmap-labels">
-                            <span>12 AM</span>
-                            <span>6 AM</span>
-                            <span>12 PM</span>
-                            <span>6 PM</span>
-                            <span style="color:var(--accent);font-weight:600;">11 PM ↑</span>
-                        </div>
-                    </div>
-
-                    <!-- On This Day memory card -->
-                    <div class="memory-strip">
-                        <div class="memory-strip-ico">📅</div>
-                        <div>
-                            <div class="memory-strip-tag">On This Day — 2 years ago</div>
-                            <div class="memory-strip-quote">"I literally cannot believe we both said the exact same thing at the same time — this is too funny 😭"</div>
-                        </div>
-                    </div>
-
                 </div>
+
+                <!-- Panel 2: Spotify-Style Chat Wrapped (The Virtual iPhone Mockup) -->
+                <div id="panel-wrapped" class="showcase-panel hidden">
+                    <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
+                        <div class="phone-mockup">
+                            <div class="phone-screen">
+                                <!-- iPhone Dynamic Island -->
+                                <div class="dynamic-island">
+                                    <div class="dynamic-island-lens"></div>
+                                </div>
+
+                                <!-- Story Progress Indicators -->
+                                <div class="story-progress-container" id="story-progress">
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                </div>
+
+                                <!-- Share Button -->
+                                <div class="story-share-btn" id="story-share" title="Share your story">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                </div>
+
+                                <!-- Story Slides Container -->
+                                <div class="story-container" id="story-carousel">
+                                    <!-- Slide 1: Intro -->
+                                    <div class="story-card story-bg-1">
+                                        <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
+                                        <h1 class="story-title">Your Chat, Wrapped.</h1>
+                                        <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations reveal about you &amp; Sarah.</p>
+                                        <span style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap to flip 👉</span>
+                                    </div>
+
+                                    <!-- Slide 2: Stats -->
+                                    <div class="story-card story-bg-2">
+                                        <h2 class="story-subtitle">The Numbers</h2>
+                                        <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px;">14,847</div>
+                                        <p class="story-text">messages sent over</p>
+                                        <div class="story-highlight">574 Days</div>
+                                    </div>
+
+                                    <!-- Slide 3: Vibe Check -->
+                                    <div class="story-card story-bg-3">
+                                        <h2 class="story-subtitle">Vibe Check</h2>
+                                        <div style="font-size: 3.5rem; margin-bottom: 6px;">🎢</div>
+                                        <div class="story-highlight" style="width: 85%;">82% Laughter &amp; Banter 😂</div>
+                                        <div class="story-highlight" style="width: 85%;">18% Wholesome Talks ❤️</div>
+                                    </div>
+
+                                    <!-- Slide 4: Top Words -->
+                                    <div class="story-card story-bg-4">
+                                        <h2 class="story-subtitle">Most Used Words</h2>
+                                        <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1 literally 💬</div>
+                                        <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 haha 😂</div>
+                                        <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 actually ✨</div>
+                                        <div class="story-highlight" style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 see you 📍</div>
+                                    </div>
+
+                                    <!-- Slide 5: Time Patterns -->
+                                    <div class="story-card story-bg-5">
+                                        <h2 class="story-subtitle">Time Patterns</h2>
+                                        <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
+                                        <h1 class="story-title" style="font-size: 2rem;">Night Owls</h1>
+                                        <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>11:00 PM</b></p>
+                                    </div>
+
+                                    <!-- Slide 6: AI Memory -->
+                                    <div class="story-card story-bg-6">
+                                        <h2 class="story-subtitle">Memory Intelligence</h2>
+                                        <h1 class="story-title" style="font-size: 1.85rem;">Inside Jokes Kept</h1>
+                                        <p class="story-text" style="margin-top: 10px; font-size: 14px;">Instant searchable archive of all memories, nicknames &amp; quotes.</p>
+                                        <div class="story-highlight" style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
+                                            💬 "Wait, are you serious right now? 😂"
+                                        </div>
+                                    </div>
+
+                                    <!-- Slide 7: Outro -->
+                                    <div class="story-card story-bg-7">
+                                        <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
+                                        <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat &amp; unlock your Chat Wrapped.</p>
+                                        <a href="/app.html?chat=kotha_assistant&auth=google" id="story-cta-btn" class="btn"
+                                            style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                            <span>Try Free Now</span>
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                            <span>Tap left or right to browse stories</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -4887,161 +5022,32 @@
     }
     </script>
 
-    <!-- ═══════════ HERO INTERACTIVE PERSONA SIMULATOR JS ═══════════ -->
+    <!-- ═══════════ HERO SHOWCASE SWITCHER JS ═══════════ -->
     <script>
     (function () {
-        var personas = {
-            kavya: {
-                name: 'Kavya ✨', avatar: 'K',
-                avatarGradient: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
-                status: 'online · simulated from 14,200 WhatsApp texts',
-                messages: [
-                    { role: 'ai',   text: "yaar sun, I literally cannot sleep 😭 its 2am and brain full of random thoughts" },
-                    { role: 'user', text: "hahaha same 💀 what thoughts?" },
-                    { role: 'ai',   text: "like... why did I say 'you too' when the waiter said enjoy your meal 😩" }
-                ],
-                chips: ["miss kiya tha", "kya chal raha", "random thought share kar", "mood kaisa hai?"],
-                replies: [
-                    "arey yaar 😂 classic tu", "haan bhai sahi bol rha hai",
-                    "OMG wait wait wait — I was literally thinking same",
-                    "okay but hear me out... 🙈", "BAHAHAHAHA 💀 bhai seriously", "nahi nahi I'm dead serious rn"
-                ]
-            },
-            kabir: {
-                name: 'Kabir ⚡', avatar: 'K',
-                avatarGradient: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                status: 'online · simulated from 8,400 college group messages',
-                messages: [
-                    { role: 'ai',   text: "oye bhai, canteen ke peeche wali jagah pe aa 5 min me" },
-                    { role: 'user', text: "kyu bhai kya hua" },
-                    { role: 'ai',   text: "chill maar, bass ek plan hai tera bhai ke liye 😈" }
-                ],
-                chips: ["kya scene hai", "aaj plan kya hai", "bhai padhai kar le", "canteen chal?"],
-                replies: [
-                    "bhai sun 😂", "tera dimaag kharab hai yaar", "haan haan sahi bol",
-                    "chup kar 💀", "oye pagal", "bhenchod kya scene hai"
-                ]
-            },
-            maa: {
-                name: 'Maa 🏡', avatar: 'M',
-                avatarGradient: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-                status: 'online · simulated from 3,200 family chat texts',
-                messages: [
-                    { role: 'ai',   text: "beta khana kha liya? Bahut der ho gayi aaj" },
-                    { role: 'user', text: "haan maa, abhi kha raha hun" },
-                    { role: 'ai',   text: "achha, thanda mat kha. Garam karke khana. Aur paani pee" }
-                ],
-                chips: ["haan maa sab theek hai", "kab aaunga ghar", "aaj busy tha", "maa kuch chahiye?"],
-                replies: [
-                    "theek hai beta, dhyan rakh", "bas bas khayal rakh apna", "haaan theek hai",
-                    "beta yaad rakh apne aap ka", "agar kuch chahiye toh batana", "beta kha le pehle"
-                ]
-            }
-        };
-
-        var currentPersona = 'kavya';
-        var isSending = false;
-
         window.switchHeroTab = function (tab) {
-            var pp = document.getElementById('panel-persona');
+            var dp = document.getElementById('panel-dashboard');
             var wp = document.getElementById('panel-wrapped');
-            var pb = document.getElementById('tab-persona-btn');
+            var db = document.getElementById('tab-dashboard-btn');
             var wb = document.getElementById('tab-wrapped-btn');
-            if (tab === 'persona') {
-                pp && pp.classList.remove('hidden');
-                wp && wp.classList.add('hidden');
-                pb && pb.classList.add('active');
-                wb && wb.classList.remove('active');
+            if (tab === 'wrapped') {
+                if (wp) wp.classList.remove('hidden');
+                if (dp) dp.classList.add('hidden');
+                if (wb) wb.classList.add('active');
+                if (db) db.classList.remove('active');
+                // Trigger carousel width calculation
+                setTimeout(function () {
+                    window.dispatchEvent(new Event('resize'));
+                }, 50);
             } else {
-                wp && wp.classList.remove('hidden');
-                pp && pp.classList.add('hidden');
-                wb && wb.classList.add('active');
-                pb && pb.classList.remove('active');
+                if (dp) dp.classList.remove('hidden');
+                if (wp) wp.classList.add('hidden');
+                if (db) db.classList.add('active');
+                if (wb) wb.classList.remove('active');
             }
-        };
-
-        window.selectPersona = function (key) {
-            if (!personas[key]) return;
-            currentPersona = key;
-            var p = personas[key];
-            ['kavya', 'kabir', 'maa'].forEach(function (k) {
-                var pill = document.getElementById('pill-' + k);
-                if (pill) pill.classList.toggle('active', k === key);
-            });
-            var av = document.getElementById('sim-avatar');
-            if (av) { av.textContent = p.avatar; av.style.background = p.avatarGradient; }
-            var nm = document.getElementById('sim-name');
-            if (nm) nm.textContent = p.name;
-            var st = document.getElementById('sim-status');
-            if (st) st.textContent = p.status;
-            var box = document.getElementById('sim-messages-box');
-            if (box) {
-                box.innerHTML = '';
-                p.messages.forEach(function (m) { appendMsg(m.role, m.text); });
-            }
-            var cc = document.getElementById('sim-chips-container');
-            if (cc) {
-                cc.innerHTML = '';
-                p.chips.forEach(function (chip) {
-                    var btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'wa-prompt-chip';
-                    btn.textContent = chip;
-                    btn.onclick = function () { sendMsg(chip); };
-                    cc.appendChild(btn);
-                });
-            }
-            var inp = document.getElementById('sim-input');
-            if (inp) inp.placeholder = 'Message ' + p.name.split(' ')[0] + '...';
-        };
-
-        function appendMsg(role, text) {
-            var box = document.getElementById('sim-messages-box');
-            if (!box) return;
-            var div = document.createElement('div');
-            div.className = 'wa-bubble ' + (role === 'ai' ? 'wa-bubble-ai' : 'wa-bubble-user');
-            div.textContent = text;
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function sendMsg(text) {
-            if (isSending || !text || !text.trim()) return;
-            isSending = true;
-            appendMsg('user', text);
-            var inp = document.getElementById('sim-input');
-            if (inp) inp.value = '';
-            var box = document.getElementById('sim-messages-box');
-            var td = document.createElement('div');
-            td.className = 'wa-bubble wa-bubble-ai';
-            td.id = 'sim-typing-indicator';
-            td.innerHTML = '<span style="opacity:0.6;font-size:12px;">typing...</span>';
-            if (box) { box.appendChild(td); box.scrollTop = box.scrollHeight; }
-            var p = personas[currentPersona];
-            var reply = p.replies[Math.floor(Math.random() * p.replies.length)];
-            setTimeout(function () {
-                var ind = document.getElementById('sim-typing-indicator');
-                if (ind) ind.remove();
-                appendMsg('ai', reply);
-                isSending = false;
-            }, 900 + Math.random() * 600);
-        }
-
-        window.handleSimSend = function (e) {
-            e.preventDefault();
-            var inp = document.getElementById('sim-input');
-            if (inp && inp.value.trim()) sendMsg(inp.value.trim());
         };
 
         document.addEventListener('DOMContentLoaded', function () {
-            var sampleBtn = document.getElementById('hero-sample-btn');
-            if (sampleBtn) {
-                sampleBtn.addEventListener('click', function () {
-                    var sc = document.getElementById('hero-interactive-showcase');
-                    if (sc) sc.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    window.switchHeroTab('persona');
-                });
-            }
             var expBtn = document.getElementById('hero-how-export-btn');
             if (expBtn) {
                 expBtn.addEventListener('click', function () {
@@ -5049,7 +5055,6 @@
                     if (modal) { modal.classList.add('show'); document.body.style.overflow = 'hidden'; }
                 });
             }
-            window.selectPersona('kavya');
         });
     })();
     </script>
