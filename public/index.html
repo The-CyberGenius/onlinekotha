@@ -2260,6 +2260,361 @@
             animation-delay: 0.55s;
         }
 
+        /* ══════════════════════════════════════════════
+           PREMIUM HERO — Product Intelligence Dashboard
+           ══════════════════════════════════════════════ */
+
+        .hero-category-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.07em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 28px;
+        }
+
+        .hero-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1.25fr;
+            gap: 64px;
+            align-items: center;
+        }
+
+        @media (max-width: 960px) {
+            .hero-two-col { grid-template-columns: 1fr; gap: 48px; }
+        }
+
+        .btn-outline-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 13px 22px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 14.5px;
+            font-weight: 500;
+            color: var(--text-primary);
+            background: transparent;
+            text-decoration: none;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-outline-hero:hover {
+            border-color: var(--accent);
+            background: rgba(99,102,241,0.05);
+        }
+
+        /* ── Product Browser Frame ── */
+        .product-browser-frame {
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03),
+                        0 8px 24px rgba(0,0,0,0.05),
+                        0 24px 56px rgba(0,0,0,0.07);
+            background: var(--card-bg);
+            position: relative;
+        }
+
+        html.dark .product-browser-frame {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2),
+                        0 8px 24px rgba(0,0,0,0.35),
+                        0 24px 56px rgba(0,0,0,0.5),
+                        inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        .browser-chrome-bar {
+            height: 38px;
+            background: var(--bg-soft);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 10px;
+        }
+
+        .browser-dots { display: flex; gap: 5px; }
+        .browser-dots span {
+            width: 10px; height: 10px; border-radius: 50%; display: block;
+        }
+        .browser-dots span:nth-child(1) { background: #ff5f57; }
+        .browser-dots span:nth-child(2) { background: #febc2e; }
+        .browser-dots span:nth-child(3) { background: #28c840; }
+
+        .browser-url-pill {
+            flex: 1;
+            height: 22px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10.5px;
+            color: var(--text-muted);
+            letter-spacing: 0.01em;
+            max-width: 240px;
+            margin: 0 auto;
+        }
+
+        .dashboard-body { padding: 18px; }
+
+        .dash-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dash-contact-info { display: flex; align-items: center; gap: 9px; }
+
+        .dash-av {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0;
+        }
+
+        .dash-av-name {
+            font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.2;
+        }
+
+        .dash-av-meta {
+            font-size: 10.5px; color: var(--text-muted); margin-top: 1px;
+        }
+
+        .dash-export-btn {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        /* Metric tiles */
+        .metrics-3col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .metric-tile {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 10px 11px;
+        }
+
+        .metric-tile-val {
+            font-size: 19px; font-weight: 700; color: var(--text-primary);
+            letter-spacing: -0.04em; line-height: 1;
+        }
+
+        .metric-tile-val sup {
+            font-size: 10px; font-weight: 600; vertical-align: super; letter-spacing: 0;
+        }
+
+        .metric-tile-lbl {
+            font-size: 9.5px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;
+        }
+
+        .metric-tile-delta {
+            font-size: 9.5px; font-weight: 600; margin-top: 3px;
+        }
+
+        .delta-g { color: #10b981; }
+        .delta-r { color: #ef4444; }
+        .delta-b { color: var(--accent); }
+
+        /* Bar chart */
+        .chart-section { margin-bottom: 13px; }
+
+        .chart-title {
+            font-size: 9.5px; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+        }
+
+        .bar-row {
+            display: grid;
+            grid-template-columns: 42px 1fr 28px;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 6px;
+        }
+
+        .bar-lbl { font-size: 10.5px; color: var(--text-secondary); font-weight: 500; text-align: right; }
+
+        .bar-track {
+            height: 7px;
+            background: var(--border);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .bar-fill { height: 100%; border-radius: 99px; }
+
+        .bar-pct { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+
+        /* Heatmap bars */
+        .heatmap-bars {
+            display: flex; gap: 2px; align-items: flex-end; height: 34px;
+        }
+
+        .heatmap-bars > div {
+            flex: 1; border-radius: 2px;
+        }
+
+        .heatmap-labels {
+            display: flex; justify-content: space-between; margin-top: 3px;
+        }
+
+        .heatmap-labels span {
+            font-size: 8.5px; color: var(--text-muted);
+        }
+
+        /* Memory strip */
+        .memory-strip {
+            background: linear-gradient(135deg, rgba(99,102,241,0.07), rgba(236,72,153,0.04));
+            border: 1px solid rgba(99,102,241,0.14);
+            border-radius: 9px;
+            padding: 11px 13px;
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+        }
+
+        .memory-strip-ico { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+        .memory-strip-tag {
+            font-size: 9px; font-weight: 700; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px;
+        }
+
+        .memory-strip-quote {
+            font-size: 11.5px; color: var(--text-secondary); line-height: 1.5; font-style: italic;
+        }
+
+        /* ── Enterprise / B2B Section ── */
+        .enterprise-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: start;
+        }
+
+        @media (max-width: 860px) {
+            .enterprise-grid { grid-template-columns: 1fr; gap: 40px; }
+        }
+
+        .enterprise-feature-list {
+            list-style: none;
+            padding: 0; margin: 24px 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .enterprise-feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .enterprise-feature-list li::before {
+            content: '';
+            width: 18px; height: 18px; flex-shrink: 0;
+            border-radius: 50%;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.2);
+            display: flex; align-items: center; justify-content: center;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 10px;
+        }
+
+        .enterprise-form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .enterprise-form-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .enterprise-form-card p {
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .form-field {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-soft);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .form-field:focus { border-color: var(--accent); }
+
+        .form-field::placeholder { color: var(--text-muted); }
+
+        textarea.form-field { resize: vertical; min-height: 90px; }
+
+        .form-submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--text-primary);
+            color: var(--bg);
+            border: none;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: opacity 0.2s;
+            font-family: inherit;
+            margin-top: 4px;
+        }
+
+        .form-submit-btn:hover { opacity: 0.85; }
+
+        /* ══════════════════════════════════════════════
+           END PREMIUM HERO STYLES
+           ══════════════════════════════════════════════ */
+
         /* ═══════════ LANDING PAGE EXPONENTIAL UPGRADE ═══════════ */
         .showcase-tabs-wrapper {
             display: flex;
@@ -2727,6 +3082,9 @@
                 <a href="/pricing.html" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;"
                     onmouseover="this.style.color='var(--text-primary)'"
                     onmouseout="this.style.color='var(--text-secondary)'">Pricing</a>
+                <a href="#enterprise" style="color:var(--text-secondary);text-decoration:none;transition:color 0.2s;"
+                    onmouseover="this.style.color='var(--text-primary)'"
+                    onmouseout="this.style.color='var(--text-secondary)'">Enterprise</a>
             </div>
 
             <div class="nav-right" style="display:flex;align-items:center;gap:10px;">
@@ -2781,399 +3139,167 @@
         document.getElementById('nav-login').style.display = 'inline-flex';
     </script>
     <!-- ═══════════ HERO ═══════════ -->
-    <section class="hero sec" style="position: relative; overflow: visible;">
-        <div
-            style="position: absolute; top: 20%; left: 50%; width: 80vw; max-width: 800px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 60%); opacity: 0.12; transform: translateX(-50%); filter: blur(80px); z-index: -1; pointer-events: none; animation: pulseGlow 8s ease-in-out infinite alternate;">
-        </div>
-        <div class="wrap hero-centered">
-            <!-- Pill Badge -->
-            <div class="hero-brand-pill rise d1" style="margin-bottom: 22px;">
-                <span class="brand-pill-badge">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                    </svg>
-                    TRUSTED BY 120,000+ USERS WORLDWIDE
-                </span>
-                <span class="brand-pill-text">100% Private · Never Shares Your Data</span>
-            </div>
+    <section class="hero sec" style="position:relative; overflow:hidden; padding-top:72px; padding-bottom:80px;">
 
-            <!-- Main High-Converting Headline -->
-            <h1 class="display rise d1 hero-title-main"
-                style="margin-bottom:20px; font-weight: 900; letter-spacing: -0.04em; font-size: clamp(30px, 6vw, 64px); line-height: 1.18; overflow: visible;">
-                <span class="hero-title-prefix">Your</span><br>
-                <span style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.2; overflow: visible; padding-bottom: 4px;">
-                    <span id="platform-rotator" style="
-                        background: linear-gradient(135deg, var(--accent), var(--accent-rose)); 
-                        -webkit-background-clip: text; 
-                        -webkit-text-fill-color: transparent; 
-                        border-right: 3px solid var(--accent);
-                        padding-right: 6px;
-                        padding-left: 2px;
-                        padding-bottom: 0.18em;
-                        margin-bottom: -0.18em;
-                        display: inline-block;
-                        white-space: nowrap;
-                        line-height: 1.15;
-                        overflow: visible;
-                    ">Communication Intelligence</span>
-                </span>
-                <span style="display: block; font-size: clamp(20px, 4vw, 36px); font-weight: 800; background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 8px;">
-                    Mirror. 🪞 Understand Every Relationship Deeper.
-                </span>
+        <!-- Subtle background: two soft gradient orbs, no animation -->
+        <div style="position:absolute;top:-10%;right:-5%;width:55vw;max-width:700px;height:700px;background:radial-gradient(ellipse at 70% 30%,rgba(99,102,241,0.07),transparent 65%);pointer-events:none;z-index:0;"></div>
+        <div style="position:absolute;bottom:0;left:-5%;width:45vw;max-width:560px;height:500px;background:radial-gradient(ellipse at 30% 70%,rgba(236,72,153,0.05),transparent 65%);pointer-events:none;z-index:0;"></div>
 
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        const words = ['Communication Intelligence', 'Relationship Analytics', 'Chat Pattern Mirror', 'Conversation Intelligence'];
-                        let currentIndex = 0;
-                        const rotator = document.getElementById('platform-rotator');
-                        if (!rotator) return;
+        <div class="wrap hero-two-col" style="position:relative;z-index:1;max-width:1200px;">
 
-                        let isDeleting = false;
-                        let txt = 'AI Memory Clone';
-                        let typingSpeed = 100;
+            <!-- ── LEFT: Copy ── -->
+            <div>
 
-                        function type() {
-                            const fullWord = words[currentIndex];
-
-                            if (isDeleting) {
-                                txt = fullWord.substring(0, txt.length - 1);
-                                typingSpeed = 35;
-                            } else {
-                                txt = fullWord.substring(0, txt.length + 1);
-                                typingSpeed = 90;
-                            }
-
-                            rotator.textContent = txt || '​';
-
-                            if (!isDeleting && txt === fullWord) {
-                                typingSpeed = 2200;
-                                isDeleting = true;
-                            } else if (isDeleting && txt === '') {
-                                isDeleting = false;
-                                currentIndex = (currentIndex + 1) % words.length;
-                                typingSpeed = 400;
-                            }
-
-                            setTimeout(type, typingSpeed);
-                        }
-
-                        setTimeout(type, 1500);
-
-                        setInterval(() => {
-                            rotator.style.borderRightColor = rotator.style.borderRightColor === 'transparent'
-                                ? 'var(--accent)'
-                                : 'transparent';
-                        }, 500);
-                    });
-                </script>
-            </h1>
-
-            <p class="lead rise d2"
-                style="font-size: clamp(16px, 1.9vw, 20px); color: var(--text-secondary); max-width: 680px; margin: 0 auto 36px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
-                Upload any WhatsApp chat. Kotha reveals your communication patterns, conversation dynamics, and relationship intelligence — with Spotify-style analytics, AI chat simulation, and "On This Day" memory moments. For couples, friends, therapists &amp; teams.
-            </p>
-
-            <!-- Dual High-Converting CTAs -->
-            <div class="hero-cta-group rise d3">
-                <a href="/app.html?chat=kotha_assistant&auth=google" id="hero-cta" class="btn cta-primary hero-btn-main">
-                    <span>Upload WhatsApp Chat (Free)</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round">
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <button type="button" class="btn hero-btn-secondary" id="hero-sample-btn" style="border-radius:999px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                    <span>Try Live Demo (Zero Upload)</span>
-                </button>
-                <button type="button" class="btn hero-btn-secondary" id="hero-how-export-btn" style="border-radius:999px;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                    </svg>
-                    <span>How to Export in 10s 📱</span>
-                </button>
-            </div>
-
-            <div class="hero-trust-chips rise d3">
-                <span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                    100% Private Client-Side Vault
-                </span>
-                <span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                    </svg>
-                    Never Trains Public AI
-                </span>
-                <span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    Zero Password or WhatsApp Login Needed
-                </span>
-            </div>
-
-            <!-- ═══════════ HERO INTERACTIVE SHOWCASE CONTAINER ═══════════ -->
-            <div class="rise d4 hero-showcase-container" id="hero-interactive-showcase" style="width:100%; max-width:860px; margin-top:40px;">
-                <!-- Tab Switcher -->
-                <div class="showcase-tabs-wrapper">
-                    <div class="showcase-tabs">
-                        <button type="button" class="showcase-tab active" id="tab-persona-btn" onclick="window.switchHeroTab('persona')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                            <span>Live AI Persona Demo</span>
-                            <span class="tab-badge">Interactive</span>
-                        </button>
-                        <button type="button" class="showcase-tab" id="tab-wrapped-btn" onclick="window.switchHeroTab('wrapped')">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                            <span>Chat Wrapped Stories</span>
-                            <span class="tab-badge">7 Slides</span>
-                        </button>
-                    </div>
+                <!-- Category tag -->
+                <div class="hero-category-tag rise d1">
+                    <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;flex-shrink:0;"></span>
+                    Communication Intelligence Platform
                 </div>
 
-                <!-- Panel 1: Live Interactive Persona Simulator -->
-                <div id="panel-persona" class="showcase-panel">
-                    <div class="persona-simulator-card">
-                        <!-- Top Bar / Persona Switcher -->
-                        <div class="persona-top-bar">
-                            <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em;">Try Sample Persona:</span>
-                            <div class="persona-pills-group">
-                                <button type="button" class="persona-pill-btn active" id="pill-kavya" onclick="window.selectPersona('kavya')">
-                                    <span>💖 Kavya (Late Night)</span>
-                                </button>
-                                <button type="button" class="persona-pill-btn" id="pill-kabir" onclick="window.selectPersona('kabir')">
-                                    <span>⚡ Kabir (College Gang)</span>
-                                </button>
-                                <button type="button" class="persona-pill-btn" id="pill-maa" onclick="window.selectPersona('maa')">
-                                    <span>🏡 Maa (Family)</span>
-                                </button>
+                <!-- Headline: confident, static, no animation -->
+                <h1 class="rise d1" style="font-size:clamp(34px,5.2vw,62px);font-weight:800;letter-spacing:-0.04em;line-height:1.07;margin-bottom:22px;color:var(--text-primary);">
+                    Your conversations<br>
+                    contain patterns<br>
+                    <span style="background:linear-gradient(135deg,#6366f1 20%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">you've never seen.</span>
+                </h1>
+
+                <!-- Subtitle: professional, no slang -->
+                <p class="rise d2" style="font-size:16.5px;color:var(--text-secondary);line-height:1.78;margin-bottom:34px;max-width:430px;font-weight:400;">
+                    Upload any WhatsApp export. Kotha surfaces communication dynamics, behavioral patterns, and relationship intelligence — processed entirely in your browser. Zero data leaves your device.
+                </p>
+
+                <!-- CTAs -->
+                <div class="rise d2" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;">
+                    <a href="/app.html?chat=kotha_assistant&auth=google" class="btn cta-primary" style="font-size:14.5px;padding:13px 24px;gap:8px;border-radius:10px;">
+                        Start Analyzing — Free
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#how" class="btn-outline-hero rise d2">
+                        How It Works
+                    </a>
+                </div>
+
+                <!-- Privacy: factual, simple, not a badge -->
+                <div class="rise d3" style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    All analysis runs in your browser. Your files never reach our servers.
+                </div>
+
+            </div>
+
+            <!-- ── RIGHT: Product Dashboard ── -->
+            <div class="product-browser-frame rise d2">
+
+                <!-- Browser chrome -->
+                <div class="browser-chrome-bar">
+                    <div class="browser-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="browser-url-pill">onlinekotha.com/app</div>
+                    <div style="width:40px;"></div>
+                </div>
+
+                <!-- Dashboard inner -->
+                <div class="dashboard-body">
+
+                    <!-- Top bar: contact info + action -->
+                    <div class="dash-top-bar">
+                        <div class="dash-contact-info">
+                            <div class="dash-av">P</div>
+                            <div>
+                                <div class="dash-av-name">Priya — Chat Analytics</div>
+                                <div class="dash-av-meta">14,847 messages &middot; 2.3 years &middot; 96 active days</div>
                             </div>
                         </div>
+                        <div class="dash-export-btn">Export PDF ↗</div>
+                    </div>
 
-                        <!-- Chat Header -->
-                        <div class="persona-chat-header">
-                            <div class="persona-avatar" id="sim-avatar">K</div>
-                            <div style="flex:1;">
-                                <div style="display:flex; align-items:center; gap:6px;">
-                                    <h4 id="sim-name" style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0;">Kavya ✨</h4>
-                                    <span style="font-size:10px; background:rgba(16,185,129,0.12); color:#10b981; font-weight:700; padding:1px 6px; border-radius:999px;">AI Persona</span>
-                                </div>
-                                <p id="sim-status" style="font-size:11px; color:#10b981; font-weight:500; margin:0;">online · simulated from 14,200 WhatsApp texts</p>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:11px; color:var(--text-muted); font-weight:600; background:var(--msg-ai-bg); padding:4px 8px; border-radius:8px; border:1px solid var(--border);">Sample Preview</span>
-                            </div>
+                    <!-- Metric tiles -->
+                    <div class="metrics-3col">
+                        <div class="metric-tile">
+                            <div class="metric-tile-val">4.2<sup>m</sup></div>
+                            <div class="metric-tile-lbl">Avg Response</div>
+                            <div class="metric-tile-delta delta-g">↓ 23% healthier</div>
                         </div>
-
-                        <!-- Chat Messages Scroll Area -->
-                        <div class="persona-chat-messages" id="sim-messages-box"></div>
-
-                        <!-- Quick Prompt Chips -->
-                        <div class="wa-chips-row" id="sim-chips-container"></div>
-
-                        <!-- Input Box Form -->
-                        <form class="wa-input-form" id="sim-input-form" onsubmit="window.handleSimSend(event)">
-                            <input type="text" class="wa-input-box" id="sim-input" placeholder="Type a message to test her reply..." autocomplete="off">
-                            <button type="submit" class="wa-send-btn" aria-label="Send message">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                                </svg>
-                            </button>
-                        </form>
-
-                        <!-- Bottom Contextual CTA Bar -->
-                        <div class="persona-bottom-cta">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span style="font-size:18px;">💡</span>
-                                <span style="font-size:12px; color:var(--text-secondary); line-height:1.4;">
-                                    <b>This is a demo.</b> Your AI will sound exactly like <i>your</i> friend, using your private inside jokes.
-                                </span>
-                            </div>
-                            <a href="/app.html?chat=kotha_assistant&auth=google" class="btn cta-primary" style="min-height:36px; padding:0 16px; font-size:12.5px; border-radius:999px;">
-                                <span>Import My Chat Free</span>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
-                            </a>
+                        <div class="metric-tile">
+                            <div class="metric-tile-val">61<sup>%</sup></div>
+                            <div class="metric-tile-lbl">You Initiate</div>
+                            <div class="metric-tile-delta delta-r">↑ pattern detected</div>
+                        </div>
+                        <div class="metric-tile">
+                            <div class="metric-tile-val">11<sup>pm</sup></div>
+                            <div class="metric-tile-lbl">Peak Hour</div>
+                            <div class="metric-tile-delta delta-b">Late night ✦</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Panel 2: Spotify-Style Chat Wrapped (The Phone Mockup with 7 slides) -->
-                <div id="panel-wrapped" class="showcase-panel hidden">
-            <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
-                <div class="phone-mockup">
-
-
-                    <div class="phone-screen">
-                        <!-- iPhone Dynamic Island -->
-                        <div class="dynamic-island">
-                            <div class="dynamic-island-lens"></div>
+                    <!-- Bar chart: message distribution -->
+                    <div class="chart-section">
+                        <div class="chart-title">Message Distribution</div>
+                        <div class="bar-row">
+                            <div class="bar-lbl">You</div>
+                            <div class="bar-track"><div class="bar-fill" style="width:52%;background:linear-gradient(90deg,#6366f1,#818cf8);"></div></div>
+                            <div class="bar-pct">52%</div>
                         </div>
-
-                        <!-- Story Progress Indicators -->
-                        <div class="story-progress-container" id="story-progress">
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                        </div>
-
-                        <!-- Share Button -->
-                        <div class="story-share-btn" id="story-share" title="Share your story">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="18" cy="5" r="3"></circle>
-                                <circle cx="6" cy="12" r="3"></circle>
-                                <circle cx="18" cy="19" r="3"></circle>
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                            </svg>
-                        </div>
-
-                        <!-- Story Slides Container -->
-                        <div class="story-container" id="story-carousel">
-                            <!-- Slide 1: Intro -->
-                            <div class="story-card story-bg-1">
-                                <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
-                                <h1 class="story-title">Your Chat, Wrapped.</h1>
-                                <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations
-                                    reveal about you &amp; them.</p>
-                                <span
-                                    style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap
-                                    to flip 👉</span>
-                            </div>
-
-                            <!-- Slide 2: Stats -->
-                            <div class="story-card story-bg-2">
-                                <h2 class="story-subtitle">The Numbers</h2>
-                                <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px;">12,842</div>
-                                <p class="story-text">messages sent over</p>
-                                <div class="story-highlight">574 Days</div>
-                            </div>
-
-                            <!-- Slide 3: Vibe Check -->
-                            <div class="story-card story-bg-3">
-                                <h2 class="story-subtitle">Vibe Check</h2>
-                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🎢</div>
-                                <div class="story-highlight" style="width: 85%;">80% Chaos 😂</div>
-                                <div class="story-highlight" style="width: 85%;">20% Wholesome ❤️</div>
-                            </div>
-
-                            <!-- Slide 4: Top Words -->
-                            <div class="story-card story-bg-4">
-                                <h2 class="story-subtitle">Most Used Words</h2>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1
-                                    literally 💬</div>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀
-                                </div>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂
-                                </div>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 anyway
-                                    ✨</div>
-                            </div>
-
-                            <!-- Slide 5: Time Patterns -->
-                            <div class="story-card story-bg-5">
-                                <h2 class="story-subtitle">Time Patterns</h2>
-                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
-                                <h1 class="story-title" style="font-size: 2rem;">Night Owls</h1>
-                                <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14
-                                        AM</b></p>
-                            </div>
-
-                            <!-- Slide 6: AI Conversation -->
-                            <div class="story-card story-bg-6">
-                                <h2 class="story-subtitle">The Magic</h2>
-                                <h1 class="story-title" style="font-size: 1.85rem;">AI Clone Ready</h1>
-                                <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact
-                                    words, humor, tone &amp; texting style.</p>
-                                <div class="story-highlight"
-                                    style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
-                                    💬 "Wait, are you serious right now? 😂"
-                                </div>
-                            </div>
-
-                            <!-- Slide 7: Outro -->
-                            <div class="story-card story-bg-7">
-                                <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
-                                <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat
-                                    &amp; relive your memories securely.</p>
-                                <a href="/app.html?chat=kotha_assistant&auth=google" id="story-cta-btn" class="btn"
-                                    style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                                    <span>Try Free Now</span>
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="1.5" stroke-linecap="round">
-                                        <path d="M5 12h14M13 5l7 7-7 7" />
-                                    </svg>
-                                </a>
-                            </div>
+                        <div class="bar-row">
+                            <div class="bar-lbl">Priya</div>
+                            <div class="bar-track"><div class="bar-fill" style="width:48%;background:linear-gradient(90deg,#ec4899,#f472b6);"></div></div>
+                            <div class="bar-pct">48%</div>
                         </div>
                     </div>
-                </div>
-                <div
-                    style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                    <span>Tap left or right to browse stories</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 18l6-6-6-6" />
-                    </svg>
+
+                    <!-- Heatmap: activity by hour -->
+                    <div class="chart-section">
+                        <div class="chart-title">Activity Heatmap — 24h</div>
+                        <div class="heatmap-bars">
+                            <div style="height:18%;background:rgba(99,102,241,0.18);"></div>
+                            <div style="height:22%;background:rgba(99,102,241,0.20);"></div>
+                            <div style="height:16%;background:rgba(99,102,241,0.16);"></div>
+                            <div style="height:12%;background:rgba(99,102,241,0.12);"></div>
+                            <div style="height:10%;background:rgba(99,102,241,0.10);"></div>
+                            <div style="height:14%;background:rgba(99,102,241,0.14);"></div>
+                            <div style="height:28%;background:rgba(99,102,241,0.28);"></div>
+                            <div style="height:44%;background:rgba(99,102,241,0.44);"></div>
+                            <div style="height:52%;background:rgba(99,102,241,0.50);"></div>
+                            <div style="height:46%;background:rgba(99,102,241,0.44);"></div>
+                            <div style="height:38%;background:rgba(99,102,241,0.38);"></div>
+                            <div style="height:32%;background:rgba(99,102,241,0.32);"></div>
+                            <div style="height:48%;background:rgba(99,102,241,0.48);"></div>
+                            <div style="height:58%;background:rgba(99,102,241,0.56);"></div>
+                            <div style="height:42%;background:rgba(99,102,241,0.42);"></div>
+                            <div style="height:36%;background:rgba(99,102,241,0.36);"></div>
+                            <div style="height:34%;background:rgba(99,102,241,0.34);"></div>
+                            <div style="height:40%;background:rgba(99,102,241,0.40);"></div>
+                            <div style="height:63%;background:rgba(99,102,241,0.60);"></div>
+                            <div style="height:80%;background:rgba(99,102,241,0.75);"></div>
+                            <div style="height:100%;background:#6366f1;"></div>
+                            <div style="height:88%;background:rgba(99,102,241,0.84);"></div>
+                            <div style="height:70%;background:rgba(99,102,241,0.68);"></div>
+                            <div style="height:48%;background:rgba(99,102,241,0.48);"></div>
+                        </div>
+                        <div class="heatmap-labels">
+                            <span>12 AM</span>
+                            <span>6 AM</span>
+                            <span>12 PM</span>
+                            <span>6 PM</span>
+                            <span style="color:var(--accent);font-weight:600;">11 PM ↑</span>
+                        </div>
+                    </div>
+
+                    <!-- On This Day memory card -->
+                    <div class="memory-strip">
+                        <div class="memory-strip-ico">📅</div>
+                        <div>
+                            <div class="memory-strip-tag">On This Day — 2 years ago</div>
+                            <div class="memory-strip-quote">"I literally cannot believe we both said the exact same thing at the same time — this is too funny 😭"</div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </div>
-        <!-- End of Panel 2 (Wrapped) -->
-    </div>
-    <!-- End of Hero Interactive Showcase Container -->
 
-    <!-- Hero Showcase Infinity Banner (Chats Are Memories Too) -->
-    <div class="rise d3 hero-banner-container" id="hero-infinity-banner" style="margin-top: 36px;">
-        <div class="hero-banner-card">
-            <img src="/img/hero-banner.webp" onerror="this.onerror=null;this.src='/img/hero-banner.png';"
-                alt="Your Chats Are Memories Too — OnlineKotha AI Memories" loading="eager" width="1024"
-                height="341">
         </div>
-    </div>
-</div>
-</section>
+    </section>
 
     <!-- ═══════════ WHAT IS KOTHA ═══════════ -->
     <section class="sec" id="what-is-kotha">
@@ -3276,14 +3402,6 @@
                     <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px;">Memory Preservation</h3>
                     <p class="muted" style="font-size:13px;line-height:1.65;">Keep cherished conversations alive with "On This Day" flashbacks and private AI that recalls the same humor, tone, and warmth from your most important chats.</p>
                 </div>
-            </div>
-            <!-- B2B CTA strip -->
-            <div style="margin-top:40px;padding:24px 28px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(236,72,153,0.06));border:1px solid rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-                <div>
-                    <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">🧠 Are you a therapist or counselor?</div>
-                    <div style="font-size:13px;color:var(--text-secondary);">We offer team plans starting at $30/month. Get objective communication data for your clients.</div>
-                </div>
-                <a href="mailto:hello@onlinekotha.com?subject=Therapist%20Plan%20Inquiry" class="btn cta-primary" style="font-size:13px;padding:10px 20px;white-space:nowrap;">Contact for B2B Pricing →</a>
             </div>
         </div>
     </section>
@@ -3544,6 +3662,81 @@
 
         </div>
     </section>
+
+    <!-- ═══════════ ENTERPRISE ═══════════ -->
+    <section class="sec" id="enterprise" style="border-top:1px solid var(--border);">
+        <div class="wrap">
+            <div class="enterprise-grid">
+
+                <!-- Left: Copy -->
+                <div>
+                    <span class="eyebrow">For Teams &amp; Practitioners</span>
+                    <h2 class="h2" style="margin-top:12px;font-size:clamp(1.6rem,3.5vw,2.4rem);letter-spacing:-0.03em;">
+                        Built for professionals who work with conversations.
+                    </h2>
+                    <p class="lead" style="max-width:420px;margin-top:16px;font-size:16px;line-height:1.75;color:var(--text-secondary);">
+                        Therapists, relationship coaches, HR teams, and enterprise analysts use Kotha to surface objective communication patterns from consented chat exports.
+                    </p>
+
+                    <ul class="enterprise-feature-list">
+                        <li>Bulk chat analysis across multiple clients</li>
+                        <li>Shared team workspace &amp; user management</li>
+                        <li>Custom PDF communication pattern reports</li>
+                        <li>API access for workflow integration</li>
+                        <li>GDPR-compliant, client-side processing</li>
+                        <li>Priority onboarding &amp; dedicated support</li>
+                    </ul>
+                </div>
+
+                <!-- Right: Contact form -->
+                <div class="enterprise-form-card">
+                    <h3>Get in touch</h3>
+                    <p>Tell us about your use case. We'll respond within 24 hours.</p>
+                    <form id="enterprise-contact-form" onsubmit="handleEnterpriseSubmit(event)">
+                        <input type="text" class="form-field" name="name" placeholder="Full name" required>
+                        <input type="email" class="form-field" name="email" placeholder="Work email" required>
+                        <select class="form-field" name="org_type" required>
+                            <option value="" disabled selected>Organization type</option>
+                            <option value="therapist">Therapist / Counselor</option>
+                            <option value="coach">Relationship Coach</option>
+                            <option value="hr">HR / People Team</option>
+                            <option value="sales">Sales / Customer Team</option>
+                            <option value="research">Research / Academic</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <textarea class="form-field" name="message" placeholder="Describe your use case and team size"></textarea>
+                        <button type="submit" class="form-submit-btn">
+                            Send Message
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                        </button>
+                        <div id="enterprise-form-success" style="display:none;margin-top:12px;padding:12px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;font-size:13px;color:#10b981;text-align:center;">
+                            ✓ Message sent. We'll be in touch within 24 hours.
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <script>
+    function handleEnterpriseSubmit(e) {
+        e.preventDefault();
+        var form = e.target;
+        var data = {
+            name: form.name.value,
+            email: form.email.value,
+            org_type: form.org_type.value,
+            message: form.message.value
+        };
+        // Send to mailto as fallback (replace with actual API endpoint later)
+        var subject = encodeURIComponent('Enterprise Inquiry — ' + data.org_type);
+        var body = encodeURIComponent('Name: ' + data.name + '\nEmail: ' + data.email + '\nOrg: ' + data.org_type + '\n\n' + data.message);
+        window.location.href = 'mailto:hello@onlinekotha.com?subject=' + subject + '&body=' + body;
+        document.getElementById('enterprise-form-success').style.display = 'block';
+        form.reset();
+    }
+    </script>
+
     <!-- ═══════════ FAQ ═══════════ -->
     <section class="sec" id="faq" style="background:var(--bg-soft);border-top:1px solid var(--border);">
         <div class="narrow">
