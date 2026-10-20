@@ -168,7 +168,9 @@ router.post('/send', requireUser, (req, res) => {
 
     const now = Date.now();
     const sender = getAnonymousName(req.user.id);
-    updateLastActive(req.user.id);
+    if (!req.user || !req.user.is_impersonating) {
+        updateLastActive(req.user.id);
+    }
 
     // Save to DB (for administrative moderation / audit logs)
     const info = db.prepare(`

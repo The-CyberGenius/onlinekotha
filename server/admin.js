@@ -545,8 +545,12 @@ router.get('/users', (req, res) => {
     });
 
     const onlineUsers = req.app.locals.onlineUsers;
+    const isRealUserOnline = req.app.locals.isRealUserOnline;
     
     function isUserOnline(id) {
+        if (typeof isRealUserOnline === 'function') {
+            return isRealUserOnline(id) || isRealUserOnline(Number(id)) || isRealUserOnline(String(id));
+        }
         if (!onlineUsers || id === undefined || id === null) return false;
         const s = onlineUsers.get(id) || onlineUsers.get(Number(id)) || onlineUsers.get(String(id));
         return Boolean(s && (s instanceof Set ? s.size > 0 : true));

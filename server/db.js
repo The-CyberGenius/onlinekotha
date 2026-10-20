@@ -453,8 +453,8 @@ function setSetting(key, value) {
     ).run(key, String(value));
 }
 
-function updateLastActive(userId) {
-    if (!userId) return;
+function updateLastActive(userId, isImpersonating = false) {
+    if (!userId || isImpersonating) return;
     try {
         db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(Date.now(), userId);
     } catch (e) {}

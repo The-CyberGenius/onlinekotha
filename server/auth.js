@@ -190,14 +190,24 @@ function authMiddleware(req, res, next) {
                 req.user.id = targetUid;
                 req.user.is_impersonating = true;
             }
-        } else {
-            // Update last_active_at (throttled to 5 minutes)
+            // Update admin's own activity time, NEVER the impersonated user's
             const now = Date.now();
-            if (!req.user.last_active_at || (now - req.user.last_active_at) > 5 * 60 * 1000) {
+            if (!session.user.last_active_at || (now - session.user.last_active_at) > 5 * 60 * 1000) {
                 try {
-                    db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(now, req.user.id);
-                    req.user.last_active_at = now;
+                    db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(now, session.user.id);
+                    session.user.last_active_at = now;
                 } catch (e) { }
+            }
+        } else {
+            // Normal user or admin browsing as themselves: Update last_active_at (throttled to 5 minutes)
+            if (!req.user.is_impersonating) {
+                const now = Date.now();
+                if (!req.user.last_active_at || (now - req.user.last_active_at) > 5 * 60 * 1000) {
+                    try {
+                        db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(now, req.user.id);
+                        req.user.last_active_at = now;
+                    } catch (e) { }
+                }
             }
         }
     } else {

@@ -335,7 +335,20 @@ app.get('/api/dm/search', requireUser, (req, res) => {
 // DM Presence & Real-time State Store
 // ─────────────────────────────────────────────
 const onlineUsers = new Map(); // userId → Set of socketIds
+const impersonatorSockets = new Set(); // socketId of sockets that are currently impersonating
 app.locals.onlineUsers = onlineUsers;
+app.locals.impersonatorSockets = impersonatorSockets;
+
+function isRealUserOnline(uid) {
+    if (!onlineUsers || uid === undefined || uid === null) return false;
+    const sids = onlineUsers.get(uid) || onlineUsers.get(Number(uid)) || onlineUsers.get(String(uid));
+    if (!sids || sids.size === 0) return false;
+    for (const sid of sids) {
+        if (!impersonatorSockets.has(sid)) return true;
+    }
+    return false;
+}
+app.locals.isRealUserOnline = isRealUserOnline;
 
 // Get or create a DM conversation with another user
 app.post('/api/dm/conversations', requireUser, (req, res) => {
@@ -596,22 +609,33 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
     const uid = socket.user.id;
-    const isFirstConnection = !onlineUsers.has(uid) || onlineUsers.get(uid).size === 0;
-    if (!onlineUsers.has(uid)) onlineUsers.set(uid, new Set());
-    onlineUsers.get(uid).add(socket.id);
-    updateLastActive(uid);
+    const isImpersonating = Boolean(socket.user && socket.user.is_impersonating);
+    socket.is_impersonating = isImpersonating;
 
-    // Send immediate initial presence list to this newly connected user
-    const currentOnlineIds = Array.from(onlineUsers.keys());
-    socket.emit('presence:init', { online_user_ids: currentOnlineIds });
-
-    // Broadcast user:online to everyone else if this is their first active socket
-    if (isFirstConnection) {
-        io.emit('user:online', { user_id: uid });
+    if (isImpersonating) {
+        impersonatorSockets.add(socket.id);
     }
 
+    const wasRealOnline = isRealUserOnline(uid);
+
+    if (!onlineUsers.has(uid)) onlineUsers.set(uid, new Set());
+    onlineUsers.get(uid).add(socket.id);
+
+    // ONLY real users (NOT admin impersonators) update last_active_at and trigger user:online
+    if (!isImpersonating) {
+        updateLastActive(uid);
+        if (!wasRealOnline) {
+            io.emit('user:online', { user_id: uid });
+        }
+    }
+
+    // Send immediate initial presence list of REAL online users to this socket
+    const currentOnlineIds = Array.from(onlineUsers.keys()).filter(id => isRealUserOnline(id));
+    socket.emit('presence:init', { online_user_ids: currentOnlineIds });
+
     socket.on('dm:get_presence', () => {
-        socket.emit('presence:init', { online_user_ids: Array.from(onlineUsers.keys()) });
+        const currentRealOnlineIds = Array.from(onlineUsers.keys()).filter(id => isRealUserOnline(id));
+        socket.emit('presence:init', { online_user_ids: currentRealOnlineIds });
     });
 
     socket.on('dm:send', (data) => {
@@ -699,7 +723,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('dm:typing', ({ conv_id, typing }) => {
-        updateLastActive(uid);
+        if (!socket.is_impersonating) {
+            updateLastActive(uid);
+        }
         const conv = db.prepare(
             'SELECT * FROM dm_conversations WHERE id = ? AND (user_a = ? OR user_b = ?)'
         ).get(conv_id, uid, uid);
@@ -710,13 +736,20 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
+        const wasImpersonating = impersonatorSockets.has(socket.id);
+        impersonatorSockets.delete(socket.id);
+
         const set = onlineUsers.get(uid);
         if (set) {
             set.delete(socket.id);
             if (set.size === 0) {
                 onlineUsers.delete(uid);
-                io.emit('user:offline', { user_id: uid });
             }
+        }
+
+        // Only emit user:offline if this was a real user and user has NO other real sockets
+        if (!wasImpersonating && !isRealUserOnline(uid)) {
+            io.emit('user:offline', { user_id: uid });
         }
     });
 });

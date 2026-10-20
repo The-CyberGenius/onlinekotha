@@ -77,8 +77,8 @@
             const utm = getUTMParams();
             const device = getDeviceInfo();
 
-            // Link user_id if logged in
-            if (window.__USER__ && window.__USER__.id) {
+            // Link user_id if logged in (never when impersonating so user analytics/activity aren't corrupted)
+            if (window.__USER__ && window.__USER__.id && !window.__USER__.is_impersonating) {
                 metadata.user_id = window.__USER__.id;
             }
 

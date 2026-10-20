@@ -53,6 +53,8 @@ router.post('/event', express.json(), (req, res) => {
         }
 
         // Upsert Visitor
+        const isImpersonating = Boolean(req.user && req.user.is_impersonating);
+        const effectiveUserId = isImpersonating ? null : (metadata.user_id || null);
         const existingVisitor = db.prepare('SELECT visitor_id FROM analytics_visitors WHERE visitor_id = ?').get(visitor_id);
         
         if (!existingVisitor) {
@@ -65,7 +67,7 @@ router.post('/event', express.json(), (req, res) => {
             `).run(
                 visitor_id, realIp, country, country_code, region, city,
                 now, now, event_type === 'page_view' ? 1 : 0,
-                device, browser, os, screen_res, metadata.user_id || null
+                device, browser, os, screen_res, effectiveUserId
             );
         } else {
             db.prepare(`
@@ -80,7 +82,7 @@ router.post('/event', express.json(), (req, res) => {
                 realIp,
                 realIp,
                 event_type === 'page_view' ? 1 : 0,
-                metadata.user_id || null,
+                effectiveUserId,
                 visitor_id
             );
         }
