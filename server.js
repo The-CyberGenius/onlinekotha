@@ -769,6 +769,12 @@ app.use(errorHandler);
 
 httpServer.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
+    try {
+        const { healOrphanedGuestChats } = require('./server/guest');
+        healOrphanedGuestChats();
+    } catch (e) {
+        console.error('healOrphanedGuestChats startup error:', e);
+    }
     if (typeof adminRouter.syncProvidersFromEnv === 'function') {
         adminRouter.syncProvidersFromEnv();
     }

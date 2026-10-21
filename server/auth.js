@@ -175,20 +175,34 @@ function authMiddleware(req, res, next) {
     if (session && session.user) {
         req.user = { ...session.user };
         if (req.user.is_admin && req.cookies && req.cookies.admin_impersonate_uid) {
-            const targetUid = Number(req.cookies.admin_impersonate_uid);
-            const targetUser = db.prepare(
-                'SELECT id, email, plan, trial_expires_at, is_admin, is_suspended, display_name, avatar_url, last_active_at, phone, phone_country_code, phone_prompted FROM users WHERE id = ?'
-            ).get(targetUid);
-            if (targetUser) {
+            const rawUid = req.cookies.admin_impersonate_uid;
+            if (String(rawUid).startsWith('gst_')) {
                 req.user = {
-                    ...targetUser,
+                    id: 0,
+                    guest_id: rawUid,
+                    email: 'Guest (' + rawUid.substring(4, 12) + ')',
+                    plan: 'guest',
+                    display_name: 'Guest User',
                     is_admin: 1,
                     is_impersonating: true,
                     original_admin_id: session.user.id
                 };
             } else {
-                req.user.id = targetUid;
-                req.user.is_impersonating = true;
+                const targetUid = Number(rawUid);
+                const targetUser = db.prepare(
+                    'SELECT id, email, plan, trial_expires_at, is_admin, is_suspended, display_name, avatar_url, last_active_at, phone, phone_country_code, phone_prompted FROM users WHERE id = ?'
+                ).get(targetUid);
+                if (targetUser) {
+                    req.user = {
+                        ...targetUser,
+                        is_admin: 1,
+                        is_impersonating: true,
+                        original_admin_id: session.user.id
+                    };
+                } else {
+                    req.user.id = targetUid;
+                    req.user.is_impersonating = true;
+                }
             }
             // Update admin's own activity time, NEVER the impersonated user's
             const now = Date.now();

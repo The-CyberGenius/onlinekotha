@@ -1035,7 +1035,7 @@ HARD RULES
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
                     const isGuest = String(uid).startsWith('gst_');
-const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease;" onmouseover="this.style.background='var(--accent)';this.style.color='#ffffff'" onmouseout="this.style.background='rgba(192,132,252,0.12)';this.style.color='var(--accent)'"><span>🔑</span> Login As User</button>`;
+                    const loginAsBtnHtml = `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease;" onmouseover="this.style.background='var(--accent)';this.style.color='#ffffff'" onmouseout="this.style.background='rgba(192,132,252,0.12)';this.style.color='var(--accent)'"><span>🔑</span> Login As User</button>`;
 
                     if (!chats.length) {
                         area.innerHTML = `
@@ -1054,7 +1054,7 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                                     <div style="width:38px;height:38px;border-radius:50%;background:rgba(192,132,252,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;">💬</div>
                                     <div style="font-size:13px;font-weight:600;color:var(--text-primary);">No WhatsApp chats uploaded yet</div>
                                     <p style="font-size:12px;color:var(--text-muted);margin:0;max-width:320px;line-height:1.4;">This user has not imported any chats yet. You can still login to their account to test or assist.</p>
-                                    ${String(uid).startsWith('gst_') ? '' : `<button onclick=\"window.location.href='/api/admin/impersonate/start?uid=${uid}'\" style=\"margin-top:6px;padding:7px 16px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:var(--accent);color:#ffffff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(192,132,252,0.35);\"><span>🔑</span> Login As User</button>`}
+                                    <button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="margin-top:6px;padding:7px 16px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:var(--accent);color:#ffffff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(192,132,252,0.35);"><span>🔑</span> Login As User</button>
                                 </div>
                             </div>
                         `;
@@ -1093,7 +1093,7 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                                         '<span>' + formatDateTime(c.created_at) + '</span>' +
                                     '</div>' +
                                     '<div style="display:flex;gap:6px;align-items:center;">' +
-                                        '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">ZIP</a>' +
+                                        '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" download style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;" title="Download chat folder as .zip">ZIP</a>' +
                                         '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--accent);cursor:pointer;">Open</button>' +
                                         restoreBtn +
                                         '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
@@ -1133,7 +1133,7 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                                         <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.message_count || 0}</div>
                                         <div style="width:120px;color:var(--text-muted);font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
                                         <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
-                                            <a href="/api/admin/users/${uid}/chats/${c.id}/download" class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;">ZIP</a>
+                                            <a href="/api/admin/users/${uid}/chats/${c.id}/download" download class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;" title="Download chat folder as .zip">ZIP</a>
                                             <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:var(--accent);">Open</button>
                                             ${c.deleted_by_user ? `<button data-admin-restore-chat="${c.id}" data-uid="${uid}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#10b981;">Restore</button>` : ''}
                                             <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
@@ -1159,7 +1159,7 @@ const loginAsBtnHtml = isGuest ? '' : `<button onclick="window.location.href='/a
                     area.querySelectorAll('[data-admin-open-chat]').forEach(openBtn => {
                         openBtn.addEventListener('click', () => {
                             const folder = openBtn.dataset.folder;
-                            if (String(uid).startsWith('gst_')) { alert('Cannot impersonate a guest. However, you can use the Open Chat button which will be implemented for guests soon.'); return; } else { window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`; }
+                            window.location.href = `/api/admin/impersonate/start?uid=${uid}&chat=${encodeURIComponent(folder)}`;
                         });
                     });
 

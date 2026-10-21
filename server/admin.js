@@ -562,7 +562,8 @@ router.get('/users', (req, res) => {
     const activeGuests = [];
     guests.forEach(g => {
         const isOnline = isUserOnline(g.id);
-        if (g.chats_imported > 0 || g.ai_messages_count > 0 || isOnline) {
+        const guestChatCount = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL) AND deleted_by_user = 0').get(g.id)?.c || 0;
+        if (guestChatCount > 0 || g.ai_messages_count > 0 || isOnline) {
             activeGuests.push({
                 id: g.id,
                 email: 'Guest (' + g.id.substring(4, 12) + ')',
@@ -578,7 +579,7 @@ router.get('/users', (req, res) => {
                 trial_expires_at: null,
                 created_at: g.created_at,
                 last_active_at: g.last_active_at,
-                chat_count: g.chats_imported || 0,
+                chat_count: guestChatCount,
                 total_cost: 0,
                 is_guest: true,
                 is_online: isOnline
@@ -627,11 +628,71 @@ router.get('/users', (req, res) => {
     res.json(rows);
 });
 
+// Helper to resolve chat folder on disk (with auto-healing for migrated guest chats)
+function resolveChatDir(userIdOrGuestId, chat) {
+    if (!chat || !chat.folder_name) return null;
+    const targetParent = path.join(SRC_DIR, `u_${userIdOrGuestId}`);
+    const primaryDir = path.join(targetParent, chat.folder_name);
+
+    if (fs.existsSync(primaryDir)) return primaryDir;
+
+    // 1. Check guest directory if chat was originally imported by a guest
+    if (chat.guest_id && String(chat.guest_id) !== String(userIdOrGuestId)) {
+        const guestChatDir = path.join(SRC_DIR, `u_${chat.guest_id}`, chat.folder_name);
+        if (fs.existsSync(guestChatDir)) {
+            try {
+                if (!fs.existsSync(targetParent)) fs.mkdirSync(targetParent, { recursive: true });
+                fs.renameSync(guestChatDir, primaryDir);
+                console.log(`[Auto-Heal] Successfully moved chat "${chat.folder_name}" from u_${chat.guest_id} to u_${userIdOrGuestId}`);
+                return primaryDir;
+            } catch (err) {
+                return guestChatDir;
+            }
+        }
+    }
+
+    // 2. Check for slight name variations in targetParent
+    if (fs.existsSync(targetParent)) {
+        try {
+            const subdirs = fs.readdirSync(targetParent, { withFileTypes: true }).filter(d => d.isDirectory());
+            const targetClean = chat.folder_name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            for (const sub of subdirs) {
+                const subClean = sub.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (subClean === targetClean || (targetClean.length > 5 && (subClean.includes(targetClean) || targetClean.includes(subClean)))) {
+                    return path.join(targetParent, sub.name);
+                }
+            }
+        } catch (e) {}
+    }
+
+    // 3. Global search across all u_* folders in SRC_DIR (recovers any orphaned uploads)
+    try {
+        if (fs.existsSync(SRC_DIR)) {
+            const userDirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_'));
+            for (const uDir of userDirs) {
+                const candidatePath = path.join(SRC_DIR, uDir.name, chat.folder_name);
+                if (fs.existsSync(candidatePath)) {
+                    try {
+                        if (!fs.existsSync(targetParent)) fs.mkdirSync(targetParent, { recursive: true });
+                        fs.renameSync(candidatePath, primaryDir);
+                        console.log(`[Auto-Heal] Recovered chat "${chat.folder_name}" from ${uDir.name} to u_${userIdOrGuestId}`);
+                        return primaryDir;
+                    } catch (e) {
+                        return candidatePath;
+                    }
+                }
+            }
+        }
+    } catch (e) {}
+
+    return primaryDir;
+}
+
 // Helper to get folder size
 function getFolderSize(dirPath) {
     let totalSize = 0;
     try {
-        if (!fs.existsSync(dirPath)) return 0;
+        if (!dirPath || !fs.existsSync(dirPath)) return 0;
         const stat = fs.statSync(dirPath);
         if (!stat.isDirectory()) {
             return stat.size;
@@ -661,19 +722,19 @@ router.get('/users/:id/chats', (req, res) => {
         
         if (isGuest) {
             chats = db.prepare(
-                'SELECT id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE guest_id = ? ORDER BY created_at DESC'
+                'SELECT id, user_id, guest_id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL) ORDER BY created_at DESC'
             ).all(idParam);
         } else {
             userId = Number(idParam);
             const user = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
             if (!user) return res.status(404).json({ error: 'User not found' });
             chats = db.prepare(
-                'SELECT id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE user_id = ? ORDER BY created_at DESC'
+                'SELECT id, user_id, guest_id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE user_id = ? ORDER BY created_at DESC'
             ).all(userId);
         }
         
         const chatsWithSize = chats.map(chat => {
-            const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
+            const chatDir = resolveChatDir(req.params.id, chat);
             chat.size_bytes = getFolderSize(chatDir);
             return chat;
         });
@@ -702,15 +763,19 @@ router.patch('/users/:id/chats/:chatId/restore', (req, res) => {
 // Permanently delete a user's chat (files + DB)
 router.delete('/users/:id/chats/:chatId', (req, res) => {
     try {
-        const userId = Number(req.params.id);
+        const idParam = req.params.id;
+        const isGuest = typeof idParam === 'string' && idParam.startsWith('gst_');
         const chatId = Number(req.params.chatId);
-        const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
+        
+        const chat = isGuest
+            ? db.prepare('SELECT * FROM chats WHERE id = ? AND guest_id = ?').get(chatId, idParam)
+            : db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, Number(idParam));
         if (!chat) return res.status(404).json({ error: 'Chat not found' });
 
         // Remove files from disk
-        const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
+        const chatDir = resolveChatDir(idParam, chat);
         try {
-            if (fs.existsSync(chatDir)) {
+            if (chatDir && fs.existsSync(chatDir)) {
                 fs.rmSync(chatDir, { recursive: true, force: true });
             }
         } catch (e) {
@@ -718,11 +783,20 @@ router.delete('/users/:id/chats/:chatId', (req, res) => {
         }
 
         // Remove AI conversations linked to this chat
-        const convs = db.prepare('SELECT id FROM conversations WHERE user_id = ? AND chat_folder = ?').all(userId, chat.folder_name);
-        for (const c of convs) {
-            db.prepare('DELETE FROM conv_messages WHERE conversation_id = ?').run(c.id);
+        if (isGuest) {
+            const convs = db.prepare('SELECT id FROM conversations WHERE guest_id = ? AND chat_folder = ?').all(idParam, chat.folder_name);
+            for (const c of convs) {
+                db.prepare('DELETE FROM conv_messages WHERE conversation_id = ?').run(c.id);
+            }
+            db.prepare('DELETE FROM conversations WHERE guest_id = ? AND chat_folder = ?').run(idParam, chat.folder_name);
+        } else {
+            const userId = Number(idParam);
+            const convs = db.prepare('SELECT id FROM conversations WHERE user_id = ? AND chat_folder = ?').all(userId, chat.folder_name);
+            for (const c of convs) {
+                db.prepare('DELETE FROM conv_messages WHERE conversation_id = ?').run(c.id);
+            }
+            db.prepare('DELETE FROM conversations WHERE user_id = ? AND chat_folder = ?').run(userId, chat.folder_name);
         }
-        db.prepare('DELETE FROM conversations WHERE user_id = ? AND chat_folder = ?').run(userId, chat.folder_name);
 
         // Remove chat record
         db.prepare('DELETE FROM chats WHERE id = ?').run(chatId);
@@ -735,20 +809,27 @@ router.delete('/users/:id/chats/:chatId', (req, res) => {
 
 // Download a user's chat folder as zip
 router.get('/users/:id/chats/:chatId/download', (req, res) => {
-    const userId = Number(req.params.id);
+    const idParam = req.params.id;
+    const isGuest = typeof idParam === 'string' && idParam.startsWith('gst_');
     const chatId = Number(req.params.chatId);
-    const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
-    if (!chat) return res.status(404).json({ error: 'Chat not found' });
+    
+    const chat = isGuest
+        ? db.prepare('SELECT * FROM chats WHERE id = ? AND guest_id = ?').get(chatId, idParam)
+        : db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, Number(idParam));
+    if (!chat) return res.status(404).json({ error: 'Chat not found in database' });
 
-    const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
-    if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
+    const chatDir = resolveChatDir(idParam, chat);
+    if (!chatDir || !fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
 
     const safeName = (chat.display_name || chat.folder_name).replace(/[^a-zA-Z0-9_\-]/g, '_');
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${safeName}.zip"`);
 
     const archive = archiver('zip', { zlib: { level: 5 } });
-    archive.on('error', (err) => { res.status(500).end(); });
+    archive.on('error', (err) => { 
+        console.error('Archiver error:', err);
+        if (!res.headersSent) res.status(500).end(); 
+    });
     archive.pipe(res);
     archive.directory(chatDir, safeName);
     archive.finalize();
@@ -756,13 +837,17 @@ router.get('/users/:id/chats/:chatId/download', (req, res) => {
 
 // Get a user's chat messages for admin viewing
 router.get('/users/:id/chats/:chatId/messages', async (req, res) => {
-    const userId = Number(req.params.id);
+    const idParam = req.params.id;
+    const isGuest = typeof idParam === 'string' && idParam.startsWith('gst_');
     const chatId = Number(req.params.chatId);
-    const chat = db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, userId);
+    
+    const chat = isGuest
+        ? db.prepare('SELECT * FROM chats WHERE id = ? AND guest_id = ?').get(chatId, idParam)
+        : db.prepare('SELECT * FROM chats WHERE id = ? AND user_id = ?').get(chatId, Number(idParam));
     if (!chat) return res.status(404).json({ error: 'Chat not found' });
 
-    const chatDir = path.join(SRC_DIR, `u_${req.params.id}`, chat.folder_name);
-    if (!fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
+    const chatDir = resolveChatDir(idParam, chat);
+    if (!chatDir || !fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat folder not found on disk' });
 
     try {
         const result = await getMessages(chatDir);

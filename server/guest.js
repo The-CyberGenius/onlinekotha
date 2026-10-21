@@ -1,4 +1,6 @@
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const { db, getSetting } = require('./db');
 
 function getClientIp(req) {
@@ -97,10 +99,104 @@ function claimGuestData(guestId, userId) {
     if (!guestId || !userId) return;
     try {
         // Link any guest chats to the user
-        db.prepare('UPDATE chats SET user_id = ? WHERE guest_id = ?').run(userId, guestId);
-        db.prepare('UPDATE conversations SET user_id = ? WHERE guest_id = ?').run(userId, guestId);
+        db.prepare('UPDATE chats SET user_id = ? WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL)').run(userId, guestId);
+        db.prepare('UPDATE conversations SET user_id = ? WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL)').run(userId, guestId);
+        try {
+            db.prepare('UPDATE kotha_assistant_messages SET user_id = ? WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL)').run(userId, guestId);
+        } catch (e) {}
+
+        // Move files from u_<guestId> to u_<userId> on disk
+        const { SRC_DIR } = require('./upload');
+        const guestDir = path.join(SRC_DIR, `u_${guestId}`);
+        const userDir = path.join(SRC_DIR, `u_${userId}`);
+
+        if (fs.existsSync(guestDir)) {
+            if (!fs.existsSync(userDir)) {
+                fs.mkdirSync(userDir, { recursive: true });
+            }
+            const entries = fs.readdirSync(guestDir, { withFileTypes: true });
+            for (const entry of entries) {
+                const srcPath = path.join(guestDir, entry.name);
+                const destPath = path.join(userDir, entry.name);
+                try {
+                    if (fs.existsSync(destPath)) {
+                        const uniqueDest = path.join(userDir, `${entry.name}_${Date.now()}`);
+                        fs.renameSync(srcPath, uniqueDest);
+                    } else {
+                        fs.renameSync(srcPath, destPath);
+                    }
+                } catch (err) {
+                    console.error(`Failed to move chat folder from ${srcPath} to ${destPath}:`, err);
+                }
+            }
+            try {
+                if (fs.readdirSync(guestDir).length === 0) {
+                    fs.rmdirSync(guestDir);
+                }
+            } catch (e) {}
+        }
+
+        try {
+            db.prepare('UPDATE guest_sessions SET chats_imported = 0 WHERE id = ?').run(guestId);
+        } catch (e) {}
     } catch (e) {
         console.error('Error claiming guest data:', e);
+    }
+}
+
+function healOrphanedGuestChats() {
+    try {
+        const { SRC_DIR } = require('./upload');
+        if (!fs.existsSync(SRC_DIR)) return;
+
+        // Find all chats where user is registered and guest_id is known
+        const chats = db.prepare('SELECT id, user_id, guest_id, folder_name FROM chats WHERE user_id > 0 AND guest_id IS NOT NULL AND guest_id != ""').all();
+        for (const chat of chats) {
+            const userChatDir = path.join(SRC_DIR, `u_${chat.user_id}`, chat.folder_name);
+            const guestChatDir = path.join(SRC_DIR, `u_${chat.guest_id}`, chat.folder_name);
+            if (!fs.existsSync(userChatDir) && fs.existsSync(guestChatDir)) {
+                console.log(`[Auto-Heal] Moving orphaned chat "${chat.folder_name}" from guest u_${chat.guest_id} to user u_${chat.user_id}`);
+                const userBase = path.join(SRC_DIR, `u_${chat.user_id}`);
+                if (!fs.existsSync(userBase)) fs.mkdirSync(userBase, { recursive: true });
+                try {
+                    fs.renameSync(guestChatDir, userChatDir);
+                } catch(e) {
+                    console.error(`[Auto-Heal] Failed to rename:`, e.message);
+                }
+            }
+        }
+
+        // Clean up any remaining guest folders whose chats were claimed
+        const allGuestDirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_gst_'));
+        for (const gDir of allGuestDirs) {
+            const guestId = gDir.name.replace(/^u_/, '');
+            const unclaimedCount = db.prepare('SELECT COUNT(*) as c FROM chats WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL)').get(guestId)?.c || 0;
+            if (unclaimedCount === 0) {
+                const gDirPath = path.join(SRC_DIR, gDir.name);
+                const subfolders = fs.readdirSync(gDirPath, { withFileTypes: true });
+                for (const sub of subfolders) {
+                    if (sub.isDirectory()) {
+                        const claimedRow = db.prepare('SELECT user_id FROM chats WHERE guest_id = ? AND folder_name = ? AND user_id > 0').get(guestId, sub.name);
+                        if (claimedRow && claimedRow.user_id) {
+                            const destUserBase = path.join(SRC_DIR, `u_${claimedRow.user_id}`);
+                            if (!fs.existsSync(destUserBase)) fs.mkdirSync(destUserBase, { recursive: true });
+                            const destChatPath = path.join(destUserBase, sub.name);
+                            if (!fs.existsSync(destChatPath)) {
+                                console.log(`[Auto-Heal] Migrated "${sub.name}" from ${gDir.name} to u_${claimedRow.user_id}`);
+                                try { fs.renameSync(path.join(gDirPath, sub.name), destChatPath); } catch(e) {}
+                            }
+                        }
+                    }
+                }
+                try {
+                    if (fs.readdirSync(gDirPath).length === 0) {
+                        fs.rmdirSync(gDirPath);
+                    }
+                } catch(e) {}
+            }
+        }
+    } catch (err) {
+        console.error('healOrphanedGuestChats error:', err);
     }
 }
 
@@ -110,4 +206,5 @@ module.exports = {
     recordGuestChatImport,
     recordGuestAIMessage,
     claimGuestData,
+    healOrphanedGuestChats,
 };

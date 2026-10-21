@@ -12,7 +12,12 @@ const { findChatFile } = require('../parser');
 
 // Helper to get storage directory for either User or Guest
 function getOwnerId(req, res) {
-    if (req.user) return req.user.id;
+    if (req.user) {
+        if (req.user.is_impersonating && req.user.guest_id) {
+            return req.user.guest_id;
+        }
+        if (req.user.id > 0) return req.user.id;
+    }
     return getOrCreateGuestId(req, res);
 }
 
@@ -23,7 +28,7 @@ router.get('/chats', requireUserOrGuest, (req, res) => {
     
     let deletedSet = new Set();
     let dbChats = [];
-    if (req.user) {
+    if (req.user && (!req.user.is_impersonating || !req.user.guest_id)) {
         dbChats = db.prepare('SELECT folder_name, created_at, deleted_by_user FROM chats WHERE user_id = ?').all(req.user.id);
         const deletedRows = dbChats.filter(r => r.deleted_by_user === 1);
         deletedSet = new Set(deletedRows.map(r => r.folder_name));
@@ -54,7 +59,7 @@ router.get('/chats', requireUserOrGuest, (req, res) => {
 router.get('/chats/meta', requireUserOrGuest, (req, res) => {
     const ownerId = getOwnerId(req, res);
     let rows = [];
-    if (req.user) {
+    if (req.user && (!req.user.is_impersonating || !req.user.guest_id)) {
         rows = db.prepare('SELECT folder_name, display_name, deleted_by_user, message_count, is_group, participants FROM chats WHERE user_id = ?').all(req.user.id);
     } else {
         rows = db.prepare('SELECT folder_name, display_name, message_count, is_group, participants FROM chats WHERE guest_id = ?').all(ownerId);
