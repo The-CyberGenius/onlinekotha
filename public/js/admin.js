@@ -78,6 +78,16 @@
 
     let knownProviders = {};
 
+    function isGuestUser(u) {
+        if (!u) return false;
+        if (Boolean(u.is_guest)) return true;
+        if (String(u.id || '').startsWith('gst_')) return true;
+        if (u.id === 0 || u.id === '0') return true;
+        if (u.plan === 'guest') return true;
+        if (u.email && u.email.toLowerCase().includes('guest')) return true;
+        return false;
+    }
+
     async function loadStats() {
         const r = await (await fetch('/api/admin/usage/summary')).json();
         document.getElementById('stat-today-cost').textContent = (r.todayCost || 0).toFixed(3);
@@ -85,7 +95,7 @@
         document.getElementById('stat-total-calls').textContent = Number(r.totalCalls || 0).toLocaleString();
         document.getElementById('stat-cap').textContent = (r.dailyCap || 0).toFixed(2);
         const users = await (await fetch('/api/admin/users')).json();
-        const registeredUsers = Array.isArray(users) ? users.filter(u => !u.is_guest) : [];
+        const registeredUsers = Array.isArray(users) ? users.filter(u => !isGuestUser(u)) : [];
         document.getElementById('stat-users').textContent = registeredUsers.length;
     }
 
@@ -701,8 +711,8 @@ HARD RULES
         const userQuery = document.getElementById('admin-user-search')?.value.toLowerCase().trim() || '';
         const guestQuery = document.getElementById('admin-guest-search')?.value.toLowerCase().trim() || '';
 
-        const registeredUsers = cachedUsers.filter(u => !u.is_guest);
-        const guestUsers = cachedUsers.filter(u => Boolean(u.is_guest));
+        const registeredUsers = cachedUsers.filter(u => !isGuestUser(u));
+        const guestUsers = cachedUsers.filter(u => isGuestUser(u));
 
         const navGuestCount = document.getElementById('nav-guest-count');
         if (navGuestCount) {

@@ -13,6 +13,8 @@ const email = require('./email');
 const oauth = require('./oauth');
 const { callLLM, callModelDirectly } = require('./llm');
 const firewall = require('./firewall');
+let geoip;
+try { geoip = require('geoip-lite'); } catch (e) {}
 
 const router = express.Router();
 router.use(requireAdmin);
@@ -528,6 +530,7 @@ router.put('/settings', (req, res) => {
 
 // ---------- Users + Usage ----------
 router.get('/users', (req, res) => {
+    // 1. Fetch only registered accounts (strictly exclude placeholder guest user id=0 or plan='guest')
     const users = db.prepare(
         `SELECT u.id, u.email, u.plan, u.trial_expires_at, u.created_at, u.is_admin,
                 COALESCE(u.is_suspended, 0) AS is_suspended,
@@ -535,7 +538,8 @@ router.get('/users', (req, res) => {
                 u.phone, u.phone_country_code,
                 (SELECT COUNT(*) FROM chats WHERE user_id = u.id) AS chat_count,
                 (SELECT COALESCE(SUM(cost_usd), 0) FROM usage_log WHERE user_id = u.id) AS total_cost
-         FROM users u`
+         FROM users u
+         WHERE u.id > 0 AND u.plan != 'guest' AND u.email != 'guest@onlinekotha.com'`
     ).all();
     
     users.forEach(u => {
@@ -556,35 +560,73 @@ router.get('/users', (req, res) => {
         return Boolean(s && (s instanceof Set ? s.size > 0 : true));
     }
     
-    // Only include guests who imported a chat, sent AI messages, OR are currently online!
+    // Auto-sync any guest sessions from chats or filesystem that are missing from guest_sessions table
+    try {
+        const chatsWithGuest = db.prepare(`SELECT DISTINCT guest_id FROM chats WHERE guest_id IS NOT NULL AND guest_id != ''`).all();
+        for (const row of chatsWithGuest) {
+            const existing = db.prepare('SELECT id FROM guest_sessions WHERE id = ?').get(row.guest_id);
+            if (!existing) {
+                db.prepare(`
+                    INSERT OR IGNORE INTO guest_sessions (id, ip, fingerprint, created_at, updated_at, chats_imported, ai_messages_count)
+                    VALUES (?, '127.0.0.1', null, ?, ?, 1, 0)
+                `).run(row.guest_id, Date.now(), Date.now());
+            }
+        }
+        if (fs.existsSync(SRC_DIR)) {
+            const diskDirs = fs.readdirSync(SRC_DIR, { withFileTypes: true })
+                .filter(d => d.isDirectory() && d.name.startsWith('u_gst_'));
+            for (const d of diskDirs) {
+                const guestId = d.name.replace('u_', '');
+                const existing = db.prepare('SELECT id FROM guest_sessions WHERE id = ?').get(guestId);
+                if (!existing) {
+                    const stats = fs.statSync(path.join(SRC_DIR, d.name));
+                    const ctime = Math.round(stats.ctimeMs || Date.now());
+                    db.prepare(`
+                        INSERT OR IGNORE INTO guest_sessions (id, ip, fingerprint, created_at, updated_at, chats_imported, ai_messages_count)
+                        VALUES (?, '127.0.0.1', null, ?, ?, 0, 0)
+                    `).run(guestId, ctime, ctime);
+                }
+            }
+        }
+    } catch (e) {}
+
+    // Fetch ALL guest sessions so newly created guest sessions show up instantly
     const guests = db.prepare(`SELECT id, ip as ip_address, created_at, updated_at as last_active_at, chats_imported, ai_messages_count FROM guest_sessions`).all();
     
-    const activeGuests = [];
+    const guestUsers = [];
     guests.forEach(g => {
         const isOnline = isUserOnline(g.id);
         const guestChatCount = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL) AND deleted_by_user = 0').get(g.id)?.c || 0;
-        if (guestChatCount > 0 || g.ai_messages_count > 0 || isOnline) {
-            activeGuests.push({
-                id: g.id,
-                email: 'Guest (' + g.id.substring(4, 12) + ')',
-                display_name: 'Guest User',
-                plan: 'guest',
-                is_admin: 0,
-                google_id: null,
-                avatar_url: null,
-                ip_address: g.ip_address,
-                country: null,
-                phone: null,
-                phone_country_code: null,
-                trial_expires_at: null,
-                created_at: g.created_at,
-                last_active_at: g.last_active_at,
-                chat_count: guestChatCount,
-                total_cost: 0,
-                is_guest: true,
-                is_online: isOnline
-            });
+        
+        let guestCountry = null;
+        if (geoip && g.ip_address) {
+            try {
+                const geo = geoip.lookup(g.ip_address);
+                if (geo && geo.country) guestCountry = geo.country;
+            } catch (e) {}
         }
+
+        guestUsers.push({
+            id: g.id,
+            email: 'Guest (' + g.id.substring(4, 12) + ')',
+            display_name: 'Guest User',
+            plan: 'guest',
+            is_admin: 0,
+            google_id: null,
+            avatar_url: null,
+            ip_address: g.ip_address,
+            country: guestCountry,
+            phone: null,
+            phone_country_code: null,
+            trial_expires_at: null,
+            created_at: g.created_at,
+            last_active_at: g.last_active_at || g.created_at,
+            chat_count: Math.max(guestChatCount, g.chats_imported || 0),
+            ai_messages_count: g.ai_messages_count || 0,
+            total_cost: 0,
+            is_guest: true,
+            is_online: isOnline
+        });
     });
 
     users.forEach(r => {
@@ -600,7 +642,7 @@ router.get('/users', (req, res) => {
         return isNaN(p) ? 0 : p;
     }
 
-    const rows = [...users, ...activeGuests];
+    const rows = [...users, ...guestUsers];
     rows.sort((a, b) => {
         // 1. Any user currently online is at the top!
         const aOnline = Boolean(a.is_online);
@@ -608,7 +650,7 @@ router.get('/users', (req, res) => {
         if (aOnline && !bOnline) return -1;
         if (!aOnline && bOnline) return 1;
 
-        // 2. Newest registered users on top (created_at descending)
+        // 2. Newest registered users or guests on top (created_at descending)
         const aCreated = parseTs(a.created_at);
         const bCreated = parseTs(b.created_at);
         if (bCreated !== aCreated) {
@@ -622,7 +664,10 @@ router.get('/users', (req, res) => {
             return bActive - aActive;
         }
 
-        return (Number(b.id) || 0) - (Number(a.id) || 0);
+        const aNum = Number(a.id);
+        const bNum = Number(b.id);
+        if (!isNaN(aNum) && !isNaN(bNum)) return bNum - aNum;
+        return String(b.id || '').localeCompare(String(a.id || ''));
     });
 
     res.json(rows);
@@ -983,6 +1028,26 @@ router.post('/purge-guests', (req, res) => {
             db.prepare('DELETE FROM guest_sessions WHERE id = ?').run(g.id);
             deleted++;
         }
+
+        // Also clean any leftover empty u_gst_* folders on disk
+        if (fs.existsSync(SRC_DIR)) {
+            const diskDirs = fs.readdirSync(SRC_DIR, { withFileTypes: true })
+                .filter(d => d.isDirectory() && d.name.startsWith('u_gst_'));
+            for (const d of diskDirs) {
+                const guestId = d.name.replace('u_', '');
+                const hasChats = db.prepare('SELECT COUNT(*) as c FROM chats WHERE guest_id = ?').get(guestId)?.c || 0;
+                if (!hasChats) {
+                    const fullP = path.join(SRC_DIR, d.name);
+                    try {
+                        const contents = fs.readdirSync(fullP);
+                        if (!contents.length) {
+                            fs.rmSync(fullP, { recursive: true, force: true });
+                        }
+                    } catch (e) {}
+                }
+            }
+        }
+
         res.json({ ok: true, deleted });
     } catch (err) {
         res.status(500).json({ error: err.message });
