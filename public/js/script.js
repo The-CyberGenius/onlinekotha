@@ -1509,8 +1509,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderChatList(chats, activeChat) {
         if (!chatListUI) return;
         chatListUI.innerHTML = '';
+        const realChats = (chats || []).filter(c => c !== 'kotha_assistant');
         if (chats.length === 0) {
-            chatListUI.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">No chats yet. Import one!</p>';
+            chatListUI.innerHTML = `
+                <div class="m-2 p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 text-center flex flex-col items-center">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-600/10 dark:bg-indigo-400/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    </div>
+                    <div class="text-[12.5px] font-bold text-gray-900 dark:text-gray-100 mb-0.5">Upload WhatsApp Chat</div>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3 leading-tight">Export chat (.zip or .txt) from WhatsApp to unlock Chat Wrapped &amp; analytics.</p>
+                    <button onclick="document.getElementById('open-upload-btn').click()" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[11.5px] font-bold rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+                        <span>Import Now (Free)</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            `;
             return;
         }
         chats.forEach((chat, idx) => {
@@ -1644,6 +1657,24 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             chatListUI.appendChild(item);
         });
+
+        if (realChats.length === 0 && chats.includes('kotha_assistant')) {
+            const promoDiv = document.createElement('div');
+            promoDiv.innerHTML = `
+                <div class="m-2 p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 text-center flex flex-col items-center">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-600/10 dark:bg-indigo-400/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    </div>
+                    <div class="text-[12.5px] font-bold text-gray-900 dark:text-gray-100 mb-0.5">Upload WhatsApp Chat</div>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-3 leading-tight">Export chat (.zip or .txt) from WhatsApp to unlock Chat Wrapped &amp; analytics.</p>
+                    <button onclick="document.getElementById('open-upload-btn').click()" class="w-full py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white text-[11.5px] font-bold rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
+                        <span>Import Now (Free)</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            `;
+            if (promoDiv.firstElementChild) chatListUI.appendChild(promoDiv.firstElementChild);
+        }
 
         // Add Reactivate Assistant button if hidden
         if (localStorage.getItem('hide_kotha_assistant') === 'true') {
@@ -1786,7 +1817,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     } else {
                         // Target chat not found
-                        if (chats.length === 1 && chats[0] === 'kotha_assistant') {
+                        if (targetChat === 'kotha_assistant' && chats.includes('kotha_assistant')) {
                             currentChat = 'kotha_assistant';
                             window.currentChat = 'kotha_assistant'; localStorage.setItem("kotha_active_chat", 'kotha_assistant');
                             loadData('kotha_assistant');
@@ -1806,7 +1837,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         toggleSidebar(false);
                     }
                 } else if (!isViewingDM) {
-                    if (chats.includes('kotha_assistant') && chats.length === 1) {
+                    if (chatParam === 'kotha_assistant' && chats.includes('kotha_assistant')) {
                         currentChat = 'kotha_assistant';
                         window.currentChat = 'kotha_assistant'; localStorage.setItem("kotha_active_chat", 'kotha_assistant');
                         loadData('kotha_assistant');

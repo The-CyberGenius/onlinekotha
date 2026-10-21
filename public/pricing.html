@@ -2709,15 +2709,18 @@
                     window.kothaUser = d.user;
                     const dest = d.user.is_admin ? '/admin.html' : '/app';
                     const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
-                    document.querySelectorAll('a[href^="/api/auth/google"], a[href^="/login.html"], a[href^="/app.html"]').forEach(a => {
+                    const navCta = document.getElementById('nav-cta');
+                    if (navCta) {
+                        navCta.href = dest;
+                        navCta.innerHTML = `<span>${label}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>`;
+                    }
+                    document.querySelectorAll('a[href^="/api/auth/google"], a[href^="/login.html"], a[href^="/app.html"], a[href^="/app"]').forEach(a => {
+                        if (a.id === 'nav-cta' || a.id === 'nav-logout-btn') return;
                         if (a.classList.contains('checkout-btn')) {
                             const plan = a.getAttribute('data-plan') || 'pro_lifetime';
                             a.href = `/app?checkout=${plan}`;
-                        } else if (/get|start|bring|preserv|free|talking|demo|see your chat|open app/i.test(a.textContent) || a.id === 'nav-cta' || a.id === 'hero-cta' || a.id === 'final-cta') {
-                            a.href = dest;
-                            a.innerHTML = label;
-                        } else if (a.id !== 'nav-logout-btn') {
-                            a.href = dest;
+                        } else {
+                            a.href = '/app?action=import';
                         }
                     });
                     const navLogin = document.getElementById('nav-login');
