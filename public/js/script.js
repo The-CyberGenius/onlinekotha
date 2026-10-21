@@ -680,7 +680,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dateStr.includes('-')) {
             const parts = dateStr.split('-');
             if (parts.length !== 3) return null;
-            y = parseInt(parts[0]);
+            // Sanitize year — strip embedded timestamp noise (e.g. "2026041816" → "2026")
+            let yRaw = parts[0].trim();
+            if (yRaw.length > 4) yRaw = yRaw.substring(0, 4);
+            y = parseInt(yRaw);
             mon = parseInt(parts[1]);
             day = parseInt(parts[2]);
         } else if (dateStr.includes('/')) {
@@ -1487,7 +1490,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Check if user has selected who they are in this chat
                 if (!myName && chatName !== 'kotha_assistant' && chatName !== '__global__') {
-                    // Do NOT render one-sided chat!
+                    // Do NOT render one-sided chat! Show identity selection prompt.
                     chatContainer.innerHTML = `
                         <div class="flex flex-col items-center justify-center min-h-[380px] p-6 text-center max-w-md mx-auto my-auto animate-fade-in" style="margin-top:auto;margin-bottom:auto;">
                             <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 text-indigo-500 flex items-center justify-center text-3xl mb-4 shadow-sm border border-indigo-200/50 dark:border-indigo-800/50">
@@ -1503,6 +1506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </button>
                         </div>
                     `;
+                    // Button click re-opens the modal in case user dismissed the auto-popup
                     const promptBtn = document.getElementById('chat-select-identity-btn');
                     if (promptBtn) {
                         promptBtn.onclick = () => {
@@ -1511,12 +1515,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         };
                     }
-                    if (typeof window.ensureIdentity === 'function') {
-                        window.ensureIdentity(chatName, true);
-                    }
+                    // Mark loading as done before auto-opening modal
+                    // (kothaSetMyName will call loadData when identity is confirmed)
                     window.kothaChatLoading = false;
                     window.kothaLoadedChat = chatName;
                     updateHeaderIdentityPill();
+                    // Auto-open the modal immediately so user sees the selection right away
+                    if (typeof window.ensureIdentity === 'function') {
+                        window.ensureIdentity(chatName, true);
+                    }
                     return;
                 }
 
@@ -3417,6 +3424,11 @@ document.addEventListener('DOMContentLoaded', () => {
             renderChats(start, end, 'reset');
             // Scroll to bottom to show latest messages in correct alignment
             setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 30);
+        } else if (currentChat && myName && !window.kothaChatLoading) {
+            // Identity set from "Who are you?" prompt screen (no messages yet, no loadData in-flight).
+            // Do a full reload so messages fetch + all UI renders correctly.
+            if (window._chatMsgCache) delete window._chatMsgCache[currentChat];
+            loadData(currentChat);
         }
     };
 
