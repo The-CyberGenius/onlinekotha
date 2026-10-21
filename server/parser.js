@@ -45,14 +45,22 @@ function parseLine(line, format) {
     let date, time, sender, rawText;
     
     if (format === 'bracket') {
-        const dtParts = match[1].split(',');
-        if (dtParts.length === 2) {
+        const inside = match[1].trim();
+        if (inside.includes(',')) {
+            const dtParts = inside.split(',');
             const p1 = dtParts[0].trim();
             const p2 = dtParts[1].trim();
             if (p1.includes(':')) { time = p1; date = p2; }
             else { date = p1; time = p2; }
+        } else if (inside.includes(' ')) {
+            const spaceIdx = inside.indexOf(' ');
+            const p1 = inside.substring(0, spaceIdx).trim();
+            const p2 = inside.substring(spaceIdx + 1).trim();
+            if (p1.includes(':')) { time = p1; date = p2; }
+            else { date = p1; time = p2; }
         } else {
-            date = match[1]; time = '';
+            date = inside;
+            time = '';
         }
         sender = match[2];
         rawText = match[3];
@@ -199,9 +207,12 @@ async function parseChatFile(chatFilePath) {
         if (!msg.date) continue;
         const parts = msg.date.split(/[\/\-\.]/);
         if (parts.length === 3) {
-            if (parts[0].length === 4) {
-                // It's already YYYY-MM-DD, just ensure dashes
-                msg.date = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+            if (parts[0].length >= 4) {
+                // It's already YYYY-MM-DD or prefixed
+                const y = parts[0].substring(0, 4);
+                const m = parts[1].replace(/\D/g, '').padStart(2, '0');
+                const d = parts[2].trim().split(/\s+/)[0].replace(/\D/g, '').padStart(2, '0');
+                msg.date = `${y}-${m}-${d}`;
                 continue;
             }
             
@@ -213,7 +224,8 @@ async function parseChatFile(chatFilePath) {
                 day = parseInt(parts[0]);
                 month = parseInt(parts[1]);
             }
-            let yearStr = parts[2].replace(/\D/g, ''); // strip any non-digits
+            let yearStr = parts[2].trim().split(/\s+/)[0].replace(/\D/g, ''); // strip any non-digits
+            if (yearStr.length > 4) yearStr = yearStr.substring(0, 4);
             let year = yearStr.length === 2 ? 2000 + parseInt(yearStr) : parseInt(yearStr);
             const dd = String(day).padStart(2, '0');
             const mm = String(month).padStart(2, '0');

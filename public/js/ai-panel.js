@@ -440,10 +440,13 @@
         }
         try {
             const resp = await fetch(`/api/ai/chat/${encodeURIComponent(chatFolder)}/identity`);
-            if (!resp.ok) return true;
+            if (!resp.ok) {
+                console.error('[IDENTITY] Error fetching identity status:', resp.status);
+                return false;
+            }
             const data = await resp.json();
 
-            if (!data.requiresSelection && !forceShow) {
+            if (!data.requiresSelection && !forceShow && data.userParticipant) {
                 // Identity already stored and valid — sync it to the rendering engine
                 const savedUser = data.userParticipant;
                 const otherPerson = (data.participants || []).find(p => p !== savedUser) || null;
@@ -585,7 +588,7 @@
             });
         } catch (e) {
             console.error('ensureIdentity error', e);
-            return true;
+            return false;
         }
     };
 

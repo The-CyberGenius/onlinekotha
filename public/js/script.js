@@ -539,7 +539,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // YYYY-MM-DD format (ISO style from desktop regex)
             const parts = raw.split('-');
             if (parts.length === 3) {
-                d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                let yStr = parts[0].trim();
+                if (yStr.length > 4) yStr = yStr.substring(0, 4);
+                const y = parseInt(yStr);
+                const m = parseInt(parts[1].trim()) - 1;
+                const day = parseInt(parts[2].trim().split(/\s+/)[0]);
+                if (!isNaN(y) && !isNaN(m) && !isNaN(day)) {
+                    d = new Date(y, m, day);
+                }
             }
         } else if (raw.includes('/')) {
             // DD/MM/YY format (Indian WhatsApp style)
@@ -547,7 +554,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (parts.length === 3) {
                 const day = parseInt(parts[0]);
                 const month = parseInt(parts[1]);
-                let year = parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2]);
+                let yearStr = parts[2].trim().split(/\s+/)[0].replace(/\D/g, '');
+                if (yearStr.length > 4) yearStr = yearStr.substring(0, 4);
+                let year = yearStr.length === 2 ? 2000 + parseInt(yearStr) : parseInt(yearStr);
                 d = new Date(year, month - 1, day);
                 // Fallback to MM/DD/YY if the parsed date is in the future
                 if (d > new Date()) {
@@ -867,13 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statsInfo.innerText = 'Loading identity...';
 
             if (typeof window.ensureIdentity === 'function') {
-                const identityConfirmed = await window.ensureIdentity(chatName);
-                if (!identityConfirmed) {
-                    window.kothaChatLoading = false;
-                    currentChat = '';
-                    showEmptyState();
-                    return; // Abort loading if identity wasn't confirmed
-                }
+                await window.ensureIdentity(chatName);
             }
 
             // ── Client-side cache: re-opening a chat is instant (no network/re-fetch) ──
@@ -1205,8 +1208,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     expandedContent.appendChild(statsStrip);
                     
                     const filterWrap = document.createElement('div');
-                    filterWrap.className = 'flex flex-wrap gap-1.5';
+                    filterWrap.className = 'flex flex-wrap gap-1.5 items-center';
                     expandedContent.appendChild(filterWrap);
+
+                    const switchIdBtn = document.createElement('button');
+                    switchIdBtn.className = 'text-[10px] bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200 dark:border-indigo-800/60 rounded-full px-2.5 py-1 font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition whitespace-nowrap cursor-pointer flex items-center gap-1 font-sans active:scale-95 shadow-xs mr-1';
+                    switchIdBtn.innerHTML = `<span>👋 Change Who You Are</span>`;
+                    switchIdBtn.onclick = () => {
+                        if (currentChat && typeof window.ensureIdentity === 'function') {
+                            window.ensureIdentity(currentChat, true);
+                        }
+                    };
+                    filterWrap.appendChild(switchIdBtn);
                     
                     participantContainer.appendChild(expandedContent);
 
@@ -1472,10 +1485,46 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                 }
 
+                // Check if user has selected who they are in this chat
+                if (!myName && chatName !== 'kotha_assistant' && chatName !== '__global__') {
+                    // Do NOT render one-sided chat!
+                    chatContainer.innerHTML = `
+                        <div class="flex flex-col items-center justify-center min-h-[380px] p-6 text-center max-w-md mx-auto my-auto animate-fade-in" style="margin-top:auto;margin-bottom:auto;">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 text-indigo-500 flex items-center justify-center text-3xl mb-4 shadow-sm border border-indigo-200/50 dark:border-indigo-800/50">
+                                👋
+                            </div>
+                            <h3 class="text-xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">Who are you in this chat?</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed max-w-xs">
+                                Please select your name so your messages align to the right in green, and the contact's messages to the left.
+                            </p>
+                            <button id="chat-select-identity-btn" class="px-6 py-3.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-indigo-500/25 active:scale-95 transition-all cursor-pointer flex items-center gap-2">
+                                <span>Select Who You Are</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </button>
+                        </div>
+                    `;
+                    const promptBtn = document.getElementById('chat-select-identity-btn');
+                    if (promptBtn) {
+                        promptBtn.onclick = () => {
+                            if (typeof window.ensureIdentity === 'function') {
+                                window.ensureIdentity(currentChat, true);
+                            }
+                        };
+                    }
+                    if (typeof window.ensureIdentity === 'function') {
+                        window.ensureIdentity(chatName, true);
+                    }
+                    window.kothaChatLoading = false;
+                    window.kothaLoadedChat = chatName;
+                    updateHeaderIdentityPill();
+                    return;
+                }
+
                 // Initial render: last CHUNK_SIZE messages
                 const end = allMessages.length;
                 const start = Math.max(0, end - CHUNK_SIZE);
                 renderChats(start, end);
+                updateHeaderIdentityPill();
 
                 setTimeout(() => {
                     scrollArea.scrollTop = scrollArea.scrollHeight;
@@ -3312,6 +3361,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function updateHeaderIdentityPill() {
+        const btn = document.getElementById('header-switch-identity-btn');
+        const label = document.getElementById('header-identity-name');
+        if (!btn || !label) return;
+        if (myName && currentChat && currentChat !== 'kotha_assistant' && currentChat !== '__global__') {
+            label.innerText = myName;
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+
+    const switchIdentityHeaderBtn = document.getElementById('header-switch-identity-btn');
+    if (switchIdentityHeaderBtn && !switchIdentityHeaderBtn._bound) {
+        switchIdentityHeaderBtn._bound = true;
+        switchIdentityHeaderBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentChat && typeof window.ensureIdentity === 'function') {
+                window.ensureIdentity(currentChat, true);
+            }
+        });
+    }
+
     // Expose chat data getters globally for features (like Chat Wrapped)
     window.kothaGetAllMessages = () => allMessages;
     window.kothaGetMyName = () => myName;
@@ -3320,14 +3392,31 @@ document.addEventListener('DOMContentLoaded', () => {
     window.kothaSetMyName = (name, otherName) => {
         myName = name || null;
         if (otherName) otherPersonName = otherName;
+        updateHeaderIdentityPill();
+
+        // Update header name for 1-on-1 chats
+        if (otherPersonName && headerName && currentChat !== 'kotha_assistant' && currentChat !== '__global__') {
+            const isGroup = window._chatMetaCache?.[currentChat]?.isGroup;
+            if (!isGroup) {
+                headerName.innerText = otherPersonName;
+                if (headerAvatar) {
+                    headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
+                }
+            }
+        }
+
         // Re-render the current visible chat slice to apply correct alignment
-        if (currentChat && displayedMessages.length > 0) {
+        if (currentChat && allMessages.length > 0) {
             lastRenderedDate = '';
             chatContainer.innerHTML = '';
-            const end = Math.min(displayedMessages.length, renderStart + (renderEnd - renderStart || 100));
-            renderChats(renderStart, end, 'reset');
+            if (!displayedMessages || displayedMessages.length === 0) {
+                displayedMessages = [...allMessages];
+            }
+            const end = displayedMessages.length;
+            const start = Math.max(0, end - CHUNK_SIZE);
+            renderChats(start, end, 'reset');
             // Scroll to bottom to show latest messages in correct alignment
-            scrollArea.scrollTop = scrollArea.scrollHeight;
+            setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 30);
         }
     };
 

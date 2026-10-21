@@ -15,8 +15,16 @@ router.use(requireUserOrGuest);
 
 // Helper for owner ID (User ID or Guest ID)
 function getOwner(req) {
-    if (req.user) return { userId: req.user.id, guestId: null, dirKey: req.user.id };
-    return { userId: 0, guestId: req.guestStatus.guestId, dirKey: req.guestStatus.guestId };
+    if (req.user) {
+        if (req.user.is_impersonating && req.user.guest_id) {
+            return { userId: 0, guestId: req.user.guest_id, dirKey: req.user.guest_id, isGuest: true };
+        }
+        if (req.user.id > 0) {
+            return { userId: req.user.id, guestId: null, dirKey: req.user.id, isGuest: false };
+        }
+    }
+    const guestId = (req.guestStatus && req.guestStatus.guestId) || (req.cookies && req.cookies.kotha_guest_id) || null;
+    return { userId: 0, guestId: guestId, dirKey: guestId, isGuest: true };
 }
 
 // ---------- Plan + rate-limit gates ----------
@@ -69,8 +77,8 @@ function aiGate(req, res, next) {
 // ---------- Conversations CRUD ----------
 router.get('/conversations', (req, res) => {
     const chatFolder = req.query.chat;
-    const { userId, guestId } = getOwner(req);
-    const sql = req.user
+    const owner = getOwner(req);
+    const sql = !owner.isGuest
         ? `SELECT c.id, c.title, c.chat_folder, c.created_at, c.updated_at,
                   (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
            FROM conversations c WHERE c.user_id = ? ${chatFolder ? 'AND c.chat_folder = ?' : ''}
@@ -79,17 +87,17 @@ router.get('/conversations', (req, res) => {
                   (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
            FROM conversations c WHERE c.guest_id = ? ${chatFolder ? 'AND c.chat_folder = ?' : ''}
            ORDER BY c.updated_at DESC`;
-    const params = req.user ? (chatFolder ? [userId, chatFolder] : [userId]) : (chatFolder ? [guestId, chatFolder] : [guestId]);
+    const params = !owner.isGuest ? (chatFolder ? [owner.userId, chatFolder] : [owner.userId]) : (chatFolder ? [owner.guestId, chatFolder] : [owner.guestId]);
     const rows = db.prepare(sql).all(...params);
     res.json(rows);
 });
 
 router.get('/conversations/:id', (req, res) => {
-    const { userId, guestId } = getOwner(req);
-    const sql = req.user
+    const owner = getOwner(req);
+    const sql = !owner.isGuest
         ? 'SELECT * FROM conversations WHERE id = ? AND user_id = ?'
         : 'SELECT * FROM conversations WHERE id = ? AND guest_id = ?';
-    const params = req.user ? [Number(req.params.id), userId] : [Number(req.params.id), guestId];
+    const params = !owner.isGuest ? [Number(req.params.id), owner.userId] : [Number(req.params.id), owner.guestId];
     const conv = db.prepare(sql).get(...params);
     if (!conv) return res.status(404).json({ error: 'Not found' });
     const msgs = db.prepare(
@@ -102,11 +110,11 @@ router.get('/conversations/:id', (req, res) => {
 });
 
 router.delete('/conversations/:id', (req, res) => {
-    const { userId, guestId } = getOwner(req);
-    const sql = req.user
+    const owner = getOwner(req);
+    const sql = !owner.isGuest
         ? 'SELECT id FROM conversations WHERE id = ? AND user_id = ?'
         : 'SELECT id FROM conversations WHERE id = ? AND guest_id = ?';
-    const params = req.user ? [Number(req.params.id), userId] : [Number(req.params.id), guestId];
+    const params = !owner.isGuest ? [Number(req.params.id), owner.userId] : [Number(req.params.id), owner.guestId];
     const conv = db.prepare(sql).get(...params);
     if (!conv) return res.status(404).json({ error: 'Not found' });
     db.prepare('DELETE FROM conversations WHERE id = ?').run(conv.id);
@@ -114,14 +122,14 @@ router.delete('/conversations/:id', (req, res) => {
 });
 
 router.put('/conversations/:id/rename', (req, res) => {
-    const { userId, guestId } = getOwner(req);
+    const owner = getOwner(req);
     const { newName } = req.body || {};
     if (!newName || !newName.trim()) return res.status(400).json({ error: 'newName is required' });
     
-    const sql = req.user
+    const sql = !owner.isGuest
         ? 'SELECT id FROM conversations WHERE id = ? AND user_id = ?'
         : 'SELECT id FROM conversations WHERE id = ? AND guest_id = ?';
-    const params = req.user ? [Number(req.params.id), userId] : [Number(req.params.id), guestId];
+    const params = !owner.isGuest ? [Number(req.params.id), owner.userId] : [Number(req.params.id), owner.guestId];
     const conv = db.prepare(sql).get(...params);
     if (!conv) return res.status(404).json({ error: 'Not found' });
     
@@ -131,13 +139,16 @@ router.put('/conversations/:id/rename', (req, res) => {
 
 // ---------- Identity Onboarding ----------
 router.get('/chat/:folder/identity', async (req, res) => {
-    const { userId, guestId } = getOwner(req);
-    const sql = req.user
+    const owner = getOwner(req);
+    const sql = !owner.isGuest
         ? 'SELECT user_participant FROM chats WHERE folder_name = ? AND user_id = ?'
         : 'SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?';
-    const params = req.user ? [req.params.folder, userId] : [req.params.folder, guestId];
-    const chatRow = db.prepare(sql).get(...params);
-    // Don't return 404 if not in DB; it might be an older chat on disk
+    const params = !owner.isGuest ? [req.params.folder, owner.userId] : [req.params.folder, owner.guestId];
+    let chatRow = db.prepare(sql).get(...params);
+    if (!chatRow) {
+        // Fallback for newly migrated or shared chats
+        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ?').get(req.params.folder);
+    }
     
     try {
         const { getMessages } = require('./cache');
@@ -145,10 +156,19 @@ router.get('/chat/:folder/identity', async (req, res) => {
         if (!chatFolder || chatFolder.includes('..')) {
             return res.status(400).json({ error: 'Invalid folder' });
         }
-        const base = path.resolve(userDir(req.user ? userId : guestId));
-        const dir = path.resolve(base, path.normalize(chatFolder));
-        if (!dir.startsWith(base + path.sep)) {
-            return res.status(403).json({ error: 'Access denied' });
+        let dir = path.resolve(userDir(owner.dirKey), path.normalize(chatFolder));
+        if (!fs.existsSync(dir)) {
+            const { SRC_DIR } = require('./upload');
+            if (fs.existsSync(SRC_DIR)) {
+                const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_'));
+                for (const sd of subdirs) {
+                    const cand = path.join(SRC_DIR, sd.name, chatFolder);
+                    if (fs.existsSync(cand)) {
+                        dir = cand;
+                        break;
+                    }
+                }
+            }
         }
         
         const { participants, participantStats, isGroup } = await getMessages(dir);
@@ -172,17 +192,31 @@ router.post('/chat/:folder/identity', async (req, res) => {
     const { userParticipant } = req.body;
     if (!userParticipant) return res.status(400).json({ error: 'userParticipant is required' });
     
-    const { userId, guestId } = getOwner(req);
-    const sql = req.user
+    const owner = getOwner(req);
+    const sql = !owner.isGuest
         ? 'UPDATE chats SET user_participant = ? WHERE folder_name = ? AND user_id = ?'
         : 'UPDATE chats SET user_participant = ? WHERE folder_name = ? AND guest_id = ?';
-    const params = req.user ? [userParticipant, req.params.folder, userId] : [userParticipant, req.params.folder, guestId];
+    const params = !owner.isGuest ? [userParticipant, req.params.folder, owner.userId] : [userParticipant, req.params.folder, owner.guestId];
     
     let info = db.prepare(sql).run(...params);
     if (info.changes === 0) {
         // Chat not in DB yet, insert it. Let's try to parse it first to get metadata.
-        const myDir = userDir(req.user ? userId : guestId);
-        const finalDir = path.join(myDir, req.params.folder);
+        const myDir = userDir(owner.dirKey);
+        let finalDir = path.join(myDir, req.params.folder);
+        if (!fs.existsSync(finalDir)) {
+            const { SRC_DIR } = require('./upload');
+            if (fs.existsSync(SRC_DIR)) {
+                const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_'));
+                for (const sd of subdirs) {
+                    const cand = path.join(SRC_DIR, sd.name, req.params.folder);
+                    if (fs.existsSync(cand)) {
+                        finalDir = cand;
+                        break;
+                    }
+                }
+            }
+        }
+
         let msgCount = 0, isGroup = 0, parts = [];
         try {
             const parsed = await getMessages(finalDir);
@@ -191,12 +225,12 @@ router.post('/chat/:folder/identity', async (req, res) => {
             parts = parsed.participants || [];
         } catch(e) {}
 
-        const insertSql = req.user
+        const insertSql = !owner.isGuest
             ? 'INSERT INTO chats (user_id, folder_name, user_participant, created_at, message_count, is_group, participants) VALUES (?, ?, ?, ?, ?, ?, ?)'
             : 'INSERT INTO chats (user_id, guest_id, folder_name, user_participant, created_at, message_count, is_group, participants) VALUES (0, ?, ?, ?, ?, ?, ?, ?)';
-        const insertParams = req.user 
-            ? [userId, req.params.folder, userParticipant, Date.now(), msgCount, isGroup, JSON.stringify(parts)]
-            : [guestId, req.params.folder, userParticipant, Date.now(), msgCount, isGroup, JSON.stringify(parts)];
+        const insertParams = !owner.isGuest 
+            ? [owner.userId, req.params.folder, userParticipant, Date.now(), msgCount, isGroup, JSON.stringify(parts)]
+            : [owner.guestId, req.params.folder, userParticipant, Date.now(), msgCount, isGroup, JSON.stringify(parts)];
         try {
             info = db.prepare(insertSql).run(...insertParams);
         } catch(e) {
@@ -204,7 +238,7 @@ router.post('/chat/:folder/identity', async (req, res) => {
         }
     }
     
-    res.json({ ok: true });
+    res.json({ ok: true, userParticipant });
 });
 
 // ---------- Main streaming chat ----------
@@ -217,8 +251,12 @@ router.post('/chat', aiGate, async (req, res) => {
         return res.status(400).json({ error: `Message exceeds limit (max ${maxWords} words). Please shorten your message to prevent server slowdown.` });
     }
 
-    const { userId, guestId, dirKey } = getOwner(req);
-    const ownerKey = req.user ? `ai_${userId}` : `ai_guest_${guestId}`;
+    const owner = getOwner(req);
+    const userId = owner.userId;
+    const guestId = owner.guestId;
+    const dirKey = owner.dirKey;
+    const isGuest = owner.isGuest;
+    const ownerKey = !isGuest ? `ai_${userId}` : `ai_guest_${guestId}`;
     const burstCheck = checkBurstLimit(ownerKey);
     if (!burstCheck.allowed) {
         return res.status(429).json({ error: burstCheck.error });
@@ -228,8 +266,16 @@ router.post('/chat', aiGate, async (req, res) => {
         const baseDir = path.resolve(userDir(dirKey));
         const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
         const chatDir = path.resolve(baseDir, cleanFolder);
-        if (!chatDir.startsWith(baseDir)) {
-            throw new Error('Invalid chat path');
+        if (chatDir.startsWith(baseDir) && fs.existsSync(chatDir)) {
+            return chatDir;
+        }
+        const { SRC_DIR } = require('./upload');
+        if (fs.existsSync(SRC_DIR)) {
+            const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_'));
+            for (const sd of subdirs) {
+                const cand = path.join(SRC_DIR, sd.name, cleanFolder);
+                if (fs.existsSync(cand)) return cand;
+            }
         }
         return chatDir;
     }
@@ -257,11 +303,14 @@ router.post('/chat', aiGate, async (req, res) => {
     let userParticipant = null;
 
     // Fetch user_participant from chats table
-    const chatSql = req.user
+    const chatSql = !isGuest
         ? 'SELECT user_participant FROM chats WHERE folder_name = ? AND user_id = ?'
         : 'SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?';
-    const chatParams = req.user ? [chat, userId] : [chat, guestId];
-    const chatRow = db.prepare(chatSql).get(...chatParams);
+    const chatParams = !isGuest ? [chat, userId] : [chat, guestId];
+    let chatRow = db.prepare(chatSql).get(...chatParams);
+    if (!chatRow) {
+        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ?').get(chat);
+    }
     if (chatRow && chatRow.user_participant) {
         userParticipant = chatRow.user_participant;
     }
@@ -270,7 +319,7 @@ router.post('/chat', aiGate, async (req, res) => {
     if (!convId) {
         const now = Date.now();
         const title = message.slice(0, 60);
-        if (req.user) {
+        if (!isGuest) {
             const info = db.prepare(
                 `INSERT INTO conversations (user_id, chat_folder, title, created_at, updated_at, ai_participant, ai_paused)
                  VALUES (?, ?, ?, ?, ?, ?, 0)`
@@ -285,10 +334,10 @@ router.post('/chat', aiGate, async (req, res) => {
         }
         existingAiParticipant = aiParticipant || null;
     } else {
-        const convSql = req.user
+        const convSql = !isGuest
             ? 'SELECT id, ai_participant, ai_paused FROM conversations WHERE id = ? AND user_id = ?'
             : 'SELECT id, ai_participant, ai_paused FROM conversations WHERE id = ? AND guest_id = ?';
-        const convParams = req.user ? [convId, userId] : [convId, guestId];
+        const convParams = !isGuest ? [convId, userId] : [convId, guestId];
         const convRow = db.prepare(convSql).get(...convParams);
         if (!convRow) return res.status(404).json({ error: 'Conversation not found' });
         existingAiParticipant = convRow.ai_participant;
