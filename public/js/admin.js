@@ -654,161 +654,249 @@ HARD RULES
             const bActive = parseTs(b.last_active_at);
             if (bActive !== aActive) return bActive - aActive;
 
-            return (Number(b.id) || 0) - (Number(a.id) || 0);
+            const aNum = Number(a.id);
+            const bNum = Number(b.id);
+            if (!isNaN(aNum) && !isNaN(bNum)) return bNum - aNum;
+            return String(b.id || '').localeCompare(String(a.id || ''));
         });
     }
 
+    const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+    function getCountryName(code) {
+        if (!code) return 'UNKNOWN REGION';
+        if (code.length > 3) return code.toUpperCase();
+        try { 
+            const name = regionNames.of(code.toUpperCase()) || code;
+            return name.toUpperCase(); 
+        } catch (e) { 
+            return code.toUpperCase() === 'IN' ? 'INDIA' : code.toUpperCase(); 
+        }
+    }
+
+    function getBadge(u) {
+        if (u.is_suspended) return '<span class="badge" style="background:rgba(239,68,68,0.18);color:#ef4444;border:1px solid rgba(239,68,68,0.4);font-weight:700;">SUSPENDED</span>';
+        if (u.is_guest) return '<span class="badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);">GUEST</span>';
+        if (u.is_admin) return '<span class="badge badge-admin">ADMIN</span>';
+        if (u.plan === 'paid') return '<span class="badge badge-paid">PAID</span>';
+        if (u.plan === 'trial' && u.trial_expires_at > Date.now()) return '<span class="badge badge-trial">TRIAL</span>';
+        if (u.plan === 'trial') return '<span class="badge badge-expired">EXPIRED</span>';
+        return '<span class="badge">FREE</span>';
+    }
+
+    function filterUsersByQuery(list, query) {
+        if (!query) return list;
+        return list.filter(u => 
+            String(u.id || '').toLowerCase().includes(query) ||
+            (u.email && u.email.toLowerCase().includes(query)) ||
+            (u.display_name && u.display_name.toLowerCase().includes(query)) ||
+            (u.phone && u.phone.toLowerCase().includes(query)) ||
+            (u.ip_address && u.ip_address.toLowerCase().includes(query)) ||
+            (u.country && u.country.toLowerCase().includes(query))
+        );
+    }
+
     let cachedUsers = [];
+
+    function renderAllUserLists() {
+        const userQuery = document.getElementById('admin-user-search')?.value.toLowerCase().trim() || '';
+        const guestQuery = document.getElementById('admin-guest-search')?.value.toLowerCase().trim() || '';
+
+        const registeredUsers = cachedUsers.filter(u => !u.is_guest);
+        const guestUsers = cachedUsers.filter(u => Boolean(u.is_guest));
+
+        const navGuestCount = document.getElementById('nav-guest-count');
+        if (navGuestCount) {
+            navGuestCount.textContent = guestUsers.length;
+            navGuestCount.style.display = guestUsers.length > 0 ? 'inline-block' : 'none';
+        }
+
+        const filteredRegistered = filterUsersByQuery(registeredUsers, userQuery);
+        const filteredGuests = filterUsersByQuery(guestUsers, guestQuery);
+
+        renderUserSection('user-list', filteredRegistered, false);
+        renderUserSection('guest-list', filteredGuests, true);
+    }
+
     async function loadUsers() {
         try {
             const res = await fetch('/api/admin/users');
             if (res.ok) {
                 cachedUsers = await res.json();
-                renderUserList(sortUsers(cachedUsers));
+                renderAllUserLists();
             }
         } catch (e) {
             console.error('Failed to load users:', e);
         }
 
-        const searchInput = document.getElementById('admin-user-search');
-        if (searchInput && !searchInput._bound) {
-            searchInput._bound = true;
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase().trim();
-                if (!query) {
-                    renderUserList(sortUsers(cachedUsers));
-                    return;
-                }
-                const filtered = cachedUsers.filter(u => 
-                    String(u.id).includes(query) ||
-                    (u.email && u.email.toLowerCase().includes(query)) ||
-                    (u.display_name && u.display_name.toLowerCase().includes(query)) ||
-                    (u.phone && u.phone.toLowerCase().includes(query))
-                );
-                renderUserList(sortUsers(filtered));
+        const userSearch = document.getElementById('admin-user-search');
+        if (userSearch && !userSearch._bound) {
+            userSearch._bound = true;
+            userSearch.addEventListener('input', () => renderAllUserLists());
+        }
+
+        const guestSearch = document.getElementById('admin-guest-search');
+        if (guestSearch && !guestSearch._bound) {
+            guestSearch._bound = true;
+            guestSearch.addEventListener('input', () => renderAllUserLists());
+        }
+
+        const refreshUsersBtn = document.getElementById('refresh-users-btn');
+        if (refreshUsersBtn && !refreshUsersBtn._bound) {
+            refreshUsersBtn._bound = true;
+            refreshUsersBtn.addEventListener('click', async () => {
+                refreshUsersBtn.disabled = true;
+                refreshUsersBtn.style.opacity = '0.6';
+                await loadUsers();
+                setTimeout(() => {
+                    refreshUsersBtn.disabled = false;
+                    refreshUsersBtn.style.opacity = '1';
+                }, 400);
             });
         }
 
-        const refreshBtn = document.getElementById('refresh-users-btn');
-        if (refreshBtn && !refreshBtn._bound) {
-            refreshBtn._bound = true;
-            refreshBtn.addEventListener('click', async () => {
-                refreshBtn.disabled = true;
-                refreshBtn.style.opacity = '0.6';
+        const refreshGuestsBtn = document.getElementById('refresh-guests-btn');
+        if (refreshGuestsBtn && !refreshGuestsBtn._bound) {
+            refreshGuestsBtn._bound = true;
+            refreshGuestsBtn.addEventListener('click', async () => {
+                refreshGuestsBtn.disabled = true;
+                refreshGuestsBtn.style.opacity = '0.6';
                 await loadUsers();
                 setTimeout(() => {
-                    refreshBtn.disabled = false;
-                    refreshBtn.style.opacity = '1';
+                    refreshGuestsBtn.disabled = false;
+                    refreshGuestsBtn.style.opacity = '1';
                 }, 400);
+            });
+        }
+
+        const purgeGuestsBtn = document.getElementById('purge-guests-btn');
+        if (purgeGuestsBtn && !purgeGuestsBtn._bound) {
+            purgeGuestsBtn._bound = true;
+            purgeGuestsBtn.addEventListener('click', async () => {
+                if (!confirm('Purge all empty guest sessions?\n\nThis deletes guest sessions that have 0 uploaded chats and no activity.')) return;
+                purgeGuestsBtn.disabled = true;
+                purgeGuestsBtn.textContent = 'Purging…';
+                try {
+                    const res = await fetch('/api/admin/purge-guests', { method: 'POST' });
+                    const d = await res.json();
+                    alert(d.ok ? `Successfully purged ${d.deleted} empty guest sessions.` : (d.error || 'Failed'));
+                    await loadUsers();
+                } catch (err) {
+                    alert('Network error: ' + err.message);
+                } finally {
+                    purgeGuestsBtn.disabled = false;
+                    purgeGuestsBtn.textContent = 'Purge empty guests';
+                }
             });
         }
     }
 
-    // Auto-refresh users tab every 30s to keep online and newly registered users updated
+    // Auto-refresh users & guests tabs every 30s to keep online and newly registered/guest sessions updated
     setInterval(() => {
         const tabUsers = document.getElementById('tab-users');
-        const searchInput = document.getElementById('admin-user-search');
-        if (tabUsers && tabUsers.classList.contains('active') && (!searchInput || !searchInput.value.trim())) {
+        const tabGuests = document.getElementById('tab-guests');
+        const isUsersActive = tabUsers && !tabUsers.classList.contains('hidden');
+        const isGuestsActive = tabGuests && !tabGuests.classList.contains('hidden');
+        const userSearch = document.getElementById('admin-user-search')?.value.trim();
+        const guestSearch = document.getElementById('admin-guest-search')?.value.trim();
+
+        if ((isUsersActive || isGuestsActive) && !userSearch && !guestSearch) {
             loadUsers();
         }
     }, 30000);
 
     function renderUserList(rows) {
+        if (Array.isArray(rows)) {
+            cachedUsers = rows;
+        }
+        renderAllUserLists();
+    }
+
+    function renderUserSection(containerId, rows, isGuestSection) {
+        const list = document.getElementById(containerId);
+        if (!list) return;
+
         rows = sortUsers(rows);
-        const list = document.getElementById('user-list');
         if (!rows.length) {
-            list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">No users match your query</div>';
+            const emptyMsg = isGuestSection ? 'No guest sessions found' : 'No registered users match your query';
+            list.innerHTML = `<div style="text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;">${emptyMsg}</div>`;
             return;
         }
 
         const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
-        // Shared badge helper
-        function getBadge(u) {
-            if (u.is_suspended) return '<span class="badge" style="background:rgba(239,68,68,0.18);color:#ef4444;border:1px solid rgba(239,68,68,0.4);font-weight:700;">SUSPENDED</span>';
-            if (u.is_guest) return '<span class="badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);">GUEST</span>';
-            if (u.is_admin) return '<span class="badge badge-admin">ADMIN</span>';
-            if (u.plan === 'paid') return '<span class="badge badge-paid">PAID</span>';
-            if (u.plan === 'trial' && u.trial_expires_at > Date.now()) return '<span class="badge badge-trial">TRIAL</span>';
-            if (u.plan === 'trial') return '<span class="badge badge-expired">EXPIRED</span>';
-            return '<span class="badge">FREE</span>';
-        }
-
-        const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
-        function getCountryName(code) {
-            if (!code) return 'UNKNOWN REGION';
-            if (code.length > 3) return code.toUpperCase();
-            try { 
-                const name = regionNames.of(code.toUpperCase()) || code;
-                return name.toUpperCase(); 
-            } catch (e) { 
-                return code.toUpperCase() === 'IN' ? 'INDIA' : code.toUpperCase(); 
-            }
-        }
-
-        const registeredCount = rows.filter(u => !u.is_guest).length;
-        const activeGuestCount = rows.filter(u => u.is_guest).length;
+        const totalCount = rows.length;
         const onlineCount = rows.filter(u => u.is_online).length;
-        const countSummaryText = `${registeredCount} registered user${registeredCount !== 1 ? 's' : ''}${activeGuestCount ? ' · ' + activeGuestCount + ' active guest' + (activeGuestCount !== 1 ? 's' : '') : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' online now</span>' : ''}`;
+
+        let countSummaryText = '';
+        if (isGuestSection) {
+            const withChats = rows.filter(u => (u.chat_count || 0) > 0).length;
+            countSummaryText = `${totalCount} guest session${totalCount !== 1 ? 's' : ''}${withChats ? ' · ' + withChats + ' with uploaded chats' : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' active online</span>' : ''}`;
+        } else {
+            countSummaryText = `${totalCount} registered user${totalCount !== 1 ? 's' : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' online now</span>' : ''}`;
+        }
 
         if (isMobile) {
-            // ══════════════════════════════════════════════════════════
-            // MOBILE — pure <div> cards, inline styles, no CSS needed
-            // ══════════════════════════════════════════════════════════
             let html = '<div style="display:flex;align-items:center;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + countSummaryText + '</span></div>';
 
             for (const u of rows) {
                 const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
-                const av = u.avatar_url
-                    ? '<img src="' + u.avatar_url + '" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div style="display:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>'
-                    : '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>';
+                const av = isGuestSection
+                    ? '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">G</div>'
+                    : (u.avatar_url
+                        ? '<img src="' + u.avatar_url + '" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div style="display:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>'
+                        : '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">' + initials + '</div>');
+                
                 const dot = u.is_online ? '<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px;"><span style="width:5px;height:5px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;"></span>ONLINE</span>' : '';
-                const phone = u.phone ? (u.phone_country_code||'') + ' ' + u.phone : (u.is_guest ? 'Guest mode' : 'No phone');
+                const phone = u.phone ? (u.phone_country_code || '') + ' ' + u.phone : (u.is_guest ? 'Guest mode' : 'No phone');
                 const loc = u.ip_address ? u.ip_address + (u.country ? ' · ' + getCountryName(u.country) : '') : 'No IP';
                 const costStr = Number(u.total_cost || 0).toFixed(3);
                 const authMethod = u.is_guest ? 'Guest' : (u.google_id ? 'Google' : 'Email');
+                const displayName = isGuestSection ? `Guest (${String(u.id).substring(4, 12)})` : (u.display_name || (u.email ? u.email.split('@')[0] : 'User'));
+                const subText = isGuestSection ? String(u.id) : (u.email || '');
 
                 html += '<div data-uid="' + u.id + '" style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
-                // ── Header row (always visible)
                 html += '<div class="mcard-hdr" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;-webkit-tap-highlight-color:rgba(99,102,241,0.12);touch-action:manipulation;user-select:none;">';
                 html += av;
-                html += '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">' + (u.display_name || u.email.split('@')[0]) + '</span>' + dot + ' ' + getBadge(u) + '</div>';
-                html += '<div style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + u.email + '</div></div>';
+                html += '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">' + displayName + '</span>' + dot + ' ' + getBadge(u) + '</div>';
+                html += '<div style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (isGuestSection ? 'font-family:monospace;' : '') + '">' + subText + '</div></div>';
                 html += '<div class="mcard-chev" style="width:28px;height:28px;border-radius:50%;background:var(--bg-page);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .25s;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>';
                 html += '</div>';
 
-                // ── Body (hidden by default)
                 html += '<div class="mcard-body" style="display:none;border-top:1px solid var(--bg-alt);padding:0 14px 12px;">';
                 html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:10px;">';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Auth</div><div style="font-size:11px;color:' + (u.is_guest ? '#f59e0b' : (u.google_id ? '#2563eb' : '#64748b')) + ';">' + authMethod + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:monospace;">$' + costStr + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Phone</div><div style="font-size:12px;color:var(--text-secondary);">' + phone + '</div></div>';
+                if (!isGuestSection) {
+                    html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:monospace;">$' + costStr + '</div></div>';
+                    html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Phone</div><div style="font-size:12px;color:var(--text-secondary);">' + phone + '</div></div>';
+                }
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:var(--text-primary);">' + (u.chat_count || 0) + '</div></div>';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Location</div><div style="font-size:11px;color:var(--text-secondary);">' + loc + '</div></div>';
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Joined</div><div style="font-size:11px;color:var(--text-secondary);">' + (u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently') + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">' + (isGuestSection ? 'First Seen' : 'Joined') + '</div><div style="font-size:11px;color:var(--text-secondary);">' + (u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently') + '</div></div>';
                 html += '</div>';
                 if (u.last_active_at) html += '<div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Active: ' + formatDateTime(u.last_active_at) + '</div>';
-                // Action buttons
+
                 html += '<div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;">';
-                if (!u.is_admin && !u.is_guest) html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at||'') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
+                if (!isGuestSection && !u.is_admin && !u.is_guest) {
+                    html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at || '') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
+                }
                 html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + (u.chat_count || 0) + '" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats (' + (u.chat_count || 0) + ')</button>';
                 html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
-                if (!u.is_admin && !u.is_guest) {
+                if (!isGuestSection && !u.is_admin && !u.is_guest) {
                     const suspText = u.is_suspended ? 'Unsuspend' : 'Suspend';
                     const suspColor = u.is_suspended ? '#10b981' : '#f59e0b';
                     html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-suspend-btn" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid ' + suspColor + ';background:var(--card-bg);color:' + suspColor + ';cursor:pointer;">' + suspText + '</button>';
                 }
-                if (!u.is_admin) html += '<button data-uid="' + u.id + '" data-email="' + u.email + '" class="user-del-btn" style="flex:1;min-width:50px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>';
+                if (!u.is_admin) {
+                    html += '<button data-uid="' + u.id + '" data-email="' + (u.email || u.id) + '" class="user-del-btn" style="flex:1;min-width:50px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>';
+                }
                 html += '</div>';
-                // Expand areas
+
                 html += '<div data-chats-for="' + u.id + '" class="hidden" style="margin-top:8px;"></div>';
                 html += '<div data-ai-logs-for="' + u.id + '" class="hidden" style="margin-top:8px;"></div>';
-                html += '</div>'; // end body
-                html += '</div>'; // end card
+                html += '</div>';
+                html += '</div>';
             }
             list.innerHTML = html;
 
-            // Attach toggle listeners (pure JS — no CSS dependency)
             list.querySelectorAll('.mcard-hdr').forEach(function(hdr) {
                 hdr.addEventListener('click', function(e) {
                     if (e.target.closest('button') || e.target.closest('a')) return;
@@ -816,7 +904,6 @@ HARD RULES
                     var body = card.querySelector('.mcard-body');
                     var chev = card.querySelector('.mcard-chev');
                     var open = body.style.display !== 'none';
-                    // Close others
                     list.querySelectorAll('.mcard-body').forEach(function(b) { b.style.display = 'none'; });
                     list.querySelectorAll('.mcard-chev').forEach(function(c) { c.style.transform = 'rotate(0deg)'; });
                     if (!open) {
@@ -827,39 +914,59 @@ HARD RULES
             });
 
         } else {
-            // ══════════════════════════════════════════════════════════
-            // DESKTOP — original table layout (unchanged)
-            // ══════════════════════════════════════════════════════════
-            let html = '\n<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + countSummaryText + '</span></div>\n<div class="table-responsive"><table class="admin-table"><thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
-            for (const u of rows) {
-                const badge = getBadge(u);
-                const loginMethod = u.is_guest 
-                    ? '<span class="meta-text" style="color:#f59e0b;font-weight:600;">Guest Mode</span>'
-                    : (u.google_id ? '<span class="meta-text" style="color:var(--accent);">Google Auth</span>' : '<span class="meta-text">Email Auth</span>');
-                const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
-                const avatarHtml = u.avatar_url
-                    ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
-                    : `<div class="user-avatar">${initials}</div>`;
-                const onlineDot = u.is_online ? '<span class="status-dot" title="Online" style="margin-left:6px;box-shadow:0 0 8px #10b981;"></span><span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:5px;letter-spacing:0.02em;">ONLINE</span>' : '';
-                const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code||''}${u.phone}" style="color:var(--text-primary);text-decoration:none;">${u.phone_country_code?u.phone_country_code+' ':''}${u.phone}</a>` : `<span style="color:var(--text-muted);">${u.is_guest ? 'Guest mode' : 'No phone'}</span>`;
-                const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
-                const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
-                const costStr = Number(u.total_cost || 0).toFixed(3);
-                const suspendBtn = (u.is_admin || u.is_guest) ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-suspend-btn btn-subtle" style="padding:4px 7px;font-size:11px;color:${u.is_suspended ? '#10b981' : '#f59e0b'};border-color:${u.is_suspended ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'};" title="${u.is_suspended ? 'Unsuspend Account' : 'Suspend Account'}">${u.is_suspended ? 'Unsuspend' : 'Suspend'}</button>`;
+            let html = '\n<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + countSummaryText + '</span></div>\n<div class="table-responsive"><table class="admin-table">';
+            
+            if (isGuestSection) {
+                html += '<thead><tr><th>Guest Session</th><th>Status</th><th>Chats / Storage</th><th>Location</th><th>First Seen / Last Active</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
+                for (const u of rows) {
+                    const badge = getBadge(u);
+                    const onlineDot = u.is_online ? '<span class="status-dot" title="Online" style="margin-left:6px;box-shadow:0 0 8px #10b981;"></span><span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:5px;letter-spacing:0.02em;">ONLINE</span>' : '';
+                    const avatarHtml = `<div class="user-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-weight:700;">G</div>`;
+                    const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
+                    const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
 
-                html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name||u.email.split('@')[0]}${onlineDot}</span><span class="user-email-text">${u.email}</span></div></div></td>`;
-                html += `<td><div style="margin-bottom:4px;">${badge}</div>${loginMethod}</td>`;
-                html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">${u.chat_count || 0} chat${(u.chat_count || 0)!==1?'s':''}</span></td>`;
-                html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${costStr}</span></td>`;
-                html += `<td>${ipCountry}</td>`;
-                html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
-                html += `<td><div class="action-cell">${(u.is_admin || u.is_guest)?'':`<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at||''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin?'':`<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
-                html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
+                    html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">Guest (${String(u.id).substring(4, 12)})${onlineDot}</span><span class="user-email-text" style="font-family:monospace;font-size:11px;color:var(--text-muted);">${u.id}</span></div></div></td>`;
+                    html += `<td><div style="margin-bottom:4px;">${badge}</div><span class="meta-text" style="color:#f59e0b;font-weight:600;">Guest Session</span></td>`;
+                    html += `<td><span class="sub-text" style="font-weight:600;color:var(--text-primary);">${u.chat_count || 0} chat${(u.chat_count || 0) !== 1 ? 's' : ''}</span><span class="meta-text">${(u.ai_messages_count || 0) > 0 ? u.ai_messages_count + ' AI messages' : 'Direct web session'}</span></td>`;
+                    html += `<td>${ipCountry}</td>`;
+                    html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Created: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
+                    html += `<td><div class="action-cell"><button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button><button data-uid="${u.id}" data-email="${u.email || u.id}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete Guest Session" style="padding:4px 7px;font-size:11px;">Del</button></div></td></tr>`;
+                    html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="6" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
+                }
+            } else {
+                html += '<thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
+                for (const u of rows) {
+                    const badge = getBadge(u);
+                    const loginMethod = u.google_id ? '<span class="meta-text" style="color:var(--accent);">Google Auth</span>' : '<span class="meta-text">Email Auth</span>';
+                    const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
+                    const avatarHtml = u.avatar_url
+                        ? `<img src="${u.avatar_url}" class="user-avatar" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=\\'user-avatar\\'>${initials}</div>'">`
+                        : `<div class="user-avatar">${initials}</div>`;
+                    const onlineDot = u.is_online ? '<span class="status-dot" title="Online" style="margin-left:6px;box-shadow:0 0 8px #10b981;"></span><span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:5px;letter-spacing:0.02em;">ONLINE</span>' : '';
+                    const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" style="color:var(--text-primary);text-decoration:none;">${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>` : `<span style="color:var(--text-muted);">No phone</span>`;
+                    const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
+                    const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
+                    const costStr = Number(u.total_cost || 0).toFixed(3);
+                    const suspendBtn = u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-suspend-btn btn-subtle" style="padding:4px 7px;font-size:11px;color:${u.is_suspended ? '#10b981' : '#f59e0b'};border-color:${u.is_suspended ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'};" title="${u.is_suspended ? 'Unsuspend Account' : 'Suspend Account'}">${u.is_suspended ? 'Unsuspend' : 'Suspend'}</button>`;
+
+                    html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name || (u.email ? u.email.split('@')[0] : 'User')}${onlineDot}</span><span class="user-email-text">${u.email || ''}</span></div></div></td>`;
+                    html += `<td><div style="margin-bottom:4px;">${badge}</div>${loginMethod}</td>`;
+                    html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">${u.chat_count || 0} chat${(u.chat_count || 0) !== 1 ? 's' : ''}</span></td>`;
+                    html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${costStr}</span></td>`;
+                    html += `<td>${ipCountry}</td>`;
+                    html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
+                    html += `<td><div class="action-cell">${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
+                    html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
+                }
             }
             html += '</tbody></table></div>';
             list.innerHTML = html;
         }
 
+        bindUserRowEvents(list, isGuestSection);
+    }
+
+    function bindUserRowEvents(list, isGuestSection) {
         // Manage plan modal
         list.querySelectorAll('.user-plan-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1034,10 +1141,12 @@ HARD RULES
                 btn.style.color = 'var(--accent)';
                 try {
                     const chats = await (await fetch(`/api/admin/users/${uid}/chats`)).json();
-                    const isGuest = String(uid).startsWith('gst_');
-                    const loginAsBtnHtml = `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease;" onmouseover="this.style.background='var(--accent)';this.style.color='#ffffff'" onmouseout="this.style.background='rgba(192,132,252,0.12)';this.style.color='var(--accent)'"><span>🔑</span> Login As User</button>`;
+                    const isGuest = String(uid).startsWith('gst_') || isGuestSection;
+                    const loginAsBtnHtml = `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="padding:4px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s ease;" onmouseover="this.style.background='var(--accent)';this.style.color='#ffffff'" onmouseout="this.style.background='rgba(192,132,252,0.12)';this.style.color='var(--accent)'"><span>🔑</span> ${isGuest ? 'Login As Guest' : 'Login As User'}</button>`;
 
                     if (!chats.length) {
+                        const noTitle = isGuest ? 'No chats imported in this guest session' : 'No WhatsApp chats uploaded yet';
+                        const noDesc = isGuest ? 'This guest has not imported any WhatsApp chats yet. You can still login to inspect their guest session.' : 'This user has not imported any chats yet. You can still login to their account to test or assist.';
                         area.innerHTML = `
                             <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
                                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg-page);">
@@ -1052,9 +1161,9 @@ HARD RULES
                                 </div>
                                 <div style="padding:22px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;">
                                     <div style="width:38px;height:38px;border-radius:50%;background:rgba(192,132,252,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;">💬</div>
-                                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);">No WhatsApp chats uploaded yet</div>
-                                    <p style="font-size:12px;color:var(--text-muted);margin:0;max-width:320px;line-height:1.4;">This user has not imported any chats yet. You can still login to their account to test or assist.</p>
-                                    <button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="margin-top:6px;padding:7px 16px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:var(--accent);color:#ffffff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(192,132,252,0.35);"><span>🔑</span> Login As User</button>
+                                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);">${noTitle}</div>
+                                    <p style="font-size:12px;color:var(--text-muted);margin:0;max-width:320px;line-height:1.4;">${noDesc}</p>
+                                    <button onclick="window.location.href='/api/admin/impersonate/start?uid=${uid}'" style="margin-top:6px;padding:7px 16px;font-size:12px;font-weight:700;border-radius:8px;border:none;background:var(--accent);color:#ffffff;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 2px 10px rgba(192,132,252,0.35);"><span>🔑</span> ${isGuest ? 'Login As Guest' : 'Login As User'}</button>
                                 </div>
                             </div>
                         `;
@@ -1418,12 +1527,17 @@ HARD RULES
             });
         });
 
-        // Delete user
+        // Delete user / guest session
         list.querySelectorAll('.user-del-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const uid = btn.dataset.uid;
                 const email = btn.dataset.email;
-                if (!confirm(`DELETE user "${email}"?\n\nThis permanently removes account, files, and AI conversations.`)) return;
+                const isGuest = String(uid).startsWith('gst_') || isGuestSection;
+                const targetLabel = isGuest ? `guest session "${email || uid}"` : `user "${email}"`;
+                const confirmMsg = isGuest
+                    ? `DELETE ${targetLabel}?\n\nThis permanently removes guest files, uploaded chats, and AI conversation history.`
+                    : `DELETE ${targetLabel}?\n\nThis permanently removes account, files, and AI conversations.`;
+                if (!confirm(confirmMsg)) return;
                 btn.textContent = '...';
                 btn.disabled = true;
                 try {
@@ -1434,7 +1548,7 @@ HARD RULES
                     await loadStats();
                 } catch (err) {
                     alert('Error: ' + err.message);
-                    btn.textContent = 'Delete';
+                    btn.textContent = 'Del';
                     btn.disabled = false;
                 }
             });

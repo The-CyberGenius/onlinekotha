@@ -1022,6 +1022,7 @@
         <!-- Navigation Tabs -->
         <nav class="tabs-bar">
             <button data-tab="users" class="tab-item tab-active">Users</button>
+            <button data-tab="guests" class="tab-item">Guest Sessions <span id="nav-guest-count" style="display:none;background:rgba(245,158,11,0.2);color:#f59e0b;padding:1px 6px;border-radius:10px;font-size:10px;margin-left:4px;font-weight:700;">0</span></button>
             <button data-tab="providers" class="tab-item">Providers</button>
             <button data-tab="models" class="tab-item">Models</button>
             <button data-tab="routes" class="tab-item">Routing</button>
@@ -1210,6 +1211,31 @@
                 </div>
 
                 <div id="user-list"></div>
+            </div>
+        </section>
+
+        <!-- Tab: Guest Sessions -->
+        <section id="tab-guests" class="tab-content hidden">
+            <div class="admin-card">
+                <div class="section-header">
+                    <div class="section-header-title">
+                        <h2>Guest Sessions</h2>
+                        <p>Temporary guest sessions, chat archives, and activity before registration.</p>
+                    </div>
+                    <div class="controls-row">
+                        <div class="search-container">
+                            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="admin-guest-search" placeholder="Search guest ID, IP, location..." class="search-input-field" autocomplete="off">
+                        </div>
+                        <button id="refresh-guests-btn" class="btn-subtle" style="padding:8px 12px;font-size:12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;" title="Refresh Guest Sessions">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            <span>Refresh</span>
+                        </button>
+                        <button id="purge-guests-btn" class="btn-outline-danger" title="Purge empty guest sessions with no chats">Purge empty guests</button>
+                    </div>
+                </div>
+
+                <div id="guest-list"></div>
             </div>
         </section>
 

@@ -965,6 +965,30 @@ router.delete('/users/:id', (req, res) => {
     res.json({ ok: true });
 });
 
+// Purge empty guest sessions — guest sessions that have 0 chats and 0 AI messages
+router.post('/purge-guests', (req, res) => {
+    try {
+        const emptyGuests = db.prepare(`
+            SELECT id FROM guest_sessions 
+            WHERE (SELECT COUNT(*) FROM chats WHERE guest_id = guest_sessions.id) = 0
+              AND COALESCE(ai_messages_count, 0) = 0
+        `).all();
+        
+        let deleted = 0;
+        for (const g of emptyGuests) {
+            const uDir = path.join(SRC_DIR, `u_${g.id}`);
+            if (fs.existsSync(uDir)) {
+                try { fs.rmSync(uDir, { recursive: true, force: true }); } catch (e) {}
+            }
+            db.prepare('DELETE FROM guest_sessions WHERE id = ?').run(g.id);
+            deleted++;
+        }
+        res.json({ ok: true, deleted });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Purge spam accounts — bot signups used the fake "@example.com" domain.
 // Safe: only deletes non-admin @example.com accounts with no real activity.
 router.post('/purge-spam', (req, res) => {
