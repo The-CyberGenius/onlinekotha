@@ -750,11 +750,47 @@ button,
     z-index: 9999;
 }
 #mac-frame.mac-fullscreen #mac-titlebar { border-radius: 0; }
+/* ── macOS Dock: Hidden by default when window is open to prevent covering footer/app when zooming ── */
 #mac-dock {
+    display: none !important;
     height: 62px;
+}
+#mac-frame.mac-minimized ~ #mac-dock,
+#mac-frame.genie-minimize ~ #mac-dock,
+body.impersonating-mobile-dock #mac-dock {
+    display: flex !important;
+}
+@media (min-width: 768px) {
+    body.impersonating-mobile-dock #mac-frame {
+        max-height: calc(100vh - 100px) !important;
+        margin-bottom: 75px !important;
+    }
 }
 #dock-glass-bar, #dock-kotha-icon, #dock-dot {
     transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* ── Participant Filters Strip & Senders Typography ── */
+#participant-filters-container {
+    font-size: 11px !important;
+}
+.kotha-member-title {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+}
+.kotha-member-badge {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+}
+.kotha-member-stat-strip {
+    font-size: 10px !important;
+}
+.kotha-member-chip {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
 }
 
 /* ─── Genie Effect & Transitions ─── */

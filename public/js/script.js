@@ -1331,7 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     participantContainer.classList.remove('hidden');
                     
                     const headerRow = document.createElement('div');
-                    headerRow.className = 'flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition';
+                    headerRow.className = 'flex items-center justify-between px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition select-none';
                     
                     const leftCol = document.createElement('div');
                     leftCol.className = 'flex items-center gap-1.5';
@@ -1342,7 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
-                        <span class="text-[9.5px] font-bold text-gray-500 uppercase tracking-wider">Members (${senders.length})</span>
+                        <span class="text-gray-500 dark:text-gray-400 uppercase tracking-wider font-bold kotha-member-title" style="font-size: 10px; font-weight: 700; letter-spacing: 0.05em;">Members (${senders.length})</span>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400 transition-transform duration-200" id="participant-chevron">
                             <path d="M6 9l6 6 6-6"></path>
                         </svg>
@@ -1352,12 +1352,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     rightCol.className = 'flex items-center gap-1.5';
                     
                     const avatarsWrap = document.createElement('div');
-                    avatarsWrap.className = 'flex items-center -space-x-1.5 mr-0.5';
+                    avatarsWrap.className = 'flex items-center -space-x-1 mr-0.5';
                     
                     const topSenders = senders.slice(0, 3);
                     topSenders.forEach(([sName]) => {
                         const av = document.createElement('div');
-                        av.className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px] font-bold border border-white dark:border-[#111b21] shadow-sm';
+                        av.className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold border border-white dark:border-[#111b21] shadow-2xs';
+                        av.style.fontSize = '8px';
                         av.innerText = (sName || '?').charAt(0).toUpperCase();
                         avatarsWrap.appendChild(av);
                     });
@@ -1365,9 +1366,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     rightCol.appendChild(avatarsWrap);
                     
                     const countSpan = document.createElement('span');
-                    countSpan.className = 'text-[9.5px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded leading-none flex items-center gap-1';
+                    countSpan.className = 'font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded leading-none flex items-center gap-1 kotha-member-badge';
+                    countSpan.style.fontSize = '10px';
                     const formatNum = n => n > 9999 ? (n/1000).toFixed(1) + 'k' : n.toLocaleString();
-                    countSpan.innerHTML = `<span>${formatNum(totalMessages)} msgs</span><span class="text-gray-400">&gt;</span>`;
+                    countSpan.innerHTML = `<span>${formatNum(totalMessages)} msgs</span><span class="text-gray-400" style="font-size: 8px;">&gt;</span>`;
                     rightCol.appendChild(countSpan);
 
                     headerRow.appendChild(leftCol);
@@ -1375,28 +1377,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     participantContainer.appendChild(headerRow);
 
                     const expandedContent = document.createElement('div');
-                    expandedContent.className = 'hidden flex flex-col gap-3 border-t border-gray-100 dark:border-gray-800 pt-3 pb-3 px-3';
+                    expandedContent.className = 'hidden flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800 pt-2 pb-2.5 px-3 bg-gray-50/60 dark:bg-[#152028]';
                     
-                    // Add quick stats strip
+                    // Add quick stats strip - compact and cute
                     let activeDays = new Set(allMessages.map(m => m.date)).size;
                     let mediaCount = allMessages.filter(m => m.text && (m.text.includes('<Media omitted>') || m.text.includes('image omitted') || m.text.includes('video omitted') || m.text.includes('sticker omitted'))).length;
                     
                     const statsStrip = document.createElement('div');
-                    statsStrip.className = 'flex items-center gap-2 mb-1';
+                    statsStrip.className = 'flex items-center justify-between gap-1.5 bg-white dark:bg-[#1a252d] rounded-lg px-2.5 py-1.5 border border-gray-200/70 dark:border-gray-700/60 kotha-member-stat-strip';
+                    statsStrip.style.fontSize = '10px';
                     statsStrip.innerHTML = `
-                        <div class="flex-1 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-900/20 rounded-lg p-2 text-center border border-indigo-100/50 dark:border-indigo-800/30">
-                            <div class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mb-0.5">Active Days</div>
-                            <div class="text-[14px] font-black text-gray-800 dark:text-gray-200">${activeDays}</div>
+                        <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                            <span class="text-indigo-500 font-bold">📅 Active:</span>
+                            <span class="font-extrabold text-gray-900 dark:text-white" style="font-size: 11px;">${activeDays}d</span>
                         </div>
-                        <div class="flex-1 bg-gradient-to-br from-fuchsia-50 to-pink-50 dark:from-fuchsia-950/30 dark:to-pink-900/20 rounded-lg p-2 text-center border border-fuchsia-100/50 dark:border-fuchsia-800/30">
-                            <div class="text-[10px] text-fuchsia-500 font-bold uppercase tracking-widest mb-0.5">Media Shared</div>
-                            <div class="text-[14px] font-black text-gray-800 dark:text-gray-200">${formatNum(mediaCount)}</div>
+                        <div class="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
+                        <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                            <span class="text-fuchsia-500 font-bold">📷 Media:</span>
+                            <span class="font-extrabold text-gray-900 dark:text-white" style="font-size: 11px;">${formatNum(mediaCount)}</span>
+                        </div>
+                        <div class="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
+                        <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                            <span class="text-emerald-500 font-bold">💬 Total:</span>
+                            <span class="font-extrabold text-gray-900 dark:text-white" style="font-size: 11px;">${formatNum(totalMessages)}</span>
                         </div>
                     `;
                     expandedContent.appendChild(statsStrip);
                     
                     const filterWrap = document.createElement('div');
-                    filterWrap.className = 'flex flex-wrap gap-1.5';
+                    filterWrap.className = 'flex flex-wrap gap-1.5 pt-0.5';
                     expandedContent.appendChild(filterWrap);
                     
                     participantContainer.appendChild(expandedContent);
@@ -1408,15 +1417,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         document.getElementById('participant-chevron').style.transform = isExpanded ? 'rotate(180deg)' : '';
                     };
 
-                    senders.slice(0, 4).forEach(([sName, count]) => {
+                    senders.slice(0, 6).forEach(([sName, count]) => {
                         if (!sName) return;
                         const btn = document.createElement('button');
-                        const defaultClass = 'text-[10px] bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-2 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
-                        const activeClass = 'text-[10px] bg-indigo-600 border border-indigo-600 rounded-full px-2 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 font-sans';
+                        const defaultClass = 'bg-white dark:bg-[#1a252d] border border-gray-200 dark:border-gray-700 rounded-full px-2.5 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95 kotha-member-chip';
+                        const activeClass = 'bg-indigo-600 border border-indigo-600 rounded-full px-2.5 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-xs active:scale-95 kotha-member-chip';
                         
                         btn.className = defaultClass;
+                        btn.style.fontSize = '10.5px';
                         const formatCount = count > 9999 ? (count/1000).toFixed(1) + 'k' : count.toLocaleString();
-                        btn.innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter">${sName.charAt(0).toUpperCase()}</div> <span>${sName}</span> <span class="opacity-60 ml-0.5">${formatCount}</span>`;
+                        btn.innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold" style="font-size: 7.5px;">${sName.charAt(0).toUpperCase()}</div> <span class="font-semibold leading-none">${sName}</span> <span class="opacity-60 ml-0.5 leading-none" style="font-size: 8.5px;">${formatCount}</span>`;
                         
                         btn.onclick = () => {
                             if (activeSenderFilter === sName) {
@@ -1425,7 +1435,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 displayedMessages = [...allMessages];
                                 senderBtns.forEach(b => {
                                     b.className = defaultClass;
-                                    b.querySelector('div').className = 'w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter';
+                                    b.style.fontSize = '10.5px';
+                                    const avDiv = b.querySelector('div');
+                                    if (avDiv) {
+                                        avDiv.className = 'w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold';
+                                        avDiv.style.fontSize = '7.5px';
+                                    }
                                 });
                                 statsInfo.innerHTML = `Showing all <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages.`;
                             } else {
@@ -1434,10 +1449,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                 displayedMessages = allMessages.filter(msg => msg.sender === sName);
                                 senderBtns.forEach(b => {
                                     b.className = defaultClass + ' opacity-50';
-                                    b.querySelector('div').className = 'w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[7.5px] font-bold tracking-tighter';
+                                    b.style.fontSize = '10.5px';
+                                    const avDiv = b.querySelector('div');
+                                    if (avDiv) {
+                                        avDiv.className = 'w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold';
+                                        avDiv.style.fontSize = '7.5px';
+                                    }
                                 });
                                 btn.className = activeClass;
-                                btn.querySelector('div').className = 'w-3.5 h-3.5 rounded-full bg-white text-indigo-600 flex items-center justify-center text-[7.5px] font-bold tracking-tighter';
+                                btn.style.fontSize = '10.5px';
+                                const avDiv = btn.querySelector('div');
+                                if (avDiv) {
+                                    avDiv.className = 'w-3.5 h-3.5 rounded-full bg-white text-indigo-600 flex items-center justify-center font-bold';
+                                    avDiv.style.fontSize = '7.5px';
+                                }
                                 statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> msgs by ${sName}.`;
                             }
                             renderChats(-1, -1);
@@ -1448,7 +1473,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             toggleSidebar(false);
                         };
                         senderBtns.push(btn);
-                        expandedContent.querySelector(".flex-wrap").appendChild(btn);
+                        filterWrap.appendChild(btn);
                     });
                 }
 
@@ -3902,6 +3927,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const dock = document.getElementById('mac-dock');
         const dockIcon = document.getElementById('dock-kotha-icon');
 
+        // Hide dock by default to prevent overlapping the web app when zooming
+        if (dock && !(window.__USER__ && window.__USER__.is_impersonating)) {
+            dock.style.setProperty('display', 'none', 'important');
+        }
+
         let minimized = false;
         let isAnimating = false;
 
@@ -3915,7 +3945,9 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.remove('genie-restore');
             frame.classList.add('genie-minimize');
             if (dockDot) dockDot.style.opacity = '0';
-            if (dock) dock.style.removeProperty('display'); // Make sure dock is shown on minimize
+            if (dock) {
+                dock.style.setProperty('display', 'flex', 'important');
+            }
             setTimeout(() => {
                 frame.classList.add('mac-minimized');
                 frame.classList.remove('genie-minimize');
@@ -3931,12 +3963,12 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.add('genie-restore');
             if (dockDot) dockDot.style.opacity = '1';
             
-            // If restoring while still in fullscreen mode, keep dock hidden, otherwise show it
+            // Once restored, hide dock so it doesn't overlap the app
             if (dock) {
-                if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded')) {
-                    dock.style.setProperty('display', 'none', 'important');
-                } else {
+                if (window.__USER__ && window.__USER__.is_impersonating) {
                     dock.style.removeProperty('display');
+                } else {
+                    dock.style.setProperty('display', 'none', 'important');
                 }
             }
 
