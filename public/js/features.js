@@ -98,10 +98,11 @@
     });
 
     function showInstallBanner() {
+        if (localStorage.getItem('kotha_pwa_dismissed')) return;
         if (document.getElementById('pwa-install-banner')) return;
         const banner = document.createElement('div');
         banner.id = 'pwa-install-banner';
-        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-gray-900 text-white rounded-2xl p-4 shadow-2xl z-[90] flex items-center gap-3 animate-message';
+        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-gray-900/95 backdrop-blur-md text-white rounded-[22px] p-4 shadow-2xl z-[50] flex items-center gap-3 animate-message border border-white/10';
         banner.innerHTML = `
             <div class="w-10 h-10 flex items-center justify-center shrink-0">
                 <img src="../img/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow-md">
@@ -110,18 +111,22 @@
                 <p class="text-sm font-bold">Install Kotha</p>
                 <p class="text-[11px] text-gray-400">Get it on Google Play for the best experience</p>
             </div>
-            <button id="pwa-install-btn" class="bg-white text-gray-900 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-gray-100 transition shrink-0">Install</button>
-            <button id="pwa-dismiss-btn" class="text-gray-500 hover:text-white transition p-1 shrink-0">
+            <button id="pwa-install-btn" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:opacity-90 shadow-sm transition shrink-0">Install</button>
+            <button id="pwa-dismiss-btn" class="text-gray-400 hover:text-white transition p-1 shrink-0">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
         `;
         document.body.appendChild(banner);
 
         document.getElementById('pwa-install-btn').addEventListener('click', () => {
+            localStorage.setItem('kotha_pwa_dismissed', '1');
             window.open('https://play.google.com/store/apps/details?id=com.onlinekotha.app', '_blank');
             banner.remove();
         });
-        document.getElementById('pwa-dismiss-btn').addEventListener('click', () => banner.remove());
+        document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+            localStorage.setItem('kotha_pwa_dismissed', '1');
+            banner.remove();
+        });
         setTimeout(() => { if (banner.parentNode) banner.remove(); }, 15000);
     }
 
@@ -137,7 +142,7 @@
         if (document.getElementById('ios-install-banner') || localStorage.getItem('kotha_ios_install_dismissed')) return;
         const banner = document.createElement('div');
         banner.id = 'ios-install-banner';
-        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-zinc-950 text-white rounded-2xl p-4 shadow-2xl z-[90] flex flex-col gap-3 animate-message border border-white/10';
+        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-zinc-950/95 backdrop-blur-md text-white rounded-[22px] p-4 shadow-2xl z-[50] flex flex-col gap-3 animate-message border border-white/10';
         banner.innerHTML = `
             <div class="flex items-start gap-3">
                 <div class="w-10 h-10 flex items-center justify-center shrink-0">
