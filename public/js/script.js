@@ -434,12 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Desktop sidebar collapse/expand
     const collapseBtn = document.getElementById('collapse-sidebar-btn');
     if (collapseBtn) {
-        const savedState = localStorage.getItem('kotha_sidebar_collapsed');
-        if (savedState === '1') {
-            sidebar.classList.add('sidebar-collapsed');
-            collapseBtn.title = 'Show Sidebar';
-            collapseBtn.classList.add('bg-indigo-50', 'dark:bg-indigo-900/30', 'text-indigo-600');
-        }
+        localStorage.removeItem('kotha_sidebar_collapsed');
+        if (sidebar) sidebar.classList.remove('sidebar-collapsed');
         collapseBtn.addEventListener('click', () => {
             const collapsed = sidebar.classList.toggle('sidebar-collapsed');
             collapseBtn.title = collapsed ? 'Show Sidebar' : 'Hide Sidebar';
@@ -1168,6 +1164,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 participantContainer.classList.add('hidden');
             }
 
+            // Ensure Quick Actions toolbar (Top, Bottom, Media, Stats, Wrapped, Filter) is visible
+            const filterBar = document.getElementById('filter-buttons-container');
+            if (filterBar && chatName !== '__global__') {
+                filterBar.classList.remove('hidden');
+            }
+
             if (chatName === 'kotha_assistant') {
                 otherPersonName = 'Kotha Assistant';
                 const uName = (window.__USER__ && (window.__USER__.display_name || window.__USER__.email?.split('@')[0])) || 'You';
@@ -1705,6 +1707,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const start = Math.max(0, end - CHUNK_SIZE);
                 renderChats(start, end);
                 updateHeaderIdentityPill();
+
+                if (filterBar && chatName !== '__global__') {
+                    filterBar.classList.remove('hidden');
+                }
 
                 setTimeout(() => {
                     scrollArea.scrollTop = scrollArea.scrollHeight;
@@ -2288,6 +2294,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const scrollArea = document.getElementById('chat-scroll-area');
         if (scrollArea) {
             scrollArea.style.overflow = '';
+        }
+
+        // Show Quick Actions bottom toolbar (Top, Bottom, Media, Stats, Wrapped, Filter)
+        const filterBar = document.getElementById('filter-buttons-container');
+        if (filterBar && currentChat !== '__global__') {
+            filterBar.classList.remove('hidden');
         }
     }
 

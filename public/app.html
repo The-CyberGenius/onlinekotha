@@ -31,7 +31,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
-    <link rel="stylesheet" href="/css/style.css?v=38">
+    <link rel="stylesheet" href="/css/style.css?v=39">
     <style>
         html {
             background-color: #f0f2f5 !important;
@@ -386,7 +386,7 @@
             </div>
 
             <!-- Participant Filters (Dynamic) Sticky Bottom / Collapsible -->
-            <div id="participant-filters-container" class="hidden flex-col shrink-0 bg-transparent border-t border-gray-100 dark:border-gray-800 z-10 sticky bottom-0">
+            <div id="participant-filters-container" class="hidden flex-col shrink-0 bg-white dark:bg-[#111b21] border-t border-gray-100 dark:border-gray-800 z-10">
                 <!-- Header / collapsed view injected by JS -->
             </div>
 
@@ -397,7 +397,7 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="px-2 py-1.5 flex justify-between w-full shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#111b21] hidden"
+            <div class="px-2 py-1.5 flex justify-between w-full shrink-0 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#111b21]"
                 id="filter-buttons-container" ontouchstart="event.stopPropagation()" ontouchend="event.stopPropagation()">
                 <button id="btn-top" title="Jump to top"
                     class="action-pill text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl py-1 flex flex-1 flex-col items-center gap-1 transition">
@@ -714,9 +714,9 @@
                                 d="M4 6h16M4 12h16M4 18h7"></path>
                         </svg>
                     </button>
-                    <!-- Desktop sidebar collapse toggle -->
+                    <!-- Desktop sidebar collapse toggle (hidden to keep chat header aligned cleanly) -->
                     <button
-                        class="hidden md:flex mr-2 w-8 h-8 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 items-center justify-center transition shrink-0"
+                        class="hidden mr-2 w-8 h-8 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 items-center justify-center transition shrink-0"
                         id="collapse-sidebar-btn" title="Toggle Sidebar">
                         <svg id="collapse-icon" class="w-4 h-4 text-gray-500 dark:text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -756,9 +756,9 @@
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                     </button>
-                    <!-- Dark Mode toggle -->
+                    <!-- Dark Mode toggle (mobile only in chat header; desktop uses sidebar dark mode toggle) -->
                     <button id="dark-mode-btn"
-                        class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all active:scale-90 shrink-0 shadow-sm border border-gray-200/60 dark:border-gray-700/50 cursor-pointer"
+                        class="md:hidden w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all active:scale-90 shrink-0 shadow-sm border border-gray-200/60 dark:border-gray-700/50 cursor-pointer"
                         title="Toggle dark mode">
                         <svg id="dm-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1081,7 +1081,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="/js/ai-panel.js?v=56"></script>
-    <script src="/js/script.js?v=58"></script>
+    <script src="/js/script.js?v=59"></script>
     <script src="/js/upload.js?v=56"></script>
     <script src="/js/story.js?v=56"></script>
     <script src="/js/features.js?v=56"></script>

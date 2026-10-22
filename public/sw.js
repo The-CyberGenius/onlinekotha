@@ -1,6 +1,6 @@
 // Service Worker for Kotha PWA
-const CACHE_NAME = 'kotha-v58';
-const DYNAMIC_CACHE = 'kotha-dynamic-v58';
+const CACHE_NAME = 'kotha-v59';
+const DYNAMIC_CACHE = 'kotha-dynamic-v59';
 const STATIC_ASSETS = [
     '/css/style.css',
     '/js/tailwind.js',
