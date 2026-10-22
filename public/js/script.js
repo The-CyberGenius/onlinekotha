@@ -271,8 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Smart name cleaning — used everywhere names are displayed
     function cleanDisplayName(raw) {
-        if (!raw) return '';
-        let n = raw;
+        if (!raw) return 'WhatsApp Chat';
+        let n = String(raw).trim();
         // Strip WhatsApp prefixes
         n = n.replace(/^whatsapp[\s_-]*chat[\s_-]*(with[\s_-]*)?[-–—]?\s*/i, '');
         // Underscores → spaces
@@ -286,7 +286,12 @@ document.addEventListener('DOMContentLoaded', () => {
         n = n.replace(/\s{2,}/g, ' ').trim();
         // Title case
         if (n) n = n.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1));
-        return n;
+        if (!n) {
+            let fallback = String(raw).replace(/\.(txt|zip|csv|json)\s*$/i, '').replace(/_/g, ' ').trim();
+            n = fallback || 'WhatsApp Chat';
+            n = n.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1));
+        }
+        return n || 'WhatsApp Chat';
     }
 
     function isGarbageName(s) {
@@ -428,16 +433,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Desktop sidebar collapse/expand
     const collapseBtn = document.getElementById('collapse-sidebar-btn');
-    const collapseIcon = document.getElementById('collapse-icon');
     if (collapseBtn) {
         const savedState = localStorage.getItem('kotha_sidebar_collapsed');
         if (savedState === '1') {
             sidebar.classList.add('sidebar-collapsed');
-            if (collapseIcon) collapseIcon.style.transform = 'rotate(180deg)';
+            collapseBtn.title = 'Show Sidebar';
+            collapseBtn.classList.add('bg-indigo-50', 'dark:bg-indigo-900/30', 'text-indigo-600');
         }
         collapseBtn.addEventListener('click', () => {
             const collapsed = sidebar.classList.toggle('sidebar-collapsed');
-            if (collapseIcon) collapseIcon.style.transform = collapsed ? 'rotate(180deg)' : '';
+            collapseBtn.title = collapsed ? 'Show Sidebar' : 'Hide Sidebar';
+            collapseBtn.classList.toggle('bg-indigo-50', collapsed);
+            collapseBtn.classList.toggle('dark:bg-indigo-900/30', collapsed);
+            collapseBtn.classList.toggle('text-indigo-600', collapsed);
             localStorage.setItem('kotha_sidebar_collapsed', collapsed ? '1' : '0');
         });
     }
@@ -551,15 +559,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let nameHtml = '';
-        if (!isMe && !isConsecutive) {
-            nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>`;
+        const isGroup = window._chatMetaCache?.[currentChat]?.isGroup;
+        if (!isMe && !isConsecutive && isGroup) {
+            nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${escapeHTML(msg.sender)}</p>`;
         }
 
         let contentHtml = '';
         if (msg.text) {
-            const onlyEmojis = /^[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\s]+$/gu;
-            const isBigEmoji = msg.text.trim().length > 0 && msg.text.trim().length <= 6 && onlyEmojis.test(msg.text);
-            contentHtml = `<p style="color:var(--msg-text)" class="${isBigEmoji ? 'text-4xl' : 'text-[14px]'} leading-normal font-medium whitespace-pre-wrap break-words select-text">${isBigEmoji ? msg.text : kothaLinkify(msg.text)}</p>`;
+            const isCall = /^(voice|video)\s+call/i.test(msg.text) || /^missed\s+(voice|video)\s+call/i.test(msg.text);
+            if (isCall) {
+                const isMissed = /no\s+answer|missed|declined/i.test(msg.text);
+                const isVideo = /video/i.test(msg.text);
+                contentHtml = `
+                    <div class="flex items-center gap-2 py-0.5">
+                        <div class="w-7 h-7 rounded-full ${isMissed ? 'bg-red-500/20 text-red-500' : 'bg-emerald-500/20 text-emerald-500'} flex items-center justify-center shrink-0">
+                            ${isVideo ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>` : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[13px] font-semibold ${isMissed ? 'text-red-500 dark:text-red-400' : 'text-gray-800 dark:text-gray-200'} leading-tight">${escapeHTML(msg.text)}</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const onlyEmojis = /^[\u{1f300}-\u{1f5ff}\u{1f900}-\u{1f9ff}\u{1f600}-\u{1f64f}\u{1f680}-\u{1f6ff}\u{2600}-\u{26ff}\u{2700}-\u{27bf}\u{1f1e6}-\u{1f1ff}\u{1f191}-\u{1f251}\u{1f004}\u{1f0cf}\u{1f170}-\u{1f171}\u{1f17e}-\u{1f17f}\u{1f18e}\u{3030}\u{2b50}\u{2b55}\u{2934}-\u{2935}\u{2b05}-\u{2b07}\u{2b1b}-\u{2b1c}\u{3297}\u{3299}\u{303d}\u{00a9}\u{00ae}\u{2122}\u{23f3}\u{24c2}\u{23e9}-\u{23ef}\u{25b6}\u{23f8}-\u{23fa}\s]+$/gu;
+                const isBigEmoji = msg.text.trim().length > 0 && msg.text.trim().length <= 6 && onlyEmojis.test(msg.text);
+                contentHtml = `<p style="color:var(--msg-text)" class="${isBigEmoji ? 'text-4xl' : 'text-[14px]'} leading-normal font-medium whitespace-pre-wrap break-words select-text">${isBigEmoji ? msg.text : kothaLinkify(msg.text)}</p>`;
+            }
         }
         if (msg.type === 'system') {
             return `
@@ -1315,8 +1340,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
-                        <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Participants</span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400 transition-transform duration-200" id="participant-chevron">
+                        <span class="text-[9.5px] font-bold text-gray-500 uppercase tracking-wider">Members (${senders.length})</span>
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-gray-400 transition-transform duration-200" id="participant-chevron">
                             <path d="M6 9l6 6 6-6"></path>
                         </svg>
                     `;
@@ -1331,16 +1356,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     topSenders.forEach(([sName]) => {
                         const av = document.createElement('div');
                         av.className = 'w-4 h-4 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center text-[8px] font-bold border border-white dark:border-[#111b21] shadow-sm';
-                        av.innerText = sName.charAt(0).toUpperCase();
+                        av.innerText = (sName || '?').charAt(0).toUpperCase();
                         avatarsWrap.appendChild(av);
                     });
 
                     rightCol.appendChild(avatarsWrap);
                     
                     const countSpan = document.createElement('span');
-                    countSpan.className = 'text-[10px] font-medium text-gray-500 flex items-center gap-1.5';
+                    countSpan.className = 'text-[9.5px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded leading-none flex items-center gap-1';
                     const formatNum = n => n > 9999 ? (n/1000).toFixed(1) + 'k' : n.toLocaleString();
-                    countSpan.innerHTML = `<span class="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded font-bold tracking-tight">${formatNum(totalMessages)} msgs</span> <span>${senders.length} participants &gt;</span>`;
+                    countSpan.innerHTML = `<span>${formatNum(totalMessages)} msgs</span><span class="text-gray-400">&gt;</span>`;
                     rightCol.appendChild(countSpan);
 
                     headerRow.appendChild(leftCol);
@@ -1772,7 +1797,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const isAssistant = chat === 'kotha_assistant';
             const chatMeta = window._chatMetaCache?.[chat];
             let displayName = isAssistant ? 'Kotha Assistant' : ((chatMeta?.contactName && chatMeta.contactName !== 'Kotha Assistant') ? cleanDisplayName(chatMeta.contactName) : cleanDisplayName(chat));
-            const initial = displayName.charAt(0).toUpperCase();
+            if (!displayName || !displayName.trim()) displayName = 'WhatsApp Chat';
+            const initial = (displayName.charAt(0) || 'W').toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
             const isActive = chat === activeChat;
 
