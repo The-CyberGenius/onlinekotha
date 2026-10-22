@@ -150,13 +150,256 @@
         pasteImportBtn.addEventListener('click', () => {
             const text = (pasteText?.value || '').trim();
             if (!text) { showError('Paste some chat text first.'); return; }
-            // Wrap into a _chat.txt File and reuse the normal upload pipeline
             const file = new File([text], '_chat.txt', { type: 'text/plain' });
             uploadFiles([file]);
         });
     }
 
+    // ── Chunked Upload Constants & Helpers ──────────────────
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5 MB per chunk
+
+    function uploadSingleChunk({ uploadId, chunkIndex, totalChunks, fileName, originalName, totalSize, chunkBlob, onProgress }) {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('uploadId', uploadId);
+            formData.append('chunkIndex', String(chunkIndex));
+            formData.append('totalChunks', String(totalChunks));
+            formData.append('fileName', fileName);
+            formData.append('originalName', originalName);
+            formData.append('totalSize', String(totalSize));
+            formData.append('chunk', chunkBlob, `chunk_${chunkIndex}`);
+
+            const xhr = new XMLHttpRequest();
+            const query = `uploadId=${encodeURIComponent(uploadId)}&chunkIndex=${chunkIndex}&totalChunks=${totalChunks}`;
+            xhr.open('POST', `/api/upload/chunk?${query}`);
+            xhr.timeout = 120000; // 2 minutes per 5MB chunk
+
+            if (onProgress) {
+                xhr.upload.addEventListener('progress', e => {
+                    if (e.lengthComputable) onProgress(e.loaded);
+                });
+            }
+
+            xhr.onload = () => {
+                let resp = {};
+                try { resp = JSON.parse(xhr.responseText); } catch {}
+                if (xhr.status >= 200 && xhr.status < 300 && resp.ok) {
+                    resolve(resp);
+                } else {
+                    const err = new Error(resp.error || `Chunk upload failed (${xhr.status})`);
+                    if (resp.requireAuth || xhr.status === 403) err.requireAuth = true;
+                    if (resp.upgrade) err.upgrade = true;
+                    reject(err);
+                }
+            };
+
+            xhr.onerror = () => reject(new Error('Network error during upload'));
+            xhr.ontimeout = () => reject(new Error('Upload connection timed out'));
+            xhr.send(formData);
+        });
+    }
+
+    async function uploadChunkWithRetry(opts, maxRetries = 3) {
+        let lastErr;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return await uploadSingleChunk(opts);
+            } catch (err) {
+                lastErr = err;
+                if (err.requireAuth || err.upgrade) throw err;
+                console.warn(`Chunk ${opts.chunkIndex} attempt ${attempt} failed:`, err.message);
+                if (attempt < maxRetries) {
+                    await new Promise(r => setTimeout(r, attempt * 1200));
+                }
+            }
+        }
+        throw lastErr;
+    }
+
+    // Upload single file (ZIP or TXT) via 5MB Chunks
+    async function uploadSingleFileChunked(file) {
+        const totalSize = file.size;
+        const totalChunks = Math.max(1, Math.ceil(totalSize / CHUNK_SIZE));
+        const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+
+        let fileName = file.name.replace(/[^\x20-\x7E]/g, '').trim() || 'whatsapp_chat.zip';
+        if (file.name.toLowerCase().endsWith('.zip')) {
+            fileName = 'whatsapp_chat.zip';
+        }
+        const originalName = file.name;
+
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+            const start = chunkIndex * CHUNK_SIZE;
+            const end = Math.min(totalSize, start + CHUNK_SIZE);
+            const chunkSlice = file.slice(start, end);
+
+            // Read into in-memory ArrayBuffer to eliminate iOS Safari WebKit sliced-blob bug
+            const buffer = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Could not read file slice'));
+                reader.readAsArrayBuffer(chunkSlice);
+            });
+
+            const safeChunkBlob = new Blob([buffer], { type: 'application/octet-stream' });
+
+            await uploadChunkWithRetry({
+                uploadId,
+                chunkIndex,
+                totalChunks,
+                fileName,
+                originalName,
+                totalSize,
+                chunkBlob: safeChunkBlob,
+                onProgress: (loadedInChunk) => {
+                    const loadedBytes = start + loadedInChunk;
+                    const pct = Math.min(99, Math.round((loadedBytes / totalSize) * 100));
+                    progressBar.style.width = pct + '%';
+                    progressPercent.textContent = pct + '%';
+                    const mbUploaded = (loadedBytes / (1024 * 1024)).toFixed(1);
+                    const mbTotal = (totalSize / (1024 * 1024)).toFixed(1);
+                    progressStatus.textContent = `Uploading ${mbUploaded} / ${mbTotal} MB (${pct}%)...`;
+                }
+            });
+        }
+
+        // All chunks uploaded: assemble & process on server
+        progressStatus.textContent = 'Processing chat (extracting & analyzing)...';
+        progressBar.style.width = '100%';
+        progressPercent.textContent = '100%';
+
+        const completeResp = await fetch('/api/upload/chunk-complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                uploadId,
+                totalChunks,
+                fileName,
+                originalName,
+                totalSize
+            })
+        });
+
+        const data = await completeResp.json().catch(() => ({}));
+        if (!completeResp.ok || !data.ok) {
+            const err = new Error(data.error || `Processing failed (${completeResp.status})`);
+            if (data.requireAuth || completeResp.status === 403) err.requireAuth = true;
+            if (data.upgrade) err.upgrade = true;
+            throw err;
+        }
+
+        return data;
+    }
+
+    // Upload folder / multiple individual files
+    async function uploadMultipleFiles(files) {
+        const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+        let totalBytes = 0;
+        for (const f of files) totalBytes += f.size;
+        let uploadedBytes = 0;
+
+        let firstFolder = 'whatsapp_chat';
+        for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const relPath = f.webkitRelativePath || f.name;
+            if (relPath.includes('/') && firstFolder === 'whatsapp_chat') {
+                firstFolder = relPath.split('/')[0];
+            }
+
+            let safeBlob;
+            if (f.size <= 10 * 1024 * 1024) {
+                const buffer = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(f);
+                });
+                safeBlob = new Blob([buffer], { type: f.type || 'application/octet-stream' });
+            } else {
+                safeBlob = f;
+            }
+
+            const query = `uploadId=${encodeURIComponent(uploadId)}&fileIndex=${i}&totalFiles=${files.length}&relPath=${encodeURIComponent(relPath)}`;
+            const formData = new FormData();
+            formData.append('file', safeBlob, pathBasename(relPath));
+
+            await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', `/api/upload/file?${query}`);
+                xhr.timeout = 120000;
+
+                xhr.upload.addEventListener('progress', e => {
+                    if (e.lengthComputable) {
+                        const totalLoaded = uploadedBytes + e.loaded;
+                        const pct = Math.min(99, Math.round((totalLoaded / totalBytes) * 100));
+                        progressBar.style.width = pct + '%';
+                        progressPercent.textContent = pct + '%';
+                        progressStatus.textContent = `Uploading files ${i + 1}/${files.length} (${pct}%)...`;
+                    }
+                });
+
+                xhr.onload = () => {
+                    let resp = {};
+                    try { resp = JSON.parse(xhr.responseText); } catch {}
+                    if (xhr.status >= 200 && xhr.status < 300 && resp.ok) resolve(resp);
+                    else {
+                        const err = new Error(resp.error || `Upload failed (${xhr.status})`);
+                        if (resp.requireAuth || xhr.status === 403) err.requireAuth = true;
+                        if (resp.upgrade) err.upgrade = true;
+                        reject(err);
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Network error uploading file'));
+                xhr.ontimeout = () => reject(new Error('Upload connection timed out'));
+                xhr.send(formData);
+            });
+
+            uploadedBytes += f.size;
+        }
+
+        progressStatus.textContent = 'Processing chat (analyzing)...';
+        progressBar.style.width = '100%';
+        progressPercent.textContent = '100%';
+
+        const completeResp = await fetch('/api/upload/files-complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uploadId, folderName: firstFolder })
+        });
+
+        const data = await completeResp.json().catch(() => ({}));
+        if (!completeResp.ok || !data.ok) {
+            const err = new Error(data.error || `Processing failed (${completeResp.status})`);
+            if (data.requireAuth || completeResp.status === 403) err.requireAuth = true;
+            if (data.upgrade) err.upgrade = true;
+            throw err;
+        }
+
+        return data;
+    }
+
+    function pathBasename(p) {
+        return (p || '').split(/[\\/]/).pop() || 'file';
+    }
+
+    function handleUploadSuccess(resp) {
+        progressStatus.textContent = 'Done!';
+        if (window.__IS_GUEST__ && window.__GUEST_STATUS__) {
+            window.__GUEST_STATUS__.chatsRemaining = Math.max(0, (window.__GUEST_STATUS__.chatsRemaining || 1) - 1);
+            window.__GUEST_STATUS__.chatsImported = (window.__GUEST_STATUS__.chatsImported || 0) + 1;
+            const remEl = document.getElementById('guest-chat-rem');
+            if (remEl) remEl.textContent = window.__GUEST_STATUS__.chatsRemaining;
+        }
+        setTimeout(() => {
+            closeModal();
+            if (window.refreshChats) window.refreshChats(resp.chat);
+            else window.location.reload();
+        }, 400);
+    }
+
     async function uploadFiles(files) {
+        if (!files || !files.length) return;
+
         if (window.__IS_GUEST__) {
             const guestStatus = window.__GUEST_STATUS__ || {};
             if ((guestStatus.chatsRemaining ?? 1) <= 0) {
@@ -169,100 +412,49 @@
         }
 
         let totalSize = 0;
-        for (const f of files) {
-            totalSize += f.size;
-        }
-        if (totalSize > 650 * 1024 * 1024) {
-            showError("Chat file is too large (over 650MB). Please export your chat 'Without Media' in WhatsApp and try again.");
+        for (const f of files) totalSize += f.size;
+
+        // Allow up to 2 GB uploads
+        if (totalSize > 2048 * 1024 * 1024) {
+            showError("Chat file exceeds 2 GB limit. Please export a smaller date range in WhatsApp and try again.");
             return;
         }
 
         resetUI();
         progressWrap.classList.remove('hidden');
-        progressStatus.textContent = 'Preparing file...';
+        progressStatus.textContent = 'Preparing upload...';
 
-        const form = new FormData();
-        for (const f of files) {
-            let relPath = f.webkitRelativePath || f.name;
-            // Fix iOS Safari / Busboy bug: emojis or non-ASCII in filenames can break multipart parsing
-            if (files.length === 1 && f.name.toLowerCase().endsWith('.zip')) {
-                relPath = 'whatsapp_chat.zip';
+        try {
+            let resp;
+            if (files.length === 1) {
+                // Single file (ZIP or TXT) -> Chunked Upload (100% resilient for 200MB, 500MB, 1GB+)
+                resp = await uploadSingleFileChunked(files[0]);
             } else {
-                relPath = relPath.replace(/[^\x20-\x7E]/g, ''); // strip non-ASCII
+                // Multiple files / folder drop
+                resp = await uploadMultipleFiles(files);
             }
-            
-            // CRITICAL iOS WebKit FIX: 
-            // - If we use f.slice(), it doesn't strip the corrupted emoji filename metadata in WebKit, causing 400 errors.
-            // - If we use FileReader for a 600MB file, WebKit crashes due to Out of Memory.
-            // SOLUTION: Buffer into memory for normal-sized chats to strip emojis safely, 
-            // but use f.slice() for massive chats (which likely don't have emoji names anyway or user exported with media).
-            let safeBlob;
-            if (f.size <= 100 * 1024 * 1024) {
-                const arrayBuffer = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsArrayBuffer(f);
-                });
-                safeBlob = new Blob([arrayBuffer], { type: f.type });
-            } else {
-                safeBlob = f.slice(0, f.size, f.type);
-            }
-            form.append('files', safeBlob, relPath);
-        }
-
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload');
-
-        xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-                const pct = Math.round((e.loaded / e.total) * 100);
-                progressBar.style.width = pct + '%';
-                progressPercent.textContent = pct + '%';
-                if (pct === 100) progressStatus.textContent = 'Processing on server...';
-            }
-        });
-
-        xhr.onload = () => {
-            if (xhr.status === 413) {
-                showError('File too large — max 650 MB');
-                return;
-            }
-            try {
-                const resp = JSON.parse(xhr.responseText);
-                if (xhr.status >= 200 && xhr.status < 300 && resp.ok) {
-                    progressStatus.textContent = 'Done!';
-                    if (window.__IS_GUEST__ && window.__GUEST_STATUS__) {
-                        window.__GUEST_STATUS__.chatsRemaining = Math.max(0, (window.__GUEST_STATUS__.chatsRemaining || 1) - 1);
-                        window.__GUEST_STATUS__.chatsImported = (window.__GUEST_STATUS__.chatsImported || 0) + 1;
-                        const remEl = document.getElementById('guest-chat-rem');
-                        if (remEl) remEl.textContent = window.__GUEST_STATUS__.chatsRemaining;
-                    }
-                    setTimeout(() => {
-                        closeModal();
-                        if (window.refreshChats) window.refreshChats(resp.chat);
-                        else window.location.reload();
-                    }, 400);
-                } else if (resp.requireAuth || xhr.status === 403) {
-                    closeModal();
-                    if (window.openAuthModal) {
-                        window.openAuthModal(resp.error || 'Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!');
-                    }
-                } else {
-                    showError(resp.error || 'Upload failed');
+            handleUploadSuccess(resp);
+        } catch (err) {
+            console.error('Upload error:', err);
+            if (err.requireAuth) {
+                closeModal();
+                if (window.openAuthModal) {
+                    window.openAuthModal(err.message || 'Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!');
                 }
-            } catch (err) {
-                showError('Server error (' + xhr.status + ')');
+            } else if (err.upgrade) {
+                closeModal();
+                if (window.showProModal) {
+                    window.showProModal();
+                } else {
+                    showError(err.message || 'Free plan limit reached. Upgrade to Pro for unlimited chats!');
+                }
+            } else {
+                showError(err.message || 'Upload failed. Please check your connection and try again.');
             }
-        };
-
-        xhr.onerror = () => showError('Network error');
-        xhr.send(form);
+        }
     }
 
     // ── Share Target: file shared from WhatsApp → PWA ────────
-    // The service worker stashes the shared file in a Cache and redirects to
-    // /app?shared=1. We pick it up here and run the normal import.
     async function handleSharedFile() {
         if (!new URLSearchParams(location.search).has('shared')) return;
         try {
@@ -277,7 +469,6 @@
                 uploadFiles([file]);
             }
         } catch (e) { /* no shared file */ }
-        // Clean the URL
         history.replaceState({}, '', '/app');
     }
     handleSharedFile();

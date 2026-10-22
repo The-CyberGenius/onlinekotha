@@ -62,6 +62,12 @@ const IS_PROD = process.env.NODE_ENV === 'production' || Boolean(process.env.PUB
 
 const app = express();
 const httpServer = http.createServer(app);
+httpServer.timeout = 15 * 60 * 1000;
+httpServer.keepAliveTimeout = 65000;
+httpServer.headersTimeout = 66000;
+if (httpServer.requestTimeout !== undefined) {
+    httpServer.requestTimeout = 15 * 60 * 1000;
+}
 const io = new SocketIO(httpServer, {
     cors: {
         origin: IS_PROD
