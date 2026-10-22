@@ -2120,12 +2120,28 @@
                 border-radius: 48px;
             }
 
-            #nav-user-name {
-                max-width: 75px !important;
+            #nav-user-profile {
+                gap: 6px !important;
             }
 
-            #nav-user-profile:not(.hidden)~#nav-cta {
-                display: none !important;
+            #nav-user-name {
+                max-width: 65px !important;
+                font-size: 11px !important;
+            }
+
+            #nav-cta {
+                min-height: 34px !important;
+                padding: 0 11px !important;
+                font-size: 12px !important;
+                font-weight: 700 !important;
+                border-radius: 99px !important;
+                gap: 4px !important;
+                display: inline-flex !important;
+            }
+
+            #nav-cta svg {
+                width: 12px !important;
+                height: 12px !important;
             }
 
             .sec {
@@ -3237,8 +3253,8 @@
                 <a href="/login.html?next=%2Fapp.html" id="nav-login" class="btn-link" style="display:none;">Log
                     in</a>
                 <div id="nav-user-profile" class="hidden" style="display: none; align-items: center; gap: 8px;">
-                    <div id="nav-avatar-container"
-                        style="width: 32px; height: 32px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid rgba(120,120,120,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                    <a href="/app" id="nav-avatar-container" title="Open App"
+                        style="width: 32px; height: 32px; border-radius: 50%; background: var(--msg-ai-bg); border: 1px solid rgba(120,120,120,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden; text-decoration: none; cursor: pointer;">
                         <img id="nav-user-avatar" src="" alt="Avatar"
                             style="width: 100%; height: 100%; object-fit: cover; display: none;">
                         <svg id="nav-user-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -3247,12 +3263,17 @@
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
-                    </div>
+                    </a>
                     <div style="display: flex; flex-direction: column; line-height: 1.2;">
                         <span id="nav-user-name"
                             style="font-size: 13px; font-weight: 600; color: var(--text-primary); max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
-                        <a href="#" id="nav-logout-btn"
-                            style="font-size: 11px; color: var(--text-secondary); text-decoration: none;">Logout</a>
+                        <div id="nav-user-links" style="display: flex; align-items: center; gap: 5px; font-size: 11px;">
+                            <a href="/admin.html" id="nav-admin-link" class="hidden"
+                                style="color: var(--accent); font-weight: 700; text-decoration: none;">Admin</a>
+                            <span id="nav-admin-sep" class="hidden" style="color: var(--text-muted); font-size: 10px;">•</span>
+                            <a href="#" id="nav-logout-btn"
+                                style="color: var(--text-secondary); text-decoration: none;">Logout</a>
+                        </div>
                     </div>
                 </div>
                 <a href="/app?action=import" id="nav-cta" class="btn cta-primary"
@@ -4634,12 +4655,18 @@
                 const d = await r.json();
                 if (d.user) {
                     window.kothaUser = d.user;
-                    const dest = d.user.is_admin ? '/admin.html' : '/app';
-                    const label = d.user.is_admin ? 'Admin Panel' : 'Open App';
+                    const dest = '/app';
+                    const label = 'Open App';
                     const navCta = document.getElementById('nav-cta');
                     if (navCta) {
                         navCta.href = dest;
                         navCta.innerHTML = `<span>${label}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7" /></svg>`;
+                    }
+                    if (d.user.is_admin) {
+                        const adminLink = document.getElementById('nav-admin-link');
+                        const adminSep = document.getElementById('nav-admin-sep');
+                        if (adminLink) adminLink.classList.remove('hidden');
+                        if (adminSep) adminSep.classList.remove('hidden');
                     }
                     document.querySelectorAll('a[href^="/api/auth/google"], a[href^="/login.html"], a[href^="/app.html"], a[href^="/app"]').forEach(a => {
                         if (a.id === 'nav-cta' || a.id === 'nav-logout-btn') return;

@@ -750,10 +750,25 @@ button,
     z-index: 9999;
 }
 #mac-frame.mac-fullscreen #mac-titlebar { border-radius: 0; }
-/* ── macOS Dock: Hidden by default when window is open to prevent covering footer/app when zooming ── */
+/* ── macOS Dock ── */
 #mac-dock {
-    display: none !important;
+    display: none;
     height: 62px;
+}
+@media (min-width: 768px) {
+    #mac-dock {
+        display: flex !important;
+    }
+    body.app-shell:not(:has(#mac-frame.mac-fullscreen)):not(:has(#mac-frame.mac-expanded)) {
+        padding-bottom: 75px !important;
+    }
+    #mac-frame:not(.mac-fullscreen):not(.mac-expanded) {
+        max-height: calc(100vh - 90px) !important;
+    }
+}
+#mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock,
+#mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock {
+    display: none !important;
 }
 #mac-frame.mac-minimized ~ #mac-dock,
 #mac-frame.genie-minimize ~ #mac-dock,
@@ -787,10 +802,47 @@ body.impersonating-mobile-dock #mac-dock {
 }
 .kotha-member-stat-strip {
     font-size: 10px !important;
+    background-color: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #475569 !important;
+}
+html.dark .kotha-member-stat-strip,
+.dark .kotha-member-stat-strip {
+    background-color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #94a3b8 !important;
+}
+.kotha-member-stat-val {
+    color: #0f172a !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+html.dark .kotha-member-stat-val,
+.dark .kotha-member-stat-val {
+    color: #f8fafc !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+.kotha-member-expanded {
+    background-color: rgba(249, 250, 251, 0.8) !important;
+}
+html.dark .kotha-member-expanded,
+.dark .kotha-member-expanded {
+    background-color: #111b21 !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
 }
 .kotha-member-chip {
     font-size: 10.5px !important;
     font-weight: 600 !important;
+    background-color: #ffffff;
+    color: #334155;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+html.dark .kotha-member-chip:not(.bg-indigo-600),
+.dark .kotha-member-chip:not(.bg-indigo-600) {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 /* ─── Genie Effect & Transitions ─── */
@@ -3129,7 +3181,7 @@ html.dark .kotha-cute-sub-action,
 }
 
 /* Responsive adjustments for shorter / zoomed viewports */
-@media (max-height: 740px) {
+@media (max-height: 480px) {
     #mac-dock {
         display: none !important;
     }

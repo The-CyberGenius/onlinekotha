@@ -1388,29 +1388,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     participantContainer.appendChild(headerRow);
 
                     const expandedContent = document.createElement('div');
-                    expandedContent.className = 'hidden flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800 pt-2 pb-2.5 px-3 bg-gray-50/60 dark:bg-[#152028]';
+                    expandedContent.className = 'hidden flex flex-col gap-2 border-t border-gray-100 dark:border-gray-800 pt-2 pb-2.5 px-3 kotha-member-expanded';
                     
                     // Add quick stats strip - compact and cute
-                    let activeDays = new Set(allMessages.map(m => m.date)).size;
-                    let mediaCount = allMessages.filter(m => m.text && (m.text.includes('<Media omitted>') || m.text.includes('image omitted') || m.text.includes('video omitted') || m.text.includes('sticker omitted'))).length;
+                    let activeDays = new Set(allMessages.filter(m => m.date).map(m => m.date)).size;
+                    let mediaCount = allMessages.filter(m => m.text && (m.text.includes('<Media omitted>') || m.text.includes('image omitted') || m.text.includes('video omitted') || m.text.includes('sticker omitted') || m.text.includes('audio omitted') || m.text.includes('document omitted') || m.text.includes('omitted') || m.media)).length;
                     
                     const statsStrip = document.createElement('div');
-                    statsStrip.className = 'flex items-center justify-between gap-1.5 bg-white dark:bg-[#1a252d] rounded-lg px-2.5 py-1.5 border border-gray-200/70 dark:border-gray-700/60 kotha-member-stat-strip';
+                    statsStrip.className = 'flex items-center justify-between gap-1.5 rounded-lg px-2.5 py-1.5 kotha-member-stat-strip';
                     statsStrip.style.fontSize = '10px';
                     statsStrip.innerHTML = `
-                        <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center gap-1">
                             <span class="text-indigo-500 font-bold">📅 Active:</span>
-                            <span class="font-extrabold text-gray-900 dark:text-white" style="font-size: 11px;">${activeDays}d</span>
+                            <span class="kotha-member-stat-val">${activeDays}d</span>
                         </div>
                         <div class="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
-                        <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center gap-1">
                             <span class="text-fuchsia-500 font-bold">📷 Media:</span>
-                            <span class="font-extrabold text-gray-900 dark:text-white" style="font-size: 11px;">${formatNum(mediaCount)}</span>
+                            <span class="kotha-member-stat-val">${formatNum(mediaCount)}</span>
                         </div>
                         <div class="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
-                        <div class="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center gap-1">
                             <span class="text-emerald-500 font-bold">💬 Total:</span>
-                            <span class="font-extrabold text-gray-900 dark:text-white" style="font-size: 11px;">${formatNum(totalMessages)}</span>
+                            <span class="kotha-member-stat-val">${formatNum(totalMessages)}</span>
                         </div>
                     `;
                     expandedContent.appendChild(statsStrip);
@@ -3974,9 +3974,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const dock = document.getElementById('mac-dock');
         const dockIcon = document.getElementById('dock-kotha-icon');
 
-        // Hide dock by default to prevent overlapping the web app when zooming
-        if (dock && !(window.__USER__ && window.__USER__.is_impersonating)) {
-            dock.style.setProperty('display', 'none', 'important');
+        // Ensure dock follows CSS (desktop flex, mobile hidden unless impersonating)
+        if (dock) {
+            dock.style.removeProperty('display');
         }
 
         let minimized = false;
@@ -4010,12 +4010,12 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.classList.add('genie-restore');
             if (dockDot) dockDot.style.opacity = '1';
             
-            // Once restored, hide dock so it doesn't overlap the app
+            // Once restored, reset dock inline style so CSS media query manages visibility
             if (dock) {
-                if (window.__USER__ && window.__USER__.is_impersonating) {
-                    dock.style.removeProperty('display');
-                } else {
+                if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded')) {
                     dock.style.setProperty('display', 'none', 'important');
+                } else {
+                    dock.style.removeProperty('display');
                 }
             }
 

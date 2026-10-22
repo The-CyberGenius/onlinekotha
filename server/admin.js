@@ -539,7 +539,7 @@ router.get('/users', (req, res) => {
                 (SELECT COUNT(*) FROM chats WHERE user_id = u.id) AS chat_count,
                 (SELECT COALESCE(SUM(cost_usd), 0) FROM usage_log WHERE user_id = u.id) AS total_cost
          FROM users u
-         WHERE u.id > 0 AND u.plan != 'guest' AND u.email != 'guest@onlinekotha.com'`
+         WHERE u.id > 0 AND u.plan != 'guest' AND u.email != 'guest@onlinekotha.com' AND u.email NOT LIKE '%guest%'`
     ).all();
     
     users.forEach(u => {
@@ -642,7 +642,14 @@ router.get('/users', (req, res) => {
         return isNaN(p) ? 0 : p;
     }
 
-    const rows = [...users, ...guestUsers];
+    let rows;
+    if (req.query.type === 'registered') {
+        rows = users;
+    } else if (req.query.type === 'guests') {
+        rows = guestUsers;
+    } else {
+        rows = [...users, ...guestUsers];
+    }
     rows.sort((a, b) => {
         // 1. Any user currently online is at the top!
         const aOnline = Boolean(a.is_online);

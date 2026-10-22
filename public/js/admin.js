@@ -80,11 +80,12 @@
 
     function isGuestUser(u) {
         if (!u) return false;
-        if (Boolean(u.is_guest)) return true;
-        if (String(u.id || '').startsWith('gst_')) return true;
+        if (u.is_guest === true || u.is_guest === 1 || u.is_guest === '1' || u.is_guest === 'true') return true;
+        if (String(u.id || '').startsWith('gst_') || String(u.id || '').startsWith('guest_')) return true;
         if (u.id === 0 || u.id === '0') return true;
         if (u.plan === 'guest') return true;
-        if (u.email && u.email.toLowerCase().includes('guest')) return true;
+        if (u.email && /guest/i.test(u.email)) return true;
+        if (u.display_name && /guest/i.test(u.display_name)) return true;
         return false;
     }
 
@@ -838,6 +839,13 @@ HARD RULES
     function renderUserSection(containerId, rows, isGuestSection) {
         const list = document.getElementById(containerId);
         if (!list) return;
+
+        // Strict defensive filter to guarantee registered users never contain guests
+        if (!isGuestSection) {
+            rows = (rows || []).filter(u => !isGuestUser(u));
+        } else {
+            rows = (rows || []).filter(u => isGuestUser(u));
+        }
 
         rows = sortUsers(rows);
         if (!rows.length) {
