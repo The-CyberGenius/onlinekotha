@@ -2,14 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
 
-// Robust Date and Time matching to support various WhatsApp formats
+// Robust Date and Time matching to support various WhatsApp formats across all languages (English, Chinese, Spanish, Japanese, Korean, Arabic, etc.)
+const MERIDIAN_WORDS = 'AM|PM|am|pm|a\\.m\\.|p\\.m\\.|A\\.M\\.|P\\.M\\.|上午|下午|中午|晚上|早上|凌晨|午夜|午前|午後|오전|오후|ص|م';
 const DATE_PAT = `\\d{1,4}[\\/\\-\\.]\\d{1,2}[\\/\\-\\.]\\d{1,4}`;
-const TIME_PAT = `\\d{1,2}:\\d{2}(?::\\d{2})?\\s*(?:(?:AM|PM|am|pm|a\\.m\\.|p\\.m\\.|A\\.M\\.|P\\.M\\.)\\b)?`;
+const TIME_PAT = `(?:(?:${MERIDIAN_WORDS})\\s*)?\\d{1,2}:\\d{2}(?::\\d{2})?(?:\\s*(?:${MERIDIAN_WORDS}))?`;
 
-// Bracketed: [16:51, 3/22/23] or [3/22/23, 4:51 PM]
+// Bracketed: [16:51, 3/22/23] or [3/22/23, 4:51 PM] or [2026/7/17 下午5:43:00]
 const BRACKET_REGEX = new RegExp(`^\\[([^\\]]+)\\]\\s*([^:]+?)(?:\\s*:\\s*(.*))?$`);
 
-// Standard: 3/22/23, 4:51 PM - Sender: Message OR 2024-08-07 20:02 Sender: Message
+// Standard: 3/22/23, 4:51 PM - Sender: Message OR 2026/7/17 下午5:43 - Sender: Message
 const STANDARD_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})[\\s\\-]*([^:]+?)(?:\\s*:\\s*(.*))?$`);
 
 // iOS attachment: <attached: filename.ext>
@@ -37,6 +38,50 @@ function detectFormat(line) {
     return null;
 }
 
+function normalizeTime(rawTime) {
+    if (!rawTime) return '';
+    let t = rawTime.trim();
+
+    // Check Chinese / East Asian / Latin prefixes
+    const prefixMatch = t.match(/^(上午|早上|凌晨|午夜|中午|下午|晚上|午前|午後|오전|오후|AM|PM|am|pm)\s*(\d{1,2}:\d{2}(?::\d{2})?)/i);
+    if (prefixMatch) {
+        const pfx = prefixMatch[1];
+        const pfxLow = pfx.toLowerCase();
+        const timeDigits = prefixMatch[2];
+        const isPM = ['下午', '晚上', '中午', '午後', '오후', 'pm'].includes(pfxLow) || ['下午', '晚上', '中午', '午後', '오후'].includes(pfx);
+        const parts = timeDigits.split(':');
+        let h = parseInt(parts[0], 10);
+        const m = parts[1];
+        const s = parts[2] ? ':' + parts[2] : '';
+
+        if (pfx === '中午') {
+            return `${h}:${m}${s} PM`;
+        } else if (pfx === '午夜' || pfx === '凌晨') {
+            if (h === 12) h = 0;
+            return `${h === 0 ? 12 : h}:${m}${s} AM`;
+        } else if (isPM) {
+            return `${h}:${m}${s} PM`;
+        } else {
+            return `${h}:${m}${s} AM`;
+        }
+    }
+
+    // Check Chinese / East Asian suffixes
+    const suffixMatch = t.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*(上午|早上|凌晨|午夜|中午|下午|晚上|午前|午後|오전|오후)/);
+    if (suffixMatch) {
+        const timeDigits = suffixMatch[1];
+        const sfx = suffixMatch[2];
+        const isPM = ['下午', '晚上', '中午', '午後', '오후'].includes(sfx);
+        const parts = timeDigits.split(':');
+        let h = parseInt(parts[0], 10);
+        const m = parts[1];
+        const s = parts[2] ? ':' + parts[2] : '';
+        return `${h}:${m}${s} ${isPM ? 'PM' : 'AM'}`;
+    }
+
+    return t;
+}
+
 function parseLine(line, format) {
     const regex = format === 'bracket' ? BRACKET_REGEX : STANDARD_REGEX;
     const match = line.match(regex);
@@ -46,10 +91,10 @@ function parseLine(line, format) {
     
     if (format === 'bracket') {
         const inside = match[1].trim();
-        // Extract time pattern: e.g. 23:18:22 or 4:51 PM or 16:51
-        const timeMatch = inside.match(/\b\d{1,2}:\d{2}(?::\d{2})?(?:\s*(?:AM|PM|am|pm|a\.m\.|p\.m\.|A\.M\.|P\.M\.))?\b/);
+        // Extract time pattern: e.g. 23:18:22 or 4:51 PM or 下午5:43
+        const timeMatch = inside.match(new RegExp(`(?:(?:${MERIDIAN_WORDS})\\s*)?\\d{1,2}:\\d{2}(?::\\d{2})?(?:\\s*(?:${MERIDIAN_WORDS}))?`));
         if (timeMatch) {
-            time = timeMatch[0].trim();
+            time = normalizeTime(timeMatch[0].trim());
             date = inside.replace(timeMatch[0], '')
                          .replace(/^[\s\,\@à\–\—\-]+|[\s\,\@à\–\—\-]+$/g, '')
                          .trim();
@@ -58,8 +103,8 @@ function parseLine(line, format) {
             if (dtParts.length === 2) {
                 const p1 = dtParts[0].trim();
                 const p2 = dtParts[1].trim();
-                if (p1.includes(':')) { time = p1; date = p2; }
-                else { date = p1; time = p2; }
+                if (p1.includes(':')) { time = normalizeTime(p1); date = p2; }
+                else { date = p1; time = normalizeTime(p2); }
             } else {
                 date = inside;
                 time = '';
@@ -69,13 +114,25 @@ function parseLine(line, format) {
         rawText = match[3];
     } else {
         date = match[1];
-        time = match[2].trim();
+        time = normalizeTime(match[2].trim());
         sender = match[3];
         rawText = match[4];
     }
 
     let text = rawText || '';
     let type = 'text';
+
+    // Normalize international "Media omitted" tags
+    if (text.includes('<省略影音内容>') || text.includes('<已省略媒體>') || text.includes('<省略媒體>') ||
+        /<(?:Multimedia omitido|archivo omitido|Arquivo de mídia oculto|mídia omitida|Médias omis|Medien weggelassen|Medien ausgelassen|File multimediale omesso|Без медиафайлов|Media tidak disertakan)>/i.test(text)) {
+        text = text.replace(/<省略影音内容>|<已省略媒體>|<省略媒體>|<(?:Multimedia omitido|archivo omitido|Arquivo de mídia oculto|mídia omitida|Médias omis|Medien weggelassen|Medien ausgelassen|File multimediale omesso|Без медиафайлов|Media tidak disertakan)>/gi, '<Media omitted>');
+    }
+
+    // Normalize international "This message was edited" tags
+    if (text.includes('<这条消息已经过编辑>') || text.includes('<這條訊息已編輯>') ||
+        /<(?:Este mensaje fue editado|Esta mensagem foi editada|Ce message a été modifié|Diese Nachricht wurde bearbeitet|Questo messaggio è stato modificato|Сообщение изменено|Pesan ini telah diedit)>/i.test(text)) {
+        text = text.replace(/<这条消息已经过编辑>|<這條訊息已編輯>|<(?:Este mensaje fue editado|Esta mensagem foi editada|Ce message a été modifié|Diese Nachricht wurde bearbeitet|Questo messaggio è stato modificato|Сообщение изменено|Pesan ini telah diedit)>/gi, '<This message was edited>');
+    }
     
     // If rawText is undefined, it means there was no colon (it's a system message)
     if (rawText === undefined) {

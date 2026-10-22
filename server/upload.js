@@ -161,9 +161,13 @@ async function handleUpload(req, res) {
                 return res.status(400).json({ error: 'No _chat.txt found in uploaded files' });
             }
             const firstFile = files[0].originalname.replace(/\\/g, '/');
-            const folderName = firstFile.includes('/')
-                ? firstFile.split('/')[0]
-                : `chat_${Date.now()}`;
+            let folderName;
+            if (firstFile.includes('/')) {
+                folderName = firstFile.split('/')[0];
+            } else {
+                const ext = path.extname(firstFile);
+                folderName = path.basename(firstFile, ext).trim() || `chat_${Date.now()}`;
+            }
             baseName = sanitizeChatName(folderName);
             finalDir = uniqueChatDir(baseName, myDir);
             ensureDir(finalDir);
