@@ -19,10 +19,12 @@ function getOwner(req) {
         if (req.user.is_impersonating && req.user.guest_id) {
             return { userId: 0, guestId: req.user.guest_id, dirKey: req.user.guest_id, isGuest: true };
         }
-        return { userId: req.user.id, guestId: null, dirKey: req.user.id, isGuest: false };
+        if (req.user.id > 0) {
+            return { userId: req.user.id, guestId: null, dirKey: req.user.id, isGuest: false };
+        }
     }
     const guestStatus = req.guestStatus || (typeof getGuestStatus === 'function' ? getGuestStatus(req) : null);
-    const guestId = guestStatus ? guestStatus.guestId : null;
+    const guestId = (guestStatus && guestStatus.guestId) || (req.user && req.user.guest_id) || null;
     return { userId: 0, guestId, dirKey: guestId, isGuest: true };
 }
 
@@ -146,11 +148,7 @@ router.get('/chat/:folder/identity', async (req, res) => {
         ? 'SELECT user_participant FROM chats WHERE folder_name = ? AND user_id = ?'
         : 'SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?';
     const params = !owner.isGuest ? [req.params.folder, owner.userId] : [req.params.folder, owner.guestId];
-    let chatRow = db.prepare(sql).get(...params);
-    if (!chatRow) {
-        // Fallback for newly migrated or shared chats
-        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ?').get(req.params.folder);
-    }
+    const chatRow = db.prepare(sql).get(...params);
     
     try {
         const { getMessages } = require('./cache');

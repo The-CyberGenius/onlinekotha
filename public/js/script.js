@@ -666,6 +666,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    function updateHeaderIdentityPill() {
+        const btn = document.getElementById('header-switch-identity-btn');
+        const label = document.getElementById('header-identity-name');
+        if (!btn || !label) return;
+        if (myName && currentChat && currentChat !== 'kotha_assistant' && currentChat !== '__global__') {
+            label.innerText = myName;
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+
+    const switchIdentityHeaderBtn = document.getElementById('header-switch-identity-btn');
+    if (switchIdentityHeaderBtn && !switchIdentityHeaderBtn._boundClick) {
+        switchIdentityHeaderBtn._boundClick = true;
+        switchIdentityHeaderBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (currentChat && typeof window.ensureIdentity === 'function') {
+                window.ensureIdentity(currentChat, true);
+            }
+        });
+    }
+
+    // Expose chat data getters globally for features (like Chat Wrapped)
+    window.kothaGetAllMessages = () => allMessages;
+    window.kothaGetMyName = () => myName;
+    window.kothaGetOtherPersonName = () => otherPersonName;
+    window.kothaGetCurrentChat = () => currentChat;
+
+    // Called by ai-panel.js after identity is verified or chosen
+    window.kothaSetMyName = (name, otherName) => {
+        myName = name || null;
+        if (otherName && otherName !== 'Kotha Assistant') {
+            otherPersonName = otherName;
+        } else if (currentChat === 'kotha_assistant') {
+            otherPersonName = 'Kotha Assistant';
+        }
+        updateHeaderIdentityPill();
+
+        // Update header name for 1-on-1 chats
+        if (headerName && currentChat && currentChat !== 'kotha_assistant' && currentChat !== '__global__') {
+            const isGroup = window._chatMetaCache?.[currentChat]?.isGroup;
+            if (!isGroup && otherPersonName && otherPersonName !== 'Kotha Assistant' && otherPersonName !== 'Contact') {
+                headerName.innerText = otherPersonName;
+                if (headerAvatar) {
+                    headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
+                }
+                if (window._chatMetaCache && window._chatMetaCache[currentChat]) {
+                    window._chatMetaCache[currentChat].contactName = otherPersonName;
+                }
+            }
+        }
+
+        // Re-render the current visible chat slice with correct green alignment on right
+        if (currentChat && allMessages.length > 0 && chatContainer) {
+            lastRenderedDate = '';
+            chatContainer.innerHTML = '';
+            if (!displayedMessages || displayedMessages.length === 0) {
+                displayedMessages = [...allMessages];
+            }
+            const end = displayedMessages.length;
+            const start = Math.max(0, end - CHUNK_SIZE);
+            renderChats(start, end, 'reset');
+            // Scroll to bottom to show latest messages in correct alignment
+            setTimeout(() => { 
+                if (scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight; 
+            }, 30);
+        }
+    };
+
     let isScrolling = false;
     let scrollTimeout;
     let _scrollRaf = null;
@@ -873,6 +943,13 @@ document.addEventListener('DOMContentLoaded', () => {
         window.kothaChatLoading = true;
         window.kothaLoadedChat = null;
         try {
+            // Clean state for the new chat — NEVER leak previous chat's identity or Kotha Assistant
+            if (chatName !== 'kotha_assistant') {
+                myName = null;
+                otherPersonName = 'Contact';
+            }
+            if (typeof updateHeaderIdentityPill === 'function') updateHeaderIdentityPill();
+
             // Block UI while we check/ensure identity
             showSkeleton();
             statsInfo.innerText = 'Loading identity...';
@@ -1100,10 +1177,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 const isGroupChat = data.isGroup || isGroupChatFrontend;
-                const actualGroupName = window._chatMetaCache?.[chatName]?.contactName || chatContactName;
+                let actualGroupName = window._chatMetaCache?.[chatName]?.contactName || chatContactName;
+                if (actualGroupName === 'Kotha Assistant') {
+                    actualGroupName = chatContactName;
+                }
 
                 if (isGroupChat) {
-                    headerName.innerText = actualGroupName.replace(/(Group, d+ members)/, '').trim();
+                    headerName.innerText = actualGroupName.replace(/(Group, \d+ members)/, '').trim();
                     const participantCount = data.participants ? data.participants.length : senderNames.length;
                     const subTitle = document.createElement('span');
                     subTitle.className = 'text-[11px] font-normal text-gray-400 block -mt-1';
@@ -1113,6 +1193,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     headerAvatar.innerHTML = `<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>`;
                     if (sidebarAvatar) sidebarAvatar.innerText = 'G';
                 } else {
+                    let fallbackContact = senderNames.find(s => s !== myName) || actualGroupName;
+                    if (fallbackContact === 'Kotha Assistant') fallbackContact = chatContactName;
+                    if (!otherPersonName || otherPersonName === 'Contact' || otherPersonName === 'Kotha Assistant') {
+                        otherPersonName = fallbackContact;
+                    }
                     headerName.innerText = otherPersonName;
                     if (otherPersonName) {
                         headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
@@ -1132,7 +1217,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Animate bottom input placeholder typewriter effect
                 const bottomAiInput = document.getElementById('bottom-ai-input');
                 if (bottomAiInput) {
-                    animatePlaceholder(bottomAiInput, isGroupChat ? `Continue With virtual Group Chat…` : `Continue With virtual ${otherPersonName}…`);
+                    const placeholderTarget = isGroupChat ? 'Group Chat' : otherPersonName;
+                    animatePlaceholder(bottomAiInput, `Continue With virtual ${placeholderTarget}…`);
                 }
 
                 statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
@@ -3352,67 +3438,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    function updateHeaderIdentityPill() {
-        const btn = document.getElementById('header-switch-identity-btn');
-        const label = document.getElementById('header-identity-name');
-        if (!btn || !label) return;
-        if (myName && currentChat && currentChat !== 'kotha_assistant' && currentChat !== '__global__') {
-            label.innerText = myName;
-            btn.classList.remove('hidden');
-        } else {
-            btn.classList.add('hidden');
-        }
-    }
-
-    const switchIdentityHeaderBtn = document.getElementById('header-switch-identity-btn');
-    if (switchIdentityHeaderBtn) {
-        switchIdentityHeaderBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (currentChat && typeof window.ensureIdentity === 'function') {
-                window.ensureIdentity(currentChat, true);
-            }
-        });
-    }
-
-    // Expose chat data getters globally for features (like Chat Wrapped)
-    window.kothaGetAllMessages = () => allMessages;
-    window.kothaGetMyName = () => myName;
-
-    // Called by ai-panel.js after identity modal resolves so messages align immediately
-    window.kothaSetMyName = (name, otherName) => {
-        myName = name || null;
-        if (otherName) otherPersonName = otherName;
-        updateHeaderIdentityPill();
-
-        // Update header name for 1-on-1 chats
-        if (otherPersonName && headerName && currentChat !== 'kotha_assistant' && currentChat !== '__global__') {
-            const isGroup = window._chatMetaCache?.[currentChat]?.isGroup;
-            if (!isGroup) {
-                headerName.innerText = otherPersonName;
-                if (headerAvatar) {
-                    headerAvatar.innerText = otherPersonName.charAt(0).toUpperCase();
-                }
-            }
-        }
-
-        // Re-render the current visible chat slice to apply correct alignment
-        if (currentChat && allMessages.length > 0) {
-            lastRenderedDate = '';
-            chatContainer.innerHTML = '';
-            if (!displayedMessages || displayedMessages.length === 0) {
-                displayedMessages = [...allMessages];
-            }
-            const end = displayedMessages.length;
-            const start = Math.max(0, end - CHUNK_SIZE);
-            renderChats(start, end, 'reset');
-            // Scroll to bottom to show latest messages in correct alignment
-            setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 30);
-        }
-    };
-
-    window.kothaGetOtherPersonName = () => otherPersonName;
-    window.kothaGetCurrentChat = () => currentChat;
 
     // ─── Auto-focus input on any keypress ───
     // When user starts typing anywhere, focus the chat input automatically

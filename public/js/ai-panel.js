@@ -469,10 +469,10 @@
                 const contBtn = document.getElementById('identity-continue-btn');
                 const cancelBtn = document.getElementById('identity-cancel-btn');
                 const closeIcon = document.getElementById('identity-close-icon');
-                if (!modal || !container || !contBtn) { resolve(true); return; }
+                if (!modal || !container || !contBtn) { resolve(false); return; }
 
-                // Hide cancel buttons if it's a mandatory selection
-                if (cancelBtn) cancelBtn.style.display = forceShow ? 'block' : 'none';
+                // Always allow cancel/close button
+                if (cancelBtn) cancelBtn.style.display = 'block';
                 if (closeIcon) closeIcon.style.display = 'flex'; // ALWAYS show close icon per user request
 
                 let selectedId = null;
@@ -588,7 +588,7 @@
             });
         } catch (e) {
             console.error('ensureIdentity error', e);
-            return true;
+            return false;
         }
     };
 
