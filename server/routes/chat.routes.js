@@ -70,8 +70,16 @@ router.get('/chats/meta', requireUserOrGuest, (req, res) => {
         if (r.participants) {
             try { parts = JSON.parse(r.participants); } catch(e){}
         }
+        let dispName = (r.display_name || '').trim();
+        if (!dispName || /^(chat|whatsapp[\s_-]*chat)[\s_-]*\d*$/i.test(dispName)) {
+            if (parts.length >= 2) {
+                dispName = `${parts[0]} & ${parts[1]}`;
+            } else if (parts.length === 1) {
+                dispName = parts[0];
+            }
+        }
         map[r.folder_name] = {
-            display_name: r.display_name || '',
+            display_name: dispName,
             deleted_by_user: r.deleted_by_user || 0,
             message_count: r.message_count || 0,
             is_group: r.is_group || 0,

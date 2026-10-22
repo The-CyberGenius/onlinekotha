@@ -286,8 +286,16 @@ document.addEventListener('DOMContentLoaded', () => {
         n = n.replace(/\s{2,}/g, ' ').trim();
         // Title case
         if (n) n = n.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1));
-        if (!n) {
+        if (!n || /^(chat|whatsapp[\s_-]*chat)[\s_-]*\d*$/i.test(n.trim())) {
+            // Check if window._chatMetaCache has real participants for this chat
+            const meta = window._chatMetaCache?.[raw];
+            if (Array.isArray(meta?.participants) && meta.participants.length > 0) {
+                return meta.participants.length >= 2 ? `${meta.participants[0]} & ${meta.participants[1]}` : meta.participants[0];
+            }
             let fallback = String(raw).replace(/\.(txt|zip|csv|json)\s*$/i, '').replace(/_/g, ' ').trim();
+            if (/^(chat|whatsapp[\s_-]*chat)[\s_-]*\d*$/i.test(fallback)) {
+                return 'WhatsApp Chat';
+            }
             n = fallback || 'WhatsApp Chat';
             n = n.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1));
         }
@@ -386,11 +394,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.history.pushState({}, '', window.location.pathname);
             }
             
-            // Unselect all chats in the sidebar visually
-            document.querySelectorAll('.chat-item').forEach(el => {
-                el.classList.remove('bg-indigo-50/80', 'dark:bg-indigo-500/10', 'border-indigo-100', 'dark:border-indigo-500/20', 'shadow-sm');
-                el.classList.add('hover:bg-slate-50', 'dark:hover:bg-white/5', 'border-transparent');
-            });
+            // Re-render chat list so no chat shows active
+            if (typeof renderChatList === 'function' && Array.isArray(loadedChats)) {
+                renderChatList(loadedChats, '');
+            } else {
+                document.querySelectorAll('.chat-item').forEach(el => {
+                    el.classList.remove('bg-indigo-50/80', 'dark:bg-[#2a3942]', 'shadow-sm', 'ring-1', 'ring-indigo-100', 'dark:ring-transparent');
+                    el.classList.add('hover:bg-gray-50', 'dark:hover:bg-[#202c33]');
+                });
+            }
             
             // Show the empty state screen
             showEmptyState();
@@ -1826,7 +1838,21 @@ document.addEventListener('DOMContentLoaded', () => {
         chats.forEach((chat, idx) => {
             const isAssistant = chat === 'kotha_assistant';
             const chatMeta = window._chatMetaCache?.[chat];
-            let displayName = isAssistant ? 'Kotha Assistant' : ((chatMeta?.contactName && chatMeta.contactName !== 'Kotha Assistant') ? cleanDisplayName(chatMeta.contactName) : cleanDisplayName(chat));
+            const isGenericName = (name) => !name || /^(chat|whatsapp[\s_-]*chat)[\s_-]*\d*$/i.test(String(name).trim());
+            let displayName;
+            if (isAssistant) {
+                displayName = 'Kotha Assistant';
+            } else if (chatMeta?.contactName && chatMeta.contactName !== 'Kotha Assistant' && !isGenericName(chatMeta.contactName)) {
+                displayName = cleanDisplayName(chatMeta.contactName);
+            } else if (Array.isArray(chatMeta?.participants) && chatMeta.participants.length > 0) {
+                if (chatMeta.participants.length >= 2) {
+                    displayName = `${chatMeta.participants[0]} & ${chatMeta.participants[1]}`;
+                } else {
+                    displayName = chatMeta.participants[0];
+                }
+            } else {
+                displayName = cleanDisplayName(chat);
+            }
             if (!displayName || !displayName.trim()) displayName = 'WhatsApp Chat';
             const initial = (displayName.charAt(0) || 'W').toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
@@ -1837,8 +1863,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const lastTime = chatMeta?.lastTime || '';
             const msgCount = chatMeta?.messageCount || chatMeta?.count || '';
 
+            let subTextHtml = '';
+            if (isActive) {
+                subTextHtml = '<span class="text-indigo-500 dark:text-indigo-400 font-medium">● Active</span>';
+            } else if (lastMsg) {
+                subTextHtml = `<span class="truncate">${escapeHTML(lastMsg)}</span>`;
+            } else if (msgCount) {
+                const countNum = Number(msgCount);
+                const countStr = countNum > 999 ? (countNum / 1000).toFixed(1) + 'k messages' : countNum + ' messages';
+                subTextHtml = `<span class="text-gray-400 dark:text-gray-500">${countStr}</span>`;
+            } else {
+                subTextHtml = '<span>Tap to open</span>';
+            }
+
             const item = document.createElement('div');
-            item.className = `flex items-center gap-3 px-3 py-2.5 mx-1 mb-0 rounded-xl cursor-pointer transition-all duration-200 group border-b border-gray-100 dark:border-gray-800/50 last:border-0 ${isActive ? 'bg-indigo-50/80 dark:bg-[#2a3942] shadow-sm ring-1 ring-indigo-100 dark:ring-transparent' : 'hover:bg-gray-50 dark:hover:bg-[#202c33]'}`;
+            item.className = `chat-item flex items-center gap-3 px-3 py-2.5 mx-1 mb-0 rounded-xl cursor-pointer transition-all duration-200 group border-b border-gray-100 dark:border-gray-800/50 last:border-0 ${isActive ? 'bg-indigo-50/80 dark:bg-[#2a3942] shadow-sm ring-1 ring-indigo-100 dark:ring-transparent' : 'hover:bg-gray-50 dark:hover:bg-[#202c33]'}`;
             item.dataset.chat = chat;
             item.innerHTML = `
                 ${isAssistant
@@ -1854,7 +1893,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>
                     </div>
                     <div class="flex items-center justify-between gap-1 mt-0.5">
-                        <p class="text-[12px] text-gray-500 dark:text-gray-400 font-normal truncate leading-tight">${isActive ? '<span class="text-indigo-500 dark:text-indigo-400 font-medium">● Active</span>' : 'Tap to open'}</p>
+                        <p class="text-[12px] text-gray-500 dark:text-gray-400 font-normal truncate leading-tight">${subTextHtml}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition">
@@ -1918,7 +1957,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.chat-del-btn') || e.target.closest('.chat-rename-btn')) return;
-                if (chat === currentChat) {
+                if (chat === currentChat && !document.getElementById('empty-state')) {
                     if (isMobile() || window.kothaCompact) toggleSidebar(false);
                     return;
                 }
@@ -2201,8 +2240,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const aiContainer = document.getElementById('ai-chat-container');
         if (aiContainer) aiContainer.innerHTML = '';
 
-        // Check if user is on free plan to show Pro CTA
-        const isPro = window.__USER__ && window.__USER__.plan === 'pro';
+        // Check if user is on Pro/Paid plan to hide upsell
+        const isPro = window.__USER__ && (
+            window.__USER__.effective_plan === 'paid' ||
+            window.__USER__.plan === 'pro' ||
+            window.__USER__.plan === 'paid' ||
+            window.__USER__.is_pro
+        );
 
         container.innerHTML = `
             <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b141a] overflow-y-auto p-4 select-none" id="empty-state">
@@ -2262,15 +2306,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button id="empty-pro-btn" class="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-95 font-bold text-[11px] rounded-lg px-3 py-1.5 transition-all">
                         Upgrade
                     </button>
-                </div>` : ''}
+                </div>` : `
+                <div class="w-full max-w-[280px] rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-center">
+                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✦ Pro Member · Unlimited Access</span>
+                </div>
+                `}
 
                 <!-- Trust badges -->
                 <div class="flex items-center justify-center gap-3 text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-4">
                     <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Free Demo</span>
+                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${isPro ? 'Pro Unlimited' : 'AI-Powered'}</span>
                     <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> AI-Powered</span>
+                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Encrypted</span>
                 </div>
                 </div> <!-- End of relative z-10 wrapper -->
             </div>

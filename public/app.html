@@ -139,8 +139,8 @@
             class="w-full md:w-[300px] lg:w-[310px] shrink-0 flex flex-col absolute md:relative h-full transition-transform duration-200 left-0 bg-white dark:bg-[#111b21] z-[60] transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none border-r border-gray-200/60 dark:border-gray-800">
             <!-- Sidebar Header -->
             <div id="sidebar-header"
-                class="bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-4 py-3 z-20 shrink-0 border-b border-gray-200 dark:border-gray-800 transition-colors">
-                <div class="flex items-center gap-3">
+                class="bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-3 py-2.5 z-20 shrink-0 border-b border-gray-200 dark:border-gray-800 transition-colors">
+                <div class="flex items-center gap-2.5 min-w-0">
                     <!-- User avatar (Google photo or initials) -->
                     <div id="my-avatar-wrap" class="relative shrink-0 cursor-pointer" title="Your account">
                         <div id="my-avatar-img" class="hidden w-9 h-9 rounded-full overflow-hidden border-2 border-indigo-400/40">
@@ -149,12 +149,12 @@
                         </div>
                         <div id="my-avatar-initials" class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[13px] font-bold border-2 border-indigo-400/40">?</div>
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h2 class="text-[14px] font-semibold text-gray-900 dark:text-gray-100 tracking-tight leading-tight" id="sidebar-title">Chats</h2>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5">
+                            <h2 class="text-[13.5px] font-semibold text-gray-900 dark:text-gray-100 tracking-tight leading-tight truncate" id="sidebar-title">Chats</h2>
                             <span id="compact-plan-badge" class="hidden px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95" onclick="document.getElementById('upgrade-usd-btn')?.click()"></span>
                         </div>
-                        <p class="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[140px]" id="my-email-display"></p>
+                        <p class="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[120px]" id="my-email-display"></p>
                     </div>
                 </div>
                 <!-- Guest Mode Prominent Sign-In Button -->
@@ -162,28 +162,28 @@
                     <svg width="14" height="14" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
                     Sign In
                 </button>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-0.5 shrink-0">
                     <a href="/"
-                        class="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition"
+                        class="w-7 h-7 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/60 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
                         title="Go to Home">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                             <polyline points="9 22 9 12 15 12 15 22" />
                         </svg>
                     </a>
                     <button id="sidebar-dark-mode-btn" onclick="window.kothaToggleTheme()"
-                        class="w-8 h-8 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer"
+                        class="w-7 h-7 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer"
                         title="Toggle dark mode">
-                        <svg class="dm-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <svg class="dm-icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
                         </svg>
                     </button>
                     <a id="admin-link" href="/admin.html"
-                        class="hidden w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-700 transition"
+                        class="hidden w-7 h-7 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/60 flex items-center justify-center text-gray-500 hover:text-gray-700 transition"
                         title="Admin Panel">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round">
                             <path
                                 d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
@@ -192,9 +192,9 @@
                     </a>
 
                     <button id="logout-btn"
-                        class="w-8 h-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition"
+                        class="w-7 h-7 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition"
                         title="Logout">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                             <polyline points="16 17 21 12 16 7" />
@@ -367,20 +367,20 @@
 
             <!-- Chat List (WhatsApp-style) -->
             <div class="px-2 py-0 flex-1 min-h-0 flex flex-col" id="chats-list-section">
-                <div class="flex items-center justify-between px-1 mb-1 shrink-0">
+                <div class="flex items-center justify-between px-1.5 py-1.5 mb-1 shrink-0 sticky top-0 bg-[#f0f2f5] dark:bg-[#111b21] z-10 border-b border-black/[0.04] dark:border-white/[0.04] transition-colors">
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Chats</p>
                     <div class="flex items-center gap-1.5 cursor-pointer group" onclick="document.getElementById('open-upload-btn').click()">
                         <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 transition">Import Chat</span>
                         <button id="open-upload-btn" title="Import new chat"
-                            class="w-6 h-6 rounded-md bg-indigo-600 text-white group-hover:bg-indigo-700 transition flex items-center justify-center shadow-sm pointer-events-none">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            class="w-5 h-5 rounded-md bg-indigo-600 text-white group-hover:bg-indigo-700 transition flex items-center justify-center shadow-sm pointer-events-none">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5" stroke-linecap="round">
                                 <path d="M12 5v14M5 12h14" />
                             </svg>
                         </button>
                     </div>
                 </div>
-                <div id="chat-list-ui" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-0.5 pb-16 md:pb-2">
+                <div id="chat-list-ui" class="flex-1 overflow-y-auto pr-1 pt-1.5 flex flex-col gap-0.5 pb-16 md:pb-2 scroll-smooth" style="scroll-padding-top: 6px;">
                     <!-- Chat items rendered by JS -->
                 </div>
             </div>
