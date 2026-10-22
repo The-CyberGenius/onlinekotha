@@ -150,7 +150,7 @@ function healOrphanedGuestChats() {
         if (!fs.existsSync(SRC_DIR)) return;
 
         // Find all chats where user is registered and guest_id is known
-        const chats = db.prepare('SELECT id, user_id, guest_id, folder_name FROM chats WHERE user_id > 0 AND guest_id IS NOT NULL AND guest_id != ""').all();
+        const chats = db.prepare("SELECT id, user_id, guest_id, folder_name FROM chats WHERE user_id > 0 AND guest_id IS NOT NULL AND guest_id != ''").all();
         for (const chat of chats) {
             const userChatDir = path.join(SRC_DIR, `u_${chat.user_id}`, chat.folder_name);
             const guestChatDir = path.join(SRC_DIR, `u_${chat.guest_id}`, chat.folder_name);

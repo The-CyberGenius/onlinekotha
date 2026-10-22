@@ -599,6 +599,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderChats = (startIndex, endIndex, mode = 'reset') => {
+        // Guard: NEVER render messages if identity is not chosen yet for user/guest chats
+        if (!myName && currentChat !== 'kotha_assistant' && currentChat !== '__global__') {
+            return;
+        }
+
         if (mode === 'reset' && (startIndex === -1 || endIndex === -1 || startIndex >= endIndex || displayedMessages.length === 0)) {
             lastRenderedDate = '';
             chatContainer.innerHTML = '<div class="text-center py-12 text-sm text-gray-400 dark:text-gray-500 italic">No messages found matching current filters.</div>';
@@ -637,6 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.loadOlder = () => {
+        if (!myName && currentChat !== 'kotha_assistant' && currentChat !== '__global__') return;
         if (!currentChat || renderStart <= 0 || displayedMessages.length === 0) return;
         const newStart = Math.max(0, renderStart - CHUNK_SIZE);
         renderChats(newStart, renderStart, 'older');
@@ -651,6 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.loadNewer = () => {
+        if (!myName && currentChat !== 'kotha_assistant' && currentChat !== '__global__') return;
         if (!currentChat || renderEnd >= displayedMessages.length || displayedMessages.length === 0) return;
         const newEnd = Math.min(displayedMessages.length, renderEnd + CHUNK_SIZE);
         const oldScroll = scrollArea.scrollTop;
@@ -684,7 +691,9 @@ document.addEventListener('DOMContentLoaded', () => {
         switchIdentityHeaderBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (currentChat && typeof window.ensureIdentity === 'function') {
-                window.ensureIdentity(currentChat, true);
+                window.ensureIdentity(currentChat, true).then((chosen) => {
+                    if (chosen) loadData(currentChat);
+                });
             }
         });
     }
@@ -1158,12 +1167,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     groupRolesBtn.onclick = () => {
                         if (typeof window.ensureIdentity === 'function') {
-                            window.ensureIdentity(chatName, true).then(() => {
-                                // Re-render chat entirely after change
-                                lastRenderedDate = '';
-                                chatContainer.innerHTML = '';
-                                const end = Math.min(displayedMessages.length, renderStart + (renderEnd - renderStart || 100));
-                                renderChats(renderStart, end, 'reset');
+                            window.ensureIdentity(chatName, true).then((chosen) => {
+                                if (chosen) {
+                                    loadData(chatName);
+                                }
                             });
                         }
                     };
@@ -1196,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     let fallbackContact = senderNames.find(s => s !== myName) || actualGroupName;
                     if (fallbackContact === 'Kotha Assistant') fallbackContact = chatContactName;
                     if (!otherPersonName || otherPersonName === 'Contact' || otherPersonName === 'Kotha Assistant') {
-                        otherPersonName = fallbackContact;
+                        otherPersonName = (fallbackContact && fallbackContact !== 'Kotha Assistant') ? fallbackContact : cleanDisplayName(chatName);
                     }
                     headerName.innerText = otherPersonName;
                     if (otherPersonName) {
@@ -1210,7 +1217,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebarTitle.innerText = "All Chats";
 
                 if (window._chatMetaCache[chatName] && chatName !== 'kotha_assistant') {
-                    window._chatMetaCache[chatName].contactName = isGroupChat ? actualGroupName : otherPersonName;
+                    const finalContact = isGroupChat ? actualGroupName : otherPersonName;
+                    window._chatMetaCache[chatName].contactName = (finalContact && finalContact !== 'Kotha Assistant') ? finalContact : cleanDisplayName(chatName);
                 }
                 renderChatList(loadedChats, currentChat);
 
@@ -1565,6 +1573,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Check if user has selected who they are in this chat
                 if (!myName && chatName !== 'kotha_assistant' && chatName !== '__global__') {
+                    // Reset render boundaries so scroll handlers don't leak messages
+                    renderStart = 0;
+                    renderEnd = 0;
                     // Do NOT render one-sided chat!
                     chatContainer.innerHTML = `
                         <div class="flex flex-col items-center justify-center min-h-[380px] p-6 text-center max-w-md mx-auto my-auto animate-fade-in" style="margin-top:auto;margin-bottom:auto;">
@@ -1585,12 +1596,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (promptBtn) {
                         promptBtn.onclick = () => {
                             if (typeof window.ensureIdentity === 'function') {
-                                window.ensureIdentity(currentChat, true);
+                                window.ensureIdentity(currentChat, true).then((chosen) => {
+                                    if (chosen) {
+                                        loadData(currentChat);
+                                    }
+                                });
                             }
                         };
-                    }
-                    if (typeof window.ensureIdentity === 'function') {
-                        window.ensureIdentity(chatName, true);
                     }
                     window.kothaChatLoading = false;
                     window.kothaLoadedChat = chatName;
@@ -1656,7 +1668,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chats.forEach((chat, idx) => {
             const isAssistant = chat === 'kotha_assistant';
             const chatMeta = window._chatMetaCache?.[chat];
-            let displayName = isAssistant ? 'Kotha Assistant' : (chatMeta?.contactName ? cleanDisplayName(chatMeta.contactName) : cleanDisplayName(chat));
+            let displayName = isAssistant ? 'Kotha Assistant' : ((chatMeta?.contactName && chatMeta.contactName !== 'Kotha Assistant') ? cleanDisplayName(chatMeta.contactName) : cleanDisplayName(chat));
             const initial = displayName.charAt(0).toUpperCase();
             const colorClass = chatColors[idx % chatColors.length];
             const isActive = chat === activeChat;
