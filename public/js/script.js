@@ -3586,41 +3586,17 @@ document.addEventListener('DOMContentLoaded', () => {
         let userHasResized = false;
 
         function centerFrame() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) {
-                if (document.body.classList.contains('app-shell')) {
-                    frame.style.position = '';
-                    frame.style.left = '';
-                    frame.style.top = '';
-                    frame.style.width = '';
-                    frame.style.height = '';
-                    frame.style.margin = '';
-                    frame.style.maxWidth = '';
-                    frame.style.maxHeight = '';
-                    document.body.style.position = '';
-                }
-                return;
-            }
-            const isShort = window.innerHeight < 740;
+            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
+            const hasDock = window.innerHeight >= 700;
             const targetW = userHasResized
-                ? Math.min(parseInt(frame.style.width) || 960, window.innerWidth - 30)
-                : Math.max(380, Math.min(window.innerWidth * 0.75, 1100));
-
-            let targetH;
-            let top;
-            if (userHasResized) {
-                targetH = Math.min(parseInt(frame.style.height) || 720, window.innerHeight - (isShort ? 20 : 90));
-                top = Math.max(8, Math.round((window.innerHeight - targetH - (isShort ? 0 : 70)) / 2));
-            } else {
-                if (isShort) {
-                    targetH = Math.max(420, window.innerHeight - (window.innerHeight < 600 ? 16 : 24));
-                    top = Math.max(8, Math.round((window.innerHeight - targetH) / 2));
-                } else {
-                    targetH = Math.min(window.innerHeight * 0.86, Math.max(620, window.innerHeight - 110));
-                    top = Math.max(12, Math.round((window.innerHeight - targetH - 70) / 2));
-                }
-            }
+                ? Math.min(parseInt(frame.style.width) || 820, window.innerWidth - 30)
+                : Math.max(380, Math.min(window.innerWidth * 0.75, 820));
+            const targetH = userHasResized
+                ? Math.min(parseInt(frame.style.height) || 680, window.innerHeight - (hasDock ? 80 : 20))
+                : Math.max(380, Math.min(window.innerHeight * (hasDock ? 0.82 : 0.94), window.innerHeight - (hasDock ? 110 : 20)));
 
             const left = Math.max(10, Math.round((window.innerWidth - targetW) / 2));
+            const top = Math.max(8, Math.round((window.innerHeight - targetH - (hasDock ? 65 : 0)) / 2));
 
             frame.style.position = 'absolute';
             frame.style.width = Math.round(targetW) + 'px';
@@ -3630,13 +3606,12 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.style.margin = '0';
             frame.style.maxWidth = 'none';
             frame.style.maxHeight = 'none';
-            document.body.style.position = 'relative';
             inited = true;
         }
 
         function clampFrameInViewport() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
-            const isShort = window.innerHeight < 740;
+            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
+            const hasDock = window.innerHeight >= 700;
             const r = frame.getBoundingClientRect();
             let w = parseInt(frame.style.width) || r.width;
             let h = parseInt(frame.style.height) || r.height;
@@ -3645,20 +3620,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // If the user hasn't manually resized the frame, auto-scale it dynamically!
             if (!userHasResized) {
-                w = Math.max(380, Math.min(window.innerWidth * 0.75, 1100));
-                if (isShort) {
-                    h = Math.max(420, window.innerHeight - (window.innerHeight < 600 ? 16 : 24));
-                } else {
-                    h = Math.min(window.innerHeight * 0.86, Math.max(620, window.innerHeight - 110));
-                }
+                w = Math.max(380, Math.min(window.innerWidth * 0.75, 820));
+                h = Math.max(380, Math.min(window.innerHeight * (hasDock ? 0.82 : 0.94), window.innerHeight - (hasDock ? 110 : 20)));
             }
 
             if (w > window.innerWidth - 20) {
                 w = Math.max(380, window.innerWidth - 20);
             }
 
-            const maxBottomGap = isShort ? 12 : 85;
-            const maxAllowedH = Math.max(380, window.innerHeight - (isShort ? 20 : 95));
+            const maxBottomGap = hasDock ? 85 : 12;
+            const maxAllowedH = Math.max(360, window.innerHeight - (hasDock ? 95 : 20));
             if (h > maxAllowedH) {
                 h = maxAllowedH;
             }
@@ -3678,7 +3649,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function initPosition() {
-            if (inited || document.body.classList.contains('app-shell')) return;
+            if (inited) return;
             inited = true;
             const r = frame.getBoundingClientRect();
             frame.style.position = 'absolute';
@@ -3689,7 +3660,6 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.style.margin = '0';
             frame.style.maxWidth = 'none';
             frame.style.maxHeight = 'none';
-            document.body.style.position = 'relative';
         }
 
         function resetPosition() {
@@ -3701,7 +3671,6 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.style.margin = '';
             frame.style.maxWidth = '';
             frame.style.maxHeight = '';
-            document.body.style.position = '';
             frame.classList.remove('is-dragging');
             inited = false;
         }
@@ -3719,12 +3688,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(rhOverlay);
 
         function syncOverlay() {
-            if (isMobile() || document.body.classList.contains('app-shell')) {
-                if (inited && !document.body.classList.contains('app-shell')) resetPosition();
+            if (isMobile()) {
+                if (inited) resetPosition();
                 rhOverlay.style.display = 'none';
                 return;
             }
-            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-minimized')) {
+            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || frame.classList.contains('mac-minimized')) {
                 rhOverlay.style.display = 'none';
                 return;
             }
@@ -3739,10 +3708,6 @@ document.addEventListener('DOMContentLoaded', () => {
         syncOverlay();
 
         window.addEventListener('resize', () => {
-            if (document.body.classList.contains('app-shell')) {
-                if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
-                return;
-            }
             if (dragging) {
                 dragging = false;
                 isActualDrag = false;
@@ -3757,14 +3722,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 rhOverlay.style.display = 'none';
                 return;
             }
-            // If they haven't manually modified the window, keep it perfectly centered and auto-scaled
+            // Keep window perfectly centered and auto-scaled
             if (!userHasDragged && !userHasResized) {
                 centerFrame();
             } else {
-                // Otherwise, keep it in viewport without overriding their custom position/size
                 clampFrameInViewport();
             }
             syncOverlay();
+            if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
         });
 
         // --- Compact (phone-like) mode based on the FRAME's own width ---
@@ -3831,7 +3796,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         titlebar.addEventListener('mousedown', (e) => {
             if (e.target.closest('button')) return;
-            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile() || document.body.classList.contains('app-shell')) return;
+            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
 
             const rect = frame.getBoundingClientRect();
             // Don't drag if click is within 10px of top, left, or right edge (resize zones)
@@ -3978,7 +3943,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rhOverlay.querySelectorAll('.rh').forEach(handle => {
                 const dir = handle.dataset.dir;
                 handle.addEventListener('mousedown', (e) => {
-                    if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile() || document.body.classList.contains('app-shell')) return;
+                    if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
                     initPosition();
                     e.preventDefault();
                     e.stopPropagation();

@@ -1592,65 +1592,6 @@
                 if (e.target.closest('#mac-traffic-lights')) return;
                 window.toggleMacExpand();
             });
-
-            // Draggable Window inside viewport (Smooth hardware accelerated)
-            let isDragging = false;
-            let startX, startY;
-            let currentTranslateX = 0, currentTranslateY = 0;
-            let tempTranslateX = 0, tempTranslateY = 0;
-            let baseLeft = 0, baseTop = 0, frameW = 0;
-
-            titlebar.addEventListener('mousedown', (e) => {
-                if (e.target.closest('#mac-traffic-lights') || frame.classList.contains('mac-expanded')) return;
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                const rect = frame.getBoundingClientRect();
-                baseLeft = rect.left - currentTranslateX;
-                baseTop = rect.top - currentTranslateY;
-                frameW = rect.width;
-                frame.style.transition = 'none'; // Disable transition for 1:1 smooth drag
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                
-                let newTranslateX = currentTranslateX + dx;
-                let newTranslateY = currentTranslateY + dy;
-                
-                // --- X Constraints: Keep at least 100px of the app visible on left/right edges ---
-                const minTranslateX = 100 - frameW - baseLeft;
-                const maxTranslateX = window.innerWidth - 100 - baseLeft;
-                if (newTranslateX < minTranslateX) newTranslateX = minTranslateX;
-                if (newTranslateX > maxTranslateX) newTranslateX = maxTranslateX;
-
-                // --- Y Constraints: ---
-                // 1. Prevent dragging UP from its initial centered position (newTranslateY >= 0)
-                // 2. Prevent dragging DOWN completely off-screen (keep titlebar reachable, ~40px)
-                const maxTranslateY = window.innerHeight - 40 - baseTop;
-                if (newTranslateY < 0) {
-                    newTranslateY = 0;
-                }
-                if (newTranslateY > maxTranslateY) {
-                    newTranslateY = maxTranslateY;
-                }
-                
-                tempTranslateX = newTranslateX;
-                tempTranslateY = newTranslateY;
-                
-                frame.style.transform = `translate(${tempTranslateX}px, ${tempTranslateY}px)`;
-            });
-
-            document.addEventListener('mouseup', () => {
-                if (isDragging) {
-                    isDragging = false;
-                    currentTranslateX = tempTranslateX;
-                    currentTranslateY = tempTranslateY;
-                    frame.style.transition = ''; // Restore transitions
-                }
-            });
         })();
 
         // Extra lock to prevent body scroll
