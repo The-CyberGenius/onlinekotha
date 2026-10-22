@@ -1712,49 +1712,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getUploadPromoCardHtml() {
         return `
-            <div class="m-2.5 p-4 rounded-[24px] bg-gradient-to-b from-purple-50/90 via-pink-50/40 to-indigo-50/80 dark:from-[#1a1c2e]/90 dark:via-[#221a35]/60 dark:to-[#161a29]/90 border border-purple-200/60 dark:border-purple-500/20 shadow-lg shadow-purple-500/5 text-center flex flex-col items-center relative overflow-hidden group">
-                <!-- Cute decorative ambient blur -->
-                <div class="absolute -top-10 -right-10 w-24 h-24 bg-pink-400/15 dark:bg-pink-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-400/15 dark:bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-                <!-- Cute floating 3D squircle avatar -->
-                <div class="relative mb-2.5 transition-transform duration-300 group-hover:scale-105">
-                    <div class="w-12 h-12 rounded-[18px] bg-gradient-to-tr from-violet-500 via-indigo-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 ring-4 ring-white/80 dark:ring-gray-800/80">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="kotha-cute-upload-card" onclick="document.getElementById('open-upload-btn')?.click()" style="cursor: pointer;">
+                <!-- Cute floating 3D squircle avatar with sparkles -->
+                <div class="kotha-cute-upload-icon-wrap">
+                    <div class="kotha-cute-upload-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                         </svg>
                     </div>
-                    <span class="absolute -top-1 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-[10px] text-white shadow-sm ring-2 ring-white dark:ring-gray-800 animate-pulse">✨</span>
+                    <span class="kotha-cute-sparkle-badge">✨</span>
                 </div>
 
-                <!-- Title -->
-                <div class="text-[13.5px] font-black text-gray-900 dark:text-gray-100 mb-1 tracking-tight flex items-center gap-1.5">
-                    <span>Upload WhatsApp Chat</span>
-                </div>
+                <!-- Cute Title -->
+                <div class="kotha-cute-title">Upload WhatsApp Chat</div>
 
                 <!-- Description -->
-                <p class="text-[11.5px] text-gray-500 dark:text-gray-400 mb-3 leading-snug px-1">
-                    Export chat (<span class="font-semibold text-indigo-600 dark:text-indigo-400">.zip</span> or <span class="font-semibold text-indigo-600 dark:text-indigo-400">.txt</span>) from WhatsApp to unlock Chat Wrapped &amp; analytics.
+                <p class="kotha-cute-desc">
+                    Export your chat (<strong style="color:#6366f1;">.zip</strong> or <strong style="color:#6366f1;">.txt</strong>) from WhatsApp to unlock instant Chat Wrapped &amp; analytics!
                 </p>
 
                 <!-- Cute Pill Badges -->
-                <div class="flex items-center justify-center gap-1.5 mb-3.5 flex-wrap">
-                    <span class="px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-pink-100/80 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300 border border-pink-200/60 dark:border-pink-800/40 flex items-center gap-1">
+                <div class="kotha-cute-badges-row">
+                    <span class="kotha-cute-pill kotha-cute-pill-private">
                         <span>🔒</span> 100% Private
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-indigo-100/80 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/40 flex items-center gap-1">
+                    <span class="kotha-cute-pill kotha-cute-pill-ai">
                         <span>✨</span> Smart AI
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-100/80 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center gap-1">
+                    <span class="kotha-cute-pill kotha-cute-pill-free">
                         <span>💖</span> Free
                     </span>
                 </div>
 
-                <!-- Cute Pill Action Button -->
-                <button onclick="document.getElementById('open-upload-btn')?.click()" class="w-full py-2.5 px-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white text-[12px] font-extrabold rounded-full shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-                    <span>Import Now (Free)</span>
-                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                <!-- PROMINENT UPLOAD BUTTON (INDUSTRY STANDARD) -->
+                <button type="button" class="kotha-cute-upload-btn" onclick="event.stopPropagation(); document.getElementById('open-upload-btn')?.click()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                    </svg>
+                    <span>Upload Chat (.zip / .txt)</span>
                 </button>
+
+                <!-- Sub-action / helper -->
+                <div class="kotha-cute-sub-action">
+                    <span>💡 Tap to browse or drag &amp; drop</span>
+                </div>
             </div>
         `;
     }
@@ -1792,7 +1793,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="flex items-center justify-between gap-1 mt-0">
                         <div class="flex items-center gap-1.5 overflow-hidden">
                             <p class="text-[14px] font-semibold text-gray-900 dark:text-gray-100 truncate leading-tight tracking-tight">${escapeHTML(displayName)}</p>
-                            ${isAssistant ? '<span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 border border-violet-200 dark:border-violet-800 shrink-0">AI</span>' : ''}
                             ${chatMeta?.deletedByUser ? '<span class="px-1 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 shrink-0">Deleted</span>' : ''}
                         </div>
                         <span class="text-[10px] text-gray-400 font-medium shrink-0 whitespace-nowrap">${lastTime}</span>

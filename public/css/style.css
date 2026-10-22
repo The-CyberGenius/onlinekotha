@@ -2817,3 +2817,210 @@ html.dark #guest-preview-banner {
 html.dark #guest-preview-banner span.w-px {
     background-color: #4b5563 !important;
 }
+
+/* ── Cute & Soft WhatsApp Chat Upload Promo Card (Industry Grade) ── */
+.kotha-cute-upload-card {
+    margin: 12px 10px;
+    padding: 20px 16px;
+    border-radius: 22px !important;
+    background: linear-gradient(175deg, #f8f5ff 0%, #fdf2f8 45%, #eff6ff 100%);
+    border: 1.5px solid #e0e7ff;
+    box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+html.dark .kotha-cute-upload-card,
+.dark .kotha-cute-upload-card {
+    background: linear-gradient(175deg, #181c2b 0%, #1f192f 50%, #151d2c 100%) !important;
+    border: 1.5px solid rgba(168, 85, 247, 0.28) !important;
+    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5), 0 0 20px -4px rgba(168, 85, 247, 0.12) !important;
+}
+
+.kotha-cute-upload-icon-wrap {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.kotha-cute-upload-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #ec4899 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 8px 20px -3px rgba(139, 92, 246, 0.45);
+    border: 3px solid rgba(255, 255, 255, 0.85);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html.dark .kotha-cute-upload-icon,
+.dark .kotha-cute-upload-icon {
+    border-color: rgba(30, 41, 59, 0.9);
+}
+
+.kotha-cute-upload-card:hover .kotha-cute-upload-icon {
+    transform: scale(1.08) rotate(-2deg);
+}
+
+.kotha-cute-sparkle-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #ec4899, #f43f5e);
+    color: white;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(236, 72, 153, 0.4);
+    border: 2px solid #ffffff;
+}
+
+html.dark .kotha-cute-sparkle-badge,
+.dark .kotha-cute-sparkle-badge {
+    border-color: #111b21;
+}
+
+.kotha-cute-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+}
+
+html.dark .kotha-cute-title,
+.dark .kotha-cute-title {
+    color: #f3f4f6 !important;
+}
+
+.kotha-cute-desc {
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: #6b7280;
+    margin-bottom: 12px;
+    padding: 0 4px;
+}
+
+html.dark .kotha-cute-desc,
+.dark .kotha-cute-desc {
+    color: #9ca3af !important;
+}
+
+.kotha-cute-badges-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.kotha-cute-pill {
+    padding: 3px 9px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.2;
+}
+
+.kotha-cute-pill-private {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+html.dark .kotha-cute-pill-private,
+.dark .kotha-cute-pill-private {
+    background: rgba(6, 78, 59, 0.4) !important;
+    color: #6ee7b7 !important;
+    border-color: rgba(5, 150, 105, 0.4) !important;
+}
+
+.kotha-cute-pill-ai {
+    background: #f5f3ff;
+    color: #6d28d9;
+    border: 1px solid #ddd6fe;
+}
+html.dark .kotha-cute-pill-ai,
+.dark .kotha-cute-pill-ai {
+    background: rgba(88, 28, 135, 0.4) !important;
+    color: #c4b5fd !important;
+    border-color: rgba(124, 58, 237, 0.4) !important;
+}
+
+.kotha-cute-pill-free {
+    background: #fdf2f8;
+    color: #be185d;
+    border: 1px solid #fbcfe8;
+}
+html.dark .kotha-cute-pill-free,
+.dark .kotha-cute-pill-free {
+    background: rgba(131, 24, 67, 0.4) !important;
+    color: #f472b6 !important;
+    border-color: rgba(219, 39, 119, 0.4) !important;
+}
+
+.kotha-cute-upload-btn {
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 9999px !important;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    color: #ffffff !important;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 6px 18px -2px rgba(99, 102, 241, 0.4);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kotha-cute-upload-btn:hover {
+    box-shadow: 0 8px 22px -1px rgba(99, 102, 241, 0.55);
+    transform: translateY(-1px);
+}
+
+.kotha-cute-upload-btn:active {
+    transform: scale(0.97);
+}
+
+.kotha-cute-sub-action {
+    margin-top: 8px;
+    font-size: 10.5px;
+    color: #8b5cf6;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+    background: transparent;
+    border: none;
+}
+html.dark .kotha-cute-sub-action,
+.dark .kotha-cute-sub-action {
+    color: #a78bfa !important;
+}
+.kotha-cute-sub-action:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
