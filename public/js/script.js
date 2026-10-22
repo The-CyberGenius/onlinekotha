@@ -2128,6 +2128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const filterBar = document.getElementById('filter-buttons-container');
         if (header) header.style.display = 'none';
         if (footer) footer.style.display = 'none';
+        if (filterBar) filterBar.classList.add('hidden');
         
         // Hide participants
         const partContainer = document.getElementById('participant-filters-container');
@@ -3586,15 +3587,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function centerFrame() {
             if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            const isShort = window.innerHeight < 740;
             const targetW = userHasResized
                 ? Math.min(parseInt(frame.style.width) || 960, window.innerWidth - 30)
                 : Math.max(380, Math.min(window.innerWidth * 0.75, document.body.classList.contains('app-shell') ? 820 : 1100));
-            const targetH = userHasResized
-                ? Math.min(parseInt(frame.style.height) || 720, window.innerHeight - 100)
-                : Math.min(window.innerHeight * 0.82, Math.max(620, window.innerHeight - 130));
+
+            let targetH;
+            let top;
+            if (userHasResized) {
+                targetH = Math.min(parseInt(frame.style.height) || 720, window.innerHeight - (isShort ? 20 : 90));
+                top = Math.max(8, Math.round((window.innerHeight - targetH - (isShort ? 0 : 70)) / 2));
+            } else {
+                if (isShort) {
+                    // On short or zoomed viewports, fill almost full height so content never clips
+                    targetH = Math.max(420, window.innerHeight - (window.innerHeight < 600 ? 16 : 24));
+                    top = Math.max(8, Math.round((window.innerHeight - targetH) / 2));
+                } else {
+                    targetH = Math.min(window.innerHeight * 0.86, Math.max(620, window.innerHeight - 110));
+                    top = Math.max(12, Math.round((window.innerHeight - targetH - 70) / 2));
+                }
+            }
 
             const left = Math.max(10, Math.round((window.innerWidth - targetW) / 2));
-            const top = Math.max(15, Math.round((window.innerHeight - targetH - 80) / 2));
 
             frame.style.position = 'absolute';
             frame.style.width = Math.round(targetW) + 'px';
@@ -3610,6 +3624,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function clampFrameInViewport() {
             if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            const isShort = window.innerHeight < 740;
             const r = frame.getBoundingClientRect();
             let w = parseInt(frame.style.width) || r.width;
             let h = parseInt(frame.style.height) || r.height;
@@ -3619,23 +3634,30 @@ document.addEventListener('DOMContentLoaded', () => {
             // If the user hasn't manually resized the frame, auto-scale it dynamically!
             if (!userHasResized) {
                 w = Math.max(380, Math.min(window.innerWidth * 0.75, document.body.classList.contains('app-shell') ? 820 : 1100));
-                h = Math.min(window.innerHeight * 0.82, Math.max(620, window.innerHeight - 130));
+                if (isShort) {
+                    h = Math.max(420, window.innerHeight - (window.innerHeight < 600 ? 16 : 24));
+                } else {
+                    h = Math.min(window.innerHeight * 0.86, Math.max(620, window.innerHeight - 110));
+                }
             }
 
             if (w > window.innerWidth - 20) {
                 w = Math.max(380, window.innerWidth - 20);
             }
-            if (h > window.innerHeight - 100) {
-                h = Math.max(400, window.innerHeight - 100);
+
+            const maxBottomGap = isShort ? 12 : 85;
+            const maxAllowedH = Math.max(380, window.innerHeight - (isShort ? 20 : 95));
+            if (h > maxAllowedH) {
+                h = maxAllowedH;
             }
             if (l + w > window.innerWidth - 10) {
                 l = Math.max(10, window.innerWidth - w - 10);
             }
-            if (t + h > window.innerHeight - 95) { // 95px clears the dock perfectly
-                t = Math.max(10, window.innerHeight - h - 95);
+            if (t + h > window.innerHeight - maxBottomGap) {
+                t = Math.max(8, window.innerHeight - h - maxBottomGap);
             }
             if (l < 10) l = 10;
-            if (t < 10) t = 10;
+            if (t < 8) t = 8;
 
             frame.style.width = Math.round(w) + 'px';
             frame.style.height = Math.round(h) + 'px';
