@@ -204,6 +204,71 @@ document.addEventListener('DOMContentLoaded', () => {
     let renderEnd = 0;
     const CHUNK_SIZE = 100;
 
+    // Fast HTML escape utility
+    function escapeHTML(s) {
+        return String(s || '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    // Robust Unicode & Special Character search normalizer
+    function normalizeSearchText(str) {
+        if (!str) return '';
+        return String(str)
+            .normalize('NFC')
+            .replace(/[\uFE0E\uFE0F]/g, '') // strip emoji variation selectors for 100% accurate matching
+            .toLowerCase();
+    }
+
+    // Safe regex-based search highlighter (handles special characters, emojis, and prevents HTML breakages)
+    function highlightMatch(text, query) {
+        if (!query || !text) return escapeHTML(text || '');
+        try {
+            const rawText = String(text);
+            const escapedQ = query.replace(/[.*+?^${}()|[\]\\\/]/g, '\\$&');
+            const regex = new RegExp(`(${escapedQ})`, 'gi');
+            const parts = rawText.split(regex);
+            if (parts.length <= 1) return escapeHTML(rawText);
+
+            const normQ = normalizeSearchText(query);
+            return parts.map(part => {
+                if (normalizeSearchText(part) === normQ) {
+                    return `<mark class="bg-yellow-200 dark:bg-yellow-500/40 text-gray-900 dark:text-yellow-100 font-bold px-0.5 rounded">${escapeHTML(part)}</mark>`;
+                }
+                return escapeHTML(part);
+            }).join('');
+        } catch (e) {
+            return escapeHTML(text || '');
+        }
+    }
+
+    // Comprehensive chat filtering matching folder names, display names, contact names and participants
+    function matchesChatQuery(chatFolder, queryNorm) {
+        if (!queryNorm) return true;
+        const meta = window._chatMetaCache?.[chatFolder] || {};
+        const folderNorm = normalizeSearchText(chatFolder);
+        const cleanNameNorm = normalizeSearchText(cleanDisplayName(chatFolder));
+        const contactNorm = normalizeSearchText(meta.contactName);
+
+        if (folderNorm.includes(queryNorm) || cleanNameNorm.includes(queryNorm) || contactNorm.includes(queryNorm)) {
+            return true;
+        }
+
+        // Check participants if available
+        if (meta.participants) {
+            let parts = meta.participants;
+            if (typeof parts === 'string') {
+                try { parts = JSON.parse(parts); } catch(e) { parts = [parts]; }
+            }
+            if (Array.isArray(parts)) {
+                for (const p of parts) {
+                    if (normalizeSearchText(p).includes(queryNorm)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
     // Smart name cleaning — used everywhere names are displayed
     function cleanDisplayName(raw) {
         if (!raw) return '';
@@ -3231,7 +3296,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     searchBox.addEventListener('input', (e) => {
         const val = e.target.value.trim();
-        const lowerVal = val.toLowerCase();
+        const normVal = normalizeSearchText(val);
         
         if (val.length > 0) {
             searchClearBtn.classList.remove('hidden');
@@ -3239,9 +3304,9 @@ document.addEventListener('DOMContentLoaded', () => {
             searchClearBtn.classList.add('hidden');
         }
 
-        // Live filter chat list
+        // Live filter chat list matching folder name, display name, contact name and participants
         if (loadedChats && loadedChats.length > 0) {
-            const filteredChats = loadedChats.filter(c => c.toLowerCase().includes(lowerVal));
+            const filteredChats = loadedChats.filter(c => matchesChatQuery(c, normVal));
             renderChatList(filteredChats, currentChat);
         }
 
@@ -3249,16 +3314,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const chatsListSection = document.getElementById('chats-list-section');
         const participantContainer = document.getElementById('participant-filters-container');
 
-        if (lowerVal.length < 2) {
+        if (!normVal) {
             if (searchResultsContainer) searchResultsContainer.classList.add('hidden');
             if (resultsList) resultsList.innerHTML = '';
             if (globalSpaceSection) globalSpaceSection.classList.remove('hidden');
             if (chatsListSection) chatsListSection.classList.remove('hidden');
             if (participantContainer && window.allMessages && window.allMessages.length > 0) participantContainer.classList.remove('hidden');
+            if (loadedChats) {
+                renderChatList(loadedChats, currentChat);
+            }
+            if (statsInfo && allMessages && allMessages.length > 0) {
+                statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
+            }
             return;
         }
 
-        // Deep search in loaded messages
+        // Deep search in loaded messages (supports any special characters, punctuation, emojis and text)
         if (globalSpaceSection) globalSpaceSection.classList.add('hidden');
         if (chatsListSection) chatsListSection.classList.add('hidden');
         if (participantContainer) participantContainer.classList.add('hidden');
@@ -3267,8 +3338,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const filteredMsgs = [];
         if (allMessages && allMessages.length > 0) {
             for (let i = 0; i < allMessages.length; i++) {
-                if (allMessages[i].text && allMessages[i].text.toLowerCase().includes(lowerVal)) {
-                    filteredMsgs.push(allMessages[i]);
+                const msg = allMessages[i];
+                const textNorm = normalizeSearchText(msg.text);
+                const senderNorm = normalizeSearchText(msg.sender);
+                const attachNorm = normalizeSearchText(msg.attachment);
+                if (textNorm.includes(normVal) || senderNorm.includes(normVal) || attachNorm.includes(normVal)) {
+                    filteredMsgs.push(msg);
                 }
             }
         }
@@ -3279,21 +3354,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (resultsList) {
             if (filteredMsgs.length === 0) {
-                resultsList.innerHTML = `<div class="text-xs text-gray-400 py-2 text-center">No message matches found</div>`;
+                resultsList.innerHTML = `<div class="text-xs text-gray-400 py-4 text-center">No messages found matching "${escapeHTML(val)}"</div>`;
             } else {
                 let resultsHtml = '';
-                // Show up to 100 results so they fill the screen better
-                const limitRes = filteredMsgs.slice(-100);
-                const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                // Newest results first (reverse order) up to 100
+                const limitRes = filteredMsgs.slice(-100).reverse();
                 limitRes.forEach(msg => {
-                    const highlightedText = (msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
+                    const highlightedText = highlightMatch(msg.text || msg.attachment || '', val);
+                    const safeSender = escapeHTML(msg.sender || 'System');
+                    const safeDate = escapeHTML(msg.date || '');
+                    const safeTime = escapeHTML(msg.time || '');
                     resultsHtml += `
-                        <div class="p-1.5 bg-white dark:bg-gray-800 hover:bg-indigo-50/50 dark:hover:bg-gray-700/50 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-lg mb-1" onclick="jumpToMsg(${msg.id})">
-                            <div class="flex justify-between items-center mb-0.5">
-                                <span class="text-[10px] font-bold uppercase tracking-wide" style="color:${getStringColor(msg.sender || 'System')}">${msg.sender || 'System'}</span> 
-                                <span class="text-[9px] text-gray-400 font-semibold">${msg.date || ''} ${msg.time || ''}</span>
+                        <div class="p-2 bg-white dark:bg-gray-800 hover:bg-indigo-50/70 dark:hover:bg-gray-700/60 shadow-xs cursor-pointer border border-gray-100 dark:border-gray-700 transition-all rounded-xl mb-1.5 active:scale-[0.99]" onclick="jumpToMsg('${msg.id}')">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[11px] font-bold uppercase tracking-wide truncate max-w-[65%]" style="color:${getStringColor(msg.sender || 'System')}">${safeSender}</span> 
+                                <span class="text-[9.5px] text-gray-400 font-semibold shrink-0">${safeDate} ${safeTime}</span>
                             </div>
-                            <p class="text-[11px] text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed">${highlightedText}</p>
+                            <p class="text-[12px] text-gray-700 dark:text-gray-200 font-medium line-clamp-2 leading-relaxed break-words">${highlightedText}</p>
                         </div>
                     `;
                 });
@@ -3322,7 +3399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (searchResultsContainer) searchResultsContainer.classList.add('hidden');
         if (resultsList) resultsList.innerHTML = '';
-        if (statsInfo) {
+        if (statsInfo && allMessages && allMessages.length > 0) {
             statsInfo.innerHTML = `Loaded <span class="font-bold text-blue-600 dark:text-blue-400">${allMessages.length.toLocaleString()}</span> messages dynamically.`;
         }
     });
@@ -3399,11 +3476,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const deskQuery = searchBox ? searchBox.value.trim() : '';
                         const mobQuery = document.getElementById('inline-search-input') ? document.getElementById('inline-search-input').value.trim() : '';
                         const query = deskQuery || mobQuery;
-                        if (query.length >= 3) {
+                        if (query.length >= 1) {
                             const textEl = bubble.querySelector('p');
-                            if (textEl && textEl.textContent.toLowerCase().includes(query.toLowerCase())) {
-                                const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                                textEl.innerHTML = textEl.textContent.replace(regex, '<mark class="search-highlight">$1</mark>');
+                            if (textEl && normalizeSearchText(textEl.textContent).includes(normalizeSearchText(query))) {
+                                textEl.innerHTML = highlightMatch(textEl.textContent, query);
                             }
                         }
 
@@ -4071,35 +4147,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         inlineSearchInput.addEventListener('focus', () => {
-            if (inlineSearchInput.value.trim().length >= 2 && inlineResultsList.innerHTML.trim() !== '') {
+            if (inlineSearchInput.value.trim().length >= 1 && inlineResultsList.innerHTML.trim() !== '') {
                 inlineSearchResultsContainer.classList.remove('hidden');
             }
         });
 
         inlineSearchInput.addEventListener('input', (e) => {
             const val = e.target.value.trim();
-            const lowerVal = val.toLowerCase();
+            const normVal = normalizeSearchText(val);
 
             if (clearInlineSearchBtn) {
                 if (val.length > 0) clearInlineSearchBtn.classList.remove('hidden');
                 else clearInlineSearchBtn.classList.add('hidden');
             }
             
-            if (lowerVal.length < 2) {
+            if (!normVal) {
                 inlineSearchResultsContainer.classList.add('hidden');
                 inlineResultsList.innerHTML = '';
                 inlineSearchCount.textContent = '';
                 return;
             }
 
-            // Deep search in loaded messages
+            // Deep search in loaded messages (supports any special characters, punctuation, emojis and text)
             inlineSearchResultsContainer.classList.remove('hidden');
             const filteredMsgs = [];
             const msgs = typeof window.getAllMessages === 'function' ? window.getAllMessages() : [];
             if (msgs && msgs.length > 0) {
                 for (let i = 0; i < msgs.length; i++) {
-                    if (msgs[i].text && msgs[i].text.toLowerCase().includes(lowerVal)) {
-                        filteredMsgs.push(msgs[i]);
+                    const msg = msgs[i];
+                    const textNorm = normalizeSearchText(msg.text);
+                    const senderNorm = normalizeSearchText(msg.sender);
+                    const attachNorm = normalizeSearchText(msg.attachment);
+                    if (textNorm.includes(normVal) || senderNorm.includes(normVal) || attachNorm.includes(normVal)) {
+                        filteredMsgs.push(msg);
                     }
                 }
             }
@@ -4108,39 +4188,24 @@ document.addEventListener('DOMContentLoaded', () => {
             inlineSearchResultsContainer.classList.remove('hidden');
 
             if (filteredMsgs.length === 0) {
-                inlineResultsList.innerHTML = `<div class="text-xs text-gray-400 py-3 text-center">No messages found for "${val}"</div>`;
+                inlineResultsList.innerHTML = `<div class="text-xs text-gray-400 py-3 text-center">No messages found for "${escapeHTML(val)}"</div>`;
             } else {
                 let resultsHtml = '';
                 try {
-                    const escapeHTML = (s) => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-                    const getStrColor = (str) => {
-                        let hash = 0; for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-                        const isDark = document.documentElement.classList.contains('dark');
-                        const colors = isDark ? ['#ef9a9a', '#f48fb1', '#ce93d8', '#b39ddb', '#9fa8da', '#90caf9', '#81d4fa', '#80cbc4', '#a5d6a7', '#c5e1a5', '#e6ee9c', '#ffe082', '#ffcc80', '#ffab91', '#bcaaa4', '#eeeeee'] : ['#e53935', '#d81b60', '#8e24aa', '#5e35b1', '#3949ab', '#1e88e5', '#039be5', '#00897b', '#43a047', '#7cb342', '#c0ca33', '#fbc02d', '#fb8c00', '#f4511e', '#6d4c41', '#757575'];
-                        return colors[Math.abs(hash) % colors.length];
-                    };
-                    const limitRes = filteredMsgs.slice(-50);
-                    const regex = new RegExp(`(${lowerVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-                    
+                    const limitRes = filteredMsgs.slice(-50).reverse();
                     limitRes.forEach(msg => {
-                        const highlightedText = String(msg.text || '').replace(regex, `<mark class="bg-yellow-200 text-gray-900 font-bold px-0.5 rounded">$1</mark>`);
+                        const highlightedText = highlightMatch(msg.text || msg.attachment || '', val);
                         const myName = typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null;
                         const isMe = (myName && msg.sender === myName) || msg.sender === 'You';
-                        const senderName = isMe ? 'Me' : String(msg.sender || 'System');
                         const timeStr = msg.time && msg.date ? `${msg.date} • ${msg.time}` : String(msg.time || 'Unknown');
                         
                         const alignClass = isMe ? 'ml-auto' : 'mr-auto';
                         const bubbleClass = isMe ? 'glass-chat-me' : 'glass-chat-them';
-                        
                         const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
-
-                        let nameHtml = '';
-                        // Remove sender name in search results to keep it clean like WhatsApp 1-on-1 chats
                         
                         resultsHtml += `
                             <div class="flex flex-col mb-2 w-full cursor-pointer hover:opacity-85 transition-opacity" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg('${msg.id}')">
                                 <div class="max-w-[80%] md:max-w-[70%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${bubbleClass} ${alignClass} rounded-2xl flex flex-col gap-0.5 shadow-sm">
-                                    ${nameHtml}
                                     <p style="color:var(--msg-text)" class="text-[13px] leading-normal font-medium whitespace-pre-wrap break-words line-clamp-2">${highlightedText}</p>
                                     <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto pt-0.5">
                                         ${escapeHTML(timeStr)}
@@ -4150,7 +4215,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     });
                 } catch (err) {
-                    resultsHtml = `<div class="p-4 m-4 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 rounded-xl text-xs font-mono break-words">Error: ${err.message}</div>`;
+                    inlineResultsList.innerHTML = `<div class="text-xs text-gray-400 py-3 text-center">No messages found</div>`;
                 }
                 inlineResultsList.innerHTML = resultsHtml;
             }

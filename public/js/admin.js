@@ -693,16 +693,30 @@ HARD RULES
         return '<span class="badge">FREE</span>';
     }
 
+    function normalizeSearchText(str) {
+        if (!str) return '';
+        return String(str).normalize('NFC').replace(/[\uFE0E\uFE0F]/g, '').toLowerCase().trim();
+    }
+
     function filterUsersByQuery(list, query) {
-        if (!query) return list;
-        return list.filter(u => 
-            String(u.id || '').toLowerCase().includes(query) ||
-            (u.email && u.email.toLowerCase().includes(query)) ||
-            (u.display_name && u.display_name.toLowerCase().includes(query)) ||
-            (u.phone && u.phone.toLowerCase().includes(query)) ||
-            (u.ip_address && u.ip_address.toLowerCase().includes(query)) ||
-            (u.country && u.country.toLowerCase().includes(query))
-        );
+        const normQ = normalizeSearchText(query);
+        if (!normQ) return list;
+        return list.filter(u => {
+            const idStr = normalizeSearchText(u.id);
+            const guestIdStr = normalizeSearchText(u.guest_id);
+            const emailStr = normalizeSearchText(u.email);
+            const nameStr = normalizeSearchText(u.display_name);
+            const phoneStr = normalizeSearchText(u.phone);
+            const ipStr = normalizeSearchText(u.ip_address);
+            const countryStr = normalizeSearchText(u.country);
+            return idStr.includes(normQ) ||
+                guestIdStr.includes(normQ) ||
+                emailStr.includes(normQ) ||
+                nameStr.includes(normQ) ||
+                phoneStr.includes(normQ) ||
+                ipStr.includes(normQ) ||
+                countryStr.includes(normQ);
+        });
     }
 
     let cachedUsers = [];
