@@ -622,19 +622,22 @@
         if (!badge) return;
 
         badge.classList.remove('hidden');
-        const plan = user.effective_plan;
+        const plan = user.effective_plan || user.plan;
 
         if (plan === 'trial') {
-            const remainingMs = user.trial_expires_at - Date.now();
+            const remainingMs = (user.trial_expires_at || 0) - Date.now();
             const days = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
             badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-gradient-to-r from-indigo-500 to-purple-500 text-white';
-            badge.innerHTML = `TRIAL · ${days}d left`;
-        } else if (plan === 'paid') {
+            badge.innerHTML = days > 0 ? `TRIAL · ${days}d left` : `TRIAL`;
+        } else if (plan === 'paid' || plan === 'pro') {
             badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-emerald-500/20';
             badge.innerHTML = `PRO ✦`;
+        } else if (plan === 'guest') {
+            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 bg-amber-500 text-white';
+            badge.innerHTML = `GUEST`;
         } else {
             badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900';
-            badge.innerHTML = `FREE`;
+            badge.innerHTML = user.plan === 'trial' ? `EXPIRED` : `FREE`;
         }
     }
 })();

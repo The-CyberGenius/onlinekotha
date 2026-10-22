@@ -2240,12 +2240,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const aiContainer = document.getElementById('ai-chat-container');
         if (aiContainer) aiContainer.innerHTML = '';
 
-        // Check if user is on Pro/Paid plan to hide upsell
+        // Check if user is on Pro/Paid plan to hide upsell (respect target user plan during impersonation)
         const isPro = window.__USER__ && (
-            window.__USER__.effective_plan === 'paid' ||
-            window.__USER__.plan === 'pro' ||
-            window.__USER__.plan === 'paid' ||
-            window.__USER__.is_pro
+            (window.__USER__.effective_plan === 'paid' || window.__USER__.plan === 'paid' || window.__USER__.plan === 'pro') &&
+            (!window.__USER__.is_impersonating || window.__USER__.plan === 'paid' || window.__USER__.plan === 'pro')
         );
 
         container.innerHTML = `

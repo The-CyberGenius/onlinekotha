@@ -154,10 +154,25 @@ function logout(token) {
 
 function effectivePlan(user) {
     if (!user) return 'anonymous';
+    // When impersonating, strictly reflect the target user's true plan, not the admin's!
+    if (user.is_impersonating) {
+        if (user.plan === 'paid' || user.plan === 'pro') return 'paid';
+        if (user.plan === 'trial') {
+            if (!user.trial_expires_at || user.trial_expires_at > Date.now()) {
+                return 'trial';
+            }
+            return 'free';
+        }
+        if (user.plan === 'guest') return 'guest';
+        return 'free';
+    }
     if (user.is_admin) return 'paid';
-    if (user.plan === 'paid') return 'paid';
-    if (user.plan === 'trial' && user.trial_expires_at && user.trial_expires_at > Date.now()) {
-        return 'trial';
+    if (user.plan === 'paid' || user.plan === 'pro') return 'paid';
+    if (user.plan === 'trial') {
+        if (!user.trial_expires_at || user.trial_expires_at > Date.now()) {
+            return 'trial';
+        }
+        return 'free';
     }
     return 'free'; // Free tier: 3 AI msgs/day
 }
@@ -183,7 +198,7 @@ function authMiddleware(req, res, next) {
                     email: 'Guest (' + rawUid.substring(4, 12) + ')',
                     plan: 'guest',
                     display_name: 'Guest User',
-                    is_admin: 1,
+                    is_admin: 0,
                     is_impersonating: true,
                     original_admin_id: session.user.id
                 };
@@ -195,13 +210,15 @@ function authMiddleware(req, res, next) {
                 if (targetUser) {
                     req.user = {
                         ...targetUser,
-                        is_admin: 1,
+                        is_admin: targetUser.is_admin ? 1 : 0,
                         is_impersonating: true,
                         original_admin_id: session.user.id
                     };
                 } else {
                     req.user.id = targetUid;
+                    req.user.is_admin = 0;
                     req.user.is_impersonating = true;
+                    req.user.original_admin_id = session.user.id;
                 }
             }
             // Update admin's own activity time, NEVER the impersonated user's
@@ -247,7 +264,7 @@ function requireUserOrGuest(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-    if (!req.user || !req.user.is_admin) {
+    if (!req.user || (!req.user.is_admin && !req.user.original_admin_id)) {
         return res.status(403).json({ error: 'Admin only' });
     }
     next();
