@@ -31,7 +31,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
-    <link rel="stylesheet" href="/css/style.css?v=36">
+    <link rel="stylesheet" href="/css/style.css?v=37">
     <style>
         html {
             background-color: #f0f2f5 !important;
@@ -136,7 +136,7 @@
 
         <!-- Sidebar -->
         <div id="sidebar"
-            class="w-full md:w-[340px] lg:w-[360px] shrink-0 flex flex-col absolute md:relative h-full transition-transform duration-200 left-0 bg-white dark:bg-[#111b21] z-[60] transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none border-r border-gray-200/60 dark:border-gray-800">
+            class="w-full md:w-[300px] lg:w-[310px] shrink-0 flex flex-col absolute md:relative h-full transition-transform duration-200 left-0 bg-white dark:bg-[#111b21] z-[60] transform -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none border-r border-gray-200/60 dark:border-gray-800">
             <!-- Sidebar Header -->
             <div id="sidebar-header"
                 class="bg-[#f0f2f5] dark:bg-[#202c33] flex justify-between items-center px-4 py-3 z-20 shrink-0 border-b border-gray-200 dark:border-gray-800 transition-colors">
@@ -337,25 +337,23 @@
             </div>
 
             <!-- Global Chat (Anonymous Community) -->
-            <div class="px-2 mt-2 mb-1 shrink-0" id="global-space-section">
+            <div class="px-2 mt-1 mb-0.5 shrink-0" id="global-space-section">
                 <div class="flex items-center justify-between px-3 mb-1 cursor-pointer group" onclick="document.getElementById('global-chat-wrapper').classList.toggle('hidden'); document.getElementById('global-toggle-icon').classList.toggle('-rotate-90')">
                     <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Global Space</span>
                     <svg id="global-toggle-icon" width="12" height="12" class="text-gray-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                 </div>
                 <div id="global-chat-wrapper" class="transition-all duration-200">
                     <div id="global-chat-item"
-                        class="flex items-center gap-2 px-2 py-1 rounded-lg cursor-pointer transition-all duration-150 group border border-transparent hover:bg-gray-100 dark:hover:bg-white/5">
+                        class="flex items-center gap-2 px-2 py-0.5 rounded-lg cursor-pointer transition-all duration-150 group border border-transparent hover:bg-gray-100 dark:hover:bg-white/5">
                         <div
-                            class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm shrink-0">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/>
                             </svg>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="text-[12px] font-bold text-gray-800 dark:text-gray-200 truncate leading-tight">Global
-                                Chat Room</p>
-                            <p class="text-[9px] text-gray-400 font-medium mt-0.5" id="global-online-count">0 users online
-                            </p>
+                            <p class="text-[11.5px] font-bold text-gray-800 dark:text-gray-200 truncate leading-tight">Global Chat Room</p>
+                            <p class="text-[9px] text-gray-400 font-medium mt-0.5" id="global-online-count">0 users online</p>
                         </div>
                         <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse shrink-0 hidden"
                             id="global-active-indicator"></div>
@@ -382,7 +380,7 @@
                         </button>
                     </div>
                 </div>
-                <div id="chat-list-ui" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-0.5 pb-24 md:pb-6">
+                <div id="chat-list-ui" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-0.5 pb-16 md:pb-2">
                     <!-- Chat items rendered by JS -->
                 </div>
             </div>
@@ -1083,7 +1081,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="/js/ai-panel.js?v=56"></script>
-    <script src="/js/script.js?v=56"></script>
+    <script src="/js/script.js?v=57"></script>
     <script src="/js/upload.js?v=56"></script>
     <script src="/js/story.js?v=56"></script>
     <script src="/js/features.js?v=56"></script>

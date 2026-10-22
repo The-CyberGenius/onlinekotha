@@ -2856,10 +2856,17 @@ html.dark #chat-list-ui::-webkit-scrollbar-thumb {
     background-color: rgba(156, 163, 175, 0.25);
 }
 
+/* ── Sidebar Proportional Width for Compact Desktop ── */
+@media (min-width: 768px) {
+    #sidebar {
+        width: 310px !important;
+    }
+}
+
 /* ── Cute & Soft WhatsApp Chat Upload Promo Card (Industry Grade) ── */
 .kotha-cute-upload-card {
-    margin: 8px 6px;
-    padding: 12px 10px;
+    margin: 5px 6px 6px 6px;
+    padding: 10px 8px 8px 8px;
     border-radius: 18px !important;
     background: linear-gradient(175deg, #f8f5ff 0%, #fdf2f8 45%, #eff6ff 100%);
     border: 1.5px solid #e0e7ff;
@@ -2869,7 +2876,8 @@ html.dark #chat-list-ui::-webkit-scrollbar-thumb {
     flex-direction: column;
     align-items: center;
     position: relative;
-    overflow: hidden;
+    box-sizing: border-box;
+    flex-shrink: 0;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -2882,26 +2890,27 @@ html.dark .kotha-cute-upload-card,
 
 .kotha-cute-upload-icon-wrap {
     position: relative;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    flex-shrink: 0;
 }
 
 .kotha-cute-upload-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px !important;
+    width: 32px;
+    height: 32px;
+    border-radius: 11px !important;
     background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #ec4899 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
-    box-shadow: 0 6px 14px -2px rgba(139, 92, 246, 0.4);
-    border: 2.5px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 12px -2px rgba(139, 92, 246, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.85);
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .kotha-cute-upload-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
 }
 
 html.dark .kotha-cute-upload-icon,
@@ -2917,12 +2926,12 @@ html.dark .kotha-cute-upload-icon,
     position: absolute;
     top: -3px;
     right: -4px;
-    width: 17px;
-    height: 17px;
+    width: 15px;
+    height: 15px;
     border-radius: 9999px;
     background: linear-gradient(135deg, #ec4899, #f43f5e);
     color: white;
-    font-size: 9px;
+    font-size: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2936,11 +2945,12 @@ html.dark .kotha-cute-sparkle-badge,
 }
 
 .kotha-cute-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
     color: #111827;
     margin-bottom: 2px;
     letter-spacing: -0.01em;
+    line-height: 1.25;
 }
 
 html.dark .kotha-cute-title,
@@ -2949,11 +2959,11 @@ html.dark .kotha-cute-title,
 }
 
 .kotha-cute-desc {
-    font-size: 10px;
-    line-height: 1.35;
+    font-size: 9.5px;
+    line-height: 1.3;
     color: #6b7280;
-    margin-bottom: 8px;
-    padding: 0 2px;
+    margin-bottom: 6px;
+    padding: 0 4px;
 }
 
 html.dark .kotha-cute-desc,
@@ -2965,19 +2975,19 @@ html.dark .kotha-cute-desc,
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     flex-wrap: wrap;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .kotha-cute-pill {
-    padding: 2px 7px;
+    padding: 1.5px 6px;
     border-radius: 9999px;
-    font-size: 9.5px;
+    font-size: 8.5px;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 2.5px;
     line-height: 1.2;
 }
 
@@ -3019,30 +3029,30 @@ html.dark .kotha-cute-pill-free,
 
 .kotha-cute-upload-btn {
     width: 100%;
-    padding: 8px 12px;
+    padding: 6.5px 12px;
     border-radius: 9999px !important;
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
     color: #ffffff !important;
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.01em;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    box-shadow: 0 5px 14px -2px rgba(99, 102, 241, 0.35);
+    gap: 5px;
+    box-shadow: 0 4px 12px -2px rgba(99, 102, 241, 0.35);
     border: none;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .kotha-cute-upload-btn svg {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
 }
 
 .kotha-cute-upload-btn:hover {
-    box-shadow: 0 7px 18px -1px rgba(99, 102, 241, 0.5);
+    box-shadow: 0 6px 16px -1px rgba(99, 102, 241, 0.5);
     transform: translateY(-1px);
 }
 
@@ -3051,8 +3061,8 @@ html.dark .kotha-cute-pill-free,
 }
 
 .kotha-cute-sub-action {
-    margin-top: 5px;
-    font-size: 10px;
+    margin-top: 4px;
+    font-size: 9.5px;
     color: #8b5cf6;
     font-weight: 600;
     cursor: pointer;
@@ -3063,6 +3073,7 @@ html.dark .kotha-cute-pill-free,
     transition: opacity 0.2s;
     background: transparent;
     border: none;
+    padding-bottom: 2px;
 }
 html.dark .kotha-cute-sub-action,
 .dark .kotha-cute-sub-action {
@@ -3079,29 +3090,33 @@ html.dark .kotha-cute-sub-action,
         display: none !important;
     }
     body.app-shell {
-        padding: 6px !important;
+        padding: 4px !important;
     }
     #mac-frame {
-        max-height: calc(100vh - 12px) !important;
-        height: calc(100vh - 12px) !important;
+        max-height: calc(100vh - 8px) !important;
+        height: calc(100vh - 8px) !important;
         min-height: 0 !important;
     }
     .kotha-cute-upload-card {
-        margin: 6px 4px;
-        padding: 9px 8px;
-    }
-    .kotha-cute-upload-icon {
-        width: 32px;
-        height: 32px;
-    }
-    .kotha-cute-upload-icon svg {
-        width: 15px;
-        height: 15px;
+        margin: 3px 4px 4px 4px !important;
+        padding: 7px 6px 6px 6px !important;
     }
     .kotha-cute-desc {
-        display: none; /* Hide verbose description on very short heights */
+        display: none !important; /* Hide verbose description on short heights */
     }
     .kotha-cute-badges-row {
-        margin-bottom: 6px;
+        margin-bottom: 5px !important;
+    }
+}
+
+@media (max-height: 600px) {
+    #global-space-section {
+        display: none !important;
+    }
+    .kotha-cute-badges-row {
+        display: none !important;
+    }
+    .kotha-cute-upload-icon-wrap {
+        display: none !important;
     }
 }

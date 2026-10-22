@@ -1716,7 +1716,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <!-- Cute floating 3D squircle avatar with sparkles -->
                 <div class="kotha-cute-upload-icon-wrap">
                     <div class="kotha-cute-upload-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                         </svg>
                     </div>
@@ -1728,7 +1728,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <!-- Description -->
                 <p class="kotha-cute-desc">
-                    Export your chat (<strong style="color:#6366f1;">.zip</strong> or <strong style="color:#6366f1;">.txt</strong>) from WhatsApp to unlock instant Chat Wrapped &amp; analytics!
+                    Import chat (<strong style="color:#6366f1;">.zip</strong> or <strong style="color:#6366f1;">.txt</strong>) for instant AI analytics
                 </p>
 
                 <!-- Cute Pill Badges -->
@@ -1746,7 +1746,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <!-- PROMINENT UPLOAD BUTTON (INDUSTRY STANDARD) -->
                 <button type="button" class="kotha-cute-upload-btn" onclick="event.stopPropagation(); document.getElementById('open-upload-btn')?.click()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
                     </svg>
                     <span>Upload Chat (.zip / .txt)</span>
@@ -1754,7 +1754,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 <!-- Sub-action / helper -->
                 <div class="kotha-cute-sub-action">
-                    <span>💡 Tap to browse or drag &amp; drop</span>
+                    <span>Tap to browse, or drag &amp; drop</span>
                 </div>
             </div>
         `;
@@ -2149,7 +2149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPro = window.__USER__ && window.__USER__.plan === 'pro';
 
         container.innerHTML = `
-            <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b141a] overflow-hidden select-none" id="empty-state">
+            <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b141a] overflow-y-auto p-4 select-none" id="empty-state">
                 
                 <!-- Mobile sidebar open button (visible only on mobile when header is hidden) -->
                 <button id="empty-open-sidebar-btn" class="md:hidden absolute z-30 w-10 h-10 rounded-full bg-white dark:bg-[#202c33] shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center transition hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 cursor-pointer" style="top: max(1rem, env(safe-area-inset-top)); left: 1rem;">
@@ -2162,7 +2162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-tr from-indigo-500/15 via-purple-500/10 to-pink-500/15 blur-3xl pointer-events-none"></div>
                 <div class="absolute bottom-10 right-10 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
 
-                <div class="relative z-10 text-center px-6 flex flex-col items-center">
+                <div class="relative z-10 text-center px-4 my-auto flex flex-col items-center">
                     
                     <!-- Logo Emblem Container (Matched with OK Messages) -->
                     <div class="relative mb-6 group cursor-default">
@@ -3593,10 +3593,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 : Math.max(380, Math.min(window.innerWidth * 0.75, 820));
             const targetH = userHasResized
                 ? Math.min(parseInt(frame.style.height) || 680, window.innerHeight - (hasDock ? 80 : 20))
-                : Math.max(380, Math.min(window.innerHeight * (hasDock ? 0.82 : 0.94), window.innerHeight - (hasDock ? 110 : 20)));
+                : Math.max(480, Math.min(window.innerHeight * (hasDock ? 0.88 : 0.95), window.innerHeight - (hasDock ? 85 : 20)));
 
             const left = Math.max(10, Math.round((window.innerWidth - targetW) / 2));
-            const top = Math.max(8, Math.round((window.innerHeight - targetH - (hasDock ? 65 : 0)) / 2));
+            const top = Math.max(8, Math.round((window.innerHeight - targetH - (hasDock ? 50 : 0)) / 2));
 
             frame.style.position = 'absolute';
             frame.style.width = Math.round(targetW) + 'px';
@@ -3621,15 +3621,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // If the user hasn't manually resized the frame, auto-scale it dynamically!
             if (!userHasResized) {
                 w = Math.max(380, Math.min(window.innerWidth * 0.75, 820));
-                h = Math.max(380, Math.min(window.innerHeight * (hasDock ? 0.82 : 0.94), window.innerHeight - (hasDock ? 110 : 20)));
+                h = Math.max(480, Math.min(window.innerHeight * (hasDock ? 0.88 : 0.95), window.innerHeight - (hasDock ? 85 : 20)));
             }
 
             if (w > window.innerWidth - 20) {
                 w = Math.max(380, window.innerWidth - 20);
             }
 
-            const maxBottomGap = hasDock ? 85 : 12;
-            const maxAllowedH = Math.max(360, window.innerHeight - (hasDock ? 95 : 20));
+            const maxBottomGap = hasDock ? 70 : 12;
+            const maxAllowedH = Math.max(360, window.innerHeight - (hasDock ? 80 : 20));
             if (h > maxAllowedH) {
                 h = maxAllowedH;
             }
