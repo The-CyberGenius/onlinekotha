@@ -31,19 +31,32 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
-    <link rel="stylesheet" href="/css/style.css?v=35">
+    <link rel="stylesheet" href="/css/style.css?v=36">
     <style>
         html {
-            background-color: #0e131f !important;
+            background-color: #f0f2f5 !important;
         }
         html.dark {
-            background-color: #090d16 !important;
+            background-color: #0c1317 !important;
         }
         body {
-            background-color: #0e131f !important;
+            background-color: #f0f2f5 !important;
         }
         html.dark body {
-            background-color: #090d16 !important;
+            background-color: #0c1317 !important;
+        }
+        @media (max-height: 740px) {
+            #mac-dock {
+                display: none !important;
+            }
+            body.app-shell {
+                padding: 6px !important;
+            }
+            #mac-frame {
+                max-height: calc(100vh - 12px) !important;
+                height: calc(100vh - 12px) !important;
+                min-height: 0 !important;
+            }
         }
         /* DM area theming - must override inline styles via !important for dark mode */
         #dm-chat-area {
@@ -95,7 +108,7 @@
     <script src="/js/analytics.js" async></script>
 </head>
 
-<body class="app-shell flex flex-col items-center justify-center fixed top-0 left-0 w-screen h-screen overflow-hidden p-2 md:p-5 lg:p-6 bg-[#0e131f] dark:bg-[#090d16]" style="height: var(--viewport-height, 100dvh); background-color: #0e131f;">
+<body class="app-shell flex flex-col items-center justify-center fixed inset-0 w-full h-full overflow-hidden p-2 md:p-5 lg:p-6 bg-[#f0f2f5] dark:bg-[#0c1317]" style="background-color: #f0f2f5;">
 
     <!-- macOS Window Frame -->
     <div id="mac-frame" class="flex flex-col w-full h-full md:max-w-5xl md:max-h-[85vh] md:mx-auto relative min-h-0 rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-[#1a1f29] transition-transform duration-300 ease-out-expo">
@@ -949,7 +962,7 @@
         <!-- Upload Modal -->
     <div id="upload-modal"
         class="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity duration-300 px-4">
-        <div class="bg-white dark:bg-[#0e131f] w-full max-w-md rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] p-6 border border-gray-200/50 dark:border-white/10 transition-colors relative overflow-hidden">
+        <div class="bg-white dark:bg-[#111b21] w-full max-w-md rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] p-6 border border-gray-200/50 dark:border-white/10 transition-colors relative overflow-hidden">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">Import WhatsApp Chat</h3>
                 <button id="close-upload"
@@ -1069,17 +1082,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-    <script src="/js/ai-panel.js?v=55"></script>
-    <script src="/js/script.js?v=55"></script>
-    <script src="/js/upload.js?v=55"></script>
-    <script src="/js/story.js?v=55"></script>
-    <script src="/js/features.js?v=55"></script>
-    <script src="/js/dm.js?v=55"></script>
+    <script src="/js/ai-panel.js?v=56"></script>
+    <script src="/js/script.js?v=56"></script>
+    <script src="/js/upload.js?v=56"></script>
+    <script src="/js/story.js?v=56"></script>
+    <script src="/js/features.js?v=56"></script>
+    <script src="/js/dm.js?v=56"></script>
     <script>
         if ('caches' in window) {
             caches.keys().then(keys => {
                 keys.forEach(k => {
-                    if (k.startsWith('kotha-') && !k.includes('v55')) {
+                    if (k.startsWith('kotha-') && !k.includes('v56')) {
                         caches.delete(k);
                     }
                 });

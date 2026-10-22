@@ -1883,7 +1883,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadData(chat).then(() => {
                     if (window.innerWidth >= 768) {
                         const inp = document.getElementById('bottom-ai-input');
-                        if (inp) inp.focus();
+                        if (inp) inp.focus({ preventScroll: true });
                     }
                 });
 
@@ -1892,7 +1892,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => { 
                     if (window.innerWidth >= 768) {
                         const inp = document.getElementById('bottom-ai-input'); 
-                        if (inp) inp.focus(); 
+                        if (inp) inp.focus({ preventScroll: true }); 
                     }
                 }, 350);
             });
@@ -2329,7 +2329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Focus AI input
             setTimeout(() => {
                 const inp = document.getElementById('bottom-ai-input');
-                if (inp) inp.focus();
+                if (inp) inp.focus({ preventScroll: true });
             }, 100);
         }
     };
@@ -2482,7 +2482,7 @@ document.addEventListener('DOMContentLoaded', () => {
             inputWrap.classList.remove('rounded-2xl');
             inputWrap.classList.add('rounded-b-2xl', 'rounded-t-none', 'border-t', 'border-gray-100', 'dark:border-gray-800');
         }
-        if (bottomAiInput) bottomAiInput.focus();
+        if (bottomAiInput) bottomAiInput.focus({ preventScroll: true });
     }
 
     window.clearReplyPreview = function () {
@@ -3548,7 +3548,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (bottomAiInput) {
                 e.preventDefault();
-                bottomAiInput.focus();
+                bottomAiInput.focus({ preventScroll: true });
             }
         }
     });
@@ -3572,7 +3572,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isBackspace = e.key === 'Backspace';
         if (!isPrintable && !isEnter && !isBackspace) return;
         // Focus the input — the keystroke itself will land in it
-        inp.focus();
+        inp.focus({ preventScroll: true });
     });
 
     // ─── macOS Window: Drag + Traffic Lights (md+ only) ───
@@ -3586,11 +3586,24 @@ document.addEventListener('DOMContentLoaded', () => {
         let userHasResized = false;
 
         function centerFrame() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) {
+                if (document.body.classList.contains('app-shell')) {
+                    frame.style.position = '';
+                    frame.style.left = '';
+                    frame.style.top = '';
+                    frame.style.width = '';
+                    frame.style.height = '';
+                    frame.style.margin = '';
+                    frame.style.maxWidth = '';
+                    frame.style.maxHeight = '';
+                    document.body.style.position = '';
+                }
+                return;
+            }
             const isShort = window.innerHeight < 740;
             const targetW = userHasResized
                 ? Math.min(parseInt(frame.style.width) || 960, window.innerWidth - 30)
-                : Math.max(380, Math.min(window.innerWidth * 0.75, document.body.classList.contains('app-shell') ? 820 : 1100));
+                : Math.max(380, Math.min(window.innerWidth * 0.75, 1100));
 
             let targetH;
             let top;
@@ -3599,7 +3612,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 top = Math.max(8, Math.round((window.innerHeight - targetH - (isShort ? 0 : 70)) / 2));
             } else {
                 if (isShort) {
-                    // On short or zoomed viewports, fill almost full height so content never clips
                     targetH = Math.max(420, window.innerHeight - (window.innerHeight < 600 ? 16 : 24));
                     top = Math.max(8, Math.round((window.innerHeight - targetH) / 2));
                 } else {
@@ -3623,7 +3635,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function clampFrameInViewport() {
-            if (frame.classList.contains('mac-fullscreen') || isMobile()) return;
+            if (frame.classList.contains('mac-fullscreen') || isMobile() || document.body.classList.contains('app-shell')) return;
             const isShort = window.innerHeight < 740;
             const r = frame.getBoundingClientRect();
             let w = parseInt(frame.style.width) || r.width;
@@ -3633,7 +3645,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // If the user hasn't manually resized the frame, auto-scale it dynamically!
             if (!userHasResized) {
-                w = Math.max(380, Math.min(window.innerWidth * 0.75, document.body.classList.contains('app-shell') ? 820 : 1100));
+                w = Math.max(380, Math.min(window.innerWidth * 0.75, 1100));
                 if (isShort) {
                     h = Math.max(420, window.innerHeight - (window.innerHeight < 600 ? 16 : 24));
                 } else {
@@ -3666,7 +3678,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function initPosition() {
-            if (inited) return;
+            if (inited || document.body.classList.contains('app-shell')) return;
             inited = true;
             const r = frame.getBoundingClientRect();
             frame.style.position = 'absolute';
@@ -3707,8 +3719,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(rhOverlay);
 
         function syncOverlay() {
-            if (isMobile()) {
-                if (inited) resetPosition();
+            if (isMobile() || document.body.classList.contains('app-shell')) {
+                if (inited && !document.body.classList.contains('app-shell')) resetPosition();
                 rhOverlay.style.display = 'none';
                 return;
             }
@@ -3727,6 +3739,10 @@ document.addEventListener('DOMContentLoaded', () => {
         syncOverlay();
 
         window.addEventListener('resize', () => {
+            if (document.body.classList.contains('app-shell')) {
+                if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
+                return;
+            }
             if (dragging) {
                 dragging = false;
                 isActualDrag = false;
@@ -3815,7 +3831,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         titlebar.addEventListener('mousedown', (e) => {
             if (e.target.closest('button')) return;
-            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
+            if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile() || document.body.classList.contains('app-shell')) return;
 
             const rect = frame.getBoundingClientRect();
             // Don't drag if click is within 10px of top, left, or right edge (resize zones)
@@ -3962,7 +3978,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rhOverlay.querySelectorAll('.rh').forEach(handle => {
                 const dir = handle.dataset.dir;
                 handle.addEventListener('mousedown', (e) => {
-                    if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
+                    if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile() || document.body.classList.contains('app-shell')) return;
                     initPosition();
                     e.preventDefault();
                     e.stopPropagation();
@@ -4164,14 +4180,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mainSearchInput = document.getElementById('search-box');
                 if (mainSearchInput) {
                     if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                    setTimeout(() => mainSearchInput.focus(), 150);
+                    setTimeout(() => mainSearchInput.focus({ preventScroll: true }), 150);
                 }
                 return;
             }
 
             // Mobile: Inline chat search
             inlineSearchOverlay.classList.remove('hidden');
-            inlineSearchInput.focus();
+            inlineSearchInput.focus({ preventScroll: true });
         });
 
         closeInlineSearchBtn.addEventListener('click', () => {
@@ -4189,7 +4205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 inlineResultsList.innerHTML = '';
                 inlineSearchCount.textContent = '';
                 clearInlineSearchBtn.classList.add('hidden');
-                inlineSearchInput.focus();
+                inlineSearchInput.focus({ preventScroll: true });
             });
         }
 
@@ -4311,18 +4327,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// Fix for iOS Safari Keyboard overlap (Removed to prevent spring/bounce effect on scroll)
-// if (window.visualViewport) {
-//     const adjustViewport = () => {
-//         document.documentElement.style.setProperty('--viewport-height', `${window.visualViewport.height}px`);
-//         // If the input is focused, scroll it into view
-//         const input = document.activeElement;
-//         if (input && input.tagName === 'INPUT') {
-//             setTimeout(() => {
-//                 // input.scrollIntoView({ behavior: 'smooth', block: 'end' });
-//             }, 100);
-//         }
-//     };
-//     // window.visualViewport.addEventListener('resize', adjustViewport);
-//     // adjustViewport();
-// }
+// Strict desktop window scroll lock — ensures viewport never scrolls when focused or zoomed
+window.addEventListener('scroll', () => {
+    if (window.scrollY !== 0 || window.scrollX !== 0) {
+        window.scrollTo(0, 0);
+    }
+}, { passive: false });
