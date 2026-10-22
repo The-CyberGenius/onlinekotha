@@ -78,10 +78,11 @@ CREATE TABLE IF NOT EXISTS chats (
   created_at INTEGER NOT NULL,
   message_count INTEGER DEFAULT 0,
   format TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE(user_id, folder_name)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_chats_user ON chats(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_chats_user_folder ON chats(user_id, folder_name) WHERE user_id > 0;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_chats_guest_folder ON chats(guest_id, folder_name) WHERE guest_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS providers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -341,6 +342,47 @@ safeAddColumn("routes", "fallback_model_id_4", "INTEGER");
 safeAddColumn("routes", "fallback_model_id_5", "INTEGER");
 
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
+
+// Migrate chats table to allow multiple guests to have chats with identical folder names (e.g. 'whatsapp_chat')
+try {
+    const idxList = db.prepare('PRAGMA index_list(chats)').all();
+    const hasOldAutoIndex = idxList.some(i => i.name === 'sqlite_autoindex_chats_1');
+    if (hasOldAutoIndex) {
+        db.exec(`
+            PRAGMA foreign_keys=off;
+            BEGIN TRANSACTION;
+            CREATE TABLE chats_new (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL,
+              folder_name TEXT NOT NULL,
+              display_name TEXT,
+              created_at INTEGER NOT NULL,
+              message_count INTEGER DEFAULT 0,
+              format TEXT,
+              deleted_by_user INTEGER NOT NULL DEFAULT 0,
+              guest_id TEXT,
+              is_group INTEGER DEFAULT 0,
+              participants TEXT,
+              user_participant TEXT,
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+            INSERT INTO chats_new SELECT id, user_id, folder_name, display_name, created_at, message_count, format, deleted_by_user, guest_id, is_group, participants, user_participant FROM chats;
+            DROP TABLE chats;
+            ALTER TABLE chats_new RENAME TO chats;
+            CREATE INDEX IF NOT EXISTS idx_chats_user ON chats(user_id);
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_chats_user_folder ON chats(user_id, folder_name) WHERE user_id > 0;
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_chats_guest_folder ON chats(guest_id, folder_name) WHERE guest_id IS NOT NULL;
+            COMMIT;
+            PRAGMA foreign_keys=on;
+        `);
+        console.log('[DB] Migrated chats table: replaced global UNIQUE(user_id, folder_name) with partial unique indexes.');
+    }
+} catch (e) {
+    console.error('[DB] Migration of chats table unique constraint failed:', e.message);
+}
+
+try { db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_chats_user_folder ON chats(user_id, folder_name) WHERE user_id > 0;'); } catch(e) {}
+try { db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_chats_guest_folder ON chats(guest_id, folder_name) WHERE guest_id IS NOT NULL;'); } catch(e) {}
 
 try {
     const { KOTHA_ASSISTANT_SYSTEM_PROMPT } = require('./assistant_prompt');

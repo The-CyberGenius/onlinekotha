@@ -234,7 +234,8 @@ router.post('/chat/:folder/identity', async (req, res) => {
         try {
             info = db.prepare(insertSql).run(...insertParams);
         } catch(e) {
-            return res.status(500).json({ error: 'Failed to insert chat identity' });
+            console.error('Failed to insert chat identity:', e.message);
+            return res.status(500).json({ error: 'Failed to insert chat identity: ' + e.message });
         }
     }
     res.json({ ok: true, userParticipant });
