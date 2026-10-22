@@ -555,8 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let nameHtml = '';
-        const isGroup = window._chatMetaCache?.[currentChat]?.isGroup;
-        if (!isMe && !isConsecutive && isGroup) {
+        if (!isMe && !isConsecutive && msg.sender) {
             nameHtml = `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${escapeHTML(msg.sender)}</p>`;
         }
 
@@ -2907,7 +2906,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderGlobalMessage(msg) {
         const isMe = window.__USER__ && msg.userId === window.__USER__.id;
         const msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
-        const nameHtml = !isMe ? `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${msg.sender}</p>` : '';
+        const nameHtml = (!isMe && msg.sender) ? `<p class="sender-name text-[11px] font-bold mb-1 tracking-wide" style="color: ${getStringColor(msg.sender)}">${escapeHTML(msg.sender)}</p>` : '';
 
         let replyBlockHtml = '';
         if (msg.replyTo) {
