@@ -409,6 +409,18 @@ router.post('/chat', aiGate, async (req, res) => {
         `SELECT role, content FROM conv_messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 12`
     ).all(convId).reverse();
 
+    // SSE response setup
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const send = (event, data) => {
+        res.write(`event: ${event}\n`);
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
+
     // ── Identity: user_participant from DB is the ONLY source of truth ──
     // Never guess from message counts or sender frequency.
     let userName = userParticipant || null;   // who uploaded (the human)
@@ -471,18 +483,6 @@ router.post('/chat', aiGate, async (req, res) => {
     // Build context from chat (larger window + date-aware boosting)
     const { selected, stats } = selectContext(chatMessages, message, { topK: 50, includeRecent: 20, participants: isGroup ? participants : null });
     const contextBlock = formatContext(selected, chat);
-
-    // SSE response setup
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache, no-transform');
-    res.setHeader('X-Accel-Buffering', 'no');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-
-    const send = (event, data) => {
-        res.write(`event: ${event}\n`);
-        res.write(`data: ${JSON.stringify(data)}\n\n`);
-    };
 
     // Current time for AI awareness
     const serverNow = new Date();
