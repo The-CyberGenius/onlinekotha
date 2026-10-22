@@ -45,14 +45,25 @@ function parseLine(line, format) {
     let date, time, sender, rawText;
     
     if (format === 'bracket') {
-        const dtParts = match[1].split(',');
-        if (dtParts.length === 2) {
-            const p1 = dtParts[0].trim();
-            const p2 = dtParts[1].trim();
-            if (p1.includes(':')) { time = p1; date = p2; }
-            else { date = p1; time = p2; }
+        const inside = match[1].trim();
+        // Extract time pattern: e.g. 23:18:22 or 4:51 PM or 16:51
+        const timeMatch = inside.match(/\b\d{1,2}:\d{2}(?::\d{2})?(?:\s*(?:AM|PM|am|pm|a\.m\.|p\.m\.|A\.M\.|P\.M\.))?\b/);
+        if (timeMatch) {
+            time = timeMatch[0].trim();
+            date = inside.replace(timeMatch[0], '')
+                         .replace(/^[\s\,\@à\–\—\-]+|[\s\,\@à\–\—\-]+$/g, '')
+                         .trim();
         } else {
-            date = match[1]; time = '';
+            const dtParts = inside.split(',');
+            if (dtParts.length === 2) {
+                const p1 = dtParts[0].trim();
+                const p2 = dtParts[1].trim();
+                if (p1.includes(':')) { time = p1; date = p2; }
+                else { date = p1; time = p2; }
+            } else {
+                date = inside;
+                time = '';
+            }
         }
         sender = match[2];
         rawText = match[3];
@@ -199,9 +210,11 @@ async function parseChatFile(chatFilePath) {
         if (!msg.date) continue;
         const parts = msg.date.split(/[\/\-\.]/);
         if (parts.length === 3) {
-            if (parts[0].length === 4) {
-                // It's already YYYY-MM-DD, just ensure dashes
-                msg.date = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+            if (parts[0].length >= 4) {
+                // It's already YYYY-MM-DD, sanitize year to 4 digits just in case
+                let yStr = parts[0].trim();
+                if (yStr.length > 4) yStr = yStr.substring(0, 4);
+                msg.date = `${yStr}-${parts[1].trim().padStart(2, '0')}-${parts[2].trim().padStart(2, '0')}`;
                 continue;
             }
             
@@ -213,7 +226,8 @@ async function parseChatFile(chatFilePath) {
                 day = parseInt(parts[0]);
                 month = parseInt(parts[1]);
             }
-            let yearStr = parts[2].replace(/\D/g, ''); // strip any non-digits
+            let yearStr = parts[2].trim().split(/\s+/)[0].replace(/\D/g, ''); // strip any non-digits / trailing space
+            if (yearStr.length > 4) yearStr = yearStr.substring(0, 4);
             let year = yearStr.length === 2 ? 2000 + parseInt(yearStr) : parseInt(yearStr);
             const dd = String(day).padStart(2, '0');
             const mm = String(month).padStart(2, '0');
