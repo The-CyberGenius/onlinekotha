@@ -7,12 +7,16 @@ const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 
-const dmUploadDir = path.join(__dirname, 'public', 'uploads', 'dm');
+const dmUploadDir = path.join(__dirname, 'data', 'dm_uploads');
 if (!fs.existsSync(dmUploadDir)) fs.mkdirSync(dmUploadDir, { recursive: true });
 const dmUpload = multer({
     storage: multer.diskStorage({
         destination: dmUploadDir,
-        filename: (req, file, cb) => cb(null, `dm_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`)
+        filename: (req, file, cb) => {
+            const uid = req.user?.id || 'u';
+            const cleanName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+            cb(null, `dm_u${uid}_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${cleanName}`);
+        }
     }),
     limits: { fileSize: 50 * 1024 * 1024 }
 });
@@ -261,6 +265,66 @@ app.use('/.well-known', express.static(path.join(__dirname, 'public', '.well-kno
         res.setHeader('Access-Control-Allow-Origin', '*');
     }
 }));
+
+// =========================================================================
+// Secure Authenticated Route for Direct Message Attachments
+// (Placed BEFORE express.static so private media is NEVER served statically)
+// =========================================================================
+function canAccessDMMedia(user, filename) {
+    if (!user) return false;
+    // 1. Admin or Admin Impersonating has full access to all media across all users
+    if (user.is_admin || user.original_admin_id) return true;
+
+    // 2. If the file was uploaded by this user in the current session
+    if (filename.startsWith(`dm_u${user.id}_`)) return true;
+
+    // 3. Check if user is participant (user_a, user_b, or sender) in the conversation
+    try {
+        const msg = db.prepare(`
+            SELECT m.id, m.sender_id, c.user_a, c.user_b
+            FROM dm_messages m
+            JOIN dm_conversations c ON c.id = m.conv_id
+            WHERE m.media_url LIKE ? OR m.media_url LIKE ?
+            LIMIT 1
+        `).get(`%${filename}`, `%${filename}?%`);
+
+        if (msg) {
+            if (user.id === msg.user_a || user.id === msg.user_b || user.id === msg.sender_id) {
+                return true;
+            }
+        }
+    } catch (err) {
+        console.error('[DM Media Auth Error]:', err);
+    }
+    return false;
+}
+
+app.get('/uploads/dm/:filename', (req, res) => {
+    const rawFilename = req.params.filename;
+    const filename = path.basename(rawFilename);
+
+    let targetPath = path.join(dmUploadDir, filename);
+    if (!fs.existsSync(targetPath)) {
+        // Fallback for legacy files in public/uploads/dm during transition
+        const legacyPath = path.join(__dirname, 'public', 'uploads', 'dm', filename);
+        if (fs.existsSync(legacyPath)) {
+            targetPath = legacyPath;
+        } else {
+            return res.status(404).send('File not found');
+        }
+    }
+
+    if (!req.user) {
+        return res.status(401).send('Unauthorized. Please log in to view this conversation media.');
+    }
+
+    if (!canAccessDMMedia(req.user, filename)) {
+        return res.status(403).send('Forbidden. You do not have permission to view this media.');
+    }
+
+    res.setHeader('Cache-Control', 'private, max-age=86400');
+    return res.sendFile(targetPath);
+});
 
 // Main static files: strictly IGNORE dotfiles to prevent leaking .DS_Store, .env, or other hidden files
 app.use(express.static(path.join(__dirname, 'public'), {
