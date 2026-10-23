@@ -5,6 +5,7 @@ const { callLLM } = require('../llm');
 const { getSession, effectivePlan } = require('../auth');
 const { db, getSetting } = require('../db');
 const { KOTHA_ASSISTANT_SYSTEM_PROMPT } = require('../assistant_prompt');
+const { sanitizeAIMessage, createStreamingTagFilter } = require('../context');
 
 const DEMO_LIMIT = 15;
 
@@ -391,17 +392,27 @@ RULES:
     let fullText = '';
     try {
         const targetFeature = isAssistant ? 'assistant' : 'chat';
+        const tagFilter = createStreamingTagFilter((cleanChunk) => {
+            send('token', { text: cleanChunk });
+        });
+
         await callLLM({
             feature: targetFeature,
-            messages: usage.history,
+            messages: (usage.history || []).map(h => ({
+                role: h.role,
+                content: h.role === 'assistant' ? sanitizeAIMessage(h.content) : h.content
+            })),
             systemPrompt,
             userId: session?.user?.id || null,
             signal: abortController.signal,
             onToken: (token) => {
                 fullText += token;
-                send('token', { text: token });
+                tagFilter.feed(token);
             },
         });
+
+        tagFilter.flush();
+        const cleanResponse = sanitizeAIMessage(fullText);
 
         // Save AI response to persistent history
         if (isAssistant && (userId || guestId)) {
@@ -409,13 +420,13 @@ RULES:
                 db.prepare(`
                     INSERT INTO kotha_assistant_messages (user_id, guest_id, sender, role, text, time, date, created_at)
                     VALUES (?, ?, 'Kotha Assistant', 'assistant', ?, ?, ?, ?)
-                `).run(userId, guestId, fullText.trim(), timeNow, todayIso, Date.now());
+                `).run(userId, guestId, cleanResponse, timeNow, todayIso, Date.now());
             } catch (e) {
                 console.error('Failed to save assistant response:', e);
             }
         }
 
-        usage.history.push({ role: 'assistant', content: fullText });
+        usage.history.push({ role: 'assistant', content: cleanResponse });
         if (usage.history.length > 12) usage.history = usage.history.slice(-12);
         
         saveDemoUsage(key, usage);

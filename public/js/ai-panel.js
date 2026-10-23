@@ -16,6 +16,17 @@
 
     let liveAdminBubbles = {};
 
+    function stripHtmlTags(str) {
+        if (!str) return '';
+        if (typeof window.stripHtmlTags === 'function') return window.stripHtmlTags(str);
+        return String(str)
+            .replace(/<thought[\s\S]*?<\/thought>/gi, '')
+            .replace(/<think[\s\S]*?<\/think>/gi, '')
+            .replace(/<\/?(?:thought|think)[^>]*>/gi, '')
+            .replace(/<(?!\/?(?:image|video|audio|sticker|document|file):)\/?[a-zA-Z][^>]*>/gi, '')
+            .replace(/<\/?(?:[a-zA-Z]{1,10})?\s*$/g, '');
+    }
+
     document.addEventListener('ai:manual_message_token', (e) => {
         const data = e.detail;
         if (activeChat !== data.chatFolder && window.currentChat !== data.chatFolder) return;
@@ -34,9 +45,8 @@
         bubble._fullText += data.token;
         const textEl = bubble.querySelector('.ai-response-text');
         if (textEl) {
-            // For live stream we just update textContent to avoid heavy markdown parsing per token
-            // The final markdown render happens on ai:manual_message
-            textEl.textContent = bubble._fullText;
+            // For live stream update cleaned text to avoid leaking raw tags
+            textEl.textContent = stripHtmlTags(bubble._fullText);
         }
         _scrollToBottom();
     });
@@ -59,7 +69,8 @@
                     wrap = appendContactBubble(data.contactName || 'AI', Date.now());
                 }
                 
-                wrap.querySelector('.ai-response-text').innerHTML = typeof marked !== 'undefined' ? marked.parse(data.message) : escapeHTML(data.message);
+                const cleanMsg = stripHtmlTags(data.message);
+                wrap.querySelector('.ai-response-text').innerHTML = (typeof window.kothaLinkify === 'function') ? window.kothaLinkify(cleanMsg) : escapeHTML(cleanMsg);
                 if (window.renderMathInElement) {
                     renderMathInElement(wrap, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}] });
                 }
@@ -893,7 +904,7 @@
                                 if (timeEl) timeEl.textContent = formatNow();
                             }
                             onTypewriterComplete = () => {
-                                const cleanedText = fullText
+                                const cleanedText = stripHtmlTags(fullText)
                                     .replace(/\[#\d+[^\]\n]*\]/g, '')
                                     .replace(/[ \t]{2,}/g, ' ')
                                     .replace(/\n{3,}/g, '\n\n')
@@ -1243,13 +1254,14 @@
             const name = contactNameMap[chatFolder] || (headerEl ? headerEl.innerText : 'AI');
 
             data.messages.forEach(msg => {
+                const cleanContent = stripHtmlTags(msg.content);
                 if (msg.role === 'user') {
-                    appendUserBubble(msg.content, msg.created_at);
+                    appendUserBubble(cleanContent, msg.created_at);
                 } else if (msg.role === 'assistant') {
                     const wrap = appendContactBubble(name, msg.created_at);
                     const textEl = wrap.querySelector('.ai-response-text');
                     if (textEl) {
-                        textEl.innerHTML = (typeof window.kothaLinkify === 'function') ? window.kothaLinkify(msg.content) : escapeHTML(msg.content);
+                        textEl.innerHTML = (typeof window.kothaLinkify === 'function') ? window.kothaLinkify(cleanContent) : escapeHTML(cleanContent);
                     }
                 }
             });

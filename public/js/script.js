@@ -470,9 +470,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function stripHtmlTags(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/<thought[\s\S]*?<\/thought>/gi, '')
+            .replace(/<think[\s\S]*?<\/think>/gi, '')
+            .replace(/<\/?(?:thought|think)[^>]*>/gi, '')
+            .replace(/<(?!\/?(?:image|video|audio|sticker|document|file):)\/?[a-zA-Z][^>]*>/gi, '')
+            .replace(/<\/?(?:[a-zA-Z]{1,10})?\s*$/g, '');
+    }
+    window.stripHtmlTags = stripHtmlTags;
+
     function kothaLinkify(text) {
         if (!text) return '';
-        const esc = String(text).replace(/[&<>"']/g, c => ({
+        const clean = stripHtmlTags(text);
+        const esc = clean.replace(/[&<>"']/g, c => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
         }[c]));
         

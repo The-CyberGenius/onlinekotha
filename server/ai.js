@@ -7,7 +7,7 @@ const { getGuestStatus, recordGuestAIMessage } = require('./guest');
 const { getMessages } = require('./cache');
 const { userDir } = require('./upload');
 const { callLLM, LLMError } = require('./llm');
-const { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT } = require('./context');
+const { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT, sanitizeAIMessage, createStreamingTagFilter } = require('./context');
 
 const { countWords, checkBurstLimit } = require('./rateLimit');
 
@@ -505,11 +505,32 @@ router.post('/chat', aiGate, async (req, res) => {
         // Build default roleplay prompt (pass stats so AI knows how much history exists)
         systemPrompt = buildRoleplayPrompt(contactName, userName, contextBlock, dateStr, timeStr, stats, isGroup, participants);
     }
-    const llmMessages = history.map(h => ({ role: h.role, content: h.content }));
+    const llmMessages = history.map(h => ({
+        role: h.role,
+        content: h.role === 'assistant' ? sanitizeAIMessage(h.content) : h.content
+    }));
 
     let fullText = '';
     const abortController = new AbortController();
     req.on('close', () => abortController.abort());
+
+    const tagFilter = createStreamingTagFilter((cleanChunk) => {
+        send('token', { text: cleanChunk });
+
+        // Broadcast token to admin impersonator if connected
+        if (req.user) {
+            const sid = req.app.locals.onlineUsers?.get(req.user.id);
+            const io = req.app.locals.io;
+            if (sid && io) {
+                io.to(sid).emit('ai:manual_message_token', {
+                    chatFolder: chat,
+                    token: cleanChunk,
+                    contactName: contactName,
+                    isNew: fullText === cleanChunk
+                });
+            }
+        }
+    });
 
     try {
         await callLLM({
@@ -520,31 +541,15 @@ router.post('/chat', aiGate, async (req, res) => {
             signal: abortController.signal,
             onToken: (token) => {
                 fullText += token;
-                send('token', { text: token });
-                
-                // Broadcast token to admin impersonator if connected
-                if (req.user) {
-                    const sid = req.app.locals.onlineUsers?.get(req.user.id);
-                    const io = req.app.locals.io;
-                    if (sid && io) {
-                        io.to(sid).emit('ai:manual_message_token', {
-                            chatFolder: chatFolder,
-                            token: token,
-                            contactName: contactName,
-                            isNew: fullText === token
-                        });
-                    }
-                }
+                tagFilter.feed(token);
             },
         });
 
+        tagFilter.flush();
+
         const citations = extractCitations(fullText);
-        // Strip any leaked context-header tags (e.g. [#144789 19/05/26 11:43 PM sender])
-        const cleanText = fullText
-            .replace(/\[#\d+[^\]\n]*\]/g, '')
-            .replace(/[ \t]{2,}/g, ' ')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim();
+        // Strip any leaked HTML/XML tags, citations, and extra whitespace
+        const cleanText = sanitizeAIMessage(fullText);
 
         db.prepare(
             `INSERT INTO conv_messages (conversation_id, role, content, citations, created_at)
@@ -658,6 +663,7 @@ Analyze the <chat_history> and flawlessly replicate:
 - **OUTPUT ONLY THE MESSAGE**: Return *only* the exact text ${contactName} would send. 
 - No analysis, no explanations, no "AI:" prefixes, no quotation marks around the message, and no markdown formatting (unless they naturally use bold/italics).
 - Do not fabricate real-world actions (e.g., "I just called you" or "I just sent the money") as facts.
+- **NO HTML/XML TAGS (ABSOLUTE RULE)**: NEVER output any HTML or XML tags under ANY circumstances (such as <p>, </p>, <br>, <div>, </div>, <span>, </span>, <thought>, </thought>, <think>, </think>, etc.). You are texting on WhatsApp, which is 100% plain text. If sending multiple thoughts or messages, just use a normal blank line. Never wrap lines in tags.
 
 **Now, reply to the user's latest message as ${contactName}:**`;
 }

@@ -252,6 +252,7 @@ Rules:
 - Quote specific phrases when relevant, in quotes.
 - When you cite a specific moment, end that sentence with [#<id>] using the id from the message header. You may cite up to 5 ids per answer.
 - Keep replies clear, helpful, and accurate.
+- Output 100% pure plain text only. NEVER include any HTML or XML tags (such as <p>, </p>, <br>, <div>, </div>, <thought>, </thought>, etc.).
 - Never invent dates, names, or events that aren't in the chat. Never make up quotes.`;
 
 const GROUP_SYSTEM_PROMPT = `You are Kotha — a thoughtful, warm assistant who helps the user reflect on their own imported WhatsApp group chat history.
@@ -268,6 +269,124 @@ Rules:
 - Only answer using information present in the provided chat messages. If something isn't in the context, say you don't see it.
 - When you cite a specific moment, end that sentence with [#<id>] using the id from the message header. You may cite up to 5 ids per answer.
 - Keep replies clear, helpful, and natural. Speak like a close friend who is part of the group.
+- Output 100% pure plain text only. NEVER include any HTML or XML tags (such as <p>, </p>, <br>, <div>, </div>, <thought>, </thought>, etc.).
 - Never invent dates, names, or events that aren't in the chat. Never make up quotes.`;
 
-module.exports = { selectContext, formatContext, DEFAULT_SYSTEM_PROMPT, GROUP_SYSTEM_PROMPT, extractDateHints };
+/**
+ * Robust sanitizer for AI responses.
+ * Removes leaked <thought>...</thought>, HTML/XML tags (<p>, </p>, <div>, etc.),
+ * and citation markers while preserving WhatsApp media tokens (<image: ...>).
+ */
+function sanitizeAIMessage(text) {
+    if (!text) return '';
+    let s = String(text);
+
+    // 1. Remove thinking / reasoning blocks (e.g. <thought>...</thought>, <think>...</think>)
+    s = s.replace(/<thought[\s\S]*?<\/thought>/gi, '');
+    s = s.replace(/<think[\s\S]*?<\/think>/gi, '');
+    s = s.replace(/<\/?(?:thought|think)[^>]*>/gi, '');
+
+    // 2. Remove common HTML / XML tags (<p>, </p>, <br>, <br/>, <div>, </div>, <span>, </span>, <b>, </b>, <i>, </i>, etc.)
+    // Preserve WhatsApp media placeholders like <image: ...> or <audio: ...> if any
+    s = s.replace(/<(?!\/?(?:image|video|audio|sticker|document|file):)\/?[a-zA-Z][^>]*>/gi, '');
+
+    // 3. Remove stray closing/opening brackets at end of truncated tags (e.g. "</", "<p", "</p")
+    s = s.replace(/<\/?(?:[a-zA-Z]{1,10})?\s*$/g, '');
+
+    // 4. Strip leaked citation tags [#123 2024-05-10 ...]
+    s = s.replace(/\[#\d+[^\]\n]*\]/g, '');
+
+    // 5. Normalize whitespace and excessive newlines
+    s = s.replace(/[ \t]{2,}/g, ' ');
+    s = s.replace(/\n{3,}/g, '\n\n');
+
+    return s.trim();
+}
+
+/**
+ * Streaming tag filter that prevents partial or complete HTML tags (<p>, </p>, <div>, etc.)
+ * and reasoning blocks (<thought>...</thought>) from leaking into live tokens.
+ */
+function createStreamingTagFilter(onValidText) {
+    let tagBuffer = '';
+    let inThought = false;
+
+    return {
+        feed(token) {
+            let toSend = '';
+            for (let i = 0; i < token.length; i++) {
+                const ch = token[i];
+                if (ch === '<') {
+                    if (tagBuffer) {
+                        toSend += tagBuffer;
+                        tagBuffer = '';
+                    }
+                    tagBuffer = '<';
+                    continue;
+                }
+
+                if (tagBuffer) {
+                    tagBuffer += ch;
+                    if (ch === '>') {
+                        const lowerTag = tagBuffer.toLowerCase();
+                        if (lowerTag.startsWith('<thought') || lowerTag.startsWith('<think')) {
+                            inThought = true;
+                            tagBuffer = '';
+                            continue;
+                        }
+                        if (lowerTag === '</thought>' || lowerTag === '</think>') {
+                            inThought = false;
+                            tagBuffer = '';
+                            continue;
+                        }
+                        // Discard HTML tags
+                        if (/^<\/?(?:p|br|div|span|b|i|u|em|strong|h[1-6]|ul|ol|li|hr|a|img|html|body|table|tr|td|th|thought|think|vag)[^>]*>$/i.test(tagBuffer)) {
+                            tagBuffer = '';
+                            continue;
+                        }
+                        // Keep media tags
+                        if (/^<(image|video|audio|sticker|document|file):/i.test(tagBuffer)) {
+                            toSend += tagBuffer;
+                            tagBuffer = '';
+                            continue;
+                        }
+                        // Generic XML/HTML tags
+                        if (/^<\/?(?:[a-zA-Z][a-zA-Z0-9-]*)[^>]*>$/i.test(tagBuffer)) {
+                            tagBuffer = '';
+                            continue;
+                        }
+                        // Not a tag, flush
+                        toSend += tagBuffer;
+                        tagBuffer = '';
+                        continue;
+                    }
+                    if (tagBuffer.length > 50) {
+                        toSend += tagBuffer;
+                        tagBuffer = '';
+                    }
+                    continue;
+                }
+
+                if (inThought) continue;
+                toSend += ch;
+            }
+            if (toSend) onValidText(toSend);
+        },
+        flush() {
+            if (tagBuffer && !/^<\/?(?:[a-zA-Z]{1,10})?\s*$/i.test(tagBuffer)) {
+                onValidText(tagBuffer);
+            }
+            tagBuffer = '';
+        }
+    };
+}
+
+module.exports = {
+    selectContext,
+    formatContext,
+    DEFAULT_SYSTEM_PROMPT,
+    GROUP_SYSTEM_PROMPT,
+    extractDateHints,
+    sanitizeAIMessage,
+    createStreamingTagFilter,
+};
