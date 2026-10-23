@@ -236,6 +236,9 @@
             if (nameInput) nameInput.value = me.user.display_name || '';
             if (phoneInput) phoneInput.value = me.user.phone || '';
             if (phoneCode && me.user.phone_country_code) phoneCode.value = me.user.phone_country_code;
+            renderPlanBadge(me.user);
+        } else {
+            renderPlanBadge({ plan: 'guest' });
         }
 
         if (isEditMode) {
@@ -450,6 +453,7 @@
                 logoutBtn.title = 'Sign in to save account';
                 logoutBtn.onclick = () => window.openAuthModal();
             }
+            renderPlanBadge({ plan: 'guest' });
             return;
         }
 
@@ -618,26 +622,60 @@
 
     function renderPlanBadge(user) {
         const badge = document.getElementById('compact-plan-badge');
-        const upgradeUsd = document.getElementById('upgrade-usd-btn');
         if (!badge) return;
 
         badge.classList.remove('hidden');
-        const plan = user.effective_plan || user.plan;
+        const plan = (user && (user.effective_plan || user.plan)) || 'free';
+        const isPro = (plan === 'paid' || plan === 'pro');
 
-        if (plan === 'trial') {
+        const sidebarUpgradeBtn = document.getElementById('sidebar-upgrade-btn');
+        const chatHeaderUpgradeBtn = document.getElementById('chat-header-upgrade-btn');
+        const profilePlanName = document.getElementById('profile-plan-name');
+        const profileUpgradeBtn = document.getElementById('profile-upgrade-btn');
+
+        if (isPro) {
+            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-emerald-500/20';
+            badge.innerHTML = `PRO ✦`;
+            badge.title = 'Kotha Pro Active';
+            badge.onclick = null;
+
+            if (sidebarUpgradeBtn) sidebarUpgradeBtn.classList.add('hidden');
+            if (chatHeaderUpgradeBtn) chatHeaderUpgradeBtn.classList.add('hidden');
+            if (profilePlanName) profilePlanName.textContent = 'Kotha Pro ✦ Active';
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.add('hidden');
+        } else if (plan === 'trial') {
             const remainingMs = (user.trial_expires_at || 0) - Date.now();
             const days = Math.max(0, Math.ceil(remainingMs / (1000 * 60 * 60 * 24)));
             badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-gradient-to-r from-indigo-500 to-purple-500 text-white';
             badge.innerHTML = days > 0 ? `TRIAL · ${days}d left` : `TRIAL`;
-        } else if (plan === 'paid' || plan === 'pro') {
-            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-emerald-500/20';
-            badge.innerHTML = `PRO ✦`;
+            badge.title = 'Click to upgrade to Kotha Pro';
+            badge.onclick = () => window.openUpgradeModal ? window.openUpgradeModal() : (window.location.href = '/pricing.html');
+
+            if (sidebarUpgradeBtn) sidebarUpgradeBtn.classList.remove('hidden');
+            if (chatHeaderUpgradeBtn) chatHeaderUpgradeBtn.classList.remove('hidden');
+            if (profilePlanName) profilePlanName.textContent = days > 0 ? `Free Trial (${days}d remaining)` : `Free Trial (Ending soon)`;
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.remove('hidden');
         } else if (plan === 'guest') {
-            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 bg-amber-500 text-white';
+            badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-amber-500 text-white';
             badge.innerHTML = `GUEST`;
+            badge.title = 'Click to sign in and upgrade to Pro';
+            badge.onclick = () => window.openAuthModal ? window.openAuthModal('Sign in to save your chats and unlock Kotha Pro!') : (window.openUpgradeModal ? window.openUpgradeModal() : null);
+
+            if (sidebarUpgradeBtn) sidebarUpgradeBtn.classList.remove('hidden');
+            if (chatHeaderUpgradeBtn) chatHeaderUpgradeBtn.classList.remove('hidden');
+            if (profilePlanName) profilePlanName.textContent = 'Guest Preview Mode';
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.remove('hidden');
         } else {
+            const isExpired = user && user.plan === 'trial';
             badge.className = 'px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border-none shadow-sm shrink-0 cursor-pointer transition hover:scale-105 active:scale-95 bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900';
-            badge.innerHTML = user.plan === 'trial' ? `EXPIRED` : `FREE`;
+            badge.innerHTML = isExpired ? `EXPIRED` : `FREE`;
+            badge.title = 'Click to upgrade to Kotha Pro';
+            badge.onclick = () => window.openUpgradeModal ? window.openUpgradeModal() : (window.location.href = '/pricing.html');
+
+            if (sidebarUpgradeBtn) sidebarUpgradeBtn.classList.remove('hidden');
+            if (chatHeaderUpgradeBtn) chatHeaderUpgradeBtn.classList.remove('hidden');
+            if (profilePlanName) profilePlanName.textContent = isExpired ? 'Trial Expired' : 'Free Plan';
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.remove('hidden');
         }
     }
 })();

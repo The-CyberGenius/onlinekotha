@@ -7,11 +7,37 @@
     const pickFolderBtn = document.getElementById('pick-folder-btn');
     const fileInputZip = document.getElementById('file-input-zip');
     const fileInputFolder = document.getElementById('file-input-folder');
+    const errorEl = document.getElementById('upload-error');
+
+    // Modern active upload & processing section elements
+    const uploadInputSection = document.getElementById('upload-input-section');
+    const uploadActiveSection = document.getElementById('upload-active-section');
+    const iconPulse = document.getElementById('upload-icon-pulse');
+    const iconUploading = document.getElementById('upload-icon-uploading');
+    const iconProcessing = document.getElementById('upload-icon-processing');
+    const iconSuccess = document.getElementById('upload-icon-success');
+    const uploadPhaseBadge = document.getElementById('upload-phase-badge');
+    const uploadStatusTitle = document.getElementById('upload-status-title');
+    const uploadStatusSubtitle = document.getElementById('upload-status-subtitle');
+    const uploadProgressBar = document.getElementById('upload-progress-bar');
+    const uploadMbCounter = document.getElementById('upload-mb-counter');
+    const uploadPercentCounter = document.getElementById('upload-percent-counter');
+
+    // Legacy fallbacks
     const progressWrap = document.getElementById('upload-progress');
     const progressBar = document.getElementById('upload-bar');
     const progressPercent = document.getElementById('upload-percent');
     const progressStatus = document.getElementById('upload-status-text');
-    const errorEl = document.getElementById('upload-error');
+
+    let processingTicker = null;
+    const PROCESSING_MESSAGES = [
+        { title: 'Extracting chat archive...', sub: 'Unpacking messages, photos, videos and audio notes...' },
+        { title: 'Reading conversation history...', sub: 'Parsing timestamps, senders, replies and emojis...' },
+        { title: 'Computing chat analytics...', sub: 'Calculating activity streaks, response times and top words...' },
+        { title: 'Indexing media files...', sub: 'Organizing voice recordings, photos and shared links...' },
+        { title: 'Generating AI intelligence...', sub: 'Building relationship insights and conversation memory...' },
+        { title: 'Finalizing dashboard...', sub: 'Almost ready! Saving everything to your private space...' }
+    ];
 
     if (!modal || !openBtn) return;
 
@@ -31,29 +57,177 @@
     }
 
     function closeModal() {
+        if (processingTicker) {
+            clearInterval(processingTicker);
+            processingTicker = null;
+        }
         modal.classList.add('opacity-0');
         setTimeout(() => modal.classList.add('hidden'), 200);
     }
 
     function resetUI() {
-        progressWrap.classList.add('hidden');
-        errorEl.classList.add('hidden');
-        errorEl.textContent = '';
-        progressBar.style.width = '0%';
-        progressPercent.textContent = '0%';
-        progressStatus.textContent = 'Uploading...';
+        if (processingTicker) {
+            clearInterval(processingTicker);
+            processingTicker = null;
+        }
+        if (uploadInputSection) uploadInputSection.classList.remove('hidden');
+        if (uploadActiveSection) uploadActiveSection.classList.add('hidden');
+        if (closeBtn) closeBtn.classList.remove('hidden');
+        if (errorEl) {
+            errorEl.classList.add('hidden');
+            errorEl.textContent = '';
+        }
+        if (uploadProgressBar) uploadProgressBar.style.width = '0%';
+        if (uploadPercentCounter) uploadPercentCounter.textContent = '0%';
+        if (uploadMbCounter) uploadMbCounter.textContent = '0 MB / 0 MB';
+        if (iconUploading) iconUploading.classList.remove('hidden');
+        if (iconProcessing) iconProcessing.classList.add('hidden');
+        if (iconSuccess) iconSuccess.classList.add('hidden');
+        if (iconPulse) iconPulse.classList.remove('hidden');
+
+        // Legacy compatibility
+        if (progressWrap) progressWrap.classList.add('hidden');
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressPercent) progressPercent.textContent = '0%';
+        if (progressStatus) progressStatus.textContent = 'Uploading...';
     }
 
     function showError(msg) {
-        errorEl.textContent = msg;
-        errorEl.classList.remove('hidden');
-        progressWrap.classList.add('hidden');
+        if (processingTicker) {
+            clearInterval(processingTicker);
+            processingTicker = null;
+        }
+        if (uploadInputSection) uploadInputSection.classList.remove('hidden');
+        if (uploadActiveSection) uploadActiveSection.classList.add('hidden');
+        if (closeBtn) closeBtn.classList.remove('hidden');
+        if (errorEl) {
+            errorEl.textContent = msg;
+            errorEl.classList.remove('hidden');
+        }
+        if (progressWrap) progressWrap.classList.add('hidden');
+    }
+
+    function startUploadingUI(totalSize) {
+        if (processingTicker) {
+            clearInterval(processingTicker);
+            processingTicker = null;
+        }
+        if (uploadInputSection) uploadInputSection.classList.add('hidden');
+        if (uploadActiveSection) uploadActiveSection.classList.remove('hidden');
+        if (closeBtn) closeBtn.classList.add('hidden'); // Protect against accidental dismiss
+        if (errorEl) errorEl.classList.add('hidden');
+
+        if (uploadPhaseBadge) {
+            uploadPhaseBadge.textContent = 'Phase 1 of 2: Uploading Chat';
+            uploadPhaseBadge.className = 'inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/40 mb-2';
+        }
+        if (iconUploading) iconUploading.classList.remove('hidden');
+        if (iconProcessing) iconProcessing.classList.add('hidden');
+        if (iconSuccess) iconSuccess.classList.add('hidden');
+        if (iconPulse) iconPulse.classList.remove('hidden');
+
+        if (uploadStatusTitle) uploadStatusTitle.textContent = 'Uploading chat data...';
+        if (uploadStatusSubtitle) uploadStatusSubtitle.textContent = 'Transferring file chunks safely to server...';
+        if (uploadProgressBar) uploadProgressBar.style.width = '0%';
+        if (uploadPercentCounter) uploadPercentCounter.textContent = '0%';
+        const mbTotal = (totalSize / (1024 * 1024)).toFixed(1);
+        if (uploadMbCounter) uploadMbCounter.textContent = `0.0 / ${mbTotal} MB`;
+    }
+
+    function updateUploadProgress(loadedBytes, totalSize, chunkText = '') {
+        const pct = Math.min(99, Math.round((loadedBytes / totalSize) * 100));
+        if (uploadProgressBar) uploadProgressBar.style.width = pct + '%';
+        if (uploadPercentCounter) uploadPercentCounter.textContent = pct + '%';
+        const mbUploaded = (loadedBytes / (1024 * 1024)).toFixed(1);
+        const mbTotal = (totalSize / (1024 * 1024)).toFixed(1);
+        if (uploadMbCounter) uploadMbCounter.textContent = `${mbUploaded} / ${mbTotal} MB`;
+        if (uploadStatusSubtitle && chunkText) uploadStatusSubtitle.textContent = chunkText;
+
+        // Legacy compatibility
+        if (progressBar) progressBar.style.width = pct + '%';
+        if (progressPercent) progressPercent.textContent = pct + '%';
+        if (progressStatus) progressStatus.textContent = `Uploading ${mbUploaded} / ${mbTotal} MB (${pct}%)...`;
+    }
+
+    function startProcessingUI() {
+        if (uploadPhaseBadge) {
+            uploadPhaseBadge.textContent = 'Phase 2 of 2: Processing & Indexing';
+            uploadPhaseBadge.className = 'inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/40 mb-2';
+        }
+        if (iconUploading) iconUploading.classList.add('hidden');
+        if (iconProcessing) iconProcessing.classList.remove('hidden');
+        if (iconSuccess) iconSuccess.classList.add('hidden');
+        if (iconPulse) iconPulse.classList.remove('hidden');
+
+        let msgIndex = 0;
+        function renderStep(idx) {
+            const step = PROCESSING_MESSAGES[idx % PROCESSING_MESSAGES.length];
+            if (uploadStatusTitle) uploadStatusTitle.textContent = step.title;
+            if (uploadStatusSubtitle) {
+                uploadStatusSubtitle.style.opacity = '0';
+                setTimeout(() => {
+                    uploadStatusSubtitle.textContent = step.sub;
+                    uploadStatusSubtitle.style.opacity = '1';
+                }, 180);
+            }
+        }
+        renderStep(0);
+
+        let fakePct = 85;
+        if (uploadProgressBar) uploadProgressBar.style.width = fakePct + '%';
+        if (uploadPercentCounter) uploadPercentCounter.textContent = fakePct + '%';
+        if (uploadMbCounter) uploadMbCounter.textContent = 'Processing files...';
+
+        if (processingTicker) clearInterval(processingTicker);
+        processingTicker = setInterval(() => {
+            msgIndex++;
+            renderStep(msgIndex);
+            if (fakePct < 98) {
+                fakePct += 1;
+                if (uploadProgressBar) uploadProgressBar.style.width = fakePct + '%';
+                if (uploadPercentCounter) uploadPercentCounter.textContent = fakePct + '%';
+            }
+        }, 2500);
+
+        // Legacy compatibility
+        if (progressStatus) progressStatus.textContent = 'Processing chat (extracting & analyzing)...';
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressPercent) progressPercent.textContent = '100%';
+    }
+
+    function finishProcessingUI() {
+        if (processingTicker) {
+            clearInterval(processingTicker);
+            processingTicker = null;
+        }
+        if (uploadPhaseBadge) {
+            uploadPhaseBadge.textContent = 'Complete!';
+            uploadPhaseBadge.className = 'inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40 mb-2';
+        }
+        if (iconUploading) iconUploading.classList.add('hidden');
+        if (iconProcessing) iconProcessing.classList.add('hidden');
+        if (iconSuccess) iconSuccess.classList.remove('hidden');
+        if (iconPulse) iconPulse.classList.add('hidden');
+
+        if (uploadStatusTitle) uploadStatusTitle.textContent = 'Chat Imported Successfully! ✨';
+        if (uploadStatusSubtitle) uploadStatusSubtitle.textContent = 'Opening your conversation dashboard...';
+        if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+        if (uploadPercentCounter) uploadPercentCounter.textContent = '100%';
+        if (uploadMbCounter) uploadMbCounter.textContent = 'Ready!';
+
+        // Legacy compatibility
+        if (progressStatus) progressStatus.textContent = 'Done!';
     }
 
     openBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', e => {
-        if (e.target === modal) closeModal();
+        if (e.target === modal) {
+            if (uploadActiveSection && !uploadActiveSection.classList.contains('hidden')) {
+                return;
+            }
+            closeModal();
+        }
     });
 
     pickZipBtn.addEventListener('click', () => fileInputZip.click());
@@ -253,20 +427,13 @@
                 chunkBlob: safeChunkBlob,
                 onProgress: (loadedInChunk) => {
                     const loadedBytes = start + loadedInChunk;
-                    const pct = Math.min(99, Math.round((loadedBytes / totalSize) * 100));
-                    progressBar.style.width = pct + '%';
-                    progressPercent.textContent = pct + '%';
-                    const mbUploaded = (loadedBytes / (1024 * 1024)).toFixed(1);
-                    const mbTotal = (totalSize / (1024 * 1024)).toFixed(1);
-                    progressStatus.textContent = `Uploading ${mbUploaded} / ${mbTotal} MB (${pct}%)...`;
+                    updateUploadProgress(loadedBytes, totalSize, `Uploading chunk ${chunkIndex + 1} of ${totalChunks}...`);
                 }
             });
         }
 
         // All chunks uploaded: assemble & process on server
-        progressStatus.textContent = 'Processing chat (extracting & analyzing)...';
-        progressBar.style.width = '100%';
-        progressPercent.textContent = '100%';
+        startProcessingUI();
 
         const completeResp = await fetch('/api/upload/chunk-complete', {
             method: 'POST',
@@ -331,10 +498,7 @@
                 xhr.upload.addEventListener('progress', e => {
                     if (e.lengthComputable) {
                         const totalLoaded = uploadedBytes + e.loaded;
-                        const pct = Math.min(99, Math.round((totalLoaded / totalBytes) * 100));
-                        progressBar.style.width = pct + '%';
-                        progressPercent.textContent = pct + '%';
-                        progressStatus.textContent = `Uploading files ${i + 1}/${files.length} (${pct}%)...`;
+                        updateUploadProgress(totalLoaded, totalBytes, `Uploading file ${i + 1} of ${files.length}...`);
                     }
                 });
 
@@ -357,9 +521,7 @@
             uploadedBytes += f.size;
         }
 
-        progressStatus.textContent = 'Processing chat (analyzing)...';
-        progressBar.style.width = '100%';
-        progressPercent.textContent = '100%';
+        startProcessingUI();
 
         const completeResp = await fetch('/api/upload/files-complete', {
             method: 'POST',
@@ -383,7 +545,7 @@
     }
 
     function handleUploadSuccess(resp) {
-        progressStatus.textContent = 'Done!';
+        finishProcessingUI();
         if (window.__IS_GUEST__ && window.__GUEST_STATUS__) {
             window.__GUEST_STATUS__.chatsRemaining = Math.max(0, (window.__GUEST_STATUS__.chatsRemaining || 1) - 1);
             window.__GUEST_STATUS__.chatsImported = (window.__GUEST_STATUS__.chatsImported || 0) + 1;
@@ -394,7 +556,7 @@
             closeModal();
             if (window.refreshChats) window.refreshChats(resp.chat);
             else window.location.reload();
-        }, 400);
+        }, 700);
     }
 
     async function uploadFiles(files) {
@@ -421,8 +583,7 @@
         }
 
         resetUI();
-        progressWrap.classList.remove('hidden');
-        progressStatus.textContent = 'Preparing upload...';
+        startUploadingUI(totalSize);
 
         try {
             let resp;
@@ -443,8 +604,8 @@
                 }
             } else if (err.upgrade) {
                 closeModal();
-                if (window.showProModal) {
-                    window.showProModal();
+                if (window.openUpgradeModal) {
+                    window.openUpgradeModal();
                 } else {
                     showError(err.message || 'Free plan limit reached. Upgrade to Pro for unlimited chats!');
                 }
