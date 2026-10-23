@@ -95,8 +95,8 @@ function getOnlineUsers() {
     return Array.from(unique.values());
 }
 
-// REST endpoint for polling online count
-router.get('/online-count', requireUser, (req, res) => {
+// REST endpoint for polling online count (public so guest users don't trigger 401s)
+router.get('/online-count', (req, res) => {
     res.json({ count: getOnlineUsers().length });
 });
 

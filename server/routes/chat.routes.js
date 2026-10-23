@@ -100,8 +100,23 @@ router.get('/messages', requireUserOrGuest, async (req, res) => {
         return res.status(403).json({ error: 'Invalid path' });
     }
 
+    let finalChatDir = chatDir;
+    if (!fs.existsSync(finalChatDir)) {
+        const { SRC_DIR } = require('../upload');
+        if (fs.existsSync(SRC_DIR)) {
+            const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && (d.name.startsWith('u_') || d.name.startsWith('gst_')));
+            for (const sd of subdirs) {
+                const cand = path.join(SRC_DIR, sd.name, chatName);
+                if (fs.existsSync(cand)) {
+                    finalChatDir = cand;
+                    break;
+                }
+            }
+        }
+    }
+
     try {
-        const result = await getMessages(chatDir);
+        const result = await getMessages(finalChatDir);
         res.json(result.messages);
     } catch (err) {
         if (err.code === 'NO_CHAT_FILE') return res.status(404).json({ error: 'Chat file not found' });

@@ -29,9 +29,31 @@ function getOwner(req) {
     return { userId: 0, guestId, dirKey: guestId, isGuest: true };
 }
 
+// Helper to get safe chat directory across user and guest subdirectories
+function getSafeChatDir(dirKey, chatFolder) {
+    if (!chatFolder) return null;
+    const baseDir = path.resolve(userDir(dirKey));
+    const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
+    let chatDir = path.resolve(baseDir, cleanFolder);
+    if (!fs.existsSync(chatDir)) {
+        const { SRC_DIR } = require('./upload');
+        if (fs.existsSync(SRC_DIR)) {
+            const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && (d.name.startsWith('u_') || d.name.startsWith('gst_')));
+            for (const sd of subdirs) {
+                const cand = path.join(SRC_DIR, sd.name, cleanFolder);
+                if (fs.existsSync(cand)) {
+                    chatDir = cand;
+                    break;
+                }
+            }
+        }
+    }
+    return chatDir;
+}
+
 // ---------- Plan + rate-limit gates ----------
 function aiGate(req, res, next) {
-    if (req.user && req.user.is_impersonating) {
+    if (req.user && (req.user.is_admin || req.user.is_impersonating)) {
         return next();
     }
     if (!req.user || req.user.plan === 'guest') {
@@ -61,19 +83,25 @@ function aiGate(req, res, next) {
     if (plan === 'paid') return next();
 
     if (plan === 'free') {
-        const freeDailyMax = Number(getSetting('free_user_daily_messages', '5'));
+        const freeDailyMax = Number(getSetting('free_user_daily_messages', '20'));
         if (freeDailyMax > 0 && usedToday >= freeDailyMax) {
             return res.status(429).json({
                 error: `You've used your ${freeDailyMax} free AI messages for today. Upgrade to Pro for unlimited AI conversations!`,
                 limit: freeDailyMax,
                 used: usedToday,
+                upgrade: true,
             });
         }
     } else {
-        // Trial users: higher cap but still limited
-        const trialMax = Number(getSetting('trial_user_daily_messages', '10'));
+        // Trial users: generous daily limit (default 50/day)
+        const trialMax = Number(getSetting('trial_user_daily_messages', '50'));
         if (trialMax > 0 && usedToday >= trialMax) {
-            return res.status(429).json({ error: `Daily limit (${trialMax}) reached. Resets at midnight.` });
+            return res.status(429).json({
+                error: `You've reached your daily trial limit (${trialMax} messages). Upgrade to Pro for unlimited AI conversations!`,
+                limit: trialMax,
+                used: usedToday,
+                upgrade: true,
+            });
         }
     }
     next();
@@ -157,19 +185,9 @@ router.get('/chat/:folder/identity', async (req, res) => {
         if (!chatFolder || chatFolder.includes('..')) {
             return res.status(400).json({ error: 'Invalid folder' });
         }
-        let dir = path.resolve(userDir(owner.dirKey), path.normalize(chatFolder));
-        if (!fs.existsSync(dir)) {
-            const { SRC_DIR } = require('./upload');
-            if (fs.existsSync(SRC_DIR)) {
-                const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_'));
-                for (const sd of subdirs) {
-                    const cand = path.join(SRC_DIR, sd.name, chatFolder);
-                    if (fs.existsSync(cand)) {
-                        dir = cand;
-                        break;
-                    }
-                }
-            }
+        const dir = getSafeChatDir(owner.dirKey, chatFolder);
+        if (!dir || !fs.existsSync(dir)) {
+            return res.status(404).json({ error: 'Chat folder not found' });
         }
         
         const { participants, participantStats, isGroup } = await getMessages(dir);
@@ -202,28 +220,16 @@ router.post('/chat/:folder/identity', async (req, res) => {
     let info = db.prepare(sql).run(...params);
     if (info.changes === 0) {
         // Chat not in DB yet, insert it. Let's try to parse it first to get metadata.
-        const myDir = userDir(owner.dirKey);
-        let finalDir = path.join(myDir, req.params.folder);
-        if (!fs.existsSync(finalDir)) {
-            const { SRC_DIR } = require('./upload');
-            if (fs.existsSync(SRC_DIR)) {
-                const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_'));
-                for (const sd of subdirs) {
-                    const cand = path.join(SRC_DIR, sd.name, req.params.folder);
-                    if (fs.existsSync(cand)) {
-                        finalDir = cand;
-                        break;
-                    }
-                }
-            }
-        }
+        const finalDir = getSafeChatDir(owner.dirKey, req.params.folder);
         let msgCount = 0, isGroup = 0, parts = [];
-        try {
-            const parsed = await getMessages(finalDir);
-            msgCount = parsed.messages ? parsed.messages.length : 0;
-            isGroup = parsed.isGroup ? 1 : 0;
-            parts = parsed.participants || [];
-        } catch(e) {}
+        if (finalDir && fs.existsSync(finalDir)) {
+            try {
+                const parsed = await getMessages(finalDir);
+                msgCount = parsed.messages ? parsed.messages.length : 0;
+                isGroup = parsed.isGroup ? 1 : 0;
+                parts = parsed.participants || [];
+            } catch(e) {}
+        }
 
         const insertSql = !owner.isGuest
             ? 'INSERT INTO chats (user_id, folder_name, user_participant, created_at, message_count, is_group, participants) VALUES (?, ?, ?, ?, ?, ?, ?)'
@@ -254,29 +260,11 @@ router.post('/chat', aiGate, async (req, res) => {
     const owner = getOwner(req);
     const { userId, guestId, dirKey } = owner;
     const ownerKey = !owner.isGuest ? `ai_${userId}` : `ai_guest_${guestId}`;
-    const burstCheck = checkBurstLimit(ownerKey);
-    if (!burstCheck.allowed) {
-        return res.status(429).json({ error: burstCheck.error });
-    }
-
-    function getSafeChatDir(dirKey, chatFolder) {
-        const baseDir = path.resolve(userDir(dirKey));
-        const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
-        let chatDir = path.resolve(baseDir, cleanFolder);
-        if (!fs.existsSync(chatDir)) {
-            const { SRC_DIR } = require('./upload');
-            if (fs.existsSync(SRC_DIR)) {
-                const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_'));
-                for (const sd of subdirs) {
-                    const cand = path.join(SRC_DIR, sd.name, cleanFolder);
-                    if (fs.existsSync(cand)) {
-                        chatDir = cand;
-                        break;
-                    }
-                }
-            }
+    if (!req.user || (!req.user.is_admin && !req.user.is_impersonating)) {
+        const burstCheck = checkBurstLimit(ownerKey);
+        if (!burstCheck.allowed) {
+            return res.status(429).json({ error: burstCheck.error });
         }
-        return chatDir;
     }
 
     // Load chat messages for context
@@ -704,17 +692,15 @@ router.get('/memories', async (req, res) => {
     if (!chatFolder) return res.status(400).json({ error: 'chat required' });
 
     const { dirKey } = getOwner(req);
-    const baseDir = path.resolve(userDir(dirKey));
-    const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
-    const chatDir = path.resolve(baseDir, cleanFolder);
-    if (!chatDir.startsWith(baseDir)) return res.status(403).json({ error: 'Invalid path' });
+    const chatDir = getSafeChatDir(dirKey, chatFolder);
+    if (!chatDir || !fs.existsSync(chatDir)) return res.json({ memories: [], count: 0, date: '' });
 
     let chatMessages;
     try {
         const parsed = await getMessages(chatDir);
-        chatMessages = parsed.messages;
+        chatMessages = parsed.messages || [];
     } catch {
-        return res.json({ memories: [] });
+        return res.json({ memories: [], count: 0, date: '' });
     }
 
     const today = new Date();
@@ -753,15 +739,13 @@ router.get('/summary', async (req, res) => {
     if (!chatFolder) return res.status(400).json({ error: 'chat required' });
 
     const { dirKey } = getOwner(req);
-    const baseDir = path.resolve(userDir(dirKey));
-    const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, '');
-    const chatDir = path.resolve(baseDir, cleanFolder);
-    if (!chatDir.startsWith(baseDir)) return res.status(403).json({ error: 'Invalid path' });
+    const chatDir = getSafeChatDir(dirKey, chatFolder);
+    if (!chatDir || !fs.existsSync(chatDir)) return res.status(404).json({ error: 'Chat not found' });
 
     let chatMessages;
     try {
         const parsed = await getMessages(chatDir);
-        chatMessages = parsed.messages;
+        chatMessages = parsed.messages || [];
     } catch {
         return res.status(404).json({ error: 'Chat not found' });
     }
@@ -859,10 +843,8 @@ router.post("/chat/:folder/compatibility", async (req, res) => {
     try {
         const chatFolder = req.params.folder;
         const { dirKey } = getOwner(req);
-        const baseDir = path.resolve(userDir(dirKey));
-        const cleanFolder = path.normalize(chatFolder).replace(/^(\.\.[\/\\])+/, "");
-        const chatDir = path.resolve(baseDir, cleanFolder);
-        if (!chatDir.startsWith(baseDir)) return res.status(403).json({ error: "Invalid path" });
+        const chatDir = getSafeChatDir(dirKey, chatFolder);
+        if (!chatDir || !fs.existsSync(chatDir)) return res.status(404).json({ error: "Chat folder not found" });
 
         const parsed = await getMessages(chatDir);
         chatMessages = parsed.messages || [];

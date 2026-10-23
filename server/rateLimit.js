@@ -9,7 +9,7 @@ function countWords(str) {
 }
 
 function checkBurstLimit(key, maxMsgs, windowMs) {
-    if (maxMsgs === undefined) maxMsgs = Number(getSetting('burst_limit_messages', '10'));
+    if (maxMsgs === undefined) maxMsgs = Number(getSetting('burst_limit_messages', '30'));
     if (windowMs === undefined) windowMs = Number(getSetting('burst_limit_seconds', '30')) * 1000;
 
     const now = Date.now();
