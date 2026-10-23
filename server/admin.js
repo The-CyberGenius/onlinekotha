@@ -596,7 +596,7 @@ router.get('/users', (req, res) => {
     const guestUsers = [];
     guests.forEach(g => {
         const isOnline = isUserOnline(g.id);
-        const guestChatCount = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL) AND deleted_by_user = 0').get(g.id)?.c || 0;
+        const guestChatCount = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ?').get(g.id)?.c || 0;
         
         let guestCountry = null;
         if (geoip && g.ip_address) {
@@ -621,7 +621,7 @@ router.get('/users', (req, res) => {
             trial_expires_at: null,
             created_at: g.created_at,
             last_active_at: g.last_active_at || g.created_at,
-            chat_count: Math.max(guestChatCount, g.chats_imported || 0),
+            chat_count: guestChatCount,
             ai_messages_count: g.ai_messages_count || 0,
             total_cost: 0,
             is_guest: true,
@@ -687,6 +687,12 @@ function resolveChatDir(userIdOrGuestId, chat) {
     const primaryDir = path.join(targetParent, chat.folder_name);
 
     if (fs.existsSync(primaryDir)) return primaryDir;
+
+    // Check if chat is in registered user's folder if claimed
+    if (chat.user_id && chat.user_id > 0) {
+        const userChatDir = path.join(SRC_DIR, `u_${chat.user_id}`, chat.folder_name);
+        if (fs.existsSync(userChatDir)) return userChatDir;
+    }
 
     // 1. Check guest directory if chat was originally imported by a guest
     if (chat.guest_id && String(chat.guest_id) !== String(userIdOrGuestId)) {
@@ -773,9 +779,14 @@ router.get('/users/:id/chats', (req, res) => {
         let userId = idParam;
         
         if (isGuest) {
-            chats = db.prepare(
-                'SELECT id, user_id, guest_id, folder_name, display_name, message_count, created_at, deleted_by_user FROM chats WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL) ORDER BY created_at DESC'
-            ).all(idParam);
+            chats = db.prepare(`
+                SELECT c.id, c.user_id, c.guest_id, c.folder_name, c.display_name, c.message_count, c.created_at, c.deleted_by_user,
+                       u.email AS claimed_by_email, u.display_name AS claimed_by_name
+                FROM chats c
+                LEFT JOIN users u ON u.id = c.user_id AND c.user_id > 0
+                WHERE c.guest_id = ?
+                ORDER BY c.created_at DESC
+            `).all(idParam);
         } else {
             userId = Number(idParam);
             const user = db.prepare('SELECT id FROM users WHERE id = ?').get(userId);

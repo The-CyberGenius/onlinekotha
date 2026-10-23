@@ -34,17 +34,23 @@ function getOrCreateGuestId(req, res) {
 
 function getGuestRecord(guestId, ip, fp) {
     const now = Date.now();
-    let row = db.prepare('SELECT * FROM guest_sessions WHERE id = ? OR ip = ? OR fingerprint = ?').get(guestId, ip, fp);
+    let row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
     if (!row) {
+        // Inherit quota from existing IP or fingerprint if available (prevents incognito quota reset)
+        let existingQuota = null;
+        if (fp) existingQuota = db.prepare('SELECT chats_imported, ai_messages_count FROM guest_sessions WHERE fingerprint = ?').get(fp);
+        if (!existingQuota && ip) existingQuota = db.prepare('SELECT chats_imported, ai_messages_count FROM guest_sessions WHERE ip = ?').get(ip);
+
+        const chatsImported = existingQuota ? existingQuota.chats_imported : 0;
+        const aiCount = existingQuota ? existingQuota.ai_messages_count : 0;
+
         db.prepare(`
             INSERT INTO guest_sessions (id, ip, fingerprint, chats_imported, ai_messages_count, created_at, updated_at)
-            VALUES (?, ?, ?, 0, 0, ?, ?)
-        `).run(guestId, ip, fp, now, now);
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(guestId, ip, fp, chatsImported, aiCount, now, now);
         row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
-    } else if (row.id !== guestId) {
-        // Associate this guestId with the existing IP/fingerprint session if IP matches
-        db.prepare('UPDATE guest_sessions SET id = ?, updated_at = ? WHERE id = ?').run(guestId, now, row.id);
-        row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
+    } else {
+        db.prepare('UPDATE guest_sessions SET updated_at = ?, ip = COALESCE(?, ip), fingerprint = COALESCE(?, fingerprint) WHERE id = ?').run(now, ip, fp, guestId);
     }
     return row;
 }
@@ -168,6 +174,46 @@ function healOrphanedGuestChats() {
 
         // Clean up any remaining guest folders whose chats were claimed
         const allGuestDirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && d.name.startsWith('u_gst_'));
+        const { findChatFile } = require('./parser');
+
+        // Recover any guest chats that exist on disk but are missing from DB
+        for (const gDir of allGuestDirs) {
+            const guestId = gDir.name.replace(/^u_/, '');
+            const gDirPath = path.join(SRC_DIR, gDir.name);
+            const subfolders = fs.readdirSync(gDirPath, { withFileTypes: true });
+            for (const sub of subfolders) {
+                if (sub.isDirectory()) {
+                    const chatPath = path.join(gDirPath, sub.name);
+                    const existingInDb = db.prepare('SELECT id FROM chats WHERE folder_name = ? AND (guest_id = ? OR user_id > 0)').get(sub.name, guestId);
+                    if (!existingInDb) {
+                        const chatFile = findChatFile(chatPath);
+                        if (chatFile) {
+                            let msgCount = 0;
+                            let displayName = sub.name;
+                            let isGroup = 0;
+                            let participants = [];
+                            try {
+                                const cachePath = path.join(chatPath, '_chat.cache.json');
+                                if (fs.existsSync(cachePath)) {
+                                    const c = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+                                    msgCount = c.messages ? c.messages.length : 0;
+                                    isGroup = c.isGroup ? 1 : 0;
+                                    participants = c.participants || [];
+                                    if (participants.length >= 2) displayName = `${participants[0]} & ${participants[1]}`;
+                                    else if (participants.length === 1) displayName = participants[0];
+                                }
+                            } catch {}
+                            db.prepare(`
+                                INSERT OR IGNORE INTO chats (user_id, guest_id, folder_name, display_name, created_at, message_count, is_group, participants)
+                                VALUES (0, ?, ?, ?, ?, ?, ?, ?)
+                            `).run(guestId, sub.name, displayName, Date.now(), msgCount, isGroup, JSON.stringify(participants));
+                            console.log(`[Auto-Heal] Restored missing guest chat "${sub.name}" from disk for guest ${guestId}`);
+                        }
+                    }
+                }
+            }
+        }
+
         for (const gDir of allGuestDirs) {
             const guestId = gDir.name.replace(/^u_/, '');
             const unclaimedCount = db.prepare('SELECT COUNT(*) as c FROM chats WHERE guest_id = ? AND (user_id = 0 OR user_id IS NULL)').get(guestId)?.c || 0;

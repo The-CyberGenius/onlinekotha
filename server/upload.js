@@ -161,10 +161,19 @@ function sanitizeChatName(name) {
     return name.replace(/[^\w.\-() ]/g, '_').trim() || `chat_${Date.now()}`;
 }
 
-function uniqueChatDir(baseName, parentDir) {
+function uniqueChatDir(baseName, parentDir, ownerId, isGuest) {
     let name = baseName;
     let i = 1;
-    while (fs.existsSync(path.join(parentDir, name))) {
+    const existsInDb = (n) => {
+        try {
+            if (isGuest) {
+                return Boolean(db.prepare('SELECT 1 FROM chats WHERE guest_id = ? AND folder_name = ?').get(ownerId, n));
+            } else {
+                return Boolean(db.prepare('SELECT 1 FROM chats WHERE user_id = ? AND folder_name = ?').get(ownerId, n));
+            }
+        } catch { return false; }
+    };
+    while (fs.existsSync(path.join(parentDir, name)) || existsInDb(name)) {
         name = `${baseName} (${i++})`;
     }
     return path.join(parentDir, name);
@@ -275,7 +284,7 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
         }
 
         baseName = sanitizeChatName(path.basename(originalName || fileName, '.zip'));
-        finalDir = uniqueChatDir(baseName, myDir);
+        finalDir = uniqueChatDir(baseName, myDir, ownerId, !req.user);
         ensureDir(finalDir);
         moveAllFiles(extractDir, finalDir);
     } else {
@@ -288,7 +297,7 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
         const ext = path.extname(originalName || fileName || 'chat.txt');
         const folderName = path.basename(originalName || fileName || 'chat.txt', ext).trim() || `chat_${Date.now()}`;
         baseName = sanitizeChatName(folderName);
-        finalDir = uniqueChatDir(baseName, myDir);
+        finalDir = uniqueChatDir(baseName, myDir, ownerId, !req.user);
         ensureDir(finalDir);
         moveAllFiles(filesDir, finalDir);
     }
@@ -361,13 +370,13 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
 
     if (req.user) {
         db.prepare(
-            `INSERT OR IGNORE INTO chats (user_id, folder_name, display_name, created_at, message_count, is_group, participants)
+            `INSERT INTO chats (user_id, folder_name, display_name, created_at, message_count, is_group, participants)
              VALUES (?, ?, ?, ?, ?, ?, ?)`
         ).run(req.user.id, folderName, finalDisplayName, Date.now(), message_count, is_group, JSON.stringify(participants));
     } else {
         const { recordGuestChatImport } = require('./guest');
         db.prepare(
-            `INSERT OR IGNORE INTO chats (user_id, guest_id, folder_name, display_name, created_at, message_count, is_group, participants)
+            `INSERT INTO chats (user_id, guest_id, folder_name, display_name, created_at, message_count, is_group, participants)
              VALUES (0, ?, ?, ?, ?, ?, ?, ?)`
         ).run(guestId, folderName, finalDisplayName, Date.now(), message_count, is_group, JSON.stringify(participants));
         recordGuestChatImport(req, res);

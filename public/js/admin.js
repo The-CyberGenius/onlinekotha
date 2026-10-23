@@ -910,7 +910,9 @@ HARD RULES
                 if (!isGuestSection && !u.is_admin && !u.is_guest) {
                     html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at || '') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
                 }
-                html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + (u.chat_count || 0) + '" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Chats (' + (u.chat_count || 0) + ')</button>';
+                const cCount = Number(u.chat_count) || 0;
+                const cStyle = cCount > 0 ? 'flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;' : 'flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-muted);cursor:pointer;opacity:0.75;';
+                html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + cCount + '" style="' + cStyle + '">Chats (' + cCount + ')</button>';
                 html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
                 if (!isGuestSection && !u.is_admin && !u.is_guest) {
                     const suspText = u.is_suspended ? 'Unsuspend' : 'Suspend';
@@ -962,7 +964,8 @@ HARD RULES
                     html += `<td><span class="sub-text" style="font-weight:600;color:var(--text-primary);">${u.chat_count || 0} chat${(u.chat_count || 0) !== 1 ? 's' : ''}</span><span class="meta-text">${(u.ai_messages_count || 0) > 0 ? u.ai_messages_count + ' AI messages' : 'Direct web session'}</span></td>`;
                     html += `<td>${ipCountry}</td>`;
                     html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Created: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
-                    html += `<td><div class="action-cell"><button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button><button data-uid="${u.id}" data-email="${u.email || u.id}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete Guest Session" style="padding:4px 7px;font-size:11px;">Del</button></div></td></tr>`;
+                    const guestCC = Number(u.chat_count) || 0;
+                    html += `<td><div class="action-cell"><button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${guestCC}" style="padding:4px 7px;font-size:11px;${guestCC === 0 ? 'opacity:0.75;' : ''}">Chats (${guestCC})</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button><button data-uid="${u.id}" data-email="${u.email || u.id}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete Guest Session" style="padding:4px 7px;font-size:11px;">Del</button></div></td></tr>`;
                     html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="6" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
                 }
             } else {
@@ -987,7 +990,8 @@ HARD RULES
                     html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${costStr}</span></td>`;
                     html += `<td>${ipCountry}</td>`;
                     html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
-                    html += `<td><div class="action-cell">${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${u.chat_count || 0}" style="padding:4px 7px;font-size:11px;">Chats${(u.chat_count || 0) > 0 ? ` (${u.chat_count})` : ''}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
+                    const regCC = Number(u.chat_count) || 0;
+                    html += `<td><div class="action-cell">${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${regCC}" style="padding:4px 7px;font-size:11px;${regCC === 0 ? 'opacity:0.75;' : ''}">Chats (${regCC})</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
                     html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
                 }
             }
@@ -1152,7 +1156,7 @@ HARD RULES
             btn.addEventListener('click', async () => {
                 const uid = btn.dataset.uid;
                 const count = Number(btn.dataset.count) || 0;
-                const defaultLabel = count > 0 ? `Chats (${count})` : 'Chats';
+                const defaultLabel = `Chats (${count})`;
                 const area = list.querySelector(`[data-chats-for="${uid}"]`);
                 const expandRow = document.getElementById(`expand-row-${uid}`);
                 if (!area.classList.contains('hidden')) {
@@ -1223,11 +1227,12 @@ HARD RULES
                             chats.map(c => {
                                 const name = (c.display_name || c.folder_name).replace('WhatsApp Chat - ', '');
                                 const del = c.deleted_by_user ? ' <span class="badge badge-expired" style="font-size:9px;">deleted</span>' : '';
+                                const claimed = c.claimed_by_email ? ` <span class="badge" style="font-size:9px;background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);">claimed by ${c.claimed_by_email}</span>` : '';
                                 const sizeStr = c.size_bytes ? formatBytes(c.size_bytes) : '0 B';
                                 const restoreBtn = c.deleted_by_user ? '<button data-admin-restore-chat="' + c.id + '" data-uid="' + uid + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(16,185,129,0.35);background:var(--card-bg);color:#10b981;cursor:pointer;">Restore</button>' : '';
                                 
                                 return '<div data-admin-chat-row="' + c.id + '" style="padding:10px;border-bottom:1px solid var(--bg-alt);">' +
-                                    '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:4px;">' + name + del + '</div>' +
+                                    '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:4px;">' + name + del + claimed + '</div>' +
                                     '<div style="display:flex;gap:12px;font-size:11px;color:var(--text-muted);margin-bottom:6px;">' +
                                         '<span>' + (c.message_count || 0) + ' msgs</span>' +
                                         '<span>' + sizeStr + '</span>' +
@@ -1268,6 +1273,7 @@ HARD RULES
                                             <div style="font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                                                 <span>${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}</span>
                                                 ${c.deleted_by_user ? '<span class="badge badge-expired" style="margin-left:4px;">deleted</span>' : ''}
+                                                ${c.claimed_by_email ? `<span class="badge" style="margin-left:4px;font-size:9px;background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);">claimed by ${c.claimed_by_email}</span>` : ''}
                                             </div>
                                         </div>
                                         <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.size_bytes ? formatBytes(c.size_bytes) : '0 B'}</div>
