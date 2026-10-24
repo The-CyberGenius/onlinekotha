@@ -94,7 +94,7 @@
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        setTimeout(showInstallBanner, 5000);
+        setTimeout(showInstallBanner, 4000);
     });
 
     function showInstallBanner() {
@@ -102,79 +102,103 @@
         if (document.getElementById('pwa-install-banner')) return;
         const banner = document.createElement('div');
         banner.id = 'pwa-install-banner';
-        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-gray-900/95 backdrop-blur-md text-white rounded-[22px] p-4 shadow-2xl z-[50] flex items-center gap-3 animate-message border border-white/10';
+        banner.style.zIndex = '100005';
+        banner.className = 'fixed z-[100005] bottom-16 sm:bottom-6 left-3 right-3 sm:left-auto sm:right-6 sm:w-[330px] max-w-[380px] mx-auto sm:mx-0 bg-gray-950/92 dark:bg-[#161f26]/95 backdrop-blur-xl text-white rounded-2xl p-2.5 sm:p-3 shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex items-center gap-2.5 border border-white/15 animate-apple-spring';
         banner.innerHTML = `
-            <div class="w-10 h-10 flex items-center justify-center shrink-0">
-                <img src="../img/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow-md">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-1 flex items-center justify-center shrink-0 shadow-sm">
+                <img src="/img/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow">
             </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-bold">Install Kotha</p>
-                <p class="text-[11px] text-gray-400">Get it on Google Play for the best experience</p>
+            <div class="flex-1 min-w-0 pr-1">
+                <p class="text-[12px] font-bold text-white tracking-tight leading-tight truncate">Install Kotha</p>
+                <p class="text-[10px] text-gray-300 dark:text-gray-400 font-medium leading-tight truncate mt-0.5">Faster access & clean UI</p>
             </div>
-            <button id="pwa-install-btn" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:opacity-90 shadow-sm transition shrink-0">Install</button>
-            <button id="pwa-dismiss-btn" class="text-gray-400 hover:text-white transition p-1 shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            <button id="pwa-install-btn" class="bg-white text-gray-950 hover:bg-gray-100 active:scale-95 font-bold text-[11px] px-3 py-1 rounded-full shadow-sm transition shrink-0 cursor-pointer">Install</button>
+            <button id="pwa-dismiss-btn" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 flex items-center justify-center text-gray-400 hover:text-white transition shrink-0 cursor-pointer" title="Dismiss">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
         `;
         document.body.appendChild(banner);
 
-        document.getElementById('pwa-install-btn').addEventListener('click', () => {
+        const dismiss = () => {
             localStorage.setItem('kotha_pwa_dismissed', '1');
-            window.open('https://play.google.com/store/apps/details?id=com.onlinekotha.app', '_blank');
-            banner.remove();
+            banner.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(12px) scale(0.96)';
+            setTimeout(() => banner.remove(), 260);
+        };
+
+        document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                try {
+                    deferredPrompt.prompt();
+                    const choice = await deferredPrompt.userChoice;
+                    if (choice && choice.outcome === 'accepted') {
+                        localStorage.setItem('kotha_pwa_dismissed', '1');
+                    }
+                    deferredPrompt = null;
+                } catch (e) {
+                    window.open('https://play.google.com/store/apps/details?id=com.onlinekotha.app', '_blank');
+                }
+            } else {
+                window.open('https://play.google.com/store/apps/details?id=com.onlinekotha.app', '_blank');
+            }
+            dismiss();
         });
-        document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
-            localStorage.setItem('kotha_pwa_dismissed', '1');
-            banner.remove();
-        });
-        setTimeout(() => { if (banner.parentNode) banner.remove(); }, 15000);
+
+        document.getElementById('pwa-dismiss-btn').addEventListener('click', dismiss);
+        setTimeout(() => { if (banner.parentNode) dismiss(); }, 20000);
     }
+
+    // Expose for testing/manual triggering
+    window.showInstallBanner = showInstallBanner;
 
     // ===== iOS Install Prompt =====
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 
     if (isIOS && !isStandalone) {
-        setTimeout(showIOSInstallBanner, 5000);
+        setTimeout(showIOSInstallBanner, 4000);
     }
 
     function showIOSInstallBanner() {
         if (document.getElementById('ios-install-banner') || localStorage.getItem('kotha_ios_install_dismissed')) return;
         const banner = document.createElement('div');
         banner.id = 'ios-install-banner';
-        banner.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-zinc-950/95 backdrop-blur-md text-white rounded-[22px] p-4 shadow-2xl z-[50] flex flex-col gap-3 animate-message border border-white/10';
+        banner.style.zIndex = '100005';
+        banner.className = 'fixed z-[100005] bottom-16 sm:bottom-6 left-3 right-3 sm:left-auto sm:right-6 sm:w-[330px] max-w-[380px] mx-auto sm:mx-0 bg-zinc-950/92 dark:bg-[#161f26]/95 backdrop-blur-xl text-white rounded-2xl p-2.5 sm:p-3 shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex flex-col gap-2 border border-white/15 animate-apple-spring';
         banner.innerHTML = `
-            <div class="flex items-start gap-3">
-                <div class="w-10 h-10 flex items-center justify-center shrink-0">
-                    <img src="../img/logo.svg" alt="Logo" class="w-8 h-8 drop-shadow-md">
+            <div class="flex items-center gap-2.5 w-full">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 p-1 flex items-center justify-center shrink-0 shadow-sm">
+                    <img src="/img/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow">
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold">Install Kotha App</p>
-                    <p class="text-[11px] text-zinc-400">Save memories and view chats faster on your iPhone.</p>
+                <div class="flex-1 min-w-0 pr-1">
+                    <p class="text-[12px] font-bold text-white tracking-tight leading-tight truncate">Install Kotha App</p>
+                    <p class="text-[10px] text-zinc-300 dark:text-zinc-400 font-medium leading-tight truncate mt-0.5">Add to Home Screen for best experience</p>
                 </div>
-                <button id="ios-dismiss-btn" class="text-zinc-500 hover:text-white transition p-1 shrink-0">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                <button id="ios-dismiss-btn" class="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 active:scale-90 flex items-center justify-center text-zinc-400 hover:text-white transition shrink-0 cursor-pointer" title="Dismiss">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="bg-white/5 rounded-xl p-3 text-[11px] text-zinc-300 flex flex-col gap-2 border border-white/5">
-                <div class="flex items-center gap-2">
-                    <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[10px] shrink-0">1</span>
-                    <span>Tap Safari's **Share** button below:</span>
-                    <svg class="w-4 h-4 text-blue-400 inline shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center font-bold text-[10px] shrink-0">2</span>
-                    <span>Scroll down and select **Add to Home Screen**.</span>
-                </div>
+            <div class="bg-white/10 dark:bg-white/5 rounded-xl px-2.5 py-1.5 text-[10.5px] text-zinc-200 flex items-center gap-2 border border-white/10">
+                <svg class="w-4 h-4 text-blue-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                <span class="truncate">Tap <b>Share</b> then <b>Add to Home Screen</b></span>
             </div>
         `;
         document.body.appendChild(banner);
 
-        document.getElementById('ios-dismiss-btn').addEventListener('click', () => {
-            banner.remove();
+        const dismiss = () => {
             localStorage.setItem('kotha_ios_install_dismissed', '1');
-        });
+            banner.style.transition = 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(12px) scale(0.96)';
+            setTimeout(() => banner.remove(), 260);
+        };
+
+        document.getElementById('ios-dismiss-btn').addEventListener('click', dismiss);
     }
+
+    // Expose for testing/manual triggering
+    window.showIOSInstallBanner = showIOSInstallBanner;
 
     // ===== Tactical Haptic Feedback =====
     document.addEventListener('click', (e) => {

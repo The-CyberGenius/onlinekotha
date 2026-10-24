@@ -436,6 +436,12 @@
             const emailDisplay = document.getElementById('my-email-display');
             if (emailDisplay) emailDisplay.textContent = 'Free Preview Mode';
 
+            // Guest Global Chat indicator
+            const globalOnlineCount = document.getElementById('global-online-count');
+            if (globalOnlineCount) {
+                globalOnlineCount.innerHTML = '<span class="text-indigo-500 dark:text-indigo-400 font-semibold flex items-center gap-1">🔒 Sign in to join</span>';
+            }
+
             const avatarInitials = document.getElementById('my-avatar-initials');
             if (avatarInitials) avatarInitials.textContent = 'G';
 

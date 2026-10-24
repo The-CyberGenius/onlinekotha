@@ -691,6 +691,10 @@
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify(payload),
             }).then(resp => {
+                if (resp.status === 401 && typeof window.openAuthModal === 'function') {
+                    window.openAuthModal('Sign in with Google to join the Global Community Chat room!');
+                    return;
+                }
                 if (!resp.ok) {
                     toast('Failed to send global message');
                 }

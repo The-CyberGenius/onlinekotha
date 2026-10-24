@@ -3261,3 +3261,29 @@ html.dark .kotha-cute-sub-action,
         display: none !important;
     }
 }
+
+/* PWA & iOS Install Prompts - Highest stacking priority & Apple spring animation */
+#pwa-install-banner,
+#ios-install-banner {
+    z-index: 100005 !important;
+    position: fixed !important;
+    pointer-events: auto !important;
+}
+
+@keyframes appleSpring {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scale(0.95);
+    }
+    60% {
+        transform: translateY(-2px) scale(1.01);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.animate-apple-spring {
+    animation: appleSpring 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

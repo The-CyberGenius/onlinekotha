@@ -2127,10 +2127,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (targetChat === '__global__') {
-                    const btn = document.getElementById('global-chat-item');
-                    if (btn) btn.click();
-                    if (isMobile() || window.kothaCompact) {
-                        toggleSidebar(false);
+                    const isGuest = window.__IS_GUEST__ === true || !window.__USER__ || (window.__USER__ && window.__USER__.plan === 'guest');
+                    if (isGuest) {
+                        localStorage.removeItem('kotha_active_chat');
+                        if (typeof window.openAuthModal === 'function') {
+                            window.openAuthModal('Sign in with Google to join the Global Community Chat room!');
+                        }
+                    } else {
+                        const btn = document.getElementById('global-chat-item');
+                        if (btn) btn.click();
+                        if (isMobile() || window.kothaCompact) {
+                            toggleSidebar(false);
+                        }
                     }
                 } else if (targetChat) {
                     const match = chats.find(c => c === targetChat || c.toLowerCase() === targetChat.toLowerCase());
@@ -2810,6 +2818,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function connectGlobalChat() {
+        const isGuest = window.__IS_GUEST__ === true || !window.__USER__ || (window.__USER__ && window.__USER__.plan === 'guest');
+        if (isGuest) {
+            if (typeof window.openAuthModal === 'function') {
+                window.openAuthModal('Sign in with Google to join the Global Community Chat room!');
+            }
+            return;
+        }
+
         if (globalEventSource) return;
 
         chatContainer.innerHTML = `
@@ -3066,7 +3082,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (globalChatItem) {
-        globalChatItem.addEventListener('click', () => {
+        globalChatItem.addEventListener('click', (e) => {
+            const isGuest = window.__IS_GUEST__ === true || !window.__USER__ || (window.__USER__ && window.__USER__.plan === 'guest');
+            if (isGuest) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                if (typeof window.openAuthModal === 'function') {
+                    window.openAuthModal('Sign in with Google to join the Global Community Chat room!');
+                }
+                return;
+            }
+
             if (currentChat === '__global__') {
                 if (isMobile() || window.kothaCompact) toggleSidebar(false);
                 return;
