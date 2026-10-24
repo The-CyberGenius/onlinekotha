@@ -531,6 +531,41 @@
             // Add thin red line at the top of the body and CSS hook for mobile dock
             document.body.classList.add('border-t-4', 'border-red-500', 'impersonating-mobile-dock');
 
+            // Titlebar admin controls (desktop titlebar)
+            const titlebarControls = document.getElementById('mac-titlebar-admin-controls');
+            if (titlebarControls && !document.getElementById('tb-admin-ai-controls')) {
+                titlebarControls.classList.remove('hidden');
+                titlebarControls.classList.add('flex');
+                titlebarControls.innerHTML = `
+                    <div id="tb-admin-ai-controls" class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/5 text-[10px] font-bold">
+                        <div id="tb-ai-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                        <span id="tb-ai-status-text" class="text-slate-700 dark:text-slate-200 uppercase tracking-wide">AI ACTIVE</span>
+                        <button id="tb-admin-pause-ai-btn" class="ml-1 px-1.5 py-0.5 rounded bg-red-500/10 text-red-500 dark:text-red-400 hover:bg-red-500/20 text-[9px] font-bold transition">PAUSE AI</button>
+                    </div>
+                    <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-black/5 dark:bg-white/5 text-[10px] font-bold text-red-500 dark:text-red-400 cursor-pointer" id="tb-send-as-ai-container" style="display: none;">
+                        <input type="checkbox" id="tb-admin-send-as-ai" class="w-3.5 h-3.5 accent-red-500 cursor-pointer">
+                        <label for="tb-admin-send-as-ai" class="cursor-pointer text-[9px] select-none">SEND AS AI</label>
+                    </div>
+                    <a href="/api/admin/impersonate/stop" class="px-2 py-0.5 rounded bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-[10px] font-bold transition whitespace-nowrap" title="Exit Impersonation">EXIT</a>
+                `;
+
+                const tbPauseBtn = document.getElementById('tb-admin-pause-ai-btn');
+                if (tbPauseBtn) {
+                    tbPauseBtn.addEventListener('click', () => {
+                        const pb = document.getElementById('admin-pause-ai-btn');
+                        if (pb) pb.click();
+                    });
+                }
+
+                const tbSendAsAi = document.getElementById('tb-admin-send-as-ai');
+                if (tbSendAsAi) {
+                    tbSendAsAi.addEventListener('change', (e) => {
+                        const dockCb = document.getElementById('admin-send-as-ai');
+                        if (dockCb) dockCb.checked = e.target.checked;
+                    });
+                }
+            }
+
             // Inject "Send as AI" and "Pause AI" controls into Mac Dock
             const dockGlassBar = document.getElementById('dock-glass-bar');
             const macDock = document.getElementById('mac-dock');
@@ -570,6 +605,14 @@
                 const statusText = document.getElementById('ai-status-text');
                 const sendAsAiCont = document.getElementById('send-as-ai-container');
                 const chatInput = document.getElementById('bottom-ai-input');
+                const sendAsAiInput = document.getElementById('admin-send-as-ai');
+
+                if (sendAsAiInput) {
+                    sendAsAiInput.addEventListener('change', (e) => {
+                        const tbCb = document.getElementById('tb-admin-send-as-ai');
+                        if (tbCb) tbCb.checked = e.target.checked;
+                    });
+                }
 
                 pauseBtn.addEventListener('click', async () => {
                     const convId = typeof window.kothaGetActiveConvId === 'function' ? window.kothaGetActiveConvId() : null;
@@ -590,25 +633,66 @@
                         console.error('Failed to toggle AI pause', e);
                     }
 
+                    const tbDot = document.getElementById('tb-ai-status-dot');
+                    const tbText = document.getElementById('tb-ai-status-text');
+                    const tbPause = document.getElementById('tb-admin-pause-ai-btn');
+                    const tbSendAsAi = document.getElementById('tb-send-as-ai-container');
+
                     if (isPaused) {
-                        statusDot.classList.replace('bg-emerald-500', 'bg-orange-500');
-                        statusDot.classList.replace('shadow-[0_0_8px_rgba(16,185,129,0.8)]', 'shadow-[0_0_8px_rgba(249,115,22,0.8)]');
-                        statusText.innerText = 'AI PAUSED';
-                        pauseBtn.innerText = 'RESUME AI';
-                        pauseBtn.classList.replace('bg-red-500/20', 'bg-emerald-500/20');
-                        pauseBtn.classList.replace('text-red-400', 'text-emerald-400');
-                        pauseBtn.classList.replace('hover:bg-red-500/40', 'hover:bg-emerald-500/40');
-                        sendAsAiCont.style.display = 'flex';
+                        if (statusDot) {
+                            statusDot.classList.replace('bg-emerald-500', 'bg-orange-500');
+                            statusDot.classList.replace('shadow-[0_0_8px_rgba(16,185,129,0.8)]', 'shadow-[0_0_8px_rgba(249,115,22,0.8)]');
+                        }
+                        if (statusText) statusText.innerText = 'AI PAUSED';
+                        if (pauseBtn) {
+                            pauseBtn.innerText = 'RESUME AI';
+                            pauseBtn.classList.replace('bg-red-500/20', 'bg-emerald-500/20');
+                            pauseBtn.classList.replace('text-red-400', 'text-emerald-400');
+                            pauseBtn.classList.replace('hover:bg-red-500/40', 'hover:bg-emerald-500/40');
+                        }
+                        if (sendAsAiCont) sendAsAiCont.style.display = 'flex';
+
+                        if (tbDot) {
+                            tbDot.classList.replace('bg-emerald-500', 'bg-orange-500');
+                            tbDot.classList.replace('shadow-[0_0_8px_rgba(16,185,129,0.8)]', 'shadow-[0_0_8px_rgba(249,115,22,0.8)]');
+                        }
+                        if (tbText) tbText.innerText = 'AI PAUSED';
+                        if (tbPause) {
+                            tbPause.innerText = 'RESUME AI';
+                            tbPause.classList.replace('bg-red-500/10', 'bg-emerald-500/20');
+                            tbPause.classList.replace('text-red-500', 'text-emerald-400');
+                            tbPause.classList.replace('hover:bg-red-500/20', 'hover:bg-emerald-500/40');
+                        }
+                        if (tbSendAsAi) tbSendAsAi.style.display = 'flex';
+
                         if (chatInput) chatInput.placeholder = 'Send manually...';
                     } else {
-                        statusDot.classList.replace('bg-orange-500', 'bg-emerald-500');
-                        statusDot.classList.replace('shadow-[0_0_8px_rgba(249,115,22,0.8)]', 'shadow-[0_0_8px_rgba(16,185,129,0.8)]');
-                        statusText.innerText = 'AI ACTIVE';
-                        pauseBtn.innerText = 'PAUSE AI';
-                        pauseBtn.classList.replace('bg-emerald-500/20', 'bg-red-500/20');
-                        pauseBtn.classList.replace('text-emerald-400', 'text-red-400');
-                        pauseBtn.classList.replace('hover:bg-emerald-500/40', 'hover:bg-red-500/40');
-                        sendAsAiCont.style.display = 'none';
+                        if (statusDot) {
+                            statusDot.classList.replace('bg-orange-500', 'bg-emerald-500');
+                            statusDot.classList.replace('shadow-[0_0_8px_rgba(249,115,22,0.8)]', 'shadow-[0_0_8px_rgba(16,185,129,0.8)]');
+                        }
+                        if (statusText) statusText.innerText = 'AI ACTIVE';
+                        if (pauseBtn) {
+                            pauseBtn.innerText = 'PAUSE AI';
+                            pauseBtn.classList.replace('bg-emerald-500/20', 'bg-red-500/20');
+                            pauseBtn.classList.replace('text-emerald-400', 'text-red-400');
+                            pauseBtn.classList.replace('hover:bg-emerald-500/40', 'hover:bg-red-500/40');
+                        }
+                        if (sendAsAiCont) sendAsAiCont.style.display = 'none';
+
+                        if (tbDot) {
+                            tbDot.classList.replace('bg-orange-500', 'bg-emerald-500');
+                            tbDot.classList.replace('shadow-[0_0_8px_rgba(249,115,22,0.8)]', 'shadow-[0_0_8px_rgba(16,185,129,0.8)]');
+                        }
+                        if (tbText) tbText.innerText = 'AI ACTIVE';
+                        if (tbPause) {
+                            tbPause.innerText = 'PAUSE AI';
+                            tbPause.classList.replace('bg-emerald-500/20', 'bg-red-500/10');
+                            tbPause.classList.replace('text-emerald-400', 'text-red-500');
+                            tbPause.classList.replace('hover:bg-emerald-500/40', 'hover:bg-red-500/20');
+                        }
+                        if (tbSendAsAi) tbSendAsAi.style.display = 'none';
+
                         if (chatInput) chatInput.placeholder = 'Type your message...';
                     }
                 });

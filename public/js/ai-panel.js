@@ -705,7 +705,7 @@
 
         let sendAsAI = false;
         if (window.__USER__ && window.__USER__.is_impersonating) {
-            const toggle = document.getElementById('admin-send-as-ai');
+            const toggle = document.getElementById('admin-send-as-ai') || document.getElementById('tb-admin-send-as-ai');
             if (toggle && toggle.checked) sendAsAI = true;
         }
 

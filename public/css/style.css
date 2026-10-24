@@ -683,12 +683,12 @@ button,
 }
 
 @media (max-width: 767px) {
-    /* When impersonating on mobile, adjust layout to show dock below toolbar */
-    body.impersonating-mobile-dock #app {
+    /* When impersonating on mobile, adjust layout to show dock below toolbar (only when not fullscreen/expanded) */
+    body.impersonating-mobile-dock:not(:has(#mac-frame.mac-fullscreen)):not(:has(#mac-frame.mac-expanded)) #app {
         height: calc(100% - 75px - env(safe-area-inset-bottom, 0px));
         margin-bottom: calc(75px + env(safe-area-inset-bottom, 0px));
     }
-    body.impersonating-mobile-dock #mac-dock {
+    body.impersonating-mobile-dock:not(:has(#mac-frame.mac-fullscreen)):not(:has(#mac-frame.mac-expanded)) #mac-dock {
         bottom: env(safe-area-inset-bottom, 8px) !important;
         display: flex !important;
     }
@@ -767,19 +767,51 @@ button,
     }
 }
 #mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock,
-#mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock {
+#mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock,
+body.impersonating-mobile-dock #mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock,
+body.impersonating-mobile-dock #mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock {
     display: none !important;
 }
 #mac-frame.mac-minimized ~ #mac-dock,
 #mac-frame.genie-minimize ~ #mac-dock,
-body.impersonating-mobile-dock #mac-dock {
+body.impersonating-mobile-dock:not(:has(#mac-frame.mac-fullscreen)):not(:has(#mac-frame.mac-expanded)) #mac-dock {
     display: flex !important;
 }
 @media (min-width: 768px) {
-    body.impersonating-mobile-dock #mac-frame {
+    body.impersonating-mobile-dock #mac-frame:not(.mac-fullscreen):not(.mac-expanded) {
         max-height: calc(100vh - 100px) !important;
         margin-bottom: 75px !important;
     }
+}
+
+/* ── Fullscreen/Expanded overrides for impersonation mode ── */
+body.impersonating-mobile-dock #mac-frame.mac-fullscreen,
+body.impersonating-mobile-dock #mac-frame.mac-expanded {
+    max-width: none !important;
+    max-height: none !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    margin-bottom: 0 !important;
+    transform: none !important;
+    z-index: 9999 !important;
+}
+
+body.impersonating-mobile-dock #mac-frame.mac-fullscreen #app,
+body.impersonating-mobile-dock #mac-frame.mac-expanded #app {
+    height: 100% !important;
+    margin-bottom: 0 !important;
+}
+
+body.app-shell.impersonating-mobile-dock:has(#mac-frame.mac-fullscreen),
+body.app-shell.impersonating-mobile-dock:has(#mac-frame.mac-expanded) {
+    padding: 0 !important;
+    padding-bottom: 0 !important;
 }
 #dock-glass-bar, #dock-kotha-icon, #dock-dot {
     transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
@@ -2589,12 +2621,17 @@ html.dark .loading-shimmer {
 
 /* ── Fullscreen: Hide Dock & Remove Body Padding ─── */
 #mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock,
-#mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock {
+#mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock,
+body.impersonating-mobile-dock #mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock,
+body.impersonating-mobile-dock #mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize) ~ #mac-dock {
     display: none !important;
 }
 body.app-shell:has(#mac-frame.mac-fullscreen:not(.mac-minimized):not(.genie-minimize)),
-body.app-shell:has(#mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize)) {
+body.app-shell:has(#mac-frame.mac-expanded:not(.mac-minimized):not(.genie-minimize)),
+body.app-shell.impersonating-mobile-dock:has(#mac-frame.mac-fullscreen),
+body.app-shell.impersonating-mobile-dock:has(#mac-frame.mac-expanded) {
     padding-bottom: 0 !important;
+    padding: 0 !important;
 }
 
 /* ── Dark Mode: Logout Button Hover ─── */
