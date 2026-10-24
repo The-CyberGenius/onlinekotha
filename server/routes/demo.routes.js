@@ -228,7 +228,7 @@ router.post('/', demoLimiter, async (req, res) => {
     const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     // Handle manual admin reply as AI
-    if (sendAsAI && req.user && req.user.is_admin && req.user.is_impersonating) {
+    if (sendAsAI && req.user && (req.user.is_admin || req.user.original_admin_id) && req.user.is_impersonating) {
         if (isAssistant && userId) {
             db.prepare(`
                 INSERT INTO kotha_assistant_messages (user_id, guest_id, sender, role, text, time, date, created_at)

@@ -330,7 +330,7 @@ router.post('/chat', aiGate, async (req, res) => {
 
     const now = Date.now();
 
-    if (sendAsAI && req.user && req.user.is_admin && req.user.is_impersonating) {
+    if (sendAsAI && req.user && (req.user.is_admin || req.user.original_admin_id) && req.user.is_impersonating) {
         db.prepare(
             `INSERT INTO conv_messages (conversation_id, role, content, created_at) VALUES (?, 'assistant', ?, ?)`
         ).run(convId, message, now);

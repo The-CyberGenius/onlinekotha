@@ -199,7 +199,7 @@ app.use('/api/admin', adminRouter);
 
 // /admin → redirect to /admin.html (only if admin)
 app.get('/admin', (req, res) => {
-    if (!req.user || !req.user.is_admin) {
+    if (!req.user || (!req.user.is_admin && !req.user.original_admin_id)) {
         return res.redirect('/login.html?redirect=/admin.html');
     }
     res.redirect('/admin.html');
@@ -221,7 +221,7 @@ app.get('/healthz', (req, res) => res.json({ ok: true, time: Date.now() }));
 
 // Static frontend (landing /, login, admin, css, js, etc.) with caching
 app.get('/admin.html', (req, res) => {
-    if (!req.user || !req.user.is_admin) {
+    if (!req.user || (!req.user.is_admin && !req.user.original_admin_id)) {
         return res.redirect('/login.html?redirect=/admin.html');
     }
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');

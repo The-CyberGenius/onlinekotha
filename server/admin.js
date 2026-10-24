@@ -926,9 +926,36 @@ router.get('/impersonate/start', (req, res) => {
     const uid = req.query.uid;
     const chat = req.query.chat || '';
     if (!uid) return res.status(400).send('UID required');
+
+    const IS_PROD = process.env.NODE_ENV === 'production';
     res.cookie('admin_impersonate_uid', uid, { httpOnly: true, path: '/' });
-    if (chat) {
-        res.redirect(`/app?chat=${encodeURIComponent(chat)}`);
+
+    // When impersonating a guest session, ensure the guest cookie matches so all guest APIs align
+    if (String(uid).startsWith('gst_')) {
+        res.cookie('kotha_guest_id', uid, {
+            maxAge: 365 * 24 * 60 * 60 * 1000,
+            httpOnly: false,
+            sameSite: 'lax',
+            path: '/',
+            ...(IS_PROD && { secure: true }),
+        });
+    }
+
+    let targetChat = chat;
+    if (!targetChat) {
+        try {
+            const isGuest = String(uid).startsWith('gst_');
+            const row = isGuest
+                ? db.prepare('SELECT folder_name FROM chats WHERE guest_id = ? ORDER BY created_at DESC LIMIT 1').get(uid)
+                : db.prepare('SELECT folder_name FROM chats WHERE user_id = ? AND deleted_by_user = 0 ORDER BY created_at DESC LIMIT 1').get(Number(uid));
+            if (row && row.folder_name) {
+                targetChat = row.folder_name;
+            }
+        } catch (e) {}
+    }
+
+    if (targetChat) {
+        res.redirect(`/app?chat=${encodeURIComponent(targetChat)}`);
     } else {
         res.redirect(`/app`);
     }
@@ -936,6 +963,7 @@ router.get('/impersonate/start', (req, res) => {
 
 router.get('/impersonate/stop', (req, res) => {
     res.clearCookie('admin_impersonate_uid', { path: '/' });
+    res.clearCookie('kotha_guest_id', { path: '/' });
     res.redirect('/admin.html');
 });
 

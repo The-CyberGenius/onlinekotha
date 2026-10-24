@@ -24,29 +24,66 @@ function getOwnerId(req, res) {
 router.get('/chats', requireUserOrGuest, (req, res) => {
     const ownerId = getOwnerId(req, res);
     const myDir = userDir(ownerId);
-    if (!fs.existsSync(myDir)) return res.json([]);
     
     let deletedSet = new Set();
     let dbChats = [];
     if (req.user && (!req.user.is_impersonating || !req.user.guest_id)) {
-        dbChats = db.prepare('SELECT folder_name, created_at, deleted_by_user FROM chats WHERE user_id = ?').all(req.user.id);
+        dbChats = db.prepare('SELECT folder_name, created_at, deleted_by_user, user_id FROM chats WHERE user_id = ?').all(req.user.id);
         const deletedRows = dbChats.filter(r => r.deleted_by_user === 1);
         deletedSet = new Set(deletedRows.map(r => r.folder_name));
     } else {
-        dbChats = db.prepare('SELECT folder_name, created_at FROM chats WHERE guest_id = ?').all(ownerId);
+        dbChats = db.prepare('SELECT folder_name, created_at, deleted_by_user, user_id FROM chats WHERE guest_id = ?').all(ownerId);
+        const deletedRows = dbChats.filter(r => r.deleted_by_user === 1);
+        deletedSet = new Set(deletedRows.map(r => r.folder_name));
     }
     
     const timeMap = {};
     for (const r of dbChats) timeMap[r.folder_name] = r.created_at || 0;
 
-    const folders = fs
-        .readdirSync(myDir, { withFileTypes: true })
-        .filter(d => d.isDirectory())
-        .map(d => d.name)
+    const foldersSet = new Set();
+    const { SRC_DIR } = require('../upload');
+
+    // 1. Check user/guest directory on disk
+    if (fs.existsSync(myDir)) {
+        fs.readdirSync(myDir, { withFileTypes: true })
+            .filter(d => d.isDirectory())
+            .forEach(d => {
+                const dir = path.join(myDir, d.name);
+                if (findChatFile(dir)) foldersSet.add(d.name);
+            });
+    }
+
+    // 2. Cross-reference with DB records (finds claimed chats, moved chats, or fallback dirs)
+    for (const r of dbChats) {
+        if (!r.folder_name || foldersSet.has(r.folder_name)) continue;
+        const primaryDir = path.join(myDir, r.folder_name);
+        if (findChatFile(primaryDir)) {
+            foldersSet.add(r.folder_name);
+            continue;
+        }
+        if (r.user_id && r.user_id > 0) {
+            const claimedDir = path.join(SRC_DIR, `u_${r.user_id}`, r.folder_name);
+            if (findChatFile(claimedDir)) {
+                foldersSet.add(r.folder_name);
+                continue;
+            }
+        }
+        if (fs.existsSync(SRC_DIR)) {
+            const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && (d.name.startsWith('u_') || d.name.startsWith('gst_')));
+            for (const sd of subdirs) {
+                const cand = path.join(SRC_DIR, sd.name, r.folder_name);
+                if (findChatFile(cand)) {
+                    foldersSet.add(r.folder_name);
+                    break;
+                }
+            }
+        }
+    }
+
+    const folders = Array.from(foldersSet)
         .filter(name => {
             if (req.user && !req.user.is_impersonating && deletedSet.has(name)) return false;
-            const dir = path.join(myDir, name);
-            return !!findChatFile(dir);
+            return true;
         })
         .sort((a, b) => {
             const timeA = timeMap[a] || 0;
@@ -103,7 +140,21 @@ router.get('/messages', requireUserOrGuest, async (req, res) => {
     let finalChatDir = chatDir;
     if (!fs.existsSync(finalChatDir)) {
         const { SRC_DIR } = require('../upload');
-        if (fs.existsSync(SRC_DIR)) {
+        try {
+            const dbChat = db.prepare('SELECT user_id, guest_id FROM chats WHERE (guest_id = ? OR user_id = ?) AND folder_name = ?').get(ownerId, typeof ownerId === 'number' ? ownerId : 0, chatName);
+            if (dbChat) {
+                if (dbChat.user_id && dbChat.user_id > 0) {
+                    const userCand = path.join(SRC_DIR, `u_${dbChat.user_id}`, chatName);
+                    if (fs.existsSync(userCand)) finalChatDir = userCand;
+                }
+                if (!fs.existsSync(finalChatDir) && dbChat.guest_id) {
+                    const guestCand = path.join(SRC_DIR, `u_${dbChat.guest_id}`, chatName);
+                    if (fs.existsSync(guestCand)) finalChatDir = guestCand;
+                }
+            }
+        } catch(e) {}
+
+        if (!fs.existsSync(finalChatDir) && fs.existsSync(SRC_DIR)) {
             const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && (d.name.startsWith('u_') || d.name.startsWith('gst_')));
             for (const sd of subdirs) {
                 const cand = path.join(SRC_DIR, sd.name, chatName);

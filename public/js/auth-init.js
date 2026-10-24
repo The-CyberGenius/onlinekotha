@@ -480,8 +480,10 @@
 
         const avatarWrap = document.getElementById('my-avatar-wrap');
         if (avatarWrap) {
-            avatarWrap.title = 'Click to edit profile & phone number';
-            avatarWrap.onclick = () => window.openProfileModal(true);
+            avatarWrap.title = me.user.is_impersonating ? 'Impersonating ' + (me.user.display_name || me.user.email) : 'Click to edit profile & phone number';
+            if (!me.user.is_impersonating) {
+                avatarWrap.onclick = () => window.openProfileModal(true);
+            }
         }
 
         // Show display name below avatar
@@ -490,8 +492,8 @@
             sidebarTitle.textContent = me.user.display_name;
         }
 
-        // Auto-prompt if not prompted yet and no phone
-        if (!me.user.phone_prompted && !me.user.phone) {
+        // Auto-prompt if not prompted yet and no phone (never for guests or impersonation)
+        if (!me.user.is_impersonating && me.user.plan !== 'guest' && !me.user.phone_prompted && !me.user.phone) {
             setTimeout(() => {
                 window.openProfileModal(false);
             }, 700);
