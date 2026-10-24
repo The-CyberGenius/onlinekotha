@@ -1407,22 +1407,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     let mediaCount = allMessages.filter(m => m.text && (m.text.includes('<Media omitted>') || m.text.includes('image omitted') || m.text.includes('video omitted') || m.text.includes('sticker omitted') || m.text.includes('audio omitted') || m.text.includes('document omitted') || m.text.includes('omitted') || m.media)).length;
                     
                     const statsStrip = document.createElement('div');
-                    statsStrip.className = 'flex items-center justify-between gap-1.5 rounded-lg px-2.5 py-1.5 kotha-member-stat-strip';
-                    statsStrip.style.fontSize = '10px';
+                    statsStrip.className = 'grid grid-cols-3 gap-1.5 rounded-xl p-1.5 kotha-member-stat-strip';
                     statsStrip.innerHTML = `
-                        <div class="flex items-center gap-1">
-                            <span class="text-indigo-500 font-bold">📅 Active:</span>
-                            <span class="kotha-member-stat-val">${activeDays}d</span>
+                        <div class="flex flex-col items-center justify-center py-1 px-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04]">
+                            <div class="flex items-center gap-1 text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-tight">
+                                <span>📅</span><span>Active</span>
+                            </div>
+                            <span class="kotha-member-stat-val text-[11.5px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 leading-tight">${activeDays}d</span>
                         </div>
-                        <div class="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
-                        <div class="flex items-center gap-1">
-                            <span class="text-fuchsia-500 font-bold">📷 Media:</span>
-                            <span class="kotha-member-stat-val">${formatNum(mediaCount)}</span>
+                        <div class="flex flex-col items-center justify-center py-1 px-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04]">
+                            <div class="flex items-center gap-1 text-[9px] font-bold text-fuchsia-500 dark:text-fuchsia-400 uppercase tracking-tight">
+                                <span>📷</span><span>Media</span>
+                            </div>
+                            <span class="kotha-member-stat-val text-[11.5px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 leading-tight">${formatNum(mediaCount)}</span>
                         </div>
-                        <div class="w-px h-3 bg-gray-200 dark:bg-gray-700"></div>
-                        <div class="flex items-center gap-1">
-                            <span class="text-emerald-500 font-bold">💬 Total:</span>
-                            <span class="kotha-member-stat-val">${formatNum(totalMessages)}</span>
+                        <div class="flex flex-col items-center justify-center py-1 px-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04]">
+                            <div class="flex items-center gap-1 text-[9px] font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-tight">
+                                <span>💬</span><span>Total</span>
+                            </div>
+                            <span class="kotha-member-stat-val text-[11.5px] font-extrabold text-slate-800 dark:text-slate-100 mt-0.5 leading-tight">${formatNum(totalMessages)}</span>
                         </div>
                     `;
                     expandedContent.appendChild(statsStrip);
@@ -1443,13 +1446,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     senders.slice(0, 6).forEach(([sName, count]) => {
                         if (!sName) return;
                         const btn = document.createElement('button');
-                        const defaultClass = 'bg-white dark:bg-[#1a252d] border border-gray-200 dark:border-gray-700 rounded-full px-2.5 py-0.5 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95 kotha-member-chip';
-                        const activeClass = 'bg-indigo-600 border border-indigo-600 rounded-full px-2.5 py-0.5 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-xs active:scale-95 kotha-member-chip';
+                        const defaultClass = 'bg-white dark:bg-[#1a252d] border border-gray-200 dark:border-gray-700/80 rounded-full px-2.5 py-1 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95 kotha-member-chip';
+                        const activeClass = 'bg-indigo-600 border border-indigo-600 rounded-full px-2.5 py-1 font-medium text-white hover:bg-indigo-700 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 shadow-xs active:scale-95 kotha-member-chip';
                         
                         btn.className = defaultClass;
-                        btn.style.fontSize = '10.5px';
+                        btn.style.fontSize = '10px';
                         const formatCount = count > 9999 ? (count/1000).toFixed(1) + 'k' : count.toLocaleString();
-                        btn.innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold" style="font-size: 7.5px;">${sName.charAt(0).toUpperCase()}</div> <span class="font-semibold leading-none">${sName}</span> <span class="opacity-60 ml-0.5 leading-none" style="font-size: 8.5px;">${formatCount}</span>`;
+                        btn.innerHTML = `<div class="w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold text-[7.5px] shrink-0">${(sName || '?').charAt(0).toUpperCase()}</div> <span class="font-semibold text-[10.5px] leading-none max-w-[95px] truncate">${sName}</span> <span class="opacity-60 text-[8.5px] font-bold ml-0.5 leading-none">${formatCount}</span>`;
                         
                         btn.onclick = () => {
                             if (activeSenderFilter === sName) {
@@ -3707,16 +3710,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function centerFrame() {
             if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
-            const hasDock = window.innerHeight >= 700;
-            const targetW = userHasResized
-                ? Math.min(parseInt(frame.style.width) || 820, window.innerWidth - 30)
-                : Math.max(380, Math.min(window.innerWidth * 0.75, 820));
-            const targetH = userHasResized
-                ? Math.min(parseInt(frame.style.height) || 680, window.innerHeight - (hasDock ? 80 : 20))
-                : Math.max(480, Math.min(window.innerHeight * (hasDock ? 0.88 : 0.95), window.innerHeight - (hasDock ? 85 : 20)));
+            const dockH = 72; // dock is 62px + 8px bottom + space
+            const maxW = Math.max(380, Math.min(window.innerWidth - 30, 1100));
+            const targetW = userHasResized && parseInt(frame.style.width)
+                ? Math.min(parseInt(frame.style.width), maxW)
+                : Math.max(480, Math.min(window.innerWidth * 0.86, 1040));
+
+            const availableH = window.innerHeight - dockH;
+            const maxH = Math.max(380, availableH - 14);
+            const targetH = userHasResized && parseInt(frame.style.height)
+                ? Math.min(parseInt(frame.style.height), maxH)
+                : Math.max(400, Math.min(availableH - 18, 860));
 
             const left = Math.max(10, Math.round((window.innerWidth - targetW) / 2));
-            const top = Math.max(8, Math.round((window.innerHeight - targetH - (hasDock ? 50 : 0)) / 2));
+            const top = Math.max(8, Math.round((availableH - targetH) / 2));
 
             frame.style.position = 'absolute';
             frame.style.width = Math.round(targetW) + 'px';
@@ -3731,41 +3738,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function clampFrameInViewport() {
             if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
-            const hasDock = window.innerHeight >= 700;
+            const dockH = 72;
             const r = frame.getBoundingClientRect();
             let w = parseInt(frame.style.width) || r.width;
             let h = parseInt(frame.style.height) || r.height;
             let l = parseInt(frame.style.left) || r.left;
             let t = parseInt(frame.style.top) || r.top;
 
-            // If the user hasn't manually resized the frame, auto-scale it dynamically!
+            const availableH = window.innerHeight - dockH;
+
             if (!userHasResized) {
-                w = Math.max(380, Math.min(window.innerWidth * 0.75, 820));
-                h = Math.max(480, Math.min(window.innerHeight * (hasDock ? 0.88 : 0.95), window.innerHeight - (hasDock ? 85 : 20)));
+                w = Math.max(480, Math.min(window.innerWidth * 0.86, 1040));
+                h = Math.max(400, Math.min(availableH - 18, 860));
             }
 
             if (w > window.innerWidth - 20) {
                 w = Math.max(380, window.innerWidth - 20);
             }
 
-            const maxBottomGap = hasDock ? 70 : 12;
-            const maxAllowedH = Math.max(360, window.innerHeight - (hasDock ? 80 : 20));
+            const maxAllowedH = Math.max(360, availableH - 10);
             if (h > maxAllowedH) {
                 h = maxAllowedH;
             }
             if (l + w > window.innerWidth - 10) {
                 l = Math.max(10, window.innerWidth - w - 10);
             }
-            if (t + h > window.innerHeight - maxBottomGap) {
-                t = Math.max(8, window.innerHeight - h - maxBottomGap);
+            if (t + h > availableH - 4) {
+                t = Math.max(8, availableH - h - 4);
             }
             if (l < 10) l = 10;
             if (t < 8) t = 8;
 
+            frame.style.position = 'absolute';
             frame.style.width = Math.round(w) + 'px';
             frame.style.height = Math.round(h) + 'px';
             frame.style.left = Math.round(l) + 'px';
             frame.style.top = Math.round(t) + 'px';
+            frame.style.margin = '0';
+            frame.style.maxWidth = 'none';
+            frame.style.maxHeight = 'none';
         }
 
         function initPosition() {
@@ -3915,60 +3926,66 @@ document.addEventListener('DOMContentLoaded', () => {
         let sx = 0, sy = 0, sl = 0, st = 0;
 
         titlebar.addEventListener('mousedown', (e) => {
-            if (e.target.closest('button')) return;
+            if (e.target.closest('button, a, input, select, label, #mac-traffic-lights, #mac-titlebar-admin-controls')) return;
             if (frame.classList.contains('mac-fullscreen') || frame.classList.contains('mac-expanded') || isMobile()) return;
 
             const rect = frame.getBoundingClientRect();
-            // Don't drag if click is within 10px of top, left, or right edge (resize zones)
-            if (e.clientY - rect.top < 10 || e.clientX - rect.left < 10 || rect.right - e.clientX < 10) {
-                return;
-            }
+            frame.style.position = 'absolute';
+            frame.style.margin = '0';
+            frame.style.maxWidth = 'none';
+            frame.style.maxHeight = 'none';
+            if (!frame.style.width) frame.style.width = Math.round(rect.width) + 'px';
+            if (!frame.style.height) frame.style.height = Math.round(rect.height) + 'px';
+            frame.style.left = Math.round(rect.left) + 'px';
+            frame.style.top = Math.round(rect.top) + 'px';
 
-            initPosition();
             dragging = true;
             isActualDrag = false;
             sx = e.clientX;
             sy = e.clientY;
-            sl = parseInt(frame.style.left) || rect.left;
-            st = parseInt(frame.style.top) || rect.top;
+            sl = rect.left;
+            st = rect.top;
+
+            frame.classList.add('is-dragging');
+            document.body.classList.add('is-dragging');
             e.preventDefault();
         });
 
         document.addEventListener('mousemove', (e) => {
             if (!dragging) return;
             if (!isActualDrag) {
-                if (Math.hypot(e.clientX - sx, e.clientY - sy) > 4) {
+                if (Math.hypot(e.clientX - sx, e.clientY - sy) > 2) {
                     isActualDrag = true;
                     userHasDragged = true;
-                    frame.classList.add('is-dragging');
                 } else {
                     return;
                 }
             }
-            const w = parseInt(frame.style.width) || frame.getBoundingClientRect().width;
-            const h = parseInt(frame.style.height) || frame.getBoundingClientRect().height;
-            const maxL = Math.max(0, window.innerWidth - Math.min(w, window.innerWidth - 60));
-            const maxT = Math.max(0, window.innerHeight - h - 95);
-            
-            frame.style.left = Math.max(0, Math.min(maxL, sl + (e.clientX - sx))) + 'px';
-            frame.style.top = Math.max(0, Math.min(maxT, st + (e.clientY - sy))) + 'px';
+            const w = frame.offsetWidth || 800;
+            const minL = -w + 80;
+            const maxL = window.innerWidth - 80;
+            const minT = 0;
+            const maxT = Math.max(0, window.innerHeight - 45);
+
+            const nextL = Math.max(minL, Math.min(maxL, sl + (e.clientX - sx)));
+            const nextT = Math.max(minT, Math.min(maxT, st + (e.clientY - sy)));
+
+            frame.style.left = Math.round(nextL) + 'px';
+            frame.style.top = Math.round(nextT) + 'px';
             syncOverlay();
         });
 
-        document.addEventListener('mouseup', () => {
+        const stopDragging = () => {
             if (!dragging) return;
             dragging = false;
             isActualDrag = false;
             frame.classList.remove('is-dragging');
-        });
+            document.body.classList.remove('is-dragging');
+            syncOverlay();
+        };
 
-        window.addEventListener('blur', () => {
-            if (dragging) {
-                dragging = false;
-                isActualDrag = false;
-                frame.classList.remove('is-dragging');
-            }
-        });
+        document.addEventListener('mouseup', stopDragging);
+        window.addEventListener('blur', stopDragging);
 
         // Double-click titlebar to toggle fullscreen
         titlebar.addEventListener('dblclick', (e) => {
@@ -4133,6 +4150,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         }
+        window.centerMacFrame = centerFrame;
+        window.clampMacFrame = clampFrameInViewport;
+        window.syncMacOverlay = syncOverlay;
     })();
 
 
