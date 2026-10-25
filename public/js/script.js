@@ -4310,10 +4310,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inlineInput) inlineInput.blur(); // Dismiss mobile keyboard immediately
 
         const resultsContainer = document.getElementById('inline-search-results-container');
-        if (resultsContainer) resultsContainer.classList.add('hidden');
+        if (resultsContainer) {
+            resultsContainer.classList.add('hidden');
+            resultsContainer.style.setProperty('display', 'none', 'important');
+        }
 
         const overlay = document.getElementById('chat-inline-search-overlay');
-        if (overlay) overlay.classList.add('hidden');
+        if (overlay) {
+            overlay.classList.add('hidden');
+            overlay.style.setProperty('display', 'none', 'important');
+        }
 
         if (typeof window.jumpToMsg === 'function') {
             window.jumpToMsg(id);
@@ -4330,6 +4336,115 @@ document.addEventListener('DOMContentLoaded', () => {
     const inlineResultsList = document.getElementById('inline-results-list');
     const inlineSearchCount = document.getElementById('inline-search-count');
 
+    function performInlineChatSearch(val) {
+        const resultsContainer = document.getElementById('inline-search-results-container');
+        const resultsList = document.getElementById('inline-results-list');
+        const countLabel = document.getElementById('inline-search-count');
+
+        if (!resultsContainer || !resultsList) return;
+
+        const trimmedVal = (val || '').trim();
+        if (!trimmedVal) {
+            resultsContainer.classList.add('hidden');
+            resultsContainer.style.setProperty('display', 'none', 'important');
+            resultsList.innerHTML = '';
+            if (countLabel) {
+                countLabel.textContent = '';
+                countLabel.style.setProperty('display', 'none', 'important');
+            }
+            return;
+        }
+
+        // Force container visibility
+        resultsContainer.classList.remove('hidden');
+        resultsContainer.style.setProperty('display', 'block', 'important');
+
+        try {
+            const valLower = trimmedVal.toLowerCase();
+
+            // 4-level message lookup
+            let msgs = [];
+            if (Array.isArray(allMessages) && allMessages.length > 0) {
+                msgs = allMessages;
+            } else if (typeof window.getAllMessages === 'function' && Array.isArray(window.getAllMessages()) && window.getAllMessages().length > 0) {
+                msgs = window.getAllMessages();
+            } else if (currentChat && window._chatMsgCache && Array.isArray(window._chatMsgCache[currentChat])) {
+                msgs = window._chatMsgCache[currentChat];
+            } else if (Array.isArray(displayedMessages) && displayedMessages.length > 0) {
+                msgs = displayedMessages;
+            }
+
+            if (msgs.length === 0) {
+                if (countLabel) {
+                    countLabel.textContent = '0';
+                    countLabel.style.setProperty('display', 'inline-block', 'important');
+                }
+                resultsList.innerHTML = `
+                    <div style="padding: 48px 16px; text-align: center; color: #9ca3af;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary, #e5e7eb);">Loading chat messages...</div>
+                        <div style="font-size: 12px;">Please wait a moment and try searching again.</div>
+                    </div>`;
+                return;
+            }
+
+            const filteredMsgs = [];
+            for (let i = 0; i < msgs.length; i++) {
+                const msg = msgs[i];
+                if (!msg) continue;
+                const text = msg.text ? String(msg.text).toLowerCase() : '';
+                const sender = msg.sender ? String(msg.sender).toLowerCase() : '';
+                const attach = msg.attachment ? String(msg.attachment).toLowerCase() : '';
+                if (text.includes(valLower) || sender.includes(valLower) || attach.includes(valLower)) {
+                    filteredMsgs.push(msg);
+                }
+            }
+
+            if (countLabel) {
+                countLabel.textContent = `${filteredMsgs.length.toLocaleString()} matches`;
+                countLabel.style.setProperty('display', 'inline-block', 'important');
+            }
+
+            if (filteredMsgs.length === 0) {
+                resultsList.innerHTML = `
+                    <div style="padding: 48px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(128,128,128,0.12); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #9ca3af;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </div>
+                        <p style="font-size: 14px; font-weight: 600; color: #4b5563; margin: 0;" class="dark:text-gray-300">No messages found matching "${escapeHTML(trimmedVal)}"</p>
+                        <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">Try searching for different words, names, or dates</p>
+                    </div>`;
+            } else {
+                let resultsHtml = '';
+                const limitRes = filteredMsgs.slice(-80).reverse();
+                limitRes.forEach(msg => {
+                    const safeId = (msg.id !== undefined && msg.id !== null) ? String(msg.id) : '';
+                    const highlightedText = (typeof highlightMatch === 'function') ? highlightMatch(msg.text || msg.attachment || '', trimmedVal) : escapeHTML(msg.text || msg.attachment || '');
+                    const safeSender = escapeHTML(msg.sender || 'User');
+                    const safeDate = escapeHTML(msg.date || '');
+                    const safeTime = escapeHTML(msg.time || '');
+                    const senderColor = (typeof getStringColor === 'function') ? getStringColor(msg.sender || 'User') : '#6366f1';
+
+                    resultsHtml += `
+                        <div class="search-result-card" onclick="window.selectSearchResult('${safeId}')" style="cursor: pointer;">
+                            <div class="search-result-header">
+                                <span class="search-result-sender" style="color: ${senderColor}; font-weight: 700; font-size: 12px;">${safeSender}</span> 
+                                <span class="search-result-time" style="font-size: 10.5px; color: #9ca3af; display: flex; align-items: center; gap: 4px;">
+                                    ${safeDate} ${safeTime}
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                </span>
+                            </div>
+                            <p class="search-result-snippet" style="margin: 0; font-size: 13px; line-height: 1.45; word-break: break-word;">${highlightedText}</p>
+                        </div>
+                    `;
+                });
+                resultsList.innerHTML = resultsHtml;
+            }
+        } catch (err) {
+            console.error('performInlineChatSearch error:', err);
+            resultsList.innerHTML = `<div style="padding: 24px; text-align: center; color: #ef4444; font-size: 13px;">Search error: ${escapeHTML(err.message)}</div>`;
+        }
+    }
+
     // Click outside to close inline search
     document.addEventListener('click', (e) => {
         if (inlineSearchOverlay && !inlineSearchOverlay.classList.contains('hidden')) {
@@ -4344,13 +4459,18 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             if (inlineSearchOverlay.classList.contains('hidden')) {
                 inlineSearchOverlay.classList.remove('hidden');
+                inlineSearchOverlay.style.setProperty('display', 'flex', 'important');
                 setTimeout(() => inlineSearchInput.focus({ preventScroll: true }), 60);
-                if (inlineSearchInput.value.trim().length > 0 && inlineResultsList && inlineResultsList.children.length > 0) {
-                    inlineSearchResultsContainer.classList.remove('hidden');
+                if (inlineSearchInput.value.trim().length > 0) {
+                    performInlineChatSearch(inlineSearchInput.value);
                 }
             } else {
                 inlineSearchOverlay.classList.add('hidden');
-                inlineSearchResultsContainer.classList.add('hidden');
+                inlineSearchOverlay.style.setProperty('display', 'none', 'important');
+                if (inlineSearchResultsContainer) {
+                    inlineSearchResultsContainer.classList.add('hidden');
+                    inlineSearchResultsContainer.style.setProperty('display', 'none', 'important');
+                }
                 inlineSearchInput.blur();
             }
         });
@@ -4359,11 +4479,18 @@ document.addEventListener('DOMContentLoaded', () => {
             closeInlineSearchBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 inlineSearchOverlay.classList.add('hidden');
-                inlineSearchResultsContainer.classList.add('hidden');
+                inlineSearchOverlay.style.setProperty('display', 'none', 'important');
+                if (inlineSearchResultsContainer) {
+                    inlineSearchResultsContainer.classList.add('hidden');
+                    inlineSearchResultsContainer.style.setProperty('display', 'none', 'important');
+                }
                 inlineSearchInput.value = '';
                 if (inlineResultsList) inlineResultsList.innerHTML = '';
-                if (inlineSearchCount) inlineSearchCount.textContent = '';
-                if (clearInlineSearchBtn) clearInlineSearchBtn.classList.add('hidden');
+                if (inlineSearchCount) {
+                    inlineSearchCount.textContent = '';
+                    inlineSearchCount.style.setProperty('display', 'none', 'important');
+                }
+                if (clearInlineSearchBtn) clearInlineSearchBtn.style.setProperty('display', 'none', 'important');
                 inlineSearchInput.blur();
             });
         }
@@ -4372,10 +4499,16 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInlineSearchBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 inlineSearchInput.value = '';
-                inlineSearchResultsContainer.classList.add('hidden');
+                if (inlineSearchResultsContainer) {
+                    inlineSearchResultsContainer.classList.add('hidden');
+                    inlineSearchResultsContainer.style.setProperty('display', 'none', 'important');
+                }
                 if (inlineResultsList) inlineResultsList.innerHTML = '';
-                if (inlineSearchCount) inlineSearchCount.textContent = '';
-                clearInlineSearchBtn.classList.add('hidden');
+                if (inlineSearchCount) {
+                    inlineSearchCount.textContent = '';
+                    inlineSearchCount.style.setProperty('display', 'none', 'important');
+                }
+                clearInlineSearchBtn.style.setProperty('display', 'none', 'important');
                 inlineSearchInput.focus({ preventScroll: true });
             });
         }
@@ -4384,113 +4517,34 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Escape') {
                 e.preventDefault();
                 if (closeInlineSearchBtn) closeInlineSearchBtn.click();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const list = document.getElementById('inline-results-list');
+                if (list && list.firstElementChild) {
+                    const firstCard = list.querySelector('.search-result-card');
+                    if (firstCard) firstCard.click();
+                }
             }
         });
 
         inlineSearchInput.addEventListener('focus', () => {
-            if (inlineSearchInput.value.trim().length >= 1 && inlineResultsList && inlineResultsList.children.length > 0) {
-                inlineSearchResultsContainer.classList.remove('hidden');
+            if (inlineSearchInput.value.trim().length >= 1) {
+                performInlineChatSearch(inlineSearchInput.value);
             }
         });
 
-        let inlineSearchDebounce = null;
-
+        // Instant synchronous search on every keystroke
         inlineSearchInput.addEventListener('input', (e) => {
-            const val = e.target.value.trim();
-
+            const val = e.target.value;
             if (clearInlineSearchBtn) {
-                if (val.length > 0) {
-                    clearInlineSearchBtn.style.display = 'block';
-                    clearInlineSearchBtn.classList.remove('hidden');
+                if (val.trim().length > 0) {
+                    clearInlineSearchBtn.style.setProperty('display', 'block', 'important');
                 } else {
-                    clearInlineSearchBtn.style.display = 'none';
-                    clearInlineSearchBtn.classList.add('hidden');
+                    clearInlineSearchBtn.style.setProperty('display', 'none', 'important');
                 }
             }
-            
-            if (!val) {
-                if (inlineSearchResultsContainer) inlineSearchResultsContainer.classList.add('hidden');
-                if (inlineResultsList) inlineResultsList.innerHTML = '';
-                if (inlineSearchCount) {
-                    inlineSearchCount.textContent = '';
-                    inlineSearchCount.style.display = 'none';
-                }
-                return;
-            }
-
-            clearTimeout(inlineSearchDebounce);
-            inlineSearchDebounce = setTimeout(() => {
-                performInlineChatSearch(val);
-            }, 50);
+            performInlineChatSearch(val);
         });
-
-        function performInlineChatSearch(val) {
-            if (!inlineSearchResultsContainer || !inlineResultsList) return;
-
-            inlineSearchResultsContainer.classList.remove('hidden');
-
-            const valLower = val.toLowerCase();
-            const msgs = (allMessages && allMessages.length > 0) ? allMessages : (typeof window.getAllMessages === 'function' ? window.getAllMessages() : []);
-            const filteredMsgs = [];
-
-            if (msgs && msgs.length > 0) {
-                for (let i = 0; i < msgs.length; i++) {
-                    const msg = msgs[i];
-                    if (!msg) continue;
-                    const text = msg.text ? String(msg.text).toLowerCase() : '';
-                    const sender = msg.sender ? String(msg.sender).toLowerCase() : '';
-                    const attach = msg.attachment ? String(msg.attachment).toLowerCase() : '';
-                    if (text.includes(valLower) || sender.includes(valLower) || attach.includes(valLower)) {
-                        filteredMsgs.push(msg);
-                    }
-                }
-            }
-
-            if (inlineSearchCount) {
-                inlineSearchCount.textContent = `${filteredMsgs.length.toLocaleString()}`;
-                inlineSearchCount.style.display = 'inline-block';
-            }
-
-            if (filteredMsgs.length === 0) {
-                inlineResultsList.innerHTML = `
-                    <div style="padding: 48px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                        <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(128,128,128,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #9ca3af;">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        </div>
-                        <p style="font-size: 13.5px; font-weight: 600; color: #4b5563;" class="dark:text-gray-300">No matching messages found for "${escapeHTML(val)}"</p>
-                        <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">Try searching for other words or emojis</p>
-                    </div>`;
-            } else {
-                let resultsHtml = '';
-                try {
-                    // Show up to 80 newest matches
-                    const limitRes = filteredMsgs.slice(-80).reverse();
-                    limitRes.forEach(msg => {
-                        const highlightedText = highlightMatch(msg.text || msg.attachment || '', val);
-                        const safeSender = escapeHTML(msg.sender || 'User');
-                        const safeDate = escapeHTML(msg.date || '');
-                        const safeTime = escapeHTML(msg.time || '');
-                        const senderColor = getStringColor(msg.sender || 'User');
-
-                        resultsHtml += `
-                            <div class="search-result-card" onclick="window.selectSearchResult('${msg.id}')">
-                                <div class="search-result-header">
-                                    <span class="search-result-sender" style="color:${senderColor}">${safeSender}</span> 
-                                    <span class="search-result-time">
-                                        ${safeDate} ${safeTime}
-                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                                    </span>
-                                </div>
-                                <p class="search-result-snippet">${highlightedText}</p>
-                            </div>
-                        `;
-                    });
-                } catch (err) {
-                    resultsHtml = `<div style="font-size: 12px; color: #9ca3af; padding: 24px; text-align: center;">Unable to render results</div>`;
-                }
-                inlineResultsList.innerHTML = resultsHtml;
-            }
-        }
     }
 
     // Keyboard shortcut: Cmd+F / Ctrl+F opens in-chat search
