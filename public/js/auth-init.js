@@ -366,9 +366,9 @@
             const chatRem = document.getElementById('guest-chat-rem');
             const aiRem = document.getElementById('guest-ai-rem');
             if (chatRem) chatRem.textContent = guestStatus.chatsRemaining ?? 1;
-            if (aiRem) aiRem.textContent = guestStatus.aiMsgsRemaining ?? 10;
+            if (aiRem) aiRem.textContent = guestStatus.aiMsgsRemaining ?? 5;
 
-            // Auto-open Auth Modal if requested via URL param (e.g. auth=google, auth=true, auth=1)
+            // Auto-open Auth Modal ONLY if requested via URL param (e.g. auth=google, auth=true, auth=1)
             const urlParams = new URLSearchParams(window.location.search);
             const authParam = urlParams.get('auth');
             if (authParam === 'google' || authParam === 'true' || authParam === '1' || authParam === 'signin' || authParam === 'login') {
@@ -377,10 +377,10 @@
                 }, 400);
             }
 
-            
-            // Trigger Google One Tap for Guest
+            // Trigger Google One Tap for Guest (except when actively importing a chat)
             (async () => {
             try {
+                if (urlParams.get('action') === 'import') return;
                 const idRes = await fetch('/api/auth/google/client-id');
                 const idData = await idRes.json();
                 if (idData && idData.clientId) {

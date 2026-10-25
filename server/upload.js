@@ -295,7 +295,11 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
             return res.status(400).json({ error: 'No _chat.txt found in uploaded file(s)' });
         }
         const ext = path.extname(originalName || fileName || 'chat.txt');
-        const folderName = path.basename(originalName || fileName || 'chat.txt', ext).trim() || `chat_${Date.now()}`;
+        let folderName = path.basename(originalName || fileName || 'chat.txt', ext).trim();
+        if (!folderName || folderName.toLowerCase() === 'whatsapp_chat' || folderName.toLowerCase() === 'files') {
+            const chatBase = path.basename(chatFile, path.extname(chatFile));
+            folderName = chatBase.replace(/^whatsapp[\s_-]*chat[\s_-]*(with[\s_-]*)?[-–—]?\s*/i, '').trim() || `chat_${Date.now()}`;
+        }
         baseName = sanitizeChatName(folderName);
         finalDir = uniqueChatDir(baseName, myDir, ownerId, !req.user);
         ensureDir(finalDir);

@@ -466,7 +466,7 @@ const defaults = {
     trial_user_daily_messages: '10',
     free_lifetime_messages: '0',
     free_max_chats: '5',
-    guest_max_messages: '10',
+    guest_max_messages: '5',
     guest_max_chats: '1',
     burst_limit_messages: '10',
     burst_limit_seconds: '30',

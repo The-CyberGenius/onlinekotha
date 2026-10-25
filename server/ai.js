@@ -59,7 +59,7 @@ function aiGate(req, res, next) {
     if (!req.user || req.user.plan === 'guest') {
         const guestStatus = getGuestStatus(req, res);
         if (!guestStatus.canUseAI) {
-            const maxGuestMsgs = getSetting('guest_max_messages', '10');
+            const maxGuestMsgs = getSetting('guest_max_messages', '5');
             return res.status(403).json({
                 error: `Guest limit reached (${maxGuestMsgs}/${maxGuestMsgs} free AI messages used). Sign in with Google to continue chatting!`,
                 requireAuth: true,

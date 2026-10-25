@@ -36,18 +36,10 @@ function getGuestRecord(guestId, ip, fp) {
     const now = Date.now();
     let row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
     if (!row) {
-        // Inherit quota from existing IP or fingerprint if available (prevents incognito quota reset)
-        let existingQuota = null;
-        if (fp) existingQuota = db.prepare('SELECT chats_imported, ai_messages_count FROM guest_sessions WHERE fingerprint = ?').get(fp);
-        if (!existingQuota && ip) existingQuota = db.prepare('SELECT chats_imported, ai_messages_count FROM guest_sessions WHERE ip = ?').get(ip);
-
-        const chatsImported = existingQuota ? existingQuota.chats_imported : 0;
-        const aiCount = existingQuota ? existingQuota.ai_messages_count : 0;
-
         db.prepare(`
             INSERT INTO guest_sessions (id, ip, fingerprint, chats_imported, ai_messages_count, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).run(guestId, ip, fp, chatsImported, aiCount, now, now);
+        `).run(guestId, ip, fp, 0, 0, now, now);
         row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
     } else {
         db.prepare('UPDATE guest_sessions SET updated_at = ?, ip = COALESCE(?, ip), fingerprint = COALESCE(?, fingerprint) WHERE id = ?').run(now, ip, fp, guestId);
@@ -61,12 +53,13 @@ function getGuestStatus(req, res) {
     const fp = getFingerprint(req);
     const record = getGuestRecord(guestId, ip, fp);
 
-    const actualChats = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ?').get(guestId)?.c || 0;
-    const chatsImported = Math.max(record ? record.chats_imported : 0, actualChats);
-    const aiMsgsUsed = record ? record.ai_messages_count : 0;
-    
+    const actualChats = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ? AND (deleted_by_user = 0 OR deleted_by_user IS NULL)').get(guestId)?.c || 0;
     const GUEST_MAX_CHATS = Number(getSetting('guest_max_chats', '1'));
-    const GUEST_MAX_AI_MSGS = Number(getSetting('guest_max_messages', '10'));
+    const GUEST_MAX_AI_MSGS = Number(getSetting('guest_max_messages', '5'));
+
+    // Count how many chats this guest currently has active
+    const chatsImported = actualChats;
+    const aiMsgsUsed = record ? record.ai_messages_count : 0;
 
     return {
         guestId,

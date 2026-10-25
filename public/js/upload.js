@@ -44,7 +44,7 @@
     function openModal() {
         if (window.__IS_GUEST__) {
             const guestStatus = window.__GUEST_STATUS__ || {};
-            if ((guestStatus.chatsRemaining ?? 1) <= 0) {
+            if (guestStatus.chatsImported >= 1 && (guestStatus.chatsRemaining ?? 1) <= 0) {
                 if (window.openAuthModal) {
                     window.openAuthModal('Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!');
                 }
@@ -458,8 +458,24 @@
         return data;
     }
 
-    // Upload folder / multiple individual files
-    async function uploadMultipleFiles(files) {
+    // Upload folder / multiple individual files with retry & pacing
+    async function uploadMultipleFiles(rawFiles) {
+        // Filter out OS junk files (.DS_Store, Thumbs.db, etc.)
+        const files = Array.from(rawFiles).filter(f => {
+            const name = f.name.toLowerCase();
+            return !name.startsWith('.') && !name.includes('__macosx') && name !== 'thumbs.db' && name !== 'desktop.ini';
+        });
+
+        if (!files.length) {
+            throw new Error("No readable files found in the selected folder.");
+        }
+
+        // Check if there is at least one .txt file in the folder
+        const hasTxt = files.some(f => f.name.toLowerCase().endsWith('.txt') || f.name.toLowerCase().endsWith('.zip'));
+        if (!hasTxt) {
+            throw new Error("No WhatsApp chat file (_chat.txt) found in this folder. Please select the folder that contains your chat text file.");
+        }
+
         const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
         let totalBytes = 0;
         for (const f of files) totalBytes += f.size;
@@ -473,52 +489,60 @@
                 firstFolder = relPath.split('/')[0];
             }
 
-            let safeBlob;
-            if (f.size <= 10 * 1024 * 1024) {
-                const buffer = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsArrayBuffer(f);
-                });
-                safeBlob = new Blob([buffer], { type: f.type || 'application/octet-stream' });
-            } else {
-                safeBlob = f;
-            }
+            const sendFileWithRetry = async (attempt = 1) => {
+                const query = `uploadId=${encodeURIComponent(uploadId)}&fileIndex=${i}&totalFiles=${files.length}&relPath=${encodeURIComponent(relPath)}`;
+                const formData = new FormData();
+                formData.append('file', f, pathBasename(relPath));
 
-            const query = `uploadId=${encodeURIComponent(uploadId)}&fileIndex=${i}&totalFiles=${files.length}&relPath=${encodeURIComponent(relPath)}`;
-            const formData = new FormData();
-            formData.append('file', safeBlob, pathBasename(relPath));
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `/api/upload/file?${query}`);
+                    xhr.timeout = 180000;
 
-            await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', `/api/upload/file?${query}`);
-                xhr.timeout = 120000;
+                    xhr.upload.addEventListener('progress', e => {
+                        if (e.lengthComputable) {
+                            const totalLoaded = uploadedBytes + e.loaded;
+                            updateUploadProgress(totalLoaded, totalBytes, `Uploading file ${i + 1} of ${files.length}...`);
+                        }
+                    });
 
-                xhr.upload.addEventListener('progress', e => {
-                    if (e.lengthComputable) {
-                        const totalLoaded = uploadedBytes + e.loaded;
-                        updateUploadProgress(totalLoaded, totalBytes, `Uploading file ${i + 1} of ${files.length}...`);
+                    xhr.onload = () => {
+                        let resp = {};
+                        try { resp = JSON.parse(xhr.responseText); } catch {}
+                        if (xhr.status >= 200 && xhr.status < 300 && resp.ok) {
+                            resolve(resp);
+                        } else {
+                            const err = new Error(resp.error || `Upload failed (${xhr.status})`);
+                            if (resp.requireAuth || xhr.status === 403) err.requireAuth = true;
+                            if (resp.upgrade) err.upgrade = true;
+                            err.status = xhr.status;
+                            reject(err);
+                        }
+                    };
+                    xhr.onerror = () => reject(new Error('Network error uploading file'));
+                    xhr.ontimeout = () => reject(new Error('Upload connection timed out'));
+                    xhr.send(formData);
+                }).catch(async err => {
+                    if (err.requireAuth || err.upgrade) throw err;
+                    if (attempt < 3) {
+                        console.warn(`File ${f.name} attempt ${attempt} failed (${err.message}), retrying...`);
+                        await new Promise(r => setTimeout(r, attempt * 1000));
+                        return sendFileWithRetry(attempt + 1);
                     }
-                });
-
-                xhr.onload = () => {
-                    let resp = {};
-                    try { resp = JSON.parse(xhr.responseText); } catch {}
-                    if (xhr.status >= 200 && xhr.status < 300 && resp.ok) resolve(resp);
-                    else {
-                        const err = new Error(resp.error || `Upload failed (${xhr.status})`);
-                        if (resp.requireAuth || xhr.status === 403) err.requireAuth = true;
-                        if (resp.upgrade) err.upgrade = true;
-                        reject(err);
+                    // If a non-text media file fails after 3 tries, log warning and continue so chat still imports
+                    const isChatTxt = f.name.toLowerCase().endsWith('.txt') || /^.*chat.*\.txt$/i.test(f.name);
+                    if (!isChatTxt) {
+                        console.warn(`Skipping unreadable media file after retries: ${f.name}`);
+                        return { ok: true, skipped: true };
                     }
-                };
-                xhr.onerror = () => reject(new Error('Network error uploading file'));
-                xhr.ontimeout = () => reject(new Error('Upload connection timed out'));
-                xhr.send(formData);
-            });
+                    throw err;
+                });
+            };
 
+            await sendFileWithRetry();
             uploadedBytes += f.size;
+            // Pacing delay (25ms) to prevent overflowing server rate limiters
+            await new Promise(r => setTimeout(r, 25));
         }
 
         startProcessingUI();
@@ -564,7 +588,7 @@
 
         if (window.__IS_GUEST__) {
             const guestStatus = window.__GUEST_STATUS__ || {};
-            if ((guestStatus.chatsRemaining ?? 1) <= 0) {
+            if (guestStatus.chatsImported >= 1 && (guestStatus.chatsRemaining ?? 1) <= 0) {
                 closeModal();
                 if (window.openAuthModal) {
                     window.openAuthModal('Guest limit reached (1/1 free chat imported). Please sign in with Google to import more chats!');
