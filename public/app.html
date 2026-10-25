@@ -105,7 +105,7 @@
         }
     </style>
 
-    <script src="/js/auth-init.js?v=4.3"></script>
+    <script src="/js/auth-init.js?v=4.4"></script>
     <script>if (localStorage.getItem('kotha_dark') === '1') document.documentElement.classList.add('dark');</script>
     <!-- Google Analytics — async, non-blocking -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
@@ -171,6 +171,15 @@
                         <svg width="12" height="12" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
                         Sign In
                     </button>
+                    <a href="/"
+                        class="w-7 h-7 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
+                        title="Go to Home">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                            <polyline points="9 22 9 12 15 12 15 22" />
+                        </svg>
+                    </a>
                     <button id="sidebar-dark-mode-btn" onclick="window.kothaToggleTheme()"
                         class="w-7 h-7 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition cursor-pointer"
                         title="Toggle dark mode">
@@ -204,8 +213,6 @@
                         title="Exit Impersonation">
                         EXIT
                     </a>
-                </div>
-            </div>
                     <button id="close-sidebar-btn"
                         class="hidden md:hidden w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 items-center justify-center text-gray-500 transition"
                         title="Back to Chat">
@@ -1134,8 +1141,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-    <script src="/js/ai-panel.js?v=59"></script>
-    <script src="/js/script.js?v=65"></script>
+    <script src="/js/ai-panel.js?v=60"></script>
+    <script src="/js/script.js?v=66"></script>
     <script src="/js/upload.js?v=65"></script>
     <script src="/js/story.js?v=56"></script>
     <script src="/js/features.js?v=57"></script>
