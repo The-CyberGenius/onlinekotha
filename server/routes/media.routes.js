@@ -9,7 +9,12 @@ const { SRC_DIR } = require('../upload');
 
 // Helper to get storage directory for either User or Guest
 function getOwnerId(req, res) {
-    if (req.user) return req.user.id;
+    if (req.user) {
+        if (req.user.is_impersonating && req.user.guest_id) {
+            return req.user.guest_id;
+        }
+        if (req.user.id > 0) return req.user.id;
+    }
     return getOrCreateGuestId(req, res);
 }
 

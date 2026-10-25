@@ -107,6 +107,8 @@ function aiGate(req, res, next) {
     next();
 }
 
+router.aiGate = aiGate;
+
 // ---------- Conversations CRUD ----------
 router.get('/conversations', (req, res) => {
     const chatFolder = req.query.chat;
@@ -558,7 +560,7 @@ router.post('/chat', aiGate, async (req, res) => {
 
         db.prepare('UPDATE conversations SET updated_at = ? WHERE id = ?').run(Date.now(), convId);
 
-        if (!req.user) {
+        if (!req.user || req.user.plan === 'guest') {
             recordGuestAIMessage(req, res);
         }
 

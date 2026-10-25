@@ -48,7 +48,7 @@ function userDir(userId) {
 // Check guest and free-tier quotas before or during upload
 function checkUploadQuota(req, res) {
     const { getGuestStatus } = require('./guest');
-    let ownerId = req.user ? req.user.id : null;
+    let ownerId = (req.user && req.user.id > 0 && req.user.plan !== 'guest') ? req.user.id : null;
     let guestId = null;
 
     if (!ownerId) {
@@ -85,7 +85,7 @@ function checkUploadQuota(req, res) {
         }
     }
 
-    return { allowed: true, ownerId, guestId, isGuest: !req.user };
+    return { allowed: true, ownerId, guestId, isGuest: !ownerId };
 }
 
 // ── Standard Monolithic Multer (Legacy & Small uploads up to 2GB) ──
@@ -372,17 +372,18 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
         finalDisplayName = targetName;
     }
 
-    if (req.user) {
+    if (req.user && req.user.id > 0 && req.user.plan !== 'guest') {
         db.prepare(
             `INSERT INTO chats (user_id, folder_name, display_name, created_at, message_count, is_group, participants)
              VALUES (?, ?, ?, ?, ?, ?, ?)`
         ).run(req.user.id, folderName, finalDisplayName, Date.now(), message_count, is_group, JSON.stringify(participants));
     } else {
+        const effectiveGuestId = guestId || (req.user && req.user.guest_id);
         const { recordGuestChatImport } = require('./guest');
         db.prepare(
             `INSERT INTO chats (user_id, guest_id, folder_name, display_name, created_at, message_count, is_group, participants)
              VALUES (0, ?, ?, ?, ?, ?, ?, ?)`
-        ).run(guestId, folderName, finalDisplayName, Date.now(), message_count, is_group, JSON.stringify(participants));
+        ).run(effectiveGuestId, folderName, finalDisplayName, Date.now(), message_count, is_group, JSON.stringify(participants));
         recordGuestChatImport(req, res);
     }
 
@@ -546,6 +547,7 @@ async function handleCompleteMultiFiles(req, res) {
 }
 
 module.exports = {
+    checkUploadQuota,
     upload,
     handleUpload,
     uploadChunk,

@@ -15,6 +15,12 @@ function getFingerprint(req) {
 }
 
 function getOrCreateGuestId(req, res) {
+    if (req.user && req.user.guest_id) {
+        return req.user.guest_id;
+    }
+    if (req.cookies && req.cookies.admin_impersonate_uid && String(req.cookies.admin_impersonate_uid).startsWith('gst_')) {
+        return String(req.cookies.admin_impersonate_uid);
+    }
     let guestId = req.cookies && req.cookies.kotha_guest_id;
     if (!guestId) {
         guestId = 'gst_' + crypto.randomBytes(16).toString('hex');
@@ -127,8 +133,10 @@ function claimGuestData(guestId, userId) {
                 const destPath = path.join(userDir, entry.name);
                 try {
                     if (fs.existsSync(destPath)) {
-                        const uniqueDest = path.join(userDir, `${entry.name}_${Date.now()}`);
+                        const newFolderName = `${entry.name}_${Date.now()}`;
+                        const uniqueDest = path.join(userDir, newFolderName);
                         fs.renameSync(srcPath, uniqueDest);
+                        db.prepare('UPDATE chats SET folder_name = ? WHERE user_id = ? AND folder_name = ?').run(newFolderName, userId, entry.name);
                     } else {
                         fs.renameSync(srcPath, destPath);
                     }

@@ -2590,7 +2590,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!r.ok) return;
             const data = await r.json();
             if (globalOnlineCount) {
-                globalOnlineCount.textContent = `${data.count} user${data.count === 1 ? '' : 's'} online`;
+                if (window.__IS_GUEST__) {
+                    globalOnlineCount.innerHTML = '<span class="text-indigo-500 dark:text-indigo-400 font-semibold flex items-center gap-1">🔒 Sign in to join</span>';
+                } else {
+                    globalOnlineCount.textContent = `${data.count} user${data.count === 1 ? '' : 's'} online`;
+                }
             }
         } catch (err) {}
     }
