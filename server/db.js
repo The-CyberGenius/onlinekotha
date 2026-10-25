@@ -203,6 +203,7 @@ CREATE TABLE IF NOT EXISTS guest_sessions (
   fingerprint TEXT,
   chats_imported INTEGER DEFAULT 0,
   ai_messages_count INTEGER DEFAULT 0,
+  last_ai_date TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );
@@ -340,6 +341,7 @@ safeAddColumn('routes', 'fallback_model_id_2', 'INTEGER');
 safeAddColumn('routes', 'fallback_model_id_3', 'INTEGER');
 safeAddColumn("routes", "fallback_model_id_4", "INTEGER");
 safeAddColumn("routes", "fallback_model_id_5", "INTEGER");
+safeAddColumn('guest_sessions', 'last_ai_date', 'TEXT');
 
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 

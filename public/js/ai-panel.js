@@ -824,16 +824,22 @@
                 if (!resp.ok) {
                     let errMsg = `Error ${resp.status}`;
                     let isLimit = false;
+                    let requireAuth = false;
                     try { 
                         const data = await resp.json();
                         errMsg = data.error || errMsg; 
+                        if (data.requireAuth) requireAuth = true;
                         if (resp.status === 429 && errMsg.toLowerCase().includes('limit')) isLimit = true;
                     } catch { }
                     typingEl.remove();
-                    if (isLimit || errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
-                        if (errMsg.toLowerCase().includes('guest') && typeof window.openAuthModal === 'function') {
+                    if (requireAuth || errMsg.toLowerCase().includes('guest')) {
+                        if (typeof window.openAuthModal === 'function') {
                             window.openAuthModal(errMsg);
-                        } else if (typeof window.openUpgradeModal === 'function') {
+                        } else {
+                            appendErrorBubble(errMsg);
+                        }
+                    } else if (isLimit || errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
+                        if (typeof window.openUpgradeModal === 'function') {
                             window.openUpgradeModal();
                         } else {
                             appendErrorBubble('Server busy. Please try again or upgrade to Pro.');

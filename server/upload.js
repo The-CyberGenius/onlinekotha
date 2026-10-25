@@ -70,7 +70,7 @@ function checkUploadQuota(req, res) {
         const { effectivePlan } = require('./auth');
         const plan = effectivePlan(req.user);
         if (plan === 'free') {
-            const FREE_MAX_CHATS = Number(getSetting('free_max_chats', '2'));
+            const FREE_MAX_CHATS = Number(getSetting('free_max_chats', '5'));
             const chatCount = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE user_id = ? AND deleted_by_user = 0').get(req.user.id)?.c || 0;
             if (chatCount >= FREE_MAX_CHATS) {
                 return {

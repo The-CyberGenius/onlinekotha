@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerName = document.getElementById('chat-header-name');
     const headerAvatar = document.getElementById('header-avatar');
     const sidebarAvatar = document.getElementById('sidebar-avatar');
-    const sidebarTitle = document.getElementById('sidebar-title');
+    const sidebarTitle = document.getElementById('chats-header-label') || document.getElementById('sidebar-title');
     const statsInfo = document.getElementById('stats-info');
     const searchBox = document.getElementById('search-box');
     const payBtn = document.getElementById('modal-pay-btn');
@@ -2582,6 +2582,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const r = await fetch('/api/global-chat/online-count');
             if (r.status === 401 || r.status === 403) {
                 isPollingStopped = true; // Stop spamming if user is a guest/unauthorized
+                if (globalOnlineCount) {
+                    globalOnlineCount.innerHTML = '<span class="text-indigo-500 dark:text-indigo-400 font-semibold flex items-center gap-1">🔒 Sign in to join</span>';
+                }
                 return;
             }
             if (!r.ok) return;

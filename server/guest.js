@@ -4,7 +4,7 @@ const path = require('path');
 const { db, getSetting } = require('./db');
 
 function getClientIp(req) {
-    return req.ip || req.socket.remoteAddress || '127.0.0.1';
+    return req.ip || req.socket?.remoteAddress || req.connection?.remoteAddress || '127.0.0.1';
 }
 
 function getFingerprint(req) {
@@ -34,12 +34,13 @@ function getOrCreateGuestId(req, res) {
 
 function getGuestRecord(guestId, ip, fp) {
     const now = Date.now();
+    const today = new Date().toISOString().slice(0, 10);
     let row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
     if (!row) {
         db.prepare(`
-            INSERT INTO guest_sessions (id, ip, fingerprint, chats_imported, ai_messages_count, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `).run(guestId, ip, fp, 0, 0, now, now);
+            INSERT INTO guest_sessions (id, ip, fingerprint, chats_imported, ai_messages_count, last_ai_date, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(guestId, ip, fp, 0, 0, today, now, now);
         row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
     } else {
         db.prepare('UPDATE guest_sessions SET updated_at = ?, ip = COALESCE(?, ip), fingerprint = COALESCE(?, fingerprint) WHERE id = ?').run(now, ip, fp, guestId);
@@ -59,7 +60,10 @@ function getGuestStatus(req, res) {
 
     // Count how many chats this guest currently has active
     const chatsImported = actualChats;
-    const aiMsgsUsed = record ? record.ai_messages_count : 0;
+
+    // Daily reset: count AI messages used today only
+    const today = new Date().toISOString().slice(0, 10);
+    const aiMsgsUsed = (record && record.last_ai_date === today) ? (record.ai_messages_count || 0) : 0;
 
     return {
         guestId,
@@ -88,10 +92,14 @@ function recordGuestAIMessage(req, res) {
     const guestId = getOrCreateGuestId(req, res);
     const ip = getClientIp(req);
     const fp = getFingerprint(req);
-    getGuestRecord(guestId, ip, fp);
+    const record = getGuestRecord(guestId, ip, fp);
 
     const now = Date.now();
-    db.prepare('UPDATE guest_sessions SET ai_messages_count = ai_messages_count + 1, updated_at = ? WHERE id = ? OR ip = ? OR fingerprint = ?').run(now, guestId, ip, fp);
+    const today = new Date().toISOString().slice(0, 10);
+    const currentCount = (record && record.last_ai_date === today) ? (record.ai_messages_count || 0) : 0;
+    const newCount = currentCount + 1;
+
+    db.prepare('UPDATE guest_sessions SET ai_messages_count = ?, last_ai_date = ?, updated_at = ? WHERE id = ? OR ip = ? OR fingerprint = ?').run(newCount, today, now, guestId, ip, fp);
 }
 
 function claimGuestData(guestId, userId) {

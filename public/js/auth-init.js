@@ -322,9 +322,9 @@
             }
 
             // Update UI
-            const sidebarTitle = document.getElementById('sidebar-title');
-            if (sidebarTitle && data.user.display_name) {
-                sidebarTitle.textContent = data.user.display_name;
+            const sidebarDisplayName = document.getElementById('sidebar-user-display-name') || document.getElementById('sidebar-title');
+            if (sidebarDisplayName && data.user.display_name) {
+                sidebarDisplayName.textContent = data.user.display_name;
             }
             const info = document.getElementById('sidebar-user-info');
             if (info && data.user.display_name) {
@@ -434,7 +434,7 @@
             if (info) info.textContent = 'Guest User';
 
             const emailDisplay = document.getElementById('my-email-display');
-            if (emailDisplay) emailDisplay.textContent = 'Free Preview Mode';
+            if (emailDisplay) emailDisplay.textContent = '5 Free AI Replies / Day';
 
             // Guest Global Chat indicator
             const globalOnlineCount = document.getElementById('global-online-count');
@@ -451,11 +451,12 @@
                 avatarWrap.onclick = () => window.openAuthModal();
             }
 
-            const sidebarTitle = document.getElementById('sidebar-title');
-            if (sidebarTitle) sidebarTitle.textContent = 'Guest Mode';
+            const sidebarDisplayName = document.getElementById('sidebar-user-display-name') || document.getElementById('sidebar-title');
+            if (sidebarDisplayName) sidebarDisplayName.textContent = 'Guest Preview';
 
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
+                logoutBtn.classList.add('hidden');
                 logoutBtn.title = 'Sign in to save account';
                 logoutBtn.onclick = () => window.openAuthModal();
             }
@@ -493,9 +494,14 @@
         }
 
         // Show display name below avatar
-        const sidebarTitle = document.getElementById('sidebar-title');
-        if (sidebarTitle && me.user.display_name) {
-            sidebarTitle.textContent = me.user.display_name;
+        const sidebarDisplayName = document.getElementById('sidebar-user-display-name') || document.getElementById('sidebar-title');
+        if (sidebarDisplayName) {
+            sidebarDisplayName.textContent = me.user.display_name || me.user.email?.split('@')[0] || 'My Account';
+        }
+
+        const guestSigninBtn = document.getElementById('guest-signin-btn');
+        if (guestSigninBtn) {
+            guestSigninBtn.classList.add('hidden');
         }
 
         // Auto-prompt if not prompted yet and no phone (never for guests or impersonation)
