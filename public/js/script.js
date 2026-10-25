@@ -3625,9 +3625,9 @@ document.addEventListener('DOMContentLoaded', () => {
         displayedMessages = allMessages; // Make sure we are in main view
         const idx = displayedMessages.findIndex(m => String(m.id) === String(id));
         if (idx !== -1) {
-            const start = Math.max(0, idx - 50);
-            const end = Math.min(displayedMessages.length, idx + 100);
-            renderChats(start, end);
+            const start = Math.max(0, idx - 45);
+            const end = Math.min(displayedMessages.length, idx + 65);
+            renderChats(start, end, 'reset');
 
             toggleSidebar(false);
             if (typeof closeSearchModal === 'function') closeSearchModal();
@@ -3640,25 +3640,36 @@ document.addEventListener('DOMContentLoaded', () => {
             if (searchMod) { searchMod.classList.add('hidden'); searchMod.style.display = 'none'; }
             if (filtMod) { filtMod.classList.add('hidden'); filtMod.style.display = 'none'; }
             const inlineSearchOverlay = document.getElementById('chat-inline-search-overlay');
-            if (inlineSearchOverlay) {
-                inlineSearchOverlay.classList.add('hidden');
-                document.getElementById('inline-search-results-container').classList.add('hidden');
-            }
+            const inlineResults = document.getElementById('inline-search-results-container');
+            if (inlineSearchOverlay) inlineSearchOverlay.classList.add('hidden');
+            if (inlineResults) inlineResults.classList.add('hidden');
 
-            setTimeout(() => {
+            // Dismiss mobile virtual keyboard if open
+            const mobInput = document.getElementById('inline-search-input');
+            if (mobInput) mobInput.blur();
+
+            const performScrollAndHighlight = () => {
                 const el = document.getElementById(`msg-${id}`);
-                if (el) {
-                    scrollArea.scrollTop = el.offsetTop - (scrollArea.clientHeight / 2) + 50;
+                if (el && scrollArea) {
+                    try {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } catch (_) {}
+
+                    const elRect = el.getBoundingClientRect();
+                    const areaRect = scrollArea.getBoundingClientRect();
+                    const targetScrollTop = scrollArea.scrollTop + (elRect.top - areaRect.top) - (areaRect.height / 2) + (elRect.height / 2);
+                    scrollArea.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+
                     const bubble = el.firstElementChild;
                     if (bubble) {
-                        bubble.style.transition = 'all 0.3s ease';
-                        bubble.style.boxShadow = '0 0 0 3px rgba(250,204,21,0.6), 0 8px 24px -4px rgba(0,0,0,0.15)';
-                        bubble.style.transform = 'scale(1.02)';
+                        bubble.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+                        bubble.style.boxShadow = '0 0 0 3.5px #6366f1, 0 10px 28px -4px rgba(99, 102, 241, 0.45)';
+                        bubble.style.transform = 'scale(1.025)';
                         bubble.classList.add('search-result-flash');
 
                         // Highlight search query inside the message
                         const deskQuery = searchBox ? searchBox.value.trim() : '';
-                        const mobQuery = document.getElementById('inline-search-input') ? document.getElementById('inline-search-input').value.trim() : '';
+                        const mobQuery = mobInput ? mobInput.value.trim() : '';
                         const query = deskQuery || mobQuery;
                         if (query.length >= 1) {
                             const textEl = bubble.querySelector('p');
@@ -3671,25 +3682,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             bubble.style.boxShadow = '';
                             bubble.style.transform = '';
                             bubble.classList.remove('search-result-flash');
-                            // Remove highlight marks after a while
                             setTimeout(() => {
-                                const marks = bubble.querySelectorAll('mark.search-highlight');
+                                const marks = bubble.querySelectorAll('mark');
                                 marks.forEach(m => {
                                     m.outerHTML = m.textContent;
                                 });
                             }, 3000);
-                        }, 2500);
+                        }, 2600);
                     }
                 }
-                
-                // Clear the mobile input now that highlighting is set up
-                const mobInput = document.getElementById('inline-search-input');
-                if (mobInput) {
-                    mobInput.value = '';
-                    const countLabel = document.getElementById('inline-search-count');
-                    if (countLabel) countLabel.textContent = '';
-                }
-            }, 100);
+            };
+
+            // Dual-pass execution for rock-solid centering
+            setTimeout(performScrollAndHighlight, 60);
+            setTimeout(performScrollAndHighlight, 220);
         }
     };
 
@@ -4298,7 +4304,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Header search button — opens inline chat search overlay
+    // Global search result selector (jumps to message & closes search smoothly)
+    window.selectSearchResult = (id) => {
+        const inlineInput = document.getElementById('inline-search-input');
+        if (inlineInput) inlineInput.blur(); // Dismiss mobile keyboard immediately
+
+        const resultsContainer = document.getElementById('inline-search-results-container');
+        if (resultsContainer) resultsContainer.classList.add('hidden');
+
+        const overlay = document.getElementById('chat-inline-search-overlay');
+        if (overlay) overlay.classList.add('hidden');
+
+        if (typeof window.jumpToMsg === 'function') {
+            window.jumpToMsg(id);
+        }
+    };
+
+    // Header search button — opens inline chat search overlay across all screen sizes
     const headerSearchBtn = document.getElementById('header-search-btn');
     const inlineSearchOverlay = document.getElementById('chat-inline-search-overlay');
     const closeInlineSearchBtn = document.getElementById('close-inline-search-btn');
@@ -4318,46 +4340,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (headerSearchBtn && inlineSearchOverlay && inlineSearchInput) {
-        headerSearchBtn.addEventListener('click', () => {
-            const sidebarBtn = document.getElementById('open-sidebar-btn');
-            const isMobile = sidebarBtn && sidebarBtn.offsetParent !== null;
-            
-            if (!isMobile) {
-                // Desktop: Open sidebar search box
-                const mainSearchInput = document.getElementById('search-box');
-                if (mainSearchInput) {
-                    if (window.kothaSidebarOpen) window.kothaSidebarOpen();
-                    setTimeout(() => mainSearchInput.focus({ preventScroll: true }), 150);
+        headerSearchBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (inlineSearchOverlay.classList.contains('hidden')) {
+                inlineSearchOverlay.classList.remove('hidden');
+                setTimeout(() => inlineSearchInput.focus({ preventScroll: true }), 60);
+                if (inlineSearchInput.value.trim().length > 0 && inlineResultsList && inlineResultsList.children.length > 0) {
+                    inlineSearchResultsContainer.classList.remove('hidden');
                 }
-                return;
+            } else {
+                inlineSearchOverlay.classList.add('hidden');
+                inlineSearchResultsContainer.classList.add('hidden');
+                inlineSearchInput.blur();
             }
-
-            // Mobile: Inline chat search
-            inlineSearchOverlay.classList.remove('hidden');
-            inlineSearchInput.focus({ preventScroll: true });
         });
 
-        closeInlineSearchBtn.addEventListener('click', () => {
-            inlineSearchOverlay.classList.add('hidden');
-            inlineSearchInput.value = '';
-            inlineSearchResultsContainer.classList.add('hidden');
-            inlineSearchCount.textContent = '';
-            if (clearInlineSearchBtn) clearInlineSearchBtn.classList.add('hidden');
-        });
+        if (closeInlineSearchBtn) {
+            closeInlineSearchBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                inlineSearchOverlay.classList.add('hidden');
+                inlineSearchResultsContainer.classList.add('hidden');
+                inlineSearchInput.value = '';
+                if (inlineResultsList) inlineResultsList.innerHTML = '';
+                if (inlineSearchCount) inlineSearchCount.textContent = '';
+                if (clearInlineSearchBtn) clearInlineSearchBtn.classList.add('hidden');
+                inlineSearchInput.blur();
+            });
+        }
 
         if (clearInlineSearchBtn) {
-            clearInlineSearchBtn.addEventListener('click', () => {
+            clearInlineSearchBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 inlineSearchInput.value = '';
                 inlineSearchResultsContainer.classList.add('hidden');
-                inlineResultsList.innerHTML = '';
-                inlineSearchCount.textContent = '';
+                if (inlineResultsList) inlineResultsList.innerHTML = '';
+                if (inlineSearchCount) inlineSearchCount.textContent = '';
                 clearInlineSearchBtn.classList.add('hidden');
                 inlineSearchInput.focus({ preventScroll: true });
             });
         }
 
+        inlineSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (closeInlineSearchBtn) closeInlineSearchBtn.click();
+            }
+        });
+
         inlineSearchInput.addEventListener('focus', () => {
-            if (inlineSearchInput.value.trim().length >= 1 && inlineResultsList.innerHTML.trim() !== '') {
+            if (inlineSearchInput.value.trim().length >= 1 && inlineResultsList && inlineResultsList.children.length > 0) {
                 inlineSearchResultsContainer.classList.remove('hidden');
             }
         });
@@ -4373,18 +4404,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!normVal) {
                 inlineSearchResultsContainer.classList.add('hidden');
-                inlineResultsList.innerHTML = '';
-                inlineSearchCount.textContent = '';
+                if (inlineResultsList) inlineResultsList.innerHTML = '';
+                if (inlineSearchCount) inlineSearchCount.textContent = '';
                 return;
             }
 
-            // Deep search in loaded messages (supports any special characters, punctuation, emojis and text)
-            inlineSearchResultsContainer.classList.remove('hidden');
+            // Deep search in loaded messages for current chat
+            const msgs = (allMessages && allMessages.length > 0) ? allMessages : (typeof window.getAllMessages === 'function' ? window.getAllMessages() : []);
             const filteredMsgs = [];
-            const msgs = typeof window.getAllMessages === 'function' ? window.getAllMessages() : [];
             if (msgs && msgs.length > 0) {
                 for (let i = 0; i < msgs.length; i++) {
                     const msg = msgs[i];
+                    if (!msg) continue;
                     const textNorm = normalizeSearchText(msg.text);
                     const senderNorm = normalizeSearchText(msg.sender);
                     const attachNorm = normalizeSearchText(msg.attachment);
@@ -4394,43 +4425,62 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            inlineSearchCount.textContent = `${filteredMsgs.length}`;
+            if (inlineSearchCount) {
+                inlineSearchCount.textContent = filteredMsgs.length > 0 ? `${filteredMsgs.length}` : '0';
+            }
             inlineSearchResultsContainer.classList.remove('hidden');
 
             if (filteredMsgs.length === 0) {
-                inlineResultsList.innerHTML = `<div class="text-xs text-gray-400 py-3 text-center">No messages found for "${escapeHTML(val)}"</div>`;
+                inlineResultsList.innerHTML = `
+                    <div class="py-12 px-4 text-center flex flex-col items-center justify-center">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-3">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </div>
+                        <p class="text-[13px] font-semibold text-gray-600 dark:text-gray-300">No matching messages found</p>
+                        <p class="text-[11.5px] text-gray-400 dark:text-gray-500 mt-1">Try searching for other words or emojis</p>
+                    </div>`;
             } else {
                 let resultsHtml = '';
                 try {
-                    const limitRes = filteredMsgs.slice(-50).reverse();
+                    const limitRes = filteredMsgs.slice(-60).reverse();
                     limitRes.forEach(msg => {
                         const highlightedText = highlightMatch(msg.text || msg.attachment || '', val);
-                        const myName = typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null;
-                        const isMe = (myName && msg.sender === myName) || msg.sender === 'You';
-                        const timeStr = msg.time && msg.date ? `${msg.date} • ${msg.time}` : String(msg.time || 'Unknown');
-                        
-                        const alignClass = isMe ? 'ml-auto' : 'mr-auto';
-                        const bubbleClass = isMe ? 'glass-chat-me' : 'glass-chat-them';
-                        const timeVar = isMe ? '--msg-time-me' : '--msg-time-them';
-                        
+                        const safeSender = escapeHTML(msg.sender || 'User');
+                        const safeDate = escapeHTML(msg.date || '');
+                        const safeTime = escapeHTML(msg.time || '');
+                        const senderColor = getStringColor(msg.sender || 'User');
+
                         resultsHtml += `
-                            <div class="flex flex-col mb-2 w-full cursor-pointer hover:opacity-85 transition-opacity" onclick="document.getElementById('inline-search-results-container').classList.add('hidden'); window.jumpToMsg && window.jumpToMsg('${msg.id}')">
-                                <div class="max-w-[80%] md:max-w-[70%] relative px-3 py-1.5 md:px-3.5 md:py-2 ${bubbleClass} ${alignClass} rounded-2xl flex flex-col gap-0.5 shadow-sm">
-                                    <p style="color:var(--msg-text)" class="text-[13px] leading-normal font-medium whitespace-pre-wrap break-words line-clamp-2">${highlightedText}</p>
-                                    <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto pt-0.5">
-                                        ${escapeHTML(timeStr)}
-                                    </div>
+                            <div class="p-3 md:p-3.5 bg-white/95 dark:bg-[#1f2c34]/95 backdrop-blur-md hover:bg-indigo-50/70 dark:hover:bg-[#2a3942] border border-black/5 dark:border-white/10 shadow-xs cursor-pointer transition-all rounded-xl active:scale-[0.99] flex flex-col gap-1.5 group" onclick="window.selectSearchResult('${msg.id}')">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[12px] font-bold tracking-tight truncate max-w-[65%]" style="color:${senderColor}">${safeSender}</span> 
+                                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold shrink-0 flex items-center gap-1.5">
+                                        ${safeDate} ${safeTime}
+                                        <svg class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                    </span>
                                 </div>
+                                <p class="text-[12.5px] text-gray-800 dark:text-gray-200 font-normal line-clamp-2 leading-relaxed break-words">${highlightedText}</p>
                             </div>
                         `;
                     });
                 } catch (err) {
-                    inlineResultsList.innerHTML = `<div class="text-xs text-gray-400 py-3 text-center">No messages found</div>`;
+                    resultsHtml = `<div class="text-xs text-gray-400 py-6 text-center">Unable to display results</div>`;
                 }
                 inlineResultsList.innerHTML = resultsHtml;
             }
         });
     }
+
+    // Keyboard shortcut: Cmd+F / Ctrl+F opens in-chat search
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && (e.key === 'f' || e.key === 'F')) {
+            const chatHeader = document.getElementById('chat-header-bar');
+            if (chatHeader && chatHeader.offsetParent !== null) {
+                e.preventDefault();
+                if (headerSearchBtn) headerSearchBtn.click();
+            }
+        }
+    });
 
     // --- Mobile Filter Modal Closing Logic ---
     window.closeMobileFilterModal = function() {
