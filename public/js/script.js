@@ -4393,56 +4393,78 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        let inlineSearchDebounce = null;
+
         inlineSearchInput.addEventListener('input', (e) => {
             const val = e.target.value.trim();
-            const normVal = normalizeSearchText(val);
 
             if (clearInlineSearchBtn) {
-                if (val.length > 0) clearInlineSearchBtn.classList.remove('hidden');
-                else clearInlineSearchBtn.classList.add('hidden');
+                if (val.length > 0) {
+                    clearInlineSearchBtn.style.display = 'block';
+                    clearInlineSearchBtn.classList.remove('hidden');
+                } else {
+                    clearInlineSearchBtn.style.display = 'none';
+                    clearInlineSearchBtn.classList.add('hidden');
+                }
             }
             
-            if (!normVal) {
-                inlineSearchResultsContainer.classList.add('hidden');
+            if (!val) {
+                if (inlineSearchResultsContainer) inlineSearchResultsContainer.classList.add('hidden');
                 if (inlineResultsList) inlineResultsList.innerHTML = '';
-                if (inlineSearchCount) inlineSearchCount.textContent = '';
+                if (inlineSearchCount) {
+                    inlineSearchCount.textContent = '';
+                    inlineSearchCount.style.display = 'none';
+                }
                 return;
             }
 
-            // Deep search in loaded messages for current chat
+            clearTimeout(inlineSearchDebounce);
+            inlineSearchDebounce = setTimeout(() => {
+                performInlineChatSearch(val);
+            }, 50);
+        });
+
+        function performInlineChatSearch(val) {
+            if (!inlineSearchResultsContainer || !inlineResultsList) return;
+
+            inlineSearchResultsContainer.classList.remove('hidden');
+
+            const valLower = val.toLowerCase();
             const msgs = (allMessages && allMessages.length > 0) ? allMessages : (typeof window.getAllMessages === 'function' ? window.getAllMessages() : []);
             const filteredMsgs = [];
+
             if (msgs && msgs.length > 0) {
                 for (let i = 0; i < msgs.length; i++) {
                     const msg = msgs[i];
                     if (!msg) continue;
-                    const textNorm = normalizeSearchText(msg.text);
-                    const senderNorm = normalizeSearchText(msg.sender);
-                    const attachNorm = normalizeSearchText(msg.attachment);
-                    if (textNorm.includes(normVal) || senderNorm.includes(normVal) || attachNorm.includes(normVal)) {
+                    const text = msg.text ? String(msg.text).toLowerCase() : '';
+                    const sender = msg.sender ? String(msg.sender).toLowerCase() : '';
+                    const attach = msg.attachment ? String(msg.attachment).toLowerCase() : '';
+                    if (text.includes(valLower) || sender.includes(valLower) || attach.includes(valLower)) {
                         filteredMsgs.push(msg);
                     }
                 }
             }
 
             if (inlineSearchCount) {
-                inlineSearchCount.textContent = filteredMsgs.length > 0 ? `${filteredMsgs.length}` : '0';
+                inlineSearchCount.textContent = `${filteredMsgs.length.toLocaleString()}`;
+                inlineSearchCount.style.display = 'inline-block';
             }
-            inlineSearchResultsContainer.classList.remove('hidden');
 
             if (filteredMsgs.length === 0) {
                 inlineResultsList.innerHTML = `
-                    <div class="py-12 px-4 text-center flex flex-col items-center justify-center">
-                        <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 mb-3">
+                    <div style="padding: 48px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(128,128,128,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; color: #9ca3af;">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                         </div>
-                        <p class="text-[13px] font-semibold text-gray-600 dark:text-gray-300">No matching messages found</p>
-                        <p class="text-[11.5px] text-gray-400 dark:text-gray-500 mt-1">Try searching for other words or emojis</p>
+                        <p style="font-size: 13.5px; font-weight: 600; color: #4b5563;" class="dark:text-gray-300">No matching messages found for "${escapeHTML(val)}"</p>
+                        <p style="font-size: 12px; color: #9ca3af; margin-top: 4px;">Try searching for other words or emojis</p>
                     </div>`;
             } else {
                 let resultsHtml = '';
                 try {
-                    const limitRes = filteredMsgs.slice(-60).reverse();
+                    // Show up to 80 newest matches
+                    const limitRes = filteredMsgs.slice(-80).reverse();
                     limitRes.forEach(msg => {
                         const highlightedText = highlightMatch(msg.text || msg.attachment || '', val);
                         const safeSender = escapeHTML(msg.sender || 'User');
@@ -4451,24 +4473,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         const senderColor = getStringColor(msg.sender || 'User');
 
                         resultsHtml += `
-                            <div class="p-3 md:p-3.5 bg-white/95 dark:bg-[#1f2c34]/95 backdrop-blur-md hover:bg-indigo-50/70 dark:hover:bg-[#2a3942] border border-black/5 dark:border-white/10 shadow-xs cursor-pointer transition-all rounded-xl active:scale-[0.99] flex flex-col gap-1.5 group" onclick="window.selectSearchResult('${msg.id}')">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-[12px] font-bold tracking-tight truncate max-w-[65%]" style="color:${senderColor}">${safeSender}</span> 
-                                    <span class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold shrink-0 flex items-center gap-1.5">
+                            <div class="search-result-card" onclick="window.selectSearchResult('${msg.id}')">
+                                <div class="search-result-header">
+                                    <span class="search-result-sender" style="color:${senderColor}">${safeSender}</span> 
+                                    <span class="search-result-time">
                                         ${safeDate} ${safeTime}
-                                        <svg class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                                     </span>
                                 </div>
-                                <p class="text-[12.5px] text-gray-800 dark:text-gray-200 font-normal line-clamp-2 leading-relaxed break-words">${highlightedText}</p>
+                                <p class="search-result-snippet">${highlightedText}</p>
                             </div>
                         `;
                     });
                 } catch (err) {
-                    resultsHtml = `<div class="text-xs text-gray-400 py-6 text-center">Unable to display results</div>`;
+                    resultsHtml = `<div style="font-size: 12px; color: #9ca3af; padding: 24px; text-align: center;">Unable to render results</div>`;
                 }
                 inlineResultsList.innerHTML = resultsHtml;
             }
-        });
+        }
     }
 
     // Keyboard shortcut: Cmd+F / Ctrl+F opens in-chat search

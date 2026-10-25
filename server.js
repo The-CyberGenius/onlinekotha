@@ -205,8 +205,8 @@ app.get('/admin', (req, res) => {
     res.redirect('/admin.html');
 });
 
-// /app → main viewer (app.html). Allows both authenticated users & guests!
-app.get('/app', (req, res) => {
+// /app and /app.html → main viewer (app.html). Allows both authenticated users & guests!
+app.get(['/app', '/app.html'], (req, res) => {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
