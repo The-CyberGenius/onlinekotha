@@ -153,19 +153,28 @@
     document.getElementById('yr').textContent = new Date().getFullYear();
     document.getElementById('contact-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector('button[type=submit]');
+        const form = e.target;
+        const btn = form.querySelector('button[type=submit]');
+        const originalText = btn.textContent;
         btn.textContent = 'Sending…';
         btn.disabled = true;
-        // Send to backend
         try {
-            await fetch('/api/contact', {
+            const res = await fetch('/api/contact', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(Object.fromEntries(new FormData(e.target)))
+                body: JSON.stringify(Object.fromEntries(new FormData(form)))
             });
-        } catch {}
-        e.target.style.display = 'none';
-        document.getElementById('form-success').style.display = 'block';
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) {
+                throw new Error(data.error || 'Failed to send message. Please try again or email us directly at oksshiva@gmail.com.');
+            }
+            form.style.display = 'none';
+            document.getElementById('form-success').style.display = 'block';
+        } catch (err) {
+            alert(err.message || 'Unable to submit message. Please try again.');
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
     });
 </script>
 </body>

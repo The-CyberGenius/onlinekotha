@@ -118,14 +118,14 @@
           "description": "Upload WhatsApp chat exports (.zip/.txt) to chat with an authentic AI simulation of your ex-partner, girlfriend, boyfriend, or loved ones. Recreates their texting patterns, slang, humor, and memories.",
           "featureList": [
             "AI Chat with Ex Simulation",
-            "AI Personality Clones from WhatsApp Chat History",
+            "AI Personality Simulations from WhatsApp Chat History",
             "AI Girlfriend / Boyfriend Text Simulator",
             "WhatsApp Chat Export Viewer (.zip and .txt)",
             "WhatsApp Wrapped & Relationship Analytics",
             "Digital Grief & Memory Preservation AI",
             "On This Day Historical Chat Search",
             "Multi-Language and Hinglish Texting Support",
-            "Client-Side Privacy with Zero Model Training"
+            "Zero AI Model Training & Private Encrypted Processing"
           ],
           "offers": {
             "@type": "Offer",
@@ -186,7 +186,7 @@
               "name": "Can I chat with an AI simulation of my ex, former partner, or loved one?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Yes. By uploading your exported WhatsApp chat history, Kotha's AI analyzes thousands of real messages to learn your contact's exact vocabulary, humor, sentence length, emojis, and emotional tone. You can then chat with an AI clone that responds authentically in their unique texting voice."
+                "text": "Yes. By uploading your exported WhatsApp chat history, Kotha's AI analyzes communication style to learn your contact's vocabulary, humor, sentence length, emojis, and emotional tone. You can then chat with an AI persona simulation that responds authentically in their unique texting voice (clearly distinguished as an automated AI simulation)."
               }
             },
             {
@@ -1781,6 +1781,11 @@
                 display: block !important;
             }
 
+            /* On mobile, keep bottom screen clear for primary sticky CTA */
+            #floating-assistant-widget:not(.is-open) {
+                display: none !important;
+            }
+
             #floating-assistant-widget {
                 bottom: calc(85px + env(safe-area-inset-bottom, 0px)) !important;
                 right: 16px !important;
@@ -2607,6 +2612,15 @@
             font-size: 13.5px;
             color: var(--text-secondary);
             margin-bottom: 20px;
+        }
+
+        .enterprise-field-label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 10px 0 5px 2px;
+            text-align: left;
         }
 
         .form-field {
@@ -3772,10 +3786,8 @@
                         </svg>
                     </div>
                     <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">AI
-                        Memory Clone</h3>
-                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Our AI
-                        reads your uploaded chat and learns their exact vocabulary, inside jokes, and texting habits so
-                        you can experience their vibe again.</p>
+                        Persona Simulation</h3>
+                    <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">An optional, reflective AI simulation based on texting patterns and vocabulary. Clearly marked as an AI simulation — not a real person — with strict privacy boundaries.</p>
                 </div>
                 <div class="card liquid-glass" style="padding: 32px 28px; text-align: left;">
                     <div
@@ -3785,11 +3797,10 @@
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                         </svg>
                     </div>
-                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">100%
+                    <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:10px; letter-spacing:-0.01em;">Encrypted
                         Private Vault</h3>
                     <p class="muted" style="font-size:14.5px; line-height:1.65; color: var(--text-secondary);">Your
-                        chats are processed securely. We don't send SMS or WhatsApp messages, and your chat remains in
-                        your private Kotha workspace.</p>
+                        chats are uploaded over TLS and processed in your private workspace. Raw zip archives are deleted after processing, and your data is never used to train public AI models.</p>
                 </div>
             </div>
         </div>
@@ -3939,7 +3950,7 @@
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <path d="M12 16v-4"></path>
                                 <path d="M12 8h.01"></path>
-                            </svg>Instant Authentic AI Clone</span>
+                            </svg>Optional AI Persona Simulation</span>
                     </div>
                 </div>
             </div>
@@ -4175,12 +4186,12 @@
                     </p>
 
                     <ul class="enterprise-feature-list">
-                        <li>Bulk chat analysis across multiple clients</li>
-                        <li>Shared team workspace &amp; user management</li>
-                        <li>Custom PDF communication pattern reports</li>
-                        <li>API access for workflow integration</li>
-                        <li>GDPR-compliant, client-side processing</li>
-                        <li>Priority onboarding &amp; dedicated support</li>
+                        <li>Bulk chat analysis across multiple clients <span style="font-size:11px;opacity:0.8;margin-left:6px;background:rgba(255,255,255,0.08);padding:2px 7px;border-radius:4px;font-weight:600;">Available on request</span></li>
+                        <li>Shared team workspace &amp; user management <span style="font-size:11px;opacity:0.8;margin-left:6px;background:rgba(255,255,255,0.08);padding:2px 7px;border-radius:4px;font-weight:600;">Available on request</span></li>
+                        <li>Custom PDF communication pattern reports <span style="font-size:11px;opacity:0.8;margin-left:6px;background:rgba(255,255,255,0.08);padding:2px 7px;border-radius:4px;font-weight:600;">Available on request</span></li>
+                        <li>API access for workflow integration <span style="font-size:11px;opacity:0.8;margin-left:6px;background:rgba(255,255,255,0.08);padding:2px 7px;border-radius:4px;font-weight:600;">In early access</span></li>
+                        <li>Private isolated workspace &amp; zero model training</li>
+                        <li>Priority onboarding &amp; dedicated practitioner support</li>
                     </ul>
                 </div>
 
@@ -4189,13 +4200,13 @@
                     <h3>Get in touch</h3>
                     <p>Tell us about your use case. We'll respond within 24 hours.</p>
                     <form id="enterprise-contact-form" onsubmit="handleEnterpriseSubmit(event)">
-                        <label class="sr-only" for="enterprise-name">Full name</label>
+                        <label class="enterprise-field-label" for="enterprise-name">Full name</label>
                         <input id="enterprise-name" type="text" class="form-field" name="name" placeholder="Full name" autocomplete="name" required>
-                        <label class="sr-only" for="enterprise-email">Work email</label>
+                        <label class="enterprise-field-label" for="enterprise-email">Work email</label>
                         <input id="enterprise-email" type="email" class="form-field" name="email" placeholder="Work email" autocomplete="email" required>
-                        <label class="sr-only" for="enterprise-org-type">Organization type</label>
+                        <label class="enterprise-field-label" for="enterprise-org-type">Organization type</label>
                         <select id="enterprise-org-type" class="form-field" name="org_type" required>
-                            <option value="" disabled selected>Organization type</option>
+                            <option value="" disabled selected>Select organization type</option>
                             <option value="therapist">Therapist / Counselor</option>
                             <option value="coach">Relationship Coach</option>
                             <option value="hr">HR / People Team</option>
@@ -4203,7 +4214,7 @@
                             <option value="research">Research / Academic</option>
                             <option value="other">Other</option>
                         </select>
-                        <label class="sr-only" for="enterprise-message">Use case and team size</label>
+                        <label class="enterprise-field-label" for="enterprise-message">Use case and team size</label>
                         <textarea id="enterprise-message" class="form-field" name="message" placeholder="Describe your use case and team size" required></textarea>
                         <button type="submit" class="form-submit-btn">
                             Send Message

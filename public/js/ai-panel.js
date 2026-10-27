@@ -1281,11 +1281,27 @@
         }
     }
 
+    function _renderAiDisclaimer() {
+        if (document.getElementById('ai-persona-disclaimer')) return;
+        const disclaimer = document.createElement('div');
+        disclaimer.id = 'ai-persona-disclaimer';
+        disclaimer.className = 'mx-auto max-w-lg mb-4 px-3.5 py-2.5 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/40 text-center text-[12px] text-gray-600 dark:text-gray-300 leading-normal';
+        disclaimer.innerHTML = `
+            <div class="flex items-center justify-center gap-1.5 font-bold text-[11px] uppercase tracking-wider mb-0.5 text-indigo-700 dark:text-indigo-400">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                AI Persona Simulation Notice
+            </div>
+            <span>This is an automated AI simulation reflecting communication patterns from exported messages — not the real person.</span>
+        `;
+        chatContainer.appendChild(disclaimer);
+    }
+
     window.kothaLoadAiHistory = async (chatFolder) => {
         if (!chatFolder) return;
         activeChat = chatFolder;
         chatContainer.innerHTML = '';
         lastRenderedDate = null;
+        _renderAiDisclaimer();
         try {
             const resp = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
             if (!resp.ok) return;
