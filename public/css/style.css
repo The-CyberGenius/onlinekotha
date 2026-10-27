@@ -38,8 +38,6 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    -webkit-user-select: none;
-    user-select: none;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -205,13 +203,8 @@ html.dark .chat-link {
     color: #818cf8;
 }
 
-*:focus {
-    outline: none !important;
-}
-button:focus, a:focus, input:focus, textarea:focus, [tabindex]:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
+*:focus { outline: none; }
+button:focus, a:focus, input:focus, textarea:focus, [tabindex]:focus { box-shadow: none; }
 
 /* Safe area insets for bottom bar */
 @supports (padding: env(safe-area-inset-bottom)) {
@@ -648,7 +641,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-    outline: 2px solid #6366f1;
+    outline: 2px solid #6366f1 !important;
     outline-offset: 2px;
 }
 

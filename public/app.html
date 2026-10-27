@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Kotha Web App — WhatsApp Chat AI & Interactive Viewer</title>
     <meta name="description" content="Open the Kotha web app to import WhatsApp chats (.zip/.txt), search conversations, view WhatsApp Wrapped analytics, and chat with AI persona simulations.">
     <meta name="robots" content="index, follow">
@@ -1061,15 +1061,19 @@
                         </button>
                     </div>
                     
-                    <!-- Strong Privacy Reassurance -->
                     <div class="mt-5 flex items-center justify-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        100% Private. Encrypted locally, never sold.
+                        Encrypted upload. Your file is sent to Kotha for processing and is never sold.
                     </div>
                     
                     <input type="file" id="file-input-zip" accept=".zip,.txt" class="hidden">
                     <input type="file" id="file-input-folder" webkitdirectory directory multiple class="hidden">
                 </div>
+
+                <label class="mt-4 flex items-start gap-2.5 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300 cursor-pointer">
+                    <input id="upload-consent" type="checkbox" class="mt-0.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                    <span>I have the right to upload this chat and understand it contains other people’s messages. I agree to Kotha processing it under the <a href="/privacy.html" class="text-indigo-600 dark:text-indigo-400 underline" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+                </label>
 
                 <!-- OR paste text -->
                 <div class="flex items-center gap-3 my-3">

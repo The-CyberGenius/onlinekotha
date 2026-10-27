@@ -8,6 +8,7 @@
     const fileInputZip = document.getElementById('file-input-zip');
     const fileInputFolder = document.getElementById('file-input-folder');
     const errorEl = document.getElementById('upload-error');
+    const consentInput = document.getElementById('upload-consent');
 
     // Modern active upload & processing section elements
     const uploadInputSection = document.getElementById('upload-input-section');
@@ -585,6 +586,11 @@
 
     async function uploadFiles(files) {
         if (!files || !files.length) return;
+
+        if (!consentInput || !consentInput.checked) {
+            showError('Please confirm that you have the right to upload this chat before continuing.');
+            return;
+        }
 
         if (window.__IS_GUEST__) {
             const guestStatus = window.__GUEST_STATUS__ || {};
