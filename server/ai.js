@@ -175,11 +175,16 @@ router.put('/conversations/:id/rename', (req, res) => {
 // ---------- Identity Onboarding ----------
 router.get('/chat/:folder/identity', async (req, res) => {
     const owner = getOwner(req);
-    const sql = !owner.isGuest
-        ? 'SELECT user_participant FROM chats WHERE folder_name = ? AND user_id = ?'
-        : 'SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?';
-    const params = !owner.isGuest ? [req.params.folder, owner.userId] : [req.params.folder, owner.guestId];
-    const chatRow = db.prepare(sql).get(...params);
+    let chatRow = null;
+    if (!owner.isGuest && owner.userId) {
+        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ? AND user_id = ?').get(req.params.folder, owner.userId);
+    } else if (owner.guestId) {
+        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ? AND guest_id = ?').get(req.params.folder, owner.guestId);
+    }
+    // Fallback: If not found under current owner session (e.g. cross-session or guest cookie change), find by folder_name
+    if (!chatRow || !chatRow.user_participant) {
+        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ? AND user_participant IS NOT NULL AND user_participant != "" ORDER BY id DESC LIMIT 1').get(req.params.folder);
+    }
     
     try {
         const { getMessages } = require('./cache');
@@ -214,12 +219,8 @@ router.post('/chat/:folder/identity', async (req, res) => {
     if (!userParticipant) return res.status(400).json({ error: 'userParticipant is required' });
     
     const owner = getOwner(req);
-    const sql = !owner.isGuest
-        ? 'UPDATE chats SET user_participant = ? WHERE folder_name = ? AND user_id = ?'
-        : 'UPDATE chats SET user_participant = ? WHERE folder_name = ? AND guest_id = ?';
-    const params = !owner.isGuest ? [userParticipant, req.params.folder, owner.userId] : [userParticipant, req.params.folder, owner.guestId];
-    
-    let info = db.prepare(sql).run(...params);
+    // Persist across both specific owner and folder so identity survives cross-device / guest switches
+    let info = db.prepare('UPDATE chats SET user_participant = ? WHERE folder_name = ?').run(userParticipant, req.params.folder);
     if (info.changes === 0) {
         // Chat not in DB yet, insert it. Let's try to parse it first to get metadata.
         const finalDir = getSafeChatDir(owner.dirKey, req.params.folder);

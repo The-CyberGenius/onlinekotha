@@ -1065,9 +1065,13 @@ document.addEventListener('DOMContentLoaded', () => {
         window.kothaChatLoading = true;
         window.kothaLoadedChat = null;
         try {
-            // Clean state for the new chat — NEVER leak previous chat's identity or Kotha Assistant
+            // Clean state for the new chat — restore stored identity if available, else clean
             if (chatName !== 'kotha_assistant') {
-                myName = null;
+                const storedLocal = localStorage.getItem('kotha_identity_' + chatName) 
+                    || localStorage.getItem('kotha_user_identity_' + chatName) 
+                    || (window._chatUserParticipantMap && window._chatUserParticipantMap[chatName]) 
+                    || null;
+                myName = storedLocal || null;
                 otherPersonName = 'Contact';
             }
             if (typeof updateHeaderIdentityPill === 'function') updateHeaderIdentityPill();

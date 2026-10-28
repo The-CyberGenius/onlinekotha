@@ -3464,7 +3464,7 @@ html.dark .search-result-snippet {
     color: #e9edef;
 }
 
-/* ── Identity Selection Modal (Who are you?) Fixes ── */
+/* ── Identity Selection Modal (Who are you?) Perfect UI & Rounded Corners ── */
 #identity-modal {
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
@@ -3476,6 +3476,69 @@ html.dark .search-result-snippet {
     max-width: 390px !important;
     display: flex !important;
     flex-direction: column !important;
+    border-radius: 28px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.dark #identity-modal-dialog {
+    background: #111b21 !important;
+    color: #e9edef !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+}
+
+#identity-close-icon {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #6b7280 !important;
+}
+#identity-close-icon:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+}
+html.dark #identity-close-icon {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #8696a0 !important;
+}
+html.dark #identity-close-icon:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #f87171 !important;
+}
+
+#identity-modal-title {
+    color: #111827 !important;
+}
+html.dark #identity-modal-title {
+    color: #ffffff !important;
+}
+
+#identity-modal-subtitle {
+    color: #6b7280 !important;
+}
+html.dark #identity-modal-subtitle {
+    color: #8696a0 !important;
+}
+
+#identity-search-input {
+    background: #f3f4f6 !important;
+    color: #111827 !important;
+    border: 1.5px solid transparent !important;
+}
+#identity-search-input:focus {
+    background: #ffffff !important;
+    border-color: #6366f1 !important;
+}
+html.dark #identity-search-input {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #e9edef !important;
+    border: 1.5px solid transparent !important;
+}
+html.dark #identity-search-input:focus {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: #818cf8 !important;
 }
 
 #identity-cards-container {
@@ -3494,26 +3557,146 @@ html.dark .search-result-snippet {
 #identity-cards-container::-webkit-scrollbar {
     width: 6px !important;
 }
-
 #identity-cards-container::-webkit-scrollbar-track {
     background: transparent !important;
 }
-
 #identity-cards-container::-webkit-scrollbar-thumb {
     background: rgba(99, 102, 241, 0.4) !important;
     border-radius: 9999px !important;
 }
-
 #identity-cards-container::-webkit-scrollbar-thumb:hover {
     background: rgba(99, 102, 241, 0.7) !important;
 }
-
 html.dark #identity-cards-container::-webkit-scrollbar-thumb {
     background: rgba(129, 140, 248, 0.4) !important;
 }
-
 html.dark #identity-cards-container::-webkit-scrollbar-thumb:hover {
     background: rgba(129, 140, 248, 0.7) !important;
 }
+
+/* Individual Participant Card in Identity Modal */
+.identity-card {
+    border-radius: 18px !important;
+    padding: 12px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+    background: #f9fafb !important;
+    border: 1.5px solid #e5e7eb !important;
+}
+.identity-card:hover {
+    border-color: #a5b4fc !important;
+    background: #f5f3ff !important;
+}
+.identity-card.is-selected {
+    background: #f5f3ff !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15) !important;
+}
+
+html.dark .identity-card {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+}
+html.dark .identity-card:hover {
+    border-color: rgba(129, 140, 248, 0.5) !important;
+    background: rgba(99, 102, 241, 0.08) !important;
+}
+html.dark .identity-card.is-selected {
+    background: rgba(99, 102, 241, 0.18) !important;
+    border-color: #818cf8 !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25) !important;
+}
+
+/* Radio Bullet Component (Off vs On) */
+.identity-radio-bullet {
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 9999px !important;
+    border: 2px solid #9ca3af !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+    background: transparent !important;
+}
+.identity-radio-bullet .inner-dot {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 9999px !important;
+    background: transparent !important;
+    transform: scale(0) !important;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+html.dark .identity-radio-bullet {
+    border-color: #6b7280 !important;
+}
+
+/* Bullet ON state */
+.identity-card.is-selected .identity-radio-bullet {
+    border-color: #6366f1 !important;
+    background: rgba(99, 102, 241, 0.1) !important;
+}
+html.dark .identity-card.is-selected .identity-radio-bullet {
+    border-color: #818cf8 !important;
+    background: rgba(129, 140, 248, 0.15) !important;
+}
+.identity-card.is-selected .identity-radio-bullet .inner-dot {
+    background: #6366f1 !important;
+    transform: scale(1) !important;
+}
+html.dark .identity-card.is-selected .identity-radio-bullet .inner-dot {
+    background: #818cf8 !important;
+    transform: scale(1) !important;
+}
+
+/* Footer & Buttons */
+#identity-modal-footer {
+    background: #ffffff !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+html.dark #identity-modal-footer {
+    background: #111b21 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+#identity-continue-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
+}
+#identity-continue-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45) !important;
+}
+#identity-continue-btn:disabled {
+    opacity: 0.4 !important;
+    filter: grayscale(1) !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+#identity-cancel-btn {
+    color: #6b7280 !important;
+    background: transparent !important;
+}
+#identity-cancel-btn:hover {
+    color: #111827 !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+}
+html.dark #identity-cancel-btn {
+    color: #8696a0 !important;
+}
+html.dark #identity-cancel-btn:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
 
 

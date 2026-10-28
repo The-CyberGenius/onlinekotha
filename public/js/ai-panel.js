@@ -488,8 +488,11 @@
 
                 // ── Identify currently saved user participant (if any) ──
                 const savedIdentity = data.userParticipant 
-                    || (typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null)
+                    || (window._chatUserParticipantMap && window._chatUserParticipantMap[chatFolder])
+                    || localStorage.getItem('kotha_identity_' + chatFolder)
                     || localStorage.getItem('kotha_user_identity_' + chatFolder)
+                    || sessionStorage.getItem('kotha_identity_' + chatFolder)
+                    || (typeof window.kothaGetMyName === 'function' ? window.kothaGetMyName() : null)
                     || null;
 
                 let selectedId = (savedIdentity && participants.includes(savedIdentity)) ? savedIdentity : null;
@@ -521,11 +524,7 @@
                     const isAlreadySelected = (selectedId === name);
 
                     const card = document.createElement('div');
-                    card.className = `identity-card p-3 rounded-[22px] transition-all cursor-pointer flex items-center justify-between gap-3 active:scale-[0.98] border-2 ${
-                        isAlreadySelected
-                            ? 'border-indigo-500 bg-indigo-50/80 dark:bg-indigo-500/25 shadow-sm'
-                            : 'border-transparent bg-gray-50 dark:bg-white/5 hover:border-indigo-400/50 hover:bg-indigo-50/40 dark:hover:bg-indigo-500/15'
-                    }`;
+                    card.className = `identity-card ${isAlreadySelected ? 'is-selected' : ''}`;
                     card.setAttribute('data-name', name);
                     if (isAlreadySelected) {
                         card.setAttribute('data-selected', 'true');
@@ -533,45 +532,38 @@
 
                     card.innerHTML = `
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full ${isAlreadySelected ? 'bg-gradient-to-br from-indigo-600 to-purple-600' : 'bg-gradient-to-br from-indigo-500 to-purple-500'} flex items-center justify-center text-white font-bold text-[17px] shrink-0 shadow-md">
+                            <div class="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-[17px] shrink-0 shadow-md">
                                 ${escapeHTML(initial)}
                             </div>
                             <div class="min-w-0 flex flex-col justify-center">
-                                <div class="flex items-center gap-1.5 min-w-0">
-                                    <p class="text-[14.5px] sm:text-[15px] font-extrabold text-gray-900 dark:text-white truncate leading-tight">${escapeHTML(name)}</p>
-                                    ${isAlreadySelected ? '<span class="identity-active-badge text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-700/60 px-1.5 py-0.5 rounded-md shrink-0">Current</span>' : ''}
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <p class="text-[14.5px] font-bold text-gray-900 dark:text-gray-100 truncate leading-tight">${escapeHTML(name)}</p>
+                                    ${isAlreadySelected ? '<span class="identity-badge text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800/60 px-2 py-0.5 rounded-full shrink-0">Current</span>' : ''}
                                 </div>
-                                <p class="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5 leading-tight">${msgCount > 0 ? msgCount.toLocaleString() + ' msgs' : 'Participant'}</p>
+                                <p class="text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-0.5 leading-tight">${msgCount > 0 ? msgCount.toLocaleString() + ' msgs' : 'Participant'}</p>
                             </div>
                         </div>
-                        <div class="radio-icon text-gray-300 dark:text-gray-500 transition-colors mr-1 shrink-0">
-                            <svg class="unselected-svg w-6 h-6 ${isAlreadySelected ? 'hidden' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
-                            <svg class="selected-svg w-6 h-6 ${isAlreadySelected ? '' : 'hidden'} text-emerald-500 dark:text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z" clip-rule="evenodd"></path></svg>
+                        <div class="identity-radio-bullet">
+                            <div class="inner-dot"></div>
                         </div>
                     `;
 
                     card.addEventListener('click', () => {
                         // Deselect all
                         container.querySelectorAll('.identity-card').forEach(c => {
-                            c.classList.remove('border-indigo-500', 'bg-indigo-50/80', 'dark:bg-indigo-500/25', 'shadow-sm');
-                            c.classList.add('border-transparent');
+                            c.classList.remove('is-selected');
                             c.removeAttribute('data-selected');
-                            c.querySelector('.unselected-svg')?.classList.remove('hidden');
-                            c.querySelector('.selected-svg')?.classList.add('hidden');
-                            c.querySelector('.identity-active-badge')?.remove();
+                            c.querySelector('.identity-badge')?.remove();
                         });
 
                         // Select this one
-                        card.classList.remove('border-transparent');
-                        card.classList.add('border-indigo-500', 'bg-indigo-50/80', 'dark:bg-indigo-500/25', 'shadow-sm');
+                        card.classList.add('is-selected');
                         card.setAttribute('data-selected', 'true');
-                        card.querySelector('.unselected-svg')?.classList.add('hidden');
-                        card.querySelector('.selected-svg')?.classList.remove('hidden');
 
-                        const nameRow = card.querySelector('.flex.items-center.gap-1\\.5');
-                        if (nameRow && !card.querySelector('.identity-active-badge')) {
+                        const nameRow = card.querySelector('.flex.items-center.gap-2');
+                        if (nameRow && !card.querySelector('.identity-badge')) {
                             const badge = document.createElement('span');
-                            badge.className = 'identity-active-badge text-[10px] font-extrabold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-950/70 border border-indigo-300 dark:border-indigo-700/60 px-1.5 py-0.5 rounded-md shrink-0';
+                            badge.className = 'identity-badge text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-950/80 border border-indigo-200 dark:border-indigo-800/60 px-2 py-0.5 rounded-full shrink-0';
                             badge.textContent = (name === savedIdentity) ? 'Current' : 'Selected';
                             nameRow.appendChild(badge);
                         }
@@ -595,20 +587,20 @@
 
                 modal.classList.remove('hidden');
                 requestAnimationFrame(() => {
-                    const dialog = modal.querySelector('#identity-modal-dialog') || modal.querySelector('.transform');
+                    const dialog = modal.querySelector('#identity-modal-dialog');
                     if (dialog) {
                         dialog.classList.remove('scale-95', 'opacity-0');
                         dialog.classList.add('scale-100', 'opacity-100');
                     }
-                    // Auto-scroll to selected card so user sees it right away
-                    const activeCard = container.querySelector('[data-selected="true"]');
+                    // Auto-scroll to selected card so user sees bullet ON right away
+                    const activeCard = container.querySelector('.identity-card.is-selected');
                     if (activeCard) {
                         activeCard.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
                     }
                 });
 
                 const closeModal = (result) => {
-                    const inner = modal.querySelector('#identity-modal-dialog') || modal.querySelector('.transform');
+                    const inner = modal.querySelector('#identity-modal-dialog');
                     if (inner) {
                         inner.classList.remove('scale-100', 'opacity-100');
                         inner.classList.add('scale-95', 'opacity-0');
@@ -637,9 +629,13 @@
                             body: JSON.stringify({ userParticipant: selectedId, aiParticipant })
                         });
 
-                        // ── Remember identity locally ──
+                        // ── Remember identity locally across all caches ──
                         try {
+                            localStorage.setItem('kotha_identity_' + chatFolder, selectedId);
                             localStorage.setItem('kotha_user_identity_' + chatFolder, selectedId);
+                            sessionStorage.setItem('kotha_identity_' + chatFolder, selectedId);
+                            if (!window._chatUserParticipantMap) window._chatUserParticipantMap = {};
+                            window._chatUserParticipantMap[chatFolder] = selectedId;
                         } catch(e) {}
 
                         // ── Update contactNameMap & script.js rendering engine ──
