@@ -183,7 +183,7 @@ router.get('/chat/:folder/identity', async (req, res) => {
     }
     // Fallback: If not found under current owner session (e.g. cross-session or guest cookie change), find by folder_name
     if (!chatRow || !chatRow.user_participant) {
-        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ? AND user_participant IS NOT NULL AND user_participant != "" ORDER BY id DESC LIMIT 1').get(req.params.folder);
+        chatRow = db.prepare('SELECT user_participant FROM chats WHERE folder_name = ? AND user_participant IS NOT NULL AND length(user_participant) > 0 ORDER BY id DESC LIMIT 1').get(req.params.folder);
     }
     
     try {
