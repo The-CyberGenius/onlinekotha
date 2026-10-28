@@ -3464,3 +3464,56 @@ html.dark .search-result-snippet {
     color: #e9edef;
 }
 
+/* ── Identity Selection Modal (Who are you?) Fixes ── */
+#identity-modal {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+#identity-modal-dialog {
+    max-height: min(85vh, 640px) !important;
+    height: auto !important;
+    max-width: 390px !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+#identity-cards-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(85vh - 230px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(99, 102, 241, 0.45) transparent !important;
+}
+
+#identity-cards-container::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+#identity-cards-container::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+#identity-cards-container::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.4) !important;
+    border-radius: 9999px !important;
+}
+
+#identity-cards-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.7) !important;
+}
+
+html.dark #identity-cards-container::-webkit-scrollbar-thumb {
+    background: rgba(129, 140, 248, 0.4) !important;
+}
+
+html.dark #identity-cards-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(129, 140, 248, 0.7) !important;
+}
+
+
