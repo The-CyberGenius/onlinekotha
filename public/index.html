@@ -1710,13 +1710,16 @@
             right: 0;
             bottom: 0;
             z-index: 900;
-            background: var(--bg-glass);
-            border-top: 1px solid var(--border);
-            padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px));
+            background: rgba(9, 9, 11, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 18px calc(10px + env(safe-area-inset-bottom, 0px));
             display: none;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5);
             transform: translateY(110%);
             transition: transform .3s cubic-bezier(.16, 1, .3, 1);
         }
@@ -1725,15 +1728,37 @@
             transform: translateY(0);
         }
 
+        .sticky-cta .sticky-cta-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
         .sticky-cta b {
-            font-size: 13.5px;
-            color: var(--text-primary);
+            font-size: 13px;
+            color: #ffffff;
             display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .sticky-cta small {
             font-size: 11px;
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.65);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sticky-cta .btn-sticky-action {
+            flex-shrink: 0;
+            width: auto !important;
+            padding: 9px 18px !important;
+            font-size: 13px !important;
+            border-radius: 999px !important;
+            white-space: nowrap !important;
         }
 
         @media (max-width: 720px) {
@@ -3590,12 +3615,36 @@
                 max-width: 100% !important;
                 box-sizing: border-box !important;
             }
-            .btn-primary-hero, .btn-secondary-hero {
+            .hero-cta-group .btn-primary-hero, 
+            .hero-cta-group .btn-secondary-hero {
                 width: 100% !important;
                 box-sizing: border-box !important;
                 justify-content: center !important;
                 padding: 13px 18px !important;
                 font-size: 14px !important;
+            }
+            #nav #nav-login {
+                display: none !important;
+            }
+            #nav #nav-cta {
+                padding: 6px 14px !important;
+                font-size: 12px !important;
+                min-height: 34px !important;
+                border-radius: 999px !important;
+            }
+            #nav .nav-inner {
+                padding: 10px 16px !important;
+            }
+            .hero-privacy-badge {
+                max-width: 100% !important;
+                border-radius: 12px !important;
+                text-align: center !important;
+                font-size: 11.5px !important;
+                line-height: 1.4 !important;
+                box-sizing: border-box !important;
+            }
+            .fm-pop-launcher, [data-formms-popup], #formms-embed-container {
+                display: none !important;
             }
             .display.rise {
                 font-size: clamp(26px, 7.5vw, 40px) !important;
@@ -3755,7 +3804,7 @@
             </div>
 
             <!-- Factual Privacy Note -->
-            <div class="rise d3" style="display:inline-flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-muted);margin-bottom:26px;background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:6px 16px;border-radius:999px;">
+            <div class="hero-privacy-badge rise d3" style="display:inline-flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-muted);margin-bottom:26px;background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:6px 16px;border-radius:999px;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                 <span>Zero-Knowledge Pipeline: TLS 1.3 transit, immediate raw archive shredding, zero AI model training.</span>
             </div>
@@ -4894,14 +4943,13 @@
     </footer>
     <!-- ═══════════ STICKY MOBILE CTA (redirects to the app) ═══════════ -->
     <div class="sticky-cta" id="sticky-cta">
-        <div>
-            <b>Ready to continue your chat?</b>
-            <small>Free to start · import takes a minute</small>
+        <div class="sticky-cta-text">
+            <b>Ready to analyze your chat?</b>
+            <small>Instant memory parse · 100% private</small>
         </div>
-        <a href="/app?action=import" class="btn-primary-hero"
-            style="min-height:38px;padding:0 16px;font-size:13px;border-radius:999px;flex-shrink:0;">
-            <span>Import Chat</span>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        <a href="/app?action=import" class="btn-primary-hero btn-sticky-action">
+            <span>Upload Free</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round">
                 <path d="M5 12h14M13 5l7 7-7 7" />
             </svg>
@@ -5797,10 +5845,6 @@
             }
         });
     </script>
-    <div data-formms-popup="https://form.ms/2b6f4h?embed=1" data-title="OnlineKotha User Feedback" data-label=""
-        data-trigger="click" data-position="bottom-right" data-width="380" data-overlay="1" data-hide-on-submit="1">
-    </div>
-    <script src="https://api.form.ms/assets/embed.js" async></script>
     <!-- ═══════════ CRAZY DESIGNER / TECH ENGINE (GSAP + VanillaTilt + Ethereal Ambient Canvas + Lucide Icons) ═══════════ -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -5809,14 +5853,14 @@
                 lucide.createIcons();
             }
 
-            // 2. 3D Tilt Effect on Cards & Phone Mockup
-            if (window.VanillaTilt) {
-                VanillaTilt.init(document.querySelectorAll('.liquid-glass, .phone-mockup'), {
-                    max: 8,
-                    speed: 400,
+            // 2. 3D Tilt Effect on Cards & Phone Mockup (Desktop only, never touch/mobile)
+            if (window.VanillaTilt && window.innerWidth > 768 && !('ontouchstart' in window)) {
+                VanillaTilt.init(document.querySelectorAll('.liquid-glass, .phone-mockup, .bento-card, .pipeline-card, .hero-interactive-dropzone'), {
+                    max: 6,
+                    speed: 500,
                     glare: true,
-                    "max-glare": 0.15,
-                    gyroscope: true
+                    "max-glare": 0.12,
+                    gyroscope: false
                 });
             }
 
