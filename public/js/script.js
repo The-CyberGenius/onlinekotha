@@ -2364,15 +2364,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.addEventListener('click', () => {
             const openUploadBtn = document.getElementById('open-upload-btn');
             if (openUploadBtn) openUploadBtn.click();
+            else if (typeof window.openUploadModal === 'function') window.openUploadModal();
         });
         const dmBtn = document.getElementById('empty-dm-btn');
         if (dmBtn) dmBtn.addEventListener('click', () => {
-            const btnDm = document.getElementById('btn-dm');
-            if (btnDm) btnDm.click();
+            if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+            else if (typeof toggleSidebar === 'function') toggleSidebar(true);
+            const tabDmBtn = document.getElementById('tab-dm-btn');
+            if (tabDmBtn) tabDmBtn.click();
+            else if (typeof window.dmShowTab === 'function') window.dmShowTab();
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) emptyState.classList.add('hidden');
+            const dmEmpty = document.getElementById('dm-empty-state');
+            if (dmEmpty) dmEmpty.classList.remove('hidden');
+            setTimeout(() => {
+                const searchInp = document.getElementById('dm-search-email');
+                if (searchInp) searchInp.focus();
+            }, 250);
         });
         const proBtn = document.getElementById('empty-pro-btn');
         if (proBtn) proBtn.addEventListener('click', () => {
             if (typeof openUpgradeModal === 'function') openUpgradeModal();
+            else if (typeof window.openUpgradeModal === 'function') window.openUpgradeModal();
         });
     }
 
@@ -2403,6 +2416,9 @@ document.addEventListener('DOMContentLoaded', () => {
             filterBar.classList.remove('hidden');
         }
     }
+
+    window.showEmptyState = showEmptyState;
+    window.removeEmptyState = removeEmptyState;
 
     const chatSelector = document.getElementById('chat-selector');
     if (chatSelector) {
@@ -4124,6 +4140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             requestAnimationFrame(syncOverlay);
         });
+        window.toggleMacExpand = () => fsBtn && fsBtn.click();
 
         // Dock icon click toggles minimize/restore
         if (dockIcon) dockIcon.addEventListener('click', () => {

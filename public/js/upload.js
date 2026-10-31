@@ -663,4 +663,5 @@
         history.replaceState({}, '', '/app');
     }
     handleSharedFile();
+    window.openUploadModal = openModal;
 })();

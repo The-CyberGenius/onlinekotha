@@ -336,6 +336,12 @@
         // Hide DM chat overlay so imported chats are visible again
         if (chatArea) chatArea.style.display = 'none';
         document.getElementById('dm-empty-state')?.classList.add('hidden');
+        // Restore WhatsApp empty state if no chat is active
+        const emptyState = document.getElementById('empty-state');
+        if (!window.currentChat) {
+            if (emptyState) emptyState.classList.remove('hidden');
+            else if (typeof window.showEmptyState === 'function') window.showEmptyState();
+        }
         activeConvId = null;
         closeCtxMenu();
         localStorage.setItem(LS.view, 'chats');
@@ -349,6 +355,9 @@
         tabChatsBtn?.classList.remove('bg-indigo-600','text-white','shadow-sm');
         tabChatsBtn?.classList.add('text-gray-500','dark:text-gray-400','hover:bg-gray-100','dark:hover:bg-gray-800');
         localStorage.setItem(LS.view, 'messages');
+        // Hide WhatsApp empty state so DM view or DM empty state takes over
+        const emptyState = document.getElementById('empty-state');
+        if (emptyState) emptyState.classList.add('hidden');
         // Only show empty state if no chat is currently open AND no saved conv to restore
         const savedConv = Number(localStorage.getItem(LS.conv));
         if (!activeConvId && !savedConv) {
@@ -366,6 +375,7 @@
             }
             return;
         }
+        if (window.kothaSidebarOpen) window.kothaSidebarOpen();
         const box = searchInput?.closest('.dm-search-box');
         box?.classList.toggle('hidden');
         searchInput?.focus();
@@ -1492,13 +1502,19 @@
     }
 
     // ── External triggers ─────────────────────────────────────
-    document.getElementById('btn-dm')?.addEventListener('click', () => {
-        if(window.kothaSidebarOpen) window.kothaSidebarOpen();
-        showDmTab();
-    });
-    document.getElementById('empty-dm-btn')?.addEventListener('click', () => {
-        if(window.kothaSidebarOpen) window.kothaSidebarOpen();
-        showDmTab();
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('#empty-dm-btn, #btn-dm');
+        if (btn) {
+            e.preventDefault();
+            if (window.kothaSidebarOpen) window.kothaSidebarOpen();
+            showDmTab();
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) emptyState.classList.add('hidden');
+            setTimeout(() => {
+                const searchInp = document.getElementById('dm-search-email');
+                if (searchInp) searchInp.focus();
+            }, 250);
+        }
     });
 
     // ── Snapshot the EXACT on-screen state right before leaving/refresh ──
@@ -1660,6 +1676,7 @@
     });
 
     window.dmShowTab       = showDmTab;
+    window.dmShowChatsTab  = showChatsTab;
     window.dmOpenConv      = openConv;
     window.dmIsConvActive  = () => !!activeConvId;
     window.dmActiveConvId  = () => activeConvId;
