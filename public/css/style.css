@@ -1260,9 +1260,10 @@ html.dark #app {
 
 /* ── Import / Upload modal (dark) — guaranteed, independent of Tailwind cache ── */
 #upload-modal-dialog {
-    max-width: 390px !important;
+    max-width: min(390px, calc(100vw - 32px)) !important;
     width: 100% !important;
     margin: 0 auto !important;
+    box-sizing: border-box !important;
 }
 html.dark #upload-modal-dialog,
 html.dark #upload-modal > div {
