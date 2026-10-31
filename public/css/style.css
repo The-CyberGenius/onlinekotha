@@ -1259,9 +1259,15 @@ html.dark #app {
 }
 
 /* ── Import / Upload modal (dark) — guaranteed, independent of Tailwind cache ── */
+#upload-modal-dialog {
+    max-width: 390px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+}
+html.dark #upload-modal-dialog,
 html.dark #upload-modal > div {
-    background: #1f2937 !important;
-    border-color: #374151 !important;
+    background: #111b21 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
 }
 html.dark #upload-modal #drop-zone {
     border-color: #4b5563 !important;
