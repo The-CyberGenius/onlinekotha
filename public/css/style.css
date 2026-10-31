@@ -1271,9 +1271,9 @@ html.dark #upload-modal #drop-zone p:first-of-type {
     color: #f3f4f6 !important;
 }
 html.dark #upload-modal #pick-folder-btn {
-    background: #374151 !important;
-    border-color: #4b5563 !important;
-    color: #e5e7eb !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #a5b4fc !important;
 }
 
 /* ── Sidebar ── */
@@ -1674,9 +1674,15 @@ html.dark #drop-zone .bg-indigo-50 {
 }
 
 html.dark #pick-folder-btn {
-    background: #2a3942 !important;
-    border-color: #3b4a54 !important;
-    color: #d1d7db !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #a5b4fc !important;
+}
+
+#drop-zone.is-dragover,
+html.dark #drop-zone.is-dragover {
+    border-color: #6366f1 !important;
+    background-color: rgba(99, 102, 241, 0.12) !important;
 }
 
 html.dark #upload-modal details {

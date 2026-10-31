@@ -91,6 +91,13 @@
         if (progressBar) progressBar.style.width = '0%';
         if (progressPercent) progressPercent.textContent = '0%';
         if (progressStatus) progressStatus.textContent = 'Uploading...';
+
+        if (fileInputZip) fileInputZip.value = '';
+        if (fileInputFolder) fileInputFolder.value = '';
+        const exportHelpCard = document.getElementById('export-help-card');
+        if (exportHelpCard) exportHelpCard.classList.add('hidden');
+        const pasteAreaEl = document.getElementById('paste-area');
+        if (pasteAreaEl) pasteAreaEl.classList.add('hidden');
     }
 
     function showError(msg) {
@@ -231,8 +238,20 @@
         }
     });
 
-    pickZipBtn.addEventListener('click', () => fileInputZip.click());
-    pickFolderBtn.addEventListener('click', () => fileInputFolder.click());
+    // Click anywhere on dropZone opens file picker (unless folder link was clicked)
+    dropZone.addEventListener('click', e => {
+        if (e.target.closest('#pick-folder-btn, a, textarea, #paste-import-btn, #toggle-paste-btn, #toggle-help-btn')) return;
+        fileInputZip.click();
+    });
+
+    pickZipBtn?.addEventListener('click', e => {
+        e.stopPropagation();
+        fileInputZip.click();
+    });
+    pickFolderBtn?.addEventListener('click', e => {
+        e.stopPropagation();
+        fileInputFolder.click();
+    });
 
     fileInputZip.addEventListener('change', e => {
         if (e.target.files.length) uploadFiles(Array.from(e.target.files));
@@ -245,7 +264,7 @@
         dropZone.addEventListener(evt, e => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.add('bg-indigo-100/80', 'border-indigo-500');
+            dropZone.classList.add('is-dragover', 'border-indigo-500');
         });
     });
 
@@ -253,7 +272,7 @@
         dropZone.addEventListener(evt, e => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.classList.remove('bg-indigo-100/80', 'border-indigo-500');
+            dropZone.classList.remove('is-dragover', 'border-indigo-500');
         });
     });
 
@@ -327,6 +346,15 @@
             if (!text) { showError('Paste some chat text first.'); return; }
             const file = new File([text], '_chat.txt', { type: 'text/plain' });
             uploadFiles([file]);
+        });
+    }
+
+    // ── Toggle Export Help Card ─────────────────────────────
+    const toggleHelpBtn = document.getElementById('toggle-help-btn');
+    const exportHelpCard = document.getElementById('export-help-card');
+    if (toggleHelpBtn && exportHelpCard) {
+        toggleHelpBtn.addEventListener('click', () => {
+            exportHelpCard.classList.toggle('hidden');
         });
     }
 

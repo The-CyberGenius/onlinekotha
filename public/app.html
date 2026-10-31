@@ -966,14 +966,17 @@
         <div id="modal-content" class="max-w-5xl max-h-[90vh] flex items-center justify-center p-4"></div>
     </div>
 
-        <!-- Upload Modal -->
+    <!-- Upload Modal -->
     <div id="upload-modal"
         class="fixed inset-0 z-[10000] bg-black/60 backdrop-blur-sm flex items-center justify-center hidden opacity-0 transition-opacity duration-300 px-4">
-        <div class="bg-white dark:bg-[#111b21] w-full max-w-md rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] p-6 border border-gray-200/50 dark:border-white/10 transition-colors relative overflow-hidden">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">Import WhatsApp Chat</h3>
+        <div class="bg-white dark:bg-[#111b21] w-full max-w-[390px] rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] p-4 sm:p-5 border border-gray-200/60 dark:border-white/10 transition-colors relative overflow-hidden">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="text-[15px] font-bold text-gray-900 dark:text-gray-100 leading-tight">Import WhatsApp Chat</h3>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">Private, encrypted conversation analysis</p>
+                </div>
                 <button id="close-upload"
-                    class="w-7 h-7 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+                    class="w-7 h-7 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition cursor-pointer" title="Close">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round">
                         <path d="M18 6L6 18M6 6l12 12" />
@@ -982,124 +985,139 @@
             </div>
 
             <!-- ── Active Upload & Processing State ── -->
-            <div id="upload-active-section" class="hidden py-2 text-center">
+            <div id="upload-active-section" class="hidden py-1 text-center">
                 <!-- Multi-state Icon -->
-                <div class="relative w-14 h-14 mx-auto mb-3">
+                <div class="relative w-12 h-12 mx-auto mb-2.5">
                     <div id="upload-icon-pulse" class="absolute inset-0 rounded-2xl bg-indigo-500/20 dark:bg-indigo-500/30 animate-ping"></div>
-                    <div class="relative w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
-                        <svg id="upload-icon-uploading" class="w-6 h-6 animate-bounce" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+                        <svg id="upload-icon-uploading" class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        <svg id="upload-icon-processing" class="w-6 h-6 animate-spin hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <svg id="upload-icon-processing" class="w-5 h-5 animate-spin hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <svg id="upload-icon-success" class="w-6 h-6 hidden text-emerald-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <svg id="upload-icon-success" class="w-5 h-5 hidden text-emerald-300" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                 </div>
 
                 <!-- Phase Badge -->
-                <div id="upload-phase-badge" class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/40 mb-2">
+                <div id="upload-phase-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/40 mb-1.5">
                     Phase 1 of 2: Uploading Chat
                 </div>
 
                 <!-- Main Status Title -->
-                <h4 id="upload-status-title" class="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-1">
+                <h4 id="upload-status-title" class="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-0.5">
                     Uploading chat file...
                 </h4>
 
                 <!-- Rotating Dynamic Subtitle -->
-                <p id="upload-status-subtitle" class="text-xs text-gray-500 dark:text-gray-400 min-h-[22px] transition-opacity duration-200 mb-3 font-medium">
+                <p id="upload-status-subtitle" class="text-[11px] text-gray-500 dark:text-gray-400 min-h-[18px] transition-opacity duration-200 mb-2.5 font-medium">
                     Sending data securely to server...
                 </p>
 
                 <!-- Modern Progress Bar -->
-                <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden p-0.5 border border-gray-200/80 dark:border-gray-700/60 mb-1.5 relative">
+                <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden p-0.5 border border-gray-200/80 dark:border-gray-700/60 mb-1 relative">
                     <div id="upload-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-full transition-all duration-300 relative shadow-sm" style="width: 0%">
                     </div>
                 </div>
 
                 <!-- Counters: MB / % -->
-                <div class="flex justify-between items-center text-[11px] font-semibold text-gray-500 dark:text-gray-400 px-1 mb-3">
+                <div class="flex justify-between items-center text-[10.5px] font-semibold text-gray-500 dark:text-gray-400 px-0.5 mb-2.5">
                     <span id="upload-mb-counter">0 MB / 0 MB</span>
                     <span id="upload-percent-counter" class="text-indigo-600 dark:text-indigo-400 font-bold">0%</span>
                 </div>
 
                 <!-- Safety Warning Banner -->
-                <div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 flex items-start gap-2.5 text-left">
-                    <span class="text-amber-500 text-sm shrink-0 mt-0.5">⚠️</span>
-                    <div class="text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+                <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 flex items-start gap-2 text-left">
+                    <span class="text-amber-500 text-xs shrink-0 mt-0.5">⚠️</span>
+                    <div class="text-[10.5px] leading-relaxed text-amber-800 dark:text-amber-300">
                         <strong class="font-bold block text-amber-900 dark:text-amber-200">Please keep this window open</strong>
-                        Do not close or refresh this tab while we unpack and process your chat history. Large archives with media may take 30–60 seconds.
+                        Do not close or refresh this tab while we unpack and process your chat history.
                     </div>
                 </div>
             </div>
 
             <!-- ── File Input Section (Hidden during active upload) ── -->
             <div id="upload-input-section">
+                <!-- Dropzone Area -->
                 <div id="drop-zone"
-                    class="group border border-dashed border-gray-300 dark:border-white/20 rounded-xl p-8 text-center hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-white/[0.02] transition-all duration-300 cursor-pointer">
-                    <div class="w-12 h-12 rounded-full bg-indigo-100/50 dark:bg-indigo-500/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 border border-indigo-200/50 dark:border-indigo-500/20">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"
-                            stroke-linecap="round">
+                    class="group border border-dashed border-gray-300 dark:border-white/15 rounded-2xl py-5 px-4 text-center hover:border-indigo-500/80 dark:hover:border-indigo-400/80 hover:bg-indigo-50/30 dark:hover:bg-white/[0.02] transition-all duration-200 cursor-pointer bg-slate-50/50 dark:bg-white/[0.01]">
+                    
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-105 transition-transform duration-200 border border-indigo-100 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
                         </svg>
                     </div>
-                    <p class="font-bold text-sm text-gray-800 dark:text-gray-100 mb-0.5">Drop chat file or folder here</p>
-                    <p class="text-xs text-gray-400 dark:text-gray-400 mb-4">Supports .txt, .zip exported from WhatsApp</p>
-                    <div class="flex flex-wrap gap-2 justify-center">
-                        <button id="pick-zip-btn"
-                            class="flex-1 bg-white dark:bg-[#1a2333] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 text-[13px] font-medium hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                            Upload File (.zip / .txt)
-                        </button>
-                        <button id="pick-folder-btn" class="flex-1 bg-white dark:bg-[#1a2333] border border-gray-200 dark:border-white/10 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 text-[13px] font-medium hover:bg-gray-50 dark:hover:bg-white/5 hover:border-gray-300 dark:hover:border-white/20 transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-                            Upload Folder
+
+                    <p class="font-bold text-[13px] text-gray-800 dark:text-gray-100 mb-0.5">Drop chat file or folder here</p>
+                    <p class="text-[11px] text-gray-400 dark:text-gray-400 mb-3.5">Supports .zip, .txt, or unzipped WhatsApp export</p>
+
+                    <!-- Single Unified Primary Action Button -->
+                    <button id="pick-zip-btn" type="button"
+                        class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-semibold text-[12.5px] shadow-sm shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+                        </svg>
+                        <span>Choose WhatsApp Chat</span>
+                    </button>
+
+                    <!-- Subtle Secondary Folder Trigger -->
+                    <div class="mt-2.5 flex items-center justify-center gap-1 text-[11px] text-gray-400 dark:text-gray-500">
+                        <span>or select an</span>
+                        <button id="pick-folder-btn" type="button" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold cursor-pointer inline-flex items-center gap-1">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+                            unzipped folder
                         </button>
                     </div>
-                    
-                    <div class="mt-5 flex items-center justify-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        Encrypted upload. Your file is sent to Kotha for processing and is never sold.
+
+                    <div class="mt-3 pt-2.5 border-t border-gray-200/50 dark:border-white/5 flex items-center justify-center gap-1.5 text-[10.5px] font-medium text-gray-400 dark:text-gray-500">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Encrypted · Processed securely · Auto-deleted
                     </div>
-                    
-                    <input type="file" id="file-input-zip" accept=".zip,.txt" class="hidden">
+
+                    <!-- Hidden Inputs -->
+                    <input type="file" id="file-input-zip" accept=".zip,.txt,text/plain,application/zip,application/x-zip-compressed" multiple class="hidden">
                     <input type="file" id="file-input-folder" webkitdirectory directory multiple class="hidden">
                 </div>
 
-                <label class="mt-4 flex items-start gap-2.5 text-[11px] leading-relaxed text-gray-600 dark:text-gray-300 cursor-pointer">
-                    <input id="upload-consent" type="checkbox" class="mt-0.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                    <span>I have the right to upload this chat and understand it contains other people’s messages. I agree to Kotha processing it under the <a href="/privacy.html" class="text-indigo-600 dark:text-indigo-400 underline" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+                <!-- Consent Checkbox (Checked by default for seamless 1-click upload) -->
+                <label class="mt-3 flex items-start gap-2 text-[11px] leading-tight text-gray-500 dark:text-gray-400 cursor-pointer select-none">
+                    <input id="upload-consent" type="checkbox" checked class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 shrink-0">
+                    <span>I confirm I have the right to upload this chat (<a href="/privacy.html" class="text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-500" target="_blank" rel="noopener">Privacy Policy</a>).</span>
                 </label>
 
-                <!-- OR paste text -->
-                <div class="flex items-center gap-3 my-3">
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-800"></div>
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">or</span>
-                    <div class="flex-1 h-px bg-gray-200 dark:bg-gray-800"></div>
-                </div>
-                <button id="toggle-paste-btn"
-                    class="w-full text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition flex items-center justify-center gap-1.5 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-950/30 cursor-pointer">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
-                    Paste chat text instead
-                </button>
-                <div id="paste-area" class="hidden mt-2.5">
-                    <textarea id="paste-text" rows="5" placeholder="Paste your exported _chat.txt content here…&#10;&#10;3/22/23, 4:51 PM - Rahul: hey&#10;3/22/23, 4:52 PM - You: hi!"
-                        class="w-full text-[11px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-400 transition font-mono resize-none"></textarea>
-                    <button id="paste-import-btn"
-                        class="mt-2 w-full bg-indigo-600 text-white rounded-xl py-2 text-xs font-bold hover:bg-indigo-500 transition shadow-sm cursor-pointer">Import Pasted Chat</button>
+                <!-- Compact Action Links Row -->
+                <div class="mt-3 pt-2.5 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
+                    <button id="toggle-paste-btn" type="button" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition inline-flex items-center gap-1 font-medium cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+                        Paste raw text
+                    </button>
+                    <button id="toggle-help-btn" type="button" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition inline-flex items-center gap-1 font-medium cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        How to export
+                    </button>
                 </div>
 
-                <details class="mt-4 text-xs text-gray-400 dark:text-gray-400">
-                    <summary class="font-semibold cursor-pointer hover:text-gray-600 dark:hover:text-gray-200 transition">How to export from WhatsApp</summary>
-                    <div class="mt-2 space-y-1.5 pl-2 text-gray-500 dark:text-gray-400 text-[11px]">
-                        <p><b class="text-gray-700 dark:text-gray-300">iPhone:</b> Open chat &gt; contact name &gt; Export Chat &gt; Without Media &gt; Save .zip</p>
-                        <p><b class="text-gray-700 dark:text-gray-300">Android:</b> Open chat &gt; 3 dots menu &gt; More &gt; Export chat &gt; Without media &gt; Save .zip</p>
+                <!-- Collapsible Help Card -->
+                <div id="export-help-card" class="hidden mt-2.5 p-3 rounded-xl bg-gray-50 dark:bg-white/[0.03] border border-gray-100 dark:border-white/5 text-[11px] text-gray-500 dark:text-gray-400 space-y-1.5 animate-in">
+                    <div class="flex items-center justify-between font-bold text-gray-700 dark:text-gray-200 mb-0.5">
+                        <span>How to export from WhatsApp:</span>
+                        <span class="text-[10px] text-indigo-500 font-semibold">Without Media recommended</span>
                     </div>
-                </details>
+                    <p><b class="text-gray-800 dark:text-gray-200">iPhone:</b> Open chat &gt; Tap contact name &gt; Export Chat &gt; Without Media &gt; Save .zip</p>
+                    <p><b class="text-gray-800 dark:text-gray-200">Android:</b> Open chat &gt; ⋮ 3-dots menu &gt; More &gt; Export chat &gt; Without media &gt; Save .zip</p>
+                </div>
+
+                <!-- Collapsible Paste Area -->
+                <div id="paste-area" class="hidden mt-2.5">
+                    <textarea id="paste-text" rows="4" placeholder="Paste your exported _chat.txt content here…&#10;&#10;3/22/23, 4:51 PM - Rahul: hey&#10;3/22/23, 4:52 PM - You: hi!"
+                        class="w-full text-[11px] bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-800 dark:text-gray-100 placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-400 transition font-mono resize-none"></textarea>
+                    <button id="paste-import-btn" type="button"
+                        class="mt-2 w-full bg-indigo-600 text-white rounded-xl py-2 text-xs font-bold hover:bg-indigo-500 active:scale-[0.99] transition shadow-sm cursor-pointer">Import Pasted Chat</button>
+                </div>
             </div>
 
             <!-- Legacy IDs kept hidden for backward compatibility -->
@@ -1109,7 +1127,7 @@
                 <div id="upload-bar"></div>
             </div>
 
-            <p id="upload-error" class="mt-3 text-xs text-red-500 font-semibold hidden text-center"></p>
+            <p id="upload-error" class="mt-2.5 text-xs text-red-500 font-semibold hidden text-center"></p>
         </div>
     </div>
 
