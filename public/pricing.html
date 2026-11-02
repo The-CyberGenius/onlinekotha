@@ -1590,6 +1590,34 @@
         }
         #demo-chat-frame {
             transform-origin: bottom right !important; /* Mobile default */
+            display: none;
+            flex-direction: column !important;
+            box-sizing: border-box !important;
+        }
+        #demo-form {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            height: 48px !important;
+            max-height: 48px !important;
+            flex-shrink: 0 !important;
+            border-radius: 999px !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+        }
+        #demo-input {
+            height: 38px !important;
+            min-height: 38px !important;
+            flex: 1 1 auto !important;
+            box-sizing: border-box !important;
+        }
+        #demo-send {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            min-height: 36px !important;
+            flex-shrink: 0 !important;
+            border-radius: 50% !important;
         }
         @media (min-width: 768px) {
             #floating-assistant-widget {
@@ -1602,6 +1630,12 @@
             }
             #demo-chat-frame {
                 transform-origin: bottom left !important;
+                display: none;
+                flex-direction: column !important;
+            }
+            #floating-assistant-widget.is-open #demo-chat-frame {
+                display: flex !important;
+                flex-direction: column !important;
             }
         }
 
@@ -3006,7 +3040,7 @@
     <div id="floating-assistant-widget"
         style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none;opacity:0;transform:translateY(20px);transition:all 0.3s ease;">
         <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
-            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
+            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
             <div class="mobile-sheet-handle"></div>
             <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
                 style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
@@ -3070,7 +3104,7 @@
                 </div>
             </div>
             <form id="demo-form" onsubmit="event.preventDefault();"
-                style="margin-top:16px;display:flex;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);">
+                style="margin-top:16px;display:flex;flex-direction:row;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);height:48px;max-height:48px;flex-shrink:0;box-sizing:border-box;">
                 <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Ask me a question..."
                     style="background:transparent;font-size:16px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
                 <button type="submit" id="demo-send" aria-label="Send message"
@@ -3137,6 +3171,7 @@
                     }
                     if (chatFrame) {
                         chatFrame.style.display = 'flex';
+                        chatFrame.style.flexDirection = 'column';
                         void chatFrame.offsetWidth;
                         chatFrame.style.opacity = '1';
                         chatFrame.style.pointerEvents = 'auto';
