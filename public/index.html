@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnlineKotha — See the Story Hidden in Your WhatsApp Chats</title>
+    <title>OnlineKotha — Every conversation is an accidental diary</title>
     <meta name="description"
-        content="Turn your exported WhatsApp chats into Spotify-style Wrapped stories, relationship habits, and unforgettable memories. 100% private and auto-deleted.">
+        content="Turn your exported WhatsApp chats into an intimate, private story. Spotify-style Wrapped, late-night archives, and relationship balance. 100% private.">
 
     <!-- Open Graph / Meta -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="OnlineKotha — WhatsApp Chat Wrapped & Memories">
+    <meta property="og:title" content="OnlineKotha — Every conversation is an accidental diary">
     <meta property="og:description"
-        content="See who texts first, peak late-night chat hours, and your annual Wrapped stories. 100% private to you.">
+        content="Turn your exported WhatsApp chats into an intimate, private story. 100% private to you.">
     <meta property="og:image" content="https://www.onlinekotha.com/img/og-image.png">
     <meta property="og:url" content="https://www.onlinekotha.com">
     <meta name="twitter:card" content="summary_large_image">
@@ -21,10 +21,10 @@
     <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="./css/landing.css?v=5.0">
+    <link rel="stylesheet" href="./css/landing.css?v=6.0">
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
@@ -37,383 +37,530 @@
 </head>
 
 <body>
-    <!-- Ambient Background Illumination (Meta Muse Glow) -->
-    <div class="muse-ambient-glow" aria-hidden="true"></div>
+    <!-- Subtle Architectural Lighting -->
+    <div class="ambient-lighting" aria-hidden="true"></div>
 
     <!-- ═══════════ NAVIGATION ═══════════ -->
-    <nav class="muse-nav" id="nav">
-        <div class="muse-wrap nav-inner">
-            <a href="/" class="muse-brand">
-                <img src="./img/logo.svg" alt="OnlineKotha" class="brand-logo">
+    <nav class="nav" id="nav">
+        <div class="wrap nav-inner">
+            <a href="/" class="nav-brand">
+                <img src="./img/logo.svg" alt="OnlineKotha" class="brand-icon">
                 <span class="brand-name">OnlineKotha</span>
             </a>
 
             <div class="nav-links">
+                <a href="#anatomy" class="nav-link">Anatomy</a>
                 <a href="#how" class="nav-link">How it works</a>
-                <a href="#features" class="nav-link">Wrapped</a>
-                <a href="#privacy" class="nav-link">Privacy</a>
+                <a href="#privacy" class="nav-link">Privacy manifesto</a>
                 <a href="#faq" class="nav-link">FAQ</a>
             </div>
 
             <div class="nav-actions">
-                <a href="/app?demo=1" class="btn-ghost">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <span>Live Demo</span>
+                <a href="/app?demo=1" class="btn-nav-demo">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span>Sample Story</span>
                 </a>
 
                 <div id="nav-user-profile" class="hidden" style="align-items: center; gap: 8px;">
-                    <a href="/app" id="nav-avatar-container" class="nav-avatar" title="Open App">
-                        <img id="nav-user-avatar" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                        <svg id="nav-user-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <a href="/app" id="nav-avatar-container" style="width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; text-decoration: none; color: #fff;">
+                        <img id="nav-user-avatar" src="" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none;">
+                        <svg id="nav-user-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </a>
-                    <a href="#" id="nav-logout-btn" class="nav-link text-xs">Logout</a>
                 </div>
 
-                <a href="/app?action=import" id="nav-cta" class="btn-primary-nav">
-                    <span>Upload Chat</span>
+                <a href="/app?action=import" id="nav-cta" class="btn-primary" style="padding: 7px 14px; font-size: 12.5px;">
+                    <span>Open Vault</span>
                 </a>
             </div>
         </div>
     </nav>
 
     <!-- ═══════════ HERO SECTION ═══════════ -->
-    <header class="muse-hero">
-        <div class="muse-wrap text-center">
+    <header class="hero">
+        <div class="wrap text-center">
             
-            <!-- Category Pill -->
-            <div class="muse-pill">
-                <span class="pill-dot"></span>
-                <span>WhatsApp Wrapped &amp; Relationship Stories</span>
+            <!-- Monospace Status Tag -->
+            <div class="hero-meta-tag">
+                <span class="tag-dot"></span>
+                <span>Private Memory Archive · WhatsApp Edition</span>
             </div>
 
-            <!-- Main Headline -->
-            <h1 class="hero-headline">
-                See the story hidden in<br>
-                <span class="gradient-text">your WhatsApp chats.</span>
+            <!-- Crafted Literary Headline -->
+            <h1 class="hero-title">
+                Every conversation is an<br>
+                <span class="serif-italic">accidental diary.</span>
             </h1>
 
-            <!-- Subtitle -->
-            <p class="hero-subtitle">
-                Discover who texts first, your late-night conversation peaks, and your annual Spotify-style Chat Wrapped in seconds. 100% private to you.
+            <!-- Subtitle with Depth -->
+            <p class="hero-description max-w-prose">
+                Years of late-night thoughts, audio notes, inside jokes, and quiet moments — turned into an intimate, private story. Analyzed in your browser memory, auto-deleted when you close the tab.
             </p>
 
-            <!-- Dual Primary CTAs -->
-            <div class="hero-ctas">
-                <a href="/app?action=import" id="hero-primary-cta" class="btn-primary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                    <span>Upload WhatsApp Chat — Free</span>
-                </a>
-                
-                <a href="/app?demo=1" class="btn-secondary">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <span>Try Live Demo (1-Click)</span>
-                </a>
-            </div>
-
-            <!-- Reassuring Human Trust Bar (Zero Technical Jargon) -->
-            <div class="hero-trust">
-                <div class="trust-item">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    <span>No password or phone number needed</span>
+            <!-- Tactile Dropzone Box -->
+            <div class="hero-action-box" id="hero-dropzone" onclick="window.location.href='/app?action=import'">
+                <div class="drop-icon-wrap">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                 </div>
-                <div class="trust-dot"></div>
-                <div class="trust-item">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <span>Instant insights in seconds</span>
-                </div>
-                <div class="trust-dot"></div>
-                <div class="trust-item">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <span>Never saved on servers · Auto-deleted</span>
-                </div>
-            </div>
-
-            <!-- ═══════════ INTERACTIVE HERO ASSET (MUSE GLASS CARD) ═══════════ -->
-            <div class="hero-preview-wrap">
-                <div class="muse-glass-card">
-                    <!-- Card Top Header -->
-                    <div class="glass-header">
-                        <div class="glass-user">
-                            <div class="glass-avatar">S</div>
-                            <div>
-                                <div class="glass-user-title">Sarah &amp; Alex</div>
-                                <div class="glass-user-sub">2,840 Messages Analyzed · 8 Months Together</div>
-                            </div>
-                        </div>
-                        <div class="glass-status">
-                            <span class="status-dot"></span>
-                            <span>Live Insights</span>
-                        </div>
-                    </div>
-
-                    <!-- 3-Column Metric Showcase -->
-                    <div class="glass-metrics">
-                        <!-- Metric 1 -->
-                        <div class="metric-box">
-                            <div class="metric-label">Texting Balance</div>
-                            <div class="metric-value">54% You · 46% Sarah</div>
-                            <div class="metric-bar-wrap">
-                                <div class="metric-bar-fill you" style="width: 54%;"></div>
-                                <div class="metric-bar-fill them" style="width: 46%;"></div>
-                            </div>
-                            <div class="metric-sub">Balanced conversations 🤝</div>
-                        </div>
-
-                        <!-- Metric 2 -->
-                        <div class="metric-box">
-                            <div class="metric-label">Peak Chat Hour</div>
-                            <div class="metric-value">1:42 AM</div>
-                            <div class="metric-badge night">🦉 Night Owls (38% late-night)</div>
-                            <div class="metric-sub">Longest streak: 43 days</div>
-                        </div>
-
-                        <!-- Metric 3 -->
-                        <div class="metric-box">
-                            <div class="metric-label">Response Time</div>
-                            <div class="metric-value">2.4 mins</div>
-                            <div class="metric-badge speed">⚡ Instant Responder</div>
-                            <div class="metric-sub">Top emoji: 😂 (842 times)</div>
-                        </div>
-                    </div>
-
-                    <!-- Chat Wrapped Banner Trigger -->
-                    <a href="/app?demo=1" class="glass-wrapped-banner">
-                        <div class="wrapped-banner-content">
-                            <div class="wrapped-banner-icon">🎁</div>
-                            <div class="text-left">
-                                <div class="wrapped-banner-title">Spotify-Style Chat Wrapped Ready</div>
-                                <div class="wrapped-banner-sub">"Top inside joke: 'bas 5 min' · 184,200 words shared together ❤️"</div>
-                            </div>
-                        </div>
-                        <span class="wrapped-banner-btn">
-                            <span>Open 7-Slide Story</span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-                        </span>
+                <div class="drop-headline">Drop your exported chat file here</div>
+                <div class="drop-sub">Supports .txt or .zip exported from WhatsApp (Without Media)</div>
+                <div class="drop-buttons-row">
+                    <a href="/app?action=import" class="btn-primary" onclick="event.stopPropagation();">
+                        <span>Select WhatsApp Export</span>
                     </a>
+                    <a href="/app?demo=1" class="btn-secondary" onclick="event.stopPropagation();">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <span>Explore Sarah &amp; Alex (Live Demo)</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quiet Trust Markers -->
+            <div class="hero-trust-bar">
+                <div class="trust-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                    <span>No phone number or login required</span>
+                </div>
+                <span>·</span>
+                <div class="trust-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Processed in temporary RAM</span>
+                </div>
+                <span>·</span>
+                <div class="trust-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>Auto-deleted on tab close</span>
                 </div>
             </div>
 
         </div>
     </header>
 
-    <!-- ═══════════ 3 CORE PILLARS ═══════════ -->
-    <section class="muse-section" id="features">
-        <div class="muse-wrap">
-            <div class="section-heading text-center">
-                <span class="section-tag">Core Features</span>
-                <h2 class="section-title">Everything hidden in your conversations.</h2>
-                <p class="section-subtitle">No complicated tools. Just pure memories, genuine relationship habits, and beautiful stories.</p>
+    <!-- ═══════════ INTERACTIVE ARTIFACT: ANATOMY OF A CONVERSATION ═══════════ -->
+    <section class="anatomy-section" id="anatomy">
+        <div class="wrap text-center">
+            
+            <div class="section-label">Interactive Artifact</div>
+            <h2 class="section-heading serif">The anatomy of two people talking.</h2>
+
+            <!-- The Artifact Window -->
+            <div class="artifact-container">
+                
+                <!-- Tab Controls -->
+                <div class="artifact-tabs" role="tablist">
+                    <button class="artifact-tab active" data-tab="tab-night" onclick="switchArtifactTab('tab-night')">
+                        <span class="tab-num">01 / ARCHIVE</span>
+                        <span class="tab-title">The 2:00 AM Talks</span>
+                    </button>
+                    <button class="artifact-tab" data-tab="tab-words" onclick="switchArtifactTab('tab-words')">
+                        <span class="tab-num">02 / LEXICON</span>
+                        <span class="tab-title">Private Vocabulary</span>
+                    </button>
+                    <button class="artifact-tab" data-tab="tab-balance" onclick="switchArtifactTab('tab-balance')">
+                        <span class="tab-num">03 / DYNAMICS</span>
+                        <span class="tab-title">Texting Balance</span>
+                    </button>
+                    <button class="artifact-tab" data-tab="tab-wrapped" onclick="switchArtifactTab('tab-wrapped')">
+                        <span class="tab-num">04 / STORIES</span>
+                        <span class="tab-title">Annual Wrapped</span>
+                    </button>
+                </div>
+
+                <!-- Tab Panel 1: The 2:00 AM Talks -->
+                <div class="artifact-body">
+                    <div id="tab-night" class="artifact-view active">
+                        <div class="chat-excerpt-box">
+                            <div class="chat-bubble them">
+                                are you asleep?
+                                <span class="chat-time">02:14 AM</span>
+                            </div>
+                            <div class="chat-bubble you">
+                                couldn't sleep. thinking about what you said at dinner.
+                                <span class="chat-time">02:15 AM</span>
+                            </div>
+                            <div class="chat-bubble them">
+                                same here. call me if you want?
+                                <span class="chat-time">02:16 AM</span>
+                            </div>
+                        </div>
+
+                        <div class="artifact-stats-grid">
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Peak Hour</div>
+                                <div class="stat-tile-val">02:14 AM</div>
+                                <div class="stat-tile-desc">41% of all messages happen after midnight</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Night Streak</div>
+                                <div class="stat-tile-val">43 Nights</div>
+                                <div class="stat-tile-desc">Consecutive 1 AM – 4 AM conversations</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Late Night Mood</div>
+                                <div class="stat-tile-val">Vulnerable</div>
+                                <div class="stat-tile-desc">Average message length triples after 12 AM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Panel 2: Private Vocabulary -->
+                    <div id="tab-words" class="artifact-view">
+                        <div class="lexicon-cloud">
+                            <div class="lexicon-pill">
+                                <span class="pill-word">"puchki"</span>
+                                <span class="pill-count">1,420×</span>
+                            </div>
+                            <div class="lexicon-pill">
+                                <span class="pill-word">"bas 5 min"</span>
+                                <span class="pill-count">840×</span>
+                            </div>
+                            <div class="lexicon-pill">
+                                <span class="pill-word">"chai peene chalein?"</span>
+                                <span class="pill-count">412×</span>
+                            </div>
+                            <div class="lexicon-pill">
+                                <span class="pill-word">"call me when you reach"</span>
+                                <span class="pill-count">365×</span>
+                            </div>
+                            <div class="lexicon-pill">
+                                <span class="pill-word">"sun na"</span>
+                                <span class="pill-count">1,108×</span>
+                            </div>
+                            <div class="lexicon-pill">
+                                <span class="pill-word">"🥺"</span>
+                                <span class="pill-count">2,410×</span>
+                            </div>
+                        </div>
+
+                        <div class="artifact-stats-grid">
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Unique Shared Words</div>
+                                <div class="stat-tile-val">128 Words</div>
+                                <div class="stat-tile-desc">Found in no dictionary, only in this chat</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Top Voice Note Length</div>
+                                <div class="stat-tile-val">4m 12s</div>
+                                <div class="stat-tile-desc">Longest podcast-style audio memo</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Favorite Emoji</div>
+                                <div class="stat-tile-val">❤️ · 😂 · ☕</div>
+                                <div class="stat-tile-desc">Over 6,800 emojis shared in 8 months</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Panel 3: Texting Balance -->
+                    <div id="tab-balance" class="artifact-view">
+                        <div class="chat-excerpt-box">
+                            <div style="margin-bottom: 12px; display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
+                                <span>YOU (54%)</span>
+                                <span>SARAH (46%)</span>
+                            </div>
+                            <div style="height: 6px; border-radius: 9999px; background: rgba(255,255,255,0.08); overflow: hidden; display: flex;">
+                                <div style="width: 54%; background: #818cf8;"></div>
+                                <div style="width: 46%; background: #f43f5e;"></div>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-secondary); text-align: center;">
+                                Perfectly reciprocal thread dynamics · No one is left on read
+                            </div>
+                        </div>
+
+                        <div class="artifact-stats-grid">
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Median Reply Time</div>
+                                <div class="stat-tile-val">2.4 mins</div>
+                                <div class="stat-tile-desc">Fastest response: 8 seconds</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Who Initiates?</div>
+                                <div class="stat-tile-val">Sarah (58%)</div>
+                                <div class="stat-tile-desc">Sends the first "good morning" text</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Double Texting</div>
+                                <div class="stat-tile-val">You (62%)</div>
+                                <div class="stat-tile-desc">Tends to send 3-4 consecutive messages</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Panel 4: Annual Wrapped -->
+                    <div id="tab-wrapped" class="artifact-view">
+                        <div class="chat-excerpt-box" style="text-align: center; padding: 28px 20px;">
+                            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;">
+                                STORY PREVIEW · SLIDE 3 OF 7
+                            </div>
+                            <div style="font-family: var(--font-serif); font-size: 24px; color: #ffffff; margin-bottom: 8px; font-style: italic;">
+                                "The Night You Spoke in Code."
+                            </div>
+                            <p style="font-size: 12.5px; color: var(--text-secondary); max-width: 380px; margin: 0 auto 16px auto;">
+                                On October 14th, you exchanged 482 messages between 11 PM and 5 AM without a single pause.
+                            </p>
+                            <a href="/app?demo=1" class="btn-primary" style="padding: 8px 16px; font-size: 12px; display: inline-flex;">
+                                <span>Play Full 7-Slide Story in App →</span>
+                            </a>
+                        </div>
+
+                        <div class="artifact-stats-grid">
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Export Format</div>
+                                <div class="stat-tile-val">Instagram 9:16</div>
+                                <div class="stat-tile-desc">Ready to download as HD status stories</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Milestones Tracked</div>
+                                <div class="stat-tile-val">8 Key Dates</div>
+                                <div class="stat-tile-desc">First text, biggest laughing day, anniversary</div>
+                            </div>
+                            <div class="stat-tile">
+                                <div class="stat-tile-label">Soundtrack Vibe</div>
+                                <div class="stat-tile-val">Lofi &amp; Ambient</div>
+                                <div class="stat-tile-desc">Animated cards with soft audio cues</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="pillars-grid">
-                <!-- Pillar 1 -->
-                <div class="pillar-card">
-                    <div class="pillar-icon">🎵</div>
-                    <h3 class="pillar-title">Spotify-Style Chat Wrapped</h3>
-                    <p class="pillar-desc">
-                        Turn years of WhatsApp messages into 7 beautiful, animated story slides with milestones, late-night peaks, and inside jokes. Perfect for Instagram &amp; WhatsApp status.
+        </div>
+    </section>
+
+    <!-- ═══════════ EDITORIAL 3-STEP PROCESS ═══════════ -->
+    <section class="process-section" id="how">
+        <div class="wrap text-center">
+            
+            <div class="section-label">Protocol</div>
+            <h2 class="section-heading serif">Three movements. Thirty seconds.</h2>
+
+            <div class="steps-grid">
+                
+                <div class="step-item">
+                    <span class="step-num">01 / EXPORT</span>
+                    <h3 class="step-title">Generate export in WhatsApp</h3>
+                    <p class="step-body">
+                        Open any chat on your phone. Tap the contact name or three dots &rarr; <strong>Export Chat</strong> &rarr; select <strong>Without Media</strong>. Save the resulting <span class="mono">.zip</span> or <span class="mono">.txt</span> file.
                     </p>
-                    <div class="pillar-badge">7 Shareable Story Slides</div>
                 </div>
 
-                <!-- Pillar 2 -->
-                <div class="pillar-card">
-                    <div class="pillar-icon">📊</div>
-                    <h3 class="pillar-title">Relationship Habits &amp; Balance</h3>
-                    <p class="pillar-desc">
-                        Find out who texts first, who takes longer to reply, your peak texting hours, and your most frequently used emojis across tens of thousands of messages.
+                <div class="step-item">
+                    <span class="step-num">02 / DECRYPT</span>
+                    <h3 class="step-title">Stream into browser memory</h3>
+                    <p class="step-body">
+                        Drag the file into OnlineKotha. Our client-side parser unpacks timestamps, participants, and emojis instantly in temporary RAM. No files are written to hard disks.
                     </p>
-                    <div class="pillar-badge">Deep Habit Analytics</div>
                 </div>
 
-                <!-- Pillar 3 -->
-                <div class="pillar-card">
-                    <div class="pillar-icon">🔒</div>
-                    <h3 class="pillar-title">100% Private by Design</h3>
-                    <p class="pillar-desc">
-                        We never connect to your live WhatsApp or read incoming texts. Messages are processed safely in your temporary browser session and shredded immediately after.
+                <div class="step-item">
+                    <span class="step-num">03 / UNVEIL</span>
+                    <h3 class="step-title">Relive your shared history</h3>
+                    <p class="step-body">
+                        Explore your relationship Wrapped, search through forgotten inside jokes, track year-over-year balance, and download status-ready visual keepsakes.
                     </p>
-                    <div class="pillar-badge">Never Used to Train AI</div>
                 </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ═══════════ PRIVACY MANIFESTO ═══════════ -->
+    <section class="privacy-monolith" id="privacy">
+        <div class="wrap">
+            <div class="monolith-card">
+                
+                <div class="section-label">Privacy Manifesto</div>
+                
+                <blockquote class="monolith-quote">
+                    "Personal messages are not dataset fuel. They are sacred records of intimacy, grief, humor, and trust."
+                </blockquote>
+
+                <div class="monolith-pillars">
+                    <div>
+                        <div class="pillar-item-title">Zero Model Training</div>
+                        <div class="pillar-item-desc">Your private messages are never piped into training sets for LLMs or AI providers.</div>
+                    </div>
+                    <div>
+                        <div class="pillar-item-title">Transient RAM Parsing</div>
+                        <div class="pillar-item-desc">Data lives solely in volatile session memory. Closing the browser tab destroys the instance.</div>
+                    </div>
+                    <div>
+                        <div class="pillar-item-title">No Account Required</div>
+                        <div class="pillar-item-desc">No phone numbers, no social logins, no tracking cookies tied to your identity.</div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
 
-    <!-- ═══════════ HOW IT WORKS (3 SIMPLE STEPS) ═══════════ -->
-    <section class="muse-section" id="how">
-        <div class="muse-wrap">
-            <div class="section-heading text-center">
-                <span class="section-tag">Simple &amp; Fast</span>
-                <h2 class="section-title">Three steps. Under 30 seconds.</h2>
-                <p class="section-subtitle">No account setup required. Export directly from WhatsApp, drop your file, and start exploring.</p>
+    <!-- ═══════════ FREQUENTLY ASKED QUESTIONS ═══════════ -->
+    <section class="faq-section" id="faq">
+        <div class="wrap">
+            <div class="text-center" style="margin-bottom: 40px;">
+                <div class="section-label">Inquiries</div>
+                <h2 class="section-heading serif" style="margin-bottom: 0;">Frequently clarified points.</h2>
             </div>
 
-            <div class="steps-container">
-                <div class="step-box">
-                    <div class="step-num">01</div>
-                    <h3 class="step-name">Export Chat in WhatsApp</h3>
-                    <p class="step-detail">Open any chat &rarr; Tap Menu (⋮ or Contact Name) &rarr; Export Chat &rarr; <b>Without Media</b>. Save as .zip or .txt.</p>
+            <div class="faq-list">
+                
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Does OnlineKotha connect directly to my live WhatsApp?</span>
+                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        No, never. We do not require your phone number, QR codes, or access to your active WhatsApp account. You remain in complete custody: you manually export a text file from WhatsApp and choose when to load it.
+                    </div>
                 </div>
 
-                <div class="step-box">
-                    <div class="step-num">02</div>
-                    <h3 class="step-name">Drop File or Choose Folder</h3>
-                    <p class="step-detail">Upload your file or unzipped folder. It takes less than 3 seconds to analyze safely.</p>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>What happens to my chat file after it is analyzed?</span>
+                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        The parsing is performed in temporary browser session memory. Raw files are not retained on disk or stored permanently in databases. Once you refresh or close the tab, the state is cleared.
+                    </div>
                 </div>
 
-                <div class="step-box">
-                    <div class="step-num">03</div>
-                    <h3 class="step-name">Relive Your Story</h3>
-                    <p class="step-detail">Browse your Wrapped story cards, texting stats, and searchable memory archive instantly.</p>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Can I test the experience before uploading my own personal chat?</span>
+                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        Yes. We have built an authentic 1-click live demo featuring "Sarah &amp; Alex" (8 months of real banter, midnight peaks, and Wrapped stories). You can click "Sample Story" anywhere on this page to experience the full app without uploading anything.
+                    </div>
                 </div>
-            </div>
 
-            <div class="text-center mt-8">
-                <a href="/app?demo=1" class="link-demo">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <span>Don't have a file ready right now? Try Live Sample Demo</span>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════ REASSURING FAQ ═══════════ -->
-    <section class="muse-section" id="faq">
-        <div class="muse-wrap max-w-2xl">
-            <div class="section-heading text-center">
-                <span class="section-tag">Frequently Asked</span>
-                <h2 class="section-title">Common questions.</h2>
-            </div>
-
-            <div class="muse-faq-list">
-                <details class="muse-faq-item" open>
-                    <summary class="muse-faq-q">
-                        <span>Does OnlineKotha connect to my live WhatsApp account?</span>
-                        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                    </summary>
-                    <div class="muse-faq-a">
-                        No, never. We do not ask for your phone number, password, or access to your live messages. You only upload the specific export file (.zip or .txt) that you choose to analyze.
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is it free?</span>
+                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                    <div class="faq-answer">
+                        Core analysis, relationship balance metrics, search, and Spotify-style Wrapped story generation are completely free.
                     </div>
-                </details>
+                </div>
 
-                <details class="muse-faq-item">
-                    <summary class="muse-faq-q">
-                        <span>What happens to my chat file after upload?</span>
-                        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                    </summary>
-                    <div class="muse-faq-a">
-                        Your file is processed securely in temporary memory and automatically deleted from the server immediately after parsing. You can also delete your workspace history at any time.
-                    </div>
-                </details>
-
-                <details class="muse-faq-item">
-                    <summary class="muse-faq-q">
-                        <span>Are my private messages used to train AI models?</span>
-                        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                    </summary>
-                    <div class="muse-faq-a">
-                        Never. We have a strict zero-AI-training policy. Your messages are never used to train public models like ChatGPT or any third-party systems.
-                    </div>
-                </details>
-
-                <details class="muse-faq-item">
-                    <summary class="muse-faq-q">
-                        <span>Is it free to use?</span>
-                        <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                    </summary>
-                    <div class="muse-faq-a">
-                        Yes! You can upload your chat, view your relationship stats, and generate your Chat Wrapped for free.
-                    </div>
-                </details>
             </div>
         </div>
     </section>
 
     <!-- ═══════════ FINAL CALL TO ACTION ═══════════ -->
-    <section class="muse-section cta-section">
-        <div class="muse-wrap text-center">
-            <div class="muse-final-box">
-                <h2 class="final-headline">Ready to see your conversation story?</h2>
-                <p class="final-subtitle">Join thousands of users who celebrate their friendships, relationships, and memories with OnlineKotha.</p>
-                <div class="hero-ctas justify-center">
-                    <a href="/app?action=import" class="btn-primary">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                        <span>Upload WhatsApp Chat — Free</span>
-                    </a>
-                    <a href="/app?demo=1" class="btn-secondary">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        <span>Try Live Demo</span>
-                    </a>
-                </div>
+    <section style="padding: 80px 0; border-top: 1px solid var(--border-subtle); text-align: center;">
+        <div class="wrap max-w-prose">
+            <h2 class="serif" style="font-size: 38px; font-weight: 400; color: #ffffff; margin-bottom: 16px;">
+                Ready to open your conversation archive?
+            </h2>
+            <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; font-weight: 300;">
+                Turn years of forgotten moments into an intimate keepsake today.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="/app?action=import" class="btn-primary" style="padding: 12px 24px;">
+                    <span>Upload WhatsApp Export</span>
+                </a>
+                <a href="/app?demo=1" class="btn-secondary" style="padding: 12px 20px;">
+                    <span>Explore Live Sample Story</span>
+                </a>
             </div>
         </div>
     </section>
 
     <!-- ═══════════ MINIMAL FOOTER ═══════════ -->
-    <footer class="muse-footer">
-        <div class="muse-wrap footer-inner">
-            <div class="footer-left">
-                <span class="footer-brand">OnlineKotha</span>
-                <span class="footer-copy">&copy; <span id="year">2026</span> · Private by design.</span>
+    <footer class="footer">
+        <div class="wrap footer-inner">
+            <div>
+                <span style="font-weight: 600; color: #ffffff;">OnlineKotha</span>
+                <span style="margin: 0 8px;">·</span>
+                <span>Every conversation is an accidental diary.</span>
             </div>
-            <div class="footer-right">
-                <a href="/privacy.html" class="footer-link">Privacy</a>
-                <a href="/terms.html" class="footer-link">Terms</a>
-                <a href="/app?demo=1" class="footer-link">Sample Chat</a>
-                <a href="/app" class="footer-link">Open App</a>
+            <div class="footer-links">
+                <a href="/privacy.html">Privacy</a>
+                <a href="/terms.html">Terms</a>
+                <a href="/app?demo=1">Sample Chat</a>
+                <a href="/app">Launch App</a>
             </div>
         </div>
     </footer>
 
-    <!-- ═══════════ LIGHTWEIGHT SCRIPTS ═══════════ -->
+    <!-- ═══════════ LIGHTWEIGHT CLIENT SCRIPT ═══════════ -->
     <script>
-        // Set dynamic year
-        document.getElementById('year').textContent = new Date().getFullYear();
+        // Interactive Artifact Tab Switcher
+        function switchArtifactTab(tabId) {
+            document.querySelectorAll('.artifact-tab').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+            });
+            document.querySelectorAll('.artifact-view').forEach(v => {
+                v.classList.toggle('active', v.id === tabId);
+            });
+        }
 
-        // Nav blur on scroll
-        (function() {
-            const nav = document.getElementById('nav');
-            window.addEventListener('scroll', () => {
-                nav.classList.toggle('scrolled', window.scrollY > 20);
-            }, { passive: true });
-        })();
+        // FAQ Accordion Toggle
+        function toggleFaq(btn) {
+            const item = btn.closest('.faq-item');
+            const isOpen = item.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+            if (!isOpen) {
+                item.classList.add('open');
+            }
+        }
 
-        // Auth Check & Header Profile Sync
-        (async () => {
+        // Drag & Drop onto Hero Box
+        const dropBox = document.getElementById('hero-dropzone');
+        if (dropBox) {
+            ['dragenter', 'dragover'].forEach(name => {
+                dropBox.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropBox.style.borderColor = 'rgba(255,255,255,0.7)';
+                    dropBox.style.background = 'var(--bg-surface-elevated)';
+                });
+            });
+            ['dragleave', 'drop'].forEach(name => {
+                dropBox.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropBox.style.borderColor = '';
+                    dropBox.style.background = '';
+                });
+            });
+            dropBox.addEventListener('drop', (e) => {
+                window.location.href = '/app?action=import';
+            });
+        }
+
+        // Dynamic Auth Nav Check
+        (function checkUserNav() {
             try {
-                const r = await fetch('/api/auth/me?_t=' + Date.now());
-                const d = await r.json();
-                if (d && d.user) {
-                    const navCta = document.getElementById('nav-cta');
-                    if (navCta) {
-                        navCta.href = '/app';
-                        navCta.textContent = 'Open App';
-                    }
-                    const navProfile = document.getElementById('nav-user-profile');
-                    const navAvatar = document.getElementById('nav-user-avatar');
-                    const navIcon = document.getElementById('nav-user-icon');
-                    const navLogout = document.getElementById('nav-logout-btn');
-                    if (navProfile) {
-                        navProfile.classList.remove('hidden');
-                        navProfile.style.display = 'flex';
-                        if (d.user.picture && navAvatar) {
-                            navAvatar.src = d.user.picture;
-                            navAvatar.style.display = 'block';
-                            if (navIcon) navIcon.style.display = 'none';
+                fetch('/api/auth/me')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.user) {
+                            const profileEl = document.getElementById('nav-user-profile');
+                            const navCta = document.getElementById('nav-cta');
+                            if (profileEl) profileEl.classList.remove('hidden');
+                            if (navCta) navCta.textContent = 'Go to Vault';
+                            if (data.user.picture) {
+                                const img = document.getElementById('nav-user-avatar');
+                                const icon = document.getElementById('nav-user-icon');
+                                if (img) {
+                                    img.src = data.user.picture;
+                                    img.style.display = 'block';
+                                }
+                                if (icon) icon.style.display = 'none';
+                            }
                         }
-                    }
-                    navLogout?.addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
-                        window.location.reload();
-                    });
-                }
-            } catch {}
+                    })
+                    .catch(() => {});
+            } catch (e) {}
         })();
     </script>
 </body>
-
 </html>
