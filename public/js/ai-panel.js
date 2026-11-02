@@ -16,6 +16,12 @@
 
     let liveAdminBubbles = {};
 
+    function _scrollToBottom() {
+        if (scrollArea) {
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+        }
+    }
+
     function stripHtmlTags(str) {
         if (!str) return '';
         if (typeof window.stripHtmlTags === 'function') return window.stripHtmlTags(str);
