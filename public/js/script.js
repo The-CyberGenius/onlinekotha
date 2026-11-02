@@ -2449,6 +2449,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.removeEmptyState = removeEmptyState;
 
     window.openSampleChat = function() {
+        localStorage.setItem('kotha_onboarded', '1');
+        const onboardingOverlay = document.getElementById('onboarding-overlay');
+        if (onboardingOverlay) onboardingOverlay.remove();
+
         if (window.installSampleChat) window.installSampleChat();
         const sampleName = window.__SAMPLE_CHAT_DATA__ ? window.__SAMPLE_CHAT_DATA__.name : 'Sample Chat (Sarah & Alex)';
         currentChat = sampleName;
@@ -2463,6 +2467,23 @@ document.addEventListener('DOMContentLoaded', () => {
         loadData(sampleName);
         if (isMobile() || window.kothaCompact) {
             toggleSidebar(false);
+        }
+
+        // Add subtle floating demo banner if not already present
+        if (!document.getElementById('sample-demo-floating-banner')) {
+            const banner = document.createElement('div');
+            banner.id = 'sample-demo-floating-banner';
+            banner.className = 'w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[12px] font-medium py-2 px-3 text-center flex items-center justify-center gap-2 shadow-md relative z-40';
+            banner.innerHTML = `
+                <span>💡 You're exploring the live sample chat (Sarah &amp; Alex)!</span>
+                <button onclick="if(window.openUploadModal) window.openUploadModal();" class="bg-white text-indigo-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] hover:bg-indigo-50 shadow-sm cursor-pointer ml-1">
+                    Upload Your Chat
+                </button>
+            `;
+            const mainPanel = document.getElementById('main-panel');
+            if (mainPanel && mainPanel.firstChild) {
+                mainPanel.insertBefore(banner, mainPanel.firstChild);
+            }
         }
     };
 
