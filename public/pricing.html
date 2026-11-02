@@ -1590,6 +1590,7 @@
         }
         #demo-chat-frame {
             transform-origin: bottom right !important; /* Mobile default */
+            flex-direction: column !important;
         }
         @media (min-width: 768px) {
             #floating-assistant-widget {
@@ -3006,7 +3007,7 @@
     <div id="floating-assistant-widget"
         style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none;opacity:0;transform:translateY(20px);transition:all 0.3s ease;">
         <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
-            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
+            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;flex-direction:column !important;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);">
             <div class="mobile-sheet-handle"></div>
             <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
                 style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">

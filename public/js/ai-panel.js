@@ -27,6 +27,13 @@
             .replace(/<\/?(?:[a-zA-Z]{1,10})?\s*$/g, '');
     }
 
+    function _scrollToBottom() {
+        if (!scrollArea) return;
+        requestAnimationFrame(() => {
+            scrollArea.scrollTop = scrollArea.scrollHeight;
+        });
+    }
+
     document.addEventListener('ai:manual_message_token', (e) => {
         const data = e.detail;
         if (activeChat !== data.chatFolder && window.currentChat !== data.chatFolder) return;

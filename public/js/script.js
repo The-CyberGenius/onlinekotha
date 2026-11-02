@@ -4034,7 +4034,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Double-click titlebar to toggle fullscreen
         titlebar.addEventListener('dblclick', (e) => {
-            if (document.body.classList.contains('app-shell')) return;
             if (e.target.closest('button')) return;
             document.getElementById('mac-fullscreen').click();
         });
@@ -4107,7 +4106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (minBtn) minBtn.addEventListener('click', genieMinimize);
         if (fsBtn) fsBtn.addEventListener('click', () => {
-            if (document.body.classList.contains('app-shell')) return;
             const isFs = frame.classList.toggle('mac-fullscreen');
             if (isFs) {
                 resetPosition();
