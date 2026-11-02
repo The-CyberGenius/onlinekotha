@@ -1,30 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnlineKotha — Every conversation is an accidental diary</title>
+    <title>OnlineKotha — WhatsApp Wrapped &amp; Relationship Stories</title>
     <meta name="description"
-        content="Turn your exported WhatsApp chats into an intimate, private story. Spotify-style Wrapped, late-night archives, and relationship balance. 100% private.">
+        content="Turn your exported WhatsApp chats into Spotify-style Wrapped stories, relationship analytics, and memorable moments. 100% private to you.">
 
     <!-- Open Graph / Meta -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="OnlineKotha — Every conversation is an accidental diary">
+    <meta property="og:title" content="OnlineKotha — WhatsApp Wrapped &amp; Memories">
     <meta property="og:description"
-        content="Turn your exported WhatsApp chats into an intimate, private story. 100% private to you.">
+        content="See who texts first, peak late-night chat hours, and your annual Wrapped stories. 100% private to you.">
     <meta property="og:image" content="https://www.onlinekotha.com/img/og-image.png">
     <meta property="og:url" content="https://www.onlinekotha.com">
     <meta name="twitter:card" content="summary_large_image">
 
-    <!-- Fonts & Favicon -->
+    <!-- Favicon & Stylesheet -->
     <link rel="icon" type="image/svg+xml" href="./img/logo.svg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="./css/landing.css?v=6.0">
+    <link rel="stylesheet" href="./css/landing.css?v=7.0">
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
@@ -37,42 +32,30 @@
 </head>
 
 <body>
-    <!-- Subtle Architectural Lighting -->
-    <div class="ambient-lighting" aria-hidden="true"></div>
+    <!-- Subtle Ambient Glow -->
+    <div class="hero-glow" aria-hidden="true"></div>
 
-    <!-- ═══════════ NAVIGATION ═══════════ -->
-    <nav class="nav" id="nav">
-        <div class="wrap nav-inner">
-            <a href="/" class="nav-brand">
-                <img src="./img/logo.svg" alt="OnlineKotha" class="brand-icon">
-                <span class="brand-name">OnlineKotha</span>
+    <!-- ═══════════ ULTRA-CLEAN NAVBAR (ONLY LOGO & TRY FREE) ═══════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="container navbar-inner">
+            <a href="/" class="brand-link">
+                <img src="./img/logo.svg" alt="OnlineKotha" class="brand-logo-img">
+                <span>OnlineKotha</span>
             </a>
 
-            <div class="nav-links">
-                <a href="#anatomy" class="nav-link">Anatomy</a>
-                <a href="#how" class="nav-link">How it works</a>
-                <a href="#privacy" class="nav-link">Privacy manifesto</a>
-                <a href="#faq" class="nav-link">FAQ</a>
-            </div>
-
-            <div class="nav-actions">
-                <a href="/app?demo=1" class="btn-nav-demo">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                    <span>Sample Story</span>
-                </a>
-
+            <div style="display: flex; align-items: center; gap: 12px;">
                 <div id="nav-user-profile" class="hidden" style="align-items: center; gap: 8px;">
-                    <a href="/app" id="nav-avatar-container" style="width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; text-decoration: none; color: #fff;">
+                    <a href="/app" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; text-decoration: none; color: #fff;">
                         <img id="nav-user-avatar" src="" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none;">
-                        <svg id="nav-user-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg id="nav-user-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                             <circle cx="12" cy="7" r="4"></circle>
                         </svg>
                     </a>
                 </div>
 
-                <a href="/app?action=import" id="nav-cta" class="btn-primary" style="padding: 7px 14px; font-size: 12.5px;">
-                    <span>Open Vault</span>
+                <a href="/app?demo=1" class="nav-cta-btn" id="nav-cta">
+                    <span>Try Free →</span>
                 </a>
             </div>
         </div>
@@ -80,250 +63,164 @@
 
     <!-- ═══════════ HERO SECTION ═══════════ -->
     <header class="hero">
-        <div class="wrap text-center">
+        <div class="container text-center">
             
-            <!-- Monospace Status Tag -->
-            <div class="hero-meta-tag">
-                <span class="tag-dot"></span>
-                <span>Private Memory Archive · WhatsApp Edition</span>
+            <!-- Category Badge -->
+            <div class="hero-pill">
+                <span class="pill-pulse"></span>
+                <span>WhatsApp Wrapped &amp; Relationship Analytics</span>
             </div>
 
-            <!-- Crafted Literary Headline -->
+            <!-- Punchy 2-Line Headline -->
             <h1 class="hero-title">
-                Every conversation is an<br>
-                <span class="serif-italic">accidental diary.</span>
+                Your WhatsApp chats,<br>
+                <span class="gradient-headline">turned into living stories.</span>
             </h1>
 
-            <!-- Subtitle with Depth -->
-            <p class="hero-description max-w-prose">
-                Years of late-night thoughts, audio notes, inside jokes, and quiet moments — turned into an intimate, private story. Analyzed in your browser memory, auto-deleted when you close the tab.
+            <!-- Single Concise Subtitle -->
+            <p class="hero-desc">
+                Spotify-style Wrapped, texting habits, and memorable moments from any exported chat. 100% private in your browser.
             </p>
 
-            <!-- Tactile Dropzone Box -->
-            <div class="hero-action-box" id="hero-dropzone" onclick="window.location.href='/app?action=import'">
-                <div class="drop-icon-wrap">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            <!-- Dual Primary CTAs -->
+            <div class="hero-actions">
+                <a href="/app?action=import" class="btn-primary">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    <span>Upload WhatsApp Chat — Free</span>
+                </a>
+                <a href="/app?demo=1" class="btn-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span>Try Live Demo (1-Click)</span>
+                </a>
+            </div>
+
+            <!-- Micro Trust Line -->
+            <div class="hero-trust-row">
+                <div class="trust-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span>No phone number or login needed</span>
                 </div>
-                <div class="drop-headline">Drop your exported chat file here</div>
-                <div class="drop-sub">Supports .txt or .zip exported from WhatsApp (Without Media)</div>
-                <div class="drop-buttons-row">
-                    <a href="/app?action=import" class="btn-primary" onclick="event.stopPropagation();">
-                        <span>Select WhatsApp Export</span>
-                    </a>
-                    <a href="/app?demo=1" class="btn-secondary" onclick="event.stopPropagation();">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        <span>Explore Sarah &amp; Alex (Live Demo)</span>
-                    </a>
+                <span>·</span>
+                <div class="trust-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    <span>Ready in 30 seconds</span>
+                </div>
+                <span>·</span>
+                <div class="trust-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>Auto-deleted on tab close</span>
                 </div>
             </div>
 
-            <!-- Quiet Trust Markers -->
-            <div class="hero-trust-bar">
-                <div class="trust-item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                    <span>No phone number or login required</span>
-                </div>
-                <span>·</span>
-                <div class="trust-item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <span>Processed in temporary RAM</span>
-                </div>
-                <span>·</span>
-                <div class="trust-item">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    <span>Auto-deleted on tab close</span>
+            <!-- ═══════════ INTERACTIVE HERO GLASS CARD ═══════════ -->
+            <div class="hero-card-wrap">
+                <div class="glass-preview-card">
+                    
+                    <!-- Card Top Bar -->
+                    <div class="card-top">
+                        <div class="card-user-info">
+                            <div class="card-avatar">S</div>
+                            <div>
+                                <div class="card-user-name">Sarah &amp; Alex</div>
+                                <div class="card-user-meta">2,840 Messages Analyzed · 8 Months Together</div>
+                            </div>
+                        </div>
+                        <div class="card-badge-live">
+                            <span class="live-dot"></span>
+                            <span>Live Insights</span>
+                        </div>
+                    </div>
+
+                    <!-- 3 Metrics -->
+                    <div class="metrics-grid">
+                        
+                        <div class="metric-card">
+                            <div class="metric-tag">Texting Balance</div>
+                            <div class="metric-val">54% You · 46% Sarah</div>
+                            <div class="metric-bar-track">
+                                <div class="metric-bar-you" style="width: 54%;"></div>
+                                <div class="metric-bar-them" style="width: 46%;"></div>
+                            </div>
+                            <div class="metric-note">Balanced connection 🤝</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-tag">Peak Chat Hour</div>
+                            <div class="metric-val">1:42 AM</div>
+                            <div style="font-size: 11.5px; font-weight: 600; color: #fbbf24; margin-bottom: 6px;">
+                                🦉 Night Owls (38% late-night)
+                            </div>
+                            <div class="metric-note">Longest streak: 43 days</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-tag">Response Speed</div>
+                            <div class="metric-val">2.4 mins</div>
+                            <div style="font-size: 11.5px; font-weight: 600; color: #34d399; margin-bottom: 6px;">
+                                ⚡ Instant Responders
+                            </div>
+                            <div class="metric-note">Top emoji: 😂 (842×)</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Spotify Wrapped Story Banner -->
+                    <div class="wrapped-banner">
+                        <div>
+                            <div class="wrapped-title">🎵 Spotify-Style Chat Wrapped Ready</div>
+                            <div class="wrapped-desc">"Top inside joke: 'bas 5 min' · 184,200 words shared together ❤️"</div>
+                        </div>
+                        <a href="/app?demo=1" class="wrapped-play-btn">
+                            Play Story (7 Slides) →
+                        </a>
+                    </div>
+
                 </div>
             </div>
 
         </div>
     </header>
 
-    <!-- ═══════════ INTERACTIVE ARTIFACT: ANATOMY OF A CONVERSATION ═══════════ -->
-    <section class="anatomy-section" id="anatomy">
-        <div class="wrap text-center">
+    <!-- ═══════════ CORE FEATURES (BENTO GRID) ═══════════ -->
+    <section class="features-section">
+        <div class="container text-center">
             
-            <div class="section-label">Interactive Artifact</div>
-            <h2 class="section-heading serif">The anatomy of two people talking.</h2>
+            <div class="section-tag">Core Capabilities</div>
+            <h2 class="section-title">Everything hidden inside your chats.</h2>
+            <p class="section-sub">
+                No complex dashboards or confusing charts. Just pure memories and authentic relationship habits.
+            </p>
 
-            <!-- The Artifact Window -->
-            <div class="artifact-container">
+            <div class="bento-grid">
                 
-                <!-- Tab Controls -->
-                <div class="artifact-tabs" role="tablist">
-                    <button class="artifact-tab active" data-tab="tab-night" onclick="switchArtifactTab('tab-night')">
-                        <span class="tab-num">01 / ARCHIVE</span>
-                        <span class="tab-title">The 2:00 AM Talks</span>
-                    </button>
-                    <button class="artifact-tab" data-tab="tab-words" onclick="switchArtifactTab('tab-words')">
-                        <span class="tab-num">02 / LEXICON</span>
-                        <span class="tab-title">Private Vocabulary</span>
-                    </button>
-                    <button class="artifact-tab" data-tab="tab-balance" onclick="switchArtifactTab('tab-balance')">
-                        <span class="tab-num">03 / DYNAMICS</span>
-                        <span class="tab-title">Texting Balance</span>
-                    </button>
-                    <button class="artifact-tab" data-tab="tab-wrapped" onclick="switchArtifactTab('tab-wrapped')">
-                        <span class="tab-num">04 / STORIES</span>
-                        <span class="tab-title">Annual Wrapped</span>
-                    </button>
+                <div class="bento-card">
+                    <div class="bento-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13M9 9l12-2M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+                    </div>
+                    <h3 class="bento-heading">Spotify-Style Chat Wrapped</h3>
+                    <p class="bento-text">
+                        Turn years of WhatsApp messages into 7 animated, downloadable story slides with milestones, late-night peaks, and inside jokes. Perfect for WhatsApp &amp; Instagram status.
+                    </p>
                 </div>
 
-                <!-- Tab Panel 1: The 2:00 AM Talks -->
-                <div class="artifact-body">
-                    <div id="tab-night" class="artifact-view active">
-                        <div class="chat-excerpt-box">
-                            <div class="chat-bubble them">
-                                are you asleep?
-                                <span class="chat-time">02:14 AM</span>
-                            </div>
-                            <div class="chat-bubble you">
-                                couldn't sleep. thinking about what you said at dinner.
-                                <span class="chat-time">02:15 AM</span>
-                            </div>
-                            <div class="chat-bubble them">
-                                same here. call me if you want?
-                                <span class="chat-time">02:16 AM</span>
-                            </div>
-                        </div>
-
-                        <div class="artifact-stats-grid">
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Peak Hour</div>
-                                <div class="stat-tile-val">02:14 AM</div>
-                                <div class="stat-tile-desc">41% of all messages happen after midnight</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Night Streak</div>
-                                <div class="stat-tile-val">43 Nights</div>
-                                <div class="stat-tile-desc">Consecutive 1 AM – 4 AM conversations</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Late Night Mood</div>
-                                <div class="stat-tile-val">Vulnerable</div>
-                                <div class="stat-tile-desc">Average message length triples after 12 AM</div>
-                            </div>
-                        </div>
+                <div class="bento-card">
+                    <div class="bento-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                     </div>
+                    <h3 class="bento-heading">Relationship Balance &amp; Habits</h3>
+                    <p class="bento-text">
+                        Find out who texts first, who takes longer to reply, your peak conversation hours, and your most frequently used emojis across tens of thousands of messages.
+                    </p>
+                </div>
 
-                    <!-- Tab Panel 2: Private Vocabulary -->
-                    <div id="tab-words" class="artifact-view">
-                        <div class="lexicon-cloud">
-                            <div class="lexicon-pill">
-                                <span class="pill-word">"puchki"</span>
-                                <span class="pill-count">1,420×</span>
-                            </div>
-                            <div class="lexicon-pill">
-                                <span class="pill-word">"bas 5 min"</span>
-                                <span class="pill-count">840×</span>
-                            </div>
-                            <div class="lexicon-pill">
-                                <span class="pill-word">"chai peene chalein?"</span>
-                                <span class="pill-count">412×</span>
-                            </div>
-                            <div class="lexicon-pill">
-                                <span class="pill-word">"call me when you reach"</span>
-                                <span class="pill-count">365×</span>
-                            </div>
-                            <div class="lexicon-pill">
-                                <span class="pill-word">"sun na"</span>
-                                <span class="pill-count">1,108×</span>
-                            </div>
-                            <div class="lexicon-pill">
-                                <span class="pill-word">"🥺"</span>
-                                <span class="pill-count">2,410×</span>
-                            </div>
-                        </div>
-
-                        <div class="artifact-stats-grid">
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Unique Shared Words</div>
-                                <div class="stat-tile-val">128 Words</div>
-                                <div class="stat-tile-desc">Found in no dictionary, only in this chat</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Top Voice Note Length</div>
-                                <div class="stat-tile-val">4m 12s</div>
-                                <div class="stat-tile-desc">Longest podcast-style audio memo</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Favorite Emoji</div>
-                                <div class="stat-tile-val">❤️ · 😂 · ☕</div>
-                                <div class="stat-tile-desc">Over 6,800 emojis shared in 8 months</div>
-                            </div>
-                        </div>
+                <div class="bento-card">
+                    <div class="bento-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
-
-                    <!-- Tab Panel 3: Texting Balance -->
-                    <div id="tab-balance" class="artifact-view">
-                        <div class="chat-excerpt-box">
-                            <div style="margin-bottom: 12px; display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);">
-                                <span>YOU (54%)</span>
-                                <span>SARAH (46%)</span>
-                            </div>
-                            <div style="height: 6px; border-radius: 9999px; background: rgba(255,255,255,0.08); overflow: hidden; display: flex;">
-                                <div style="width: 54%; background: #818cf8;"></div>
-                                <div style="width: 46%; background: #f43f5e;"></div>
-                            </div>
-                            <div style="margin-top: 10px; font-size: 11.5px; color: var(--text-secondary); text-align: center;">
-                                Perfectly reciprocal thread dynamics · No one is left on read
-                            </div>
-                        </div>
-
-                        <div class="artifact-stats-grid">
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Median Reply Time</div>
-                                <div class="stat-tile-val">2.4 mins</div>
-                                <div class="stat-tile-desc">Fastest response: 8 seconds</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Who Initiates?</div>
-                                <div class="stat-tile-val">Sarah (58%)</div>
-                                <div class="stat-tile-desc">Sends the first "good morning" text</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Double Texting</div>
-                                <div class="stat-tile-val">You (62%)</div>
-                                <div class="stat-tile-desc">Tends to send 3-4 consecutive messages</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tab Panel 4: Annual Wrapped -->
-                    <div id="tab-wrapped" class="artifact-view">
-                        <div class="chat-excerpt-box" style="text-align: center; padding: 28px 20px;">
-                            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;">
-                                STORY PREVIEW · SLIDE 3 OF 7
-                            </div>
-                            <div style="font-family: var(--font-serif); font-size: 24px; color: #ffffff; margin-bottom: 8px; font-style: italic;">
-                                "The Night You Spoke in Code."
-                            </div>
-                            <p style="font-size: 12.5px; color: var(--text-secondary); max-width: 380px; margin: 0 auto 16px auto;">
-                                On October 14th, you exchanged 482 messages between 11 PM and 5 AM without a single pause.
-                            </p>
-                            <a href="/app?demo=1" class="btn-primary" style="padding: 8px 16px; font-size: 12px; display: inline-flex;">
-                                <span>Play Full 7-Slide Story in App →</span>
-                            </a>
-                        </div>
-
-                        <div class="artifact-stats-grid">
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Export Format</div>
-                                <div class="stat-tile-val">Instagram 9:16</div>
-                                <div class="stat-tile-desc">Ready to download as HD status stories</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Milestones Tracked</div>
-                                <div class="stat-tile-val">8 Key Dates</div>
-                                <div class="stat-tile-desc">First text, biggest laughing day, anniversary</div>
-                            </div>
-                            <div class="stat-tile">
-                                <div class="stat-tile-label">Soundtrack Vibe</div>
-                                <div class="stat-tile-val">Lofi &amp; Ambient</div>
-                                <div class="stat-tile-desc">Animated cards with soft audio cues</div>
-                            </div>
-                        </div>
-                    </div>
-
+                    <h3 class="bento-heading">100% Private by Design</h3>
+                    <p class="bento-text">
+                        We never connect to your live WhatsApp. Files are parsed temporarily in your browser session and shredded immediately after. Never saved, never used to train AI models.
+                    </p>
                 </div>
 
             </div>
@@ -331,36 +228,39 @@
         </div>
     </section>
 
-    <!-- ═══════════ EDITORIAL 3-STEP PROCESS ═══════════ -->
-    <section class="process-section" id="how">
-        <div class="wrap text-center">
+    <!-- ═══════════ 3 SIMPLE STEPS ═══════════ -->
+    <section class="steps-section">
+        <div class="container text-center">
             
-            <div class="section-label">Protocol</div>
-            <h2 class="section-heading serif">Three movements. Thirty seconds.</h2>
+            <div class="section-tag">Frictionless Flow</div>
+            <h2 class="section-title">Three steps. Under 30 seconds.</h2>
+            <p class="section-sub">
+                No account setup required. Export directly from WhatsApp, drop your file, and start exploring.
+            </p>
 
             <div class="steps-grid">
                 
-                <div class="step-item">
-                    <span class="step-num">01 / EXPORT</span>
-                    <h3 class="step-title">Generate export in WhatsApp</h3>
-                    <p class="step-body">
-                        Open any chat on your phone. Tap the contact name or three dots &rarr; <strong>Export Chat</strong> &rarr; select <strong>Without Media</strong>. Save the resulting <span class="mono">.zip</span> or <span class="mono">.txt</span> file.
+                <div class="step-card">
+                    <span class="step-number">STEP 01</span>
+                    <h3 class="step-title">Export Chat in WhatsApp</h3>
+                    <p class="step-desc">
+                        Open any chat &rarr; tap contact name (or ⋮) &rarr; tap <strong>Export Chat</strong> &rarr; select <strong>Without Media</strong>. Save as <code style="color: #818cf8;">.zip</code> or <code style="color: #818cf8;">.txt</code>.
                     </p>
                 </div>
 
-                <div class="step-item">
-                    <span class="step-num">02 / DECRYPT</span>
-                    <h3 class="step-title">Stream into browser memory</h3>
-                    <p class="step-body">
-                        Drag the file into OnlineKotha. Our client-side parser unpacks timestamps, participants, and emojis instantly in temporary RAM. No files are written to hard disks.
+                <div class="step-card">
+                    <span class="step-number">STEP 02</span>
+                    <h3 class="step-title">Drop File or Choose Folder</h3>
+                    <p class="step-desc">
+                        Drop your exported file into OnlineKotha. Our parser unpacks your messages in under 3 seconds in temporary memory.
                     </p>
                 </div>
 
-                <div class="step-item">
-                    <span class="step-num">03 / UNVEIL</span>
-                    <h3 class="step-title">Relive your shared history</h3>
-                    <p class="step-body">
-                        Explore your relationship Wrapped, search through forgotten inside jokes, track year-over-year balance, and download status-ready visual keepsakes.
+                <div class="step-card">
+                    <span class="step-number">STEP 03</span>
+                    <h3 class="step-title">Relive Your Story</h3>
+                    <p class="step-desc">
+                        Browse your animated Wrapped cards, texting stats, and search through forgotten memories instantly.
                     </p>
                 </div>
 
@@ -369,172 +269,67 @@
         </div>
     </section>
 
-    <!-- ═══════════ PRIVACY MANIFESTO ═══════════ -->
-    <section class="privacy-monolith" id="privacy">
-        <div class="wrap">
-            <div class="monolith-card">
-                
-                <div class="section-label">Privacy Manifesto</div>
-                
-                <blockquote class="monolith-quote">
-                    "Personal messages are not dataset fuel. They are sacred records of intimacy, grief, humor, and trust."
-                </blockquote>
-
-                <div class="monolith-pillars">
-                    <div>
-                        <div class="pillar-item-title">Zero Model Training</div>
-                        <div class="pillar-item-desc">Your private messages are never piped into training sets for LLMs or AI providers.</div>
-                    </div>
-                    <div>
-                        <div class="pillar-item-title">Transient RAM Parsing</div>
-                        <div class="pillar-item-desc">Data lives solely in volatile session memory. Closing the browser tab destroys the instance.</div>
-                    </div>
-                    <div>
-                        <div class="pillar-item-title">No Account Required</div>
-                        <div class="pillar-item-desc">No phone numbers, no social logins, no tracking cookies tied to your identity.</div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════ FREQUENTLY ASKED QUESTIONS ═══════════ -->
-    <section class="faq-section" id="faq">
-        <div class="wrap">
-            <div class="text-center" style="margin-bottom: 40px;">
-                <div class="section-label">Inquiries</div>
-                <h2 class="section-heading serif" style="margin-bottom: 0;">Frequently clarified points.</h2>
-            </div>
-
-            <div class="faq-list">
-                
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Does OnlineKotha connect directly to my live WhatsApp?</span>
-                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-answer">
-                        No, never. We do not require your phone number, QR codes, or access to your active WhatsApp account. You remain in complete custody: you manually export a text file from WhatsApp and choose when to load it.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>What happens to my chat file after it is analyzed?</span>
-                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-answer">
-                        The parsing is performed in temporary browser session memory. Raw files are not retained on disk or stored permanently in databases. Once you refresh or close the tab, the state is cleared.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Can I test the experience before uploading my own personal chat?</span>
-                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-answer">
-                        Yes. We have built an authentic 1-click live demo featuring "Sarah &amp; Alex" (8 months of real banter, midnight peaks, and Wrapped stories). You can click "Sample Story" anywhere on this page to experience the full app without uploading anything.
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-question" onclick="toggleFaq(this)">
-                        <span>Is it free?</span>
-                        <svg class="faq-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
-                    </button>
-                    <div class="faq-answer">
-                        Core analysis, relationship balance metrics, search, and Spotify-style Wrapped story generation are completely free.
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════ FINAL CALL TO ACTION ═══════════ -->
-    <section style="padding: 80px 0; border-top: 1px solid var(--border-subtle); text-align: center;">
-        <div class="wrap max-w-prose">
-            <h2 class="serif" style="font-size: 38px; font-weight: 400; color: #ffffff; margin-bottom: 16px;">
-                Ready to open your conversation archive?
-            </h2>
-            <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; font-weight: 300;">
-                Turn years of forgotten moments into an intimate keepsake today.
+    <!-- ═══════════ BOTTOM CTA BOX ═══════════ -->
+    <div class="container">
+        <div class="cta-box">
+            <h2 class="section-title" style="margin-bottom: 12px;">Ready to see your conversation story?</h2>
+            <p class="section-sub" style="margin-bottom: 28px;">
+                Experience the magic with our interactive sample chat or upload your own.
             </p>
-            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                <a href="/app?action=import" class="btn-primary" style="padding: 12px 24px;">
-                    <span>Upload WhatsApp Export</span>
+            <div class="hero-actions" style="margin-bottom: 0;">
+                <a href="/app?action=import" class="btn-primary">
+                    <span>Upload WhatsApp Chat — Free</span>
                 </a>
-                <a href="/app?demo=1" class="btn-secondary" style="padding: 12px 20px;">
-                    <span>Explore Live Sample Story</span>
+                <a href="/app?demo=1" class="btn-secondary">
+                    <span>Try Live Demo</span>
                 </a>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- ═══════════ MINIMAL FOOTER ═══════════ -->
-    <footer class="footer">
-        <div class="wrap footer-inner">
-            <div>
-                <span style="font-weight: 600; color: #ffffff;">OnlineKotha</span>
-                <span style="margin: 0 8px;">·</span>
-                <span>Every conversation is an accidental diary.</span>
+    <!-- ═══════════ AUTHENTIC FOOTER ═══════════ -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                
+                <div>
+                    <div class="footer-brand-title">OnlineKotha</div>
+                    <p class="footer-brand-desc">
+                        Private WhatsApp chat analytics, Spotify-style Wrapped stories, and conversation memories. Engineered with privacy as the core architecture.
+                    </p>
+                </div>
+
+                <div>
+                    <div class="footer-col-title">Product</div>
+                    <ul class="footer-links-list">
+                        <li><a href="/app?demo=1">Live Sample Demo</a></li>
+                        <li><a href="/app?action=import">Import WhatsApp Chat</a></li>
+                        <li><a href="/pricing.html">Kotha Pro</a></li>
+                        <li><a href="/app">Launch Web App</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <div class="footer-col-title">Trust &amp; Legal</div>
+                    <ul class="footer-links-list">
+                        <li><a href="/privacy.html">Privacy Policy</a></li>
+                        <li><a href="/terms.html">Terms of Service</a></li>
+                        <li><a href="mailto:support@onlinekotha.com">Contact Support</a></li>
+                    </ul>
+                </div>
+
             </div>
-            <div class="footer-links">
-                <a href="/privacy.html">Privacy</a>
-                <a href="/terms.html">Terms</a>
-                <a href="/app?demo=1">Sample Chat</a>
-                <a href="/app">Launch App</a>
+
+            <div class="footer-bottom">
+                <div>&copy; <span id="year">2026</span> OnlineKotha. All rights reserved.</div>
+                <div>Processed securely in temporary RAM · Never sold</div>
             </div>
         </div>
     </footer>
 
-    <!-- ═══════════ LIGHTWEIGHT CLIENT SCRIPT ═══════════ -->
+    <!-- ═══════════ LIGHTWEIGHT SCRIPT ═══════════ -->
     <script>
-        // Interactive Artifact Tab Switcher
-        function switchArtifactTab(tabId) {
-            document.querySelectorAll('.artifact-tab').forEach(b => {
-                b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
-            });
-            document.querySelectorAll('.artifact-view').forEach(v => {
-                v.classList.toggle('active', v.id === tabId);
-            });
-        }
-
-        // FAQ Accordion Toggle
-        function toggleFaq(btn) {
-            const item = btn.closest('.faq-item');
-            const isOpen = item.classList.contains('open');
-            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-            if (!isOpen) {
-                item.classList.add('open');
-            }
-        }
-
-        // Drag & Drop onto Hero Box
-        const dropBox = document.getElementById('hero-dropzone');
-        if (dropBox) {
-            ['dragenter', 'dragover'].forEach(name => {
-                dropBox.addEventListener(name, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropBox.style.borderColor = 'rgba(255,255,255,0.7)';
-                    dropBox.style.background = 'var(--bg-surface-elevated)';
-                });
-            });
-            ['dragleave', 'drop'].forEach(name => {
-                dropBox.addEventListener(name, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dropBox.style.borderColor = '';
-                    dropBox.style.background = '';
-                });
-            });
-            dropBox.addEventListener('drop', (e) => {
-                window.location.href = '/app?action=import';
-            });
-        }
+        document.getElementById('year').textContent = new Date().getFullYear();
 
         // Dynamic Auth Nav Check
         (function checkUserNav() {
@@ -546,7 +341,7 @@
                             const profileEl = document.getElementById('nav-user-profile');
                             const navCta = document.getElementById('nav-cta');
                             if (profileEl) profileEl.classList.remove('hidden');
-                            if (navCta) navCta.textContent = 'Go to Vault';
+                            if (navCta) navCta.innerHTML = '<span>Open App →</span>';
                             if (data.user.picture) {
                                 const img = document.getElementById('nav-user-avatar');
                                 const icon = document.getElementById('nav-user-icon');

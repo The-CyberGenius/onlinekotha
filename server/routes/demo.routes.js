@@ -24,10 +24,15 @@ function getAssistantOwner(req) {
     return { userId: null, guestId: guestId || null };
 }
 
-function getDemoLimitAndUsage(req, sessionId) {
+function getDemoLimitAndUsage(req, sessionId, role) {
     const user = req.user;
     let key, limit;
-    if (user) {
+    const isSarahDemo = role === 'sarah_demo' || sessionId === 'sample_demo_session';
+    if (isSarahDemo) {
+        const guestId = req.cookies && req.cookies.kotha_guest_id;
+        key = user ? `user_${user.id}_sarah_demo` : `guest_${guestId || req.ip}_sarah_demo`;
+        limit = 5;
+    } else if (user) {
         const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }).split(',')[0];
         key = `user_${user.id}_${dateStr}`;
         limit = (user.is_admin || user.is_pro || user.plan === 'paid') ? 9999 : 15;
@@ -253,11 +258,13 @@ router.post('/', demoLimiter, async (req, res) => {
         return res.json({ ok: true, manual: true });
     }
 
-    const { session, key, limit, usage } = getDemoLimitAndUsage(req, sessionId);
+    const { session, key, limit, usage } = getDemoLimitAndUsage(req, sessionId, role);
 
     if (usage.count >= limit) {
+        const isSarahDemo = role === 'sarah_demo' || sessionId === 'sample_demo_session';
         return res.status(429).json({
-            error: session ? 'Daily limit reached for demo chat. Check back tomorrow!' : 'Demo limit reached! Sign up for free to keep chatting.',
+            error: isSarahDemo ? 'Demo limit reached! Import your WhatsApp chat to keep chatting.' : (session ? 'Daily limit reached for demo chat. Check back tomorrow!' : 'Demo limit reached! Sign up for free to keep chatting.'),
+            isDemoLimit: true,
             remaining: 0,
             limit: limit,
         });
@@ -316,7 +323,19 @@ router.post('/', demoLimiter, async (req, res) => {
     const nowIST = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true, weekday: 'long', day: 'numeric', month: 'long' });
     let systemPrompt = '';
 
-    if (role === 'best_friend') {
+    if (role === 'sarah_demo') {
+        systemPrompt = `You are Sarah, chatting on WhatsApp with Alex in a live interactive demo.
+CURRENT TIME (IST): ${nowIST}.
+CONTEXT:
+- You and Alex have been talking for 8 months (2,840 messages).
+- You are witty, warm, caring, playful, and text late at night.
+- You naturally use inside jokes like "puchki", "bas 5 min", "chai peene chalein?", "sun na", and emojis: ❤️, 😂, 🥺, ☕.
+- Text like a real person on WhatsApp: short 1-2 sentence messages, natural lowercase/emojis, casual Hinglish/English.
+RULES:
+1. NEVER break character. You ARE Sarah talking to Alex.
+2. NEVER mention AI, prompts, chatbots, or OnlineKotha.
+3. Keep responses authentic, casual, and brief (1-3 sentences max).`;
+    } else if (role === 'best_friend') {
         systemPrompt = `You are the user's ultimate "Best Friend" chatting on WhatsApp.
 CURRENT TIME (IST): ${nowIST}.
 PERSONALITY:

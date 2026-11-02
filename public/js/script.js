@@ -4119,11 +4119,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseup', stopDragging);
         window.addEventListener('blur', stopDragging);
 
-        // Double-click titlebar to toggle fullscreen
+        // Double-click titlebar to toggle fullscreen / maximize
         titlebar.addEventListener('dblclick', (e) => {
-            if (document.body.classList.contains('app-shell')) return;
-            if (e.target.closest('button')) return;
-            document.getElementById('mac-fullscreen').click();
+            if (e.target.closest('button, a, input, select')) return;
+            const fsBtn = document.getElementById('mac-fullscreen');
+            if (fsBtn) fsBtn.click();
         });
 
         // --- Traffic light buttons ---
@@ -4194,7 +4194,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (minBtn) minBtn.addEventListener('click', genieMinimize);
         if (fsBtn) fsBtn.addEventListener('click', () => {
-            if (document.body.classList.contains('app-shell')) return;
             const isFs = frame.classList.toggle('mac-fullscreen');
             if (isFs) {
                 resetPosition();
@@ -4203,6 +4202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 userHasDragged = false;
                 userHasResized = false;
                 if (dock) dock.style.removeProperty('display');
+                resetPosition();
                 centerFrame();
             }
             requestAnimationFrame(syncOverlay);

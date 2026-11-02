@@ -449,6 +449,13 @@
             }
             return true;
         }
+        if (chatFolder === 'sample_demo' || (window.__SAMPLE_CHAT_DATA__ && chatFolder === window.__SAMPLE_CHAT_DATA__.name)) {
+            contactNameMap[chatFolder] = 'Sarah';
+            if (typeof window.kothaSetMyName === 'function') {
+                window.kothaSetMyName('Alex', 'Sarah');
+            }
+            return true;
+        }
         try {
             const resp = await fetch(`/api/ai/chat/${encodeURIComponent(chatFolder)}/identity`);
             if (!resp.ok) {
@@ -816,7 +823,7 @@
         const convId = conversationMap[chatFolder] || null;
         const cName = chatFolder === 'kotha_assistant'
             ? 'Kotha Assistant'
-            : (contactNameMap[chatFolder] || (document.getElementById('chat-header-name')?.innerText) || 'AI');
+            : (chatFolder === 'sample_demo' ? 'Sarah' : (contactNameMap[chatFolder] || (document.getElementById('chat-header-name')?.innerText) || 'AI'));
         const uName = (typeof window.kothaGetMyName === 'function') ? window.kothaGetMyName() : 'User';
 
         _dotStart();
@@ -877,6 +884,18 @@
                     if (typeof window.renderChatList === 'function' && window.loadedChats) {
                         window.renderChatList(window.loadedChats, window.currentChat);
                     }
+                } else if (chatFolder === 'sample_demo' || (window.__SAMPLE_CHAT_DATA__ && chatFolder === window.__SAMPLE_CHAT_DATA__.name)) {
+                    endpoint = '/api/demo-chat';
+                    payload = { message: text, sessionId: 'sample_demo_session', role: 'sarah_demo', contactName: 'Sarah', userName: 'Alex', nonce: nonce };
+                    if (sendAsAI) {
+                        payload.sendAsAI = true;
+                    }
+                    
+                    // Save to sample_demo cache
+                    let history = (window._chatMsgCache && window._chatMsgCache[chatFolder]) ? window._chatMsgCache[chatFolder] : [];
+                    const todayIso = new Date().toLocaleDateString('en-CA');
+                    history.push({ text: text, sender: sendAsAI ? 'Sarah' : 'Alex', time: formatNow(), date: todayIso });
+                    if (window._chatMsgCache) window._chatMsgCache[chatFolder] = history;
                 }
 
                 const resp = await fetch(endpoint, {
@@ -893,9 +912,27 @@
                         const data = await resp.json();
                         errMsg = data.error || errMsg; 
                         if (data.requireAuth) requireAuth = true;
-                        if (resp.status === 429 && errMsg.toLowerCase().includes('limit')) isLimit = true;
+                        if (resp.status === 429 || (errMsg && errMsg.toLowerCase().includes('limit'))) isLimit = true;
                     } catch { }
                     typingEl.remove();
+
+                    if ((chatFolder === 'sample_demo' || (window.__SAMPLE_CHAT_DATA__ && chatFolder === window.__SAMPLE_CHAT_DATA__.name)) && isLimit) {
+                        const demoWrap = document.createElement('div');
+                        demoWrap.className = 'flex justify-center my-3 animate-message';
+                        demoWrap.innerHTML = `
+                            <div class="glass-chat-them rounded-2xl p-4 max-w-[85%] border border-indigo-500/30 bg-indigo-500/10 text-center shadow-lg">
+                                <div class="text-sm font-bold text-indigo-400 mb-1">✨ Sarah &amp; Alex Demo Limit Reached (5/5)</div>
+                                <p class="text-xs text-gray-300 mb-3 leading-relaxed">You've reached the free demo limit! Ready to relive your real memories and chat with your own WhatsApp contacts?</p>
+                                <button onclick="document.getElementById('upload-modal') ? document.getElementById('upload-modal').classList.remove('hidden') : window.location.href='/app?action=import'" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                    Upload Your WhatsApp Chat
+                                </button>
+                            </div>`;
+                        chatContainer.appendChild(demoWrap);
+                        _scrollToBottom();
+                        return resolve();
+                    }
+
                     if (requireAuth || errMsg.toLowerCase().includes('guest')) {
                         if (typeof window.openAuthModal === 'function') {
                             window.openAuthModal(errMsg);
