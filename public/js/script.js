@@ -123,11 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
     
-    // Auto-trigger import modal if action=import is in URL (only if NOT viewing assistant and NOT auth flow)
+    // Auto-trigger demo or import modal from URL
     const actionParam = urlParams.get('action');
     const chatParam = urlParams.get('chat');
     const authParam = urlParams.get('auth');
-    if (actionParam === 'import' && chatParam !== 'kotha_assistant' && !authParam) {
+    const demoParam = urlParams.get('demo') || (actionParam === 'demo') || (chatParam === 'sample_demo');
+
+    if (demoParam) {
+        setTimeout(() => {
+            if (typeof window.openSampleChat === 'function') window.openSampleChat();
+        }, 350);
+    } else if (actionParam === 'import' && chatParam !== 'kotha_assistant' && !authParam) {
         setTimeout(() => {
             const openUploadBtn = document.getElementById('open-upload-btn');
             if (openUploadBtn) openUploadBtn.click();
@@ -1142,6 +1148,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         ];
                     }
                     window._chatMsgCache[chatName] = data;
+                } else if (window.__SAMPLE_CHAT_DATA__ && (chatName === window.__SAMPLE_CHAT_DATA__.name || chatName === 'sample_demo' || chatName.includes('Sample Chat'))) {
+                    data = window.__SAMPLE_CHAT_DATA__.messages;
+                    myName = window.__SAMPLE_CHAT_DATA__.myName;
+                    otherPersonName = window.__SAMPLE_CHAT_DATA__.contactName;
+                    window._chatMsgCache[chatName] = data;
+                    if (!window._chatMetaCache) window._chatMetaCache = {};
+                    window._chatMetaCache[chatName] = {
+                        contactName: otherPersonName,
+                        isGroup: false,
+                        lastMessage: data[data.length - 1].text,
+                        lastTime: data[data.length - 1].time
+                    };
                 } else {
                     const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
                     data = await resp.json();
@@ -2308,16 +2326,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
                 <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 max-w-[260px] leading-relaxed mb-5">Select a chat from the sidebar, or import a new one to start talking with AI.</p>
 
-                <!-- Import + DM Buttons -->
-                <div class="flex flex-wrap items-center justify-center gap-2.5 w-full max-w-[280px] mx-auto mb-5">
-                    <button id="empty-upload-btn" class="flex-1 min-w-[120px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-[12px] rounded-xl px-4 py-2.5 transition-all shadow-md flex items-center justify-center gap-1.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                        Import Chat
+                <!-- Import + Try Demo + DM Buttons -->
+                <div class="flex flex-col gap-2 w-full max-w-[280px] mx-auto mb-5">
+                    <button id="empty-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-[13px] rounded-xl px-4 py-2.5 transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        Upload WhatsApp Chat
                     </button>
-                    <button id="empty-dm-btn" class="flex-1 min-w-[120px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[12px] rounded-xl px-4 py-2.5 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Message Someone
-                    </button>
+                    <div class="flex items-center gap-2 w-full">
+                        <button id="empty-demo-btn" class="flex-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1 cursor-pointer">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            Try Sample Chat
+                        </button>
+                        <button id="empty-dm-btn" class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1 cursor-pointer">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Direct Message
+                        </button>
+                    </div>
                 </div>
 
                 ${!isPro ? `
@@ -2365,6 +2389,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const openUploadBtn = document.getElementById('open-upload-btn');
             if (openUploadBtn) openUploadBtn.click();
             else if (typeof window.openUploadModal === 'function') window.openUploadModal();
+        });
+        const demoBtn = document.getElementById('empty-demo-btn');
+        if (demoBtn) demoBtn.addEventListener('click', () => {
+            if (typeof window.openSampleChat === 'function') window.openSampleChat();
         });
         const dmBtn = document.getElementById('empty-dm-btn');
         if (dmBtn) dmBtn.addEventListener('click', () => {
@@ -2419,6 +2447,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.showEmptyState = showEmptyState;
     window.removeEmptyState = removeEmptyState;
+
+    window.openSampleChat = function() {
+        if (window.installSampleChat) window.installSampleChat();
+        const sampleName = window.__SAMPLE_CHAT_DATA__ ? window.__SAMPLE_CHAT_DATA__.name : 'Sample Chat (Sarah & Alex)';
+        currentChat = sampleName;
+        window.currentChat = sampleName;
+        localStorage.setItem("kotha_active_chat", sampleName);
+
+        if (!loadedChats.includes(sampleName)) {
+            loadedChats.unshift(sampleName);
+        }
+        renderChatList(loadedChats, currentChat);
+        removeEmptyState();
+        loadData(sampleName);
+        if (isMobile() || window.kothaCompact) {
+            toggleSidebar(false);
+        }
+    };
 
     const chatSelector = document.getElementById('chat-selector');
     if (chatSelector) {

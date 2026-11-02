@@ -229,6 +229,18 @@
 
     openBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
+
+    const modalSampleBtn = document.getElementById('modal-sample-chat-btn');
+    if (modalSampleBtn) {
+        modalSampleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeModal();
+            if (typeof window.openSampleChat === 'function') {
+                window.openSampleChat();
+            }
+        });
+    }
     modal.addEventListener('click', e => {
         if (e.target === modal) {
             if (uploadActiveSection && !uploadActiveSection.classList.contains('hidden')) {

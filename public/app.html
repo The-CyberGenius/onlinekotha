@@ -1083,6 +1083,14 @@
                     <input type="file" id="file-input-folder" webkitdirectory directory multiple class="hidden">
                 </div>
 
+                <!-- 1-Click Demo Trigger in Modal -->
+                <div class="mt-2 text-center">
+                    <button type="button" id="modal-sample-chat-btn" class="text-[11.5px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer inline-flex items-center gap-1.5 transition">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        Don't have an export ready? Try Live Demo (1-Click)
+                    </button>
+                </div>
+
                 <!-- Consent Checkbox (Checked by default for seamless 1-click upload) -->
                 <label class="mt-3 flex items-start gap-2 text-[11px] leading-tight text-gray-500 dark:text-gray-400 cursor-pointer select-none">
                     <input id="upload-consent" type="checkbox" checked class="mt-0.5 rounded border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 shrink-0">
@@ -1166,6 +1174,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="/js/sample-chat-data.js?v=1"></script>
     <script src="/js/ai-panel.js?v=60"></script>
     <script src="/js/script.js?v=73"></script>
     <script src="/js/upload.js?v=65"></script>
