@@ -273,6 +273,17 @@ body {
     padding: 6px 14px;
     border-radius: 9999px;
     margin-bottom: 24px;
+    max-width: 95%;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .hero-meta-tag {
+        font-size: 9.5px;
+        letter-spacing: 0.07em;
+        padding: 4px 10px;
+        margin-bottom: 18px;
+    }
 }
 
 .hero-meta-tag .tag-dot {
@@ -375,6 +386,13 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
+}
+
+@media (max-width: 480px) {
+    .drop-buttons-row .btn-primary,
+    .drop-buttons-row .btn-secondary {
+        width: 100%;
+    }
 }
 
 .hero-trust-bar {
