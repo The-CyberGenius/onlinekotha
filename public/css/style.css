@@ -3503,3 +3503,100 @@ html.dark .search-result-snippet {
     color: #e9edef;
 }
 
+/* ========================================================
+   MODERN CHAT & SIDEBAR FILTERS (Links, Media, Stickers, Dates)
+   ======================================================== */
+#chat-filter-bar {
+    min-height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    user-select: none;
+}
+html.dark #chat-filter-bar {
+    background: rgba(17, 27, 33, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.chat-filter-chip {
+    background: rgba(0, 0, 0, 0.04);
+    color: #4b5563;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+}
+html.dark .chat-filter-chip {
+    background: rgba(255, 255, 255, 0.05);
+    color: #9ca3af;
+    border-color: rgba(255, 255, 255, 0.09);
+}
+.chat-filter-chip:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #111827;
+    transform: translateY(-0.5px);
+}
+html.dark .chat-filter-chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f3f4f6;
+}
+.chat-filter-chip:active {
+    transform: scale(0.96);
+}
+.chat-filter-chip.active {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%) !important;
+    color: #ffffff !important;
+    border-color: #4338ca !important;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.28);
+}
+.chat-filter-chip.active .chip-count {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+
+/* Sidebar filter pill buttons */
+.sidebar-filter-btn {
+    background: #ffffff;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+html.dark .sidebar-filter-btn {
+    background: #1f2937;
+    color: #9ca3af;
+    border-color: #374151;
+}
+.sidebar-filter-btn:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+html.dark .sidebar-filter-btn:hover {
+    background: #374151;
+    color: #f9fafb;
+}
+.sidebar-filter-btn:active {
+    transform: scale(0.97);
+}
+.sidebar-filter-btn.active {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+    border-color: #4338ca !important;
+    box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
+}
+
+/* Jump highlight pulse animation */
+@keyframes jumpPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+    50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+}
+.jump-highlight {
+    animation: jumpPulse 1.8s ease-in-out;
+    background-color: rgba(99, 102, 241, 0.15) !important;
+    border-radius: 12px;
+}
+
+

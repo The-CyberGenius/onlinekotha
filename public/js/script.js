@@ -199,6 +199,45 @@ document.addEventListener('DOMContentLoaded', () => {
     window.getAllMessages = () => allMessages;
     let displayedMessages = [];
     let otherPersonName = "Contact";
+    let currentFilterType = 'all'; // 'all' | 'links' | 'media' | 'stickers'
+    let currentFilterDate = null;
+    let activeSenderFilter = null;
+
+    function isLinkMessage(msg) {
+        if (!msg || !msg.text) return false;
+        const text = msg.text;
+        return /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9.-]+\.(?:com|org|net|in|co|io|app|ai|me|ly|be|edu|gov)\b[^\s]*)/i.test(text);
+    }
+    window.isLinkMessage = isLinkMessage;
+
+    function isMediaMessage(msg) {
+        if (!msg) return false;
+        if (msg.attachment && msg.type !== 'system') return true;
+        if (msg.type === 'image' || msg.type === 'video' || msg.type === 'audio' || msg.type === 'document' || msg.type === 'media') return true;
+        if (msg.text) {
+            const t = msg.text.toLowerCase();
+            if (/<(image|video|audio|document|file):/i.test(t)) return true;
+            const mediaIndicators = [
+                'image omitted', 'video omitted', 'audio omitted', 'document omitted', 'photo omitted',
+                '.jpg', '.jpeg', '.png', '.mp4', '.mov', '.mp3', '.opus', '.m4a', '.pdf', '.docx'
+            ];
+            if (mediaIndicators.some(ext => t.includes(ext))) return true;
+        }
+        return false;
+    }
+    window.isMediaMessage = isMediaMessage;
+
+    function isStickerMessage(msg) {
+        if (!msg) return false;
+        if (msg.type === 'sticker') return true;
+        if (msg.text) {
+            const t = msg.text.toLowerCase();
+            if (/<sticker:/i.test(t)) return true;
+            if (t.includes('sticker omitted') || t.includes('.webp')) return true;
+        }
+        return false;
+    }
+    window.isStickerMessage = isStickerMessage;
     
     // Robust mobile check matching CSS exactly
     const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
@@ -499,8 +538,8 @@ document.addEventListener('DOMContentLoaded', () => {
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
         }[c]));
         
-        let processed = esc.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi, (url) => {
-            const href = url.toLowerCase().startsWith('www.') ? `http://${url}` : url;
+        let processed = esc.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+|[a-zA-Z0-9.-]+\.(?:com|org|net|in|co|io|app|ai|me|ly|be)\/[^\s<]*|[a-zA-Z0-9.-]+\.(?:com|org|net|in|co|io|app|ai|me|ly|be)\b)/gi, (url) => {
+            const href = url.toLowerCase().startsWith('http') ? url : (url.toLowerCase().startsWith('www.') ? `http://${url}` : `https://${url}`);
             return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="chat-link" onclick="event.stopPropagation()">${url}</a>`;
         });
         
@@ -726,7 +765,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (mode === 'reset' && (startIndex === -1 || endIndex === -1 || startIndex >= endIndex || displayedMessages.length === 0)) {
             lastRenderedDate = '';
-            chatContainer.innerHTML = '<div class="text-center py-12 text-sm text-gray-400 dark:text-gray-500 italic">No messages found matching current filters.</div>';
+            let icon = '🔍';
+            let title = 'No messages found';
+            let subtitle = 'No messages match your selected filter.';
+
+            if (currentFilterType === 'links') {
+                icon = '🔗';
+                title = 'No links found';
+                subtitle = 'None of the messages in this chat contain URLs or web links.';
+            } else if (currentFilterType === 'media') {
+                icon = '📷';
+                title = 'No media found';
+                subtitle = 'There are no photos, videos, or attachments in this chat.';
+            } else if (currentFilterType === 'stickers') {
+                icon = '✨';
+                title = 'No stickers found';
+                subtitle = 'No stickers were shared in this conversation.';
+            } else if (currentFilterDate) {
+                icon = '📅';
+                title = 'No messages on this date';
+                subtitle = `No messages found on ${currentFilterDate}.`;
+            }
+
+            chatContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-16 px-4 text-center max-w-sm mx-auto animate-fade-in" style="min-height: 350px;">
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 dark:text-indigo-400 flex items-center justify-center text-3xl mb-3.5 shadow-sm border border-indigo-100 dark:border-indigo-900/50">
+                        ${icon}
+                    </div>
+                    <h3 class="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">
+                        ${title}
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-5 leading-relaxed max-w-xs">
+                        ${subtitle}
+                    </p>
+                    <button type="button" onclick="if(window.clearChatFilters) window.clearChatFilters();" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                        <span>Show All Messages</span>
+                    </button>
+                </div>
+            `;
             renderStart = 0;
             renderEnd = 0;
             return;
@@ -1216,6 +1293,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterBar.classList.remove('hidden');
             }
 
+            // Show or hide in-chat quick filter bar
+            const chatFilterBar = document.getElementById('chat-filter-bar');
+            if (chatFilterBar) {
+                if (chatName === '__global__' || chatName === 'kotha_assistant') {
+                    chatFilterBar.classList.add('hidden');
+                } else {
+                    chatFilterBar.classList.remove('hidden');
+                }
+            }
+
             if (chatName === 'kotha_assistant') {
                 otherPersonName = 'Kotha Assistant';
                 const uName = (window.__USER__ && (window.__USER__.display_name || window.__USER__.email?.split('@')[0])) || 'You';
@@ -1526,139 +1613,156 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                // Populate Smart Filters (Years & Days)
-                const yearCounts = {};
-                const currentYearNum = new Date().getFullYear();
-                allMessages.forEach(msg => {
-                    if (!msg.date) return;
-                    const parts = msg.date.split(/[\/\-.]/);
-                    if (parts.length === 3) {
-                        let yRaw = parts[2].trim();
-                        if (parts[0].trim().length === 4) {
-                            yRaw = parts[0].trim(); // Handle YYYY-MM-DD
-                        }
-                        const fullY = yRaw.length === 2 ? 2000 + parseInt(yRaw) : parseInt(yRaw);
-                        if (!isNaN(fullY) && fullY >= 2009 && fullY <= currentYearNum + 1) {
-                            yearCounts[yRaw] = (yearCounts[yRaw] || 0) + 1;
-                        }
+                // Update and initialize smart filters
+                window.updateFilterCounts = function() {
+                    if (!allMessages || !allMessages.length) return;
+                    let linkCount = 0, mediaCount = 0, stickerCount = 0;
+                    for (let i = 0; i < allMessages.length; i++) {
+                        const m = allMessages[i];
+                        if (isLinkMessage(m)) linkCount++;
+                        if (isMediaMessage(m)) mediaCount++;
+                        if (isStickerMessage(m)) stickerCount++;
                     }
-                });
-                
-                const validYears = Object.keys(yearCounts).filter(y => {
-                    // Only include years that have a meaningful amount of messages, to filter out random parser mistakes
-                    return yearCounts[y] > 5 || yearCounts[y] >= Math.max(1, allMessages.length * 0.001);
-                });
+                    const elAll = document.getElementById('chip-count-all');
+                    const elLinks = document.getElementById('chip-count-links');
+                    const elMedia = document.getElementById('chip-count-media');
+                    const elStickers = document.getElementById('chip-count-stickers');
+                    if (elAll) elAll.textContent = allMessages.length.toLocaleString();
+                    if (elLinks) elLinks.textContent = linkCount.toLocaleString();
+                    if (elMedia) elMedia.textContent = mediaCount.toLocaleString();
+                    if (elStickers) elStickers.textContent = stickerCount.toLocaleString();
+                };
+                window.updateFilterCounts();
 
-                const yearSelect = document.getElementById('filter-year');
-                yearSelect.innerHTML = '<option value="">Year</option>';
-                validYears.sort().forEach(y => {
-                    const fullYear = y.length === 2 ? `20${y}` : (y.length === 4 ? y : null);
-                    if (fullYear) yearSelect.innerHTML += `<option value="${y}">${fullYear}</option>`;
-                });
-                const daySelect = document.getElementById('filter-day');
-                daySelect.innerHTML = '<option value="">Day</option>';
-                for (let i = 1; i <= 31; i++) {
-                    daySelect.innerHTML += `<option value="${i}">${i}</option>`;
-                }
-
-                // Smart Filters Logic — Apply button driven (no auto-change listeners)
-                const filterMonth = document.getElementById('filter-month');
-                const toggleMedia = document.getElementById('toggle-media');
-                const toggleStickers = document.getElementById('toggle-stickers');
-                const toggleLinks = document.getElementById('toggle-links');
-                const resetFiltersBtn = document.getElementById('reset-filters');
-                const applyFiltersBtn = document.getElementById('apply-filters-btn');
-
-                const applyFilters = () => {
-                    let anchorId = null;
-                    const msgs = document.querySelectorAll('.chat-message');
-                    for (let i = 0; i < msgs.length; i++) {
-                        const rect = msgs[i].getBoundingClientRect();
-                        if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
-                            anchorId = msgs[i].id.replace('msg-', '');
-                            break;
-                        }
-                    }
-                    if (!anchorId && msgs.length > 0) {
-                        anchorId = msgs[Math.floor(msgs.length/2)].id.replace('msg-', '');
+                // Unified filter setter
+                window.setChatFilter = function(type = 'all', dateStr = null) {
+                    currentFilterType = type || 'all';
+                    if (dateStr !== undefined) {
+                        currentFilterDate = dateStr;
                     }
 
-                    const d = daySelect.value;
-                    const m = filterMonth.value;
-                    const y = yearSelect.value;
-                    const showMedia = toggleMedia.checked;
-                    const showStickers = toggleStickers.checked;
-                    const showLinks = toggleLinks ? toggleLinks.checked : false;
-                    const hasDateFilter = !!(d || m || y);
+                    // Update in-chat pill buttons
+                    document.querySelectorAll('.chat-filter-chip').forEach(chip => {
+                        const cType = chip.getAttribute('data-filter-type');
+                        if (cType === currentFilterType) chip.classList.add('active');
+                        else chip.classList.remove('active');
+                    });
 
-                    if (hasDateFilter || !showMedia || !showStickers || showLinks) {
-                        resetFiltersBtn.classList.remove('hidden');
-                    } else {
-                        resetFiltersBtn.classList.add('hidden');
-                    }
+                    // Update sidebar filter buttons
+                    document.querySelectorAll('.sidebar-filter-btn').forEach(btn => {
+                        const bType = btn.getAttribute('data-type');
+                        if (bType === currentFilterType) btn.classList.add('active');
+                        else btn.classList.remove('active');
+                    });
 
-                    displayedMessages = allMessages.filter(msg => {
-                        // Respect active sender filter
-                        if (activeSenderFilter && msg.sender !== activeSenderFilter) return false;
-
-                        // Media Toggle (Mobile)
-                        if (window.__showOnlyMedia) {
-                            const isMedia = msg.attachment || (msg.text && ['.jpg', '.jpeg', '.png', '.mp4', '.mov', 'image omitted', 'video omitted', 'audio omitted', 'document omitted'].some(ext => msg.text.toLowerCase().includes(ext)));
-                            if (!isMedia) return false;
-                        }
-
-                        // Content check
-                        if (!showMedia && msg.attachment) return false;
-
-                        if (msg.text) {
-                            const text = msg.text.toLowerCase();
-
-                            if (showLinks) {
-                                if (!text.includes('http') && !text.includes('www.')) return false;
-                            }
-
-                            if (!showMedia) {
-                                const mediaExts = ['.jpg', '.jpeg', '.png', '.mp4', '.mov', 'image omitted', 'video omitted', 'audio omitted', 'document omitted'];
-                                if (mediaExts.some(ext => text.includes(ext))) return false;
-                            }
-
-                            if (!showStickers) {
-                                const stickerExts = ['.webp', 'sticker omitted'];
-                                if (stickerExts.some(ext => text.includes(ext))) return false;
-                            }
+                    // Update bottom bar Media button
+                    const isMedia = (currentFilterType === 'media');
+                    [document.getElementById('btn-media'), document.getElementById('btn-media-2')].forEach(btn => {
+                        if (!btn) return;
+                        if (isMedia) {
+                            btn.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
+                            btn.classList.remove('text-gray-500', 'dark:text-gray-400');
                         } else {
-                            if (showLinks) return false;
+                            btn.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
+                            btn.classList.add('text-gray-500', 'dark:text-gray-400');
                         }
+                    });
 
+                    const hasActiveFilter = (currentFilterType !== 'all' || !!currentFilterDate);
+                    const resetBtn = document.getElementById('reset-filters');
+                    if (resetBtn) {
+                        if (hasActiveFilter) resetBtn.classList.remove('hidden');
+                        else resetBtn.classList.add('hidden');
+                    }
+
+                    // Filter allMessages into displayedMessages
+                    displayedMessages = allMessages.filter(msg => {
+                        if (activeSenderFilter && msg.sender !== activeSenderFilter) return false;
+                        if (currentFilterType === 'links' && !isLinkMessage(msg)) return false;
+                        if (currentFilterType === 'media' && !isMediaMessage(msg)) return false;
+                        if (currentFilterType === 'stickers' && !isStickerMessage(msg)) return false;
+                        if (currentFilterDate) {
+                            const parsed = parseMsgDate(msg.date);
+                            if (!parsed) return false;
+                            const targetParts = currentFilterDate.split('-');
+                            if (targetParts.length === 3) {
+                                if (parsed.y !== parseInt(targetParts[0]) || parsed.mon !== parseInt(targetParts[1]) || parsed.day !== parseInt(targetParts[2])) return false;
+                            }
+                        }
                         return true;
                     });
 
-                    // Find index of the first message matching the date filter
-                    let targetIdx = -1;
-                    if (hasDateFilter) {
-                        targetIdx = displayedMessages.findIndex(msg => {
-                            if (!msg.date) return false;
-                            const parts = msg.date.split('/');
-                            if (parts.length === 3) {
-                                const msgM = parseInt(parts[datePartsOrder.monthIdx]);
-                                const msgD = parseInt(parts[datePartsOrder.dayIdx]);
-                                const msgY = parts[2];
-
-                                if (m && msgM !== parseInt(m)) return false;
-                                if (d && msgD !== parseInt(d)) return false;
-                                if (y && msgY !== y) return false;
-                                return true;
-                            }
-                            return false;
-                        });
+                    // Subheader active filter badge
+                    const badgeWrap = document.getElementById('chat-filter-badge');
+                    const badgeText = document.getElementById('chat-filter-badge-text');
+                    if (badgeWrap && badgeText) {
+                        if (hasActiveFilter) {
+                            badgeWrap.classList.remove('hidden');
+                            let label = '';
+                            if (currentFilterType === 'links') label = `${displayedMessages.length.toLocaleString()} links`;
+                            else if (currentFilterType === 'media') label = `${displayedMessages.length.toLocaleString()} media`;
+                            else if (currentFilterType === 'stickers') label = `${displayedMessages.length.toLocaleString()} stickers`;
+                            if (currentFilterDate) label += (label ? ' · ' : '') + currentFilterDate;
+                            badgeText.textContent = label;
+                        } else {
+                            badgeWrap.classList.add('hidden');
+                        }
                     }
 
-                    renderChats(-1, -1); // Clear UI
-
+                    renderChats(-1, -1);
                     if (displayedMessages.length > 0) {
-                        if (hasDateFilter && targetIdx !== -1) {
-                            // Date matches, render chunk centered around it
-                            const start = Math.max(0, targetIdx - 30);
+                        const end = displayedMessages.length;
+                        const start = Math.max(0, end - CHUNK_SIZE);
+                        renderChats(start, end, 'reset');
+                        setTimeout(() => { if (scrollArea) scrollArea.scrollTop = scrollArea.scrollHeight; }, 20);
+                        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> ${currentFilterType === 'all' ? 'messages' : currentFilterType}.`;
+                    } else {
+                        renderChats(-1, -1, 'reset');
+                        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">0</span> messages.`;
+                    }
+                };
+
+                window.clearChatFilters = function() {
+                    currentFilterType = 'all';
+                    currentFilterDate = null;
+                    const dateInput = document.getElementById('filter-date-input');
+                    if (dateInput) dateInput.value = '';
+                    window.setChatFilter('all', null);
+                };
+
+                const resetFiltersBtn = document.getElementById('reset-filters');
+                if (resetFiltersBtn) {
+                    resetFiltersBtn.onclick = () => window.clearChatFilters();
+                }
+
+                // Jump to date handler
+                const jumpDateBtn = document.getElementById('jump-to-date-btn');
+                const filterDateInput = document.getElementById('filter-date-input');
+                if (jumpDateBtn && filterDateInput) {
+                    jumpDateBtn.onclick = () => {
+                        const val = filterDateInput.value;
+                        if (!val) {
+                            if (window.kothaToast) window.kothaToast('Select a date first');
+                            return;
+                        }
+                        const parts = val.split('-');
+                        if (parts.length !== 3) return;
+                        const targetY = parseInt(parts[0]);
+                        const targetM = parseInt(parts[1]);
+                        const targetD = parseInt(parts[2]);
+
+                        if (currentFilterType !== 'all') {
+                            window.setChatFilter('all', null);
+                        }
+
+                        const targetIdx = displayedMessages.findIndex(msg => {
+                            const parsed = parseMsgDate(msg.date);
+                            if (!parsed) return false;
+                            return parsed.y === targetY && parsed.mon === targetM && parsed.day === targetD;
+                        });
+
+                        if (targetIdx !== -1) {
+                            const start = Math.max(0, targetIdx - 25);
                             const end = Math.min(displayedMessages.length, start + CHUNK_SIZE);
                             renderChats(start, end, 'reset');
                             setTimeout(() => {
@@ -1667,74 +1771,54 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (targetEl) {
                                     targetEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
                                     targetEl.classList.add('jump-highlight');
-                                    setTimeout(() => {
-                                        targetEl.classList.remove('jump-highlight');
-                                    }, 2500);
+                                    setTimeout(() => targetEl.classList.remove('jump-highlight'), 2500);
                                 }
-                            }, 80);
-                            statsInfo.innerHTML = `Jumped to date. Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> total messages.`;
+                            }, 100);
+                            statsInfo.innerHTML = `Jumped to <span class="font-bold text-indigo-600 dark:text-indigo-400">${val}</span>.`;
+                            if (typeof window.closeMobileFilterModal === 'function') window.closeMobileFilterModal();
+                            toggleSidebar(false);
                         } else {
-                            if (anchorId && !hasDateFilter) {
-                                const aidx = displayedMessages.findIndex(m => m.id == anchorId);
-                                if (aidx !== -1) {
-                                    const start = Math.max(0, aidx - 30);
-                                    const end = Math.min(displayedMessages.length, start + CHUNK_SIZE);
-                                    renderChats(start, end, 'reset');
-                                    setTimeout(() => {
-                                        const targetEl = document.getElementById(`msg-${anchorId}`);
-                                        if (targetEl) {
-                                            targetEl.scrollIntoView({ block: 'center' });
-                                        }
-                                    }, 80);
-                                    statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> messages.`;
-                                    toggleSidebar(false);
-                                    return;
-                                }
-                            }
-                            // Default: show newest messages at bottom
-                            const end = displayedMessages.length;
-                            renderChats(Math.max(0, end - CHUNK_SIZE), end, 'reset');
-                            setTimeout(() => { scrollArea.scrollTop = scrollArea.scrollHeight; }, 10);
-
-                            if (hasDateFilter && targetIdx === -1) {
-                                statsInfo.innerHTML = `<span class="text-red-500 font-semibold">No messages found on that date.</span> Showing all ${displayedMessages.length.toLocaleString()} messages.`;
-                            } else {
-                                statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">${displayedMessages.length.toLocaleString()}</span> messages.`;
-                            }
+                            if (window.kothaToast) window.kothaToast('No messages found on ' + val);
+                            else statsInfo.innerHTML = `<span class="text-amber-500 font-semibold">No messages found on ${val}</span>`;
                         }
-                    } else {
-                        statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">0</span> messages.`;
-                    }
-
-                    // Close sidebar on mobile after applying
-                    toggleSidebar(false);
-                    if (typeof window.closeMobileFilterModal === 'function') {
-                        window.closeMobileFilterModal();
-                    }
-                };
-
-                // Apply button — single click to filter
-                if (applyFiltersBtn) {
-                    applyFiltersBtn.onclick = applyFilters;
+                    };
                 }
 
-                // NO auto-change listeners on dropdowns — only the Apply button triggers filtering
-                // Checkboxes still auto-apply since they're simple toggles
-                [toggleMedia, toggleStickers, toggleLinks].forEach(el => {
-                    if (el) el.onchange = applyFilters;
-                });
+                // Global delegator for filter chips & buttons
+                if (!window._kothaFilterClicksBound) {
+                    window._kothaFilterClicksBound = true;
+                    document.addEventListener('click', (e) => {
+                        const chip = e.target.closest('.chat-filter-chip');
+                        if (chip) {
+                            const type = chip.getAttribute('data-filter-type');
+                            if (type) {
+                                if (currentFilterType === type && type !== 'all') {
+                                    window.setChatFilter('all');
+                                } else {
+                                    window.setChatFilter(type);
+                                }
+                            }
+                            return;
+                        }
 
-                if (resetFiltersBtn) {
-                    resetFiltersBtn.onclick = () => {
-                        if (daySelect) daySelect.value = ''; 
-                        if (filterMonth) filterMonth.value = ''; 
-                        if (yearSelect) yearSelect.value = '';
-                        if (toggleMedia) toggleMedia.checked = true; 
-                        if (toggleStickers) toggleStickers.checked = true;
-                        if (toggleLinks) toggleLinks.checked = false;
-                        
-                        applyFilters();
-                    };
+                        const sBtn = e.target.closest('.sidebar-filter-btn');
+                        if (sBtn) {
+                            const type = sBtn.getAttribute('data-type');
+                            if (type) {
+                                if (currentFilterType === type && type !== 'all') {
+                                    window.setChatFilter('all');
+                                } else {
+                                    window.setChatFilter(type);
+                                }
+                            }
+                            return;
+                        }
+
+                        if (e.target.closest('#chat-filter-badge-clear')) {
+                            window.clearChatFilters();
+                            return;
+                        }
+                    });
                 }
 
                 // Check if user has selected who they are in this chat
@@ -3311,24 +3395,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.kothaToast) window.kothaToast('Open a chat first');
             return;
         }
-        
-        window.__showOnlyMedia = !window.__showOnlyMedia;
-        
-        [btnMedia, btnMedia2].forEach(btn => {
-            if (btn) {
-                if (window.__showOnlyMedia) {
-                    btn.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
-                    btn.classList.remove('text-gray-500', 'dark:text-gray-400');
-                } else {
-                    btn.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
-                    btn.classList.add('text-gray-500', 'dark:text-gray-400');
-                }
-            }
-        });
-        
-        const applyFiltersBtn = document.getElementById('apply-filters-btn');
-        if (applyFiltersBtn) applyFiltersBtn.click();
-        
+        if (typeof window.setChatFilter === 'function') {
+            window.setChatFilter(currentFilterType === 'media' ? 'all' : 'media');
+        }
         toggleSidebar(false);
     };
     if (btnMedia) btnMedia.addEventListener('click', openMediaGallery);
@@ -4362,16 +4431,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetId = btn.getAttribute('data-target');
 
             if (targetId === 'btn-media') {
-                window.__showOnlyMedia = !window.__showOnlyMedia;
-                if (window.__showOnlyMedia) {
-                    btn.classList.add('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
-                    btn.classList.remove('text-gray-500', 'dark:text-gray-400');
-                } else {
-                    btn.classList.remove('text-indigo-600', 'dark:text-indigo-400', 'bg-indigo-50', 'dark:bg-indigo-900/30');
-                    btn.classList.add('text-gray-500', 'dark:text-gray-400');
+                if (!currentChat || currentChat === '__global__' || !allMessages.length) {
+                    if (window.kothaToast) window.kothaToast('Open a chat first');
+                    return;
                 }
-                const applyFiltersBtn = document.getElementById('apply-filters-btn');
-                if (applyFiltersBtn) applyFiltersBtn.click();
+                if (typeof window.setChatFilter === 'function') {
+                    window.setChatFilter(currentFilterType === 'media' ? 'all' : 'media');
+                }
                 if (fab && isMenuOpen) fab.click();
                 return;
             }

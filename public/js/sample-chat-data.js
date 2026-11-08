@@ -15,7 +15,7 @@
         { date: '2024-03-15', time: '05:48 PM', sender: 'Alex', text: 'Classic "bas 5 min" 😂 No rush, traffic is light anyway.' },
         { date: '2024-03-15', time: '05:52 PM', sender: 'Sarah', text: 'Coming down now! Haha ❤️' },
         { date: '2024-03-15', time: '11:42 PM', sender: 'Sarah', text: 'That concert was unreal!! That guitar solo at the end 🔥' },
-        { date: '2024-03-15', time: '11:44 PM', sender: 'Alex', text: 'Right?! Best live set I’ve seen this entire year.' },
+        { date: '2024-03-15', time: '11:44 PM', sender: 'Alex', text: 'Right?! Look at this clip from the front row: https://youtube.com/watch?v=concert_solo 🔥' },
         { date: '2024-03-15', time: '11:46 PM', sender: 'Sarah', text: 'Thanks for driving us back! Reach home safe.' },
         { date: '2024-03-15', time: '11:48 PM', sender: 'Alex', text: 'Just parked. Good night Sarah! 🌙' },
 
@@ -30,15 +30,15 @@
         { date: '2024-04-02', time: '04:16 PM', sender: 'Alex', text: 'LETS GOOO!! Told you!! So proud of you!! 🥳' },
         { date: '2024-04-02', time: '04:18 PM', sender: 'Sarah', text: 'Dinner is on me tonight! Pizza? 🍕' },
         { date: '2024-04-02', time: '04:19 PM', sender: 'Alex', text: 'You don’t even have to ask twice. 8 PM at Luigi’s?' },
-        { date: '2024-04-02', time: '04:20 PM', sender: 'Sarah', text: 'Done! Deal sealed 🤝' },
+        { date: '2024-04-02', time: '04:20 PM', sender: 'Sarah', text: 'Done! Deal sealed 🤝 Check out their menu: https://luigispizza.com/menu' },
 
-        { date: '2024-05-18', time: '02:14 PM', sender: 'Alex', text: 'Look at this dog I saw at the cafe today 🐶' },
-        { date: '2024-05-18', time: '02:15 PM', sender: 'Sarah', text: 'OMGGG STOP!! What breed is that?? 😭❤️' },
+        { date: '2024-05-18', time: '02:14 PM', sender: 'Alex', text: 'Look at this dog I saw at the cafe today 🐶 <image: golden_puppy.jpg>' },
+        { date: '2024-05-18', time: '02:15 PM', sender: 'Sarah', text: 'OMGGG STOP!! What breed is that?? 😭❤️ <sticker: heart_eyes.webp>' },
         { date: '2024-05-18', time: '02:16 PM', sender: 'Alex', text: 'Golden retriever puppy! Literally stole everyone’s attention.' },
         { date: '2024-05-18', time: '02:18 PM', sender: 'Sarah', text: 'We need an office dog urgently.' },
 
         { date: '2024-06-25', time: '01:35 AM', sender: 'Alex', text: 'Are we still planning the road trip next month?' },
-        { date: '2024-06-25', time: '01:36 AM', sender: 'Sarah', text: '100%! I already made a Spotify playlist with 200 songs 🎧' },
+        { date: '2024-06-25', time: '01:36 AM', sender: 'Sarah', text: '100%! I already made a Spotify playlist with 200 songs: https://open.spotify.com/playlist/roadtrip2024 🎧' },
         { date: '2024-06-25', time: '01:38 AM', sender: 'Alex', text: 'Haha please tell me there is 90s rock on it.' },
         { date: '2024-06-25', time: '01:40 AM', sender: 'Sarah', text: 'Half of it is 90s rock, the other half is pop nostalgia. You’re going to love it.' },
         { date: '2024-06-25', time: '01:42 AM', sender: 'Alex', text: 'Approved! Peak night-owl planning right here 🦉' },
