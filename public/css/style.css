@@ -3599,4 +3599,23 @@ html.dark .sidebar-filter-btn:hover {
     border-radius: 12px;
 }
 
+/* Floating Date Positioning with Filter Bar */
+#floating-date {
+    top: 114px !important;
+}
+#chat-filter-bar.hidden ~ #floating-date {
+    top: 72px !important;
+}
+
+/* Hide duplicate header inside mobile filter modal */
+#mobile-filter-modal #smart-filters-container > div:first-child {
+    display: none !important;
+}
+#mobile-filter-modal #smart-filters-container {
+    border-bottom: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+
 

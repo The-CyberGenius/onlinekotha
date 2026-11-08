@@ -1720,6 +1720,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderChats(-1, -1, 'reset');
                         statsInfo.innerHTML = `Showing <span class="font-bold text-indigo-600 dark:text-indigo-400">0</span> messages.`;
                     }
+
+                    if (typeof window.closeMobileFilterModal === 'function') {
+                        window.closeMobileFilterModal();
+                    }
                 };
 
                 window.clearChatFilters = function() {
