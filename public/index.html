@@ -2270,8 +2270,24 @@
         }
 
         #demo-chat-frame {
+            display: none;
+            flex-direction: column !important;
+            box-sizing: border-box !important;
             transform-origin: bottom right !important;
             /* Mobile default */
+        }
+
+        #demo-form {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            flex-shrink: 0 !important;
+            height: 48px !important;
+            max-height: 48px !important;
+        }
+
+        #hero-chat {
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         @media (min-width: 768px) {
@@ -3750,7 +3766,7 @@
     <div id="floating-assistant-widget"
         style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none;opacity:0;transform:translateY(20px);transition:all 0.3s ease;">
         <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
-            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid var(--border);">
+            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;flex-direction:column !important;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid var(--border);">
             <div class="mobile-sheet-handle"></div>
             <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
                 style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
@@ -3883,6 +3899,7 @@
                     }
                     if (chatFrame) {
                         chatFrame.style.display = 'flex';
+                        chatFrame.style.flexDirection = 'column';
                         void chatFrame.offsetWidth;
                         chatFrame.style.opacity = '1';
                         chatFrame.style.pointerEvents = 'auto';
