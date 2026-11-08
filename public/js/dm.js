@@ -1492,6 +1492,9 @@
     }
 
     // ── External triggers ─────────────────────────────────────
+    window.kothaShowDmTab = showDmTab;
+    window.kothaShowChatsTab = showChatsTab;
+
     document.getElementById('btn-dm')?.addEventListener('click', () => {
         if(window.kothaSidebarOpen) window.kothaSidebarOpen();
         showDmTab();

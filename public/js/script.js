@@ -123,14 +123,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
     
-    // Auto-trigger import modal if action=import is in URL (only if NOT viewing assistant and NOT auth flow)
+    // Auto-trigger demo or import modal from URL
     const actionParam = urlParams.get('action');
     const chatParam = urlParams.get('chat');
     const authParam = urlParams.get('auth');
-    if (actionParam === 'import' && chatParam !== 'kotha_assistant' && !authParam) {
+    const demoParam = urlParams.get('demo') || (actionParam === 'demo') || (chatParam === 'sample_demo');
+
+    if (demoParam) {
+        setTimeout(() => {
+            if (typeof window.openSampleChat === 'function') window.openSampleChat();
+        }, 350);
+    } else if (actionParam === 'import' && chatParam !== 'kotha_assistant' && !authParam) {
         setTimeout(() => {
             const openUploadBtn = document.getElementById('open-upload-btn');
             if (openUploadBtn) openUploadBtn.click();
+            else if (typeof window.openUploadModal === 'function') window.openUploadModal();
         }, 500);
     }
 
@@ -1138,6 +1145,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         ];
                     }
                     window._chatMsgCache[chatName] = data;
+                } else if (window.__SAMPLE_CHAT_DATA__ && (chatName === window.__SAMPLE_CHAT_DATA__.name || chatName === 'sample_demo' || chatName.includes('Sample Chat'))) {
+                    data = window.__SAMPLE_CHAT_DATA__.messages;
+                    myName = window.__SAMPLE_CHAT_DATA__.myName;
+                    otherPersonName = window.__SAMPLE_CHAT_DATA__.contactName;
+                    window._chatMsgCache[chatName] = data;
+                    if (!window._chatMetaCache) window._chatMetaCache = {};
+                    window._chatMetaCache[chatName] = {
+                        contactName: otherPersonName,
+                        isGroup: false,
+                        lastMessage: data[data.length - 1].text,
+                        lastTime: data[data.length - 1].time
+                    };
                 } else {
                     const resp = await fetch(`/api/messages?chat=${encodeURIComponent(chatName)}`);
                     data = await resp.json();
@@ -2304,16 +2323,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
                 <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 max-w-[260px] leading-relaxed mb-5">Select a chat from the sidebar, or import a new one to start talking with AI.</p>
 
-                <!-- Import + DM Buttons -->
-                <div class="flex flex-wrap items-center justify-center gap-2.5 w-full max-w-[280px] mx-auto mb-5">
-                    <button id="empty-upload-btn" class="flex-1 min-w-[120px] whitespace-nowrap bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-[12px] rounded-xl px-4 py-2.5 transition-all shadow-md flex items-center justify-center gap-1.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                        Import Chat
+                <!-- Import + Try Demo + DM Buttons -->
+                <div class="flex flex-col gap-2 w-full max-w-[280px] mx-auto mb-5">
+                    <button id="empty-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-[13px] rounded-xl px-4 py-2.5 transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        Upload WhatsApp Chat
                     </button>
-                    <button id="empty-dm-btn" class="flex-1 min-w-[120px] whitespace-nowrap bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[12px] rounded-xl px-4 py-2.5 transition-all hover:bg-indigo-50 dark:hover:bg-indigo-900/20 active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Message Someone
-                    </button>
+                    <div class="flex items-center gap-2 w-full">
+                        <button id="empty-demo-btn" class="flex-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1 cursor-pointer">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            Try Sample Chat
+                        </button>
+                        <button id="empty-dm-btn" class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1 cursor-pointer">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Direct Message
+                        </button>
+                    </div>
                 </div>
 
                 ${!isPro ? `
@@ -2360,11 +2385,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.addEventListener('click', () => {
             const openUploadBtn = document.getElementById('open-upload-btn');
             if (openUploadBtn) openUploadBtn.click();
+            else if (typeof window.openUploadModal === 'function') window.openUploadModal();
+        });
+        const demoBtn = document.getElementById('empty-demo-btn');
+        if (demoBtn) demoBtn.addEventListener('click', () => {
+            if (typeof window.openSampleChat === 'function') window.openSampleChat();
         });
         const dmBtn = document.getElementById('empty-dm-btn');
         if (dmBtn) dmBtn.addEventListener('click', () => {
-            const btnDm = document.getElementById('btn-dm');
-            if (btnDm) btnDm.click();
+            const tabDmBtn = document.getElementById('tab-dm-btn');
+            if (tabDmBtn) tabDmBtn.click();
+            else if (typeof window.kothaShowDmTab === 'function') window.kothaShowDmTab();
+            if (isMobile() || window.kothaCompact) {
+                toggleSidebar(true);
+            }
         });
         const proBtn = document.getElementById('empty-pro-btn');
         if (proBtn) proBtn.addEventListener('click', () => {
@@ -2399,6 +2433,48 @@ document.addEventListener('DOMContentLoaded', () => {
             filterBar.classList.remove('hidden');
         }
     }
+
+    window.showEmptyState = showEmptyState;
+    window.removeEmptyState = removeEmptyState;
+
+    window.openSampleChat = function() {
+        localStorage.setItem('kotha_onboarded', '1');
+        const onboardingOverlay = document.getElementById('onboarding-overlay');
+        if (onboardingOverlay) onboardingOverlay.remove();
+
+        if (window.installSampleChat) window.installSampleChat();
+        const sampleName = window.__SAMPLE_CHAT_DATA__ ? window.__SAMPLE_CHAT_DATA__.name : 'Sample Chat (Sarah & Alex)';
+        currentChat = sampleName;
+        window.currentChat = sampleName;
+        localStorage.setItem("kotha_active_chat", sampleName);
+
+        if (!loadedChats.includes(sampleName)) {
+            loadedChats.unshift(sampleName);
+        }
+        renderChatList(loadedChats, currentChat);
+        removeEmptyState();
+        loadData(sampleName);
+        if (isMobile() || window.kothaCompact) {
+            toggleSidebar(false);
+        }
+
+        // Add subtle floating demo banner if not already present
+        if (!document.getElementById('sample-demo-floating-banner')) {
+            const banner = document.createElement('div');
+            banner.id = 'sample-demo-floating-banner';
+            banner.className = 'w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[12px] font-medium py-2 px-3 text-center flex items-center justify-center gap-2 shadow-md relative z-40';
+            banner.innerHTML = `
+                <span>💡 You're exploring the live sample chat (Sarah &amp; Alex)!</span>
+                <button onclick="if(window.openUploadModal) window.openUploadModal();" class="bg-white text-indigo-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] hover:bg-indigo-50 shadow-sm cursor-pointer ml-1">
+                    Upload Your Chat
+                </button>
+            `;
+            const mainPanel = document.getElementById('main-panel');
+            if (mainPanel && mainPanel.firstChild) {
+                mainPanel.insertBefore(banner, mainPanel.firstChild);
+            }
+        }
+    };
 
     const chatSelector = document.getElementById('chat-selector');
     if (chatSelector) {
@@ -2535,14 +2611,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const dots = steps.map((_, i) => `<div class="onboarding-step-dot ${i === step ? 'active' : ''}"></div>`).join('');
             const isLast = step === steps.length - 1;
             document.getElementById('onboarding-overlay').innerHTML = `
-                <div class="onboarding-card">
-                    <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mx-auto mb-5">${s.icon}</div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">${s.title}</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed mb-6 max-w-xs mx-auto">${s.desc}</p>
+                <div class="onboarding-card relative bg-white dark:bg-[#1f2c34] border border-gray-100 dark:border-white/10 shadow-2xl">
+                    <button id="onboard-close" class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition cursor-pointer" title="Close">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                    <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center mx-auto mb-5">${s.icon}</div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">${s.title}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6 max-w-xs mx-auto">${s.desc}</p>
                     <div class="flex items-center justify-center gap-2 mb-5">${dots}</div>
                     <div class="flex gap-3 justify-center">
-                        <button id="onboard-skip" class="text-sm text-gray-400 hover:text-gray-600 font-medium px-4 py-2 transition">${isLast ? '' : 'Skip'}</button>
-                        <button id="onboard-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl px-6 py-2.5 transition shadow-sm">${isLast ? 'Get Started!' : 'Next'}</button>
+                        <button id="onboard-skip" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium px-4 py-2 transition cursor-pointer">${isLast ? '' : 'Skip'}</button>
+                        <button id="onboard-next" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl px-6 py-2.5 transition shadow-sm cursor-pointer">${isLast ? 'Get Started!' : 'Next'}</button>
                     </div>
                 </div>
             `;
@@ -2553,6 +2632,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const skipBtn = document.getElementById('onboard-skip');
             if (skipBtn) skipBtn.addEventListener('click', closeOnboarding);
+            const closeBtn = document.getElementById('onboard-close');
+            if (closeBtn) closeBtn.addEventListener('click', closeOnboarding);
         }
 
         function closeOnboarding() {
@@ -2564,6 +2645,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.createElement('div');
         overlay.id = 'onboarding-overlay';
         overlay.className = 'onboarding-overlay';
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeOnboarding();
+        });
         document.body.appendChild(overlay);
         renderStep();
     }
@@ -4032,10 +4116,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseup', stopDragging);
         window.addEventListener('blur', stopDragging);
 
-        // Double-click titlebar to toggle fullscreen
+        // Double-click titlebar to toggle fullscreen / maximize
         titlebar.addEventListener('dblclick', (e) => {
-            if (e.target.closest('button')) return;
-            document.getElementById('mac-fullscreen').click();
+            if (e.target.closest('button, a, input, select, label, #mac-traffic-lights, #mac-titlebar-admin-controls')) return;
+            toggleExpand();
         });
 
         // --- Traffic light buttons ---
@@ -4044,6 +4128,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const fsBtn = document.getElementById('mac-fullscreen');
         const dock = document.getElementById('mac-dock');
         const dockIcon = document.getElementById('dock-kotha-icon');
+
+        // Dynamic titlebar title updater
+        window.updateMacTitle = function(title) {
+            const el = document.getElementById('mac-titlebar-title');
+            if (el) {
+                el.textContent = title ? ('Kotha — ' + title) : 'OnlineKotha';
+            }
+        };
 
         // Ensure dock follows CSS (desktop flex, mobile hidden unless impersonating)
         if (dock) {
@@ -4101,23 +4193,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 450);
         }
 
+        let savedWindowState = null;
+
+        function toggleExpand() {
+            const isFs = frame.classList.toggle('mac-fullscreen');
+            frame.classList.toggle('mac-expanded', isFs);
+            document.body.classList.toggle('p-0', isFs);
+
+            if (isFs) {
+                savedWindowState = {
+                    left: frame.style.left,
+                    top: frame.style.top,
+                    width: frame.style.width,
+                    height: frame.style.height
+                };
+                resetPosition();
+                if (dock) dock.style.setProperty('display', 'none', 'important');
+            } else {
+                if (dock) dock.style.removeProperty('display');
+                if (savedWindowState && savedWindowState.width && parseInt(savedWindowState.width) > 300) {
+                    frame.style.position = 'absolute';
+                    frame.style.left = savedWindowState.left;
+                    frame.style.top = savedWindowState.top;
+                    frame.style.width = savedWindowState.width;
+                    frame.style.height = savedWindowState.height;
+                    frame.style.margin = '0';
+                    clampFrameInViewport();
+                } else {
+                    userHasDragged = false;
+                    userHasResized = false;
+                    resetPosition();
+                    centerFrame();
+                }
+            }
+            requestAnimationFrame(syncOverlay);
+        }
+
         if (closeBtn) closeBtn.addEventListener('click', () => {
             window.location.href = '/';
         });
         if (minBtn) minBtn.addEventListener('click', genieMinimize);
-        if (fsBtn) fsBtn.addEventListener('click', () => {
-            const isFs = frame.classList.toggle('mac-fullscreen');
-            if (isFs) {
-                resetPosition();
-                if (dock) dock.style.setProperty('display', 'none', 'important');
-            } else {
-                userHasDragged = false;
-                userHasResized = false;
-                if (dock) dock.style.removeProperty('display');
-                centerFrame();
-            }
-            requestAnimationFrame(syncOverlay);
-        });
+        if (fsBtn) fsBtn.addEventListener('click', toggleExpand);
+        window.toggleMacExpand = toggleExpand;
 
         // Dock icon click toggles minimize/restore
         if (dockIcon) dockIcon.addEventListener('click', () => {

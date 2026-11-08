@@ -683,6 +683,20 @@ button,
 }
 
 @media (max-width: 767px) {
+    body.app-shell {
+        padding: 0 !important;
+    }
+    #mac-frame {
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        max-width: none !important;
+        max-height: none !important;
+        width: 100vw !important;
+        height: 100% !important;
+        margin: 0 !important;
+        transform: none !important;
+    }
     /* When impersonating on mobile, adjust layout to show dock below toolbar (only when not fullscreen/expanded) */
     body.impersonating-mobile-dock:not(:has(#mac-frame.mac-fullscreen)):not(:has(#mac-frame.mac-expanded)) #app {
         height: calc(100% - 75px - env(safe-area-inset-bottom, 0px));

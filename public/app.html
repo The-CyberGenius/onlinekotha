@@ -45,6 +45,22 @@
         html.dark body {
             background-color: #0c1317 !important;
         }
+        @media (max-width: 767px) {
+            body.app-shell {
+                padding: 0 !important;
+            }
+            #mac-frame {
+                border-radius: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                max-width: none !important;
+                max-height: none !important;
+                width: 100vw !important;
+                height: 100% !important;
+                margin: 0 !important;
+                transform: none !important;
+            }
+        }
         @media (max-height: 480px) {
             #mac-dock {
                 display: none !important;
@@ -126,11 +142,11 @@
                 <button id="mac-minimize" class="w-3 h-3 rounded-full bg-[#febc2e] hover:brightness-90 transition border border-black/10 relative group" title="Minimize">
                     <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#995700]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><path d="M5 12h14"/></svg>
                 </button>
-                <button id="mac-fullscreen" class="w-3 h-3 rounded-full bg-[#28c840] hover:brightness-90 transition border border-black/10 relative group" title="Toggle Fullscreen inside app" onclick="window.toggleMacExpand && window.toggleMacExpand()">
+                <button id="mac-fullscreen" class="w-3 h-3 rounded-full bg-[#28c840] hover:brightness-90 transition border border-black/10 relative group" title="Toggle Fullscreen inside app">
                     <svg class="w-2 h-2 absolute inset-0 m-auto opacity-0 group-hover:opacity-100 text-[#006500]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M16 21h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
                 </button>
             </div>
-            <span class="absolute left-1/2 -translate-x-1/2 text-[12px] text-gray-400 font-semibold tracking-tight pointer-events-none">KothaChat</span>
+            <span id="mac-titlebar-title" class="absolute left-1/2 -translate-x-1/2 text-[12px] text-gray-400 font-semibold tracking-tight pointer-events-none truncate max-w-[200px]">OnlineKotha</span>
             <!-- Impersonation controls in titlebar (visible when impersonating on desktop) -->
             <div id="mac-titlebar-admin-controls" class="ml-auto hidden items-center gap-2 z-10"></div>
         </div>
@@ -1066,6 +1082,14 @@
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                         100% Private. Encrypted locally, never sold.
                     </div>
+
+                    <!-- 1-Click Demo Trigger in Modal -->
+                    <div class="mt-2.5 text-center">
+                        <button type="button" id="modal-sample-chat-btn" class="text-[11.5px] text-indigo-600 dark:text-indigo-400 font-semibold hover:underline cursor-pointer inline-flex items-center gap-1.5 transition">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            Don't have an export ready? Try Live Demo (1-Click)
+                        </button>
+                    </div>
                     
                     <input type="file" id="file-input-zip" accept=".zip,.txt" class="hidden">
                     <input type="file" id="file-input-folder" webkitdirectory directory multiple class="hidden">
@@ -1144,6 +1168,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="/js/sample-chat-data.js?v=2"></script>
     <script src="/js/ai-panel.js?v=60"></script>
     <script src="/js/script.js?v=73"></script>
     <script src="/js/upload.js?v=65"></script>
@@ -1652,61 +1677,6 @@
 
 
         
-        // Draggable & Inside-Viewport Expansion for macOS Window Titlebar
-        (function initMacFrameDragAndExpand() {
-            const titlebar = document.getElementById('mac-titlebar');
-            const frame = document.getElementById('mac-frame');
-            if (!titlebar || !frame) return;
-
-            let savedWindowState = null;
-
-            // Expand / Maximize toggle inside app viewport
-            window.toggleMacExpand = function() {
-                const isExp = frame.classList.toggle('mac-expanded');
-                document.body.classList.toggle('p-0');
-                const dock = document.getElementById('mac-dock');
-
-                if (isExp) {
-                    savedWindowState = {
-                        left: frame.style.left,
-                        top: frame.style.top,
-                        width: frame.style.width,
-                        height: frame.style.height
-                    };
-                    frame.style.removeProperty('transform');
-                    frame.style.removeProperty('top');
-                    frame.style.removeProperty('left');
-                    frame.style.removeProperty('width');
-                    frame.style.removeProperty('height');
-                    frame.style.removeProperty('position');
-                    if (dock) dock.style.setProperty('display', 'none', 'important');
-                } else {
-                    if (dock) dock.style.removeProperty('display');
-                    if (savedWindowState && savedWindowState.width && savedWindowState.height && parseInt(savedWindowState.width) > 300) {
-                        frame.style.position = 'absolute';
-                        frame.style.left = savedWindowState.left;
-                        frame.style.top = savedWindowState.top;
-                        frame.style.width = savedWindowState.width;
-                        frame.style.height = savedWindowState.height;
-                        frame.style.margin = '0';
-                        if (typeof window.clampMacFrame === 'function') {
-                            window.clampMacFrame();
-                        }
-                    } else if (typeof window.centerMacFrame === 'function') {
-                        window.centerMacFrame();
-                    }
-                }
-                if (typeof window.syncMacOverlay === 'function') {
-                    window.syncMacOverlay();
-                }
-            };
-
-            titlebar.addEventListener('dblclick', (e) => {
-                if (e.target.closest('#mac-traffic-lights, #mac-titlebar-admin-controls, button, a, input, select, label')) return;
-                window.toggleMacExpand();
-            });
-        })();
-
         // Extra lock to prevent body scroll
         document.body.addEventListener('touchmove', function(e) {
             if (e.target.closest('.overflow-y-auto, .overflow-x-auto, textarea, input')) return;

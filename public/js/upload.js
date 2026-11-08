@@ -230,6 +230,16 @@
         }
     });
 
+    const modalSampleBtn = document.getElementById('modal-sample-chat-btn');
+    if (modalSampleBtn) {
+        modalSampleBtn.addEventListener('click', () => {
+            closeModal();
+            if (typeof window.openSampleChat === 'function') {
+                window.openSampleChat();
+            }
+        });
+    }
+
     pickZipBtn.addEventListener('click', () => fileInputZip.click());
     pickFolderBtn.addEventListener('click', () => fileInputFolder.click());
 
