@@ -106,8 +106,7 @@
         }
         const banner = document.createElement('div');
         banner.id = 'pwa-install-banner';
-        banner.style.zIndex = '100005';
-        banner.className = 'fixed z-[100005] bottom-4 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-[320px] max-w-[360px] mx-auto bg-gray-950/95 dark:bg-[#161f26]/95 backdrop-blur-xl text-white rounded-2xl p-2.5 sm:p-3 shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex items-center gap-2.5 border border-white/15 animate-apple-spring';
+        banner.className = 'bg-gray-950/95 dark:bg-[#161f26]/95 backdrop-blur-xl text-white rounded-2xl p-2.5 sm:p-3 shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex items-center gap-2.5 border border-white/15 animate-apple-spring';
         banner.innerHTML = `
             <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-1 flex items-center justify-center shrink-0 shadow-sm">
                 <img src="/img/logo.svg" alt="Logo" class="w-full h-full object-contain drop-shadow">
@@ -172,8 +171,7 @@
         }
         const banner = document.createElement('div');
         banner.id = 'ios-install-banner';
-        banner.style.zIndex = '100005';
-        banner.className = 'fixed z-[100005] bottom-4 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-[320px] max-w-[360px] mx-auto bg-zinc-950/95 dark:bg-[#161f26]/95 backdrop-blur-xl text-white rounded-2xl p-2.5 sm:p-3 shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex flex-col gap-2 border border-white/15 animate-apple-spring';
+        banner.className = 'bg-zinc-950/95 dark:bg-[#161f26]/95 backdrop-blur-xl text-white rounded-2xl p-2.5 sm:p-3 shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex flex-col gap-2 border border-white/15 animate-apple-spring';
         banner.innerHTML = `
             <div class="flex items-center gap-2.5 w-full">
                 <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 p-1 flex items-center justify-center shrink-0 shadow-sm">
