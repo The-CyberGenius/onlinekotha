@@ -2133,6 +2133,7 @@
                                 ? `<span class="badge" style="background:rgba(16,185,129,0.18); color:#10b981; border:1px solid rgba(16,185,129,0.45); font-weight:800; font-size:11px; padding:2px 7px;">📁 ${chatCount} Chat${chatCount !== 1 ? 's' : ''} Uploaded</span>`
                                 : '<span style="color:var(--text-muted); font-size:11px;">No chats</span>';
                             const durationBadge = `<span class="badge" style="background:rgba(245,158,11,0.14); color:#f59e0b; border:1px solid rgba(245,158,11,0.35); font-weight:700; font-size:11px;">⏱️ ${u.formatted_duration || '0s'}</span>`;
+                            const adminInspectBadge = u.admin_inspected_at ? `<div style="display:inline-flex;align-items:center;gap:3px;background:rgba(192,132,252,0.14);border:1px solid rgba(192,132,252,0.35);color:var(--accent);font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;margin-top:2px;"><span>🛡️</span> Admin: ${new Date(u.admin_inspected_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>` : '';
                             const cInfo = u.country_info || { name: 'Unknown', flag: '🌐' };
                             const locStr = `${cInfo.flag} ${cInfo.name}`;
                             const createdDate = u.created_at ? new Date(u.created_at).toLocaleString() : 'Recently';
@@ -2153,7 +2154,7 @@
                                     </td>
                                     <td style="font-size:12px; font-weight:500;">${locStr}</td>
                                     <td style="font-size:11px; color:var(--text-muted);">${createdDate}</td>
-                                    <td>${durationBadge}</td>
+                                    <td>${durationBadge}${adminInspectBadge}</td>
                                     <td>${chatBadge}</td>
                                     <td style="font-size:11px; color:var(--text-secondary); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${landing}${ref}">${landing}${ref}</td>
                                     <td style="text-align:right;">

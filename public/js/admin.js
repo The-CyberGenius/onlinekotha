@@ -992,7 +992,12 @@ HARD RULES
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Location</div><div style="font-size:11px;color:var(--text-secondary);">' + loc + '</div></div>';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">' + (isGuestSection ? 'First Seen' : 'Joined') + '</div><div style="font-size:11px;color:var(--text-secondary);">' + (u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently') + '</div></div>';
                 html += '</div>';
-                if (u.last_active_at) html += '<div style="font-size:10px;color:var(--text-muted);margin-top:6px;">Active: ' + formatDateTime(u.last_active_at) + '</div>';
+                if (u.last_active_at) html += '<div style="font-size:11px;color:var(--text-primary);font-weight:500;margin-top:6px;">User Active: ' + formatDateTime(u.last_active_at) + '</div>';
+                if (u.is_being_inspected) {
+                    html += '<div style="font-size:10px;color:var(--accent);font-weight:800;margin-top:2px;">👁️ Admin Inspecting Now</div>';
+                } else if (u.admin_inspected_at) {
+                    html += '<div style="font-size:10px;color:var(--accent);font-weight:700;margin-top:2px;">🛡️ Admin Activity: ' + formatDateTime(u.admin_inspected_at) + '</div>';
+                }
 
                 html += '<div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;">';
                 if (!u.is_admin) {
@@ -1050,7 +1055,15 @@ HARD RULES
                     const onlineDot = u.is_online ? '<span class="status-dot" title="Online" style="margin-left:6px;box-shadow:0 0 8px #10b981;"></span><span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:5px;letter-spacing:0.02em;">ONLINE</span>' : '';
                     const avatarHtml = `<div class="user-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-weight:700;">G</div>`;
                     const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
-                    const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
+                    
+                    let adminBadge = '';
+                    if (u.is_being_inspected) {
+                        adminBadge = `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(192,132,252,0.22);border:1px solid var(--accent);color:var(--accent);font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;margin-top:3px;box-shadow:0 0 8px rgba(192,132,252,0.3);"><span style="font-size:11px;">👁️</span> Admin Inspecting Now</div>`;
+                    } else if (u.admin_inspected_at) {
+                        adminBadge = `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(192,132,252,0.14);border:1px solid rgba(192,132,252,0.38);color:var(--accent);font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:3px;" title="Last inspected by admin at this time"><span style="font-size:11px;">🛡️</span> Admin Activity: ${formatDateTime(u.admin_inspected_at)}</div>`;
+                    }
+
+                    const userActive = u.last_active_at ? `<span class="meta-text" style="color:var(--text-primary);font-weight:500;">User Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No user activity</span>';
                     const hasChats = (Number(u.chat_count) || 0) > 0;
                     const rowStyle = hasChats ? 'style="background:rgba(16,185,129,0.06);border-left:3px solid #10b981;"' : '';
 
@@ -1064,7 +1077,7 @@ HARD RULES
                     }
 
                     html += `<td>${ipCountry}</td>`;
-                    html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Created: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
+                    html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Created: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${userActive}${adminBadge}</td>`;
                     const guestCC = Number(u.chat_count) || 0;
                     const chatsBtnStyle = hasChats 
                         ? 'padding:4px 8px;font-size:11px;font-weight:800;color:#10b981;border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.14);' 
@@ -1084,7 +1097,15 @@ HARD RULES
                     const onlineDot = u.is_online ? '<span class="status-dot" title="Online" style="margin-left:6px;box-shadow:0 0 8px #10b981;"></span><span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:5px;letter-spacing:0.02em;">ONLINE</span>' : '';
                     const phoneStr = u.phone ? `<a href="tel:${u.phone_country_code || ''}${u.phone}" style="color:var(--text-primary);text-decoration:none;">${u.phone_country_code ? u.phone_country_code + ' ' : ''}${u.phone}</a>` : `<span style="color:var(--text-muted);">No phone</span>`;
                     const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
-                    const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
+                    
+                    let adminBadge = '';
+                    if (u.is_being_inspected) {
+                        adminBadge = `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(192,132,252,0.22);border:1px solid var(--accent);color:var(--accent);font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;margin-top:3px;box-shadow:0 0 8px rgba(192,132,252,0.3);"><span style="font-size:11px;">👁️</span> Admin Inspecting Now</div>`;
+                    } else if (u.admin_inspected_at) {
+                        adminBadge = `<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(192,132,252,0.14);border:1px solid rgba(192,132,252,0.38);color:var(--accent);font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;margin-top:3px;" title="Last inspected by admin at this time"><span style="font-size:11px;">🛡️</span> Admin Activity: ${formatDateTime(u.admin_inspected_at)}</div>`;
+                    }
+
+                    const userActive = u.last_active_at ? `<span class="meta-text" style="color:var(--text-primary);font-weight:500;">User Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No user activity</span>';
                     const costStr = Number(u.total_cost || 0).toFixed(3);
                     const suspendBtn = u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-suspend-btn btn-subtle" style="padding:4px 7px;font-size:11px;color:${u.is_suspended ? '#10b981' : '#f59e0b'};border-color:${u.is_suspended ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'};" title="${u.is_suspended ? 'Unsuspend Account' : 'Suspend Account'}">${u.is_suspended ? 'Unsuspend' : 'Suspend'}</button>`;
                     const hasChats = (Number(u.chat_count) || 0) > 0;
@@ -1101,7 +1122,7 @@ HARD RULES
 
                     html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${costStr}</span></td>`;
                     html += `<td>${ipCountry}</td>`;
-                    html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
+                    html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${userActive}${adminBadge}</td>`;
                     const regCC = Number(u.chat_count) || 0;
                     const chatsBtnStyle = hasChats 
                         ? 'padding:4px 8px;font-size:11px;font-weight:800;color:#10b981;border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.14);' 

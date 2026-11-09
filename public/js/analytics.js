@@ -72,6 +72,12 @@
     // Main tracking function exposed globally
     window.trackKothaEvent = async function(event_type, metadata = {}) {
         try {
+            // Never track admin visits, admin impersonations, or admin pages
+            if (window.location.pathname.startsWith('/admin')) return;
+            if (window.__USER__ && (window.__USER__.is_admin || window.__USER__.original_admin_id || window.__USER__.is_impersonating)) return;
+            if (document.cookie.includes('admin_impersonate_uid=')) return;
+            if (localStorage.getItem('kotha_is_admin') === 'true') return;
+
             const visitor_id = getVisitorId();
             const session_id = getSessionId();
             const utm = getUTMParams();

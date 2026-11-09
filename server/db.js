@@ -342,6 +342,8 @@ safeAddColumn('routes', 'fallback_model_id_3', 'INTEGER');
 safeAddColumn("routes", "fallback_model_id_4", "INTEGER");
 safeAddColumn("routes", "fallback_model_id_5", "INTEGER");
 safeAddColumn('guest_sessions', 'last_ai_date', 'TEXT');
+safeAddColumn('guest_sessions', 'admin_inspected_at', 'INTEGER');
+safeAddColumn('users', 'admin_inspected_at', 'INTEGER');
 
 try { db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL').run(); } catch {}
 

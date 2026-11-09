@@ -28,14 +28,31 @@ router.post('/event', express.json(), (req, res) => {
             return res.status(400).json({ error: 'Missing visitor_id or event_type' });
         }
 
-        // Never count admin visits in public website activity metrics
+        // Never count admin visits or admin impersonations in public website activity metrics
+        if (req.user && (req.user.is_admin || req.user.original_admin_id || req.user.is_impersonating)) {
+            return res.status(200).json({ success: true, skipped: true, reason: 'admin_user' });
+        }
+        if (req.cookies && req.cookies.admin_impersonate_uid) {
+            return res.status(200).json({ success: true, skipped: true, reason: 'admin_impersonating' });
+        }
+        if (metadata && (metadata.is_admin || metadata.is_impersonating)) {
+            return res.status(200).json({ success: true, skipped: true, reason: 'admin_metadata' });
+        }
         if (page && (page === '/admin.html' || page === '/admin' || page.startsWith('/admin'))) {
-            return res.status(200).json({ success: true, skipped: true });
+            return res.status(200).json({ success: true, skipped: true, reason: 'admin_page' });
         }
 
         const now = Date.now();
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '';
         const realIp = ip.split(',')[0].trim();
+
+        // Also skip if IP matches any known admin IP
+        try {
+            const adminIps = db.prepare("SELECT DISTINCT ip_address FROM users WHERE is_admin = 1 AND ip_address IS NOT NULL AND ip_address != ''").all().map(r => r.ip_address);
+            if (realIp && adminIps.includes(realIp)) {
+                return res.status(200).json({ success: true, skipped: true, reason: 'admin_ip' });
+            }
+        } catch (e) {}
         
         let country = 'Unknown';
         let country_code = 'XX';

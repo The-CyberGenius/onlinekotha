@@ -535,17 +535,20 @@ router.get('/users', (req, res) => {
         `SELECT u.id, u.email, u.plan, u.trial_expires_at, u.created_at, u.is_admin,
                 COALESCE(u.is_suspended, 0) AS is_suspended,
                 u.google_id, u.display_name, u.avatar_url, u.ip_address, u.country, u.last_active_at,
-                u.phone, u.phone_country_code,
+                u.phone, u.phone_country_code, u.admin_inspected_at,
                 (SELECT COUNT(*) FROM chats WHERE user_id = u.id) AS chat_count,
                 (SELECT COALESCE(SUM(cost_usd), 0) FROM usage_log WHERE user_id = u.id) AS total_cost
          FROM users u
          WHERE u.id > 0 AND u.plan != 'guest' AND u.email != 'guest@onlinekotha.com' AND u.email NOT LIKE '%guest%'`
     ).all();
     
+    const activeImpersonateUid = req.cookies && req.cookies.admin_impersonate_uid;
+
     users.forEach(u => {
         u.is_guest = false;
         u.is_suspended = Boolean(u.is_suspended);
         u.total_cost = Number(u.total_cost || 0);
+        u.is_being_inspected = Boolean(activeImpersonateUid && String(activeImpersonateUid) === String(u.id));
     });
 
     const onlineUsers = req.app.locals.onlineUsers;
@@ -590,8 +593,21 @@ router.get('/users', (req, res) => {
         }
     } catch (e) {}
 
-    // Fetch ALL guest sessions so newly created guest sessions show up instantly
-    const guests = db.prepare(`SELECT id, ip as ip_address, created_at, updated_at as last_active_at, chats_imported, ai_messages_count FROM guest_sessions`).all();
+    // Find known admin IPs to purge accidental empty guest sessions created by admin visits
+    try {
+        const adminIps = db.prepare("SELECT DISTINCT ip_address FROM users WHERE is_admin = 1 AND ip_address IS NOT NULL AND ip_address != ''").all().map(r => r.ip_address);
+        for (const aIp of adminIps) {
+            db.prepare(`
+                DELETE FROM guest_sessions 
+                WHERE ip = ? 
+                  AND (SELECT COUNT(*) FROM chats WHERE guest_id = guest_sessions.id) = 0
+                  AND COALESCE(ai_messages_count, 0) = 0
+            `).run(aIp);
+        }
+    } catch (e) {}
+
+    // Fetch ALL guest sessions
+    const guests = db.prepare(`SELECT id, ip as ip_address, created_at, updated_at as last_active_at, chats_imported, ai_messages_count, admin_inspected_at FROM guest_sessions`).all();
     
     const guestUsers = [];
     guests.forEach(g => {
@@ -621,6 +637,8 @@ router.get('/users', (req, res) => {
             trial_expires_at: null,
             created_at: g.created_at,
             last_active_at: g.last_active_at || g.created_at,
+            admin_inspected_at: g.admin_inspected_at || null,
+            is_being_inspected: Boolean(activeImpersonateUid && String(activeImpersonateUid) === String(g.id)),
             chat_count: guestChatCount,
             ai_messages_count: g.ai_messages_count || 0,
             total_cost: 0,
@@ -929,6 +947,19 @@ router.get('/impersonate/start', (req, res) => {
 
     const IS_PROD = process.env.NODE_ENV === 'production';
     res.cookie('admin_impersonate_uid', uid, { httpOnly: true, path: '/' });
+
+    // Mark as admin inspected immediately
+    const now = Date.now();
+    try {
+        if (String(uid).startsWith('gst_')) {
+            db.prepare('UPDATE guest_sessions SET admin_inspected_at = ? WHERE id = ?').run(now, String(uid));
+        } else {
+            const numUid = Number(uid);
+            if (numUid > 0) {
+                db.prepare('UPDATE users SET admin_inspected_at = ? WHERE id = ?').run(now, numUid);
+            }
+        }
+    } catch (e) {}
 
     // When impersonating a guest session, ensure the guest cookie matches so all guest APIs align
     if (String(uid).startsWith('gst_')) {

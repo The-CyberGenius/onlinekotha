@@ -21,6 +21,13 @@ function getOrCreateGuestId(req, res) {
     if (req.cookies && req.cookies.admin_impersonate_uid && String(req.cookies.admin_impersonate_uid).startsWith('gst_')) {
         return String(req.cookies.admin_impersonate_uid);
     }
+    // If authenticated user or admin (and not impersonating a guest): NEVER treat them as guest or create guest session!
+    if (req.user && (req.user.id > 0 || req.user.is_admin) && !req.user.is_impersonating) {
+        if (res && req.cookies && req.cookies.kotha_guest_id) {
+            res.clearCookie('kotha_guest_id', { path: '/' });
+        }
+        return null;
+    }
     let guestId = req.cookies && req.cookies.kotha_guest_id;
     if (!guestId) {
         guestId = 'gst_' + crypto.randomBytes(16).toString('hex');
@@ -38,7 +45,8 @@ function getOrCreateGuestId(req, res) {
     return guestId;
 }
 
-function getGuestRecord(guestId, ip, fp) {
+function getGuestRecord(guestId, ip, fp, isImpersonating = false) {
+    if (!guestId) return null;
     const now = Date.now();
     const today = new Date().toISOString().slice(0, 10);
     let row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
@@ -48,17 +56,48 @@ function getGuestRecord(guestId, ip, fp) {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `).run(guestId, ip, fp, 0, 0, today, now, now);
         row = db.prepare('SELECT * FROM guest_sessions WHERE id = ?').get(guestId);
+    } else if (isImpersonating) {
+        // Admin is inspecting: record admin_inspected_at, NEVER overwrite guest's original IP or updated_at!
+        db.prepare('UPDATE guest_sessions SET admin_inspected_at = ? WHERE id = ?').run(now, guestId);
+        row.admin_inspected_at = now;
     } else {
+        // Real guest: update IP and updated_at
         db.prepare('UPDATE guest_sessions SET updated_at = ?, ip = COALESCE(?, ip), fingerprint = COALESCE(?, fingerprint) WHERE id = ?').run(now, ip, fp, guestId);
     }
     return row;
 }
 
 function getGuestStatus(req, res) {
+    // If authenticated user or admin browsing as themselves: NEVER generate guest session or cookie!
+    if (req.user && (req.user.id > 0 || req.user.is_admin) && !req.user.is_impersonating) {
+        if (res && req.cookies && req.cookies.kotha_guest_id) {
+            res.clearCookie('kotha_guest_id', { path: '/' });
+        }
+        return {
+            guestId: null,
+            chatsImported: 0,
+            maxChats: 999,
+            canImportChat: true,
+            aiMsgsUsed: 0,
+            maxAiMsgs: 999,
+            canUseAI: true,
+            chatsRemaining: 999,
+            aiMsgsRemaining: 999,
+            isUser: true,
+            isAdmin: Boolean(req.user.is_admin)
+        };
+    }
+
+    const isImpersonating = Boolean(
+        (req.user && req.user.is_impersonating) ||
+        (req.cookies && req.cookies.admin_impersonate_uid)
+    );
     const guestId = getOrCreateGuestId(req, res);
+    if (!guestId) return null;
+
     const ip = getClientIp(req);
     const fp = getFingerprint(req);
-    const record = getGuestRecord(guestId, ip, fp);
+    const record = getGuestRecord(guestId, ip, fp, isImpersonating);
 
     const actualChats = db.prepare('SELECT COUNT(*) AS c FROM chats WHERE guest_id = ? AND (deleted_by_user = 0 OR deleted_by_user IS NULL)').get(guestId)?.c || 0;
     const GUEST_MAX_CHATS = Number(getSetting('guest_max_chats', '1'));
@@ -85,7 +124,9 @@ function getGuestStatus(req, res) {
 }
 
 function recordGuestChatImport(req, res) {
+    if (req.user && req.user.is_impersonating) return;
     const guestId = getOrCreateGuestId(req, res);
+    if (!guestId) return;
     const ip = getClientIp(req);
     const fp = getFingerprint(req);
     getGuestRecord(guestId, ip, fp);
@@ -95,7 +136,9 @@ function recordGuestChatImport(req, res) {
 }
 
 function recordGuestAIMessage(req, res) {
+    if (req.user && req.user.is_impersonating) return;
     const guestId = getOrCreateGuestId(req, res);
+    if (!guestId) return;
     const ip = getClientIp(req);
     const fp = getFingerprint(req);
     const record = getGuestRecord(guestId, ip, fp);

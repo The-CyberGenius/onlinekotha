@@ -205,7 +205,7 @@ function authMiddleware(req, res, next) {
             } else {
                 const targetUid = Number(rawUid);
                 const targetUser = db.prepare(
-                    'SELECT id, email, plan, trial_expires_at, is_admin, is_suspended, display_name, avatar_url, last_active_at, phone, phone_country_code, phone_prompted FROM users WHERE id = ?'
+                    'SELECT id, email, plan, trial_expires_at, is_admin, is_suspended, display_name, avatar_url, last_active_at, phone, phone_country_code, phone_prompted, admin_inspected_at FROM users WHERE id = ?'
                 ).get(targetUid);
                 if (targetUser) {
                     req.user = {
@@ -221,8 +221,15 @@ function authMiddleware(req, res, next) {
                     req.user.original_admin_id = session.user.id;
                 }
             }
-            // Update admin's own activity time, NEVER the impersonated user's
+            // Record admin inspection timestamp on target account & update admin's own activity time (never the user's)
             const now = Date.now();
+            try {
+                if (String(rawUid).startsWith('gst_')) {
+                    db.prepare('UPDATE guest_sessions SET admin_inspected_at = ? WHERE id = ?').run(now, rawUid);
+                } else if (Number(rawUid) > 0) {
+                    db.prepare('UPDATE users SET admin_inspected_at = ? WHERE id = ?').run(now, Number(rawUid));
+                }
+            } catch (e) {}
             if (!session.user.last_active_at || (now - session.user.last_active_at) > 5 * 60 * 1000) {
                 try {
                     db.prepare('UPDATE users SET last_active_at = ? WHERE id = ?').run(now, session.user.id);
