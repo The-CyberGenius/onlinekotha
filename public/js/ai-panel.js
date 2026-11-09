@@ -867,7 +867,7 @@
                             <div class="glass-chat-them rounded-2xl p-4 max-w-[85%] border border-indigo-500/30 bg-indigo-500/10 text-center shadow-lg">
                                 <div class="text-sm font-bold text-indigo-400 mb-1">✨ Sarah &amp; Alex Demo Limit Reached (5/5)</div>
                                 <p class="text-xs text-gray-300 dark:text-gray-300 mb-3 leading-relaxed">You've reached the free demo limit! Ready to relive your real memories and chat with your own WhatsApp contacts?</p>
-                                <button onclick="document.getElementById('upload-modal') ? document.getElementById('upload-modal').classList.remove('hidden') : window.location.href='/app?action=import'" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer">
+                                <button type="button" data-action="open-upload" onclick="if(typeof window.openUploadModal === 'function'){ window.openUploadModal(); } else { document.getElementById('open-upload-btn')?.click(); }" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                                     Upload Your WhatsApp Chat
                                 </button>

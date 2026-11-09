@@ -2564,7 +2564,7 @@ document.addEventListener('DOMContentLoaded', () => {
             banner.className = 'w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[12px] font-medium py-2 px-3 text-center flex items-center justify-center gap-2 shadow-md relative z-40';
             banner.innerHTML = `
                 <span>💡 You're exploring the live sample chat (Sarah &amp; Alex)!</span>
-                <button onclick="if(window.openUploadModal) window.openUploadModal();" class="bg-white text-indigo-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] hover:bg-indigo-50 shadow-sm cursor-pointer ml-1">
+                <button type="button" data-action="open-upload" onclick="if(typeof window.openUploadModal === 'function') { window.openUploadModal(); } else { document.getElementById('open-upload-btn')?.click(); }" class="bg-white text-indigo-700 font-bold px-2.5 py-0.5 rounded-full text-[11px] hover:bg-indigo-50 shadow-sm cursor-pointer ml-1">
                     Upload Your Chat
                 </button>
             `;

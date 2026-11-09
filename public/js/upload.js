@@ -51,19 +51,41 @@
                 return;
             }
         }
-        modal.classList.remove('hidden');
-        requestAnimationFrame(() => modal.classList.remove('opacity-0'));
-        resetUI();
+        const m = document.getElementById('upload-modal');
+        if (m) {
+            m.classList.remove('hidden');
+            m.style.setProperty('display', 'flex', 'important');
+            void m.offsetHeight;
+            m.classList.remove('opacity-0');
+            resetUI();
+        }
     }
+    window.openUploadModal = openModal;
 
     function closeModal() {
         if (processingTicker) {
             clearInterval(processingTicker);
             processingTicker = null;
         }
-        modal.classList.add('opacity-0');
-        setTimeout(() => modal.classList.add('hidden'), 200);
+        const m = document.getElementById('upload-modal');
+        if (m) {
+            m.classList.add('opacity-0');
+            setTimeout(() => {
+                m.classList.add('hidden');
+                m.style.display = 'none';
+            }, 200);
+        }
     }
+    window.closeUploadModal = closeModal;
+
+    // Global click listener for any upload trigger
+    document.addEventListener('click', (e) => {
+        const trigger = e.target.closest('#open-upload-btn, .kotha-cute-upload-btn, [data-action="open-upload"], .btn-open-upload');
+        if (trigger) {
+            e.preventDefault();
+            openModal();
+        }
+    });
 
     function resetUI() {
         if (processingTicker) {
