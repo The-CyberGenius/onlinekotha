@@ -942,36 +942,475 @@
             aspect-ratio: 1024 / 341;
         }
 
-        /* ── Phone Mockup (Chat Wrapped Story Cards) ── */
+        /* ── Phone Mockup & 3D Time Capsule Presentation ── */
         .mockup-wrapper {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-top: 40px;
+            position: relative;
         }
 
+        /* ── HUD Status Bar ── */
+        .vault-hud {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            z-index: 15;
+            transition: all 0.3s ease;
+            animation: hudFloat 4s ease-in-out infinite alternate;
+        }
+        html.dark .vault-hud {
+            background: rgba(24, 24, 27, 0.75);
+            border-color: rgba(255, 255, 255, 0.12);
+            color: #f8fafc;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        @keyframes hudFloat {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-4px); }
+        }
+        .hud-beacon {
+            position: relative;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+        .hud-beacon::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1.5px solid #10b981;
+            animation: beaconPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes beaconPing {
+            0% { transform: scale(0.6); opacity: 1; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+        .hud-counter {
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+        html.dark .hud-counter {
+            color: #a5b4fc;
+        }
+        .hud-badge {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.05em;
+        }
 
+        /* ── Presentation Wrapper ── */
+        .vault-presentation-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* ── Breathing Ambient Aura ── */
+        .vault-ambient-aura {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 480px;
+            height: 700px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at 50% 40%, rgba(139, 92, 246, 0.45) 0%, rgba(245, 158, 11, 0.22) 35%, rgba(16, 185, 129, 0.32) 65%, transparent 75%);
+            filter: blur(60px);
+            z-index: 1;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: auraBreathing 4.5s ease-in-out infinite alternate;
+            transition: all 0.4s ease;
+        }
+        @keyframes auraBreathing {
+            0% {
+                transform: translate(-50%, -50%) scale(0.88);
+                opacity: 0.55;
+                filter: blur(55px);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.12);
+                opacity: 0.95;
+                filter: blur(75px) hue-rotate(25deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0.96);
+                opacity: 0.7;
+                filter: blur(60px) hue-rotate(-20deg);
+            }
+        }
+
+        /* ── Orbiting Stardust Rings ── */
+        .vault-orbit-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 1px dashed rgba(99, 102, 241, 0.16);
+            pointer-events: none;
+            z-index: 2;
+        }
+        .orbit-ring-1 {
+            width: 430px;
+            height: 430px;
+            animation: spinRing 24s linear infinite;
+        }
+        .orbit-ring-2 {
+            width: 550px;
+            height: 550px;
+            border-color: rgba(236, 72, 153, 0.12);
+            animation: spinRing 36s linear infinite reverse;
+        }
+        @keyframes spinRing {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* ── Phone Mockup Chassis ── */
         .phone-mockup {
             position: relative;
-            width: 310px;
-            /* Refined width */
-            height: 640px;
-            border-radius: 54px;
-            /* Smoother curve */
-            background: #111;
-            padding: 12px;
+            width: 330px;
+            height: 590px;
+            border-radius: 52px;
+            background: #0f0f17;
+            padding: 11px;
             box-shadow:
-                0 0 0 2px #333,
-                0 0 0 4px #1a1a1a,
-                0 40px 100px -20px rgba(0, 0, 0, 0.6),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+                0 0 0 2px #3a3a4c,
+                0 0 0 4px #181824,
+                0 25px 60px -15px rgba(124, 58, 237, 0.42),
+                0 40px 100px -20px rgba(0, 0, 0, 0.85),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.15);
             overflow: hidden;
             display: flex;
             flex-direction: column;
             z-index: 10;
             transform: perspective(1000px) rotateX(2deg);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+            animation: phoneLevitate 5s ease-in-out infinite alternate;
+        }
+        @keyframes phoneLevitate {
+            0% {
+                transform: perspective(1000px) rotateX(2deg) translateY(0px);
+            }
+            50% {
+                transform: perspective(1000px) rotateX(0deg) translateY(-14px);
+            }
+            100% {
+                transform: perspective(1000px) rotateX(2deg) translateY(0px);
+            }
+        }
+        .phone-mockup:hover {
+            animation-play-state: paused;
+            transform: perspective(1000px) rotateX(0deg) translateY(-8px) scale(1.02);
+            box-shadow:
+                0 0 0 2px #6366f1,
+                0 0 0 4px #1e1b4b,
+                0 35px 80px -10px rgba(99, 102, 241, 0.6),
+                0 50px 120px -20px rgba(0, 0, 0, 0.9),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+        }
+
+        .phone-screen {
+            border-radius: 42px;
+            overflow: hidden;
+            position: relative;
+            background: #080812;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Mockup View Panes */
+        .mockup-view-pane {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        #mockup-view-vault {
+            z-index: 5;
+        }
+        #mockup-view-wrapped {
+            z-index: 6;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .phone-screen img.vault-bg-img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            display: block;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* ── Holographic Glass Shimmer Sweep ── */
+        .vault-shimmer-sweep {
+            position: absolute;
+            inset: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                115deg,
+                transparent 35%,
+                rgba(255, 255, 255, 0.05) 45%,
+                rgba(255, 255, 255, 0.22) 50%,
+                rgba(255, 255, 255, 0.05) 55%,
+                transparent 65%
+            );
+            transform: rotate(25deg);
+            pointer-events: none;
+            z-index: 25;
+            animation: shimmerSweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        @keyframes shimmerSweep {
+            0%, 25% { transform: translateY(-70%) rotate(25deg); opacity: 0; }
+            30% { opacity: 1; }
+            55%, 100% { transform: translateY(70%) rotate(25deg); opacity: 0; }
+        }
+
+        /* ── Active Loading Sparkles & Hourglass Stream ── */
+        .hourglass-stream-container {
+            position: absolute;
+            top: 41%;
+            left: 50%;
+            width: 20px;
+            height: 88px;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 20;
+            overflow: hidden;
+        }
+        .sand-drop {
+            position: absolute;
+            width: 3.5px;
+            height: 6px;
+            border-radius: 999px;
+            background: #fbbf24;
+            box-shadow: 0 0 6px #f59e0b, 0 0 10px #fbbf24;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: sandFall 1.4s infinite cubic-bezier(0.55, 0.055, 0.675, 0.19);
+        }
+        .sand-drop:nth-child(1) { animation-delay: 0s; left: 45%; }
+        .sand-drop:nth-child(2) { animation-delay: 0.25s; left: 52%; }
+        .sand-drop:nth-child(3) { animation-delay: 0.5s; left: 48%; }
+        .sand-drop:nth-child(4) { animation-delay: 0.75s; left: 54%; }
+        .sand-drop:nth-child(5) { animation-delay: 1.0s; left: 47%; }
+        .sand-drop:nth-child(6) { animation-delay: 1.25s; left: 51%; }
+
+        @keyframes sandFall {
+            0% { top: 0%; opacity: 0; transform: translateX(-50%) scale(0.6); }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { top: 100%; opacity: 0; transform: translateX(-50%) scale(1.4); }
+        }
+
+        /* ── Pedestal Warm Hearth Glow ── */
+        .pedestal-glow {
+            position: absolute;
+            top: 59%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 48px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(251, 191, 36, 0.35) 0%, rgba(245, 158, 11, 0.15) 50%, transparent 75%);
+            filter: blur(10px);
+            pointer-events: none;
+            z-index: 15;
+            animation: pedestalBreathe 3s ease-in-out infinite alternate;
+        }
+        @keyframes pedestalBreathe {
+            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.95; }
+        }
+
+        /* ── Live Micro Indicators over Cards ── */
+        /* Top-left: 100% Secure Memory Vault */
+        .vault-live-dot {
+            position: absolute;
+            top: 31.8%;
+            left: 20.8%;
+            width: 6.5px;
+            height: 6.5px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            z-index: 22;
+        }
+        .vault-live-dot::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 1.5px solid #10b981;
+            animation: beaconPing 2s infinite;
+        }
+
+        /* Top-right: Smart AI Message Recall spinner */
+        .ai-spinner-radar {
+            position: absolute;
+            top: 26.2%;
+            right: 9.8%;
+            width: 14px;
+            height: 14px;
+            border: 1.8px solid rgba(168, 85, 247, 0.25);
+            border-top-color: #c084fc;
+            border-radius: 50%;
+            animation: spinRing 1.2s linear infinite;
+            z-index: 22;
+        }
+
+        /* Bottom-left: Time Capsule Preservation Loading Progress Bar */
+        .time-capsule-bar {
+            position: absolute;
+            top: 54.4%;
+            left: 9.3%;
+            width: 22.5%;
+            height: 3.5px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+            z-index: 22;
+        }
+        .time-capsule-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24, #10b981);
+            border-radius: 999px;
+            animation: capsuleBarFill 3.5s ease-in-out infinite;
+        }
+        @keyframes capsuleBarFill {
+            0% { width: 10%; }
+            50% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        /* ── Clickable CTA Overlay ("Start Preserving >") ── */
+        .vault-cta-link {
+            position: absolute;
+            top: 86.2%;
+            left: 12.8%;
+            width: 74.4%;
+            height: 52px;
+            border-radius: 999px;
+            z-index: 30;
+            text-decoration: none;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: block;
+        }
+        .vault-cta-link:hover {
+            transform: scale(1.025);
+        }
+        .vault-cta-shine {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+            transform: translateX(-100%);
+            animation: ctaShine 3s infinite;
+        }
+        @keyframes ctaShine {
+            0%, 40% { transform: translateX(-100%); }
+            60%, 100% { transform: translateX(100%); }
+        }
+
+        /* ── Interactive Controls Dock ── */
+        .vault-controls-dock {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 22px;
+            z-index: 15;
+            flex-wrap: wrap;
+        }
+        .dock-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        }
+        html.dark .dock-btn {
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        }
+        .dock-btn:hover, .dock-btn.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+            border-color: transparent !important;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+            transform: translateY(-2px);
+        }
+        .dock-btn.pulse-trigger:active {
+            transform: scale(0.92);
+        }
+
+        /* ── Turbo Pulse Crazy Mode ── */
+        .turbo-active .vault-ambient-aura {
+            transform: translate(-50%, -50%) scale(1.35) !important;
+            opacity: 1 !important;
+            filter: blur(85px) hue-rotate(60deg) !important;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .turbo-active .sand-drop {
+            animation-duration: 0.45s !important;
+            box-shadow: 0 0 12px #34d399, 0 0 20px #10b981 !important;
+            background: #34d399 !important;
+        }
+        .turbo-active .phone-mockup {
+            animation: turboJolt 0.35s ease-in-out infinite alternate !important;
+            box-shadow: 
+                0 0 0 2px #34d399,
+                0 0 0 5px rgba(52, 211, 153, 0.4),
+                0 35px 90px -10px rgba(52, 211, 153, 0.6),
+                0 50px 120px -20px rgba(0, 0, 0, 0.9) !important;
+        }
+        @keyframes turboJolt {
+            0% { transform: perspective(1000px) rotateX(1deg) translateY(-8px) scale(1.02); }
+            100% { transform: perspective(1000px) rotateX(-1deg) translateY(-14px) scale(1.035); }
         }
 
         .phone-mockup:hover {
@@ -2110,14 +2549,24 @@
             }
 
             .mockup-wrapper {
-                margin-top: 15vh !important;
-                padding-top: 20px;
+                margin-top: 30px !important;
+                padding-top: 10px;
             }
 
             .phone-mockup {
-                width: 290px;
-                height: 590px;
-                border-radius: 48px;
+                width: 300px !important;
+                height: 538px !important;
+                border-radius: 46px !important;
+                padding: 10px !important;
+            }
+
+            .vault-ambient-aura {
+                width: 340px !important;
+                height: 580px !important;
+            }
+
+            .vault-orbit-ring {
+                display: none !important;
             }
 
             #nav-user-name {
@@ -2427,140 +2876,211 @@
                 </div>
             </div>
 
-            <!-- Interactive Virtual Phone Mockup (Chat Wrapped Story Cards) -->
+            <!-- Interactive Virtual Phone Mockup Showcase (Time Capsule 3D & Chat Wrapped) -->
             <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
-                <div class="phone-mockup">
+                <!-- Live Status HUD -->
+                <div class="vault-hud" id="vault-hud">
+                    <span class="hud-beacon"></span>
+                    <span>Memory Vault: <strong class="hud-counter" id="vault-msg-counter">144,794</strong> chats encrypted</span>
+                    <span class="hud-badge">LIVE 3D</span>
+                </div>
 
+                <div class="vault-presentation-wrapper" id="vault-presentation-wrap">
+                    <!-- Breathing Ambient Aura -->
+                    <div class="vault-ambient-aura"></div>
 
-                    <div class="phone-screen">
-                        <!-- iPhone Dynamic Island -->
-                        <div class="dynamic-island">
-                            <div class="dynamic-island-lens"></div>
-                        </div>
+                    <!-- Orbit Rings -->
+                    <div class="vault-orbit-ring orbit-ring-1"></div>
+                    <div class="vault-orbit-ring orbit-ring-2"></div>
 
-                        <!-- Story Progress Indicators -->
-                        <div class="story-progress-container" id="story-progress">
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                            <div class="story-progress-bar">
-                                <div class="story-progress-fill"></div>
-                            </div>
-                        </div>
+                    <!-- Phone Mockup Chassis -->
+                    <div class="phone-mockup" id="landing-phone-mockup">
+                        <div class="phone-screen" id="phone-screen-container">
 
-                        <!-- Share Button -->
-                        <div class="story-share-btn" id="story-share" title="Share your story">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="18" cy="5" r="3"></circle>
-                                <circle cx="6" cy="12" r="3"></circle>
-                                <circle cx="18" cy="19" r="3"></circle>
-                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                            </svg>
-                        </div>
+                            <!-- ═════════ 3D TIME CAPSULE VAULT VIEW (DEFAULT) ═════════ -->
+                            <div class="mockup-view-pane active" id="mockup-view-vault">
+                                <picture>
+                                    <source srcset="/img/hourglass-vault.webp" type="image/webp">
+                                    <img class="vault-bg-img" src="/img/hourglass-vault.jpg" alt="OnlineKotha 3D Memory Vault Hourglass" loading="eager" width="571" height="1024">
+                                </picture>
 
-                        <!-- Story Slides Container -->
-                        <div class="story-container" id="story-carousel">
-                            <!-- Slide 1: Intro -->
-                            <div class="story-card story-bg-1">
-                                <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
-                                <h1 class="story-title">Your Chat, Wrapped.</h1>
-                                <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations
-                                    reveal about you &amp; them.</p>
-                                <span
-                                    style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap
-                                    to flip 👉</span>
-                            </div>
+                                <!-- Holographic Glass Shimmer Sweep -->
+                                <div class="vault-shimmer-sweep"></div>
 
-                            <!-- Slide 2: Stats -->
-                            <div class="story-card story-bg-2">
-                                <h2 class="story-subtitle">The Numbers</h2>
-                                <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px;">12,842</div>
-                                <p class="story-text">messages sent over</p>
-                                <div class="story-highlight">574 Days</div>
-                            </div>
-
-                            <!-- Slide 3: Vibe Check -->
-                            <div class="story-card story-bg-3">
-                                <h2 class="story-subtitle">Vibe Check</h2>
-                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🎢</div>
-                                <div class="story-highlight" style="width: 85%;">80% Chaos 😂</div>
-                                <div class="story-highlight" style="width: 85%;">20% Wholesome ❤️</div>
-                            </div>
-
-                            <!-- Slide 4: Top Words -->
-                            <div class="story-card story-bg-4">
-                                <h2 class="story-subtitle">Most Used Words</h2>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1
-                                    literally 💬</div>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀
+                                <!-- Animated Sand Falling Stream inside Hourglass Neck -->
+                                <div class="hourglass-stream-container">
+                                    <div class="sand-drop"></div>
+                                    <div class="sand-drop"></div>
+                                    <div class="sand-drop"></div>
+                                    <div class="sand-drop"></div>
+                                    <div class="sand-drop"></div>
+                                    <div class="sand-drop"></div>
                                 </div>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂
-                                </div>
-                                <div class="story-highlight"
-                                    style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 anyway
-                                    ✨</div>
-                            </div>
 
-                            <!-- Slide 5: Time Patterns -->
-                            <div class="story-card story-bg-5">
-                                <h2 class="story-subtitle">Time Patterns</h2>
-                                <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
-                                <h1 class="story-title" style="font-size: 2rem;">Night Owls</h1>
-                                <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14
-                                        AM</b></p>
-                            </div>
+                                <!-- Pedestal Hearth Warm Glow -->
+                                <div class="pedestal-glow"></div>
 
-                            <!-- Slide 6: AI Conversation -->
-                            <div class="story-card story-bg-6">
-                                <h2 class="story-subtitle">The Magic</h2>
-                                <h1 class="story-title" style="font-size: 1.85rem;">AI Clone Ready</h1>
-                                <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact
-                                    words, humor, tone &amp; texting style.</p>
-                                <div class="story-highlight"
-                                    style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
-                                    💬 "Wait, are you serious right now? 😂"
-                                </div>
-                            </div>
+                                <!-- Live Status Indicators over Cards -->
+                                <div class="vault-live-dot" title="Vault Online"></div>
+                                <div class="ai-spinner-radar" title="AI Memory Neural Engine Active"></div>
+                                <div class="time-capsule-bar"><div class="time-capsule-bar-fill"></div></div>
 
-                            <!-- Slide 7: Outro -->
-                            <div class="story-card story-bg-7">
-                                <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
-                                <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat
-                                    &amp; relive your memories securely.</p>
-                                <a href="/app.html?chat=kotha_assistant&auth=google" id="story-cta-btn" class="btn"
-                                    style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                                    <span>Try Free Now</span>
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="1.5" stroke-linecap="round">
-                                        <path d="M5 12h14M13 5l7 7-7 7" />
-                                    </svg>
+                                <!-- Interactive Clickable CTA Button ("Start Preserving >") -->
+                                <a href="/app.html?chat=kotha_assistant&auth=google" class="vault-cta-link" title="Start Preserving Your Chats">
+                                    <div class="vault-cta-shine"></div>
                                 </a>
                             </div>
+
+                            <!-- ═════════ CHAT WRAPPED CAROUSEL VIEW ═════════ -->
+                            <div class="mockup-view-pane" id="mockup-view-wrapped" style="display: none;">
+                                <!-- iPhone Dynamic Island -->
+                                <div class="dynamic-island">
+                                    <div class="dynamic-island-lens"></div>
+                                </div>
+
+                                <!-- Story Progress Indicators -->
+                                <div class="story-progress-container" id="story-progress">
+                                    <div class="story-progress-bar">
+                                        <div class="story-progress-fill"></div>
+                                    </div>
+                                    <div class="story-progress-bar">
+                                        <div class="story-progress-fill"></div>
+                                    </div>
+                                    <div class="story-progress-bar">
+                                        <div class="story-progress-fill"></div>
+                                    </div>
+                                    <div class="story-progress-bar">
+                                        <div class="story-progress-fill"></div>
+                                    </div>
+                                    <div class="story-progress-bar">
+                                        <div class="story-progress-fill"></div>
+                                    </div>
+                                    <div class="story-progress-bar">
+                                        <div class="story-progress-fill"></div>
+                                    </div>
+                                    <div class="story-progress-bar">
+                                        <div class="story-progress-fill"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Share Button -->
+                                <div class="story-share-btn" id="story-share" title="Share your story">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                </div>
+
+                                <!-- Story Slides Container -->
+                                <div class="story-container" id="story-carousel">
+                                    <!-- Slide 1: Intro -->
+                                    <div class="story-card story-bg-1">
+                                        <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
+                                        <h1 class="story-title">Your Chat, Wrapped.</h1>
+                                        <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations
+                                            reveal about you &amp; them.</p>
+                                        <span
+                                            style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap
+                                            to flip 👉</span>
+                                    </div>
+
+                                    <!-- Slide 2: Stats -->
+                                    <div class="story-card story-bg-2">
+                                        <h2 class="story-subtitle">The Numbers</h2>
+                                        <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px;">12,842</div>
+                                        <p class="story-text">messages sent over</p>
+                                        <div class="story-highlight">574 Days</div>
+                                    </div>
+
+                                    <!-- Slide 3: Vibe Check -->
+                                    <div class="story-card story-bg-3">
+                                        <h2 class="story-subtitle">Vibe Check</h2>
+                                        <div style="font-size: 3.5rem; margin-bottom: 6px;">🎢</div>
+                                        <div class="story-highlight" style="width: 85%;">80% Chaos 😂</div>
+                                        <div class="story-highlight" style="width: 85%;">20% Wholesome ❤️</div>
+                                    </div>
+
+                                    <!-- Slide 4: Top Words -->
+                                    <div class="story-card story-bg-4">
+                                        <h2 class="story-subtitle">Most Used Words</h2>
+                                        <div class="story-highlight"
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1
+                                            literally 💬</div>
+                                        <div class="story-highlight"
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀
+                                        </div>
+                                        <div class="story-highlight"
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂
+                                        </div>
+                                        <div class="story-highlight"
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 anyway
+                                            ✨</div>
+                                    </div>
+
+                                    <!-- Slide 5: Time Patterns -->
+                                    <div class="story-card story-bg-5">
+                                        <h2 class="story-subtitle">Time Patterns</h2>
+                                        <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
+                                        <h1 class="story-title" style="font-size: 2rem;">Night Owls</h1>
+                                        <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14
+                                                AM</b></p>
+                                    </div>
+
+                                    <!-- Slide 6: AI Conversation -->
+                                    <div class="story-card story-bg-6">
+                                        <h2 class="story-subtitle">The Magic</h2>
+                                        <h1 class="story-title" style="font-size: 1.85rem;">AI Clone Ready</h1>
+                                        <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact
+                                            words, humor, tone &amp; texting style.</p>
+                                        <div class="story-highlight"
+                                            style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
+                                            💬 "Wait, are you serious right now? 😂"
+                                        </div>
+                                    </div>
+
+                                    <!-- Slide 7: Outro -->
+                                    <div class="story-card story-bg-7">
+                                        <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
+                                        <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat
+                                            &amp; relive your memories securely.</p>
+                                        <a href="/app.html?chat=kotha_assistant&auth=google" id="story-cta-btn" class="btn"
+                                            style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                            <span>Try Free Now</span>
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.5" stroke-linecap="round">
+                                                <path d="M5 12h14M13 5l7 7-7 7" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-                <div
-                    style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
+
+                <!-- Interactive Controls Dock -->
+                <div class="vault-controls-dock">
+                    <button class="dock-btn active" id="tab-btn-vault" onclick="switchMockupView('vault')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>Time Capsule 3D</span>
+                    </button>
+                    <button class="dock-btn" id="tab-btn-wrapped" onclick="switchMockupView('wrapped')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Chat Wrapped</span>
+                    </button>
+                    <button class="dock-btn pulse-trigger" id="btn-turbo-pulse" onclick="triggerTurboPulse()" title="Activate Turbo Memory Sync">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <span>Turbo Pulse</span>
+                    </button>
+                </div>
+
+                <div id="wrapped-browse-hint"
+                    style="display:none; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M15 18l-6-6 6-6" />
@@ -3099,19 +3619,23 @@
                 bar.classList.toggle('show', window.scrollY > 600);
             }, { passive: true });
         })();
-        // ── Chat Wrapped Story Carousel on Virtual Phone ──
+        // ── Interactive Virtual Phone Presentation (Time Capsule 3D & Chat Wrapped) ──
         (function () {
             const phoneScreen = document.querySelector('.phone-screen');
             const carousel = document.getElementById('story-carousel');
             const shareBtn = document.getElementById('story-share');
             const progressFills = document.querySelectorAll('.story-progress-fill');
-
-            if (!carousel || !phoneScreen) return;
+            const vaultPane = document.getElementById('mockup-view-vault');
+            const wrappedPane = document.getElementById('mockup-view-wrapped');
 
             let currentSlide = 0;
             const totalSlides = 7;
             const slideDuration = 4500;
             let storyInterval = null;
+
+            function isWrappedActive() {
+                return wrappedPane && wrappedPane.style.display !== 'none';
+            }
 
             function updateProgressBars() {
                 progressFills.forEach((fill, index) => {
@@ -3135,6 +3659,7 @@
             }
 
             function goToSlide(index) {
+                if (!carousel) return;
                 if (index < 0) index = 0;
                 if (index >= totalSlides) index = 0;
 
@@ -3143,16 +3668,82 @@
                 carousel.scrollTo({ left: slideWidth * currentSlide, behavior: 'smooth' });
 
                 updateProgressBars();
-                startTimer();
+                if (isWrappedActive()) {
+                    startTimer();
+                }
             }
 
             function startTimer() {
                 clearInterval(storyInterval);
+                if (!isWrappedActive()) return;
                 const duration = (currentSlide === totalSlides - 1) ? 8000 : slideDuration;
                 storyInterval = setInterval(() => {
                     goToSlide(currentSlide + 1);
                 }, duration);
             }
+
+            // Expose globally
+            window.startStoryTimer = startTimer;
+            window.pauseStoryTimer = function() { clearInterval(storyInterval); };
+
+            // Tab switcher
+            window.switchMockupView = function(view) {
+                const tabVault = document.getElementById('tab-btn-vault');
+                const tabWrapped = document.getElementById('tab-btn-wrapped');
+                const wrappedHint = document.getElementById('wrapped-browse-hint');
+                const hud = document.getElementById('vault-hud');
+
+                if (view === 'vault') {
+                    if (vaultPane) { vaultPane.style.display = 'block'; vaultPane.classList.add('active'); }
+                    if (wrappedPane) { wrappedPane.style.display = 'none'; wrappedPane.classList.remove('active'); }
+                    tabVault?.classList.add('active');
+                    tabWrapped?.classList.remove('active');
+                    if (wrappedHint) wrappedHint.style.display = 'none';
+                    if (hud) hud.style.display = 'inline-flex';
+                    clearInterval(storyInterval);
+                } else {
+                    if (vaultPane) { vaultPane.style.display = 'none'; vaultPane.classList.remove('active'); }
+                    if (wrappedPane) { wrappedPane.style.display = 'flex'; wrappedPane.classList.add('active'); }
+                    tabVault?.classList.remove('active');
+                    tabWrapped?.classList.add('active');
+                    if (wrappedHint) wrappedHint.style.display = 'flex';
+                    if (hud) hud.style.display = 'none';
+                    goToSlide(currentSlide);
+                }
+            };
+
+            // Turbo pulse interactive burst
+            window.triggerTurboPulse = function() {
+                const wrap = document.getElementById('vault-presentation-wrap');
+                const counter = document.getElementById('vault-msg-counter');
+                const btn = document.getElementById('btn-turbo-pulse');
+                if (!wrap) return;
+
+                wrap.classList.add('turbo-active');
+                if (btn) btn.style.transform = 'scale(0.92)';
+
+                if (counter) {
+                    const current = parseInt(counter.textContent.replace(/,/g, ''), 10) || 144794;
+                    const next = current + Math.floor(Math.random() * 32) + 14;
+                    counter.textContent = next.toLocaleString();
+                    counter.style.color = '#34d399';
+                }
+
+                setTimeout(() => {
+                    wrap.classList.remove('turbo-active');
+                    if (btn) btn.style.transform = '';
+                    if (counter) counter.style.color = '';
+                }, 1800);
+            };
+
+            // Organic counter increment every 8s
+            setInterval(() => {
+                const counter = document.getElementById('vault-msg-counter');
+                if (counter && !document.hidden) {
+                    const current = parseInt(counter.textContent.replace(/,/g, ''), 10) || 144794;
+                    counter.textContent = (current + 1).toLocaleString();
+                }
+            }, 8000);
 
             // Share button handler
             if (shareBtn) {
@@ -3172,68 +3763,73 @@
                 });
             }
 
-            // Touch and Click navigation
+            // Touch and Click navigation (wrapped view only)
             let touchStartX = 0;
             let touchStartY = 0;
             let isSwiping = false;
             let lastNavTime = 0;
 
-            phoneScreen.addEventListener('touchstart', (e) => {
-                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
-                if (e.touches && e.touches.length > 0) {
-                    touchStartX = e.touches[0].clientX;
-                    touchStartY = e.touches[0].clientY;
-                    isSwiping = false;
-                }
-                clearInterval(storyInterval);
-            }, { passive: true });
+            if (phoneScreen) {
+                phoneScreen.addEventListener('touchstart', (e) => {
+                    if (!isWrappedActive()) return;
+                    if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                    if (e.touches && e.touches.length > 0) {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                        isSwiping = false;
+                    }
+                    clearInterval(storyInterval);
+                }, { passive: true });
 
-            phoneScreen.addEventListener('touchend', (e) => {
-                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
-                if (e.changedTouches && e.changedTouches.length > 0) {
-                    const touchEndX = e.changedTouches[0].clientX;
-                    const touchEndY = e.changedTouches[0].clientY;
-                    const diffX = touchEndX - touchStartX;
-                    const diffY = touchEndY - touchStartY;
+                phoneScreen.addEventListener('touchend', (e) => {
+                    if (!isWrappedActive()) return;
+                    if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                    if (e.changedTouches && e.changedTouches.length > 0) {
+                        const touchEndX = e.changedTouches[0].clientX;
+                        const touchEndY = e.changedTouches[0].clientY;
+                        const diffX = touchEndX - touchStartX;
+                        const diffY = touchEndY - touchStartY;
 
-                    if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
-                        isSwiping = true;
-                        lastNavTime = Date.now();
-                        if (diffX < 0) {
-                            goToSlide(currentSlide + 1);
-                        } else {
-                            goToSlide(currentSlide - 1);
+                        if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                            isSwiping = true;
+                            lastNavTime = Date.now();
+                            if (diffX < 0) {
+                                goToSlide(currentSlide + 1);
+                            } else {
+                                goToSlide(currentSlide - 1);
+                            }
+                            return;
                         }
+                    }
+                    startTimer();
+                }, { passive: true });
+
+                phoneScreen.addEventListener('click', (e) => {
+                    if (!isWrappedActive()) return;
+                    if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
+                    const now = Date.now();
+                    if (isSwiping || (now - lastNavTime < 300)) {
+                        isSwiping = false;
                         return;
                     }
-                }
-                startTimer();
-            }, { passive: true });
+                    lastNavTime = now;
 
-            phoneScreen.addEventListener('click', (e) => {
-                if (e.target.closest('#story-cta-btn') || e.target.closest('#story-share')) return;
-                const now = Date.now();
-                if (isSwiping || (now - lastNavTime < 300)) {
-                    isSwiping = false;
-                    return;
-                }
-                lastNavTime = now;
+                    const rect = phoneScreen.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    if (clickX < rect.width * 0.35) {
+                        goToSlide(currentSlide - 1);
+                    } else {
+                        goToSlide(currentSlide + 1);
+                    }
+                });
 
-                const rect = phoneScreen.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                if (clickX < rect.width * 0.35) {
-                    goToSlide(currentSlide - 1);
-                } else {
-                    goToSlide(currentSlide + 1);
-                }
-            });
-
-            phoneScreen.addEventListener('mouseenter', () => clearInterval(storyInterval));
-            phoneScreen.addEventListener('mouseleave', () => startTimer());
-
-            setTimeout(() => {
-                goToSlide(0);
-            }, 400);
+                phoneScreen.addEventListener('mouseenter', () => {
+                    if (isWrappedActive()) clearInterval(storyInterval);
+                });
+                phoneScreen.addEventListener('mouseleave', () => {
+                    if (isWrappedActive()) startTimer();
+                });
+            }
         })();
         // ── Hero Interactive Demo Chat (server-connected, floating assistant) ──
         document.addEventListener('DOMContentLoaded', function heroChat() {
