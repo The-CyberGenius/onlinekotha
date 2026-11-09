@@ -1654,8 +1654,57 @@ router.post('/emails/send', async (req, res) => {
     }
 });
 // ─────────────────────────────────────────────
-// Analytics APIs
+// Analytics APIs & Geographic / Duration Helpers
 // ─────────────────────────────────────────────
+
+const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+function getCountryFlag(code) {
+    if (!code || code === 'XX' || code === 'Unknown' || code === '—') return '🌐';
+    const clean = String(code).trim().toUpperCase();
+    if (clean.length !== 2) return '🌐';
+    try {
+        const codePoints = clean.split('').map(char => 127397 + char.charCodeAt(0));
+        return String.fromCodePoint(...codePoints);
+    } catch (e) {
+        return '🌐';
+    }
+}
+
+function resolveCountry(input) {
+    if (!input || input === 'Unknown' || input === 'XX' || input === '—') {
+        return { name: 'Unknown Location', flag: '🌐', code: 'XX' };
+    }
+    const clean = String(input).trim();
+    if (clean.length === 2) {
+        const code = clean.toUpperCase();
+        try {
+            const name = regionNames.of(code) || code;
+            return { name, flag: getCountryFlag(code), code };
+        } catch(e) {
+            return { name: code === 'IN' ? 'India' : code, flag: getCountryFlag(code), code };
+        }
+    }
+    const nameMap = { 
+        'india': 'IN', 'united states': 'US', 'usa': 'US', 'united kingdom': 'GB', 'uk': 'GB',
+        'germany': 'DE', 'canada': 'CA', 'australia': 'AU', 'pakistan': 'PK', 'bangladesh': 'BD',
+        'uae': 'AE', 'united arab emirates': 'AE', 'singapore': 'SG', 'france': 'FR', 'netherlands': 'NL'
+    };
+    const code = nameMap[clean.toLowerCase()] || 'XX';
+    return { name: clean, flag: getCountryFlag(code), code };
+}
+
+function formatDurationSec(seconds) {
+    const s = Math.max(0, Math.round(Number(seconds) || 0));
+    if (s === 0) return '0s (Bounce)';
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60);
+    const remS = s % 60;
+    if (m < 60) return remS > 0 ? `${m}m ${remS}s` : `${m}m`;
+    const h = Math.floor(m / 60);
+    const remM = m % 60;
+    return remM > 0 ? `${h}h ${remM}m` : `${h}h`;
+}
 
 router.get('/analytics/summary', (req, res) => {
     try {
@@ -1712,21 +1761,50 @@ router.get('/analytics/overview', (req, res) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayMs = today.getTime();
+        const yesterdayMs = todayMs - 86400000;
+        const sevenDaysMs = todayMs - (7 * 86400000);
+        const fourteenDaysMs = todayMs - (14 * 86400000);
         const liveThreshold = Date.now() - (5 * 60 * 1000); // 5 minutes
 
         const totalVisitors = db.prepare('SELECT COUNT(*) as c FROM analytics_visitors').get().c;
         const totalPageViews = db.prepare("SELECT COUNT(*) as c FROM analytics_events WHERE event_type = 'page_view'").get().c;
         const signups = db.prepare("SELECT COUNT(*) as c FROM analytics_events WHERE event_type = 'signup_completed'").get().c;
+        const registeredUsersCount = db.prepare("SELECT COUNT(*) as c FROM users WHERE id > 0 AND plan != 'guest' AND email != 'guest@onlinekotha.com' AND email NOT LIKE '%guest%'").get().c;
         const todayViews = db.prepare("SELECT COUNT(*) as c FROM analytics_events WHERE event_type = 'page_view' AND created_at >= ?").get(todayMs).c;
         const liveNow = db.prepare('SELECT COUNT(DISTINCT visitor_id) as c FROM analytics_sessions WHERE last_active >= ?').get(liveThreshold).c;
+
+        const todayVisitors = db.prepare('SELECT COUNT(DISTINCT visitor_id) as c FROM analytics_sessions WHERE start_time >= ?').get(todayMs).c;
+        const yesterdayVisitors = db.prepare('SELECT COUNT(DISTINCT visitor_id) as c FROM analytics_sessions WHERE start_time >= ? AND start_time < ?').get(yesterdayMs, todayMs).c;
+        const weekVisitors = db.prepare('SELECT COUNT(DISTINCT visitor_id) as c FROM analytics_sessions WHERE start_time >= ?').get(sevenDaysMs).c;
+        const prevWeekVisitors = db.prepare('SELECT COUNT(DISTINCT visitor_id) as c FROM analytics_sessions WHERE start_time >= ? AND start_time < ?').get(fourteenDaysMs, sevenDaysMs).c;
+
+        const avgDurationRow = db.prepare('SELECT ROUND(AVG(CASE WHEN last_active > start_time THEN (last_active - start_time) / 1000.0 ELSE 0 END)) as c FROM analytics_sessions').get();
+        const avgDurationSec = avgDurationRow && avgDurationRow.c ? Math.round(avgDurationRow.c) : 0;
+
+        const chatUploadersCount = db.prepare(`
+            SELECT 
+                (SELECT COUNT(DISTINCT user_id) FROM chats WHERE user_id > 0) +
+                (SELECT COUNT(DISTINCT guest_id) FROM chats WHERE guest_id IS NOT NULL AND guest_id != '') as c
+        `).get().c;
+
+        const effectiveSignups = Math.max(signups, registeredUsersCount);
+        const conversionRate = totalVisitors > 0 ? ((effectiveSignups / totalVisitors) * 100).toFixed(1) + '%' : '0%';
 
         res.json({
             ok: true,
             totalVisitors,
             totalPageViews,
-            signups,
+            signups: effectiveSignups,
             todayViews,
-            liveNow
+            liveNow,
+            todayVisitors,
+            yesterdayVisitors,
+            weekVisitors,
+            prevWeekVisitors,
+            avgDurationSec,
+            formattedAvgDuration: formatDurationSec(avgDurationSec),
+            chatUploadersCount,
+            conversionRate
         });
     } catch (err) {
         console.error(err);
@@ -1734,9 +1812,183 @@ router.get('/analytics/overview', (req, res) => {
     }
 });
 
+router.get('/analytics/activity', (req, res) => {
+    try {
+        const period = req.query.period === 'weekly' ? 'weekly' : 'daily';
+        let data = [];
+        if (period === 'weekly') {
+            const query = `
+                WITH session_stats AS (
+                    SELECT 
+                        strftime('%Y-W%W', start_time / 1000, 'unixepoch') as week,
+                        MIN(date(start_time / 1000, 'unixepoch')) as week_start,
+                        MAX(date(start_time / 1000, 'unixepoch')) as week_end,
+                        COUNT(DISTINCT visitor_id) as session_visitors,
+                        COUNT(DISTINCT session_id) as total_sessions,
+                        ROUND(AVG(CASE WHEN last_active > start_time THEN (last_active - start_time) / 1000.0 ELSE 0 END)) as avg_duration_sec
+                    FROM analytics_sessions
+                    GROUP BY week
+                ),
+                event_stats AS (
+                    SELECT 
+                        strftime('%Y-W%W', created_at / 1000, 'unixepoch') as week,
+                        COUNT(DISTINCT visitor_id) as event_visitors,
+                        COUNT(CASE WHEN event_type = 'page_view' THEN 1 END) as page_views,
+                        COUNT(CASE WHEN event_type = 'signup_completed' THEN 1 END) as signups
+                    FROM analytics_events
+                    GROUP BY week
+                )
+                SELECT 
+                    COALESCE(s.week, e.week) as key,
+                    s.week_start,
+                    s.week_end,
+                    COALESCE(s.session_visitors, e.event_visitors, 0) as unique_visitors,
+                    COALESCE(e.page_views, 0) as page_views,
+                    COALESCE(s.total_sessions, 0) as total_sessions,
+                    COALESCE(s.avg_duration_sec, 0) as avg_duration_sec,
+                    COALESCE(e.signups, 0) as signups
+                FROM session_stats s
+                LEFT JOIN event_stats e ON s.week = e.week
+                UNION
+                SELECT 
+                    e.week as key,
+                    s.week_start,
+                    s.week_end,
+                    COALESCE(s.session_visitors, e.event_visitors, 0) as unique_visitors,
+                    COALESCE(e.page_views, 0) as page_views,
+                    COALESCE(s.total_sessions, 0) as total_sessions,
+                    COALESCE(s.avg_duration_sec, 0) as avg_duration_sec,
+                    COALESCE(e.signups, 0) as signups
+                FROM event_stats e
+                LEFT JOIN session_stats s ON e.week = s.week
+                ORDER BY key DESC
+                LIMIT 12
+            `;
+            data = db.prepare(query).all().map(r => ({
+                ...r,
+                label: `Week ${r.key ? r.key.split('-W')[1] : ''} (${r.week_start || ''} ~ ${r.week_end || ''})`,
+                avg_duration_sec: Math.round(r.avg_duration_sec || 0),
+                formatted_duration: formatDurationSec(r.avg_duration_sec)
+            }));
+        } else {
+            const query = `
+                WITH session_stats AS (
+                    SELECT 
+                        strftime('%Y-%m-%d', start_time / 1000, 'unixepoch') as date,
+                        COUNT(DISTINCT visitor_id) as session_visitors,
+                        COUNT(DISTINCT session_id) as total_sessions,
+                        ROUND(AVG(CASE WHEN last_active > start_time THEN (last_active - start_time) / 1000.0 ELSE 0 END)) as avg_duration_sec
+                    FROM analytics_sessions
+                    GROUP BY date
+                ),
+                event_stats AS (
+                    SELECT 
+                        strftime('%Y-%m-%d', created_at / 1000, 'unixepoch') as date,
+                        COUNT(DISTINCT visitor_id) as event_visitors,
+                        COUNT(CASE WHEN event_type = 'page_view' THEN 1 END) as page_views,
+                        COUNT(CASE WHEN event_type = 'signup_completed' THEN 1 END) as signups
+                    FROM analytics_events
+                    GROUP BY date
+                )
+                SELECT 
+                    COALESCE(s.date, e.date) as key,
+                    COALESCE(s.session_visitors, e.event_visitors, 0) as unique_visitors,
+                    COALESCE(e.page_views, 0) as page_views,
+                    COALESCE(s.total_sessions, 0) as total_sessions,
+                    COALESCE(s.avg_duration_sec, 0) as avg_duration_sec,
+                    COALESCE(e.signups, 0) as signups
+                FROM session_stats s
+                LEFT JOIN event_stats e ON s.date = e.date
+                UNION
+                SELECT 
+                    e.date as key,
+                    COALESCE(s.session_visitors, e.event_visitors, 0) as unique_visitors,
+                    COALESCE(e.page_views, 0) as page_views,
+                    COALESCE(s.total_sessions, 0) as total_sessions,
+                    COALESCE(s.avg_duration_sec, 0) as avg_duration_sec,
+                    COALESCE(e.signups, 0) as signups
+                FROM event_stats e
+                LEFT JOIN session_stats s ON e.date = s.date
+                ORDER BY key DESC
+                LIMIT 14
+            `;
+            data = db.prepare(query).all().map(r => {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const yestDate = new Date(Date.now() - 86400000);
+                const yestStr = yestDate.toISOString().split('T')[0];
+                let displayLabel = r.key;
+                if (r.key === todayStr) displayLabel = `Today (${r.key})`;
+                else if (r.key === yestStr) displayLabel = `Yesterday (${r.key})`;
+                return {
+                    ...r,
+                    label: displayLabel,
+                    avg_duration_sec: Math.round(r.avg_duration_sec || 0),
+                    formatted_duration: formatDurationSec(r.avg_duration_sec)
+                };
+            });
+        }
+        res.json({ ok: true, period, data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load activity' });
+    }
+});
+
+router.get('/analytics/signups', (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                u.id as user_id,
+                u.email,
+                u.display_name,
+                u.created_at,
+                u.country,
+                u.ip_address,
+                u.last_active_at,
+                (SELECT COUNT(*) FROM chats WHERE user_id = u.id) as chat_count,
+                v.visitor_id,
+                v.total_visits,
+                v.total_page_views,
+                v.device,
+                v.browser,
+                v.os,
+                v.first_seen,
+                v.last_seen,
+                COALESCE(
+                    (SELECT SUM(CASE WHEN last_active > start_time THEN (last_active - start_time) / 1000.0 ELSE 0 END) FROM analytics_sessions WHERE visitor_id = v.visitor_id),
+                    (CASE WHEN u.last_active_at > u.created_at THEN (u.last_active_at - u.created_at) / 1000.0 ELSE 0 END)
+                ) as active_duration_sec,
+                (SELECT landing_page FROM analytics_sessions WHERE visitor_id = v.visitor_id ORDER BY start_time ASC LIMIT 1) as landing_page,
+                (SELECT referrer FROM analytics_sessions WHERE visitor_id = v.visitor_id ORDER BY start_time ASC LIMIT 1) as referrer
+            FROM users u
+            LEFT JOIN analytics_visitors v ON v.user_id = u.id OR (u.ip_address IS NOT NULL AND v.ip_address = u.ip_address)
+            WHERE u.id > 0 AND u.plan != 'guest' AND u.email != 'guest@onlinekotha.com' AND u.email NOT LIKE '%guest%'
+            GROUP BY u.id
+            ORDER BY u.created_at DESC
+            LIMIT 50
+        `;
+        const rows = db.prepare(query).all();
+        const data = rows.map(r => {
+            const countryInfo = resolveCountry(r.country);
+            const durationSec = Math.round(r.active_duration_sec || 0);
+            return {
+                ...r,
+                country_info: countryInfo,
+                active_duration_sec: durationSec,
+                formatted_duration: formatDurationSec(durationSec)
+            };
+        });
+        res.json({ ok: true, data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to load signups analytics' });
+    }
+});
+
 router.get('/analytics/chart', (req, res) => {
     try {
-        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const days = parseInt(req.query.days) || 30;
+        const sinceMs = Date.now() - (days * 24 * 60 * 60 * 1000);
         
         // Group by day using strftime on created_at / 1000
         const query = `
@@ -1750,7 +2002,7 @@ router.get('/analytics/chart', (req, res) => {
             GROUP BY date
             ORDER BY date ASC
         `;
-        const data = db.prepare(query).all(thirtyDaysAgo);
+        const data = db.prepare(query).all(sinceMs);
         res.json({ ok: true, data });
     } catch (err) {
         console.error(err);
@@ -1769,6 +2021,10 @@ router.get('/analytics/top-pages', (req, res) => {
             LIMIT 10
         `;
         const data = db.prepare(query).all();
+        const totalViews = data.reduce((s, p) => s + p.views, 0) || 1;
+        data.forEach(p => {
+            p.percentage = Math.round((p.views / totalViews) * 100);
+        });
         res.json({ ok: true, data });
     } catch (err) {
         console.error(err);
@@ -1779,15 +2035,27 @@ router.get('/analytics/top-pages', (req, res) => {
 router.get('/analytics/top-countries', (req, res) => {
     try {
         const query = `
-            SELECT country, COUNT(*) as visitors
+            SELECT country, country_code, COUNT(*) as visitors
             FROM analytics_visitors
-            WHERE country != 'Unknown'
+            WHERE country != 'Unknown' AND country IS NOT NULL AND country != ''
             GROUP BY country
             ORDER BY visitors DESC
-            LIMIT 10
+            LIMIT 15
         `;
-        const data = db.prepare(query).all();
-        res.json({ ok: true, data });
+        const raw = db.prepare(query).all();
+        const total = raw.reduce((sum, r) => sum + r.visitors, 0) || 1;
+        const data = raw.map(r => {
+            const countryInfo = resolveCountry(r.country_code || r.country);
+            return {
+                country_raw: r.country,
+                country_code: countryInfo.code,
+                name: countryInfo.name,
+                flag: countryInfo.flag,
+                visitors: r.visitors,
+                percentage: Math.round((r.visitors / total) * 100)
+            };
+        });
+        res.json({ ok: true, data, total });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to load top countries' });
@@ -1804,8 +2072,8 @@ router.get('/analytics/visitors', (req, res) => {
         let whereClause = '';
         const params = [];
         if (search) {
-            whereClause = 'WHERE ip_address LIKE ? OR visitor_id LIKE ?';
-            params.push(`%${search}%`, `%${search}%`);
+            whereClause = 'WHERE ip_address LIKE ? OR visitor_id LIKE ? OR country LIKE ?';
+            params.push(`%${search}%`, `%${search}%`, `%${search}%`);
         }
 
         const countQuery = `SELECT COUNT(*) as c FROM analytics_visitors ${whereClause}`;
@@ -1813,7 +2081,7 @@ router.get('/analytics/visitors', (req, res) => {
 
         const dataQuery = `
             SELECT 
-                visitor_id, user_id, ip_address, country, city, device, browser, os, 
+                visitor_id, user_id, ip_address, country, country_code, city, device, browser, os, 
                 first_seen, last_seen, total_visits, total_page_views 
             FROM analytics_visitors 
             ${whereClause} 
@@ -1823,7 +2091,7 @@ router.get('/analytics/visitors', (req, res) => {
         params.push(limit, offset);
         const data = db.prepare(dataQuery).all(...params);
 
-        // Fetch latest session for these visitors to get landing page/referrer
+        // Fetch latest session for these visitors to get landing page/referrer and active duration
         if (data.length > 0) {
             const visitorIds = data.map(v => v.visitor_id);
             const placeholders = visitorIds.map(() => '?').join(',');
@@ -1840,10 +2108,29 @@ router.get('/analytics/visitors', (req, res) => {
             data.forEach(v => {
                 v.latest_session = sessionMap[v.visitor_id] || null;
                 v.is_blocked = firewall.isBlocked(v.ip_address);
+                const durationSec = v.latest_session 
+                    ? Math.max(0, Math.round((v.latest_session.last_active - v.latest_session.start_time) / 1000))
+                    : Math.max(0, Math.round((v.last_seen - v.first_seen) / 1000));
+                v.active_duration_sec = durationSec;
+                v.formatted_duration = formatDurationSec(durationSec);
+                v.country_info = resolveCountry(v.country_code || v.country);
+
+                if (v.user_id) {
+                    try {
+                        const userRow = db.prepare('SELECT email, display_name, (SELECT COUNT(*) FROM chats WHERE user_id = users.id) as chat_count FROM users WHERE id = ?').get(v.user_id);
+                        if (userRow) {
+                            v.user_email = userRow.email;
+                            v.user_name = userRow.display_name;
+                            v.chat_count = userRow.chat_count;
+                        }
+                    } catch (e) {}
+                }
             });
         } else {
             data.forEach(v => {
                 v.is_blocked = firewall.isBlocked(v.ip_address);
+                v.country_info = resolveCountry(v.country_code || v.country);
+                v.formatted_duration = '0s';
             });
         }
 

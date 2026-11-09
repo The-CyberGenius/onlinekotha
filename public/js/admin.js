@@ -673,15 +673,39 @@ HARD RULES
     }
 
     const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
-    function getCountryName(code) {
-        if (!code) return 'UNKNOWN REGION';
-        if (code.length > 3) return code.toUpperCase();
-        try { 
-            const name = regionNames.of(code.toUpperCase()) || code;
-            return name.toUpperCase(); 
-        } catch (e) { 
-            return code.toUpperCase() === 'IN' ? 'INDIA' : code.toUpperCase(); 
+
+    function getCountryFlag(code) {
+        if (!code || code === 'XX' || code === 'Unknown' || code === '—') return '🌐';
+        const clean = String(code).trim().toUpperCase();
+        if (clean.length !== 2) return '🌐';
+        try {
+            const codePoints = clean.split('').map(c => 127397 + c.charCodeAt(0));
+            return String.fromCodePoint(...codePoints);
+        } catch (e) {
+            return '🌐';
         }
+    }
+
+    function getCountryName(input) {
+        if (!input || input === 'XX' || input === 'Unknown' || input === '—') return 'Unknown Location 🌐';
+        const clean = String(input).trim();
+        if (clean.length === 2) {
+            const code = clean.toUpperCase();
+            try { 
+                const name = regionNames.of(code) || code;
+                return `${name} ${getCountryFlag(code)}`; 
+            } catch (e) { 
+                return code === 'IN' ? 'India 🇮🇳' : `${code} ${getCountryFlag(code)}`; 
+            }
+        }
+        const nameMap = { 
+            'india': 'IN', 'united states': 'US', 'usa': 'US', 'united kingdom': 'GB', 'uk': 'GB',
+            'germany': 'DE', 'canada': 'CA', 'australia': 'AU', 'pakistan': 'PK', 'bangladesh': 'BD',
+            'uae': 'AE', 'united arab emirates': 'AE', 'singapore': 'SG', 'france': 'FR', 'netherlands': 'NL'
+        };
+        const code = nameMap[clean.toLowerCase()] || 'XX';
+        const flag = getCountryFlag(code);
+        return `${clean} ${flag}`;
     }
 
     function getBadge(u) {
@@ -721,6 +745,17 @@ HARD RULES
     }
 
     let cachedUsers = [];
+    window._userFilterTab = 'all';
+    window._guestFilterTab = 'all';
+
+    window.setListFilter = function(type, filter) {
+        if (type === 'guest') {
+            window._guestFilterTab = filter;
+        } else {
+            window._userFilterTab = filter;
+        }
+        renderAllUserLists();
+    };
 
     function renderAllUserLists() {
         const userQuery = document.getElementById('admin-user-search')?.value.toLowerCase().trim() || '';
@@ -854,22 +889,67 @@ HARD RULES
             return;
         }
 
-        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const activeFilter = isGuestSection ? (window._guestFilterTab || 'all') : (window._userFilterTab || 'all');
         const totalCount = rows.length;
-        const onlineCount = rows.filter(u => u.is_online).length;
+        const withChatsCount = rows.filter(u => (Number(u.chat_count) || 0) > 0).length;
+        const noChatsCount = totalCount - withChatsCount;
+        const onlineCount = rows.filter(u => Boolean(u.is_online)).length;
+
+        let displayRows = rows;
+        if (activeFilter === 'with_chats') {
+            displayRows = rows.filter(u => (Number(u.chat_count) || 0) > 0);
+        } else if (activeFilter === 'no_chats') {
+            displayRows = rows.filter(u => (Number(u.chat_count) || 0) === 0);
+        } else if (activeFilter === 'online') {
+            displayRows = rows.filter(u => Boolean(u.is_online));
+        }
+
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
         let countSummaryText = '';
         if (isGuestSection) {
-            const withChats = rows.filter(u => (u.chat_count || 0) > 0).length;
-            countSummaryText = `${totalCount} guest session${totalCount !== 1 ? 's' : ''}${withChats ? ' · ' + withChats + ' with uploaded chats' : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' active online</span>' : ''}`;
+            countSummaryText = `${totalCount} guest session${totalCount !== 1 ? 's' : ''}${withChatsCount ? ' · ' + withChatsCount + ' with uploaded chats' : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' active online</span>' : ''}`;
         } else {
-            countSummaryText = `${totalCount} registered user${totalCount !== 1 ? 's' : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' online now</span>' : ''}`;
+            countSummaryText = `${totalCount} registered user${totalCount !== 1 ? 's' : ''}${withChatsCount ? ' · ' + withChatsCount + ' with uploaded chats' : ''}${onlineCount ? ' · <span style="color:#10b981;font-weight:700;display:inline-flex;align-items:center;gap:4px;"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981;display:inline-block;"></span>' + onlineCount + ' online now</span>' : ''}`;
+        }
+
+        const filterPillsHtml = `
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                <span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);">
+                    <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+                    ${countSummaryText}
+                </span>
+                <div style="display:inline-flex;align-items:center;gap:4px;background:var(--bg-page);padding:3px 6px;border-radius:8px;border:1px solid var(--border);flex-wrap:wrap;">
+                    <button onclick="setListFilter('${isGuestSection ? 'guest' : 'user'}', 'all')" 
+                            style="padding:3px 9px;font-size:11px;font-weight:${activeFilter === 'all' ? '700' : '500'};border-radius:6px;border:none;background:${activeFilter === 'all' ? 'var(--card-bg)' : 'transparent'};color:${activeFilter === 'all' ? 'var(--text-primary)' : 'var(--text-muted)'};box-shadow:${activeFilter === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'};cursor:pointer;">
+                        All (${totalCount})
+                    </button>
+                    <button onclick="setListFilter('${isGuestSection ? 'guest' : 'user'}', 'with_chats')" 
+                            style="padding:3px 9px;font-size:11px;font-weight:${activeFilter === 'with_chats' ? '800' : '700'};border-radius:6px;border:1px solid rgba(16,185,129,${activeFilter === 'with_chats' ? '0.6' : '0.3'});background:${activeFilter === 'with_chats' ? 'rgba(16,185,129,0.22)' : 'rgba(16,185,129,0.1)'};color:#10b981;cursor:pointer;">
+                        📁 Uploaded Chats (${withChatsCount})
+                    </button>
+                    <button onclick="setListFilter('${isGuestSection ? 'guest' : 'user'}', 'no_chats')" 
+                            style="padding:3px 9px;font-size:11px;font-weight:${activeFilter === 'no_chats' ? '700' : '500'};border-radius:6px;border:none;background:${activeFilter === 'no_chats' ? 'var(--card-bg)' : 'transparent'};color:${activeFilter === 'no_chats' ? 'var(--text-primary)' : 'var(--text-muted)'};box-shadow:${activeFilter === 'no_chats' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'};cursor:pointer;">
+                        No Chats (${noChatsCount})
+                    </button>
+                    <button onclick="setListFilter('${isGuestSection ? 'guest' : 'user'}', 'online')" 
+                            style="padding:3px 9px;font-size:11px;font-weight:${activeFilter === 'online' ? '700' : '500'};border-radius:6px;border:none;background:${activeFilter === 'online' ? 'var(--card-bg)' : 'transparent'};color:${activeFilter === 'online' ? '#10b981' : 'var(--text-muted)'};box-shadow:${activeFilter === 'online' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'};cursor:pointer;">
+                        🟢 Online (${onlineCount})
+                    </button>
+                </div>
+            </div>
+        `;
+
+        if (!displayRows.length) {
+            const emptyMsg = isGuestSection ? 'No guest sessions match this filter' : 'No registered users match this filter';
+            list.innerHTML = filterPillsHtml + `<div style="text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13px;">${emptyMsg}</div>`;
+            return;
         }
 
         if (isMobile) {
-            let html = '<div style="display:flex;align-items:center;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + countSummaryText + '</span></div>';
+            let html = filterPillsHtml;
 
-            for (const u of rows) {
+            for (const u of displayRows) {
                 const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
                 const av = isGuestSection
                     ? '<div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0;">G</div>'
@@ -884,11 +964,19 @@ HARD RULES
                 const authMethod = u.is_guest ? 'Guest' : (u.google_id ? 'Google' : 'Email');
                 const displayName = isGuestSection ? `Guest (${String(u.id).substring(4, 12)})` : (u.display_name || (u.email ? u.email.split('@')[0] : 'User'));
                 const subText = isGuestSection ? String(u.id) : (u.email || '');
+                const hasChats = (Number(u.chat_count) || 0) > 0;
+                const mcardStyle = hasChats 
+                    ? 'background:linear-gradient(135deg,rgba(16,185,129,0.08) 0%,var(--card-bg) 60%);border:1px solid rgba(16,185,129,0.45);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 10px rgba(16,185,129,0.08);'
+                    : 'background:var(--card-bg);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);';
 
-                html += '<div data-uid="' + u.id + '" style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);">';
+                html += '<div data-uid="' + u.id + '" style="' + mcardStyle + '">';
                 html += '<div class="mcard-hdr" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;-webkit-tap-highlight-color:rgba(99,102,241,0.12);touch-action:manipulation;user-select:none;">';
                 html += av;
-                html += '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">' + displayName + '</span>' + dot + ' ' + getBadge(u) + '</div>';
+                html += '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--text-primary);display:flex;align-items:center;gap:4px;flex-wrap:wrap;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">' + displayName + '</span>' + dot + ' ' + getBadge(u);
+                if (hasChats) {
+                    html += '<span class="badge" style="background:rgba(16,185,129,0.2);color:#10b981;border:1px solid rgba(16,185,129,0.45);font-size:10px;font-weight:800;padding:1px 6px;">📁 ' + u.chat_count + ' Uploaded</span>';
+                }
+                html += '</div>';
                 html += '<div style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + (isGuestSection ? 'font-family:monospace;' : '') + '">' + subText + '</div></div>';
                 html += '<div class="mcard-chev" style="width:28px;height:28px;border-radius:50%;background:var(--bg-page);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .25s;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>';
                 html += '</div>';
@@ -900,7 +988,7 @@ HARD RULES
                     html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Spend</div><div style="font-size:13px;font-weight:700;color:var(--text-primary);font-family:monospace;">$' + costStr + '</div></div>';
                     html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Phone</div><div style="font-size:12px;color:var(--text-secondary);">' + phone + '</div></div>';
                 }
-                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:var(--text-primary);">' + (u.chat_count || 0) + '</div></div>';
+                html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Chats</div><div style="font-size:12px;color:var(--text-primary);font-weight:700;">' + (u.chat_count || 0) + (hasChats ? ' 📁' : '') + '</div></div>';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">Location</div><div style="font-size:11px;color:var(--text-secondary);">' + loc + '</div></div>';
                 html += '<div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px;">' + (isGuestSection ? 'First Seen' : 'Joined') + '</div><div style="font-size:11px;color:var(--text-secondary);">' + (u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently') + '</div></div>';
                 html += '</div>';
@@ -908,14 +996,16 @@ HARD RULES
 
                 html += '<div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;">';
                 if (!u.is_admin) {
-                    html += '<button onclick="window.location.href=\'/api/admin/impersonate/start?uid=' + u.id + '\'" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:700;border-radius:8px;border:1px solid var(--accent);background:rgba(192,132,252,0.12);color:var(--accent);cursor:pointer;">🔑 Login</button>';
+                    html += '<button onclick="window.location.href=\'/api/admin/impersonate/start?uid=' + u.id + '\'" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:700;border-radius:8px;border:1px solid var(--accent);background:rgba(192,132,252,0.14);color:var(--accent);cursor:pointer;" title="Impersonate & Login as user in /app">🔑 Login</button>';
                 }
                 if (!isGuestSection && !u.is_admin && !u.is_guest) {
                     html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at || '') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
                 }
                 const cCount = Number(u.chat_count) || 0;
-                const cStyle = cCount > 0 ? 'flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;' : 'flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-muted);cursor:pointer;opacity:0.75;';
-                html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + cCount + '" style="' + cStyle + '">Chats (' + cCount + ')</button>';
+                const cStyle = cCount > 0 
+                    ? 'flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:800;border-radius:8px;border:1px solid rgba(16,185,129,0.45);background:rgba(16,185,129,0.15);color:#10b981;cursor:pointer;' 
+                    : 'flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-muted);cursor:pointer;opacity:0.75;';
+                html += '<button data-uid="' + u.id + '" class="user-chats-btn" data-count="' + cCount + '" style="' + cStyle + '">' + (cCount > 0 ? '📁 Chats (' + cCount + ')' : 'Chats (0)') + '</button>';
                 html += '<button data-uid="' + u.id + '" class="user-ai-logs-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Logs</button>';
                 if (!isGuestSection && !u.is_admin && !u.is_guest) {
                     const suspText = u.is_suspended ? 'Unsuspend' : 'Suspend';
@@ -951,29 +1041,40 @@ HARD RULES
             });
 
         } else {
-            let html = '\n<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><span style="font-size:12px;font-weight:600;color:var(--text-muted);display:inline-flex;align-items:center;gap:6px;background:var(--card-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--border);"><span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>' + countSummaryText + '</span></div>\n<div class="table-responsive"><table class="admin-table">';
+            let html = filterPillsHtml + '\n<div class="table-responsive"><table class="admin-table">';
             
             if (isGuestSection) {
                 html += '<thead><tr><th>Guest Session</th><th>Status</th><th>Chats / Storage</th><th>Location</th><th>First Seen / Last Active</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
-                for (const u of rows) {
+                for (const u of displayRows) {
                     const badge = getBadge(u);
                     const onlineDot = u.is_online ? '<span class="status-dot" title="Online" style="margin-left:6px;box-shadow:0 0 8px #10b981;"></span><span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#10b981;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:5px;letter-spacing:0.02em;">ONLINE</span>' : '';
                     const avatarHtml = `<div class="user-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-weight:700;">G</div>`;
                     const ipCountry = u.ip_address ? `<span class="sub-text">${u.ip_address}</span><span class="meta-text">${getCountryName(u.country)}</span>` : '<span class="sub-text" style="color:var(--text-muted);">No IP</span>';
                     const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
+                    const hasChats = (Number(u.chat_count) || 0) > 0;
+                    const rowStyle = hasChats ? 'style="background:rgba(16,185,129,0.06);border-left:3px solid #10b981;"' : '';
 
-                    html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">Guest (${String(u.id).substring(4, 12)})${onlineDot}</span><span class="user-email-text" style="font-family:monospace;font-size:11px;color:var(--text-muted);">${u.id}</span></div></div></td>`;
+                    html += `<tr class="user-main-row" ${rowStyle}><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">Guest (${String(u.id).substring(4, 12)})${onlineDot}</span><span class="user-email-text" style="font-family:monospace;font-size:11px;color:var(--text-muted);">${u.id}</span></div></div></td>`;
                     html += `<td><div style="margin-bottom:4px;">${badge}</div><span class="meta-text" style="color:#f59e0b;font-weight:600;">Guest Session</span></td>`;
-                    html += `<td><span class="sub-text" style="font-weight:600;color:var(--text-primary);">${u.chat_count || 0} chat${(u.chat_count || 0) !== 1 ? 's' : ''}</span><span class="meta-text">${(u.ai_messages_count || 0) > 0 ? u.ai_messages_count + ' AI messages' : 'Direct web session'}</span></td>`;
+                    
+                    if (hasChats) {
+                        html += `<td><div style="display:inline-flex;align-items:center;gap:4px;background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.45);color:#10b981;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;box-shadow:0 0 8px rgba(16,185,129,0.25);margin-bottom:2px;"><span>📁</span> ${u.chat_count} Chat${u.chat_count !== 1 ? 's' : ''} Uploaded</div><span class="meta-text" style="display:block;">${(u.ai_messages_count || 0) > 0 ? u.ai_messages_count + ' AI messages' : 'Direct web session'}</span></td>`;
+                    } else {
+                        html += `<td><span class="sub-text" style="font-weight:600;color:var(--text-muted);">0 chats</span><span class="meta-text">${(u.ai_messages_count || 0) > 0 ? u.ai_messages_count + ' AI messages' : 'Direct web session'}</span></td>`;
+                    }
+
                     html += `<td>${ipCountry}</td>`;
                     html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Created: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
                     const guestCC = Number(u.chat_count) || 0;
-                    html += `<td><div class="action-cell"><button onclick="window.location.href='/api/admin/impersonate/start?uid=${u.id}'" class="btn-subtle" style="padding:4px 8px;font-size:11px;font-weight:700;color:var(--accent);border-color:var(--accent);background:rgba(192,132,252,0.12);" title="Login to this guest session in /app">🔑 Login</button><button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${guestCC}" style="padding:4px 7px;font-size:11px;${guestCC === 0 ? 'opacity:0.75;' : ''}">Chats (${guestCC})</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button><button data-uid="${u.id}" data-email="${u.email || u.id}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete Guest Session" style="padding:4px 7px;font-size:11px;">Del</button></div></td></tr>`;
+                    const chatsBtnStyle = hasChats 
+                        ? 'padding:4px 8px;font-size:11px;font-weight:800;color:#10b981;border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.14);' 
+                        : 'padding:4px 7px;font-size:11px;opacity:0.75;';
+                    html += `<td><div class="action-cell"><button onclick="window.location.href='/api/admin/impersonate/start?uid=${u.id}'" class="btn-subtle" style="padding:4px 9px;font-size:11px;font-weight:700;color:var(--accent);border-color:var(--accent);background:rgba(192,132,252,0.14);border-radius:6px;display:inline-flex;align-items:center;gap:4px;" title="Login to this guest session in /app"><span>🔑</span> Login</button><button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${guestCC}" style="${chatsBtnStyle}">${hasChats ? '📁 Chats (' + guestCC + ')' : 'Chats (0)'}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button><button data-uid="${u.id}" data-email="${u.email || u.id}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete Guest Session" style="padding:4px 7px;font-size:11px;">Del</button></div></td></tr>`;
                     html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="6" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
                 }
             } else {
                 html += '<thead><tr><th>User</th><th>Status</th><th>Contact / Usage</th><th>Spend</th><th>Location</th><th>Activity</th><th style="text-align:right;">Actions</th></tr></thead><tbody>';
-                for (const u of rows) {
+                for (const u of displayRows) {
                     const badge = getBadge(u);
                     const loginMethod = u.google_id ? '<span class="meta-text" style="color:var(--accent);">Google Auth</span>' : '<span class="meta-text">Email Auth</span>';
                     const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
@@ -986,15 +1087,27 @@ HARD RULES
                     const lastActive = u.last_active_at ? `<span class="meta-text">Active: ${formatDateTime(u.last_active_at)}</span>` : '<span class="meta-text">No activity</span>';
                     const costStr = Number(u.total_cost || 0).toFixed(3);
                     const suspendBtn = u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-suspend-btn btn-subtle" style="padding:4px 7px;font-size:11px;color:${u.is_suspended ? '#10b981' : '#f59e0b'};border-color:${u.is_suspended ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.35)'};" title="${u.is_suspended ? 'Unsuspend Account' : 'Suspend Account'}">${u.is_suspended ? 'Unsuspend' : 'Suspend'}</button>`;
+                    const hasChats = (Number(u.chat_count) || 0) > 0;
+                    const rowStyle = hasChats ? 'style="background:rgba(16,185,129,0.06);border-left:3px solid #10b981;"' : '';
 
-                    html += `<tr class="user-main-row"><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name || (u.email ? u.email.split('@')[0] : 'User')}${onlineDot}</span><span class="user-email-text">${u.email || ''}</span></div></div></td>`;
+                    html += `<tr class="user-main-row" ${rowStyle}><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">${u.display_name || (u.email ? u.email.split('@')[0] : 'User')}${onlineDot}</span><span class="user-email-text">${u.email || ''}</span></div></div></td>`;
                     html += `<td><div style="margin-bottom:4px;">${badge}</div>${loginMethod}</td>`;
-                    html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">${u.chat_count || 0} chat${(u.chat_count || 0) !== 1 ? 's' : ''}</span></td>`;
+                    
+                    if (hasChats) {
+                        html += `<td><span class="sub-text">${phoneStr}</span><div style="display:inline-flex;align-items:center;gap:4px;background:rgba(16,185,129,0.18);border:1px solid rgba(16,185,129,0.45);color:#10b981;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;box-shadow:0 0 8px rgba(16,185,129,0.25);margin-top:2px;"><span>📁</span> ${u.chat_count} Chat${u.chat_count !== 1 ? 's' : ''} Uploaded</div></td>`;
+                    } else {
+                        html += `<td><span class="sub-text">${phoneStr}</span><span class="meta-text">0 chats</span></td>`;
+                    }
+
                     html += `<td><span class="sub-text font-mono" style="font-weight:700;color:var(--text-primary);">$${costStr}</span></td>`;
                     html += `<td>${ipCountry}</td>`;
                     html += `<td><span class="sub-text" style="color:var(--text-primary);font-weight:500;">Joined: ${u.created_at ? formatDateTime(u.created_at).split(',')[0] : 'Recently'}</span>${lastActive}</td>`;
                     const regCC = Number(u.chat_count) || 0;
-                    html += `<td><div class="action-cell">${u.is_admin ? '' : `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${u.id}'" class="btn-subtle" style="padding:4px 8px;font-size:11px;font-weight:700;color:var(--accent);border-color:var(--accent);background:rgba(192,132,252,0.12);" title="Login to this user account in /app">🔑 Login</button><button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${regCC}" style="padding:4px 7px;font-size:11px;${regCC === 0 ? 'opacity:0.75;' : ''}">Chats (${regCC})</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
+                    const chatsBtnStyle = hasChats 
+                        ? 'padding:4px 8px;font-size:11px;font-weight:800;color:#10b981;border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.14);' 
+                        : 'padding:4px 7px;font-size:11px;opacity:0.75;';
+
+                    html += `<td><div class="action-cell">${u.is_admin ? '' : `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${u.id}'" class="btn-subtle" style="padding:4px 9px;font-size:11px;font-weight:700;color:var(--accent);border-color:var(--accent);background:rgba(192,132,252,0.14);border-radius:6px;display:inline-flex;align-items:center;gap:4px;" title="Login to this user account in /app"><span>🔑</span> Login</button><button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${regCC}" style="${chatsBtnStyle}">${hasChats ? '📁 Chats (' + regCC + ')' : 'Chats (0)'}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
                     html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
                 }
             }
@@ -1243,7 +1356,7 @@ HARD RULES
                                     '</div>' +
                                     '<div style="display:flex;gap:6px;align-items:center;">' +
                                         '<a href="/api/admin/users/' + uid + '/chats/' + c.id + '/download" download style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;" title="Download chat folder as .zip">ZIP</a>' +
-                                        '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--accent);cursor:pointer;">Open</button>' +
+                                        '<button data-admin-open-chat="' + c.id + '" data-uid="' + uid + '" data-folder="' + c.folder_name + '" style="padding:5px 12px;font-size:11px;font-weight:700;border-radius:6px;border:1px solid var(--accent);background:rgba(192,132,252,0.14);color:var(--accent);cursor:pointer;" title="Login to account and open this chat">💬 Open Chat</button>' +
                                         restoreBtn +
                                         '<button data-admin-del-chat="' + c.id + '" data-uid="' + uid + '" data-cname="' + name + '" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
                                     '</div></div>';
@@ -1268,7 +1381,7 @@ HARD RULES
                                     <div style="width:70px;text-align:center;flex-shrink:0;">Size</div>
                                     <div style="width:70px;text-align:center;flex-shrink:0;">Messages</div>
                                     <div style="width:120px;flex-shrink:0;">Imported</div>
-                                    <div style="width:150px;text-align:right;flex-shrink:0;">Actions</div>
+                                    <div style="width:170px;text-align:right;flex-shrink:0;">Actions</div>
                                 </div>
                                 ${chats.map(c => `
                                     <div style="padding:6px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;" data-admin-chat-row="${c.id}">
@@ -1282,11 +1395,11 @@ HARD RULES
                                         <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.size_bytes ? formatBytes(c.size_bytes) : '0 B'}</div>
                                         <div style="width:70px;text-align:center;color:var(--text-secondary);flex-shrink:0;">${c.message_count || 0}</div>
                                         <div style="width:120px;color:var(--text-muted);font-size:11px;flex-shrink:0;">${formatDateTime(c.created_at)}</div>
-                                        <div style="width:150px;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-shrink:0;">
-                                            <a href="/api/admin/users/${uid}/chats/${c.id}/download" download class="btn-subtle" style="text-decoration:none;font-size:10px;padding:2px 6px;" title="Download chat folder as .zip">ZIP</a>
-                                            <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:var(--accent);">Open</button>
-                                            ${c.deleted_by_user ? `<button data-admin-restore-chat="${c.id}" data-uid="${uid}" class="btn-subtle" style="font-size:10px;padding:2px 6px;color:#10b981;">Restore</button>` : ''}
-                                            <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;">Del</button>
+                                        <div style="width:170px;display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-shrink:0;">
+                                            <a href="/api/admin/users/${uid}/chats/${c.id}/download" download class="btn-subtle" style="text-decoration:none;font-size:10px;padding:3px 7px;" title="Download chat folder as .zip">ZIP</a>
+                                            <button data-admin-open-chat="${c.id}" data-uid="${uid}" data-folder="${c.folder_name}" class="btn-subtle" style="font-size:11px;font-weight:700;padding:3px 8px;color:var(--accent);border-color:var(--accent);background:rgba(192,132,252,0.12);cursor:pointer;" title="Login to account and open this chat">💬 Open Chat</button>
+                                            ${c.deleted_by_user ? `<button data-admin-restore-chat="${c.id}" data-uid="${uid}" class="btn-subtle" style="font-size:10px;padding:3px 6px;color:#10b981;">Restore</button>` : ''}
+                                            <button data-admin-del-chat="${c.id}" data-uid="${uid}" data-cname="${(c.display_name || c.folder_name).replace('WhatsApp Chat - ', '')}" class="btn-subtle btn-subtle-danger" style="font-size:10px;padding:3px 6px;">Del</button>
                                         </div>
                                     </div>
                                 `).join('')}

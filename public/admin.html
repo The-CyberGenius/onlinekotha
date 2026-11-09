@@ -1038,12 +1038,19 @@
         <!-- Tab 11: Website Activity -->
         <section id="tab-website-activity" class="tab-content hidden">
             <div class="admin-card">
-                <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div class="section-header-title">
-                        <h2>Website Activity <span id="analytics-live-now" style="font-size:12px; color:var(--success); background:rgba(16, 185, 129, 0.15); padding:2px 8px; border-radius:99px; margin-left:10px;">🟢 0 live now</span></h2>
-                        <p>Track unique visitors, page views, and conversions across the site.</p>
+                        <h2 style="display:flex; align-items:center; gap:8px;">
+                            <span>📊</span> Website Activity 
+                            <span id="analytics-live-now" style="font-size:12px; color:var(--success); background:rgba(16, 185, 129, 0.15); padding:3px 10px; border-radius:99px; border:1px solid rgba(16, 185, 129, 0.3); font-weight:700;">🟢 0 live now</span>
+                        </h2>
+                        <p>Track unique visitors, active session duration, daily/weekly trends, country distribution, and user conversions.</p>
                     </div>
-                    <div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button onclick="loadAnalytics()" class="btn-secondary" title="Refresh Analytics Data">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:4px;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            Refresh
+                        </button>
                         <button onclick="exportAnalyticsCSV()" class="header-btn">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             Export CSV
@@ -1051,60 +1058,167 @@
                     </div>
                 </div>
 
-                <div class="stats-grid" style="margin-bottom:24px;">
-                    <div class="stat-card">
-                        <span class="stat-label">Total Visitors</span>
-                        <div class="stat-value" id="analytics-total-visitors">0</div>
+                <!-- High-Density Metrics Bar (6 Cards) -->
+                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:12px; margin-bottom:20px;">
+                    <div class="stat-card" style="padding:14px;">
+                        <span class="stat-label">👥 Total Visitors</span>
+                        <div class="stat-value" id="analytics-total-visitors" style="font-size:22px;">0</div>
+                        <div class="stat-sub" id="analytics-total-visitors-sub">All-time unique visitors</div>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Total Page Views</span>
-                        <div class="stat-value" id="analytics-total-views">0</div>
+                    <div class="stat-card" style="padding:14px;">
+                        <span class="stat-label">📅 Today's Visitors</span>
+                        <div class="stat-value" id="analytics-today-visitors" style="font-size:22px; color:var(--accent);">0</div>
+                        <div class="stat-sub" id="analytics-today-visitors-sub">Views today: <span id="analytics-today-views">0</span></div>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Signups from Visitors</span>
-                        <div class="stat-value" id="analytics-signups">0</div>
+                    <div class="stat-card" style="padding:14px;">
+                        <span class="stat-label">🗓️ This Week (7 Days)</span>
+                        <div class="stat-value" id="analytics-week-visitors" style="font-size:22px; color:#10b981;">0</div>
+                        <div class="stat-sub" id="analytics-week-visitors-sub">Last 7 days unique users</div>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-label">Views Today</span>
-                        <div class="stat-value" id="analytics-today-views">0</div>
+                    <div class="stat-card" style="padding:14px;">
+                        <span class="stat-label">⏱️ Avg. Active Time</span>
+                        <div class="stat-value" id="analytics-avg-duration" style="font-size:22px; color:#f59e0b;">0s</div>
+                        <div class="stat-sub">Time active per session</div>
+                    </div>
+                    <div class="stat-card" style="padding:14px;">
+                        <span class="stat-label">🚀 Signups &amp; Users</span>
+                        <div class="stat-value" id="analytics-signups" style="font-size:22px; color:#c084fc;">0</div>
+                        <div class="stat-sub" id="analytics-conversion-rate">0.0% conversion rate</div>
+                    </div>
+                    <div class="stat-card" style="padding:14px; border:1px solid rgba(16,185,129,0.3); background:linear-gradient(135deg, rgba(16,185,129,0.06), var(--card-bg));">
+                        <span class="stat-label" style="color:#10b981; font-weight:700;">📁 Chat Uploaders</span>
+                        <div class="stat-value" id="analytics-chat-uploaders" style="font-size:22px; color:#10b981;">0</div>
+                        <div class="stat-sub">Users who imported chats</div>
                     </div>
                 </div>
 
-                <div class="analytics-grid">
-                    <!-- Left Column: Top Pages & Countries -->
-                    <div style="display:flex; flex-direction:column; gap:20px; min-width:0;">
-                        <div class="analytics-sub-card">
-                            <h3>Top Pages</h3>
-                            <table class="data-table" style="width:100%; text-align:left; font-size:13px;">
-                                <thead>
-                                    <tr>
-                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600;">Page</th>
-                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600; text-align:right;">Views</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="analytics-top-pages"></tbody>
-                            </table>
+                <!-- Daily / Weekly Unique Users Activity Breakdown (Toggleable) -->
+                <div class="analytics-sub-card" style="margin-bottom:20px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                        <div>
+                            <h3 style="margin:0; font-size:15px; display:flex; align-items:center; gap:6px;">
+                                <span>📈</span> Unique Users Activity &amp; Retention Breakdown
+                            </h3>
+                            <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">Per-day and weekly breakdown of unique visitors, page views, signups, and active duration.</p>
                         </div>
-                        <div class="analytics-sub-card">
-                            <h3>Top Countries</h3>
-                            <table class="data-table" style="width:100%; text-align:left; font-size:13px;">
-                                <thead>
-                                    <tr>
-                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600;">Country</th>
-                                        <th style="padding-bottom:8px; color:var(--text-muted); font-weight:600; text-align:right;">Visitors</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="analytics-top-countries"></tbody>
-                            </table>
+                        <div style="display:flex; gap:6px; background:var(--bg-page); padding:3px; border-radius:8px; border:1px solid var(--border);">
+                            <button id="activity-tab-daily" onclick="switchActivityPeriod('daily')" style="padding:5px 12px; font-size:11px; font-weight:700; border:none; border-radius:6px; background:var(--card-bg); color:var(--accent); cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.08);">📅 Daily Activity (14D)</button>
+                            <button id="activity-tab-weekly" onclick="switchActivityPeriod('weekly')" style="padding:5px 12px; font-size:11px; font-weight:600; border:none; border-radius:6px; background:transparent; color:var(--text-muted); cursor:pointer;">🗓️ Weekly Activity (8W)</button>
+                        </div>
+                    </div>
+                    <div class="table-container" style="max-height:280px; overflow-y:auto;">
+                        <table class="data-table" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>Period / Date</th>
+                                    <th style="text-align:right;">Unique Visitors</th>
+                                    <th style="text-align:right;">Page Views</th>
+                                    <th style="text-align:right;">Signups</th>
+                                    <th style="text-align:right;">⏱️ Avg. Active Time</th>
+                                    <th style="text-align:right;">Total Sessions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-activity-list">
+                                <tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-muted);">Loading activity...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2-Column: Top Breakdown & Chart -->
+                <div class="analytics-grid" style="margin-bottom:20px;">
+                    <!-- Left Column: Top Countries & Top Pages -->
+                    <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
+                        <!-- Top Countries Card with Full Names, Flags & Percentage Bars -->
+                        <div class="analytics-sub-card" style="padding:16px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <h3 style="margin:0; font-size:14px; display:flex; align-items:center; gap:6px;">
+                                    <span>🌍</span> Top Countries (Full Name &amp; Flag)
+                                </h3>
+                                <span style="font-size:11px; color:var(--text-muted);" id="analytics-top-countries-total">0 Visitors</span>
+                            </div>
+                            <div style="max-height:240px; overflow-y:auto;">
+                                <table class="data-table" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>Country</th>
+                                            <th style="text-align:right;">Visitors</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="analytics-top-countries">
+                                        <tr><td colspan="2" style="text-align:center; padding:12px; color:var(--text-muted);">Loading countries...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Top Pages Card -->
+                        <div class="analytics-sub-card" style="padding:16px;">
+                            <h3 style="margin:0 0 10px 0; font-size:14px; display:flex; align-items:center; gap:6px;">
+                                <span>📄</span> Top Pages Visited
+                            </h3>
+                            <div style="max-height:200px; overflow-y:auto;">
+                                <table class="data-table" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th>Page</th>
+                                            <th style="text-align:right;">Views</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="analytics-top-pages">
+                                        <tr><td colspan="2" style="text-align:center; padding:12px; color:var(--text-muted);">Loading pages...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Right Column: Chart -->
-                    <div class="analytics-sub-card" style="display:flex; flex-direction:column; position:relative; min-height:300px;">
-                        <h3>Traffic Overview</h3>
-                        <div style="position:relative; flex:1; width:100%; height:100%;">
+                    <!-- Right Column: Traffic Overview Chart -->
+                    <div class="analytics-sub-card" style="display:flex; flex-direction:column; padding:16px; min-height:360px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                            <h3 style="margin:0; font-size:14px; display:flex; align-items:center; gap:6px;">
+                                <span>📉</span> Traffic Overview
+                            </h3>
+                            <div style="display:flex; gap:4px; background:var(--bg-page); padding:2px; border-radius:6px; border:1px solid var(--border);">
+                                <button id="chart-days-7" onclick="changeChartDays(7)" class="btn-subtle" style="font-size:10px; font-weight:700; padding:2px 8px; cursor:pointer;">7D</button>
+                                <button id="chart-days-14" onclick="changeChartDays(14)" class="btn-subtle" style="font-size:10px; font-weight:700; padding:2px 8px; cursor:pointer;">14D</button>
+                                <button id="chart-days-30" onclick="changeChartDays(30)" class="btn-subtle" style="font-size:10px; font-weight:700; padding:2px 8px; cursor:pointer; background:var(--bg-alt); color:var(--accent);">30D</button>
+                            </div>
+                        </div>
+                        <div style="position:relative; flex:1; width:100%; min-height:280px;">
                             <canvas id="analyticsChart"></canvas>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Recent Signups & Active Converted Users ("kon sign up kr rha h kitni der active rhta h") -->
+                <div class="analytics-sub-card" style="margin-bottom:20px; padding:16px; border:1px solid rgba(192,132,252,0.3); background:linear-gradient(135deg, rgba(192,132,252,0.03), var(--card-bg));">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                        <div>
+                            <h3 style="margin:0; font-size:15px; display:flex; align-items:center; gap:6px;">
+                                <span>✨</span> Recent User Signups &amp; Active Duration
+                            </h3>
+                            <p style="margin:2px 0 0; font-size:11px; color:var(--text-muted);">See who registered, their country, how long they stayed active, and if they uploaded chats.</p>
+                        </div>
+                        <span id="analytics-signups-count-badge" style="font-size:11px; padding:2px 10px; border-radius:12px; background:rgba(192,132,252,0.15); color:var(--accent); font-weight:700; border:1px solid rgba(192,132,252,0.3);">0 Users</span>
+                    </div>
+                    <div class="table-container" style="max-height:300px; overflow-y:auto;">
+                        <table class="data-table" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>User / Email</th>
+                                    <th>Location</th>
+                                    <th>Signed Up</th>
+                                    <th>⏱️ Active Duration</th>
+                                    <th>Chats Uploaded</th>
+                                    <th>Landing &amp; Referrer</th>
+                                    <th style="text-align:right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-signups-list">
+                                <tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-muted);">Loading signups...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -1158,9 +1272,12 @@
 
                 <!-- Visitor Log Table -->
                 <div class="analytics-log-header">
-                    <h3>Visitor Activity Log</h3>
+                    <div>
+                        <h3 style="margin:0 0 2px 0;">Visitor Activity Log</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-muted);">Full visitor records with active time duration, full country name, and conversion status.</p>
+                    </div>
                     <div class="analytics-log-controls">
-                        <input type="text" id="analytics-search" placeholder="Search IP or Visitor ID..." class="analytics-search-input" onkeyup="if(event.key === 'Enter') loadAnalyticsVisitors(1)">
+                        <input type="text" id="analytics-search" placeholder="Search IP, Visitor ID, Country..." class="analytics-search-input" onkeyup="if(event.key === 'Enter') loadAnalyticsVisitors(1)">
                         <button onclick="clearAnalyticsLogs()" class="btn-secondary" style="border-color:#fca5a5; color:var(--danger);">Clear Logs</button>
                     </div>
                 </div>
@@ -1170,9 +1287,10 @@
                         <thead>
                             <tr>
                                 <th>Visitor ID</th>
-                                <th>Status</th>
+                                <th>Status / User</th>
                                 <th>IP Address</th>
-                                <th style="text-align:right;">Hits</th>
+                                <th style="text-align:right;">Views</th>
+                                <th>⏱️ Active Time</th>
                                 <th>Location</th>
                                 <th>Landing Page</th>
                                 <th>Device / OS</th>
@@ -1181,7 +1299,7 @@
                             </tr>
                         </thead>
                         <tbody id="analytics-visitor-list">
-                            <tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>
+                            <tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-muted);">Loading visitors...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1682,6 +1800,8 @@
         // Analytics Tab handling
         let analyticsChartInstance = null;
         let analyticsChartData = null; // Cache chart data for re-renders
+        window._activityPeriod = 'daily';
+        window._chartDays = 30;
 
         function getChartColors() {
             const style = getComputedStyle(document.documentElement);
@@ -1706,39 +1826,44 @@
                         {
                             label: 'Page Views',
                             data: views,
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                            borderWidth: 2,
                             fill: true,
-                            tension: 0.4
+                            tension: 0.35,
+                            pointRadius: labels.length > 20 ? 1 : 3
                         },
                         {
                             label: 'Unique Visitors',
                             data: visitors,
                             borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                            borderWidth: 2,
                             fill: true,
-                            tension: 0.4
+                            tension: 0.35,
+                            pointRadius: labels.length > 20 ? 1 : 3
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { color: colors.text, font: { weight: '600' } }
+                            labels: { color: colors.text, font: { weight: '600', size: 11 } }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             grid: { color: colors.grid },
-                            ticks: { color: colors.muted }
+                            ticks: { color: colors.muted, font: { size: 10 } }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: colors.muted }
+                            ticks: { color: colors.muted, font: { size: 10 }, maxRotation: 45 }
                         }
                     }
                 }
@@ -1753,21 +1878,156 @@
         }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
         
         function loadAnalytics() {
-            // Load Overview
+            // 1. Load Overview Metrics
             fetch('/api/admin/analytics/overview')
                 .then(r => r.json())
                 .then(data => {
-                    if(data.ok) {
-                        document.getElementById('analytics-total-visitors').textContent = data.totalVisitors.toLocaleString();
-                        document.getElementById('analytics-total-views').textContent = data.totalPageViews.toLocaleString();
-                        document.getElementById('analytics-signups').textContent = data.signups.toLocaleString();
-                        document.getElementById('analytics-today-views').textContent = data.todayViews.toLocaleString();
-                        document.getElementById('analytics-live-now').innerHTML = `🟢 ${data.liveNow} live now`;
-                    }
-                });
+                    if (data.ok) {
+                        const tvEl = document.getElementById('analytics-total-visitors');
+                        if (tvEl) tvEl.textContent = (data.totalVisitors || 0).toLocaleString();
+                        
+                        const tdEl = document.getElementById('analytics-today-visitors');
+                        if (tdEl) tdEl.textContent = (data.todayVisitors || 0).toLocaleString();
 
-            // Load Chart
-            fetch('/api/admin/analytics/chart')
+                        const tviewsEl = document.getElementById('analytics-today-views');
+                        if (tviewsEl) tviewsEl.textContent = (data.todayViews || 0).toLocaleString();
+
+                        const wvEl = document.getElementById('analytics-week-visitors');
+                        if (wvEl) wvEl.textContent = (data.weekVisitors || 0).toLocaleString();
+
+                        const durEl = document.getElementById('analytics-avg-duration');
+                        if (durEl) durEl.textContent = data.formattedAvgDuration || '0s';
+
+                        const suEl = document.getElementById('analytics-signups');
+                        if (suEl) suEl.textContent = (data.signups || 0).toLocaleString();
+
+                        const crEl = document.getElementById('analytics-conversion-rate');
+                        if (crEl) crEl.textContent = `${data.conversionRate || '0%'} conversion rate`;
+
+                        const cuEl = document.getElementById('analytics-chat-uploaders');
+                        if (cuEl) cuEl.textContent = (data.chatUploadersCount || 0).toLocaleString();
+
+                        const liveEl = document.getElementById('analytics-live-now');
+                        if (liveEl) liveEl.innerHTML = `🟢 ${data.liveNow || 0} live now`;
+                    }
+                })
+                .catch(err => console.error('Failed to load analytics overview:', err));
+
+            // 2. Load Activity Breakdown (Daily / Weekly)
+            loadAnalyticsActivity(window._activityPeriod || 'daily');
+
+            // 3. Load Chart
+            loadAnalyticsChart(window._chartDays || 30);
+
+            // 4. Load Top Pages
+            loadAnalyticsTopPages();
+
+            // 5. Load Top Countries
+            loadAnalyticsTopCountries();
+
+            // 6. Load Recent Signups
+            loadAnalyticsSignups();
+
+            // 7. Load Firewall & Visitors
+            loadFirewallData();
+            loadAnalyticsVisitors(1);
+        }
+
+        window.switchActivityPeriod = function(period) {
+            window._activityPeriod = period;
+            const btnDaily = document.getElementById('activity-tab-daily');
+            const btnWeekly = document.getElementById('activity-tab-weekly');
+            if (period === 'daily') {
+                if (btnDaily) {
+                    btnDaily.style.background = 'var(--card-bg)';
+                    btnDaily.style.color = 'var(--accent)';
+                    btnDaily.style.fontWeight = '700';
+                    btnDaily.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+                }
+                if (btnWeekly) {
+                    btnWeekly.style.background = 'transparent';
+                    btnWeekly.style.color = 'var(--text-muted)';
+                    btnWeekly.style.fontWeight = '600';
+                    btnWeekly.style.boxShadow = 'none';
+                }
+            } else {
+                if (btnWeekly) {
+                    btnWeekly.style.background = 'var(--card-bg)';
+                    btnWeekly.style.color = 'var(--accent)';
+                    btnWeekly.style.fontWeight = '700';
+                    btnWeekly.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
+                }
+                if (btnDaily) {
+                    btnDaily.style.background = 'transparent';
+                    btnDaily.style.color = 'var(--text-muted)';
+                    btnDaily.style.fontWeight = '600';
+                    btnDaily.style.boxShadow = 'none';
+                }
+            }
+            loadAnalyticsActivity(period);
+        };
+
+        function loadAnalyticsActivity(period) {
+            const list = document.getElementById('analytics-activity-list');
+            if (!list) return;
+            fetch(`/api/admin/analytics/activity?period=${encodeURIComponent(period)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok && data.data) {
+                        if (!data.data.length) {
+                            list.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-muted);">No activity records for this period.</td></tr>';
+                            return;
+                        }
+                        const maxVisitors = Math.max(...data.data.map(d => d.unique_visitors || 0), 1);
+                        list.innerHTML = data.data.map(row => {
+                            const barPct = Math.round(((row.unique_visitors || 0) / maxVisitors) * 100);
+                            const signupsBadge = row.signups > 0 
+                                ? `<span class="badge" style="background:rgba(192,132,252,0.18); color:#c084fc; border:1px solid rgba(192,132,252,0.4); font-weight:700; padding:1px 6px;">✨ +${row.signups}</span>` 
+                                : '<span style="color:var(--text-muted); font-size:11px;">0</span>';
+                            const durationBadge = `<span class="badge" style="background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-weight:700; font-size:11px;">⏱️ ${row.formatted_duration || '0s'}</span>`;
+                            return `
+                                <tr>
+                                    <td style="font-weight:600; font-size:12px;">
+                                        <div>${row.label || row.key}</div>
+                                        <div style="width:100px; height:3px; background:var(--bg-page); border-radius:2px; margin-top:3px; overflow:hidden;">
+                                            <div style="width:${barPct}%; height:100%; background:var(--accent); border-radius:2px;"></div>
+                                        </div>
+                                    </td>
+                                    <td style="text-align:right; font-weight:700; font-family:monospace; color:var(--text-primary);">${(row.unique_visitors || 0).toLocaleString()}</td>
+                                    <td style="text-align:right; font-family:monospace; color:var(--text-secondary);">${(row.page_views || 0).toLocaleString()}</td>
+                                    <td style="text-align:right;">${signupsBadge}</td>
+                                    <td style="text-align:right;">${durationBadge}</td>
+                                    <td style="text-align:right; font-family:monospace; color:var(--text-muted);">${(row.total_sessions || 0).toLocaleString()}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load activity:', err);
+                    list.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:var(--danger);">Failed to load activity breakdown</td></tr>';
+                });
+        }
+
+        window.changeChartDays = function(days) {
+            window._chartDays = days;
+            ['7', '14', '30'].forEach(d => {
+                const btn = document.getElementById(`chart-days-${d}`);
+                if (btn) {
+                    if (Number(d) === days) {
+                        btn.style.background = 'var(--bg-alt)';
+                        btn.style.color = 'var(--accent)';
+                    } else {
+                        btn.style.background = 'transparent';
+                        btn.style.color = 'var(--text-muted)';
+                    }
+                }
+            });
+            loadAnalyticsChart(days);
+        };
+
+        function loadAnalyticsChart(days) {
+            fetch(`/api/admin/analytics/chart?days=${days || 30}`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.ok && data.data) {
@@ -1778,38 +2038,136 @@
                         };
                         renderChart(analyticsChartData.labels, analyticsChartData.views, analyticsChartData.visitors);
                     }
-                });
+                })
+                .catch(err => console.error('Failed to load chart data:', err));
+        }
 
-            // Load Top Pages
+        function loadAnalyticsTopPages() {
+            const list = document.getElementById('analytics-top-pages');
+            if (!list) return;
             fetch('/api/admin/analytics/top-pages')
                 .then(r => r.json())
                 .then(data => {
                     if (data.ok && data.data) {
-                        document.getElementById('analytics-top-pages').innerHTML = data.data.map(p => `
-                            <tr>
-                                <td style="padding:8px 0;">${p.page}</td>
-                                <td style="padding:8px 0; text-align:right; font-weight:600;">${p.views.toLocaleString()}</td>
-                            </tr>
-                        `).join('');
+                        if (!data.data.length) {
+                            list.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:10px; color:var(--text-muted);">No page view data yet.</td></tr>';
+                            return;
+                        }
+                        list.innerHTML = data.data.map(p => {
+                            const pct = p.percentage || 0;
+                            return `
+                                <tr>
+                                    <td style="padding:7px 0; font-size:12px;">
+                                        <div style="font-weight:600; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px;">${p.page}</div>
+                                        <div style="width:100%; height:3px; background:var(--bg-page); border-radius:2px; margin-top:3px; overflow:hidden;">
+                                            <div style="width:${pct}%; height:100%; background:#3b82f6; border-radius:2px;"></div>
+                                        </div>
+                                    </td>
+                                    <td style="padding:7px 0; text-align:right;">
+                                        <span style="font-weight:700; font-family:monospace; font-size:12px;">${p.views.toLocaleString()}</span>
+                                        <span style="font-size:10px; color:var(--text-muted); margin-left:4px;">(${pct}%)</span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
                     }
-                });
+                })
+                .catch(err => console.error('Failed to load top pages:', err));
+        }
 
-            // Load Top Countries
+        function loadAnalyticsTopCountries() {
+            const list = document.getElementById('analytics-top-countries');
+            if (!list) return;
             fetch('/api/admin/analytics/top-countries')
                 .then(r => r.json())
                 .then(data => {
                     if (data.ok && data.data) {
-                        document.getElementById('analytics-top-countries').innerHTML = data.data.map(c => `
-                            <tr>
-                                <td style="padding:8px 0;">${c.country}</td>
-                                <td style="padding:8px 0; text-align:right; font-weight:600;">${c.visitors.toLocaleString()}</td>
-                            </tr>
-                        `).join('');
+                        const countEl = document.getElementById('analytics-top-countries-total');
+                        if (countEl) countEl.textContent = `${(data.total || 0).toLocaleString()} Visitors`;
+                        if (!data.data.length) {
+                            list.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:10px; color:var(--text-muted);">No country records yet.</td></tr>';
+                            return;
+                        }
+                        list.innerHTML = data.data.map(c => {
+                            const pct = c.percentage || 0;
+                            return `
+                                <tr>
+                                    <td style="padding:7px 0;">
+                                        <div style="display:flex; align-items:center; gap:6px;">
+                                            <span style="font-size:15px; line-height:1;">${c.flag || '🌐'}</span>
+                                            <span style="font-weight:700; font-size:12px; color:var(--text-primary);">${c.name || c.country_raw}</span>
+                                            <span style="font-size:10px; color:var(--text-muted); font-family:monospace;">(${c.country_code || 'XX'})</span>
+                                        </div>
+                                        <div style="width:100%; height:3px; background:var(--bg-page); border-radius:2px; margin-top:3px; overflow:hidden;">
+                                            <div style="width:${pct}%; height:100%; background:#10b981; border-radius:2px;"></div>
+                                        </div>
+                                    </td>
+                                    <td style="padding:7px 0; text-align:right;">
+                                        <span style="font-weight:700; font-family:monospace; font-size:12px;">${c.visitors.toLocaleString()}</span>
+                                        <span style="font-size:10px; color:var(--text-muted); margin-left:4px;">(${pct}%)</span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
                     }
-                });
+                })
+                .catch(err => console.error('Failed to load top countries:', err));
+        }
 
-            loadFirewallData();
-            loadAnalyticsVisitors(1);
+        function loadAnalyticsSignups() {
+            const list = document.getElementById('analytics-signups-list');
+            if (!list) return;
+            fetch('/api/admin/analytics/signups')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.ok && data.data) {
+                        const badgeEl = document.getElementById('analytics-signups-count-badge');
+                        if (badgeEl) badgeEl.textContent = `${data.data.length} Registered User${data.data.length !== 1 ? 's' : ''}`;
+                        if (!data.data.length) {
+                            list.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:var(--text-muted);">No user signups recorded yet.</td></tr>';
+                            return;
+                        }
+                        list.innerHTML = data.data.map(u => {
+                            const chatCount = Number(u.chat_count) || 0;
+                            const chatBadge = chatCount > 0 
+                                ? `<span class="badge" style="background:rgba(16,185,129,0.18); color:#10b981; border:1px solid rgba(16,185,129,0.45); font-weight:800; font-size:11px; padding:2px 7px;">📁 ${chatCount} Chat${chatCount !== 1 ? 's' : ''} Uploaded</span>`
+                                : '<span style="color:var(--text-muted); font-size:11px;">No chats</span>';
+                            const durationBadge = `<span class="badge" style="background:rgba(245,158,11,0.14); color:#f59e0b; border:1px solid rgba(245,158,11,0.35); font-weight:700; font-size:11px;">⏱️ ${u.formatted_duration || '0s'}</span>`;
+                            const cInfo = u.country_info || { name: 'Unknown', flag: '🌐' };
+                            const locStr = `${cInfo.flag} ${cInfo.name}`;
+                            const createdDate = u.created_at ? new Date(u.created_at).toLocaleString() : 'Recently';
+                            const landing = u.landing_page || '/';
+                            const ref = u.referrer ? ` · Ref: ${u.referrer}` : '';
+                            const initials = (u.display_name || u.email || '?').charAt(0).toUpperCase();
+
+                            return `
+                                <tr>
+                                    <td>
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <div style="width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">${initials}</div>
+                                            <div>
+                                                <div style="font-weight:700; font-size:12px; color:var(--text-primary);">${u.display_name || (u.email ? u.email.split('@')[0] : 'User')}</div>
+                                                <div style="font-size:11px; color:var(--text-muted); font-family:monospace;">${u.email || ''}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="font-size:12px; font-weight:500;">${locStr}</td>
+                                    <td style="font-size:11px; color:var(--text-muted);">${createdDate}</td>
+                                    <td>${durationBadge}</td>
+                                    <td>${chatBadge}</td>
+                                    <td style="font-size:11px; color:var(--text-secondary); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${landing}${ref}">${landing}${ref}</td>
+                                    <td style="text-align:right;">
+                                        <button onclick="window.location.href='/api/admin/impersonate/start?uid=${u.user_id}'" class="btn-subtle" style="padding:3px 8px; font-size:11px; font-weight:700; color:var(--accent); border-color:var(--accent); background:rgba(192,132,252,0.12);" title="Login to this user account in /app">🔑 Login</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                })
+                .catch(err => {
+                    console.error('Failed to load signups:', err);
+                    list.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:16px; color:var(--danger);">Failed to load recent signups</td></tr>';
+                });
         }
 
         // ── Firewall & IP Traffic Inspector ────────────────────────
@@ -1998,40 +2356,55 @@
         };
 
         window.loadAnalyticsVisitors = function(page) {
-            const search = document.getElementById('analytics-search').value.trim();
+            const search = document.getElementById('analytics-search')?.value.trim() || '';
             const list = document.getElementById('analytics-visitor-list');
-            list.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">Loading...</td></tr>';
+            if (!list) return;
+            list.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-muted);">Loading visitors...</td></tr>';
             
             fetch(`/api/admin/analytics/visitors?page=${page}&limit=15&search=${encodeURIComponent(search)}`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.ok) {
-                        if (data.data.length === 0) {
-                            list.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--text-muted);">No visitors found.</td></tr>';
+                        if (!data.data || data.data.length === 0) {
+                            list.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--text-muted);">No visitors found.</td></tr>';
                             return;
                         }
 
                         list.innerHTML = data.data.map(v => {
-                            const status = v.user_id ? '<span style="color:#10b981; font-weight:600;">Signed Up</span>' : '<span style="color:#64748b; font-weight:600;">Anonymous</span>';
+                            const userStatus = v.user_id 
+                                ? `<div><span class="badge" style="background:rgba(16,185,129,0.18); color:#10b981; border:1px solid rgba(16,185,129,0.4); font-weight:700; font-size:10px;">✨ Signed Up</span>${v.user_email ? `<div style="font-size:11px; color:var(--text-primary); font-family:monospace; margin-top:2px; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${v.user_email}">${v.user_email}</div>` : ''}</div>`
+                                : '<span style="color:#64748b; font-weight:600; font-size:11px;">Anonymous</span>';
                             const landing = v.latest_session ? v.latest_session.landing_page : '-';
                             const active = new Date(v.last_seen).toLocaleString();
                             const isBlocked = Boolean(v.is_blocked);
+                            const cInfo = v.country_info || { name: v.country || 'Unknown', flag: '🌐' };
+                            const locStr = `${cInfo.flag} ${cInfo.name}${v.city ? ' · ' + v.city : ''}`;
+                            const durationBadge = `<span class="badge" style="background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-weight:700; font-size:11px;">⏱️ ${v.formatted_duration || '0s'}</span>`;
+                            const loginBtn = v.user_id 
+                                ? `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${v.user_id}'" class="btn-subtle" style="padding:3px 7px; font-size:11px; font-weight:700; color:var(--accent); border-color:var(--accent); background:rgba(192,132,252,0.12);" title="Login to this user account in /app">🔑 Login</button>`
+                                : '';
+
                             return `
                                 <tr>
-                                    <td style="font-family:monospace; font-size:12px;">${v.visitor_id.substring(0,8)}</td>
-                                    <td>${status}</td>
+                                    <td style="font-family:monospace; font-size:12px;" title="${v.visitor_id}">${v.visitor_id.substring(0,8)}</td>
+                                    <td>${userStatus}</td>
                                     <td style="font-family:monospace; font-size:12px; font-weight:600;">
-                                        ${v.ip_address}
-                                        ${isBlocked ? '<span style="color:var(--danger);font-size:10px;margin-left:4px;">(Blocked)</span>' : ''}
+                                        <div style="display:flex; align-items:center; gap:4px;">
+                                            <span>${v.ip_address}</span>
+                                            <button onclick="navigator.clipboard.writeText('${v.ip_address}'); alert('Copied IP: ${v.ip_address}');" title="Copy IP" style="border:none; background:transparent; cursor:pointer; font-size:10px; opacity:0.6;">📋</button>
+                                        </div>
+                                        ${isBlocked ? '<span style="color:var(--danger);font-size:10px;font-weight:700;">(Blocked)</span>' : ''}
                                     </td>
                                     <td style="text-align:right; font-weight:700; color:var(--text-primary); font-family:monospace;">${(v.total_page_views || 0).toLocaleString()}</td>
-                                    <td>${v.city ? v.city + ', ' : ''}${v.country}</td>
-                                    <td>${landing}</td>
-                                    <td>${v.device} / ${v.os}</td>
-                                    <td>${active}</td>
+                                    <td style="white-space:nowrap;">${durationBadge}</td>
+                                    <td style="font-size:12px; white-space:nowrap;">${locStr}</td>
+                                    <td style="font-size:11px; color:var(--text-secondary); max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${landing}">${landing}</td>
+                                    <td style="font-size:11px; color:var(--text-muted);">${v.device || 'Desktop'} / ${v.os || 'OS'}</td>
+                                    <td style="font-size:11px; color:var(--text-muted); white-space:nowrap;">${active}</td>
                                     <td>
-                                        <div style="display:flex; gap:4px; align-items:center;">
+                                        <div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;">
                                             <button onclick="viewVisitorTimeline('${v.visitor_id}')" class="btn-secondary" style="padding:3px 7px; font-size:11px;">View</button>
+                                            ${loginBtn}
                                             ${v.ip_address ? (isBlocked 
                                                 ? `<button onclick="unblockIp('${v.ip_address}')" class="btn-subtle" style="color:#10b981; border-color:rgba(16,185,129,0.3); font-weight:700; padding:3px 7px; font-size:11px; cursor:pointer;">Unblock</button>` 
                                                 : `<button onclick="promptBlockIp('${v.ip_address}')" class="btn-subtle btn-subtle-danger" style="padding:3px 7px; font-size:11px; cursor:pointer;">Block IP</button>`) : ''}
@@ -2044,12 +2417,18 @@
                         // Pagination
                         const totalPages = Math.ceil(data.total / data.limit);
                         const pContainer = document.getElementById('analytics-pagination');
-                        let paginationHtml = '';
-                        if (page > 1) paginationHtml += `<button onclick="loadAnalyticsVisitors(${page - 1})" class="btn-secondary" style="padding:4px 10px;">Prev</button>`;
-                        paginationHtml += `<span style="font-size:13px; font-weight:500; display:flex; align-items:center;">Page ${page} of ${totalPages || 1}</span>`;
-                        if (page < totalPages) paginationHtml += `<button onclick="loadAnalyticsVisitors(${page + 1})" class="btn-secondary" style="padding:4px 10px;">Next</button>`;
-                        pContainer.innerHTML = paginationHtml;
+                        if (pContainer) {
+                            let paginationHtml = '';
+                            if (page > 1) paginationHtml += `<button onclick="loadAnalyticsVisitors(${page - 1})" class="btn-secondary" style="padding:4px 10px; font-size:11px;">Prev</button>`;
+                            paginationHtml += `<span style="font-size:12px; font-weight:600; display:flex; align-items:center; padding:0 8px;">Page ${page} of ${totalPages || 1}</span>`;
+                            if (page < totalPages) paginationHtml += `<button onclick="loadAnalyticsVisitors(${page + 1})" class="btn-secondary" style="padding:4px 10px; font-size:11px;">Next</button>`;
+                            pContainer.innerHTML = paginationHtml;
+                        }
                     }
+                })
+                .catch(err => {
+                    console.error('Failed to load visitors:', err);
+                    list.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:20px; color:var(--danger);">Error loading visitors</td></tr>';
                 });
         };
 
