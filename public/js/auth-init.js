@@ -735,6 +735,39 @@
         }
     };
 
+    window.kothaUpdateUpgradeVisibility = function(forceHasChats) {
+        const badge = document.getElementById('compact-plan-badge');
+        const planBanner = document.getElementById('plan-banner');
+        const profileUpgradeBtn = document.getElementById('profile-upgrade-btn');
+        const user = window.__USER__;
+        const isPro = user && (user.effective_plan === 'paid' || user.effective_plan === 'pro' || user.plan === 'paid' || user.plan === 'pro');
+
+        if (isPro) {
+            if (badge) badge.classList.remove('hidden');
+            if (planBanner) planBanner.classList.add('hidden');
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.add('hidden');
+            return;
+        }
+
+        let hasChats = false;
+        if (typeof forceHasChats === 'boolean') {
+            hasChats = forceHasChats;
+        } else if (Array.isArray(window.loadedChats)) {
+            hasChats = window.loadedChats.some(c => c && c !== 'kotha_assistant' && c !== '__global__');
+        } else if (user && (user.chat_count > 0 || user.chats_count > 0)) {
+            hasChats = true;
+        }
+
+        if (!hasChats) {
+            if (badge) badge.classList.add('hidden');
+            if (planBanner) planBanner.classList.add('hidden');
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.add('hidden');
+        } else {
+            if (badge) badge.classList.remove('hidden');
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.remove('hidden');
+        }
+    };
+
     function renderPlanBadge(user) {
         const badge = document.getElementById('compact-plan-badge');
         if (!badge) return;
@@ -794,5 +827,8 @@
             if (profilePlanName) profilePlanName.textContent = isExpired ? 'Trial Expired' : 'Free Plan';
             if (profileUpgradeBtn) profileUpgradeBtn.classList.remove('hidden');
         }
+
+        // Only show upgrade buttons/badges if user has imported at least 1 chat
+        window.kothaUpdateUpgradeVisibility();
     }
 })();

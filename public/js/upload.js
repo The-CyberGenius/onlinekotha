@@ -586,6 +586,9 @@
             const remEl = document.getElementById('guest-chat-rem');
             if (remEl) remEl.textContent = window.__GUEST_STATUS__.chatsRemaining;
         }
+        if (typeof window.kothaUpdateUpgradeVisibility === 'function') {
+            window.kothaUpdateUpgradeVisibility(true);
+        }
         setTimeout(() => {
             closeModal();
             if (window.refreshChats) window.refreshChats(resp.chat);

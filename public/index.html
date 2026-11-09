@@ -2262,51 +2262,6 @@
     </style>
     <script src="/js/analytics.js" async></script>
 
-    <style>
-        /* Floating Assistant Widget Layout */
-        #floating-assistant-widget .bot-trigger-wrapper {
-            flex-direction: row-reverse;
-            /* Mobile default: Badge on left, Button on right */
-        }
-
-        #demo-chat-frame {
-            display: none;
-            flex-direction: column !important;
-            box-sizing: border-box !important;
-            transform-origin: bottom right !important;
-            /* Mobile default */
-        }
-
-        #demo-form {
-            width: 100% !important;
-            box-sizing: border-box !important;
-            flex-shrink: 0 !important;
-            height: 48px !important;
-            max-height: 48px !important;
-        }
-
-        #hero-chat {
-            width: 100% !important;
-            box-sizing: border-box !important;
-        }
-
-        @media (min-width: 768px) {
-            #floating-assistant-widget {
-                right: auto !important;
-                left: 24px !important;
-                align-items: flex-start !important;
-            }
-
-            #floating-assistant-widget .bot-trigger-wrapper {
-                flex-direction: row !important;
-                /* Desktop: Button on left, Badge on right */
-            }
-
-            #demo-chat-frame {
-                transform-origin: bottom left !important;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -2402,72 +2357,21 @@
                 <span
                     style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.2; overflow: visible; padding-bottom: 6px;">
                     <span id="platform-rotator" style="
-                        background: linear-gradient(135deg, var(--accent), var(--accent-rose)); 
+                        background: linear-gradient(135deg, #25D366, #128C7E, var(--accent)); 
                         -webkit-background-clip: text; 
                         -webkit-text-fill-color: transparent; 
-                        border-right: 3px solid var(--accent);
-                        padding-right: 6px;
+                        padding-right: 4px;
                         padding-left: 2px;
-                        padding-bottom: 0.18em;
-                        margin-bottom: -0.18em;
                         display: inline-block;
                         white-space: nowrap;
                         line-height: 1.15;
-                        overflow: visible;
                     ">WhatsApp</span>
                     <span style="color: var(--text-primary); line-height: 1.15;">Memories.</span>
                 </span>
-
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        const words = ['WhatsApp', 'Telegram', 'Instagram', 'iMessage'];
-                        let currentIndex = 0;
-                        const rotator = document.getElementById('platform-rotator');
-                        if (!rotator) return;
-
-                        let isDeleting = false;
-                        let txt = 'WhatsApp';
-                        let typingSpeed = 100;
-
-                        function type() {
-                            const fullWord = words[currentIndex];
-
-                            if (isDeleting) {
-                                txt = fullWord.substring(0, txt.length - 1);
-                                typingSpeed = 40;
-                            } else {
-                                txt = fullWord.substring(0, txt.length + 1);
-                                typingSpeed = 100;
-                            }
-
-                            rotator.textContent = txt || '​'; // Zero-width space
-
-                            if (!isDeleting && txt === fullWord) {
-                                typingSpeed = 2000; // Pause at end of word
-                                isDeleting = true;
-                            } else if (isDeleting && txt === '') {
-                                isDeleting = false;
-                                currentIndex = (currentIndex + 1) % words.length;
-                                typingSpeed = 400; // Pause before typing new word
-                            }
-
-                            setTimeout(type, typingSpeed);
-                        }
-
-                        setTimeout(type, 1500);
-
-                        setInterval(() => {
-                            rotator.style.borderRightColor = rotator.style.borderRightColor === 'transparent'
-                                ? 'var(--accent)'
-                                : 'transparent';
-                        }, 500);
-                    });
-                </script>
             </h1>
             <p class="lead rise d2"
                 style="font-size: clamp(16px, 2vw, 21px); color: var(--text-secondary); max-width: 620px; margin: 0 auto 40px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
-                Import your exported chat files to see beautiful story cards of your past, and talk to a private AI that
-                perfectly remembers your inside jokes.
+                Import your exported WhatsApp chat (.zip or .txt) to rediscover forgotten conversations, search past moments, and talk to an AI that preserves your bond.
             </p>
             <!-- Dual High-Converting CTAs -->
             <div class="hero-cta-group rise d3">
@@ -3504,11 +3408,17 @@
                         if (a.classList.contains('checkout-btn')) {
                             const plan = a.getAttribute('data-plan') || 'pro_lifetime';
                             a.href = `/app?checkout=${plan}`;
-                        } else if (/get|start|bring|preserv|free|talking|demo|see your chat|open app/i.test(a.textContent) || a.id === 'nav-cta' || a.id === 'hero-cta' || a.id === 'final-cta') {
+                        } else if (a.id === 'nav-cta') {
                             a.href = dest;
                             a.innerHTML = label;
+                        } else if (a.id === 'hero-cta' || a.id === 'final-cta') {
+                            a.href = '/app';
+                            a.innerHTML = '<span>Open Web App</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+                        } else if (/get|start|bring|preserv|free|talking|demo|see your chat|open app/i.test(a.textContent)) {
+                            a.href = '/app';
+                            a.innerHTML = 'Open App';
                         } else if (a.id !== 'nav-logout-btn') {
-                            a.href = dest;
+                            a.href = '/app';
                         }
                     });
                     const navLogin = document.getElementById('nav-login');
@@ -3762,231 +3672,6 @@
             </div>
         </div>
     </div>
-    <!-- ── Interactive Support Chat (functional - Floating Widget) ── -->
-    <div id="floating-assistant-widget"
-        style="position:fixed;bottom:24px;right:24px;z-index:999999;display:flex;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none;opacity:0;transform:translateY(20px);transition:all 0.3s ease;">
-        <div class="mockup-frame p-5 text-left" id="demo-chat-frame"
-            style="width:360px;max-width:calc(100vw - 48px);padding:20px;text-align:left;position:relative;transition:all 0.3s;display:none;flex-direction:column !important;opacity:0;pointer-events:none;transform:translateY(10px);transform-origin:bottom left;box-shadow:0 12px 40px rgba(0,0,0,0.4);border:1px solid var(--border);">
-            <div class="mobile-sheet-handle"></div>
-            <div class="flex items-center gap-3 mb-4 pb-3 border-b border-white/[0.04]"
-                style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
-                <div class="relative" style="position:relative;">
-                    <div class="online-ring"></div>
-                    <div id="demo-avatar"
-                        style="width:40px;height:40px;border-radius:999px;background:linear-gradient(135deg, #8b5cf6, #ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;transition:all 0.3s;box-shadow:0 4px 14px rgba(168, 85, 247, 0.3);">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <div style="flex:1;">
-                    <p id="demo-name"
-                        style="font-size:13px;font-weight:700;color:var(--text-primary);transition:all 0.3s;">
-                        Kotha Assistant</p>
-                    <p style="font-size:10px;color:#34d399;font-weight:500;">Online · Support</p>
-                </div>
-                <div id="demo-counter"
-                    style="display:flex;align-items:center;gap:6px;background:var(--msg-ai-bg);padding:4px 10px;border-radius:999px;">
-                    <span class="text-[9px] font-bold text-zinc-400" id="demo-remaining"
-                        style="font-size:9px;font-weight:700;color:var(--text-muted);">15 msgs left</span>
-                </div>
-                <button id="close-assistant-btn" aria-label="Close Assistant">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div class="space-y-3" id="hero-chat"
-                style="display:flex;flex-direction:column;gap:12px;max-height:300px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;">
-                <div class="flex items-end gap-2 chat-msg" id="demo-msg-welcome"
-                    style="display:flex;align-items:flex-end;gap:8px;">
-                    <div
-                        style="width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg, #8b5cf6, #ec4899);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <path
-                                d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
-                        </svg>
-                    </div>
-                    <div class="msg-ai px-4 py-2.5 max-w-[85%]"
-                        style="padding:10px 16px;max-width:85%;background:var(--msg-ai-bg);border-radius:12px;border-bottom-left-radius:2px;">
-                        <p class="text-[13px] text-zinc-200 leading-relaxed"
-                            style="font-size:13px;color:var(--text-primary);line-height:1.5;">Hi there! <svg width="15"
-                                height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" class="inline-block"
-                                style="vertical-align:text-bottom;">
-                                <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v3" />
-                                <path d="M14 9V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v7" />
-                                <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
-                                <path
-                                    d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
-                            </svg> I'm
-                            Kotha Assistant, the official in-app AI assistant for OnlineKotha. Want to know how to
-                            export your WhatsApp chat, how our AI learns chat style, or our plans? Ask me anything in
-                            your language!</p>
-                    </div>
-                </div>
-            </div>
-            <form id="demo-form" onsubmit="event.preventDefault();"
-                style="margin-top:16px;display:flex;align-items:center;gap:8px;background:var(--msg-ai-bg);border-radius:999px;padding:4px 16px;border:1px solid var(--border);">
-                <input type="text" id="demo-input" maxlength="300" autocomplete="off" placeholder="Ask me a question..."
-                    style="background:transparent;font-size:16px;color:var(--text-primary);flex:1;outline:none;padding:10px 0;min-height:44px;border:0;">
-                <button type="submit" id="demo-send" aria-label="Send message"
-                    style="width:38px;height:38px;border-radius:999px;background:var(--accent-strong);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;border:0;cursor:pointer;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                    </svg>
-                </button>
-            </form>
-            <div id="demo-limit-cta" class="hidden" style="margin-top:12px;text-align:center;">
-                <p style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Demo limit reached!</p>
-                <a href="/login.html?next=%2Fapp.html#signup"
-                    style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-weight:700;font-size:11px;padding:8px 16px;border-radius:999px;">
-                    Sign up free for unlimited
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                        stroke-linecap="round">
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-        <div class="bot-trigger-wrapper" style="display:flex;align-items:center;gap:10px;pointer-events:auto;">
-            <button id="toggle-assistant-btn" aria-label="Open AI Assistant"
-                style="width:60px;height:60px;border-radius:999px;background:linear-gradient(135deg, #6366f1, #8b5cf6);border:2px solid rgba(255,255,255,0.1);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(99,102,241,0.4);transition:transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s;position:relative;pointer-events:auto;">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 8V4H8" />
-                    <rect width="16" height="12" x="4" y="8" rx="2" />
-                    <path d="M2 14h2" />
-                    <path d="M20 14h2" />
-                    <path d="M15 13v2" />
-                    <path d="M9 13v2" />
-                </svg>
-            </button>
-            <div id="assistant-badge"
-                style="display:flex;align-items:center;gap:6px;background:var(--bg-glass);border:1px solid var(--border);padding:7px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text-primary);box-shadow:0 6px 20px rgba(0,0,0,0.15);pointer-events:auto;cursor:pointer;transition:opacity 0.2s;">
-                <span
-                    style="display:inline-block;width:7px;height:7px;border-radius:999px;background:#34d399;box-shadow:0 0 8px #34d399;"></span>
-                <span>AI Support</span>
-            </div>
-        </div>
-    </div>
-    <!-- JavaScript for floating widget toggle -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleBtn = document.getElementById('toggle-assistant-btn');
-            const closeBtn = document.getElementById('close-assistant-btn');
-            const chatFrame = document.getElementById('demo-chat-frame');
-            const badge = document.getElementById('assistant-badge');
-            const widget = document.getElementById('floating-assistant-widget');
-            let isOpen = false;
-
-            function toggleChat(force) {
-                if (typeof force === 'boolean') {
-                    isOpen = force;
-                } else {
-                    isOpen = !isOpen;
-                }
-                const isMobile = window.innerWidth <= 768;
-                if (isOpen) {
-                    if (widget) widget.classList.add('is-open');
-                    if (isMobile) {
-                        document.body.classList.add('assistant-open');
-                    }
-                    if (chatFrame) {
-                        chatFrame.style.display = 'flex';
-                        chatFrame.style.flexDirection = 'column';
-                        void chatFrame.offsetWidth;
-                        chatFrame.style.opacity = '1';
-                        chatFrame.style.pointerEvents = 'auto';
-                        chatFrame.style.transform = isMobile ? 'none' : 'translateY(0)';
-                    }
-                    if (badge) badge.style.opacity = '0';
-                    const demoInput = document.getElementById('demo-input');
-                    if (demoInput) {
-                        if (isMobile) {
-                            setTimeout(() => {
-                                if (isOpen) {
-                                    try { demoInput.focus({ preventScroll: true }); } catch (e) { demoInput.focus(); }
-                                }
-                            }, 320);
-                        } else {
-                            demoInput.focus();
-                        }
-                    }
-                    const chatArea = document.getElementById('hero-chat');
-                    if (chatArea) {
-                        chatArea.scrollTop = chatArea.scrollHeight;
-                    }
-                } else {
-                    if (widget) widget.classList.remove('is-open');
-                    document.body.classList.remove('assistant-open');
-                    if (chatFrame) {
-                        chatFrame.style.opacity = '0';
-                        chatFrame.style.pointerEvents = 'none';
-                        chatFrame.style.transform = isMobile ? 'translateY(100%)' : 'translateY(10px)';
-                    }
-                    if (badge) badge.style.opacity = '1';
-                    setTimeout(() => {
-                        if (!isOpen && chatFrame) chatFrame.style.display = 'none';
-                    }, 300);
-                }
-            }
-
-            if (widget) {
-                widget.addEventListener('click', (e) => {
-                    // Tap on dimmed backdrop outside the sheet on mobile closes the sheet
-                    if (isOpen && window.innerWidth <= 768 && e.target === widget) {
-                        toggleChat(false);
-                    }
-                });
-            }
-            if (chatFrame) {
-                chatFrame.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
-            }
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleChat();
-                });
-            }
-            if (badge) {
-                badge.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleChat(true);
-                });
-            }
-            if (closeBtn) {
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleChat(false);
-                });
-            }
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && isOpen) {
-                    toggleChat(false);
-                }
-            });
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener('resize', () => {
-                    if (isOpen && window.innerWidth <= 768) {
-                        const chatArea = document.getElementById('hero-chat');
-                        if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
-                    }
-                });
-            }
-        });
-    </script>
-    <div data-formms-popup="https://form.ms/2b6f4h?embed=1" data-title="OnlineKotha User Feedback" data-label=""
-        data-trigger="click" data-position="bottom-right" data-width="380" data-overlay="1" data-hide-on-submit="1">
-    </div>
-    <script src="https://api.form.ms/assets/embed.js" async></script>
     <!-- ═══════════ CRAZY DESIGNER / TECH ENGINE (GSAP + VanillaTilt + Ethereal Ambient Canvas + Lucide Icons) ═══════════ -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -4066,42 +3751,6 @@
         });
     </script>
 
-    <script>
-        window.addEventListener('scroll', () => {
-            const assistant = document.getElementById('floating-assistant-widget');
-            if (assistant && !assistant.classList.contains('is-open')) {
-                if (window.scrollY > 300) {
-                    assistant.style.opacity = '1';
-                    assistant.style.transform = 'translateY(0)';
-                } else {
-                    assistant.style.opacity = '0';
-                    assistant.style.transform = 'translateY(20px)';
-                }
-            }
-        });
-    </script>
-
-    <script>
-        // Force Form.ms widget to sit above sticky banner on mobile
-        const enforceMobileLayout = () => {
-            if (window.innerWidth <= 720) {
-                const formMsFrames = document.querySelectorAll('iframe[src*="form.ms"]');
-                formMsFrames.forEach(frame => {
-                    const parent = frame.parentElement;
-                    if (parent) {
-                        parent.style.setProperty('bottom', '85px', 'important');
-                        // Optional: Adjust right position if it overlaps with AI button
-                        if (parent.style.right) {
-                            parent.style.setProperty('right', '65px', 'important');
-                        }
-                    }
-                });
-            }
-        };
-        // Run after load and occasionally if third-party re-injects
-        window.addEventListener('load', () => setTimeout(enforceMobileLayout, 1000));
-        setInterval(enforceMobileLayout, 2000);
-    </script>
 </body>
 
 

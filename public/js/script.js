@@ -414,6 +414,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.kothaSidebarOpen = () => toggleSidebar(true);
     window.kothaSidebarClose = () => toggleSidebar(false);
 
+    // Mobile default: If user arrives on mobile and no chat is requested in URL, open the Chat List sidebar first
+    if (isMobile() && !(new URLSearchParams(window.location.search).get('chat'))) {
+        toggleSidebar(true);
+    }
+
     document.getElementById('open-sidebar-btn').addEventListener('click', () => toggleSidebar(true));
     document.getElementById('close-sidebar-btn').addEventListener('click', () => toggleSidebar(false));
     const sidebarBackdrop = document.getElementById('sidebar-backdrop');
@@ -1293,14 +1298,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterBar.classList.remove('hidden');
             }
 
-            // Show or hide in-chat quick filter bar
+            // Keep in-chat quick filter bar hidden until explicitly opened by user
             const chatFilterBar = document.getElementById('chat-filter-bar');
             if (chatFilterBar) {
-                if (chatName === '__global__' || chatName === 'kotha_assistant') {
-                    chatFilterBar.classList.add('hidden');
-                } else {
-                    chatFilterBar.classList.remove('hidden');
-                }
+                chatFilterBar.classList.add('hidden');
+                const headerFilterBtn = document.getElementById('header-filter-btn');
+                if (headerFilterBtn) headerFilterBtn.classList.remove('text-amber-600', 'bg-amber-100', 'dark:bg-amber-900/40', 'dark:text-amber-400');
+                const qaBtn = document.querySelector('.qa-btn[data-target="btn-filters-toggle"]');
+                if (qaBtn) qaBtn.classList.remove('text-amber-600', 'dark:text-amber-400');
             }
 
             if (chatName === 'kotha_assistant') {
@@ -1956,7 +1961,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderChatList(chats, activeChat) {
         if (!chatListUI) return;
         chatListUI.innerHTML = '';
-        const realChats = (chats || []).filter(c => c !== 'kotha_assistant');
+        const realChats = (chats || []).filter(c => c && c !== 'kotha_assistant' && c !== '__global__');
+        if (typeof window.kothaUpdateUpgradeVisibility === 'function') {
+            window.kothaUpdateUpgradeVisibility(realChats.length > 0);
+        }
         if (chats.length === 0) {
             chatListUI.innerHTML = getUploadPromoCardHtml();
             return;
@@ -2308,6 +2316,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         currentChat = '';
                         window.currentChat = ''; localStorage.setItem("kotha_active_chat", '');
                         showEmptyState();
+                        if (isMobile() || window.kothaCompact) {
+                            toggleSidebar(true);
+                        }
                     }
                 }
                 
@@ -4447,32 +4458,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (targetId === 'btn-filters-toggle') {
-                const overlay = document.getElementById('mobile-popup-overlay');
-                const filterModal = document.getElementById('mobile-filter-modal');
-                const searchModal = document.getElementById('mobile-search-modal');
-                const filterContent = document.getElementById('mobile-filter-content');
-                const smartFilters = document.getElementById('smart-filters-container');
-                
-                if (overlay && filterModal && smartFilters) {
-                    if (searchModal) {
-                        searchModal.classList.add('hidden');
-                        searchModal.style.display = 'none';
-                    }
-                    filterModal.classList.remove('hidden');
-                    filterModal.style.display = 'block';
-                    overlay.classList.remove('hidden');
-                    overlay.style.setProperty('display', 'flex', 'important');
-                    
-                    // Move filters into mobile modal
-                    filterContent.appendChild(smartFilters);
-                    smartFilters.classList.remove('hidden');
-                    smartFilters.style.display = 'block';
-                } else if (window.kothaSidebarOpen) {
-                    window.kothaSidebarOpen();
-                    const targetEl = document.getElementById(targetId);
-                    if (targetEl) targetEl.click();
+                if (typeof window.toggleChatFilterBar === 'function') {
+                    window.toggleChatFilterBar();
+                } else {
+                    const bar = document.getElementById('chat-filter-bar');
+                    if (bar) bar.classList.toggle('hidden');
                 }
-                
                 if (fab && isMenuOpen) fab.click();
                 return;
             }
@@ -4507,6 +4498,39 @@ document.addEventListener('DOMContentLoaded', () => {
             window.jumpToMsg(id);
         }
     };
+
+    // In-Chat Filter Bar Toggle (Header and Quick Action button)
+    window.toggleChatFilterBar = (force) => {
+        const bar = document.getElementById('chat-filter-bar');
+        const headerBtn = document.getElementById('header-filter-btn');
+        const qaBtn = document.querySelector('.qa-btn[data-target="btn-filters-toggle"]');
+        if (!bar) return;
+
+        let shouldOpen;
+        if (typeof force === 'boolean') {
+            shouldOpen = force;
+        } else {
+            shouldOpen = bar.classList.contains('hidden');
+        }
+
+        if (shouldOpen) {
+            bar.classList.remove('hidden');
+            if (headerBtn) headerBtn.classList.add('text-amber-600', 'bg-amber-100', 'dark:bg-amber-900/40', 'dark:text-amber-400');
+            if (qaBtn) qaBtn.classList.add('text-amber-600', 'dark:text-amber-400');
+        } else {
+            bar.classList.add('hidden');
+            if (headerBtn) headerBtn.classList.remove('text-amber-600', 'bg-amber-100', 'dark:bg-amber-900/40', 'dark:text-amber-400');
+            if (qaBtn) qaBtn.classList.remove('text-amber-600', 'dark:text-amber-400');
+        }
+    };
+
+    const headerFilterBtn = document.getElementById('header-filter-btn');
+    if (headerFilterBtn) {
+        headerFilterBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.toggleChatFilterBar();
+        });
+    }
 
     // Header search button — opens inline chat search overlay across all screen sizes
     const headerSearchBtn = document.getElementById('header-search-btn');
