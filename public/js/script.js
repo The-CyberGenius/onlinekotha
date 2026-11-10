@@ -213,13 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function isMediaMessage(msg) {
         if (!msg) return false;
         if (msg.attachment && msg.type !== 'system') return true;
-        if (msg.type === 'image' || msg.type === 'video' || msg.type === 'audio' || msg.type === 'document' || msg.type === 'media') return true;
+        if (msg.type === 'image' || msg.type === 'video' || msg.type === 'audio' || msg.type === 'sticker' || msg.type === 'document' || msg.type === 'media') return true;
         if (msg.text) {
             const t = msg.text.toLowerCase();
-            if (/<(image|video|audio|document|file):/i.test(t)) return true;
+            if (/<(image|video|audio|document|file|sticker):/i.test(t)) return true;
             const mediaIndicators = [
-                'image omitted', 'video omitted', 'audio omitted', 'document omitted', 'photo omitted',
-                '.jpg', '.jpeg', '.png', '.mp4', '.mov', '.mp3', '.opus', '.m4a', '.pdf', '.docx'
+                'image omitted', 'video omitted', 'audio omitted', 'document omitted', 'photo omitted', 'sticker omitted',
+                'multimedia omitido', 'archivo omitido', 'mídia omitida', 'arquivo anexado', 'archivo adjunto',
+                '.jpg', '.jpeg', '.png', '.mp4', '.mov', '.mp3', '.opus', '.m4a', '.pdf', '.docx', '.webp'
             ];
             if (mediaIndicators.some(ext => t.includes(ext))) return true;
         }
@@ -230,10 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function isStickerMessage(msg) {
         if (!msg) return false;
         if (msg.type === 'sticker') return true;
+        if (msg.attachment && (msg.attachment.toLowerCase().endsWith('.webp') || msg.attachment.toUpperCase().startsWith('STK-'))) return true;
         if (msg.text) {
             const t = msg.text.toLowerCase();
             if (/<sticker:/i.test(t)) return true;
-            if (t.includes('sticker omitted') || t.includes('.webp')) return true;
+            if (t.includes('sticker omitted') || t.includes('.webp') || t.includes('stk-')) return true;
         }
         return false;
     }
@@ -570,16 +572,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderMessage = (msg, index, isConsecutive = false) => {
         const isMe = msg.sender === myName || msg.sender === 'You';
+        const isSticker = msg.type === 'sticker' || (msg.attachment && (msg.attachment.toLowerCase().endsWith('.webp') || msg.attachment.toUpperCase().startsWith('STK-')));
+        const isStickerOnly = isSticker && (!msg.text || !msg.text.trim());
 
         let mediaHtml = '';
         if (msg.attachment && msg.type !== 'system') {
             const fileUrl = `/media/${encodeURIComponent(currentChat)}/${encodeURIComponent(msg.attachment)}`;
 
-            if (msg.type === 'image') {
+            if (isSticker) {
+                mediaHtml = `
+                    <div class="relative group/sticker inline-block my-1 select-none" onclick="openImageModal('${fileUrl}')">
+                        <img src="${fileUrl}" loading="lazy" class="w-32 sm:w-40 h-auto max-h-40 object-contain drop-shadow-md cursor-zoom-in transition-transform duration-200 hover:scale-105 active:scale-95" alt="Sticker" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'text-xs text-gray-400 p-2 italic\\'>[Sticker]</div>';">
+                    </div>
+                `;
+            } else if (msg.type === 'image') {
                 mediaHtml = `
                     <div class="relative group/media overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-indigo-400/50 w-[240px] sm:w-[260px] h-[220px] sm:h-[240px] flex flex-col justify-between mb-1" onclick="openImageModal('${fileUrl}')">
                         <div class="relative overflow-hidden rounded-xl bg-white/80 dark:bg-black/40 flex items-center justify-center flex-1 w-full p-2.5">
-                            <img src="${fileUrl}" loading="lazy" class="w-full h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-105" alt="Image" onerror="this.onerror=null;this.src='../img/favicon.svg';">
+                            <img src="${fileUrl}" loading="lazy" class="w-full h-full object-contain rounded-lg cursor-zoom-in transition-transform duration-300 group-hover/media:scale-105" alt="Image" onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'flex flex-col items-center justify-center text-center p-3 text-xs text-gray-400\\'><span class=\\'text-2xl mb-1\\'>🖼️</span><span class=\\'font-semibold truncate max-w-[180px]\\'>${escapeHTML(msg.attachment)}</span><span class=\\'text-[10px] opacity-70 mt-1\\'>Media not included in export</span></div>';">
                         </div>
                     </div>
                 `;
@@ -597,22 +607,37 @@ document.addEventListener('DOMContentLoaded', () => {
                         <video controls playsinline preload="metadata" class="w-64 max-w-full rounded-xl shadow-md border border-white/20 bg-black"
                             onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
                             <source src="${fileUrl}" type="${vmime}">
+                            <source src="${fileUrl}">
                         </video>
                         <a href="${fileUrl}" target="_blank" download style="display:none" class="block text-[11px] font-bold ${isMe ? 'opacity-70' : 'text-indigo-500'} hover:underline mt-1">⬇ Can't play — Download video</a>
                         ` : `
                         <div class="w-64 h-16 rounded-xl bg-black/30 flex items-center justify-center text-xs text-gray-400">
-                            <span>📹 ${escH(msg.attachment.split('/').pop() || 'video')}</span>
+                            <span>📹 ${escapeHTML(msg.attachment.split('/').pop() || 'video')}</span>
                         </div>
                         `}
                         <a href="${fileUrl}" target="_blank" download class="block text-[11px] font-bold ${isMe ? 'opacity-70' : 'text-indigo-500'} hover:underline mt-1">⬇ Download video</a>
                     </div>
                 `;
             } else if (msg.type === 'audio') {
+                const aext = (msg.attachment.split('.').pop() || '').toLowerCase();
+                const isVoiceNote = msg.attachment.toUpperCase().includes('PTT-') || msg.attachment.toUpperCase().includes('AUD-');
+                const amime = aext === 'opus' ? 'audio/ogg; codecs=opus'
+                    : (aext === 'm4a' || aext === 'aac') ? 'audio/mp4'
+                    : aext === 'ogg' ? 'audio/ogg'
+                    : aext === 'wav' ? 'audio/wav'
+                    : 'audio/mpeg';
+
                 mediaHtml = `
-                    <div class="mb-2">
-                        <audio controls preload="metadata" class="h-10 w-64 max-w-full rounded-xl shadow-sm ${isMe ? 'opacity-90' : 'opacity-100'}">
-                            <source src="${fileUrl}" type="audio/mpeg">
+                    <div class="mb-1 p-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 max-w-xs">
+                        <div class="flex items-center gap-2 mb-1.5 text-[11px] font-semibold opacity-75">
+                            <span>${isVoiceNote ? '🎙️ Voice Note' : '🎵 Audio'}</span>
+                            <span class="truncate max-w-[140px] opacity-60">(${escapeHTML(msg.attachment)})</span>
+                        </div>
+                        <audio controls preload="metadata" class="h-9 w-64 max-w-full rounded-lg shadow-sm">
+                            <source src="${fileUrl}" type="${amime}">
+                            <source src="${fileUrl}">
                         </audio>
+                        <a href="${fileUrl}" target="_blank" download class="block text-[10px] font-medium ${isMe ? 'opacity-70' : 'text-indigo-500'} hover:underline mt-1">⬇ Download audio</a>
                     </div>
                 `;
             } else {
@@ -620,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="flex items-center ${isMe ? 'doc-me' : 'doc-them'} p-3 rounded-xl gap-3 cursor-pointer hover:opacity-80 transition mb-1 border">
                         <div class="w-10 h-10 ${isMe ? 'doc-icon-me' : 'doc-icon-them'} rounded-lg flex items-center justify-center font-bold text-xs">DOC</div>
                         <div class="overflow-hidden">
-                            <p class="text-sm font-semibold truncate">${msg.attachment}</p>
+                            <p class="text-sm font-semibold truncate">${escapeHTML(msg.attachment)}</p>
                             <a href="${fileUrl}" target="_blank" download class="text-xs font-bold uppercase hover:underline ${isMe ? 'opacity-70' : 'text-indigo-500'}">Download</a>
                         </div>
                     </div>
@@ -631,6 +656,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-sm';
         if (isConsecutive) {
             msgClass = isMe ? 'glass-chat-me ml-auto rounded-2xl rounded-tr-md rounded-br-sm' : 'glass-chat-them mr-auto rounded-2xl rounded-tl-md rounded-bl-sm';
+        }
+        if (isStickerOnly) {
+            msgClass = isMe ? 'ml-auto p-1 bg-transparent border-0 shadow-none' : 'mr-auto p-1 bg-transparent border-0 shadow-none';
         }
 
         let nameHtml = '';
@@ -678,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${nameHtml}
                     ${mediaHtml}
                     ${contentHtml}
-                    <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto select-none pt-0.5">
+                    <div style="color:var(${timeVar})" class="text-[10px] flex items-center justify-end font-semibold mt-1 ml-auto select-none pt-0.5 ${isStickerOnly ? 'bg-black/50 text-white px-2 py-0.5 rounded-full backdrop-blur-sm' : ''}">
                         ${msg.time}
                         ${isMe ? `<svg class="w-3.5 h-3.5 ml-1 text-blue-500" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>` : ''}
                     </div>

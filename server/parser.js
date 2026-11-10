@@ -3,7 +3,7 @@ const path = require('path');
 const readline = require('readline');
 
 // Robust Date and Time matching to support various WhatsApp formats across all languages (English, Chinese, Spanish, Japanese, Korean, Arabic, etc.)
-const MERIDIAN_WORDS = 'AM|PM|am|pm|a\\.m\\.|p\\.m\\.|A\\.M\\.|P\\.M\\.|上午|下午|中午|晚上|早上|凌晨|午夜|午前|午後|오전|오후|ص|م';
+const MERIDIAN_WORDS = 'AM|PM|am|pm|a\\.\\s*m\\.|p\\.\\s*m\\.|a\\.m\\.|p\\.m\\.|A\\.M\\.|P\\.M\\.|上午|下午|中午|晚上|早上|凌晨|午夜|午前|午後|오전|오후|ص|م';
 const DATE_PAT = `\\d{1,4}[\\/\\-\\.]\\d{1,2}[\\/\\-\\.]\\d{1,4}`;
 const TIME_PAT = `(?:(?:${MERIDIAN_WORDS})\\s*)?\\d{1,2}:\\d{2}(?::\\d{2})?(?:\\s*(?:${MERIDIAN_WORDS}))?`;
 
@@ -13,19 +13,26 @@ const BRACKET_REGEX = new RegExp(`^\\[([^\\]]+)\\]\\s*([^:]+?)(?:\\s*:\\s*(.*))?
 // Standard: 3/22/23, 4:51 PM - Sender: Message OR 2026/7/17 下午5:43 - Sender: Message
 const STANDARD_REGEX = new RegExp(`^(${DATE_PAT})[,\\s]+(${TIME_PAT})[\\s\\-]*([^:]+?)(?:\\s*:\\s*(.*))?$`);
 
-// iOS attachment: <attached: filename.ext>
-// Android attachment: filename.ext (file attached)
-const IOS_ATTACH_REGEX = /<attached:\s*(.+?)>/;
-const ANDROID_ATTACH_REGEX = /^(.+?)\s*\(file attached\)$/;
+// Universal Attachments across all languages (English, Spanish, Portuguese, French, German, Italian, Russian, Chinese, etc.)
+const EXT_LIST = 'jpg|jpeg|png|webp|gif|heic|mp4|mov|avi|mkv|3gp|m4a|opus|mp3|wav|ogg|aac|pdf|docx?|xlsx?|pptx?|vcf|zip';
+
+// iOS attachment: <attached: filename.ext> or <adjunto: filename.ext> or <anexo: filename.ext> or <pièce jointe : filename.ext>
+const IOS_ATTACH_REGEX = new RegExp(`<[^:>]+:\\s*([^>]+?\\.(?:${EXT_LIST}))\\s*>`, 'i');
+
+// Android attachment: filename.ext (file attached) or filename.ext (archivo adjunto) or filename.ext（附件）
+const ANDROID_ATTACH_REGEX = new RegExp(`^([a-zA-Z0-9_\\-\\.\\s\\(\\)]+?\\.(?:${EXT_LIST}))\\s*(?:\\([^)]+\\)|（[^）]+）)\\s*(.*)$`, 'i');
 
 const MEDIA_EXT = {
-    image: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.heic'],
+    image: ['.jpg', '.jpeg', '.png', '.gif', '.heic'],
     video: ['.mp4', '.mov', '.avi', '.mkv', '.3gp'],
     audio: ['.m4a', '.opus', '.mp3', '.wav', '.ogg', '.aac'],
 };
 
 function classifyAttachment(filename) {
+    if (!filename) return 'document';
     const ext = path.extname(filename).toLowerCase();
+    const base = path.basename(filename).toUpperCase();
+    if (ext === '.webp' || base.startsWith('STK-')) return 'sticker';
     for (const [type, exts] of Object.entries(MEDIA_EXT)) {
         if (exts.includes(ext)) return type;
     }
@@ -43,12 +50,11 @@ function normalizeTime(rawTime) {
     let t = rawTime.trim();
 
     // Check Chinese / East Asian / Latin prefixes
-    const prefixMatch = t.match(/^(上午|早上|凌晨|午夜|中午|下午|晚上|午前|午後|오전|오후|AM|PM|am|pm)\s*(\d{1,2}:\d{2}(?::\d{2})?)/i);
+    const prefixMatch = t.match(/^(上午|早上|凌晨|午夜|中午|下午|晚上|午前|午後|오전|오후|AM|PM|am|pm|a\.\s*m\.|p\.\s*m\.)\s*(\d{1,2}:\d{2}(?::\d{2})?)/i);
     if (prefixMatch) {
-        const pfx = prefixMatch[1];
-        const pfxLow = pfx.toLowerCase();
+        const pfx = prefixMatch[1].toLowerCase().replace(/\s+/g, '');
         const timeDigits = prefixMatch[2];
-        const isPM = ['下午', '晚上', '中午', '午後', '오후', 'pm'].includes(pfxLow) || ['下午', '晚上', '中午', '午後', '오후'].includes(pfx);
+        const isPM = ['下午', '晚上', '中午', '午後', '오후', 'pm', 'p.m.'].includes(pfx);
         const parts = timeDigits.split(':');
         let h = parseInt(parts[0], 10);
         const m = parts[1];
@@ -66,12 +72,12 @@ function normalizeTime(rawTime) {
         }
     }
 
-    // Check Chinese / East Asian suffixes
-    const suffixMatch = t.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*(上午|早上|凌晨|午夜|中午|下午|晚上|午前|午後|오전|오후)/);
+    // Check Chinese / East Asian / Latin suffixes
+    const suffixMatch = t.match(/^(\d{1,2}:\d{2}(?::\d{2})?)\s*(上午|早上|凌晨|午夜|中午|下午|晚上|午前|午後|오전|오후|AM|PM|am|pm|a\.\s*m\.|p\.\s*m\.)/i);
     if (suffixMatch) {
         const timeDigits = suffixMatch[1];
-        const sfx = suffixMatch[2];
-        const isPM = ['下午', '晚上', '中午', '午後', '오후'].includes(sfx);
+        const sfx = suffixMatch[2].toLowerCase().replace(/\s+/g, '');
+        const isPM = ['下午', '晚上', '中午', '午後', '오후', 'pm', 'p.m.'].includes(sfx);
         const parts = timeDigits.split(':');
         let h = parseInt(parts[0], 10);
         const m = parts[1];
@@ -149,11 +155,11 @@ function parseLine(line, format) {
 
         if (iosAttach) {
             attachment = iosAttach[1].trim();
-            text = '';
+            text = text.replace(iosAttach[0], '').trim();
             type = classifyAttachment(attachment);
         } else if (androidAttach) {
             attachment = androidAttach[1].trim();
-            text = '';
+            text = (androidAttach[2] || '').trim();
             type = classifyAttachment(attachment);
         }
     }

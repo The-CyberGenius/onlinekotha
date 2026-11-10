@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 
+const { db } = require('../db');
 const { requireUserOrGuest } = require('../auth');
 const { getOrCreateGuestId } = require('../guest');
 const { SRC_DIR } = require('../upload');
@@ -35,9 +36,47 @@ router.get('/*rest', requireUserOrGuest, (req, res, next) => {
         return res.status(403).end();
     }
 
-    if (!fs.existsSync(fullPath)) return res.status(404).end();
+    let finalFullPath = fullPath;
+    if (!fs.existsSync(finalFullPath)) {
+        // Fallback 1: Admin or Admin Impersonating has access across any user folder
+        if (req.user && (req.user.is_admin || req.user.original_admin_id)) {
+            const relParts = rel.split('/');
+            const chatFolder = relParts[0];
+            const fileName = relParts.slice(1).join('/');
+            if (fs.existsSync(SRC_DIR)) {
+                const subdirs = fs.readdirSync(SRC_DIR, { withFileTypes: true }).filter(d => d.isDirectory() && (d.name.startsWith('u_') || d.name.startsWith('gst_')));
+                for (const sd of subdirs) {
+                    const cand = path.join(SRC_DIR, sd.name, chatFolder, fileName);
+                    if (fs.existsSync(cand)) {
+                        finalFullPath = cand;
+                        break;
+                    }
+                }
+            }
+        } else {
+            // Fallback 2: Check if chat belongs to this user or guest in the DB
+            try {
+                const relParts = rel.split('/');
+                const chatFolder = relParts[0];
+                const fileName = relParts.slice(1).join('/');
+                const dbChat = db.prepare('SELECT user_id, guest_id FROM chats WHERE (guest_id = ? OR user_id = ?) AND folder_name = ?').get(ownerId, typeof ownerId === 'number' ? ownerId : 0, chatFolder);
+                if (dbChat) {
+                    if (dbChat.user_id && dbChat.user_id > 0) {
+                        const cand = path.join(SRC_DIR, `u_${dbChat.user_id}`, chatFolder, fileName);
+                        if (fs.existsSync(cand)) finalFullPath = cand;
+                    }
+                    if (!fs.existsSync(finalFullPath) && dbChat.guest_id) {
+                        const cand = path.join(SRC_DIR, `u_${dbChat.guest_id}`, chatFolder, fileName);
+                        if (fs.existsSync(cand)) finalFullPath = cand;
+                    }
+                }
+            } catch (e) {}
+        }
+    }
 
-    const ext = path.extname(fullPath).toLowerCase();
+    if (!fs.existsSync(finalFullPath)) return res.status(404).end();
+
+    const ext = path.extname(finalFullPath).toLowerCase();
     const MIME_MAP = {
         '.mp4': 'video/mp4', '.mov': 'video/mp4', '.m4v': 'video/mp4',
         '.webm': 'video/webm', '.3gp': 'video/3gpp',
@@ -55,7 +94,7 @@ router.get('/*rest', requireUserOrGuest, (req, res, next) => {
     const isVideo = mime && mime.startsWith('video/');
 
     if (isVideo) {
-        const stat = fs.statSync(fullPath);
+        const stat = fs.statSync(finalFullPath);
         const fileSize = stat.size;
         const rangeHeader = req.headers.range;
 
@@ -70,20 +109,20 @@ router.get('/*rest', requireUserOrGuest, (req, res, next) => {
                 'Content-Length': chunkSize,
                 'Content-Type': mime,
             });
-            fs.createReadStream(fullPath, { start, end }).pipe(res);
+            fs.createReadStream(finalFullPath, { start, end }).pipe(res);
         } else {
             res.writeHead(200, {
                 'Content-Length': fileSize,
                 'Content-Type': mime,
                 'Accept-Ranges': 'bytes',
             });
-            fs.createReadStream(fullPath).pipe(res);
+            fs.createReadStream(finalFullPath).pipe(res);
         }
         return;
     }
 
     if (mime) res.setHeader('Content-Type', mime);
-    res.sendFile(fullPath);
+    res.sendFile(finalFullPath);
 });
 
 
