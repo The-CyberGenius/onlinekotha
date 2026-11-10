@@ -338,6 +338,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
             res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
         } else if (filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') || filePath.endsWith('.webp') || filePath.endsWith('.svg') || filePath.endsWith('.ico')) {
             res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+        } else if (filePath.endsWith('.js') || filePath.endsWith('.css')) {
+            res.setHeader('Cache-Control', 'public, max-age=120, must-revalidate');
         } else {
             res.setHeader('Vary', 'Accept-Encoding');
         }
