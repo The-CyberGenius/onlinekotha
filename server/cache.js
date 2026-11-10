@@ -107,6 +107,22 @@ async function getMessages(chatDir) {
         console.warn('Cache write failed:', err.message);
     }
 
+    try {
+        const { db } = require('./db');
+        const folderName = path.basename(chatDir);
+        let dispName = null;
+        if (participants.length === 2 && !isGroup) {
+            dispName = `${participants[0]} & ${participants[1]}`;
+        }
+        if (dispName) {
+            db.prepare('UPDATE chats SET is_group = ?, participants = ?, message_count = ?, display_name = ? WHERE folder_name = ?')
+              .run(isGroup ? 1 : 0, JSON.stringify(participants), messages.length, dispName, folderName);
+        } else {
+            db.prepare('UPDATE chats SET is_group = ?, participants = ?, message_count = ? WHERE folder_name = ?')
+              .run(isGroup ? 1 : 0, JSON.stringify(participants), messages.length, folderName);
+        }
+    } catch (e) {}
+
     return { messages, cached: false, format, isGroup, participants, participantStats };
 }
 

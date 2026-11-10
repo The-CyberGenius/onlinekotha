@@ -102,13 +102,27 @@ router.get('/chats/meta', requireUserOrGuest, (req, res) => {
         rows = db.prepare('SELECT folder_name, display_name, message_count, is_group, participants FROM chats WHERE guest_id = ?').all(ownerId);
     }
     const map = {};
+    const myDir = userDir(ownerId);
     for (const r of rows) {
         let parts = [];
         if (r.participants) {
             try { parts = JSON.parse(r.participants); } catch(e){}
         }
+
+        // Check if fresh cache exists on disk to override stale DB participants
+        const cacheFile = path.join(myDir, r.folder_name, '_chat.cache.json');
+        if (fs.existsSync(cacheFile)) {
+            try {
+                const cData = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+                if (cData.participants && Array.isArray(cData.participants) && cData.participants.length > 0) {
+                    parts = cData.participants;
+                    r.is_group = cData.isGroup ? 1 : 0;
+                }
+            } catch(e) {}
+        }
+
         let dispName = (r.display_name || '').trim();
-        if (!dispName || /^(chat|whatsapp[\s_-]*chat)[\s_-]*\d*$/i.test(dispName)) {
+        if (!dispName || /^(chat|whatsapp[\s_-]*chat)[\s_-]*\d*$/i.test(dispName) || (dispName.includes('(Group)') && !r.is_group)) {
             if (parts.length >= 2) {
                 dispName = `${parts[0]} & ${parts[1]}`;
             } else if (parts.length === 1) {
