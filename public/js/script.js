@@ -1181,6 +1181,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // don't show stale data from a previously opened chat (no mismatch).
         window.kothaChatLoading = true;
         window.kothaLoadedChat = null;
+        const aiContainer = document.getElementById('ai-chat-container');
+        if (aiContainer) aiContainer.innerHTML = '';
         try {
             // Clean state for the new chat — NEVER leak previous chat's identity or Kotha Assistant
             if (chatName !== 'kotha_assistant') {
@@ -1911,7 +1913,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     scrollArea.scrollTop = scrollArea.scrollHeight;
                 }, 100);
 
-                if (window.kothaLoadAiHistory) {
+                if (window.kothaLoadAiHistory && chatName !== 'kotha_assistant') {
                     window.kothaLoadAiHistory(chatName);
                 }
 

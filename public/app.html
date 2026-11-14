@@ -121,7 +121,7 @@
         }
     </style>
 
-    <script src="/js/auth-init.js?v=4.4"></script>
+    <script src="/js/auth-init.js?v=5.0"></script>
     <script>if (localStorage.getItem('kotha_dark') === '1') document.documentElement.classList.add('dark');</script>
     <!-- Google Analytics — async, non-blocking -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GKQ286KWDG"></script>
@@ -205,7 +205,7 @@
                         </svg>
                     </button>
                     <a id="admin-link" href="/admin.html"
-                        class="hidden w-7 h-7 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/60 flex items-center justify-center text-gray-500 hover:text-gray-700 transition"
+                        class="hidden w-7 h-7 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/60 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
                         title="Admin Panel">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round">
@@ -1179,8 +1179,8 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="/js/sample-chat-data.js?v=3"></script>
-    <script src="/js/ai-panel.js?v=62"></script>
-    <script src="/js/script.js?v=76"></script>
+    <script src="/js/ai-panel.js?v=63"></script>
+    <script src="/js/script.js?v=77"></script>
     <script src="/js/upload.js?v=67"></script>
     <script src="/js/story.js?v=57"></script>
     <script src="/js/features.js?v=59"></script>
@@ -1189,14 +1189,14 @@
         if ('caches' in window) {
             caches.keys().then(keys => {
                 keys.forEach(k => {
-                    if (k.startsWith('kotha-') && !k.includes('v76')) {
+                    if (k.startsWith('kotha-') && !k.includes('v77')) {
                         caches.delete(k);
                     }
                 });
             }).catch(() => {});
         }
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js?v=76').then(reg => {
+            navigator.serviceWorker.register('/sw.js?v=77').then(reg => {
                 reg.update();
             }).catch(() => { });
             let refreshing = false;

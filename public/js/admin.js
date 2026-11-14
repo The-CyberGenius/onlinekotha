@@ -26,14 +26,28 @@
         window.location.href = '/login.html';
         return;
     }
-    if (!me.user.is_admin) {
+    const isAdminUser = Boolean(me.user.is_admin || me.user.original_admin_id || me.user.is_impersonating);
+    if (!isAdminUser) {
         document.getElementById('auth-gate').innerHTML =
             '<div style="text-align:center;padding:24px;"><p style="color:var(--danger);font-weight:600;margin-bottom:8px;">Not authorized.</p><a href="/" style="color:var(--accent);text-decoration:underline;font-size:13px;">Go to app</a></div>';
         return;
     }
     document.getElementById('auth-gate').classList.add('hidden');
     document.getElementById('app').classList.remove('hidden');
-    document.getElementById('admin-email-info').textContent = me.user.email;
+    document.getElementById('admin-email-info').textContent = me.user.is_impersonating
+        ? `${me.user.email} (Impersonated)`
+        : me.user.email;
+
+    if (me.user.is_impersonating) {
+        let existingBanner = document.getElementById('impersonation-top-banner');
+        if (!existingBanner) {
+            existingBanner = document.createElement('div');
+            existingBanner.id = 'impersonation-top-banner';
+            existingBanner.style.cssText = 'background:rgba(239,68,68,0.15);border-bottom:1px solid rgba(239,68,68,0.3);color:#ef4444;padding:8px 16px;text-align:center;font-size:12px;font-weight:700;display:flex;justify-content:center;align-items:center;gap:12px;';
+            existingBanner.innerHTML = `<span>🛡️ Currently logged in as user: <strong>${escapeHTML(me.user.display_name || me.user.email || String(me.user.id))}</strong></span> <a href="/api/admin/impersonate/stop" style="color:#ffffff;background:#ef4444;padding:3px 10px;border-radius:6px;text-decoration:none;font-size:11px;font-weight:700;">Exit Impersonation</a>`;
+            document.body.prepend(existingBanner);
+        }
+    }
 
     // Logout
     document.getElementById('logout-btn').addEventListener('click', async () => {
@@ -1000,9 +1014,6 @@ HARD RULES
                 }
 
                 html += '<div style="display:flex;gap:5px;margin-top:10px;flex-wrap:wrap;">';
-                if (!u.is_admin) {
-                    html += '<button onclick="window.location.href=\'/api/admin/impersonate/start?uid=' + u.id + '\'" style="flex:1;min-width:65px;padding:7px 0;font-size:11px;font-weight:700;border-radius:8px;border:1px solid var(--accent);background:rgba(192,132,252,0.14);color:var(--accent);cursor:pointer;" title="Impersonate & Login as user in /app">🔑 Login</button>';
-                }
                 if (!isGuestSection && !u.is_admin && !u.is_guest) {
                     html += '<button data-uid="' + u.id + '" data-plan="' + u.plan + '" data-trial="' + (u.trial_expires_at || '') + '" data-email="' + u.email + '" class="user-plan-btn" style="flex:1;min-width:55px;padding:7px 0;font-size:11px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">Plan</button>';
                 }
@@ -1067,7 +1078,7 @@ HARD RULES
                     const hasChats = (Number(u.chat_count) || 0) > 0;
                     const rowStyle = hasChats ? 'style="background:rgba(16,185,129,0.06);border-left:3px solid #10b981;"' : '';
 
-                    html += `<tr class="user-main-row" ${rowStyle}><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">Guest (${String(u.id).substring(4, 12)})${onlineDot}</span><span class="user-email-text" style="font-family:monospace;font-size:11px;color:var(--text-muted);">${u.id}</span></div></div></td>`;
+                    html += `<tr class="user-main-row" ${rowStyle}><td><div class="user-profile-cell">${avatarHtml}<div class="user-profile-text"><span class="user-name-text">Guest (${String(u.id).substring(4, 12)})${onlineDot}</span><span class="user-email-text" style="font-family:monospace;font-size:11px;color:var(--text-muted);" title="${u.id}">${u.id}</span></div></div></td>`;
                     html += `<td><div style="margin-bottom:4px;">${badge}</div><span class="meta-text" style="color:#f59e0b;font-weight:600;">Guest Session</span></td>`;
                     
                     if (hasChats) {
@@ -1082,7 +1093,7 @@ HARD RULES
                     const chatsBtnStyle = hasChats 
                         ? 'padding:4px 8px;font-size:11px;font-weight:800;color:#10b981;border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.14);' 
                         : 'padding:4px 7px;font-size:11px;opacity:0.75;';
-                    html += `<td><div class="action-cell"><button onclick="window.location.href='/api/admin/impersonate/start?uid=${u.id}'" class="btn-subtle" style="padding:4px 9px;font-size:11px;font-weight:700;color:var(--accent);border-color:var(--accent);background:rgba(192,132,252,0.14);border-radius:6px;display:inline-flex;align-items:center;gap:4px;" title="Login to this guest session in /app"><span>🔑</span> Login</button><button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${guestCC}" style="${chatsBtnStyle}">${hasChats ? '📁 Chats (' + guestCC + ')' : 'Chats (0)'}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button><button data-uid="${u.id}" data-email="${u.email || u.id}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete Guest Session" style="padding:4px 7px;font-size:11px;">Del</button></div></td></tr>`;
+                    html += `<td><div class="action-cell"><button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${guestCC}" style="${chatsBtnStyle}">${hasChats ? '📁 Chats (' + guestCC + ')' : 'Chats (0)'}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button><button data-uid="${u.id}" data-email="${u.email || u.id}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete Guest Session" style="padding:4px 7px;font-size:11px;">Del</button></div></td></tr>`;
                     html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="6" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
                 }
             } else {
@@ -1128,7 +1139,7 @@ HARD RULES
                         ? 'padding:4px 8px;font-size:11px;font-weight:800;color:#10b981;border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.14);' 
                         : 'padding:4px 7px;font-size:11px;opacity:0.75;';
 
-                    html += `<td><div class="action-cell">${u.is_admin ? '' : `<button onclick="window.location.href='/api/admin/impersonate/start?uid=${u.id}'" class="btn-subtle" style="padding:4px 9px;font-size:11px;font-weight:700;color:var(--accent);border-color:var(--accent);background:rgba(192,132,252,0.14);border-radius:6px;display:inline-flex;align-items:center;gap:4px;" title="Login to this user account in /app"><span>🔑</span> Login</button><button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${regCC}" style="${chatsBtnStyle}">${hasChats ? '📁 Chats (' + regCC + ')' : 'Chats (0)'}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
+                    html += `<td><div class="action-cell">${u.is_admin ? '' : `<button data-uid="${u.id}" data-plan="${u.plan}" data-trial="${u.trial_expires_at || ''}" data-email="${u.email}" class="user-plan-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Plan</button>`}<button data-uid="${u.id}" class="user-chats-btn btn-subtle" data-count="${regCC}" style="${chatsBtnStyle}">${hasChats ? '📁 Chats (' + regCC + ')' : 'Chats (0)'}</button><button data-uid="${u.id}" class="user-ai-logs-btn btn-subtle" style="padding:4px 7px;font-size:11px;">Logs</button>${suspendBtn}${u.is_admin ? '' : `<button data-uid="${u.id}" data-email="${u.email}" class="user-del-btn btn-subtle btn-subtle-danger" title="Delete User" style="padding:4px 7px;font-size:11px;">Del</button>`}</div></td></tr>`;
                     html += `<tr id="expand-row-${u.id}" class="hidden"><td colspan="7" style="padding:0;border:none;background:transparent;"><div data-chats-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid var(--accent);background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div><div data-ai-logs-for="${u.id}" class="hidden expand-row-container" style="padding:8px 10px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);border-left:3px solid #f59e0b;background:rgba(255,255,255,0.015);margin:4px 0 6px;border-radius:0 8px 8px 0;box-sizing:border-box;"></div></td></tr>`;
                 }
             }
@@ -1515,57 +1526,83 @@ HARD RULES
                 try {
                     const convs = await (await fetch(`/api/admin/users/${uid}/conversations`)).json();
                     if (!convs.length) {
-                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;padding:10px;text-align:center;font-size:12px;color:var(--text-muted);border:1px solid var(--border);">No AI conversations yet</div>';
+                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;padding:12px;text-align:center;font-size:12px;color:var(--text-muted);border:1px solid var(--border);">No AI or Assistant conversations found for this user</div>';
                         return;
                     }
-                    const isMobLogs = window.matchMedia('(max-width: 768px)').matches;
-                    if (isMobLogs) {
-                        // Mobile: stacked log cards
-                        area.innerHTML = '<div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">' +
-                            '<div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;justify-content:space-between;align-items:center;">' +
-                                '<span style="font-size:10px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (' + convs.length + ')</span>' +
-                                '<div style="display:flex;align-items:center;gap:6px;">' +
-                                    '<button data-uid="' + uid + '" class="ai-logs-clear-all-btn" style="padding:3px 8px;font-size:10px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;" title="Delete all AI conversations for this user">Clear All</button>' +
-                                    '<button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;padding:2px 6px;">×</button>' +
-                                '</div>' +
-                            '</div>' +
-                            convs.map(c =>
-                                '<div style="padding:10px;border-bottom:1px solid var(--bg-alt);">' +
-                                    '<div style="font-weight:600;font-size:13px;color:var(--text-primary);margin-bottom:2px;word-break:break-word;">' + (c.title || 'Untitled') + '</div>' +
-                                    '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px;">' + c.chat_folder + ' · ' + c.msg_count + ' msgs · ' + formatDateTime(c.updated_at) + '</div>' +
-                                    '<div style="display:flex;gap:6px;">' +
-                                        '<button data-uid="' + uid + '" data-convid="' + c.id + '" class="ai-log-view-btn" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);cursor:pointer;">View</button>' +
-                                        '<a href="/api/admin/users/' + uid + '/conversations/' + c.id + '/download" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-primary);text-decoration:none;">TXT</a>' +
-                                        '<button data-uid="' + uid + '" data-convid="' + c.id + '" class="ai-log-del-btn" style="padding:5px 10px;font-size:11px;font-weight:600;border-radius:6px;border:1px solid rgba(239,68,68,0.35);background:var(--card-bg);color:var(--danger);cursor:pointer;">Del</button>' +
-                                    '</div></div>'
-                            ).join('') +
-                        '</div>';
-                    } else {
-                        area.innerHTML = `
-                            <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
-                                <div style="padding:6px 10px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;align-items:center;justify-content:space-between;">
-                                    <span style="font-size:11px;font-weight:700;color:var(--text-primary);text-transform:uppercase;">AI Conversations (${convs.length})</span>
-                                    <div style="display:flex;align-items:center;gap:6px;">
-                                        <button data-uid="${uid}" class="ai-logs-clear-all-btn btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 8px;font-weight:600;" title="Permanently clear all AI chats for this user">Clear All</button>
-                                        <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:14px;">×</button>
-                                    </div>
+
+                    const chatAiConvs = convs.filter(c => !c.is_assistant && c.id !== 'kotha_assistant');
+                    const asstConvs = convs.filter(c => c.is_assistant || c.id === 'kotha_assistant');
+
+                    area.innerHTML = `
+                        <div style="background:var(--bg-page);border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+                            <div style="padding:7px 12px;border-bottom:1px solid var(--border);background:var(--bg-page);display:flex;align-items:center;justify-content:space-between;">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span style="font-size:11px;font-weight:700;color:var(--text-primary);text-transform:uppercase;letter-spacing:0.04em;">User AI & Support History</span>
+                                    <span style="font-size:10px;padding:1px 7px;border-radius:10px;background:rgba(245,158,11,0.15);color:#f59e0b;font-weight:700;">${convs.length} Total</span>
                                 </div>
-                                ${convs.map(c => `
-                                    <div style="padding:8px 10px;border-bottom:1px solid var(--bg-alt);display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">
-                                        <div style="flex:1;min-width:0;">
-                                            <p style="font-weight:600;color:var(--text-primary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled'}</p>
-                                            <p style="font-size:10px;color:var(--text-muted);margin:1px 0 0;">${c.chat_folder} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</p>
-                                        </div>
-                                        <div style="display:flex;gap:4px;align-items:center;">
-                                            <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 6px;">View</button>
-                                            <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="btn-subtle" style="font-size:10px;padding:2px 6px;text-decoration:none;">TXT</a>
-                                            <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-del-btn btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 6px;" title="Delete this conversation">Del</button>
-                                        </div>
-                                    </div>
-                                `).join('')}
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <button data-uid="${uid}" class="ai-logs-clear-all-btn btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 8px;font-weight:600;" title="Permanently clear all AI chats for this user">Clear All</button>
+                                    <button class="ai-logs-close-btn" style="border:none;background:transparent;cursor:pointer;color:var(--text-muted);font-size:16px;line-height:1;padding:2px 4px;">×</button>
+                                </div>
                             </div>
-                        `;
-                    }
+
+                            <!-- Section 1: WhatsApp Chat AI (Persona) -->
+                            <div style="padding:10px 12px;border-bottom:1px solid var(--border);background:var(--card-bg);">
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <span style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.03em;">💬 Uploaded WhatsApp Chat AI</span>
+                                        <span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(192,132,252,0.15);color:var(--accent);">${chatAiConvs.length}</span>
+                                    </div>
+                                    <span style="font-size:10px;color:var(--text-muted);">Conversations with AI personas generated from exported chats</span>
+                                </div>
+                                ${chatAiConvs.length === 0 ? `<div style="font-size:11px;color:var(--text-muted);padding:6px 2px;font-style:italic;">No WhatsApp Chat AI conversations yet.</div>` : `
+                                    <div style="display:flex;flex-direction:column;gap:4px;">
+                                        ${chatAiConvs.map(c => `
+                                            <div style="padding:6px 10px;background:var(--bg-page);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                                                <div style="flex:1;min-width:0;">
+                                                    <div style="font-weight:600;font-size:12px;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Untitled Chat AI'}</div>
+                                                    <div style="font-size:10px;color:var(--text-muted);">${c.chat_folder ? c.chat_folder.replace(/^WhatsApp Chat - /i, '') : ''} &middot; ${c.msg_count} msgs &middot; ${formatDateTime(c.updated_at)}</div>
+                                                </div>
+                                                <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
+                                                    <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 7px;">View</button>
+                                                    <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="btn-subtle" style="font-size:10px;padding:2px 7px;text-decoration:none;">TXT</a>
+                                                    <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-del-btn btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 7px;" title="Delete this conversation">Del</button>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `}
+                            </div>
+
+                            <!-- Section 2: Kotha Assistant Support -->
+                            <div style="padding:10px 12px;background:var(--card-bg);">
+                                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <span style="font-size:11px;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:0.03em;">🤖 Kotha Assistant Support Messages</span>
+                                        <span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(16,185,129,0.15);color:#10b981;">${asstConvs.length > 0 ? (asstConvs[0].msg_count + ' msgs') : '0'}</span>
+                                    </div>
+                                    <span style="font-size:10px;color:var(--text-muted);">Direct questions & inquiries asked to official Kotha bot</span>
+                                </div>
+                                ${asstConvs.length === 0 ? `<div style="font-size:11px;color:var(--text-muted);padding:6px 2px;font-style:italic;">No Kotha Assistant messages yet.</div>` : `
+                                    <div style="display:flex;flex-direction:column;gap:4px;">
+                                        ${asstConvs.map(c => `
+                                            <div style="padding:6px 10px;background:var(--bg-page);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                                                <div style="flex:1;min-width:0;">
+                                                    <div style="font-weight:600;font-size:12px;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${c.title || 'Kotha Assistant Support Session'}</div>
+                                                    <div style="font-size:10px;color:var(--text-muted);">${c.msg_count} messages logged &middot; Last message: ${formatDateTime(c.updated_at)}</div>
+                                                </div>
+                                                <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
+                                                    <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-view-btn btn-subtle" style="font-size:10px;padding:2px 7px;">View</button>
+                                                    <a href="/api/admin/users/${uid}/conversations/${c.id}/download" class="btn-subtle" style="font-size:10px;padding:2px 7px;text-decoration:none;">TXT</a>
+                                                    <button data-uid="${uid}" data-convid="${c.id}" class="ai-log-del-btn btn-subtle btn-subtle-danger" style="font-size:10px;padding:2px 7px;" title="Clear assistant messages">Del</button>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
 
                     area.querySelector('.ai-logs-close-btn')?.addEventListener('click', () => {
                         area.classList.add('hidden');

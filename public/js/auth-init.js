@@ -511,9 +511,23 @@
             }, 700);
         }
 
-        if (me.user.is_admin) {
+        const isAdminOrImpersonating = Boolean(
+            me.user && (
+                me.user.is_admin ||
+                me.user.is_impersonating ||
+                me.user.original_admin_id ||
+                (document.cookie && document.cookie.includes('admin_impersonate_uid'))
+            )
+        );
+
+        if (isAdminOrImpersonating) {
             const link = document.getElementById('admin-link');
-            if (link) link.classList.remove('hidden');
+            if (link) {
+                link.classList.remove('hidden');
+                link.style.display = 'flex';
+                link.setAttribute('title', me.user.is_impersonating ? 'Back to Admin Panel' : 'Admin Panel');
+                link.setAttribute('href', '/admin.html');
+            }
         }
 
         const logoutBtn = document.getElementById('logout-btn');
@@ -534,11 +548,16 @@
 
         // Impersonation Indicator
         if (me.user.is_impersonating) {
-            // Show exit button in header, and hide logout to prevent overflow
+            // Ensure admin-link settings button is clearly displayed in header
+            const adminLink = document.getElementById('admin-link');
+            if (adminLink) {
+                adminLink.classList.remove('hidden');
+                adminLink.style.display = 'flex';
+                adminLink.setAttribute('title', 'Return to Admin Panel');
+                adminLink.setAttribute('href', '/admin.html');
+            }
             const exitBtn = document.getElementById('exit-impersonation-btn');
             if (exitBtn) exitBtn.classList.remove('hidden');
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) logoutBtn.classList.add('hidden'); logoutBtn.style.setProperty('display', 'none', 'important');
 
             // Add thin red line at the top of the body and CSS hook for mobile dock
             document.body.classList.add('border-t-4', 'border-red-500', 'impersonating-mobile-dock');

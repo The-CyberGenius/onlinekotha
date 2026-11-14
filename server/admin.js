@@ -946,7 +946,12 @@ router.get('/impersonate/start', (req, res) => {
     if (!uid) return res.status(400).send('UID required');
 
     const IS_PROD = process.env.NODE_ENV === 'production';
-    res.cookie('admin_impersonate_uid', uid, { httpOnly: true, path: '/' });
+    res.cookie('admin_impersonate_uid', uid, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: IS_PROD,
+        path: '/'
+    });
 
     // Mark as admin inspected immediately
     const now = Date.now();
@@ -1215,7 +1220,8 @@ router.get('/users/:id/conversations', (req, res) => {
         : `SELECT c.id, c.chat_folder, c.title, c.created_at, c.updated_at,
                 (SELECT COUNT(*) FROM conv_messages WHERE conversation_id = c.id) AS msg_count
            FROM conversations c WHERE c.user_id = ? ORDER BY c.updated_at DESC`;
-    const rows = db.prepare(sql).all(isGuest ? rawId : Number(rawId));
+    const rawRows = db.prepare(sql).all(isGuest ? rawId : Number(rawId));
+    const rows = rawRows.map(r => ({ ...r, type: 'chat_ai', is_assistant: false }));
 
     try {
         const asstCount = isGuest
@@ -1228,7 +1234,9 @@ router.get('/users/:id/conversations', (req, res) => {
                 title: 'Kotha Assistant (Support & Inquiries)',
                 created_at: asstCount.last_at || Date.now(),
                 updated_at: asstCount.last_at || Date.now(),
-                msg_count: asstCount.c
+                msg_count: asstCount.c,
+                type: 'assistant_support',
+                is_assistant: true
             });
         }
     } catch (e) {}

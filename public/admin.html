@@ -56,9 +56,11 @@
         }
 
         #app {
-            max-width: 1280px; /* Made it wider for desktop */
+            max-width: 1440px;
             margin: 0 auto;
-            padding: 24px 20px 60px;
+            padding: 20px 20px 60px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* ── Header ────────────────────────────────────────── */
@@ -320,21 +322,21 @@
             table-layout: auto;
         }
         .admin-table th {
-            padding: 8px 10px;
+            padding: 7px 8px;
             background: var(--bg-page);
             border-bottom: 1px solid var(--border);
             font-size: 11px;
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
             white-space: nowrap;
         }
         .admin-table td {
-            padding: 8px 10px;
+            padding: 6px 8px;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
-            font-size: 12.5px;
+            font-size: 12px;
             color: var(--text-primary);
             white-space: nowrap;
         }
@@ -717,13 +719,14 @@
         .action-cell {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             justify-content: flex-end;
             white-space: nowrap;
         }
 
-        #tab-users .admin-card {
-            padding: 20px 16px;
+        #tab-users .admin-card,
+        #tab-guests .admin-card {
+            padding: 16px 18px;
         }
     
         /* Dark Mode Variables */
@@ -1692,7 +1695,7 @@
         </div>
     </div>
 
-    <script src="/js/admin.js?v=20261023002"></script>
+    <script src="/js/admin.js?v=20261114001"></script>
     <script>
 
     // ── Theme Manager ────────────────────────────────────────────────────────

@@ -765,9 +765,13 @@
     async function sendToAI(text, chatFolder, sendAsAI = false) {
         const convId = conversationMap[chatFolder] || null;
         const isSampleDemo = chatFolder === 'sample_demo' || (window.__SAMPLE_CHAT_DATA__ && chatFolder === window.__SAMPLE_CHAT_DATA__.name);
-        const cName = chatFolder === 'kotha_assistant'
+        let cName = chatFolder === 'kotha_assistant'
             ? 'Kotha Assistant'
-            : (isSampleDemo ? 'Sarah' : (contactNameMap[chatFolder] || (document.getElementById('chat-header-name')?.innerText) || 'AI'));
+            : (isSampleDemo ? 'Sarah' : (contactNameMap[chatFolder] || ''));
+        if (!cName || (chatFolder !== 'kotha_assistant' && cName === 'Kotha Assistant')) {
+            const hText = document.getElementById('chat-header-name')?.innerText?.trim();
+            cName = (hText && !hText.includes('Kotha Assistant')) ? hText : (chatFolder.replace(/^WhatsApp Chat - /i, '') || 'AI');
+        }
         const uName = isSampleDemo ? 'Alex' : ((typeof window.kothaGetMyName === 'function') ? window.kothaGetMyName() : 'User');
 
         _dotStart();
@@ -1306,7 +1310,11 @@
             if (!data.messages || data.messages.length === 0) return;
 
             const headerEl = document.getElementById('chat-header-name');
-            const name = contactNameMap[chatFolder] || (headerEl ? headerEl.innerText : 'AI');
+            let name = contactNameMap[chatFolder];
+            if (!name || (chatFolder !== 'kotha_assistant' && name === 'Kotha Assistant')) {
+                const headerText = headerEl ? headerEl.innerText.trim() : '';
+                name = (headerText && !headerText.includes('Kotha Assistant')) ? headerText : (chatFolder.replace(/^WhatsApp Chat - /i, '') || 'AI');
+            }
 
             data.messages.forEach(msg => {
                 const cleanContent = stripHtmlTags(msg.content);
@@ -1331,6 +1339,9 @@
         activeChat = chatFolder;
         chatContainer.innerHTML = '';
         lastRenderedDate = null;
+        if (chatFolder === 'kotha_assistant') {
+            return;
+        }
         try {
             const resp = await fetch(`/api/ai/conversations?chat=${encodeURIComponent(chatFolder)}`);
             if (!resp.ok) return;
