@@ -1,4 +1,14 @@
 (async function () {
+    function escapeHTML(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+    const escapeHtml = escapeHTML;
     function formatBytes(bytes) {
         if (!bytes || bytes === 0) return '0 B';
         const k = 1024, dm = 2, sizes = ['B', 'KB', 'MB', 'GB', 'TB'];

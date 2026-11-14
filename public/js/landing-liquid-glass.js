@@ -1,7 +1,6 @@
 /**
  * OnlineKotha - Ultra-Premium Liquid Glass WebGL Engine
- * Powers realistic WebGL refraction, chromatic aberration, specular lighting,
- * and holographic glass badges on the landing page showcase.
+ * Dynamic Dark Glass vs Frosted Day Panel & Button Mode Engine
  */
 
 import { LiquidGlass } from './liquidglass/index.js';
@@ -20,7 +19,92 @@ import { LiquidGlass } from './liquidglass/index.js';
         }
     }
 
-    // 2. Initialize LiquidGlass on Hero Memory Vault Showcase
+    function isDarkMode() {
+        return document.documentElement.classList.contains('dark');
+    }
+
+    // 2. Specific Configurations (Frosted Panel, Dark Glass, Button Mode)
+    function getPanelConfig(isDark) {
+        if (isDark) {
+            // Dark Glass (from user spec)
+            return {
+                brightness: -0.3,
+                blurAmount: 0.25,
+                cornerRadius: 50,
+                button: true,
+                floating: true,
+                refraction: 0.70,
+                specular: 0.55,
+                edgeHighlight: 0.18,
+                fresnel: 1.0,
+                shadowOpacity: 0.40,
+                shadowSpread: 14,
+                shadowOffsetY: 2
+            };
+        } else {
+            // Frosted Panel (from user spec)
+            return {
+                blurAmount: 0.25,
+                cornerRadius: 30,
+                button: true,
+                floating: true,
+                refraction: 0.70,
+                specular: 0.55,
+                edgeHighlight: 0.18,
+                fresnel: 1.0,
+                shadowOpacity: 0.25,
+                shadowSpread: 10,
+                shadowOffsetY: 2
+            };
+        }
+    }
+
+    function getButtonConfig(isDark) {
+        // Button Mode (from user spec)
+        // Set button: true to make a glass element react to hover and press:
+        // hovering brightens it, pressing flattens the bevel and deepens the shadow.
+        if (isDark) {
+            return {
+                button: true,
+                cornerRadius: 24,
+                brightness: -0.3,
+                blurAmount: 0.25,
+                refraction: 0.65,
+                specular: 0.50,
+                edgeHighlight: 0.16
+            };
+        } else {
+            return {
+                button: true,
+                cornerRadius: 24,
+                blurAmount: 0.25,
+                refraction: 0.65,
+                specular: 0.50,
+                edgeHighlight: 0.16
+            };
+        }
+    }
+
+    function applyConfigs(isDark) {
+        const panels = document.querySelectorAll('.liquid-glass-badge, .card.liquid-glass');
+        const buttons = document.querySelectorAll('.liquid-glass-button, .liquid-glass-btn');
+
+        const panelCfg = JSON.stringify(getPanelConfig(isDark));
+        panels.forEach((el) => {
+            el.dataset.config = panelCfg;
+        });
+
+        const btnCfg = JSON.stringify(getButtonConfig(isDark));
+        buttons.forEach((el) => {
+            el.dataset.config = btnCfg;
+        });
+
+        if (window.__kothaLiquidGlass) {
+            window.__kothaLiquidGlass._globalDirty = true;
+        }
+    }
+
+    // 3. Initialize LiquidGlass on Hero Showcase
     async function initVaultLiquidGlass() {
         const root = document.getElementById('vault-presentation-wrap');
         if (!root) return;
@@ -28,48 +112,47 @@ import { LiquidGlass } from './liquidglass/index.js';
         const badges = root.querySelectorAll('.liquid-glass-badge');
         if (!badges.length) return;
 
-        // If WebGL is not available, CSS backdrop-filter fallback is already active
+        // Apply initial config based on active theme
+        applyConfigs(isDarkMode());
+
         if (!isWebGLAvailable()) {
             console.info('[LiquidGlass] WebGL not available, utilizing ultra-refined CSS glass fallback.');
             return;
         }
 
         try {
+            const initialDark = isDarkMode();
             const instance = await LiquidGlass.init({
                 root: root,
                 glassElements: badges,
-                defaults: {
-                    blurAmount: 0.22,
-                    refraction: 0.72,
-                    chromAberration: 0.055,
-                    specular: 0.58,
-                    edgeHighlight: 0.20,
-                    fresnel: 1.0,
-                    cornerRadius: 22,
-                    floating: true,
-                    button: true,
-                    shadowOpacity: 0.35,
-                    shadowSpread: 12,
-                    shadowOffsetY: 2
-                }
+                defaults: getPanelConfig(initialDark)
             });
 
             window.__kothaLiquidGlass = instance;
             document.body.classList.add('liquid-glass-active');
 
-            // 3. Performance Optimization: Pause rendering when out of viewport
+            // 4. Watch for Theme Changes (Light / Dark)
+            const themeObserver = new MutationObserver((mutations) => {
+                for (const m of mutations) {
+                    if (m.attributeName === 'class') {
+                        const dark = isDarkMode();
+                        applyConfigs(dark);
+                    }
+                }
+            });
+            themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+            // 5. Performance Optimization: Pause rendering when out of viewport
             if ('IntersectionObserver' in window) {
                 const observer = new IntersectionObserver(
                     (entries) => {
                         entries.forEach((entry) => {
                             if (!entry.isIntersecting) {
-                                // Offscreen: stop unnecessary renders
                                 if (instance._running) {
                                     instance._running = false;
                                     if (instance._rafId) cancelAnimationFrame(instance._rafId);
                                 }
                             } else {
-                                // Back on screen: resume
                                 if (!instance._running) {
                                     instance._running = true;
                                     instance._globalDirty = true;
@@ -83,14 +166,13 @@ import { LiquidGlass } from './liquidglass/index.js';
                 observer.observe(root);
             }
 
-            // 4. Interactive Turbo Pulse Synchronization
+            // 6. Interactive Turbo Pulse Synchronization
             const originalTurboPulse = window.triggerTurboPulse;
             window.triggerTurboPulse = function () {
                 if (typeof originalTurboPulse === 'function') {
                     originalTurboPulse();
                 }
 
-                // Burst glass highlights & mark dirty
                 badges.forEach((badge) => {
                     badge.classList.add('turbo-glass-burst');
                     if (instance.markChanged) {
@@ -103,7 +185,7 @@ import { LiquidGlass } from './liquidglass/index.js';
                 }, 1400);
             };
 
-            // 5. Subtle ambient mouse parallax on badges (desktop only)
+            // 7. Subtle ambient mouse parallax on badges (desktop only)
             if (window.matchMedia('(pointer: fine)').matches) {
                 root.addEventListener('mousemove', (e) => {
                     const rect = root.getBoundingClientRect();
@@ -111,7 +193,6 @@ import { LiquidGlass } from './liquidglass/index.js';
                     const relY = (e.clientY - rect.top) / rect.height - 0.5;
 
                     badges.forEach((b, idx) => {
-                        // Only apply subtle shift if not currently being dragged by user
                         if (instance._drag && instance._drag.active && instance._drag.element === b) {
                             return;
                         }
