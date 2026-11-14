@@ -87,7 +87,7 @@ import { LiquidGlass } from './liquidglass/index.js';
 
     function applyConfigs(isDark) {
         const panels = document.querySelectorAll('.liquid-glass-badge, .card.liquid-glass');
-        const buttons = document.querySelectorAll('.liquid-glass-button, .liquid-glass-btn');
+        const buttons = document.querySelectorAll('.liquid-glass-button, .liquid-glass-btn, .dock-btn');
 
         const panelCfg = JSON.stringify(getPanelConfig(isDark));
         panels.forEach((el) => {
@@ -104,7 +104,18 @@ import { LiquidGlass } from './liquidglass/index.js';
         }
     }
 
-    // 3. Initialize LiquidGlass on Hero Showcase
+    // 3. Global Theme Observer: Instantly applies Dark Glass vs Frosted Panel
+    const themeObserver = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.attributeName === 'class') {
+                const dark = isDarkMode();
+                applyConfigs(dark);
+            }
+        }
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    // 4. Initialize LiquidGlass on Hero Showcase
     async function initVaultLiquidGlass() {
         const root = document.getElementById('vault-presentation-wrap');
         if (!root) return;
@@ -130,17 +141,6 @@ import { LiquidGlass } from './liquidglass/index.js';
 
             window.__kothaLiquidGlass = instance;
             document.body.classList.add('liquid-glass-active');
-
-            // 4. Watch for Theme Changes (Light / Dark)
-            const themeObserver = new MutationObserver((mutations) => {
-                for (const m of mutations) {
-                    if (m.attributeName === 'class') {
-                        const dark = isDarkMode();
-                        applyConfigs(dark);
-                    }
-                }
-            });
-            themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
             // 5. Performance Optimization: Pause rendering when out of viewport
             if ('IntersectionObserver' in window) {
