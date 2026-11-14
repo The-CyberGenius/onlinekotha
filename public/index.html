@@ -533,38 +533,61 @@
         }
 
 
+        /* ═══════════ IPHONE LIQUID GLASS UI ENGINE (APPLE DESIGN) ═══════════ */
+
+        /* ── Apple Liquid Glass Base Material (Cards & Sections) ── */
         .liquid-glass {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 var(--bg-soft);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, border-color 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(28px) saturate(190%) contrast(102%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(102%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 26px;
+            box-shadow:
+                0 16px 40px -8px rgba(0, 0, 0, 0.35),
+                0 4px 12px 0 rgba(0, 0, 0, 0.15),
+                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+            position: relative;
+        }
+
+        html:not(.dark) .liquid-glass {
+            background: rgba(255, 255, 255, 0.72);
+            border-color: rgba(255, 255, 255, 0.85);
+            box-shadow:
+                0 14px 36px -6px rgba(99, 102, 241, 0.12),
+                0 2px 8px 0 rgba(0, 0, 0, 0.04),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95);
         }
 
         .liquid-glass:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border-color: var(--accent);
-            background: linear-gradient(180deg, var(--card-bg) 0%, rgba(99, 102, 241, 0.03) 100%);
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(168, 85, 247, 0.45);
+            box-shadow:
+                0 26px 60px -12px rgba(124, 58, 237, 0.35),
+                0 8px 24px 0 rgba(0, 0, 0, 0.2),
+                inset 0 1px 2px 0 rgba(255, 255, 255, 0.5);
         }
 
-        html.dark .liquid-glass:hover {
-            background: linear-gradient(180deg, var(--card-bg) 0%, rgba(99, 102, 241, 0.08) 100%);
-            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        html:not(.dark) .liquid-glass:hover {
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow:
+                0 24px 50px -10px rgba(99, 102, 241, 0.22),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 1);
         }
 
 
         .card-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            background: var(--msg-ai-bg);
-            border: 1px solid var(--border-strong);
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
             color: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 16px;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
         }
 
         .step-num {
@@ -581,45 +604,90 @@
             justify-content: center;
         }
 
-        /* ── Buttons ── */
+        /* ── iPhone Liquid Glass Buttons ── */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            min-height: 46px;
-            padding: 0 22px;
-            border-radius: 14px;
+            min-height: 48px;
+            padding: 0 24px;
+            border-radius: 999px;
             font-weight: 600;
             font-size: 15px;
             text-decoration: none;
             cursor: pointer;
             border: 1px solid transparent;
-            transition: all .2s ease;
-            font-family: inherit;
-        }
-
-
-        .cta-primary {
-            background: var(--text-primary);
-            color: var(--bg) !important;
-            border-radius: 999px;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            font-weight: 600;
-            border: 1px solid transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif;
             letter-spacing: -0.01em;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-font-smoothing: antialiased;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        html.dark .cta-primary {
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        /* Subtle iOS Specular Glass Shimmer on Hover */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .btn:hover::before {
+            left: 140%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px) scale(1.025);
+        }
+
+        /* iPhone Haptic Touch Spring Feel */
+        .btn:active {
+            transform: scale(0.96) !important;
+        }
+
+
+        /* ── iPhone Primary Liquid Glass Button (Vibrant Accent Fluid) ── */
+        .cta-primary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.92) 0%, rgba(139, 92, 246, 0.94) 50%, rgba(168, 85, 247, 0.90) 100%);
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            backdrop-filter: blur(24px) saturate(190%) contrast(102%);
+            -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(102%);
+            box-shadow:
+                0 12px 32px -4px rgba(99, 102, 241, 0.5),
+                0 4px 12px 0 rgba(168, 85, 247, 0.3),
+                inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.7),
+                inset 0 -1.5px 1px 0 rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+        }
+
+        html:not(.dark) .cta-primary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow:
+                0 12px 28px -4px rgba(99, 102, 241, 0.45),
+                0 3px 10px 0 rgba(0, 0, 0, 0.08),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.85),
+                inset 0 -1px 1px 0 rgba(0, 0, 0, 0.15);
         }
 
         .cta-primary:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px) scale(1.02);
-            opacity: 0.9;
+            box-shadow:
+                0 18px 42px -4px rgba(99, 102, 241, 0.65),
+                0 6px 16px 0 rgba(168, 85, 247, 0.4),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.85);
+            filter: brightness(1.06);
         }
 
 
@@ -635,23 +703,38 @@
             color: var(--text-primary);
         }
 
+        /* ── iPhone Circular Glass Theme Button ── */
         .icon-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            background: transparent;
-            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             color: var(--text-secondary);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all .2s;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        }
+
+        html:not(.dark) .icon-btn {
+            background: rgba(255, 255, 255, 0.75);
+            border-color: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1), inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
         }
 
         .icon-btn:hover {
             color: var(--text-primary);
-            border-color: var(--border-strong);
+            border-color: rgba(168, 85, 247, 0.45);
+            transform: scale(1.08);
+        }
+
+        .icon-btn:active {
+            transform: scale(0.92);
         }
 
         /* ── Nav ── */
@@ -661,28 +744,73 @@
             }
         }
 
+        /* ── iPhone Dynamic Island Floating Navigation Bar ── */
         #nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 1060px;
             z-index: 1000;
-            transition: all .3s ease;
+            border-radius: 999px;
+            background: rgba(15, 17, 30, 0.72);
+            backdrop-filter: blur(28px) saturate(190%) contrast(102%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(102%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow:
+                0 16px 40px -8px rgba(0, 0, 0, 0.45),
+                0 4px 12px 0 rgba(0, 0, 0, 0.15),
+                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        html:not(.dark) #nav {
+            background: rgba(255, 255, 255, 0.75);
+            border-color: rgba(255, 255, 255, 0.85);
+            box-shadow:
+                0 14px 36px -6px rgba(99, 102, 241, 0.12),
+                0 2px 8px 0 rgba(0, 0, 0, 0.05),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95);
         }
 
         #nav.scrolled {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background: var(--bg-glass);
+            top: 10px;
+            background: rgba(12, 13, 24, 0.88);
+            box-shadow:
+                0 20px 50px -10px rgba(0, 0, 0, 0.6),
+                0 6px 16px 0 rgba(0, 0, 0, 0.25),
+                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.45);
+            border-color: rgba(168, 85, 247, 0.35);
+        }
 
-            -webkit- border-bottom: 1px solid var(--border);
+        html:not(.dark) #nav.scrolled {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow:
+                0 18px 44px -8px rgba(99, 102, 241, 0.2),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 1);
         }
 
         .nav-inner {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 14px 24px;
+            max-width: 100%;
+            margin: 0;
+            padding: 8px 22px;
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            #nav {
+                top: 10px;
+                width: calc(100% - 20px);
+            }
+            .nav-inner {
+                padding: 6px 14px;
+            }
+        }
             align-items: center;
             justify-content: space-between;
             gap: 16px;
@@ -1612,16 +1740,34 @@
             60%, 100% { transform: translateX(100%); }
         }
 
-        /* ── Interactive Controls Dock ── */
+        /* ── iPhone Segmented Controls Dock (iOS Control Center Style) ── */
         .vault-controls-dock {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-top: 22px;
+            gap: 6px;
+            margin-top: 24px;
             z-index: 15;
             flex-wrap: wrap;
+            padding: 6px;
+            border-radius: 999px;
+            background: rgba(15, 17, 30, 0.68);
+            backdrop-filter: blur(28px) saturate(190%) contrast(102%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(102%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow:
+                0 16px 40px -8px rgba(0, 0, 0, 0.45),
+                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.3);
         }
+
+        html:not(.dark) .vault-controls-dock {
+            background: rgba(255, 255, 255, 0.75);
+            border-color: rgba(255, 255, 255, 0.85);
+            box-shadow:
+                0 14px 36px -6px rgba(99, 102, 241, 0.12),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95);
+        }
+
         .dock-btn {
             display: inline-flex;
             align-items: center;
@@ -1631,29 +1777,38 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--text-secondary);
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
+            background: transparent;
+            border: 1px solid transparent;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-decoration: none;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+            user-select: none;
+            -webkit-user-select: none;
         }
-        html.dark .dock-btn {
-            color: #cbd5e1;
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.12);
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+
+        .dock-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
         }
-        .dock-btn:hover, .dock-btn.active {
+
+        html:not(.dark) .dock-btn:hover {
+            color: #0f172a;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dock-btn.active {
             color: #ffffff !important;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-            border-color: transparent !important;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(168, 85, 247, 0.95)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            box-shadow:
+                0 6px 18px rgba(99, 102, 241, 0.45),
+                inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
+            transform: scale(1.02);
         }
-        .dock-btn.pulse-trigger:active {
-            transform: scale(0.92);
+
+        .dock-btn:active {
+            transform: scale(0.95) !important;
         }
 
         /* ── Turbo Pulse Crazy Mode ── */
@@ -1890,22 +2045,52 @@
 
         .hero-btn-main {
             min-height: 54px;
-            padding: 0 30px;
+            padding: 0 32px;
             font-size: 16px;
         }
 
         .hero-btn-secondary {
-            background: var(--card-bg);
-            border: 1px solid var(--border-strong);
-            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(24px) saturate(190%) contrast(102%);
+            -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(102%);
+            box-shadow:
+                0 10px 28px -4px rgba(0, 0, 0, 0.35),
+                0 3px 8px 0 rgba(0, 0, 0, 0.15),
+                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.45),
+                inset 0 -1px 1px 0 rgba(0, 0, 0, 0.1);
             min-height: 54px;
-            padding: 0 26px;
+            padding: 0 28px;
+        }
 
+        html:not(.dark) .hero-btn-secondary {
+            background: rgba(255, 255, 255, 0.78);
+            color: #0f172a !important;
+            border-color: rgba(255, 255, 255, 0.85);
+            box-shadow:
+                0 10px 24px -4px rgba(99, 102, 241, 0.12),
+                0 2px 6px 0 rgba(0, 0, 0, 0.04),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95),
+                inset 0 -1px 1px 0 rgba(0, 0, 0, 0.04);
         }
 
         .hero-btn-secondary:hover {
-            border-color: var(--border-glow);
-            background: var(--card-hover);
+            border-color: rgba(168, 85, 247, 0.45);
+            background: rgba(255, 255, 255, 0.14);
+            box-shadow:
+                0 16px 36px -4px rgba(124, 58, 237, 0.28),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.6);
+            transform: translateY(-2px) scale(1.025);
+        }
+
+        html:not(.dark) .hero-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(99, 102, 241, 0.35);
+            box-shadow:
+                0 14px 32px -4px rgba(99, 102, 241, 0.22),
+                inset 0 1.5px 2px 0 rgba(255, 255, 255, 1);
+            transform: translateY(-2px) scale(1.025);
         }
 
         .hero-trust-chips {
@@ -3012,8 +3197,7 @@
             </div>
 
             <div class="nav-right" style="display:flex;align-items:center;gap:10px;">
-                <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark/light mode"
-                    style="border:none; background:transparent;">
+                <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark/light mode">
                     <svg id="theme-toggle-sun" class="hidden" width="18" height="18" fill="none" stroke="currentColor"
                         stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="4"></circle>
@@ -3315,8 +3499,8 @@
                                         <h1 class="story-title" style="font-size: 2.2rem;">Your Turn</h1>
                                         <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat
                                             &amp; relive your memories securely.</p>
-                                        <a href="/app.html?action=import" id="story-cta-btn" class="btn"
-                                            style="background:#ffffff; color:#0f172a !important; font-weight: 800; font-size: 15px; padding: 14px 28px; border-radius: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                        <a href="/app.html?action=import" id="story-cta-btn" class="btn cta-primary"
+                                            style="min-height: 48px; padding: 0 28px; border-radius: 999px;">
                                             <span>Try Free Now</span>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="1.5" stroke-linecap="round">
