@@ -1101,7 +1101,7 @@
                         </button>
                     </div>
                     
-                    <input type="file" id="file-input-zip" accept=".zip,.txt" class="hidden">
+                    <input type="file" id="file-input-zip" accept=".zip,.txt,text/plain,application/zip,application/x-zip-compressed,multipart/x-zip" multiple class="hidden">
                     <input type="file" id="file-input-folder" webkitdirectory directory multiple class="hidden">
                 </div>
 
@@ -1180,8 +1180,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="/js/sample-chat-data.js?v=3"></script>
     <script src="/js/ai-panel.js?v=63"></script>
-    <script src="/js/script.js?v=77"></script>
-    <script src="/js/upload.js?v=67"></script>
+    <script src="/js/script.js?v=78"></script>
+    <script src="/js/upload.js?v=68"></script>
     <script src="/js/story.js?v=57"></script>
     <script src="/js/features.js?v=59"></script>
     <script src="/js/dm.js?v=58"></script>
@@ -1189,14 +1189,14 @@
         if ('caches' in window) {
             caches.keys().then(keys => {
                 keys.forEach(k => {
-                    if (k.startsWith('kotha-') && !k.includes('v77')) {
+                    if (k.startsWith('kotha-') && !k.includes('v78')) {
                         caches.delete(k);
                     }
                 });
             }).catch(() => {});
         }
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js?v=77').then(reg => {
+            navigator.serviceWorker.register('/sw.js?v=78').then(reg => {
                 reg.update();
             }).catch(() => { });
             let refreshing = false;

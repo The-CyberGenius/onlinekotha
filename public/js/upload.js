@@ -508,6 +508,15 @@
             throw new Error("No WhatsApp chat file (_chat.txt) found in this folder. Please select the folder that contains your chat text file.");
         }
 
+        // Priority: Chat text files (_chat.txt, .txt) must be uploaded FIRST before heavy media
+        files.sort((a, b) => {
+            const aIsChat = a.name.toLowerCase().endsWith('.txt') || /^.*chat.*\.txt$/i.test(a.name) || a.name.toLowerCase().endsWith('.zip');
+            const bIsChat = b.name.toLowerCase().endsWith('.txt') || /^.*chat.*\.txt$/i.test(b.name) || b.name.toLowerCase().endsWith('.zip');
+            if (aIsChat && !bIsChat) return -1;
+            if (!aIsChat && bIsChat) return 1;
+            return 0;
+        });
+
         const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
         let totalBytes = 0;
         for (const f of files) totalBytes += f.size;

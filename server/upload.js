@@ -85,7 +85,8 @@ function checkUploadQuota(req, res) {
         }
     }
 
-    return { allowed: true, ownerId, guestId, isGuest: !ownerId };
+    const isGuest = Boolean(guestId) || !(req.user && req.user.id > 0 && req.user.plan !== 'guest');
+    return { allowed: true, ownerId, guestId, isGuest };
 }
 
 // ── Standard Monolithic Multer (Legacy & Small uploads up to 2GB) ──
@@ -185,11 +186,11 @@ async function extractZip(zipPath, destDir) {
     try {
         await new Promise((resolve, reject) => {
             execFile('unzip', ['-o', '-q', zipPath, '-d', destDir], (err) => {
-                if (err) reject(err);
+                if (err && !findChatFile(destDir)) reject(err);
                 else resolve();
             });
         });
-        return;
+        if (findChatFile(destDir)) return;
     } catch (e) {
         console.warn('System unzip failed, falling back to node unzipper:', e.message);
     }
@@ -269,6 +270,7 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
     let baseName;
 
     const isZip = (fileName || '').toLowerCase().endsWith('.zip');
+    const isGuest = Boolean(guestId) || (req.user && req.user.plan === 'guest') || !req.user;
 
     if (isZip && finalFilePath && fs.existsSync(finalFilePath)) {
         const extractDir = path.join(sessionDir, 'extracted');
@@ -284,7 +286,7 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
         }
 
         baseName = sanitizeChatName(path.basename(originalName || fileName, '.zip'));
-        finalDir = uniqueChatDir(baseName, myDir, ownerId, !req.user);
+        finalDir = uniqueChatDir(baseName, myDir, ownerId, isGuest);
         ensureDir(finalDir);
         moveAllFiles(extractDir, finalDir);
     } else {
@@ -301,7 +303,7 @@ async function finalizeChatImport({ sessionDir, finalFilePath, fileName, origina
             folderName = chatBase.replace(/^whatsapp[\s_-]*chat[\s_-]*(with[\s_-]*)?[-–—]?\s*/i, '').trim() || `chat_${Date.now()}`;
         }
         baseName = sanitizeChatName(folderName);
-        finalDir = uniqueChatDir(baseName, myDir, ownerId, !req.user);
+        finalDir = uniqueChatDir(baseName, myDir, ownerId, isGuest);
         ensureDir(finalDir);
         moveAllFiles(filesDir, finalDir);
     }
