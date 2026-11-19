@@ -2480,18 +2480,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                             <span>Import WhatsApp Chat (.zip / .txt)</span>
                         </button>
-                        <button id="empty-dm-btn" class="w-full bg-white dark:bg-[#1a2333] hover:bg-gray-50 dark:hover:bg-[#202c33] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <button id="empty-dm-btn" class="w-full font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             <span>Direct Message Friend</span>
                         </button>
                     </div>
 
                     <!-- Trust badges -->
-                    <div class="flex items-center justify-center gap-3 text-[10.5px] text-gray-400 dark:text-gray-500 font-medium">
+                    <div class="flex items-center justify-center gap-3 text-[10.5px] font-medium empty-trust-badges">
                         <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> 100% Private</span>
-                        <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                        <span class="w-1 h-1 rounded-full empty-trust-dot"></span>
                         <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> AI-Powered</span>
-                        <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                        <span class="w-1 h-1 rounded-full empty-trust-dot"></span>
                         <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Encrypted</span>
                     </div>
                 </div> <!-- End of relative z-10 wrapper -->
