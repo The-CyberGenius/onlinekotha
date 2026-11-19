@@ -2422,7 +2422,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         container.innerHTML = `
-            <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-[#f0f2f5] dark:bg-[#0c1317] overflow-y-auto p-4 select-none" id="empty-state">
+            <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center overflow-y-auto p-4 select-none" id="empty-state">
                 
                 <!-- Mobile sidebar open button (shows user avatar if signed in) -->
                 <button id="empty-open-sidebar-btn" class="md:hidden absolute z-30 w-10 h-10 rounded-full bg-white dark:bg-[#202c33] shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center transition hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 cursor-pointer overflow-hidden" style="top: max(1rem, env(safe-area-inset-top)); left: 1rem;">
@@ -2444,7 +2444,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <!-- Logo Emblem Container -->
                     <div class="relative mb-5 group cursor-default">
                         <div class="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40 group-hover:opacity-75 transition duration-500"></div>
-                        <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
+                        <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl empty-logo-box shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border">
                             <img src="../img/logo.svg" alt="OK Logo" class="w-full h-full object-contain" />
                         </div>
                     </div>
@@ -2454,22 +2454,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 max-w-[280px] leading-relaxed mb-4">Relive memories, search moments, and talk with AI based on your real conversations.</p>
 
                     <!-- 3-Step Guided Walkthrough Card -->
-                    <div class="w-full bg-white/80 dark:bg-[#111b21]/90 backdrop-blur-md rounded-2xl p-4 border border-gray-200/80 dark:border-white/10 shadow-sm text-left mb-4">
+                    <div class="w-full empty-guide-card backdrop-blur-md rounded-2xl p-4 border shadow-sm text-left mb-4">
                         <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2.5 flex items-center gap-1.5">
                             <span>🚀</span> How to import in 3 quick steps:
                         </div>
                         <div class="space-y-2 text-[12px] text-gray-700 dark:text-gray-300">
                             <div class="flex items-start gap-2.5">
-                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
-                                <span>Open any chat in WhatsApp &rarr; tap <strong class="text-gray-900 dark:text-white">⋮ (More) &rarr; Export chat</strong></span>
+                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                                <span>Open any chat in WhatsApp &rarr; tap <strong class="guide-bold font-bold">⋮ (More) &rarr; Export chat</strong></span>
                             </div>
                             <div class="flex items-start gap-2.5">
-                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
-                                <span>Choose <strong class="text-gray-900 dark:text-white">Without Media</strong> (fastest) or with media</span>
+                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                                <span>Choose <strong class="guide-bold font-bold">Without Media</strong> (fastest) or with media</span>
                             </div>
                             <div class="flex items-start gap-2.5">
-                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
-                                <span>Tap below to select your <strong class="text-gray-900 dark:text-white">.zip</strong> or <strong class="text-gray-900 dark:text-white">_chat.txt</strong></span>
+                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                                <span>Tap below to select your <strong class="guide-bold font-bold">.zip</strong> or <strong class="guide-bold font-bold">_chat.txt</strong></span>
                             </div>
                         </div>
                     </div>
@@ -2480,7 +2480,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
                             <span>Import WhatsApp Chat (.zip / .txt)</span>
                         </button>
-                        <button id="empty-dm-btn" class="w-full bg-white/70 dark:bg-[#1a2333]/70 hover:bg-white dark:hover:bg-[#1a2333] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <button id="empty-dm-btn" class="w-full bg-white dark:bg-[#1a2333] hover:bg-gray-50 dark:hover:bg-[#202c33] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             <span>Direct Message Friend</span>
                         </button>

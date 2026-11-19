@@ -37,7 +37,7 @@
     <!-- CSS first — critical render path -->
     <!-- Tailwind (purged, 94KB vs 407KB CDN) -->
     <link rel="stylesheet" href="/css/tailwind.min.css?v=5">
-    <link rel="stylesheet" href="/css/style.css?v=50">
+    <link rel="stylesheet" href="/css/style.css?v=51">
     <style>
         html {
             background-color: #f0f2f5 !important;
@@ -50,6 +50,67 @@
         }
         html.dark body {
             background-color: #0c1317 !important;
+        }
+        /* Empty State background and cards theming */
+        #empty-state {
+            background-color: #f0f2f5 !important;
+        }
+        html.dark #empty-state, .dark #empty-state {
+            background-color: #0c1317 !important;
+        }
+        #empty-state .empty-guide-card {
+            background-color: #ffffff !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+            color: #1e293b !important;
+        }
+        html.dark #empty-state .empty-guide-card, .dark #empty-state .empty-guide-card {
+            background-color: #111b21 !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            color: #cbd5e1 !important;
+        }
+        #empty-state .empty-logo-box {
+            background-color: #ffffff !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+        }
+        html.dark #empty-state .empty-logo-box, .dark #empty-state .empty-logo-box {
+            background-color: #1c1c2e !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+        }
+        #empty-state .guide-bold {
+            color: #0f172a !important;
+        }
+        html.dark #empty-state .guide-bold, .dark #empty-state .guide-bold {
+            color: #ffffff !important;
+        }
+
+        /* Profile Modal Plan Card & High-Contrast Upgrade Button */
+        #profile-plan-status-card {
+            background-color: #f8fafc !important;
+            border: 1.5px solid #e2e8f0 !important;
+        }
+        html.dark #profile-plan-status-card, .dark #profile-plan-status-card {
+            background-color: #0f172a !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+        }
+        #profile-plan-label {
+            color: #64748b !important;
+        }
+        html.dark #profile-plan-label, .dark #profile-plan-label {
+            color: #94a3b8 !important;
+        }
+        #profile-plan-name {
+            color: #0f172a !important;
+        }
+        html.dark #profile-plan-name, .dark #profile-plan-name {
+            color: #f8fafc !important;
+        }
+        #profile-upgrade-btn {
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 45%, #6366f1 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35) !important;
+        }
+        #profile-upgrade-btn span {
+            color: #ffffff !important;
         }
         @media (max-width: 767px) {
             body.app-shell {
@@ -1189,7 +1250,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="/js/sample-chat-data.js?v=3"></script>
     <script src="/js/ai-panel.js?v=63"></script>
-    <script src="/js/script.js?v=78"></script>
+    <script src="/js/script.js?v=79"></script>
     <script src="/js/upload.js?v=68"></script>
     <script src="/js/story.js?v=57"></script>
     <script src="/js/features.js?v=59"></script>
@@ -1469,17 +1530,17 @@
             </p>
 
             <!-- Plan Status Card inside Profile Modal -->
-            <div id="profile-plan-status-card" class="mb-4 p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800/40 flex items-center justify-between gap-2 text-left">
+            <div id="profile-plan-status-card" class="mb-4 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-left transition-colors">
                 <div class="flex items-center gap-2.5 min-w-0">
                     <span class="text-xl shrink-0">💎</span>
                     <div class="min-w-0">
-                        <p class="text-[9.5px] uppercase font-bold text-gray-400 tracking-wider">Current Plan</p>
-                        <p id="profile-plan-name" class="text-xs font-bold text-gray-800 dark:text-gray-100 truncate">Free Plan</p>
+                        <p class="text-[10px] uppercase font-bold tracking-wider" id="profile-plan-label">Current Plan</p>
+                        <p id="profile-plan-name" class="text-xs font-extrabold truncate">Free Plan</p>
                     </div>
                 </div>
-                <button type="button" id="profile-upgrade-btn" onclick="closeProfileModal(true); setTimeout(() => window.openUpgradeModal ? window.openUpgradeModal() : (window.location.href='/pricing.html'), 250);" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-white text-[11.5px] font-bold shadow-md shadow-amber-500/20 hover:scale-105 active:scale-95 transition shrink-0 cursor-pointer flex items-center gap-1">
-                    <span>Upgrade to Pro</span>
-                    <span>✦</span>
+                <button type="button" id="profile-upgrade-btn" onclick="closeProfileModal(true); setTimeout(() => window.openUpgradeModal ? window.openUpgradeModal() : (window.location.href='/pricing.html'), 250);" style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 45%, #6366f1 100%) !important; color: #ffffff !important; box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35) !important;" class="px-3.5 py-1.5 rounded-xl text-white text-[12px] font-bold tracking-wide hover:brightness-110 hover:scale-105 active:scale-95 transition-all duration-200 shrink-0 cursor-pointer flex items-center gap-1.5 border-none">
+                    <span style="color:#ffffff !important; font-weight:700;">Upgrade to Pro</span>
+                    <span style="color:#fef08a !important;">✦</span>
                 </button>
             </div>
 
