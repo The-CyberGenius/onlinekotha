@@ -236,6 +236,20 @@
             if (nameInput) nameInput.value = me.user.display_name || '';
             if (phoneInput) phoneInput.value = me.user.phone || '';
             if (phoneCode && me.user.phone_country_code) phoneCode.value = me.user.phone_country_code;
+
+            const profileAvatarImg = document.getElementById('profile-modal-avatar-img');
+            const profileAvatarFallback = document.getElementById('profile-modal-avatar-fallback');
+            if (me.user.avatar_url && profileAvatarImg) {
+                profileAvatarImg.src = me.user.avatar_url;
+                profileAvatarImg.classList.remove('hidden');
+                if (profileAvatarFallback) profileAvatarFallback.classList.add('hidden');
+            } else if (profileAvatarFallback) {
+                profileAvatarFallback.classList.remove('hidden');
+                if (profileAvatarImg) profileAvatarImg.classList.add('hidden');
+                const initial = (me.user.display_name || me.user.email) ? (me.user.display_name || me.user.email).charAt(0).toUpperCase() : '✨';
+                profileAvatarFallback.textContent = initial;
+            }
+
             renderPlanBadge(me.user);
         } else {
             renderPlanBadge({ plan: 'guest' });
@@ -778,9 +792,9 @@
         }
 
         if (!hasChats) {
-            if (badge) badge.classList.add('hidden');
+            if (badge) badge.classList.remove('hidden');
             if (planBanner) planBanner.classList.add('hidden');
-            if (profileUpgradeBtn) profileUpgradeBtn.classList.add('hidden');
+            if (profileUpgradeBtn) profileUpgradeBtn.classList.remove('hidden');
         } else {
             if (badge) badge.classList.remove('hidden');
             if (profileUpgradeBtn) profileUpgradeBtn.classList.remove('hidden');

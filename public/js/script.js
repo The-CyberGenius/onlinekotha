@@ -2422,83 +2422,78 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         container.innerHTML = `
-            <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#0b141a] overflow-y-auto p-4 select-none" id="empty-state">
+            <div class="absolute inset-0 z-[25] flex flex-col items-center justify-center bg-[#f0f2f5] dark:bg-[#0c1317] overflow-y-auto p-4 select-none" id="empty-state">
                 
-                <!-- Mobile sidebar open button (visible only on mobile when header is hidden) -->
-                <button id="empty-open-sidebar-btn" class="md:hidden absolute z-30 w-10 h-10 rounded-full bg-white dark:bg-[#202c33] shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center transition hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 cursor-pointer" style="top: max(1rem, env(safe-area-inset-top)); left: 1rem;">
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
-                    </svg>
+                <!-- Mobile sidebar open button (shows user avatar if signed in) -->
+                <button id="empty-open-sidebar-btn" class="md:hidden absolute z-30 w-10 h-10 rounded-full bg-white dark:bg-[#202c33] shadow-md border border-gray-200 dark:border-gray-700 flex items-center justify-center transition hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-95 cursor-pointer overflow-hidden" style="top: max(1rem, env(safe-area-inset-top)); left: 1rem;">
+                    ${window.__USER__ && window.__USER__.avatar_url ? `
+                        <img src="${window.__USER__.avatar_url}" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-full" alt="Profile">
+                    ` : `
+                        <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+                        </svg>
+                    `}
                 </button>
 
                 <!-- Ambient Background Blur Glows -->
                 <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-tr from-indigo-500/15 via-purple-500/10 to-pink-500/15 blur-3xl pointer-events-none"></div>
                 <div class="absolute bottom-10 right-10 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
 
-                <div class="relative z-10 text-center px-4 my-auto flex flex-col items-center">
+                <div class="relative z-10 text-center px-4 my-auto flex flex-col items-center w-full max-w-sm">
                     
-                    <!-- Logo Emblem Container (Matched with OK Messages) -->
-                    <div class="relative mb-6 group cursor-default">
-                        <!-- Ambient Glow -->
+                    <!-- Logo Emblem Container -->
+                    <div class="relative mb-5 group cursor-default">
                         <div class="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40 group-hover:opacity-75 transition duration-500"></div>
-                        
-                        <!-- Clean OK Emblem with animated logo (Light / Dark adaptive) -->
-                        <div class="relative w-24 h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
+                        <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
                             <img src="../img/logo.svg" alt="OK Logo" class="w-full h-full object-contain" />
                         </div>
                     </div>
 
-                <!-- Headline -->
-                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
-                <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 max-w-[260px] leading-relaxed mb-5">Select a chat from the sidebar, or import a new one to start talking with AI.</p>
+                    <!-- Headline -->
+                    <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-1">Your chats, reimagined</h2>
+                    <p class="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 max-w-[280px] leading-relaxed mb-4">Relive memories, search moments, and talk with AI based on your real conversations.</p>
 
-                <!-- Import + Try Demo + DM Buttons -->
-                <div class="flex flex-col gap-2 w-full max-w-[280px] mx-auto mb-5">
-                    <button id="empty-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold text-[13px] rounded-xl px-4 py-2.5 transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                        Upload WhatsApp Chat
-                    </button>
-                    <div class="flex items-center gap-2 w-full">
-                        <button id="empty-demo-btn" class="flex-1 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/60 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1 cursor-pointer">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                            Try Sample Chat
-                        </button>
-                        <button id="empty-dm-btn" class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:text-indigo-600 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1 cursor-pointer">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Direct Message
-                        </button>
-                    </div>
-                </div>
-
-                ${!isPro ? `
-                <!-- Pro CTA -->
-                <div class="w-full max-w-[280px] rounded-[14px] bg-white dark:bg-[#1c1c2e] p-2.5 text-left border border-gray-100 dark:border-white/5 shadow-sm flex items-center justify-between gap-2 transition-all hover:border-indigo-500/30">
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 flex items-center justify-center shrink-0">
-                            <img src="../img/KothaPro.png" alt="Pro Logo" class="w-full h-full object-contain drop-shadow-sm rounded-lg">
+                    <!-- 3-Step Guided Walkthrough Card -->
+                    <div class="w-full bg-white/80 dark:bg-[#111b21]/90 backdrop-blur-md rounded-2xl p-4 border border-gray-200/80 dark:border-white/10 shadow-sm text-left mb-4">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-2.5 flex items-center gap-1.5">
+                            <span>🚀</span> How to import in 3 quick steps:
                         </div>
-                        <div class="flex flex-col justify-center">
-                            <p class="text-[12px] font-bold text-gray-900 dark:text-white leading-tight mb-0.5">Kotha Pro</p>
-                            <p class="text-[9px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide leading-none">Unlimited AI</p>
+                        <div class="space-y-2 text-[12px] text-gray-700 dark:text-gray-300">
+                            <div class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                                <span>Open any chat in WhatsApp &rarr; tap <strong class="text-gray-900 dark:text-white">⋮ (More) &rarr; Export chat</strong></span>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                                <span>Choose <strong class="text-gray-900 dark:text-white">Without Media</strong> (fastest) or with media</span>
+                            </div>
+                            <div class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</span>
+                                <span>Tap below to select your <strong class="text-gray-900 dark:text-white">.zip</strong> or <strong class="text-gray-900 dark:text-white">_chat.txt</strong></span>
+                            </div>
                         </div>
                     </div>
-                    <button id="empty-pro-btn" class="bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 active:scale-95 font-bold text-[11px] rounded-lg px-3 py-1.5 transition-all">
-                        Upgrade
-                    </button>
-                </div>` : `
-                <div class="w-full max-w-[280px] rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-center">
-                    <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">✦ Pro Member · Unlimited Access</span>
-                </div>
-                `}
 
-                <!-- Trust badges -->
-                <div class="flex items-center justify-center gap-3 text-[10px] text-gray-400 dark:text-gray-500 font-medium mt-4">
-                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Private</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${isPro ? 'Pro Unlimited' : 'AI-Powered'}</span>
-                    <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    <span class="flex items-center gap-1"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Encrypted</span>
-                </div>
+                    <!-- Prominent Import CTA -->
+                    <div class="w-full flex flex-col gap-2 mb-4">
+                        <button id="empty-upload-btn" class="w-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] text-white font-bold text-[13.5px] rounded-xl px-4 py-3 transition-all shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 cursor-pointer">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            <span>Import WhatsApp Chat (.zip / .txt)</span>
+                        </button>
+                        <button id="empty-dm-btn" class="w-full bg-white/70 dark:bg-[#1a2333]/70 hover:bg-white dark:hover:bg-[#1a2333] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-[11.5px] rounded-xl px-3 py-2 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <span>Direct Message Friend</span>
+                        </button>
+                    </div>
+
+                    <!-- Trust badges -->
+                    <div class="flex items-center justify-center gap-3 text-[10.5px] text-gray-400 dark:text-gray-500 font-medium">
+                        <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> 100% Private</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                        <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> AI-Powered</span>
+                        <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                        <span class="flex items-center gap-1"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Encrypted</span>
+                    </div>
                 </div> <!-- End of relative z-10 wrapper -->
             </div>
         `;
