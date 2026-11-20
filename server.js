@@ -211,6 +211,54 @@ app.get(['/app', '/app.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'app.html'));
 });
 
+// ── Clean SEO Friendly URLs for Pages & Blog Hub ────────────────────────────
+app.get(['/blog', '/blog/'], (req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+    res.sendFile(path.join(__dirname, 'public', 'blog.html'));
+});
+
+app.get('/pricing', (req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+    res.sendFile(path.join(__dirname, 'public', 'pricing.html'));
+});
+
+app.get('/paper', (req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+    res.sendFile(path.join(__dirname, 'public', 'paper.html'));
+});
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/privacy', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+
+app.get('/terms', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+});
+
+app.get('/contact', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'contact.html'));
+});
+
+app.get('/refund', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'refund.html'));
+});
+
+// Extensionless blog article URLs e.g. /blog/how-to-export-whatsapp-chat
+app.get('/blog/:slug', (req, res, next) => {
+    const slug = req.params.slug;
+    const targetFile = slug.endsWith('.html') ? slug : `${slug}.html`;
+    const fullPath = path.join(__dirname, 'public', 'blog', targetFile);
+    if (fs.existsSync(fullPath)) {
+        res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+        return res.sendFile(fullPath);
+    }
+    next();
+});
+
 // Share Target fallback — if the service worker isn't active yet, the shared
 // POST hits the server. Just bounce into the app (SW handles it once installed).
 app.post('/share-target', (req, res) => res.redirect('/app'));
