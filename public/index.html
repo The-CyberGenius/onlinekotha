@@ -428,16 +428,6 @@
             overflow: hidden;
         }
 
-        #ambient-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            opacity: 0.65;
-        }
-
         .ambient-aurora {
             display: none;
         }
@@ -604,48 +594,30 @@
             justify-content: center;
         }
 
-        /* ── iPhone Liquid Glass Buttons ── */
+        /* ── Unslop Design System Controls ── */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            min-height: 48px;
-            padding: 0 24px;
-            border-radius: 999px;
-            font-weight: 600;
-            font-size: 15px;
+            min-height: 44px;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14.5px;
             text-decoration: none;
             cursor: pointer;
             border: 1px solid transparent;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Outfit', sans-serif;
             letter-spacing: -0.01em;
-            position: relative;
-            overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            -webkit-font-smoothing: antialiased;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+        }
+        .btn:active {
+            transform: scale(0.98);
         }
 
-        /* Subtle iOS Specular Glass Shimmer on Hover */
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -120%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-            transform: skewX(-20deg);
-            transition: left 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-            pointer-events: none;
-            border-radius: inherit;
-        }
-
-        .btn:hover::before {
-            left: 140%;
-        }
+        
 
         .btn:hover {
             transform: translateY(-2px) scale(1.025);
@@ -657,37 +629,21 @@
         }
 
 
-        /* ── iPhone Primary Liquid Glass Button (Vibrant Accent Fluid) ── */
+        /* ── Primary Action Button ── */
         .cta-primary {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.92) 0%, rgba(139, 92, 246, 0.94) 50%, rgba(168, 85, 247, 0.90) 100%);
+            background: var(--accent);
             color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.38);
-            backdrop-filter: blur(24px) saturate(190%) contrast(102%);
-            -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(102%);
-            box-shadow:
-                0 12px 32px -4px rgba(99, 102, 241, 0.5),
-                0 4px 12px 0 rgba(168, 85, 247, 0.3),
-                inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.7),
-                inset 0 -1.5px 1px 0 rgba(0, 0, 0, 0.2);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+            border: 1px solid transparent;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         }
-
         html:not(.dark) .cta-primary {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95) 0%, rgba(124, 58, 237, 0.95) 100%);
-            border-color: rgba(255, 255, 255, 0.6);
-            box-shadow:
-                0 12px 28px -4px rgba(99, 102, 241, 0.45),
-                0 3px 10px 0 rgba(0, 0, 0, 0.08),
-                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.85),
-                inset 0 -1px 1px 0 rgba(0, 0, 0, 0.15);
+            background: #0f172a;
+            color: #ffffff !important;
+            border: 1px solid transparent;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         }
-
         .cta-primary:hover {
-            box-shadow:
-                0 18px 42px -4px rgba(99, 102, 241, 0.65),
-                0 6px 16px 0 rgba(168, 85, 247, 0.4),
-                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.85);
-            filter: brightness(1.06);
+            opacity: 0.92;
         }
 
 
@@ -744,34 +700,27 @@
             }
         }
 
-        /* ── iPhone Dynamic Island Floating Navigation Bar ── */
+        /* ── Restrained Floating Navigation ── */
         #nav {
             position: fixed;
-            top: 14px;
+            top: 12px;
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 32px);
             max-width: 1060px;
             z-index: 1000;
-            border-radius: 999px;
-            background: rgba(15, 17, 30, 0.72);
-            backdrop-filter: blur(28px) saturate(190%) contrast(102%);
-            -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(102%);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow:
-                0 16px 40px -8px rgba(0, 0, 0, 0.45),
-                0 4px 12px 0 rgba(0, 0, 0, 0.15),
-                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.35);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 12px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
         }
-
         html:not(.dark) #nav {
-            background: rgba(255, 255, 255, 0.75);
-            border-color: rgba(255, 255, 255, 0.85);
-            box-shadow:
-                0 14px 36px -6px rgba(99, 102, 241, 0.12),
-                0 2px 8px 0 rgba(0, 0, 0, 0.05),
-                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.85);
+            border-color: var(--border);
+            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
         }
 
         #nav.scrolled {
@@ -839,22 +788,21 @@
             align-items: center;
             gap: 6px;
             font-size: 10.5px;
-            font-weight: 700;
-            letter-spacing: .08em;
-            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: .04em;
             color: var(--text-muted);
             background: var(--msg-ai-bg);
             border: 1px solid var(--border);
             padding: 4px 10px;
-            border-radius: 999px;
+            border-radius: 6px;
         }
 
         .nav-status-dot {
             width: 6px;
             height: 6px;
-            border-radius: 999px;
+            border-radius: 50%;
             background: var(--accent-emerald);
-            box-shadow: 0 0 8px var(--accent-emerald);
+            box-shadow: 0 0 6px var(--accent-emerald);
         }
 
         .nav-links {
@@ -902,8 +850,8 @@
             gap: 10px;
             background: var(--card-bg);
             border: 1px solid var(--border-strong);
-            border-radius: 999px;
-            padding: 7px 14px;
+            border-radius: 8px;
+            padding: 6px 14px;
 
             cursor: default;
         }
@@ -1080,30 +1028,22 @@
         .vault-hud {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 18px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.88);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            backdrop-filter: blur(16px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            margin-bottom: 24px;
-            font-size: 13px;
-            font-weight: 600;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            font-size: 12.5px;
+            font-weight: 500;
             color: var(--text-primary);
-            letter-spacing: -0.01em;
             z-index: 15;
-            transition: all 0.3s ease;
-            animation: hudFloat 4s ease-in-out infinite alternate;
         }
         html.dark .vault-hud {
-            background: rgba(24, 24, 27, 0.75);
-            border-color: rgba(255, 255, 255, 0.12);
+            background: var(--bg-soft);
+            border-color: var(--border);
             color: #f8fafc;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
-        @keyframes hudFloat {
-            0% { transform: translateY(0); }
             100% { transform: translateY(-4px); }
         }
         .hud-beacon {
@@ -1155,328 +1095,6 @@
             width: 100%;
         }
 
-        /* ── Floating Liquid Glass Holographic Badges (WebGL Enabled) ── */
-        .liquid-glass-badge {
-            position: absolute;
-            width: 250px;
-            padding: 14px 16px;
-            border-radius: 50px; /* Dark Glass spec: cornerRadius: 50 */
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow:
-                0 16px 36px -4px rgba(0, 0, 0, 0.4),
-                0 6px 16px -2px rgba(0, 0, 0, 0.25),
-                inset 0 1px 1px 0 rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 15;
-            cursor: grab;
-            user-select: none;
-            -webkit-user-select: none;
-            transition: box-shadow 0.3s ease, border-color 0.3s ease, border-radius 0.3s ease;
-            animation: badgeFloat 6s ease-in-out infinite alternate;
-        }
-
-        html:not(.dark) .liquid-glass-badge {
-            border-radius: 30px; /* Frosted Panel spec: cornerRadius: 30 */
-            background: rgba(255, 255, 255, 0.72);
-            border-color: rgba(255, 255, 255, 0.85);
-            box-shadow:
-                0 16px 36px -4px rgba(99, 102, 241, 0.12),
-                0 6px 16px -2px rgba(0, 0, 0, 0.06),
-                inset 0 1px 2px 0 rgba(255, 255, 255, 0.9);
-        }
-
-        /* ── Liquid Glass Button Mode (Spec: cornerRadius 24, button: true) ── */
-        .liquid-glass-btn {
-            border-radius: 24px !important;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .liquid-glass-btn:hover {
-            filter: brightness(1.2);
-            box-shadow: 0 12px 28px -4px rgba(99, 102, 241, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
-        }
-        .liquid-glass-btn:active {
-            transform: scale(0.97) !important;
-            box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
-        }
-
-        .liquid-glass-badge:active {
-            cursor: grabbing;
-        }
-
-        .liquid-glass-badge:hover {
-            border-color: rgba(168, 85, 247, 0.45);
-            box-shadow:
-                0 22px 48px -4px rgba(124, 58, 237, 0.35),
-                0 8px 20px -2px rgba(0, 0, 0, 0.3),
-                inset 0 1px 2px 0 rgba(255, 255, 255, 0.5);
-        }
-
-        .vault-badges-grid {
-            display: contents;
-        }
-
-        .badge-top-left {
-            right: calc(50% + 205px);
-            top: 8%;
-            animation-delay: 0s;
-        }
-        .badge-top-right {
-            left: calc(50% + 205px);
-            top: 12%;
-            animation-delay: -1.5s;
-        }
-        .badge-bottom-left {
-            right: calc(50% + 215px);
-            bottom: 14%;
-            animation-delay: -3s;
-        }
-        .badge-bottom-right {
-            left: calc(50% + 215px);
-            bottom: 10%;
-            animation-delay: -4.5s;
-        }
-
-        @keyframes badgeFloat {
-            0% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-8px) rotate(0.5deg);
-            }
-            100% {
-                transform: translateY(4px) rotate(-0.5deg);
-            }
-        }
-
-        /* Turbo Pulse burst on glass badges */
-        .liquid-glass-badge.turbo-glass-burst {
-            animation: turboGlassFlash 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        }
-        @keyframes turboGlassFlash {
-            0% {
-                transform: scale(1);
-                filter: brightness(1);
-            }
-            30% {
-                transform: scale(1.08);
-                filter: brightness(1.6) drop-shadow(0 0 25px rgba(168, 85, 247, 0.8));
-                border-color: #c084fc;
-            }
-            100% {
-                transform: scale(1);
-                filter: brightness(1);
-            }
-        }
-
-        .glass-badge-inner {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            pointer-events: none;
-        }
-
-        .glass-badge-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
-        }
-        .icon-shield {
-            background: rgba(16, 185, 129, 0.18);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.35);
-        }
-        .icon-brain {
-            background: rgba(168, 85, 247, 0.18);
-            color: #c084fc;
-            border: 1px solid rgba(168, 85, 247, 0.35);
-        }
-        .icon-capsule {
-            background: rgba(245, 158, 11, 0.18);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.35);
-        }
-        .icon-sparkle {
-            background: rgba(236, 72, 153, 0.18);
-            color: #f472b6;
-            border: 1px solid rgba(236, 72, 153, 0.35);
-        }
-
-        .glass-badge-content {
-            flex: 1;
-            min-width: 0;
-        }
-        .glass-badge-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-main, #fff);
-            letter-spacing: -0.01em;
-            margin-bottom: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .glass-badge-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: var(--text-secondary, rgba(255, 255, 255, 0.7));
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .status-dot-green {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 8px #10b981;
-            flex-shrink: 0;
-        }
-        .status-pulse-purple {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #a855f7;
-            box-shadow: 0 0 8px #a855f7;
-            flex-shrink: 0;
-            animation: radarPulse 2s infinite ease-out;
-        }
-        .glass-progress-wrap {
-            margin-top: 4px;
-        }
-        .glass-progress-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 999px;
-            overflow: hidden;
-            margin-bottom: 3px;
-        }
-        html:not(.dark) .glass-progress-bar {
-            background: rgba(0, 0, 0, 0.08);
-        }
-        .glass-progress-fill {
-            width: 82%;
-            height: 100%;
-            background: linear-gradient(90deg, #f59e0b, #ec4899);
-            border-radius: 999px;
-        }
-        .glass-progress-label {
-            font-size: 10.5px;
-            color: var(--text-muted, rgba(255, 255, 255, 0.6));
-        }
-        .status-badge-chip {
-            background: rgba(236, 72, 153, 0.2);
-            color: #ec4899;
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        /* Responsive Breakpoints for Glass Badges */
-        @media (max-width: 1180px) {
-            .liquid-glass-badge {
-                position: relative;
-                right: auto !important;
-                left: auto !important;
-                top: auto !important;
-                bottom: auto !important;
-                width: 100% !important;
-                max-width: 320px;
-                margin: 0 auto;
-                animation: none !important;
-            }
-            .vault-presentation-wrapper {
-                gap: 16px;
-            }
-            .vault-badges-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                gap: 14px;
-                width: 100%;
-                max-width: 680px;
-                margin-top: 24px;
-                z-index: 10;
-            }
-        }
-
-        /* ── Breathing Ambient Aura ── */
-        .vault-ambient-aura {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 480px;
-            height: 700px;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle at 50% 40%, rgba(139, 92, 246, 0.45) 0%, rgba(245, 158, 11, 0.22) 35%, rgba(16, 185, 129, 0.32) 65%, transparent 75%);
-            filter: blur(60px);
-            z-index: 1;
-            pointer-events: none;
-            border-radius: 50%;
-            animation: auraBreathing 4.5s ease-in-out infinite alternate;
-            transition: all 0.4s ease;
-        }
-        @keyframes auraBreathing {
-            0% {
-                transform: translate(-50%, -50%) scale(0.88);
-                opacity: 0.55;
-                filter: blur(55px);
-            }
-            50% {
-                transform: translate(-50%, -50%) scale(1.12);
-                opacity: 0.95;
-                filter: blur(75px) hue-rotate(25deg);
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(0.96);
-                opacity: 0.7;
-                filter: blur(60px) hue-rotate(-20deg);
-            }
-        }
-
-        /* ── Orbiting Stardust Rings ── */
-        .vault-orbit-ring {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            border: 1px dashed rgba(99, 102, 241, 0.16);
-            pointer-events: none;
-            z-index: 2;
-        }
-        .orbit-ring-1 {
-            width: 430px;
-            height: 430px;
-            animation: spinRing 24s linear infinite;
-        }
-        .orbit-ring-2 {
-            width: 550px;
-            height: 550px;
-            border-color: rgba(236, 72, 153, 0.12);
-            animation: spinRing 36s linear infinite reverse;
-        }
-        @keyframes spinRing {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
         /* ── Phone Mockup Chassis ── */
         .phone-mockup {
             position: relative;
@@ -1511,14 +1129,10 @@
             }
         }
         .phone-mockup:hover {
-            animation-play-state: paused;
-            transform: perspective(1000px) rotateX(0deg) translateY(-8px) scale(1.02);
+            transform: perspective(1000px) rotateX(0deg) translateY(-4px);
             box-shadow:
-                0 0 0 2px #6366f1,
-                0 0 0 4px #1e1b4b,
-                0 35px 80px -10px rgba(99, 102, 241, 0.6),
-                0 50px 120px -20px rgba(0, 0, 0, 0.9),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+                0 0 0 1px rgba(255, 255, 255, 0.16),
+                0 28px 72px -16px rgba(0, 0, 0, 0.45);
         }
 
         .phone-screen {
@@ -1555,88 +1169,6 @@
             display: block;
             pointer-events: none;
             user-select: none;
-        }
-
-        /* ── Holographic Glass Shimmer Sweep ── */
-        .vault-shimmer-sweep {
-            position: absolute;
-            inset: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                115deg,
-                transparent 35%,
-                rgba(255, 255, 255, 0.05) 45%,
-                rgba(255, 255, 255, 0.22) 50%,
-                rgba(255, 255, 255, 0.05) 55%,
-                transparent 65%
-            );
-            transform: rotate(25deg);
-            pointer-events: none;
-            z-index: 25;
-            animation: shimmerSweep 6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        @keyframes shimmerSweep {
-            0%, 25% { transform: translateY(-70%) rotate(25deg); opacity: 0; }
-            30% { opacity: 1; }
-            55%, 100% { transform: translateY(70%) rotate(25deg); opacity: 0; }
-        }
-
-        /* ── Active Loading Sparkles & Hourglass Stream ── */
-        .hourglass-stream-container {
-            position: absolute;
-            top: 41%;
-            left: 50%;
-            width: 20px;
-            height: 88px;
-            transform: translateX(-50%);
-            pointer-events: none;
-            z-index: 20;
-            overflow: hidden;
-        }
-        .sand-drop {
-            position: absolute;
-            width: 3.5px;
-            height: 6px;
-            border-radius: 999px;
-            background: #fbbf24;
-            box-shadow: 0 0 6px #f59e0b, 0 0 10px #fbbf24;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: sandFall 1.4s infinite cubic-bezier(0.55, 0.055, 0.675, 0.19);
-        }
-        .sand-drop:nth-child(1) { animation-delay: 0s; left: 45%; }
-        .sand-drop:nth-child(2) { animation-delay: 0.25s; left: 52%; }
-        .sand-drop:nth-child(3) { animation-delay: 0.5s; left: 48%; }
-        .sand-drop:nth-child(4) { animation-delay: 0.75s; left: 54%; }
-        .sand-drop:nth-child(5) { animation-delay: 1.0s; left: 47%; }
-        .sand-drop:nth-child(6) { animation-delay: 1.25s; left: 51%; }
-
-        @keyframes sandFall {
-            0% { top: 0%; opacity: 0; transform: translateX(-50%) scale(0.6); }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { top: 100%; opacity: 0; transform: translateX(-50%) scale(1.4); }
-        }
-
-        /* ── Pedestal Warm Hearth Glow ── */
-        .pedestal-glow {
-            position: absolute;
-            top: 59%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 140px;
-            height: 48px;
-            border-radius: 50%;
-            background: radial-gradient(ellipse, rgba(251, 191, 36, 0.35) 0%, rgba(245, 158, 11, 0.15) 50%, transparent 75%);
-            filter: blur(10px);
-            pointer-events: none;
-            z-index: 15;
-            animation: pedestalBreathe 3s ease-in-out infinite alternate;
-        }
-        @keyframes pedestalBreathe {
-            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.5; }
-            100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.95; }
         }
 
         /* ── Live Micro Indicators over Cards ── */
@@ -1706,7 +1238,7 @@
             left: 12.8%;
             width: 74.4%;
             height: 52px;
-            border-radius: 999px;
+            border-radius: 10px;
             z-index: 30;
             text-decoration: none;
             cursor: pointer;
@@ -1717,116 +1249,56 @@
         .vault-cta-link:hover {
             transform: scale(1.025);
         }
-        .vault-cta-shine {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-            transform: translateX(-100%);
-            animation: ctaShine 3s infinite;
-        }
-        @keyframes ctaShine {
-            0%, 40% { transform: translateX(-100%); }
+        
             60%, 100% { transform: translateX(100%); }
         }
 
-        /* ── iPhone Segmented Controls Dock (iOS Control Center Style) ── */
+        /* ── Restrained Segmented Controls Dock ── */
         .vault-controls-dock {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             margin-top: 24px;
             z-index: 15;
-            flex-wrap: wrap;
-            padding: 6px;
-            border-radius: 999px;
-            background: rgba(15, 17, 30, 0.68);
-            backdrop-filter: blur(28px) saturate(190%) contrast(102%);
-            -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(102%);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            box-shadow:
-                0 16px 40px -8px rgba(0, 0, 0, 0.45),
-                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.3);
+            padding: 4px;
+            border-radius: 10px;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
         }
-
-        html:not(.dark) .vault-controls-dock {
-            background: rgba(255, 255, 255, 0.75);
-            border-color: rgba(255, 255, 255, 0.85);
-            box-shadow:
-                0 14px 36px -6px rgba(99, 102, 241, 0.12),
-                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95);
-        }
-
         .dock-btn {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            padding: 9px 18px;
-            border-radius: 999px;
+            gap: 6px;
+            padding: 7px 16px;
+            border-radius: 8px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--text-secondary);
             background: transparent;
             border: 1px solid transparent;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: background 0.15s ease, color 0.15s ease;
             text-decoration: none;
             user-select: none;
             -webkit-user-select: none;
         }
-
         .dock-btn:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
+            color: var(--text-primary);
+            background: rgba(120, 120, 120, 0.08);
         }
-
-        html:not(.dark) .dock-btn:hover {
-            color: #0f172a;
-            background: rgba(0, 0, 0, 0.05);
-        }
-
         .dock-btn.active {
-            color: #ffffff !important;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(168, 85, 247, 0.95)) !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            box-shadow:
-                0 6px 18px rgba(99, 102, 241, 0.45),
-                inset 0 1px 1px rgba(255, 255, 255, 0.6) !important;
-            transform: scale(1.02);
-        }
-
-        .dock-btn:active {
-            transform: scale(0.95) !important;
-        }
-
-        /* ── Turbo Pulse Crazy Mode ── */
-        .turbo-active .vault-ambient-aura {
-            transform: translate(-50%, -50%) scale(1.35) !important;
-            opacity: 1 !important;
-            filter: blur(85px) hue-rotate(60deg) !important;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .turbo-active .sand-drop {
-            animation-duration: 0.45s !important;
-            box-shadow: 0 0 12px #34d399, 0 0 20px #10b981 !important;
-            background: #34d399 !important;
-        }
-        .turbo-active .phone-mockup {
-            animation: turboJolt 0.35s ease-in-out infinite alternate !important;
-            box-shadow: 
-                0 0 0 2px #34d399,
-                0 0 0 5px rgba(52, 211, 153, 0.4),
-                0 35px 90px -10px rgba(52, 211, 153, 0.6),
-                0 50px 120px -20px rgba(0, 0, 0, 0.9) !important;
-        }
-        @keyframes turboJolt {
-            0% { transform: perspective(1000px) rotateX(1deg) translateY(-8px) scale(1.02); }
-            100% { transform: perspective(1000px) rotateX(-1deg) translateY(-14px) scale(1.035); }
+            color: var(--text-primary) !important;
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
         }
 
         .phone-mockup:hover {
-            transform: perspective(1000px) rotateX(0deg) translateY(-8px);
+            transform: perspective(1000px) rotateX(0deg) translateY(-4px);
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.16),
+                0 28px 72px -16px rgba(0, 0, 0, 0.45);
         }
 
         .phone-screen {
@@ -2033,53 +1505,36 @@
         }
 
         .hero-btn-main {
-            min-height: 54px;
-            padding: 0 32px;
-            font-size: 16px;
+            min-height: 46px;
+            padding: 0 24px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
         }
-
         .hero-btn-secondary {
-            background: rgba(255, 255, 255, 0.08);
-            color: #ffffff !important;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(24px) saturate(190%) contrast(102%);
-            -webkit-backdrop-filter: blur(24px) saturate(190%) contrast(102%);
-            box-shadow:
-                0 10px 28px -4px rgba(0, 0, 0, 0.35),
-                0 3px 8px 0 rgba(0, 0, 0, 0.15),
-                inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.45),
-                inset 0 -1px 1px 0 rgba(0, 0, 0, 0.1);
-            min-height: 54px;
-            padding: 0 28px;
+            background: var(--card-bg);
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            min-height: 46px;
+            padding: 0 20px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            transition: background 0.15s ease, border-color 0.15s ease;
         }
-
-        html:not(.dark) .hero-btn-secondary {
-            background: rgba(255, 255, 255, 0.78);
-            color: #0f172a !important;
-            border-color: rgba(255, 255, 255, 0.85);
-            box-shadow:
-                0 10px 24px -4px rgba(99, 102, 241, 0.12),
-                0 2px 6px 0 rgba(0, 0, 0, 0.04),
-                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95),
-                inset 0 -1px 1px 0 rgba(0, 0, 0, 0.04);
-        }
-
         .hero-btn-secondary:hover {
-            border-color: rgba(168, 85, 247, 0.45);
-            background: rgba(255, 255, 255, 0.14);
-            box-shadow:
-                0 16px 36px -4px rgba(124, 58, 237, 0.28),
-                inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.6);
-            transform: translateY(-2px) scale(1.025);
+            background: var(--bg-soft);
+            border-color: var(--border-strong);
         }
-
+        html:not(.dark) .hero-btn-secondary {
+            background: #ffffff;
+            color: #0f172a !important;
+            border: 1px solid var(--border);
+        }
         html:not(.dark) .hero-btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.92);
-            border-color: rgba(99, 102, 241, 0.35);
-            box-shadow:
-                0 14px 32px -4px rgba(99, 102, 241, 0.22),
-                inset 0 1.5px 2px 0 rgba(255, 255, 255, 1);
-            transform: translateY(-2px) scale(1.025);
+            background: var(--bg-soft);
+            border-color: var(--border-strong);
         }
 
         .hero-trust-chips {
@@ -2189,12 +1644,12 @@
         .demo-avatar {
             width: 34px;
             height: 34px;
-            border-radius: 999px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
-            font-weight: 800;
+            font-weight: 600;
             flex-shrink: 0;
         }
 
@@ -2205,15 +1660,15 @@
         }
 
         .demo-avatar-ai {
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            background: var(--accent);
             color: #fff;
         }
 
         .demo-tag {
             font-size: 10.5px;
-            font-weight: 700;
-            padding: 4px 11px;
-            border-radius: 999px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 6px;
             white-space: nowrap;
         }
 
@@ -2350,19 +1805,19 @@
 
         .ba-chip {
             font-size: 11.5px;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--text-secondary);
             background: var(--bg-soft);
             border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 6px 12px;
+            border-radius: 8px;
+            padding: 5px 12px;
             cursor: pointer;
-            transition: all .2s;
+            transition: all .15s ease;
             font-family: inherit;
         }
 
         .ba-chip:hover {
-            border-color: var(--border-glow);
+            border-color: var(--border-strong);
             color: var(--text-primary);
         }
 
@@ -2378,8 +1833,8 @@
             margin-top: 12px;
             background: var(--bg-soft);
             border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 4px 6px 4px 16px;
+            border-radius: 10px;
+            padding: 4px 6px 4px 14px;
         }
 
         .demo-input-row input {
@@ -2394,18 +1849,18 @@
         }
 
         .demo-input-row button {
-            width: 38px;
-            height: 38px;
-            border-radius: 999px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             border: 0;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: var(--accent);
             color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
-            transition: transform .2s;
+            transition: opacity .15s ease;
         }
 
         .demo-input-row button:hover {
@@ -2643,7 +2098,7 @@
             background: var(--bg-soft) !important;
             border: 1px solid var(--border) !important;
             color: var(--text-secondary) !important;
-            border-radius: 999px;
+            border-radius: 8px;
             width: 32px;
             height: 32px;
             display: flex;
@@ -2866,7 +2321,7 @@
             width: min(400px, 100%);
             background: #0f1523;
             border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 24px;
+            border-radius: 16px;
             overflow: hidden;
             transform: translateY(40px) scale(.97);
             transition: transform .28s cubic-bezier(.16, 1, .3, 1);
@@ -2880,7 +2335,7 @@
             z-index: 2;
             width: 30px;
             height: 30px;
-            border-radius: 999px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, .06);
             border: none;
             color: #a1a1aa;
@@ -2923,7 +2378,7 @@
             width: min(420px, 100%);
             background: #0f1523;
             border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 24px;
+            border-radius: 16px;
             overflow: hidden;
             transform: translateY(40px) scale(.97);
             transition: transform .28s cubic-bezier(.16, 1, .3, 1);
@@ -2936,7 +2391,7 @@
             right: 14px;
             width: 30px;
             height: 30px;
-            border-radius: 999px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, .06);
             border: none;
             color: #a1a1aa;
@@ -3106,17 +2561,7 @@
         }
 
 
-        @keyframes pulseGlow {
-            0% {
-                opacity: 0.08;
-                transform: translateX(-50%) scale(0.9);
-            }
 
-            100% {
-                opacity: 0.15;
-                transform: translateX(-50%) scale(1.1);
-            }
-        }
 
         @keyframes riseUp {
             0% {
@@ -3156,14 +2601,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 20px;
             flex-wrap: wrap;
-            margin: 24px auto 40px;
-            padding: 10px 24px;
-            background: var(--card-bg);
+            margin: 24px auto 36px;
+            padding: 8px 20px;
+            background: var(--bg-soft);
             border: 1px solid var(--border);
-            border-radius: 999px;
-            box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
             max-width: fit-content;
         }
         .metric-item {
@@ -3172,15 +2616,15 @@
             gap: 8px;
         }
         .metric-num {
-            font-size: 14px;
-            font-weight: 700;
+            font-size: 13.5px;
+            font-weight: 600;
             color: var(--text-primary);
-            letter-spacing: -0.01em;
+            font-variant-numeric: tabular-nums;
         }
         .metric-label {
             font-size: 12px;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 400;
         }
         .metric-divider {
             width: 1px;
@@ -3346,9 +2790,7 @@
 </head>
 
 <body>
-    <div class="ambient-bg" aria-hidden="true">
-        <canvas id="ambient-canvas"></canvas>
-    </div>
+    <!-- Ambient Background Cleaned -->
     <!-- ═══════════ NAV ═══════════ -->
     <nav id="nav">
         <div class="nav-inner">
@@ -3413,10 +2855,9 @@
                             style="font-size: 11px; color: var(--text-secondary); text-decoration: none;">Logout</a>
                     </div>
                 </div>
-                <a href="/app.html?action=import" id="nav-cta" class="btn cta-primary liquid-glass-btn"
-                    data-config='{"button":true,"cornerRadius":24}'
-                    style="min-height:42px;padding:0 18px;">
-                    <span>Try Free</span>
+                <a href="/app.html?action=import" id="nav-cta" class="btn cta-primary"
+                    style="min-height:36px;padding:0 16px;border-radius:8px;font-size:13.5px;">
+                    <span>Try free</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
@@ -3460,90 +2901,73 @@
     </script>
     <!-- ═══════════ HERO ═══════════ -->
     <section class="hero sec" style="position: relative; overflow: visible;">
-        <div
-            style="position: absolute; top: 20%; left: 50%; width: 80vw; max-width: 800px; height: 600px; background: radial-gradient(circle, var(--accent) 0%, transparent 60%); opacity: 0.12; transform: translateX(-50%); filter: blur(80px); z-index: -1; pointer-events: none; animation: pulseGlow 8s ease-in-out infinite alternate;">
-        </div>
         <div class="wrap hero-centered">
             <!-- Eyebrow Badge -->
             <div class="rise d1" style="display:flex; justify-content:center; margin-bottom: 20px;">
-                <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 18px; border-radius:999px; background:var(--bg-soft); border:1px solid var(--border); font-size:12.5px; font-weight:600; color:var(--text-secondary); backdrop-filter:blur(10px);">
-                    <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent);"></span>
-                    <span>A Private Sanctuary for the Conversations You Treasure Most</span>
+                <div style="display:inline-flex; align-items:center; gap:8px; padding:5px 14px; border-radius:8px; background:var(--bg-soft); border:1px solid var(--border); font-size:12px; font-weight:500; color:var(--text-secondary);">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent);"></span>
+                    <span>A private sanctuary for the conversations you treasure most</span>
                 </div>
             </div>
 
             <h1 class="display rise d1 hero-title-main"
-                style="margin-bottom:20px; font-weight: 850; letter-spacing: -0.04em; font-size: clamp(30px, 5.8vw, 64px); line-height: 1.15; overflow: visible;">
-                <span class="hero-title-prefix">Talk to Someone You Deeply Miss.</span><br>
-                <span
-                    style="display: inline-flex; align-items: baseline; justify-content: center; gap: 8px; line-height: 1.15; overflow: visible; padding-bottom: 6px;">
-                    <span style="color: var(--text-primary); line-height: 1.15;">Keep Their Memory &amp;</span>
-                    <span style="
-                        background: linear-gradient(135deg, var(--accent), #818cf8, #a5b4fc); 
-                        -webkit-background-clip: text; 
-                        -webkit-text-fill-color: transparent; 
-                        display: inline-block;
-                        white-space: nowrap;
-                        line-height: 1.15;
-                    ">Voice Alive.</span>
-                </span>
+                style="margin-bottom:20px; font-weight: 600; letter-spacing: -0.035em; font-size: clamp(32px, 5.2vw, 56px); line-height: 1.15; overflow: visible;">
+                <span class="hero-title-prefix">Talk to someone you deeply miss.</span><br>
+                <span style="color: var(--text-primary); line-height: 1.15;">Keep their memory and voice alive</span>
             </h1>
             <p class="lead rise d2"
-                style="font-size: clamp(16px, 1.8vw, 20px); color: var(--text-secondary); max-width: 650px; margin: 0 auto 36px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
-                Whether it's honoring conversations with someone who has passed away, or reliving years of cherished laughter with someone you love — OnlineKotha turns your exported WhatsApp chats into an encrypted memory vault. Revisit old moments and converse with a private AI that mirrors their authentic warmth, advice, and humor.
+                style="font-size: clamp(16px, 1.7vw, 19px); color: var(--text-secondary); max-width: 640px; margin: 0 auto 32px; font-weight: 400; line-height: 1.65; text-wrap: balance;">
+                Whether honoring conversations with someone who has passed away or reliving cherished moments with someone you love — OnlineKotha turns your exported WhatsApp chats into an encrypted memory vault. Converse with a private AI that mirrors their authentic warmth, humor, and advice.
             </p>
-            <!-- Dual High-Converting CTAs -->
+            <!-- Dual Restrained CTAs -->
             <div class="hero-cta-group rise d3">
-                <a href="/app.html?action=import" id="hero-cta" class="btn cta-primary hero-btn-main liquid-glass-btn"
-                    data-config='{"button":true,"cornerRadius":24}'>
-                    <span>Preserve Memories Free</span>
+                <a href="/app.html?action=import" id="hero-cta" class="btn cta-primary hero-btn-main">
+                    <span>Preserve memories free</span>
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="/#demo-story-mockup" class="btn hero-btn-secondary liquid-glass-btn" id="hero-scroll-demo"
-                    data-config='{"button":true,"cornerRadius":24}' style="border-radius:999px;">
+                <a href="/#demo-story-mockup" class="btn hero-btn-secondary" id="hero-scroll-demo">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    <span>Explore Interactive Demo</span>
+                    <span>Explore interactive demo</span>
                 </a>
                 <a href="https://play.google.com/store/apps/developer?id=okshiva" target="_blank"
-                    rel="noopener noreferrer" class="btn hero-btn-secondary liquid-glass-btn"
-                    data-config='{"button":true,"cornerRadius":24}' style="border-radius:999px;">
+                    rel="noopener noreferrer" class="btn hero-btn-secondary">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M5 3l14 9-14 9V3z"></path>
                     </svg>
-                    <span>Android App</span>
+                    <span>Android app</span>
                 </a>
             </div>
             <div class="hero-trust-chips rise d3">
                 <span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
-                    100% Client-Side Decrypted
+                    100% in-browser decrypted
                 </span>
                 <span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     </svg>
-                    Zero Cloud Storage
+                    Zero cloud storage
                 </span>
                 <span>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
                     </svg>
-                    Never Used to Train Public AI
+                    Never used to train public AI
                 </span>
             </div>
 
@@ -3551,76 +2975,51 @@
             <div class="hero-metrics-strip rise d3">
                 <div class="metric-item">
                     <span class="metric-num">144,000+</span>
-                    <span class="metric-label">Chats Preserved</span>
+                    <span class="metric-label">chats preserved</span>
                 </div>
                 <div class="metric-divider"></div>
                 <div class="metric-item">
                     <span class="metric-num">100%</span>
-                    <span class="metric-label">Client-Side Privacy</span>
+                    <span class="metric-label">client-side privacy</span>
                 </div>
                 <div class="metric-divider"></div>
                 <div class="metric-item">
                     <span class="metric-num">4.9 ★</span>
-                    <span class="metric-label">Trust Rating</span>
+                    <span class="metric-label">trust rating</span>
                 </div>
                 <div class="metric-divider"></div>
                 <div class="metric-item">
-                    <span style="color:var(--text-secondary); font-size:12px; font-weight:600;">Web &bull; iOS &bull; Android</span>
+                    <span style="color:var(--text-secondary); font-size:12px; font-weight:500;">Web &bull; iOS &bull; Android</span>
                 </div>
             </div>
 
-            <!-- Interactive Virtual Phone Mockup Showcase (Time Capsule 3D & Chat Wrapped) -->
+            <!-- Interactive Virtual Phone Mockup Showcase (Time Capsule & Chat Wrapped) -->
             <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
                 <!-- Live Status HUD -->
                 <div class="vault-hud" id="vault-hud">
                     <span class="hud-beacon"></span>
-                    <span>Memory Vault: <strong class="hud-counter" id="vault-msg-counter">144,794</strong> chats encrypted</span>
-                    <span class="hud-badge">LIVE 3D</span>
+                    <span>Memory vault: <strong class="hud-counter" id="vault-msg-counter">144,794</strong> chats encrypted</span>
+                    <span class="hud-badge">Decrypted locally</span>
                 </div>
 
                 <div class="vault-presentation-wrapper" id="vault-presentation-wrap">
-                    <!-- Breathing Ambient Aura -->
-                    <div class="vault-ambient-aura"></div>
-
-                    <!-- Orbit Rings -->
-                    <div class="vault-orbit-ring orbit-ring-1"></div>
-                    <div class="vault-orbit-ring orbit-ring-2"></div>
-
                     <!-- Phone Mockup Chassis -->
                     <div class="phone-mockup" id="landing-phone-mockup">
                         <div class="phone-screen" id="phone-screen-container">
 
-                            <!-- ═════════ 3D TIME CAPSULE VAULT VIEW (DEFAULT) ═════════ -->
+                            <!-- ═════════ TIME CAPSULE VAULT VIEW ═════════ -->
                             <div class="mockup-view-pane active" id="mockup-view-vault">
                                 <picture>
                                     <source srcset="/img/hourglass-vault.webp" type="image/webp">
-                                    <img class="vault-bg-img" src="/img/hourglass-vault.jpg" alt="OnlineKotha 3D Memory Vault Hourglass" loading="eager" width="571" height="1024">
+                                    <img class="vault-bg-img" src="/img/hourglass-vault.jpg" alt="OnlineKotha Memory Vault Hourglass" loading="eager" width="571" height="1024">
                                 </picture>
-
-                                <!-- Holographic Glass Shimmer Sweep -->
-                                <div class="vault-shimmer-sweep"></div>
-
-                                <!-- Animated Sand Falling Stream inside Hourglass Neck -->
-                                <div class="hourglass-stream-container">
-                                    <div class="sand-drop"></div>
-                                    <div class="sand-drop"></div>
-                                    <div class="sand-drop"></div>
-                                    <div class="sand-drop"></div>
-                                    <div class="sand-drop"></div>
-                                    <div class="sand-drop"></div>
-                                </div>
-
-                                <!-- Pedestal Hearth Warm Glow -->
-                                <div class="pedestal-glow"></div>
 
                                 <!-- Live Status Indicators over Cards -->
                                 <div class="vault-live-dot" title="Vault Online"></div>
-                                <div class="ai-spinner-radar" title="AI Memory Neural Engine Active"></div>
                                 <div class="time-capsule-bar"><div class="time-capsule-bar-fill"></div></div>
 
                                 <!-- Interactive Clickable CTA Button ("Start Preserving >") -->
                                 <a href="/app.html?action=import" class="vault-cta-link" title="Start Preserving Your Chats">
-                                    <div class="vault-cta-shine"></div>
                                 </a>
                             </div>
 
@@ -3633,33 +3032,19 @@
 
                                 <!-- Story Progress Indicators -->
                                 <div class="story-progress-container" id="story-progress">
-                                    <div class="story-progress-bar">
-                                        <div class="story-progress-fill"></div>
-                                    </div>
-                                    <div class="story-progress-bar">
-                                        <div class="story-progress-fill"></div>
-                                    </div>
-                                    <div class="story-progress-bar">
-                                        <div class="story-progress-fill"></div>
-                                    </div>
-                                    <div class="story-progress-bar">
-                                        <div class="story-progress-fill"></div>
-                                    </div>
-                                    <div class="story-progress-bar">
-                                        <div class="story-progress-fill"></div>
-                                    </div>
-                                    <div class="story-progress-bar">
-                                        <div class="story-progress-fill"></div>
-                                    </div>
-                                    <div class="story-progress-bar">
-                                        <div class="story-progress-fill"></div>
-                                    </div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
+                                    <div class="story-progress-bar"><div class="story-progress-fill"></div></div>
                                 </div>
 
                                 <!-- Share Button -->
                                 <div class="story-share-btn" id="story-share" title="Share your story">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                         <circle cx="18" cy="5" r="3"></circle>
                                         <circle cx="6" cy="12" r="3"></circle>
                                         <circle cx="18" cy="19" r="3"></circle>
@@ -3672,78 +3057,72 @@
                                 <div class="story-container" id="story-carousel">
                                     <!-- Slide 1: Intro -->
                                     <div class="story-card story-bg-1">
-                                        <h2 class="story-subtitle">ONLINEKOTHA PRESENTS</h2>
-                                        <h3 class="story-title">Your Chat, Wrapped.</h3>
-                                        <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations
-                                            reveal about you &amp; them.</p>
+                                        <h2 class="story-subtitle">Memory Retrospective</h2>
+                                        <h3 class="story-title">Your Chat, Wrapped</h3>
+                                        <p class="story-text" style="margin-top: 12px;">See what your WhatsApp conversations reveal about your bond.</p>
                                         <span
-                                            style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(255,255,255,0.18); padding: 5px 12px; border-radius: 999px;">Tap
-                                            to flip 👉</span>
+                                            style="display: inline-block; margin-top: 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; background: rgba(255,255,255,0.14); padding: 5px 12px; border-radius: 6px;">Tap to advance</span>
                                     </div>
 
                                     <!-- Slide 2: Stats -->
                                     <div class="story-card story-bg-2">
                                         <h2 class="story-subtitle">The Numbers</h2>
-                                        <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px;">12,842</div>
-                                        <p class="story-text">messages sent over</p>
+                                        <div class="story-highlight" style="font-size: 2.4rem; padding: 12px 24px; font-variant-numeric: tabular-nums;">12,842</div>
+                                        <p class="story-text">messages preserved over</p>
                                         <div class="story-highlight">574 Days</div>
                                     </div>
 
                                     <!-- Slide 3: Vibe Check -->
                                     <div class="story-card story-bg-3">
-                                        <h2 class="story-subtitle">Vibe Check</h2>
-                                        <div style="font-size: 3.5rem; margin-bottom: 6px;">🎢</div>
-                                        <div class="story-highlight" style="width: 85%;">80% Chaos 😂</div>
-                                        <div class="story-highlight" style="width: 85%;">20% Wholesome ❤️</div>
+                                        <h2 class="story-subtitle">Tone Analysis</h2>
+                                        <div style="margin-bottom: 12px; color: rgba(255,255,255,0.9);">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                        </div>
+                                        <div class="story-highlight" style="width: 85%;">80% Banter &amp; Humor</div>
+                                        <div class="story-highlight" style="width: 85%;">20% Wholesome Support</div>
                                     </div>
 
                                     <!-- Slide 4: Top Words -->
                                     <div class="story-card story-bg-4">
                                         <h2 class="story-subtitle">Most Used Words</h2>
                                         <div class="story-highlight"
-                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1
-                                            literally 💬</div>
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#1 literally</div>
                                         <div class="story-highlight"
-                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 wtf 💀
-                                        </div>
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#2 actually</div>
                                         <div class="story-highlight"
-                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha 😂
-                                        </div>
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#3 haha</div>
                                         <div class="story-highlight"
-                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 anyway
-                                            ✨</div>
+                                            style="width: 85%; font-size: 1rem; text-align: left; padding: 8px 16px;">#4 always</div>
                                     </div>
 
                                     <!-- Slide 5: Time Patterns -->
                                     <div class="story-card story-bg-5">
                                         <h2 class="story-subtitle">Time Patterns</h2>
-                                        <div style="font-size: 3.5rem; margin-bottom: 6px;">🦉</div>
-                                        <h3 class="story-title" style="font-size: 2rem;">Night Owls</h3>
-                                        <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14
-                                                AM</b></p>
+                                        <div style="margin-bottom: 8px; color: rgba(255,255,255,0.9);">
+                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        </div>
+                                        <h3 class="story-title" style="font-size: 1.85rem;">Late-Night Conversations</h3>
+                                        <p class="story-text" style="margin-top: 8px;">Peak conversations happened at <b>2:14 AM</b></p>
                                     </div>
 
                                     <!-- Slide 6: AI Conversation -->
                                     <div class="story-card story-bg-6">
-                                        <h2 class="story-subtitle">The Magic</h2>
-                                        <h3 class="story-title" style="font-size: 1.85rem;">AI Clone Ready</h3>
-                                        <p class="story-text" style="margin-top: 10px; font-size: 14px;">AI learns their exact
-                                            words, humor, tone &amp; texting style.</p>
+                                        <h2 class="story-subtitle">Authentic Voice</h2>
+                                        <h3 class="story-title" style="font-size: 1.85rem;">AI Memory Companion</h3>
+                                        <p class="story-text" style="margin-top: 10px; font-size: 14px;">Learns their exact tone, cadence, humor, and advice.</p>
                                         <div class="story-highlight"
-                                            style="margin-top: 14px; font-size: 13.5px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.22);">
-                                            💬 "Wait, are you serious right now? 😂"
+                                            style="margin-top: 14px; font-size: 13.5px; font-weight: 500; text-align: left; background: rgba(255,255,255,0.18);">
+                                            "Wait, are you serious right now?"
                                         </div>
                                     </div>
 
                                     <!-- Slide 7: Outro -->
                                     <div class="story-card story-bg-7">
-                                        <h3 class="story-title" style="font-size: 2.2rem;">Your Turn</h3>
-                                        <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat
-                                            &amp; relive your memories securely.</p>
-                                        <a href="/app.html?action=import" id="story-cta-btn" class="btn cta-primary liquid-glass-btn"
-                                            data-config='{"button":true,"cornerRadius":24}'
-                                            style="min-height: 48px; padding: 0 28px; border-radius: 999px;">
-                                            <span>Try Free Now</span>
+                                        <h3 class="story-title" style="font-size: 2rem;">Preserve Your Memories</h3>
+                                        <p class="story-text" style="margin-top: 8px; margin-bottom: 22px;">Import your chat &amp; relive cherished moments securely.</p>
+                                        <a href="/app.html?action=import" id="story-cta-btn" class="btn cta-primary"
+                                            style="min-height: 44px; padding: 0 24px; border-radius: 8px;">
+                                            <span>Try free now</span>
                                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="1.5" stroke-linecap="round">
                                                 <path d="M5 12h14M13 5l7 7-7 7" />
@@ -3755,102 +3134,17 @@
 
                         </div>
                     </div>
-
-                    <!-- ═════════ 4 FLOATING LIQUID GLASS HOLOGRAPHIC BADGES (WEBGL OPTICS) ═════════ -->
-                    <div class="vault-badges-grid">
-                        <!-- Badge 1: 100% Encrypted Memory Vault (Top Left) -->
-                        <div class="liquid-glass-badge badge-top-left"
-                             data-config='{"brightness":-0.3,"blurAmount":0.25,"cornerRadius":50,"button":true,"floating":true,"refraction":0.70,"specular":0.55,"edgeHighlight":0.18}'>
-                            <div class="glass-badge-inner">
-                                <div class="glass-badge-icon icon-shield">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                    </svg>
-                                </div>
-                                <div class="glass-badge-content">
-                                    <div class="glass-badge-title">100% Secure Memory Vault</div>
-                                    <div class="glass-badge-status">
-                                        <span class="status-dot-green"></span>
-                                        <span>Zero Cloud Storage &bull; AES-256</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Badge 2: Smart AI Message Recall (Top Right) -->
-                        <div class="liquid-glass-badge badge-top-right"
-                             data-config='{"brightness":-0.3,"blurAmount":0.25,"cornerRadius":50,"button":true,"floating":true,"refraction":0.70,"specular":0.55,"edgeHighlight":0.18}'>
-                            <div class="glass-badge-inner">
-                                <div class="glass-badge-icon icon-brain">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z"/>
-                                        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z"/>
-                                    </svg>
-                                </div>
-                                <div class="glass-badge-content">
-                                    <div class="glass-badge-title">Smart AI Message Recall</div>
-                                    <div class="glass-badge-status">
-                                        <span class="status-pulse-purple"></span>
-                                        <span>Learns Humor &amp; Inside Jokes</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Badge 3: Time Capsule Preservation (Bottom Left) -->
-                        <div class="liquid-glass-badge badge-bottom-left"
-                             data-config='{"brightness":-0.3,"blurAmount":0.25,"cornerRadius":50,"button":true,"floating":true,"refraction":0.70,"specular":0.55,"edgeHighlight":0.18}'>
-                            <div class="glass-badge-inner">
-                                <div class="glass-badge-icon icon-capsule">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polyline points="12 6 12 12 16 14"/>
-                                    </svg>
-                                </div>
-                                <div class="glass-badge-content">
-                                    <div class="glass-badge-title">Time Capsule Preservation</div>
-                                    <div class="glass-progress-wrap">
-                                        <div class="glass-progress-bar"><div class="glass-progress-fill"></div></div>
-                                        <span class="glass-progress-label">Permanent Offline Backup</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Badge 4: Spotify-Style Chat Wrapped (Bottom Right) -->
-                        <div class="liquid-glass-badge badge-bottom-right"
-                             data-config='{"brightness":-0.3,"blurAmount":0.25,"cornerRadius":50,"button":true,"floating":true,"refraction":0.70,"specular":0.55,"edgeHighlight":0.18}'>
-                            <div class="glass-badge-inner">
-                                <div class="glass-badge-icon icon-sparkle">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                    </svg>
-                                </div>
-                                <div class="glass-badge-content">
-                                    <div class="glass-badge-title">Spotify-Style Chat Wrapped</div>
-                                    <div class="glass-badge-status">
-                                        <span class="status-badge-chip">7 Cards</span>
-                                        <span>Top Emojis &amp; Vibe Check</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Interactive Controls Dock -->
+                <!-- Interactive Segmented Controls Dock -->
                 <div class="vault-controls-dock">
-                    <button class="dock-btn active liquid-glass-btn" id="tab-btn-vault" data-config='{"button":true,"cornerRadius":24}' onclick="switchMockupView('vault')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        <span>Time Capsule 3D</span>
+                    <button class="dock-btn active" id="tab-btn-vault" onclick="switchMockupView('vault')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>Time Capsule</span>
                     </button>
-                    <button class="dock-btn liquid-glass-btn" id="tab-btn-wrapped" data-config='{"button":true,"cornerRadius":24}' onclick="switchMockupView('wrapped')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <button class="dock-btn" id="tab-btn-wrapped" onclick="switchMockupView('wrapped')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         <span>Chat Wrapped</span>
-                    </button>
-                    <button class="dock-btn pulse-trigger liquid-glass-btn" id="btn-turbo-pulse" data-config='{"button":true,"cornerRadius":24}' onclick="triggerTurboPulse()" title="Activate Turbo Memory Sync">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        <span>Turbo Pulse</span>
                     </button>
                 </div>
 
@@ -3874,11 +3168,11 @@
     <section class="sec" id="features" style="position: relative; overflow: hidden; padding-top: 80px; padding-bottom: 80px;">
         <div class="wrap">
             <div style="text-align: center; margin-bottom: 52px;">
-                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 16px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;">
-                    Honoring Your Most Sacred Bonds
+                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 8px; background: var(--bg-soft); border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 16px;">
+                    Honoring your most sacred bonds
                 </div>
-                <h2 class="h2" style="font-size: clamp(2.1rem, 4.2vw, 3.2rem); font-weight: 850; letter-spacing: -0.035em; margin-bottom: 16px; line-height: 1.2;">
-                    A living sanctuary for the words you never want to lose.
+                <h2 class="h2" style="font-size: clamp(2rem, 3.8vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1.2;">
+                    A living sanctuary for the words you never want to lose
                 </h2>
                 <p class="lead" style="max-width: 640px; margin: 0 auto; font-size: 16px; color: var(--text-secondary); line-height: 1.65;">
                     Engineered with privacy, emotional sensitivity, and authentic tone replication to keep their guidance, humor, and presence close to your heart.
@@ -3891,7 +3185,7 @@
                 <div class="feature-card" style="border-top: 2px solid var(--accent);">
                     <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <span class="feature-badge-label">DIGITAL MEMORIAL &amp; SANCTUARY</span>
+                            <span class="feature-badge-label">Digital memorial &amp; sanctuary</span>
                             <h3 class="feature-card-title">Talk to someone who is no longer here</h3>
                         </div>
                         <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--bg-soft); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-primary);">
@@ -3920,7 +3214,7 @@
                 <div class="feature-card" style="border-top: 2px solid var(--border-strong);">
                     <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <span class="feature-badge-label">LOCALIZED VOICE &amp; HUMOR</span>
+                            <span class="feature-badge-label">Localized voice &amp; humor</span>
                             <h3 class="feature-card-title">Sounds like them. Not a corporate AI.</h3>
                         </div>
                         <div style="width: 38px; height: 38px; border-radius: 10px; background: var(--bg-soft); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-primary);">
@@ -3960,7 +3254,7 @@
                             <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
                         </svg>
                     </div>
-                    <span class="feature-badge-label">RELATIONSHIP RETROSPECTIVE</span>
+                    <span class="feature-badge-label">Relationship retrospective</span>
                     <h3 class="feature-card-title" style="font-size: 1.25rem;">Spotify-Style Chat Wrapped</h3>
                     <p class="feature-card-desc" style="margin-bottom: 20px;">
                         Transform thousands of messages into 7 elegant story cards showing who texted more, peak late-night hours, and top shared emojis.
@@ -3978,7 +3272,7 @@
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                         </svg>
                     </div>
-                    <span class="feature-badge-label">ZERO-KNOWLEDGE PRIVACY</span>
+                    <span class="feature-badge-label">Zero-knowledge privacy</span>
                     <h3 class="feature-card-title" style="font-size: 1.25rem;">100% In-Browser Decryption</h3>
                     <p class="feature-card-desc" style="margin-bottom: 20px;">
                         Your chats are parsed locally in your browser. We never link to your live WhatsApp account, never sell data, and never train public models on your memories.
@@ -3996,7 +3290,7 @@
                             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg>
                     </div>
-                    <span class="feature-badge-label">ARCHIVAL TIME MACHINE</span>
+                    <span class="feature-badge-label">Archival time machine</span>
                     <h3 class="feature-card-title" style="font-size: 1.25rem;">Instant Memory Search</h3>
                     <p class="feature-card-desc" style="margin-bottom: 20px;">
                         Stop scrolling through years of chat history. Quickly search by keyword, date, or emotional moment to pull up cherished memories in milliseconds.
@@ -4015,11 +3309,11 @@
         style="background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;overflow:hidden; padding-top: 80px; padding-bottom: 80px;">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:52px;">
-                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 16px; border-radius: 999px; background: var(--card-bg); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;">
-                    Simple &amp; Private Process
+                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 8px; background: var(--card-bg); border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 16px;">
+                    Simple &amp; private process
                 </div>
-                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 850; letter-spacing: -0.03em;">
-                    Three steps. Under a minute.
+                <h2 class="h2" style="font-size: clamp(1.9rem, 3.5vw, 2.6rem); font-weight: 600; letter-spacing: -0.025em;">
+                    Three steps. Under a minute
                 </h2>
                 <p class="lead"
                     style="max-width: 540px; margin: 12px auto 0; font-size: 15.5px; color: var(--text-secondary); line-height: 1.6;">
@@ -4083,10 +3377,10 @@
     <section class="sec" id="trust" style="padding-top: 80px; padding-bottom: 80px;">
         <div class="wrap">
             <div style="text-align:center;margin-bottom:52px;">
-                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 16px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--border); font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;">
-                    Zero-Compromise Security
+                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 5px 14px; border-radius: 8px; background: var(--bg-soft); border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 16px;">
+                    Zero-compromise security
                 </div>
-                <h2 class="h2" style="font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 850; letter-spacing: -0.03em;">Your memories are sacred.</h2>
+                <h2 class="h2" style="font-size: clamp(1.9rem, 3.5vw, 2.6rem); font-weight: 600; letter-spacing: -0.025em;">Your memories are sacred</h2>
                 <p class="lead" style="max-width:560px;margin:14px auto 0; font-size: 15.5px; color: var(--text-secondary);">Here is our strict pledge to ensure your private conversations stay yours alone.</p>
             </div>
             <div class="grid g4" style="gap: 20px;">
@@ -4192,24 +3486,23 @@
                 a<br>treasure trove of memories.</h2>
             <p class="lead" style="max-width:560px;margin:0 auto 34px;">Keep them safe in a beautiful, private vault.
                 Relive the best moments with Chat Wrapped and nostalgic AI.</p>
-            <a href="/app.html?action=import" id="final-cta" class="btn cta-primary liquid-glass-btn"
-                data-config='{"button":true,"cornerRadius":24}'
-                style="min-height:54px;padding:0 32px;font-size:16px;box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25); margin-bottom: 24px;">
-                Try OnlineKotha Free
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            <a href="/app.html?action=import" id="final-cta" class="btn cta-primary"
+                style="min-height:48px;padding:0 28px;font-size:15px;border-radius:10px;margin-bottom: 20px;">
+                Try OnlineKotha free
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                     stroke-linecap="round">
                     <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
             </a>
             <div class="dim"
-                style="font-size:13px;font-weight:500;letter-spacing:.02em; color: #a1a1aa; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                style="font-size:13px;font-weight:400;color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 6px;">
                 <span
-                    style="display:inline-flex; align-items:center; gap:6px; background: var(--bg-soft); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5"
+                    style="display:inline-flex; align-items:center; gap:6px; background: var(--bg-soft); border: 1px solid var(--border); padding: 4px 12px; border-radius: 6px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                         stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    <span>Instant Free Preview · No sign up required</span>
+                    <span>Instant free preview &bull; No sign up required</span>
                 </span>
             </div>
         </div>
@@ -5077,68 +4370,12 @@
                 });
             }
 
-            // 4. Ultra-smooth Ethereal Ambient Canvas (Floating Glow Mesh, No Grid)
-            const canvas = document.getElementById('ambient-canvas');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                let w = canvas.width = window.innerWidth;
-                let h = canvas.height = window.innerHeight;
-
-                window.addEventListener('resize', () => {
-                    w = canvas.width = window.innerWidth;
-                    h = canvas.height = window.innerHeight;
-                });
-
-                class Blob {
-                    constructor(color, radius) {
-                        this.x = Math.random() * w;
-                        this.y = Math.random() * h;
-                        this.vx = (Math.random() - 0.5) * 0.8;
-                        this.vy = (Math.random() - 0.5) * 0.8;
-                        this.radius = radius;
-                        this.color = color;
-                    }
-                    update() {
-                        this.x += this.vx;
-                        this.y += this.vy;
-                        if (this.x < -this.radius) this.x = w + this.radius;
-                        if (this.x > w + this.radius) this.x = -this.radius;
-                        if (this.y < -this.radius) this.y = h + this.radius;
-                        if (this.y > h + this.radius) this.y = -this.radius;
-                    }
-                    draw() {
-                        const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
-                        g.addColorStop(0, this.color);
-                        g.addColorStop(1, 'transparent');
-                        ctx.fillStyle = g;
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-
-                const blobs = [
-                    new Blob('rgba(99, 102, 241, 0.14)', 450),
-                    new Blob('rgba(236, 72, 153, 0.12)', 400),
-                    new Blob('rgba(139, 92, 246, 0.14)', 500),
-                    new Blob('rgba(16, 185, 129, 0.08)', 350)
-                ];
-
-                function animate() {
-                    ctx.clearRect(0, 0, w, h);
-                    blobs.forEach(b => {
-                        b.update();
-                        b.draw();
-                    });
-                    requestAnimationFrame(animate);
-                }
-                animate();
-            }
+            // 4. Ambient canvas removed for unslop clarity
         });
     </script>
 
     <!-- Ultra-Premium Liquid Glass WebGL Engine (Landing Showcase) -->
-    <script type="module" src="/js/landing-liquid-glass.js"></script>
+    <!-- Clean Unslop Architecture -->
 
 </body>
 
