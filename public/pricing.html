@@ -431,7 +431,7 @@
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 24px;
+            border-radius: 16px;
             padding: 28px;
             transition: all .3s ease;
             box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
@@ -1079,7 +1079,7 @@
         }
 
         .demo-panel {
-            border-radius: 24px;
+            border-radius: 16px;
             padding: 22px;
             display: flex;
             flex-direction: column;
@@ -1818,7 +1818,7 @@
             width: min(400px, 100%);
             background: #0f1523;
             border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 24px;
+            border-radius: 16px;
             overflow: hidden;
             transform: translateY(40px) scale(.97);
             transition: transform .28s cubic-bezier(.16, 1, .3, 1);
@@ -1875,7 +1875,7 @@
             width: min(420px, 100%);
             background: #0f1523;
             border: 1px solid rgba(255, 255, 255, .1);
-            border-radius: 24px;
+            border-radius: 16px;
             overflow: hidden;
             transform: translateY(40px) scale(.97);
             transition: transform .28s cubic-bezier(.16, 1, .3, 1);
@@ -1999,7 +1999,7 @@
         .pricing-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 32px;
+            border-radius: 16px;
             padding: 40px 30px;
             display: flex;
             flex-direction: column;
@@ -2022,7 +2022,7 @@
             }
             .pricing-card {
                 padding: 24px 20px;
-                border-radius: 24px;
+                border-radius: 16px;
             }
             .pricing-card h3 {
                 font-size: 1.3rem !important;
@@ -2067,9 +2067,7 @@
 </head>
 
 <body>
-    <div class="ambient-bg" aria-hidden="true">
-        <canvas id="ambient-canvas"></canvas>
-    </div>
+    <!-- Ambient Background Cleaned -->
     <!-- ═══════════ NAV ═══════════ -->
     <nav id="nav">
         <div class="nav-inner">
@@ -2128,8 +2126,8 @@
                     </div>
                 </div>
                 <a href="/app?action=import" id="nav-cta" class="btn cta-primary"
-                    style="min-height:42px;padding:0 18px;">
-                    <span>Try Free</span>
+                    style="min-height:36px;padding:0 16px;border-radius:8px;font-size:13.5px;">
+                    <span>Try free</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round">
                         <path d="M5 12h14M13 5l7 7-7 7" />
@@ -2198,7 +2196,7 @@
                         </li>
                     </ul>
                     <a href="/app?action=import" class="btn"
-                        style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
+                        style="width: 100%; padding: 16px; border-radius: 10px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
                         onmouseover="this.style.background='var(--msg-ai-bg)'"
                         onmouseout="this.style.background='transparent'">Try Live Demo — Free</a>
                 </div>
@@ -2250,7 +2248,7 @@
                     </ul>
                     <a href="/login.html?next=%2Fapp.html%3Fcheckout%3Dpro_monthly" class="btn checkout-btn"
                         data-plan="pro_monthly"
-                        style="width: 100%; padding: 16px; border-radius: 16px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
+                        style="width: 100%; padding: 16px; border-radius: 10px; background: transparent; color: var(--text-primary); border: 1px solid var(--border-strong); font-weight: 600; font-size: 15px; transition: all 0.2s; text-align: center;"
                         onmouseover="this.style.background='var(--msg-ai-bg)'"
                         onmouseout="this.style.background='transparent'">
                         Start Monthly Plan
@@ -2258,16 +2256,12 @@
                 </div>
                 <!-- Pro Plan (Lifetime) -->
                 <div class="pricing-card"
-                    style="border: 2px solid var(--accent); position: relative; box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15); transform: scale(1.02); z-index: 2;">
-                    <div
-                        style="position: absolute; top: 0; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, transparent, rgba(99,102,241,1), transparent);">
-                    </div>
+                    style="border: 1.5px solid var(--accent); position: relative; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.08); z-index: 2;">
                     <div
                         style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">Lifetime Pro</h3>
+                        <h3 style="font-size: 1.5rem; font-weight: 600; color: var(--accent);">Lifetime Pro</h3>
                         <span
-                            style="background: var(--msg-ai-bg); border: 1px solid rgba(99,102,241,0.3); color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 100px;">Pay
-                            Once</span>
+                            style="background: var(--msg-ai-bg); border: 1px solid rgba(99,102,241,0.25); color: var(--accent); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 6px;">Pay once</span>
                     </div>
                     <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px; line-height: 1.5;">Pay
                         once. Keep it forever. No subscriptions, no hidden fees.</p>
@@ -2324,10 +2318,8 @@
                         </li>
                     </ul>
                     <a href="/login.html?next=%2Fapp.html%3Fcheckout%3Dpro_lifetime" id="btn-get-pro"
-                        class="btn checkout-btn" data-plan="pro_lifetime"
-                        style="width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(to right, #4f46e5, #9333ea); color: #fff; border: none; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(99,102,241,0.4); transition: all 0.2s; text-align: center;"
-                        onmouseover="this.style.boxShadow='0 6px 20px rgba(99,102,241,0.6)'; this.style.transform='translateY(-2px)';"
-                        onmouseout="this.style.boxShadow='0 4px 15px rgba(99,102,241,0.4)'; this.style.transform='translateY(0)';">
+                        class="btn checkout-btn cta-primary" data-plan="pro_lifetime"
+                        style="width: 100%; padding: 14px 16px; border-radius: 10px; font-weight: 600; font-size: 14.5px; transition: all 0.15s ease; text-align: center; border: none;">
                         Get Lifetime Deal
                     </a>
                     <p style="text-align:center; margin-top: 16px;">
@@ -3253,63 +3245,7 @@
                 });
             }
 
-            // 4. Ultra-smooth Ethereal Ambient Canvas (Floating Glow Mesh, No Grid)
-            const canvas = document.getElementById('ambient-canvas');
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                let w = canvas.width = window.innerWidth;
-                let h = canvas.height = window.innerHeight;
-
-                window.addEventListener('resize', () => {
-                    w = canvas.width = window.innerWidth;
-                    h = canvas.height = window.innerHeight;
-                });
-
-                class Blob {
-                    constructor(color, radius) {
-                        this.x = Math.random() * w;
-                        this.y = Math.random() * h;
-                        this.vx = (Math.random() - 0.5) * 0.8;
-                        this.vy = (Math.random() - 0.5) * 0.8;
-                        this.radius = radius;
-                        this.color = color;
-                    }
-                    update() {
-                        this.x += this.vx;
-                        this.y += this.vy;
-                        if (this.x < -this.radius) this.x = w + this.radius;
-                        if (this.x > w + this.radius) this.x = -this.radius;
-                        if (this.y < -this.radius) this.y = h + this.radius;
-                        if (this.y > h + this.radius) this.y = -this.radius;
-                    }
-                    draw() {
-                        const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
-                        g.addColorStop(0, this.color);
-                        g.addColorStop(1, 'transparent');
-                        ctx.fillStyle = g;
-                        ctx.beginPath();
-                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                }
-
-                const blobs = [
-                    new Blob('rgba(99, 102, 241, 0.14)', 450),
-                    new Blob('rgba(236, 72, 153, 0.12)', 400),
-                    new Blob('rgba(139, 92, 246, 0.14)', 500),
-                    new Blob('rgba(16, 185, 129, 0.08)', 350)
-                ];
-
-                function animate() {
-                    ctx.clearRect(0, 0, w, h);
-                    blobs.forEach(b => {
-                        b.update();
-                        b.draw();
-                    });
-                    requestAnimationFrame(animate);
-                }
-                animate();
-            }
+            // Ambient Canvas removed for clean unslop craft
         });
     </script>
 

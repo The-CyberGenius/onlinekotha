@@ -280,7 +280,7 @@
                 <!-- Controls & Actions -->
                 <div class="flex items-center gap-1 shrink-0">
                     <!-- Guest Mode Compact Sign-In Button -->
-                    <button id="guest-signin-btn" onclick="openAuthModal()" class="hidden px-2.5 py-1 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-95 text-white text-[11px] font-bold shadow-sm transition flex items-center gap-1 cursor-pointer">
+                    <button id="guest-signin-btn" onclick="openAuthModal()" class="hidden px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-medium shadow-sm transition flex items-center gap-1 cursor-pointer">
                         <svg width="12" height="12" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
                         Sign In
                     </button>
@@ -610,16 +610,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
                     </svg>
                 </button>
-                <!-- Ambient Background Blur Glows -->
-                <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-gradient-to-tr from-indigo-500/15 via-purple-500/10 to-pink-500/15 blur-3xl pointer-events-none"></div>
-                <div class="absolute bottom-10 right-10 w-72 h-72 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
+                <!-- Clean Empty State (Unslop) -->
 
                 <div class="relative z-10 text-center max-w-md px-6 py-8 flex flex-col items-center">
                     
                     <!-- Logo Emblem Container -->
                     <div class="relative mb-6 group cursor-default">
-                        <!-- Ambient Glow -->
-                        <div class="absolute -inset-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40 group-hover:opacity-75 transition duration-500"></div>
+
                         
                         <!-- Clean OK Emblem with animated logo (Light / Dark adaptive) -->
                         <div class="relative w-24 h-24 rounded-3xl bg-white dark:bg-[#1c1c2e] shadow-2xl flex items-center justify-center p-3 transform transition-all duration-300 group-hover:scale-105 border border-gray-200/80 dark:border-white/10">
@@ -628,9 +625,9 @@
                     </div>
 
                     <!-- Category Pill -->
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-indigo-100/80 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/50 mb-3">
-                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping"></span>
-                        Instant Direct Messaging
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 mb-3">
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                        Direct Messages
                     </span>
 
                     <!-- Main Headline -->
@@ -646,9 +643,9 @@
                     <!-- Interactive Quick Action Buttons -->
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full max-w-xs mb-8">
                         <button onclick="document.getElementById('dm-new-btn')?.click()" 
-                            class="w-full py-3 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer" style="font-family:'Inter',sans-serif">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                            Start New Message
+                            class="w-full py-2.5 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white font-medium text-sm shadow-sm transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer" style="font-family:'Inter',sans-serif">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                            Start new message
                         </button>
                     </div>
 
@@ -1428,13 +1425,13 @@
                 <img src="./img/logo.svg" alt="OK Logo" class="w-full h-full object-contain">
             </div>
 
-            <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight modal-title mb-1" id="auth-modal-title">Welcome to Kotha</h3>
+            <h3 class="text-xl sm:text-2xl font-semibold tracking-tight modal-title mb-1" id="auth-modal-title">Welcome to Kotha</h3>
             <p class="text-xs modal-sub max-w-[270px] mx-auto leading-relaxed mb-4" id="auth-modal-sub">
                 Sign in with Google to save your chats permanently and unlock AI features!
             </p>
 
             <!-- Google Sign In (Active Provider) -->
-            <a id="modal-google-btn" href="/api/auth/google?next=%2Fapp.html%3Fchat%3Dkotha_assistant" class="flex items-center justify-center gap-3 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 text-gray-800 dark:text-gray-100 font-bold text-sm py-3 rounded-2xl shadow-sm hover:shadow-md transition-all active:scale-[0.99] cursor-pointer">
+            <a id="modal-google-btn" href="/api/auth/google?next=%2Fapp.html%3Fchat%3Dkotha_assistant" class="flex items-center justify-center gap-3 w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 text-gray-800 dark:text-gray-100 font-bold text-sm py-3 rounded-xl shadow-sm transition-all cursor-pointer">
                 <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.2 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.5 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.1 5.6l6.2 5.2C41.9 35.4 44 30 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
                 Continue with Google
             </a>
@@ -1554,7 +1551,7 @@
                 </div>
             </div>
 
-            <h3 class="text-xl font-extrabold tracking-tight modal-title mb-1" id="profile-modal-title">Your Profile</h3>
+            <h3 class="text-xl font-semibold tracking-tight modal-title mb-1" id="profile-modal-title">Your Profile</h3>
             <p class="text-xs modal-sub max-w-xs mx-auto leading-relaxed mb-4" id="profile-modal-sub">
                 Manage your profile details and subscription plan.
             </p>
