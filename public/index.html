@@ -1258,18 +1258,16 @@
         .vault-cta-link:hover {
             transform: scale(1.025);
         }
-        
-            60%, 100% { transform: translateX(100%); }
-        }
 
         /* ── Restrained Segmented Controls Dock ── */
         .vault-controls-dock {
+            position: relative;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
             margin-top: 24px;
-            z-index: 15;
+            z-index: 25;
             padding: 4px;
             border-radius: 10px;
             background: var(--bg-soft);
@@ -1287,6 +1285,7 @@
             background: transparent;
             border: 1px solid transparent;
             cursor: pointer;
+            touch-action: manipulation;
             transition: background 0.15s ease, color 0.15s ease;
             text-decoration: none;
             user-select: none;
@@ -1454,8 +1453,7 @@
 
         .story-highlight {
             background: rgba(255, 255, 255, 0.16);
-
-            -webkit- border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 14px;
             padding: 10px 18px;
             margin: 6px 0;
@@ -1471,8 +1469,7 @@
             right: 18px;
             z-index: 50;
             background: rgba(255, 255, 255, 0.18);
-
-            -webkit- border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -2306,8 +2303,6 @@
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, .65);
-
-            -webkit-
         }
 
         #auth-card {
@@ -2363,8 +2358,6 @@
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, .65);
-
-            -webkit-
         }
 
         #how-card {
@@ -2992,10 +2985,10 @@
                 </div>
             </div>
 
-            <!-- Interactive Virtual Phone Mockup Showcase (Time Capsule & Chat Wrapped) -->
+            <!-- Interactive Virtual Phone Mockup Showcase (Chat Wrapped Primary + Time Capsule) -->
             <div class="rise d4 mockup-wrapper" id="demo-story-mockup">
-                <!-- Live Status HUD -->
-                <div class="vault-hud" id="vault-hud">
+                <!-- Live Status HUD (visible when Time Capsule tab is active) -->
+                <div class="vault-hud" id="vault-hud" style="display: none;">
                     <span class="hud-beacon"></span>
                     <span>Memory vault: <strong class="hud-counter" id="vault-msg-counter">144,794</strong> chats encrypted</span>
                     <span class="hud-badge">Decrypted locally</span>
@@ -3007,7 +3000,7 @@
                         <div class="phone-screen" id="phone-screen-container">
 
                             <!-- ═════════ TIME CAPSULE VAULT VIEW ═════════ -->
-                            <div class="mockup-view-pane active" id="mockup-view-vault">
+                            <div class="mockup-view-pane" id="mockup-view-vault" style="display: none;">
                                 <picture>
                                     <source srcset="/img/hourglass-vault.webp" type="image/webp">
                                     <img class="vault-bg-img" src="/img/hourglass-vault.jpg" alt="OnlineKotha Memory Vault Hourglass" loading="eager" width="571" height="1024">
@@ -3022,8 +3015,8 @@
                                 </a>
                             </div>
 
-                            <!-- ═════════ CHAT WRAPPED CAROUSEL VIEW ═════════ -->
-                            <div class="mockup-view-pane" id="mockup-view-wrapped" style="display: none;">
+                            <!-- ═════════ CHAT WRAPPED CAROUSEL VIEW (PRIMARY) ═════════ -->
+                            <div class="mockup-view-pane active" id="mockup-view-wrapped" style="display: flex;">
                                 <!-- iPhone Dynamic Island -->
                                 <div class="dynamic-island">
                                     <div class="dynamic-island-lens"></div>
@@ -3137,18 +3130,18 @@
 
                 <!-- Interactive Segmented Controls Dock -->
                 <div class="vault-controls-dock">
-                    <button class="dock-btn active" id="tab-btn-vault" onclick="switchMockupView('vault')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        <span>Time Capsule</span>
-                    </button>
-                    <button class="dock-btn" id="tab-btn-wrapped" onclick="switchMockupView('wrapped')">
+                    <button type="button" class="dock-btn active" id="tab-btn-wrapped" onclick="switchMockupView('wrapped')">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                         <span>Chat Wrapped</span>
+                    </button>
+                    <button type="button" class="dock-btn" id="tab-btn-vault" onclick="switchMockupView('vault')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>Time Capsule</span>
                     </button>
                 </div>
 
                 <div id="wrapped-browse-hint"
-                    style="display:none; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
+                    style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-muted); font-weight:600; margin-top:14px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M15 18l-6-6 6-6" />
@@ -3622,7 +3615,7 @@
                 <div>
                     <p class="foot-head">Product</p>
                     <a href="/#how" class="foot-link">How it works</a><br>
-                    <a href="/#demo-story-mockup" class="foot-link">Try it live</a><br>
+                    <a href="#demo-story-mockup" class="foot-link">Try it live</a><br>
                     <a href="/pricing.html" class="foot-link">Pricing</a><br>
                     <a href="/app.html" class="foot-link">Open Web App</a><br>
                     <a href="https://play.google.com/store/apps/developer?id=okshiva" class="foot-link" target="_blank"
@@ -3739,14 +3732,16 @@
                 }
             }
 
-            function goToSlide(index) {
+            function goToSlide(index, instant = false) {
                 if (!carousel) return;
                 if (index < 0) index = 0;
                 if (index >= totalSlides) index = 0;
 
                 currentSlide = index;
                 const slideWidth = carousel.clientWidth;
-                carousel.scrollTo({ left: slideWidth * currentSlide, behavior: 'smooth' });
+                if (slideWidth > 0) {
+                    carousel.scrollTo({ left: slideWidth * currentSlide, behavior: instant ? 'auto' : 'smooth' });
+                }
 
                 updateProgressBars();
                 if (isWrappedActive()) {
@@ -3768,7 +3763,7 @@
             window.pauseStoryTimer = function() { clearInterval(storyInterval); };
 
             // Tab switcher
-            window.switchMockupView = function(view) {
+            window.switchMockupView = function(view, opts = {}) {
                 const tabVault = document.getElementById('tab-btn-vault');
                 const tabWrapped = document.getElementById('tab-btn-wrapped');
                 const wrappedHint = document.getElementById('wrapped-browse-hint');
@@ -3789,9 +3784,21 @@
                     tabWrapped?.classList.add('active');
                     if (wrappedHint) wrappedHint.style.display = 'flex';
                     if (hud) hud.style.display = 'none';
-                    goToSlide(currentSlide);
+                    if (opts && opts.reset) {
+                        currentSlide = 0;
+                    }
+                    requestAnimationFrame(() => {
+                        goToSlide(currentSlide, Boolean(opts && opts.instant));
+                    });
                 }
             };
+
+            // Initialize Chat Wrapped playback immediately when it is the primary view
+            if (isWrappedActive()) {
+                requestAnimationFrame(() => {
+                    goToSlide(0, true);
+                });
+            }
 
             // Turbo pulse interactive burst
             window.triggerTurboPulse = function() {
@@ -3914,19 +3921,20 @@
         })();
         // ── Hero Explore Interactive Demo Scroll & Activation ──
         (function () {
-            const heroScrollDemo = document.getElementById('hero-scroll-demo');
-            if (heroScrollDemo) {
-                heroScrollDemo.addEventListener('click', function (e) {
+            document.querySelectorAll('#hero-scroll-demo, a[href="#demo-story-mockup"]').forEach((trigger) => {
+                trigger.addEventListener('click', function (e) {
                     e.preventDefault();
+                    if (typeof window.switchMockupView === 'function') {
+                        window.switchMockupView('wrapped', { reset: true, instant: true });
+                    }
                     const target = document.getElementById('demo-story-mockup');
                     if (target) {
-                        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        if (typeof window.switchMockupView === 'function') {
-                            window.switchMockupView('wrapped');
-                        }
+                        requestAnimationFrame(() => {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        });
                     }
                 });
-            }
+            });
         })();
         // ── Hero Interactive Demo Chat (server-connected, floating assistant) ──
         document.addEventListener('DOMContentLoaded', function heroChat() {
