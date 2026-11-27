@@ -133,20 +133,24 @@
             transform: scale(0.92);
         }
 
-        /* Round Share Button — positioned at bottom right of the floating story card */
+        /* Round Share Pill Button — positioned at bottom right of the floating story card */
         .ok-round-share-btn {
             position: absolute;
-            bottom: 80px;
-            right: 24px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
+            bottom: 72px;
+            right: 18px;
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 999px;
             background: rgba(255, 255, 255, 0.22);
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
+            border: 1.5px solid rgba(255, 255, 255, 0.42);
             color: #ffffff;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
+            font-size: 13.5px;
+            font-weight: 700;
+            letter-spacing: 0.01em;
             cursor: pointer;
             z-index: 500;
             backdrop-filter: blur(16px);
@@ -157,12 +161,12 @@
             outline: none;
         }
         .ok-round-share-btn:hover {
-            background: rgba(255, 255, 255, 0.35);
-            transform: scale(1.08);
+            background: rgba(255, 255, 255, 0.34);
+            transform: scale(1.04);
             box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
         }
         .ok-round-share-btn:active {
-            transform: scale(0.92);
+            transform: scale(0.95);
         }
         .ok-round-share-btn.loading {
             pointer-events: none;
@@ -170,6 +174,121 @@
         }
         .ok-round-share-btn.loading svg {
             animation: ok-spin 0.8s linear infinite;
+        }
+
+        /* Viral Share Preview Modal */
+        .ok-share-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2147483648;
+            background: rgba(6, 7, 15, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .ok-share-sheet {
+            width: 100%;
+            max-width: 380px;
+            max-height: 92dvh;
+            overflow-y: auto;
+            background: #12131f;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 24px;
+            padding: 20px;
+            color: #ffffff;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .ok-share-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 4px;
+            border-radius: 12px;
+        }
+        .ok-share-tab {
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 10px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .ok-share-tab.active {
+            background: #6366f1;
+            color: #ffffff;
+        }
+        .ok-share-preview-box {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            max-height: 44dvh;
+            background: #080812;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ok-share-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .ok-share-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .ok-share-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .ok-btn-share-primary {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+        .ok-btn-share-sec {
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
         }
         @keyframes ok-spin {
             from { transform: rotate(0deg); }
@@ -417,20 +536,19 @@
                     <path d="M18 6L6 18M6 6l12 12"/>
                 </svg>`;
 
-            // Single Round Share Button — positioned at bottom right of the floating story card
+            // Share Card Pill Button — positioned at bottom right of the floating story card
             d.shareBtn = document.createElement('button');
             d.shareBtn.className = 'ok-round-share-btn';
             d.shareBtn.id = 'ok-share-btn';
-            d.shareBtn.setAttribute('aria-label', 'Share story');
-            d.shareBtn.setAttribute('title', 'Share story');
+            d.shareBtn.setAttribute('aria-label', 'Share Wrapped Card');
+            d.shareBtn.setAttribute('title', 'Share or Download PNG Card');
             d.shareBtn.innerHTML = `
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="18" cy="5" r="3"></circle>
-                    <circle cx="6" cy="12" r="3"></circle>
-                    <circle cx="18" cy="19" r="3"></circle>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                </svg>`;
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                    <polyline points="16 6 12 2 8 6"></polyline>
+                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                </svg>
+                <span>Share Card</span>`;
 
             // Assemble
             d.vp.appendChild(d.cv);
@@ -610,95 +728,381 @@
 
         async _export(share = true) {
             if (this.isExporting) return;
+            this._openShareModal();
+        }
 
-            if (!window.htmlToImage) {
-                this._showToast('Export library not loaded. Please refresh.');
-                return;
-            }
+        _roundRectPath(ctx, x, y, w, h, r) {
+            const rad = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + rad, y);
+            ctx.arcTo(x + w, y, x + w, y + h, rad);
+            ctx.arcTo(x + w, y + h, x, y + h, rad);
+            ctx.arcTo(x, y + h, x, y, rad);
+            ctx.arcTo(x, y, x + w, y, rad);
+            ctx.closePath();
+        }
 
-            this.isExporting = true;
-            this.isPaused = true;
-            if (this.dom.shareBtn) this.dom.shareBtn.classList.add('loading');
-            this._showToast('Preparing story...');
-
-            try {
-                const clone = this.dom.cv.cloneNode(true);
-                
-                // Prepare clone off-screen but within paint area
-                clone.style.transform = 'none';
-                clone.style.position = 'fixed';
-                clone.style.left = '0';
-                clone.style.top = '0';
-                clone.style.zIndex = '-9999';
-                
-                document.body.appendChild(clone);
-
-                // Remove UI elements and problematic blur filters (html-to-image fails on CSS blur)
-                const removeEls = clone.querySelectorAll('.ok-prog, .ok-noise, .ok-vp-close-btn, .ok-round-share-btn, .ok-orb');
-                removeEls.forEach(el => el.remove());
-                
-                // Freeze animations and fix glassmorphism (causes black screen)
-                const allEls = clone.querySelectorAll('*');
-                allEls.forEach(el => {
-                    // Freeze animations explicitly
-                    if (el.classList.contains('ok-anim') || el.classList.contains('ok-huge')) {
-                        el.style.animation = 'none';
-                        el.style.opacity = '1';
-                        el.style.transform = 'none';
-                    }
-                    // Strip backdrop-filter, use opaque fallback
-                    el.style.backdropFilter = 'none';
-                    el.style.webkitBackdropFilter = 'none';
-                    if (el.classList.contains('ok-glass-card')) {
-                        el.style.backgroundColor = 'rgba(30, 30, 45, 0.95)';
-                    }
-                });
-
-                // Add a small delay to ensure DOM paints the clone
-                await new Promise(r => setTimeout(r, 250));
-
-                const dataUrl = await window.htmlToImage.toPng(clone, {
-                    width: 1080,
-                    height: 1920,
-                    pixelRatio: 1,
-                    cacheBust: true,
-                    backgroundColor: '#080812'
-                });
-
-                document.body.removeChild(clone);
-
-                if (!dataUrl || dataUrl.length < 1000) {
-                    throw new Error('Generated image is empty');
-                }
-
-                if (share && navigator.share && navigator.canShare) {
-                    try {
-                        const blob = await (await fetch(dataUrl)).blob();
-                        const file = new File([blob], `onlinekotha_wrapped_${this.idx + 1}.png`, { type: 'image/png' });
-                        if (navigator.canShare({ files: [file] })) {
-                            await navigator.share({
-                                title: 'My OnlineKotha Chat Wrapped',
-                                text: 'Check out our Chat Wrapped on OnlineKotha! ✨',
-                                files: [file]
-                            });
-                        } else {
-                            this._download(dataUrl);
-                        }
-                    } catch (e) {
-                        this._download(dataUrl);
-                    }
+        _wrapCanvasText(ctx, text, cx, startY, maxWidth, lineHeight, maxLines = 4) {
+            const words = String(text || '').split(/\s+/);
+            const lines = [];
+            let line = '';
+            for (const w of words) {
+                const test = line ? `${line} ${w}` : w;
+                if (ctx.measureText(test).width > maxWidth && line) {
+                    lines.push(line);
+                    line = w;
+                    if (lines.length >= maxLines) break;
                 } else {
-                    this._download(dataUrl);
+                    line = test;
                 }
-            } catch (err) {
-                console.error('Export error:', err);
-                this._showToast('Export failed. Please try again.');
-            } finally {
-                this.isExporting = false;
-                this.isPaused = false;
-                if (this.dom.shareBtn) this.dom.shareBtn.classList.remove('loading');
-                this.lastTick = Date.now();
             }
+            if (line && lines.length < maxLines) lines.push(line);
+            let y = startY;
+            for (const l of lines) {
+                ctx.fillText(l, cx, y);
+                y += lineHeight;
+            }
+            return y;
+        }
+
+        _renderWrappedPng(mode = 'summary', hideNames = false) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1080;
+            canvas.height = 1920;
+            const ctx = canvas.getContext('2d');
+            const s = this.stats || {};
+            const p1Name = hideNames ? 'Me' : (s.sender1Name || 'Me');
+            const p2Name = hideNames ? 'Special Someone' : (s.sender2Name || 'Friend');
+            const total = Number(s.totalMessages || 0).toLocaleString();
+            const p1Pct = Number(s.sender1Percent || 50);
+            const p2Pct = Number(s.sender2Percent || 50);
+            const topEmojis = this._topEmojis(this.msgs).slice(0, 5).map(e => e.emoji).join('  ');
+            const nightCount = this._nightCount(this.msgs);
+            const busiest = s.busiestDay || 'Weekend';
+            const peakLbl = s.peakLabel || 'Late Night';
+
+            // Palette based on active slide or rich deep slate/indigo for summary
+            const palettes = [
+                ['#1e1b4b', '#312e81', '#a855f7', '#ec4899'],
+                ['#022c22', '#064e3b', '#10b981', '#3b82f6'],
+                ['#1c1004', '#451a03', '#f59e0b', '#ef4444'],
+                ['#042f2e', '#115e59', '#14b8a6', '#38bdf8'],
+                ['#091a3c', '#172554', '#3b82f6', '#6366f1'],
+                ['#4c0519', '#3b0764', '#f43f5e', '#9333ea'],
+            ];
+            const pal = mode === 'summary' ? palettes[0] : palettes[this.idx % palettes.length];
+
+            // Background base gradient
+            const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
+            bgGrad.addColorStop(0, pal[0]);
+            bgGrad.addColorStop(1, pal[1]);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            // Soft ambient glows
+            const orb1 = ctx.createRadialGradient(920, 220, 40, 920, 220, 720);
+            orb1.addColorStop(0, pal[2] + '55');
+            orb1.addColorStop(1, 'transparent');
+            ctx.fillStyle = orb1;
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            const orb2 = ctx.createRadialGradient(140, 1660, 40, 140, 1660, 720);
+            orb2.addColorStop(0, pal[3] + '44');
+            orb2.addColorStop(1, 'transparent');
+            ctx.fillStyle = orb2;
+            ctx.fillRect(0, 0, 1080, 1920);
+
+            // Top Brand Badge
+            ctx.save();
+            this._roundRectPath(ctx, 72, 76, 310, 68, 34);
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 28px Inter, -apple-system, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('OnlineKotha Wrapped', 102, 111);
+            ctx.restore();
+
+            // Year / Badge right
+            ctx.save();
+            ctx.fillStyle = 'rgba(255,255,255,0.68)';
+            ctx.font = '700 26px Inter, -apple-system, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(new Date().getFullYear() + ' EDITION', 1008, 111);
+            ctx.restore();
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'alphabetic';
+
+            if (mode === 'summary') {
+                // Names Headline
+                ctx.fillStyle = 'rgba(255,255,255,0.72)';
+                ctx.font = '700 28px Inter, -apple-system, sans-serif';
+                ctx.fillText('OUR CONVERSATION STORY', 540, 260);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 72px Inter, -apple-system, sans-serif';
+                ctx.fillText(`${p1Name}  ×  ${p2Name}`.slice(0, 26), 540, 352);
+
+                // Card 1: Total Messages Hero Glass Card
+                this._roundRectPath(ctx, 76, 430, 928, 350, 40);
+                ctx.fillStyle = 'rgba(15, 18, 35, 0.56)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.68)';
+                ctx.font = '700 26px Inter, -apple-system, sans-serif';
+                ctx.fillText('TOTAL MESSAGES PRESERVED', 540, 505);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 132px Inter, -apple-system, sans-serif';
+                ctx.fillText(total, 540, 650);
+
+                ctx.fillStyle = '#c4b5fd';
+                ctx.font = '600 32px Inter, -apple-system, sans-serif';
+                ctx.fillText(`${s.totalDays || 1} days of memories  •  ${s.msgsPerDay || 0} msgs/day`, 540, 725);
+
+                // Card 2: Split Share Bar
+                this._roundRectPath(ctx, 76, 820, 928, 310, 40);
+                ctx.fillStyle = 'rgba(15, 18, 35, 0.56)';
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.68)';
+                ctx.font = '700 26px Inter, -apple-system, sans-serif';
+                ctx.fillText('WHO TEXTED MORE', 540, 892);
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '800 36px Inter, -apple-system, sans-serif';
+                ctx.fillText(`${p1Name} (${p1Pct}%)`, 128, 965);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#f9a8d4';
+                ctx.fillText(`${p2Name} (${p2Pct}%)`, 952, 965);
+
+                // Progress Track
+                this._roundRectPath(ctx, 128, 1000, 824, 34, 17);
+                ctx.fillStyle = 'rgba(255,255,255,0.14)';
+                ctx.fill();
+                const barW = Math.max(40, Math.round((824 * p1Pct) / 100));
+                this._roundRectPath(ctx, 128, 1000, barW, 34, 17);
+                const barGrad = ctx.createLinearGradient(128, 0, 952, 0);
+                barGrad.addColorStop(0, '#8b5cf6');
+                barGrad.addColorStop(1, '#ec4899');
+                ctx.fillStyle = barGrad;
+                ctx.fill();
+
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(255,255,255,0.82)';
+                ctx.font = '600 28px Inter, -apple-system, sans-serif';
+                const initiator = (s.s1First || 0) >= (s.s2First || 0) ? p1Name : p2Name;
+                ctx.fillText(`${initiator} usually sparked the conversation first`, 540, 1090);
+
+                // Card 3: 2-Column Highlight Grid
+                const cardW = 448;
+                this._roundRectPath(ctx, 76, 1170, cardW, 255, 36);
+                ctx.fillStyle = 'rgba(15, 18, 35, 0.56)';
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.65)';
+                ctx.font = '700 24px Inter, -apple-system, sans-serif';
+                ctx.fillText('MOST ACTIVE DAY', 76 + cardW / 2, 1240);
+                ctx.fillStyle = '#5eead4';
+                ctx.font = '900 54px Inter, -apple-system, sans-serif';
+                ctx.fillText(busiest, 76 + cardW / 2, 1325);
+                ctx.fillStyle = 'rgba(255,255,255,0.75)';
+                ctx.font = '600 26px Inter, -apple-system, sans-serif';
+                ctx.fillText(peakLbl, 76 + cardW / 2, 1380);
+
+                this._roundRectPath(ctx, 556, 1170, cardW, 255, 36);
+                ctx.fillStyle = 'rgba(15, 18, 35, 0.56)';
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.65)';
+                ctx.font = '700 24px Inter, -apple-system, sans-serif';
+                ctx.fillText('AFTER MIDNIGHT', 556 + cardW / 2, 1240);
+                ctx.fillStyle = '#c084fc';
+                ctx.font = '900 60px Inter, -apple-system, sans-serif';
+                ctx.fillText(nightCount.toLocaleString(), 556 + cardW / 2, 1325);
+                ctx.fillStyle = 'rgba(255,255,255,0.75)';
+                ctx.font = '600 26px Inter, -apple-system, sans-serif';
+                ctx.fillText('12 AM – 4 AM texts', 556 + cardW / 2, 1380);
+
+                // Card 4: Top Emojis Strip
+                this._roundRectPath(ctx, 76, 1465, 928, 220, 36);
+                ctx.fillStyle = 'rgba(15, 18, 35, 0.56)';
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(255,255,255,0.65)';
+                ctx.font = '700 24px Inter, -apple-system, sans-serif';
+                ctx.fillText('SIGNATURE EMOJIS', 540, 1532);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '76px Apple Color Emoji, Segoe UI Emoji, sans-serif';
+                ctx.fillText(topEmojis || '❤️  😂  ✨  🥹  🔥', 540, 1632);
+            } else {
+                // Current slide faithful high-res 1080x1920 render
+                const activeSafe = this.dom.content.querySelector('.ok-safe');
+                const badgeTxt = (activeSafe?.querySelector('.ok-badge-pill')?.textContent || 'CHAT WRAPPED').trim();
+                const hugeTxt = (activeSafe?.querySelector('.ok-huge')?.innerText || `${p1Name} × ${p2Name}`).trim();
+                const bigNum = (activeSafe?.querySelector('.ok-stat-num')?.textContent || total).trim();
+                const quoteTxt = (activeSafe?.querySelector('.ok-quote-box')?.textContent || s.vibeDesc || 'Every message preserved privately.').trim();
+                const safeHuge = hideNames ? hugeTxt.replaceAll(s.sender1Name || '___', p1Name).replaceAll(s.sender2Name || '___', p2Name) : hugeTxt;
+                const safeQuote = hideNames ? quoteTxt.replaceAll(s.sender1Name || '___', p1Name).replaceAll(s.sender2Name || '___', p2Name) : quoteTxt;
+
+                ctx.fillStyle = '#e9d5ff';
+                ctx.font = '800 30px Inter, -apple-system, sans-serif';
+                ctx.fillText(badgeTxt.toUpperCase(), 540, 320);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 78px Inter, -apple-system, sans-serif';
+                const afterTitleY = this._wrapCanvasText(ctx, safeHuge, 540, 440, 880, 96, 4);
+
+                this._roundRectPath(ctx, 84, Math.max(afterTitleY + 60, 740), 912, 460, 44);
+                ctx.fillStyle = 'rgba(15, 18, 35, 0.6)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                const cardTop = Math.max(afterTitleY + 60, 740);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '900 138px Inter, -apple-system, sans-serif';
+                ctx.fillText(bigNum, 540, cardTop + 230);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.82)';
+                ctx.font = '600 34px Inter, -apple-system, sans-serif';
+                ctx.fillText(`${p1Name} × ${p2Name}`, 540, cardTop + 340);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.font = '500 34px Inter, -apple-system, sans-serif';
+                this._wrapCanvasText(ctx, safeQuote, 540, cardTop + 560, 860, 50, 3);
+            }
+
+            // Viral Footer CTA & Branding
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            this._roundRectPath(ctx, 210, 1742, 660, 84, 42);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 28px Inter, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Generate yours free at  onlinekotha.com', 540, 1785);
+
+            return canvas.toDataURL('image/png', 1.0);
+        }
+
+        _openShareModal() {
+            this.isPaused = true;
+            const existing = document.getElementById('ok-share-modal');
+            if (existing) existing.remove();
+
+            let currentMode = 'summary';
+            let hideNames = false;
+            let currentDataUrl = this._renderWrappedPng(currentMode, hideNames);
+
+            const modal = document.createElement('div');
+            modal.className = 'ok-share-modal';
+            modal.id = 'ok-share-modal';
+            modal.innerHTML = `
+                <div class="ok-share-sheet">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <div>
+                            <div style="font-size:17px;font-weight:800;">Share Wrapped Card</div>
+                            <div style="font-size:12px;color:rgba(255,255,255,0.6);">Ready for WhatsApp Status &amp; IG Stories</div>
+                        </div>
+                        <button type="button" id="ok-share-close" style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.08);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="ok-share-tabs">
+                        <button type="button" class="ok-share-tab active" data-mode="summary">Summary Card</button>
+                        <button type="button" class="ok-share-tab" data-mode="slide">Current Slide</button>
+                    </div>
+                    <div class="ok-share-preview-box">
+                        <img id="ok-share-preview-img" src="${currentDataUrl}" alt="Wrapped Share Card Preview" />
+                    </div>
+                    <label class="ok-share-toggle">
+                        <span>Hide Contact Names (Anonymous)</span>
+                        <input type="checkbox" id="ok-share-anon" style="width:18px;height:18px;accent-color:#6366f1;cursor:pointer;" />
+                    </label>
+                    <div class="ok-share-actions">
+                        <button type="button" class="ok-btn-share-primary" id="ok-share-native">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                            <span>Share Story</span>
+                        </button>
+                        <button type="button" class="ok-btn-share-sec" id="ok-share-dl">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            <span>Save PNG</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const refreshPreview = () => {
+                currentDataUrl = this._renderWrappedPng(currentMode, hideNames);
+                const img = modal.querySelector('#ok-share-preview-img');
+                if (img) img.src = currentDataUrl;
+            };
+
+            modal.querySelectorAll('.ok-share-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modal.querySelectorAll('.ok-share-tab').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentMode = btn.getAttribute('data-mode') || 'summary';
+                    refreshPreview();
+                });
+            });
+
+            modal.querySelector('#ok-share-anon').addEventListener('change', (e) => {
+                hideNames = Boolean(e.target.checked);
+                refreshPreview();
+            });
+
+            const closeModal = () => {
+                modal.remove();
+                this.isPaused = false;
+                this.lastTick = Date.now();
+            };
+            modal.querySelector('#ok-share-close').addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+            modal.querySelector('#ok-share-dl').addEventListener('click', () => {
+                this._download(currentDataUrl);
+                this._showToast('Wrapped card PNG saved!');
+            });
+
+            modal.querySelector('#ok-share-native').addEventListener('click', async () => {
+                try {
+                    const blob = await (await fetch(currentDataUrl)).blob();
+                    const file = new File([blob], `onlinekotha_wrapped_${currentMode}.png`, { type: 'image/png' });
+                    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: 'My OnlineKotha Chat Wrapped',
+                            text: 'Generated on OnlineKotha.com — WhatsApp Chat Wrapped!',
+                            files: [file]
+                        });
+                    } else {
+                        this._download(currentDataUrl);
+                        this._showToast('PNG downloaded! Upload it directly to WhatsApp Status or IG Story.');
+                    }
+                } catch (err) {
+                    if (err && err.name !== 'AbortError') {
+                        this._download(currentDataUrl);
+                        this._showToast('PNG downloaded!');
+                    }
+                }
+            });
         }
 
         _download(dataUrl) {

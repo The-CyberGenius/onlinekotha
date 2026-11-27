@@ -1026,9 +1026,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 40px;
+            margin-top: 32px;
+            padding: 12px 0 8px;
             position: relative;
-            overflow: hidden;
+            overflow: visible;
         }
 
         /* ── HUD Status Bar ── */
@@ -1101,36 +1102,52 @@
             justify-content: center;
             width: 100%;
             max-width: 100%;
-            overflow: hidden;
+            padding: 20px 24px 38px;
+            overflow: visible;
         }
 
-        /* ── Phone Mockup Chassis ── */
+        /* ── Realistic Titanium iPhone Chassis ── */
         .phone-mockup {
             position: relative;
-            width: 330px;
-            max-width: calc(100vw - 32px);
-            height: 590px;
+            width: 316px;
+            max-width: calc(100vw - 44px);
+            height: 616px;
             border-radius: 52px;
-            background: #0f0f17;
-            padding: 11px;
+            background: linear-gradient(145deg, #35353f 0%, #17171d 35%, #111116 70%, #2a2a33 100%);
+            padding: 10px;
+            border: 1.5px solid rgba(255, 255, 255, 0.22);
             box-shadow:
-                0 0 0 2px #3a3a4c,
-                0 0 0 4px #181824,
-                0 20px 50px -15px rgba(0, 0, 0, 0.6),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-            overflow: hidden;
+                inset 0 0 0 2px #050508,
+                0 28px 56px -14px rgba(15, 23, 42, 0.42),
+                0 12px 24px -8px rgba(15, 23, 42, 0.22);
+            overflow: visible;
             display: flex;
             flex-direction: column;
             z-index: 10;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             animation: phoneLevitate 6s ease-in-out infinite alternate;
         }
+        /* Subtle metallic hardware side buttons */
+        .phone-hw-btn {
+            position: absolute;
+            width: 3px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #525260 0%, #26262f 50%, #444452 100%);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+            pointer-events: none;
+            z-index: 8;
+        }
+        .phone-hw-action { left: -4px; top: 108px; height: 26px; }
+        .phone-hw-vol-up { left: -4px; top: 152px; height: 44px; }
+        .phone-hw-vol-down { left: -4px; top: 208px; height: 44px; }
+        .phone-hw-power { right: -4px; top: 168px; height: 66px; }
+
         @keyframes phoneLevitate {
             0% {
                 transform: translateY(0px);
             }
             50% {
-                transform: translateY(-8px);
+                transform: translateY(-6px);
             }
             100% {
                 transform: translateY(0px);
@@ -1139,8 +1156,9 @@
         .phone-mockup:hover {
             transform: translateY(-4px);
             box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.16),
-                0 24px 60px -12px rgba(0, 0, 0, 0.5);
+                inset 0 0 0 2px #050508,
+                0 34px 64px -14px rgba(15, 23, 42, 0.48),
+                0 14px 28px -8px rgba(15, 23, 42, 0.26);
         }
 
         .phone-screen {
@@ -1152,6 +1170,44 @@
             width: 100%;
             height: 100%;
             contain: paint;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+        /* Subtle screen glass sheen + iOS home bar */
+        .phone-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 42px;
+            background: linear-gradient(125deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 36%);
+            pointer-events: none;
+            z-index: 120;
+        }
+        .ios-status-bar {
+            position: absolute;
+            top: 13px;
+            left: 22px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: rgba(255, 255, 255, 0.94);
+            z-index: 95;
+            pointer-events: none;
+        }
+        .ios-home-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 108px;
+            height: 4px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.42);
+            z-index: 110;
+            pointer-events: none;
         }
 
         /* Mockup View Panes */
@@ -1307,25 +1363,25 @@
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 110px;
-            height: 30px;
+            width: 86px;
+            height: 24px;
             background: #000;
-            border-radius: 20px;
+            border-radius: 99px;
             z-index: 100;
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding-right: 10px;
-            box-shadow: inset 0px 0px 2px rgba(255, 255, 255, 0.15), 0 5px 15px rgba(0, 0, 0, 0.5);
+            padding-right: 8px;
+            box-shadow: inset 0px 0px 1.5px rgba(255, 255, 255, 0.16);
             pointer-events: none;
         }
 
         .dynamic-island-lens {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #0a0a2a;
-            box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.2), inset -1px -1px 2px rgba(0, 0, 0, 0.5);
+            background: radial-gradient(circle at 35% 35%, #2b356e 0%, #090b1a 70%);
+            box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.25);
             position: relative;
         }
 
@@ -1334,11 +1390,10 @@
             position: absolute;
             top: 2px;
             left: 2px;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.8);
+            width: 3px;
+            height: 3px;
+            background: rgba(165, 180, 252, 0.65);
             border-radius: 50%;
-            filter: blur(0.5px);
         }
 
 
@@ -1396,7 +1451,7 @@
 
         .story-progress-container {
             position: absolute;
-            top: 40px;
+            top: 44px;
             left: 14px;
             right: 14px;
             display: flex;
@@ -2433,24 +2488,28 @@
             }
 
             .mockup-wrapper {
-                margin-top: 30px !important;
-                padding-top: 10px;
-                overflow: hidden !important;
+                margin-top: 24px !important;
+                padding: 8px 0 12px !important;
+                overflow: visible !important;
                 max-width: 100% !important;
             }
 
+            .vault-presentation-wrapper {
+                padding: 16px 14px 28px !important;
+                overflow: visible !important;
+            }
+
             .phone-mockup {
-                width: 300px !important;
-                max-width: calc(100vw - 36px) !important;
-                height: 538px !important;
-                border-radius: 46px !important;
-                padding: 10px !important;
+                width: 296px !important;
+                max-width: calc(100vw - 44px) !important;
+                height: 576px !important;
+                border-radius: 48px !important;
+                padding: 9px !important;
                 animation: none !important;
                 transform: none !important;
                 box-shadow:
-                    0 0 0 2px #3a3a4c,
-                    0 0 0 4px #181824,
-                    0 16px 36px -10px rgba(0, 0, 0, 0.6) !important;
+                    inset 0 0 0 2px #050508,
+                    0 20px 44px -12px rgba(15, 23, 42, 0.38) !important;
             }
 
             #nav-user-name {
@@ -2887,7 +2946,7 @@
         };
     </script>
     <!-- ═══════════ HERO ═══════════ -->
-    <section class="hero sec" style="position: relative; overflow: visible;">
+    <section class="hero sec" style="position: relative; overflow-x: clip; overflow-y: visible;">
         <div class="wrap hero-centered">
             <!-- Eyebrow Badge -->
             <div class="rise d1" style="display:flex; justify-content:center; margin-bottom: 20px;">
@@ -2995,9 +3054,23 @@
                 </div>
 
                 <div class="vault-presentation-wrapper" id="vault-presentation-wrap">
-                    <!-- Phone Mockup Chassis -->
+                    <!-- Realistic Titanium Phone Mockup Chassis -->
                     <div class="phone-mockup" id="landing-phone-mockup">
+                        <span class="phone-hw-btn phone-hw-action" aria-hidden="true"></span>
+                        <span class="phone-hw-btn phone-hw-vol-up" aria-hidden="true"></span>
+                        <span class="phone-hw-btn phone-hw-vol-down" aria-hidden="true"></span>
+                        <span class="phone-hw-btn phone-hw-power" aria-hidden="true"></span>
                         <div class="phone-screen" id="phone-screen-container">
+                            <!-- Authentic iOS Status Bar & Home Indicator -->
+                            <div class="ios-status-bar" aria-hidden="true">
+                                <span>9:41</span>
+                                <span style="display:inline-flex;align-items:center;gap:4px;">
+                                    <svg width="13" height="10" viewBox="0 0 18 12" fill="currentColor"><rect x="1" y="7" width="2.5" height="4" rx="0.8"/><rect x="5" y="5" width="2.5" height="6" rx="0.8"/><rect x="9" y="3" width="2.5" height="8" rx="0.8"/><rect x="13" y="1" width="2.5" height="10" rx="0.8"/></svg>
+                                    <svg width="12" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M4.2 7a5.8 5.8 0 0 1 7.6 0"/><circle cx="8" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+                                    <svg width="19" height="10" viewBox="0 0 24 12" fill="none"><rect x="1" y="1.5" width="19" height="9" rx="2.5" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.2"/><rect x="2.8" y="3.2" width="15" height="5.6" rx="1.2" fill="currentColor"/><path d="M21.5 4.2v3.6" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.5" stroke-linecap="round"/></svg>
+                                </span>
+                            </div>
+                            <div class="ios-home-indicator" aria-hidden="true"></div>
 
                             <!-- ═════════ TIME CAPSULE VAULT VIEW ═════════ -->
                             <div class="mockup-view-pane" id="mockup-view-vault" style="display: none;">
