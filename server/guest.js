@@ -106,9 +106,9 @@ function getGuestStatus(req, res) {
     // Count how many chats this guest currently has active
     const chatsImported = actualChats;
 
-    // Daily reset: count AI messages used today only
-    const today = new Date().toISOString().slice(0, 10);
-    const aiMsgsUsed = (record && record.last_ai_date === today) ? (record.ai_messages_count || 0) : 0;
+    // Lifetime guest cap across matching guestId / IP / fingerprint so clearing cookies or waiting 24h doesn't reset
+    const aggRow = db.prepare('SELECT MAX(ai_messages_count) AS max_ai FROM guest_sessions WHERE id = ? OR ip = ? OR fingerprint = ?').get(guestId, ip, fp);
+    const aiMsgsUsed = Math.max(record ? (record.ai_messages_count || 0) : 0, (aggRow && aggRow.max_ai) ? aggRow.max_ai : 0);
 
     return {
         guestId,
@@ -145,7 +145,8 @@ function recordGuestAIMessage(req, res) {
 
     const now = Date.now();
     const today = new Date().toISOString().slice(0, 10);
-    const currentCount = (record && record.last_ai_date === today) ? (record.ai_messages_count || 0) : 0;
+    const aggRow = db.prepare('SELECT MAX(ai_messages_count) AS max_ai FROM guest_sessions WHERE id = ? OR ip = ? OR fingerprint = ?').get(guestId, ip, fp);
+    const currentCount = Math.max(record ? (record.ai_messages_count || 0) : 0, (aggRow && aggRow.max_ai) ? aggRow.max_ai : 0);
     const newCount = currentCount + 1;
 
     db.prepare('UPDATE guest_sessions SET ai_messages_count = ?, last_ai_date = ?, updated_at = ? WHERE id = ? OR ip = ? OR fingerprint = ?').run(newCount, today, now, guestId, ip, fp);

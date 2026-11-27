@@ -856,15 +856,18 @@
                     let errMsg = `Error ${resp.status}`;
                     let isLimit = false;
                     let requireAuth = false;
+                    let needsUpgrade = false;
                     try { 
                         const data = await resp.json();
                         errMsg = data.error || errMsg; 
                         if (data.requireAuth) requireAuth = true;
-                        if (resp.status === 429 && errMsg.toLowerCase().includes('limit')) isLimit = true;
+                        if (data.upgrade) needsUpgrade = true;
+                        if (data.upgrade || resp.status === 429 || errMsg.toLowerCase().includes('limit')) isLimit = true;
                     } catch { }
                     typingEl.remove();
 
                     if (isSampleDemo && isLimit) {
+                        msgQueue = [];
                         const demoWrap = document.createElement('div');
                         demoWrap.className = 'flex justify-center my-3 animate-message';
                         demoWrap.innerHTML = `
@@ -881,17 +884,29 @@
                         return resolve();
                     }
 
-                    if (requireAuth || errMsg.toLowerCase().includes('guest')) {
+                    if (requireAuth || (!needsUpgrade && errMsg.toLowerCase().includes('guest'))) {
+                        msgQueue = [];
                         if (typeof window.openAuthModal === 'function') {
                             window.openAuthModal(errMsg);
                         } else {
                             appendErrorBubble(errMsg);
                         }
-                    } else if (isLimit || errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
+                    } else if (needsUpgrade || isLimit || errMsg.includes('Google 503') || errMsg.includes('high demand') || errMsg.includes('503')) {
+                        msgQueue = [];
+                        const upgradeCard = document.createElement('div');
+                        upgradeCard.className = 'flex justify-center my-3 animate-message';
+                        upgradeCard.innerHTML = `
+                            <div class="rounded-2xl p-4 max-w-[85%] border border-amber-500/30 bg-amber-500/10 text-center shadow-md">
+                                <div class="text-sm font-bold text-amber-500 mb-1">Free AI Limit Reached</div>
+                                <p class="text-xs text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">${escapeHTML(errMsg)}</p>
+                                <button type="button" onclick="window.openUpgradeModal && window.openUpgradeModal()" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition cursor-pointer">
+                                    Upgrade to Kotha Pro
+                                </button>
+                            </div>`;
+                        chatContainer.appendChild(upgradeCard);
+                        _scrollToBottom();
                         if (typeof window.openUpgradeModal === 'function') {
-                            window.openUpgradeModal();
-                        } else {
-                            appendErrorBubble('Server busy. Please try again or upgrade to Pro.');
+                            window.openUpgradeModal(errMsg);
                         }
                     } else {
                         appendErrorBubble(errMsg);

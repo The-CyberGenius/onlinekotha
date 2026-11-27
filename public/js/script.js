@@ -1,7 +1,14 @@
 
-window.openUpgradeModal = function() {
+window.openUpgradeModal = function(reasonText) {
     const modal = document.getElementById('upgrade-modal');
     if (modal) {
+        const subEl = document.getElementById('upgrade-modal-subtitle');
+        if (subEl) {
+            subEl.textContent = (typeof reasonText === 'string' && reasonText.trim())
+                ? reasonText.trim()
+                : 'Unlock limitless possibilities and supercharge your Kotha experience.';
+        }
+        modal.style.display = 'flex';
         modal.classList.remove('hidden');
         setTimeout(() => {
             modal.classList.remove('opacity-0');

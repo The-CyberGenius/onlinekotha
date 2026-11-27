@@ -465,10 +465,10 @@ db.prepare("INSERT OR IGNORE INTO users (id, email, password_hash, created_at, p
 const defaults = {
     daily_spend_cap_usd: '0',
     trial_duration_hours: '72',
-    free_user_daily_messages: '5',
+    free_user_daily_messages: '12',
     paid_user_daily_messages: '500',
-    trial_user_daily_messages: '10',
-    free_lifetime_messages: '0',
+    trial_user_daily_messages: '12',
+    free_lifetime_messages: '12',
     free_max_chats: '5',
     guest_max_messages: '5',
     guest_max_chats: '1',

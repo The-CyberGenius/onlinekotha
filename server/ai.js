@@ -52,6 +52,21 @@ function getSafeChatDir(dirKey, chatFolder) {
 }
 
 // ---------- Plan + rate-limit gates ----------
+const inFlightAiRequests = new Map();
+
+function getUserLifetimeAiCount(userId) {
+    if (!userId || userId <= 0) return 0;
+    const logRow = db.prepare(
+        `SELECT COUNT(*) AS n FROM usage_log WHERE user_id = ? AND feature = 'chat' AND error IS NULL`
+    ).get(userId);
+    const convRow = db.prepare(
+        `SELECT COUNT(*) AS n FROM conv_messages cm
+         JOIN conversations c ON c.id = cm.conversation_id
+         WHERE c.user_id = ? AND cm.role = 'assistant'`
+    ).get(userId);
+    return Math.max(logRow ? logRow.n : 0, convRow ? convRow.n : 0);
+}
+
 function aiGate(req, res, next) {
     if (req.user && (req.user.is_admin || req.user.is_impersonating)) {
         return next();
@@ -61,7 +76,7 @@ function aiGate(req, res, next) {
         if (!guestStatus.canUseAI) {
             const maxGuestMsgs = getSetting('guest_max_messages', '5');
             return res.status(403).json({
-                error: `Guest daily limit reached (${maxGuestMsgs}/${maxGuestMsgs} free AI replies used today). Sign in with Google to continue chatting!`,
+                error: `Free guest limit reached (${maxGuestMsgs}/${maxGuestMsgs} free AI replies used). Sign in with Google to continue chatting!`,
                 requireAuth: true,
                 guest: guestStatus,
             });
@@ -71,33 +86,48 @@ function aiGate(req, res, next) {
 
     const plan = effectivePlan(req.user);
 
+    // Paid plan = truly unlimited, no cap check at all
+    if (plan === 'paid') return next();
+
+    const inFlight = inFlightAiRequests.get(req.user.id) || 0;
+
+    // Strict lifetime free AI response cap across ALL non-paid users (trial & free)
+    // Counts usage_log + conv_messages so deleting conversations cannot reset the cap.
+    const freeLifetimeMax = Number(getSetting('free_lifetime_messages', '12'));
+    const usedLifetime = getUserLifetimeAiCount(req.user.id) + inFlight;
+    if (freeLifetimeMax > 0 && usedLifetime >= freeLifetimeMax) {
+        return res.status(429).json({
+            error: `You've used all ${freeLifetimeMax} free AI responses. Upgrade to Kotha Pro to continue chatting!`,
+            limit: freeLifetimeMax,
+            used: usedLifetime,
+            upgrade: true,
+            lifetime_limit_reached: true,
+        });
+    }
+
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const usedToday = db.prepare(
         `SELECT COUNT(*) AS n FROM conv_messages cm
          JOIN conversations c ON c.id = cm.conversation_id
          WHERE c.user_id = ? AND cm.role = 'user' AND cm.created_at >= ?`
-    ).get(req.user.id, startOfDay.getTime()).n;
-
-    // Paid plan = truly unlimited, no cap check at all
-    if (plan === 'paid') return next();
+    ).get(req.user.id, startOfDay.getTime()).n + inFlight;
 
     if (plan === 'free') {
-        const freeDailyMax = Number(getSetting('free_user_daily_messages', '20'));
+        const freeDailyMax = Number(getSetting('free_user_daily_messages', '12'));
         if (freeDailyMax > 0 && usedToday >= freeDailyMax) {
             return res.status(429).json({
-                error: `You've used your ${freeDailyMax} free AI messages for today. Upgrade to Pro for unlimited AI conversations!`,
+                error: `You've reached your ${freeDailyMax} free AI responses limit. Upgrade to Kotha Pro for unlimited AI conversations!`,
                 limit: freeDailyMax,
                 used: usedToday,
                 upgrade: true,
             });
         }
     } else {
-        // Trial users: generous daily limit (default 50/day)
-        const trialMax = Number(getSetting('trial_user_daily_messages', '50'));
+        const trialMax = Number(getSetting('trial_user_daily_messages', '12'));
         if (trialMax > 0 && usedToday >= trialMax) {
             return res.status(429).json({
-                error: `You've reached your daily trial limit (${trialMax} messages). Upgrade to Pro for unlimited AI conversations!`,
+                error: `You've reached your ${trialMax} free trial AI responses limit. Upgrade to Kotha Pro for unlimited AI conversations!`,
                 limit: trialMax,
                 used: usedToday,
                 upgrade: true,
@@ -534,6 +564,11 @@ router.post('/chat', aiGate, async (req, res) => {
         }
     });
 
+    const trackedUid = (req.user && req.user.id > 0) ? req.user.id : null;
+    if (trackedUid) {
+        inFlightAiRequests.set(trackedUid, (inFlightAiRequests.get(trackedUid) || 0) + 1);
+    }
+
     try {
         await callLLM({
             feature: 'chat',
@@ -583,6 +618,11 @@ router.post('/chat', aiGate, async (req, res) => {
         console.error('AI chat error:', err);
         send('error', { message: err.message || 'AI request failed', code: err.code });
     } finally {
+        if (trackedUid) {
+            const cur = inFlightAiRequests.get(trackedUid) || 0;
+            if (cur <= 1) inFlightAiRequests.delete(trackedUid);
+            else inFlightAiRequests.set(trackedUid, cur - 1);
+        }
         res.end();
     }
 });
@@ -886,7 +926,7 @@ ${contextStr}`;
 
         let replyText = "";
         await callLLM({
-            feature: "chat",
+            feature: "compatibility",
             messages: [{ role: "user", content: prompt }],
             systemPrompt: "Respond ONLY with JSON.",
             userId: req.user?.id || null,
